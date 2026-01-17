@@ -31,6 +31,7 @@ This is the standard way to use the library. It uses the pre-compiled JavaScript
 ```vue
 <script setup>
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+
 import '@pdanpdan/virtual-scroll/style.css';
 </script>
 ```
@@ -61,6 +62,7 @@ import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 ```vue
 <script setup>
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+
 import '@pdanpdan/virtual-scroll/style.css';
 
 const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ i }` }));
