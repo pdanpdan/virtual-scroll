@@ -1,0 +1,33 @@
+{
+  "name": "virtual-scroll-workspace",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "description": "Workspace for virtual scroll components",
+  "scripts": {
+    "dev": "pnpm --filter playground dev",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:ui": "vitest --ui --coverage.enabled --coverage.reporter=html",
+    "test:watch": "vitest",
+    "test:types": "pnpm --filter @pdanpdan/virtual-scroll test:types",
+    "test:coverage": "pnpm --filter @pdanpdan/virtual-scroll --dir packages/virtual-scroll test:coverage",
+    "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:",
+    "@release-it/conventional-changelog": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-vuejs-accessibility": "catalog:",
+    "release-it": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}
