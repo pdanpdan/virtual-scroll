@@ -1,7 +1,7 @@
 {
   "name": "@pdanpdan/virtual-scroll",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A high-performance virtual scroll component for Vue 3",
   "author": "",
   "license": "MIT",
@@ -15,16 +15,20 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./*": "./*"
+    "./VirtualScroll.vue": "./src/components/VirtualScroll.vue",
+    "./style.css": "./dist/index.css"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
-    "build": "vue-tsc",
+    "build": "pnpm build:lib && pnpm build:types",
+    "build:lib": "vite build",
+    "build:types": "vue-tsc --emitDeclarationOnly --declaration",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix",
     "test": "vitest run",
@@ -34,12 +38,16 @@
     "test:coverage": "vitest run --coverage",
     "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage"
   },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
   "devDependencies": {
     "@vitejs/plugin-vue": "catalog:",
     "@vue/test-utils": "catalog:",
     "@vue/tsconfig": "catalog:",
     "jsdom": "catalog:",
     "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
     "vue-tsc": "catalog:"
