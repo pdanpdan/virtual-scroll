@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.2.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.1.0...v0.2.0) (2026-01-17)
+
+
+### Features
+
+* create d.ts files for published package ([f5df730](https://github.com/pdanpdan/virtual-scroll/commit/f5df73005206be2a51d84964e40eb8008db91368))
+
 # 0.1.0 (2026-01-17)
 
 
