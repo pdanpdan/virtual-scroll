@@ -67,4 +67,4 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - run: pnpm build
-      - run: pnpm --filter @pdanpdan/virtual-scroll publish --no-git-checks --access public --provenance
+      - run: npm publish ./packages/virtual-scroll --access public --provenance
