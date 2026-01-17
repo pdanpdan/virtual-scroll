@@ -1,5 +1,12 @@
 # Changelog
 
+# 0.1.0 (2026-01-17)
+
+
+### Features
+
+* complete implementation of core and playground ([57d1415](https://github.com/pdanpdan/virtual-scroll/commit/57d14153466d1f58b7f5918de42ddb5c25a7e1ba))
+
 All notable changes to this project will be documented in this file.
 
 ## [0.0.1] - 2026-01-17

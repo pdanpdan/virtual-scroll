@@ -1,7 +1,7 @@
 {
   "name": "@pdanpdan/virtual-scroll",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A high-performance virtual scroll component for Vue 3",
   "author": "",
   "license": "MIT",
