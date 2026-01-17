@@ -1,0 +1,16 @@
+# Workspace files
+.vscode/
+coverage/
+node_modules/
+
+# Source exclusions
+src/**/*.test.ts
+src/**/__tests__
+
+# Build artifacts
+*.tsbuildinfo
+
+# Config files (already excluded by files whitelist, but added for safety)
+tsconfig*.json
+vitest.config.ts
+vite.config.ts

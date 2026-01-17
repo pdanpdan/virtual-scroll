@@ -17,7 +17,9 @@
     }
   },
   "hooks": {
-    "before:init": ["pnpm test:all"],
-    "after:bump": "pnpm -r exec npm version ${version} --no-git-tag-version && git add packages/*/package.json"
+    "before:init": [
+      "pnpm test:all"
+    ],
+    "after:bump": "npm version ${version} --no-git-tag-version --prefix packages/virtual-scroll && git add packages/virtual-scroll/package.json"
   }
 }
