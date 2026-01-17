@@ -67,8 +67,9 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - run: pnpm build
-      - name: Clean npm config
-        run: rm -f .npmrc packages/virtual-scroll/.npmrc
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: |
+          unset NODE_AUTH_TOKEN
+          rm -f ~/.npmrc .npmrc ../../.npmrc
+          npm publish --access public --provenance
         working-directory: packages/virtual-scroll

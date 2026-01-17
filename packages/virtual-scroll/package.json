@@ -5,6 +5,15 @@
   "description": "A high-performance virtual scroll component for Vue 3",
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/pdanpdan/virtual-scroll#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pdanpdan/virtual-scroll",
+    "directory": "packages/virtual-scroll"
+  },
+  "bugs": {
+    "url": "https://github.com/pdanpdan/virtual-scroll/issues"
+  },
   "keywords": [
     "vue",
     "virtual-scroll",
