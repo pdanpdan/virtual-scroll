@@ -1,5 +1,6 @@
 {
   "name": "virtual-scroll-workspace",
+  "version": "0.0.1",
   "type": "module",
   "private": true,
   "packageManager": "pnpm@10.28.0",
