@@ -51,7 +51,7 @@ function onScroll(details: ScrollDetails) {
     </template>
 
     <template #description>
-      Demonstrates the <strong>restoreScrollOnPrepend</strong> prop. When items are added to the beginning of the list, the scroll position is adjusted to keep the current view stable.
+      Demonstrates the <strong>restoreScrollOnPrepend</strong> prop. Currently showing {{ items.length.toLocaleString() }} items. When items are added to the beginning of the list, the scroll position is adjusted to keep the current view stable.
     </template>
 
     <template #icon>

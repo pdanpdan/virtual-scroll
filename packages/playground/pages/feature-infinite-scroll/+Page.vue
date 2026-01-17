@@ -53,7 +53,7 @@ function onScroll(details: ScrollDetails) {
     </template>
 
     <template #description>
-      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. When you reach the end of the list, more items are automatically fetched and appended.
+      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. Currently showing {{ items.length.toLocaleString() }} items. When you reach the end of the list, more items are automatically fetched and appended.
     </template>
 
     <template #icon>

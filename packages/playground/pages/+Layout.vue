@@ -64,6 +64,7 @@ const featureLinks: Link[] = [
   { href: '/feature-sticky-sections', label: 'Sticky Sections' },
   { href: '/feature-scroll-restoration', label: 'Scroll Restoration' },
   { href: '/feature-chat', label: 'Chat Interface' },
+  { href: '/feature-spreadsheet', label: 'Spreadsheet' },
 ];
 </script>
 

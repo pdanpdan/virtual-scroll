@@ -28,14 +28,14 @@
   "scripts": {
     "build": "pnpm build:lib && pnpm build:types",
     "build:lib": "vite build",
-    "build:types": "vue-tsc --emitDeclarationOnly --declaration",
+    "build:types": "vue-tsc -p tsconfig.app.json --emitDeclarationOnly --declaration",
     "prepublishOnly": "pnpm build",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix",
     "test": "vitest run",
     "test:ui": "vitest --ui --coverage.enabled --coverage.reporter=html",
     "test:watch": "vitest",
-    "test:types": "vue-tsc --noEmit",
+    "test:types": "vue-tsc -p tsconfig.app.json --noEmit",
     "test:coverage": "vitest run --coverage",
     "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage"
   },

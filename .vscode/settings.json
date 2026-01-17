@@ -1,17 +1,23 @@
 {
+  "css.lint.unknownAtRules": "ignore",
   "eslint.workingDirectories": [
     {
       "mode": "auto"
     }
   ],
   "javascript.validate.enable": false,
+  "scss.lint.unknownAtRules": "ignore",
   "search.exclude": {
     "**/.vike": true,
     "**/dist": true,
     "**/node_modules": true
   },
+  "tailwindCSS.includeLanguages": {
+    "vue": "html"
+  },
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsserver.maxTypeAcquisitionRecursion": 10,
   "typescript.validate.enable": true
 }

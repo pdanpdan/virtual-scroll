@@ -58,7 +58,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      This example uses the main browser window for scrolling with dynamic item sizes detected via <strong>ResizeObserver</strong>.
+      This example uses the main browser window for scrolling {{ itemCount.toLocaleString() }} dynamic items. Sizes are automatically detected via <strong>ResizeObserver</strong>.
     </template>
 
     <template #icon>

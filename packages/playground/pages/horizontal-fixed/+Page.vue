@@ -45,7 +45,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Optimized for horizontal lists where every item has the same width. Row height is filled automatically. Default buffers are set to 20 for smoother horizontal panning.
+      Optimized for {{ itemCount.toLocaleString() }} items where every item has the same width ({{ itemSize }}px). Row height is filled automatically. Default buffers are set to {{ bufferBefore }} for smoother horizontal panning.
     </template>
 
     <template #icon>

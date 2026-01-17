@@ -53,7 +53,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Items have different widths measured via <strong>ResizeObserver</strong>. Even items are {{ baseItemSize }}px, odd items are {{ baseItemSize * 2 }}px. Try resizing the container!
+      Horizontal scrolling with {{ itemCount.toLocaleString() }} items with different widths measured via <strong>ResizeObserver</strong>. Even items are {{ baseItemSize }}px, odd items are {{ baseItemSize * 2 }}px. Try resizing the container!
     </template>
 
     <template #icon>
@@ -79,6 +79,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 
         <ScrollControls
           v-model:item-count="itemCount"
+          v-model:item-size="baseItemSize"
           v-model:buffer-before="bufferBefore"
           v-model:buffer-after="bufferAfter"
           direction="horizontal"
