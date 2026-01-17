@@ -1,4 +1,4 @@
-import type { ScrollDirection, ScrollToIndexOptions } from '../composables/useVirtualScroll.js';
+import type { ScrollDirection, ScrollToIndexOptions } from '../composables/useVirtualScroll';
 
 /**
  * Checks if the container has a bounding client rect method.

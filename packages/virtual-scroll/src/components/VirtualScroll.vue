@@ -5,12 +5,12 @@ import type {
   ScrollAlignmentOptions,
   ScrollDetails,
   VirtualScrollProps,
-} from '../composables/useVirtualScroll.js';
+} from '../composables/useVirtualScroll';
 
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { useVirtualScroll } from '../composables/useVirtualScroll.js';
-import { getPaddingX, getPaddingY } from '../utils/scroll.js';
+import { useVirtualScroll } from '../composables/useVirtualScroll';
+import { getPaddingX, getPaddingY } from '../utils/scroll';
 
 export interface Props<T = unknown> {
   /** Array of items to be virtualized. */

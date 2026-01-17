@@ -3,8 +3,8 @@ import type { Ref } from 'vue';
 /* global ScrollToOptions */
 import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
-import { FenwickTree } from '../utils/fenwick-tree.js';
-import { getPaddingX, getPaddingY, isElement, isScrollableElement, isScrollToIndexOptions } from '../utils/scroll.js';
+import { FenwickTree } from '../utils/fenwick-tree';
+import { getPaddingX, getPaddingY, isElement, isScrollableElement, isScrollToIndexOptions } from '../utils/scroll';
 
 export const DEFAULT_ITEM_SIZE = 50;
 export const DEFAULT_COLUMN_WIDTH = 150;
