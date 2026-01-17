@@ -51,7 +51,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      This example uses the main browser window for scrolling instead of a nested container. Scroll height is fixed at {{ itemSize }}px.
+      This example uses the main browser window for scrolling {{ itemCount.toLocaleString() }} items instead of a nested container. Item height is fixed at {{ itemSize }}px.
     </template>
 
     <template #icon>

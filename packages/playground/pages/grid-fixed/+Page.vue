@@ -50,7 +50,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Simultaneously virtualizes rows and columns. Uses fixed <strong>itemSize</strong> and alternating <strong>columnWidth</strong> values. Panning in any direction maintains high performance.
+      Simultaneously virtualizes {{ itemCount.toLocaleString() }} rows and {{ columnCount.toLocaleString() }} columns. Uses fixed <strong>itemSize</strong> ({{ itemSize }}px) and alternating <strong>columnWidth</strong> values. Panning in any direction maintains high performance.
     </template>
 
     <template #icon>

@@ -47,7 +47,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Optimized for large lists where every item has the same height. Items are only rendered when they enter the visible viewport. Row height is fixed at {{ itemSize }}px.
+      Optimized for {{ itemCount.toLocaleString() }} items where every item has the same height. Items are only rendered when they enter the visible viewport. Row height is fixed at {{ itemSize }}px.
     </template>
 
     <template #icon>

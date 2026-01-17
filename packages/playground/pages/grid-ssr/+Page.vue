@@ -53,7 +53,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Demonstrates the <strong>ssrRange</strong> prop. The grid is configured to start pre-rendered at <strong>Row 100, Column 50</strong>. On the client, it automatically scrolls to match this range on mount.<br /><br />
+      Demonstrates the <strong>ssrRange</strong> prop. The grid is configured to start pre-rendered at <strong>Row {{ ssrRange.start }}, Column {{ ssrRange.colStart }}</strong>. On the client, it automatically scrolls to match this range on mount.<br /><br />
       <div class="alert alert-soft alert-info shadow-sm py-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"

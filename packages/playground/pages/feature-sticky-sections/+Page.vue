@@ -49,7 +49,7 @@ function onScroll(details: ScrollDetails) {
     </template>
 
     <template #description>
-      Demonstrates iOS-style sticky headers using the <strong>stickyIndices</strong> prop. When a new header scrolls up, it 'pushes' the previous sticky header out of the view.
+      Demonstrates iOS-style sticky headers using the <strong>stickyIndices</strong> prop for {{ sectionCount }} sections with {{ itemsPerSection }} items each. When a new header scrolls up, it 'pushes' the previous sticky header out of the view.
     </template>
 
     <template #icon>

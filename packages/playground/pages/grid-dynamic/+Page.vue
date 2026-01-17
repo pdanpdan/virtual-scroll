@@ -74,7 +74,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Simultaneously virtualizes rows and columns. Uses <strong>querySelectorAll('[data-col-index]')</strong> to robustly detect column widths from any slot structure. Toggling buffers or resizing will re-measure automatically.
+      Simultaneously virtualizes {{ itemCount.toLocaleString() }} rows and {{ columnCount.toLocaleString() }} columns. Uses <strong>querySelectorAll('[data-col-index]')</strong> to robustly detect column widths from any slot structure. Toggling buffers or resizing will re-measure automatically.
     </template>
 
     <template #icon>

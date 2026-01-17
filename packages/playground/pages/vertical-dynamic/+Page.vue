@@ -54,7 +54,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #description>
-      Vertical scrolling with variable item heights. Automatically measures item sizes using <strong>ResizeObserver</strong>. Even items are 50px, odd items are 100px.
+      Vertical scrolling with variable item heights for {{ itemCount.toLocaleString() }} items. Automatically measures item sizes using <strong>ResizeObserver</strong>. Even items are {{ baseItemSize }}px, odd items are {{ baseItemSize * 2 }}px.
     </template>
 
     <template #icon>

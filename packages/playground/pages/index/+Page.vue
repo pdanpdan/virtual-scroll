@@ -239,9 +239,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-warning">
         <div class="card-body">
-          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-60">Vertical</h2>
+          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-60">Table</h2>
           <h3 class="card-title mt-0">Vertical Fixed Table</h3>
-          <p class="text-sm opacity-80">Custom tags (table, tbody, tr) for accessible tabular data.</p>
+          <p class="text-sm opacity-80">Semantic HTML <strong>&lt;table&gt;</strong> virtualization for accessible data grids.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/vertical-fixed-table">
               <a
@@ -287,7 +287,7 @@ const logoUrl = normalizeHref('logo.svg');
         <div class="card-body">
           <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-60">Feature</h2>
           <h3 class="card-title mt-0">Sticky Sections</h3>
-          <p class="text-sm opacity-80">iOS-style pushing of headers for segmented lists.</p>
+          <p class="text-sm opacity-80">iOS-style pushing headers for segmented lists and grouped items.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-sticky-sections">
               <a
@@ -327,7 +327,7 @@ const logoUrl = normalizeHref('logo.svg');
         <div class="card-body">
           <h2 class="card-title text-error font-bold uppercase text-xs opacity-60">Feature</h2>
           <h3 class="card-title mt-0">Chat Interface</h3>
-          <p class="text-sm opacity-80">A full-featured chat UI with smooth auto-scrolling and history loading.</p>
+          <p class="text-sm opacity-80">Smooth auto-scrolling, history loading, and dynamic message heights.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-chat">
               <a
