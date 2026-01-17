@@ -58,13 +58,13 @@ onUnmounted(stopDetection);
       <div />
       <div class="font-semibold">
         <template v-if="direction !== 'vertical'">
-          {{ scrollDetails?.totalSize.width }}px
+          {{ Math.round(scrollDetails?.totalSize.width || 0) }}
         </template>
         <template v-if="direction === 'both'">
           &times;
         </template>
         <template v-if="direction !== 'horizontal'">
-          {{ scrollDetails?.totalSize.height }}px
+          {{ Math.round(scrollDetails?.totalSize.height || 0) }}
         </template>
       </div>
     </li>
@@ -74,13 +74,13 @@ onUnmounted(stopDetection);
       <div />
       <div class="font-semibold">
         <template v-if="direction !== 'vertical'">
-          {{ scrollDetails?.viewportSize.width }}px
+          {{ Math.round(scrollDetails?.viewportSize.width || 0) }}
         </template>
         <template v-if="direction === 'both'">
           &times;
         </template>
         <template v-if="direction !== 'horizontal'">
-          {{ scrollDetails?.viewportSize.height }}px
+          {{ Math.round(scrollDetails?.viewportSize.height || 0) }}
         </template>
       </div>
     </li>
@@ -90,13 +90,13 @@ onUnmounted(stopDetection);
       <div />
       <div class="font-semibold">
         <template v-if="direction !== 'vertical'">
-          {{ scrollDetails?.scrollOffset.x }}px
+          {{ Math.round(scrollDetails?.scrollOffset.x || 0) }}
         </template>
         <template v-if="direction === 'both'">
           &times;
         </template>
         <template v-if="direction !== 'horizontal'">
-          {{ scrollDetails?.scrollOffset.y }}px
+          {{ Math.round(scrollDetails?.scrollOffset.y || 0) }}
         </template>
       </div>
     </li>

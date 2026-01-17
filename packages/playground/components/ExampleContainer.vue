@@ -40,12 +40,13 @@ const pageContext = usePageContext();
 const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchHref('/index', pageContext.urlPathname));
 
 let highlighter: import('shikiji').Highlighter | null = null;
+let highlighting = false;
 
 async function highlight() {
-  if (!props.code) {
-    highlightedCode.value = '';
+  if (!props.code || highlighting) {
     return;
   }
+  highlighting = true;
   try {
     const { getHighlighter } = await import('shikiji/bundle/full');
     const { createCssVariablesTheme } = await import('shikiji/theme-css-variables');
@@ -68,6 +69,8 @@ async function highlight() {
   } catch (err) {
     console.error('Shikiji highlighting failed:', err);
     highlightedCode.value = `<pre><code>${ props.code }</code></pre>`;
+  } finally {
+    highlighting = false;
   }
 }
 

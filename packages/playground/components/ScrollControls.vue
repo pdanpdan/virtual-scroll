@@ -63,6 +63,15 @@ watch(localBufferAfter, (val) => emit('update:bufferAfter', val));
 watch(localStickyHeader, (val) => emit('update:stickyHeader', val));
 watch(localStickyFooter, (val) => emit('update:stickyFooter', val));
 
+watch(() => props.itemCount, (val) => localItemCount.value = val);
+watch(() => props.itemSize, (val) => localItemSize.value = val ?? 50);
+watch(() => props.columnCount, (val) => localColumnCount.value = val ?? 0);
+watch(() => props.columnWidth, (val) => localColumnWidth.value = val ?? 0);
+watch(() => props.bufferBefore, (val) => localBufferBefore.value = val ?? 5);
+watch(() => props.bufferAfter, (val) => localBufferAfter.value = val ?? 5);
+watch(() => props.stickyHeader, (val) => localStickyHeader.value = val ?? false);
+watch(() => props.stickyFooter, (val) => localStickyFooter.value = val ?? false);
+
 function handleScrollToIndex() {
   const align = { x: scrollAlignX.value, y: scrollAlignY.value };
   if (props.direction === 'both') {
