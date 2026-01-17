@@ -18,11 +18,50 @@ A high-performance, flexible virtual scrolling component for Vue 3.
 pnpm add @pdanpdan/virtual-scroll
 ```
 
+## Usage Modes
+
+The package provides two ways to use the component, depending on your build setup and requirements.
+
+### 1. Compiled Component (Recommended)
+
+This is the standard way to use the library. It uses the pre-compiled JavaScript version, which is compatible with most modern bundlers.
+
+**Important:** You must manually import the CSS file for styles to work.
+
+```vue
+<script setup>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+</script>
+```
+
+**Why use this?**
+-   Fastest build times (no need to compile the component logic).
+-   Maximum compatibility with different build tools.
+-   Scoped CSS works perfectly as it is extracted into `style.css` with unique data attributes.
+
+### 2. Original Vue SFC
+
+If you want to compile the component yourself using your own Vue compiler configuration, you can import the raw `.vue` file.
+
+```vue
+<script setup>
+import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
+// No need to import CSS; it's handled by your Vue loader/plugin
+</script>
+```
+
+**Why use this?**
+-   Allows for better tree-shaking and optimization by your own bundler.
+-   Enables deep integration with your project's CSS-in-JS or specialized styling solutions.
+-   Easier debugging of the component source in some IDEs.
+
 ## Basic Usage
 
 ```vue
 <script setup>
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
 
 const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ i }` }));
 </script>

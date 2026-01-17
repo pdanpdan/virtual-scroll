@@ -30,6 +30,42 @@ const logoUrl = normalizeHref('logo.svg');
         </div>
       </section>
 
+      <section id="usage-modes">
+        <h2 class="text-3xl font-bold mb-6">Usage Modes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="card bg-base-200 border border-base-300 shadow-sm overflow-hidden">
+            <div class="card-body">
+              <h3 class="card-title text-xl text-primary">Compiled Component</h3>
+              <p class="text-sm opacity-80 mb-4">The recommended way for most projects. Uses pre-compiled JS for faster builds.</p>
+              <div class="mockup-code bg-base-300 text-xs mb-4">
+                <pre><code>import { VirtualScroll } from '@pdanpdan/virtual-scroll';</code></pre>
+                <pre><code>import '@pdanpdan/virtual-scroll/style.css';</code></pre>
+              </div>
+              <ul class="list-disc pl-5 text-sm space-y-1 opacity-70">
+                <li>Compatible with all modern bundlers.</li>
+                <li><strong>Note:</strong> Manual CSS import is required.</li>
+                <li>Scoped CSS is preserved via data-attributes.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card bg-base-200 border border-base-300 shadow-sm overflow-hidden">
+            <div class="card-body">
+              <h3 class="card-title text-xl text-secondary">Original Vue SFC</h3>
+              <p class="text-sm opacity-80 mb-4">Import the raw source for custom compilation and optimization.</p>
+              <div class="mockup-code bg-base-300 text-xs mb-4">
+                <pre><code>import VS from '@pdanpdan/virtual-scroll/VirtualScroll.vue';</code></pre>
+              </div>
+              <ul class="list-disc pl-5 text-sm space-y-1 opacity-70">
+                <li>Enables better tree-shaking in your build.</li>
+                <li>Styles are handled automatically by your Vue loader.</li>
+                <li>Better source-map debugging in some IDEs.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="virtual-scroll">
         <h2 class="text-3xl font-bold mb-6">VirtualScroll Component</h2>
         <p class="mb-8 opacity-80 text-lg">The main component provided by the library.</p>
