@@ -20,6 +20,9 @@
     "before:init": [
       "pnpm test:all"
     ],
-    "after:bump": "npm version ${version} --no-git-tag-version --prefix packages/virtual-scroll && git add packages/virtual-scroll/package.json"
+    "after:bump": [
+      "npm version ${version} --no-git-tag-version --prefix packages/virtual-scroll",
+      "git add package.json packages/virtual-scroll/package.json"
+    ]
   }
 }
