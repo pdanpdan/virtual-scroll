@@ -26,9 +26,7 @@
     "src"
   ],
   "scripts": {
-    "build": "pnpm build:lib && pnpm build:types",
-    "build:lib": "vite build",
-    "build:types": "vue-tsc -p tsconfig.app.json --emitDeclarationOnly --declaration",
+    "build": "vite build",
     "prepublishOnly": "pnpm build",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix",
@@ -52,6 +50,7 @@
     "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
     "vue-tsc": "catalog:"

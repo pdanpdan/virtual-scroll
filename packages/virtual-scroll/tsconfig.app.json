@@ -29,11 +29,11 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.vue",
-    "src/**/*.test.ts"
+    "src/**/*.vue"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/**/*.test.ts"
   ]
 }
