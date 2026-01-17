@@ -1,0 +1,9 @@
+.git/
+.github/
+.vscode/
+node_modules/
+coverage/
+packages/playground/
+dist/
+*.log
+.release-it.json
