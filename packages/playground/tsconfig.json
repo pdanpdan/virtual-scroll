@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    "target": "ES2022",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "#/*": ["./*"],
+      "@pdanpdan/virtual-scroll": ["../virtual-scroll/src"]
+    },
+    "types": [
+      "vite/client",
+      "vue"
+    ],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "references": [
+    { "path": "../virtual-scroll" }
+  ],
+  "include": [
+    "**/*.ts",
+    "**/*.vue",
+    "**/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

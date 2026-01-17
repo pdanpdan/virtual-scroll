@@ -1,0 +1,28 @@
+{
+  "name": "playground",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vike dev --host",
+    "build": "vike build",
+    "preview": "vike build && vike preview",
+    "lint": "pnpm --dir ../.. lint",
+    "lint:fix": "pnpm --dir ../.. lint:fix"
+  },
+  "dependencies": {
+    "@pdanpdan/virtual-scroll": "workspace:*",
+    "shikiji": "catalog:",
+    "vike": "catalog:",
+    "vike-vue": "catalog:",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "daisyui": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

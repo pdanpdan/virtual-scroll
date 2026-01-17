@@ -1,0 +1,47 @@
+{
+  "name": "@pdanpdan/virtual-scroll",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A high-performance virtual scroll component for Vue 3",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "vue",
+    "virtual-scroll",
+    "typescript"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": "./*"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vue-tsc",
+    "lint": "pnpm --dir ../.. lint",
+    "lint:fix": "pnpm --dir ../.. lint:fix",
+    "test": "vitest run",
+    "test:ui": "vitest --ui --coverage.enabled --coverage.reporter=html",
+    "test:watch": "vitest",
+    "test:types": "vue-tsc --noEmit",
+    "test:coverage": "vitest run --coverage",
+    "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "catalog:",
+    "@vue/test-utils": "catalog:",
+    "@vue/tsconfig": "catalog:",
+    "jsdom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "vue": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

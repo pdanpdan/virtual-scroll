@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "vitest.config.ts"
+  ]
+}
