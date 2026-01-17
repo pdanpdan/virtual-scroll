@@ -82,7 +82,7 @@ watch(() => props.code, highlight);
   <div class="space-y-2 md:space-y-4">
     <div v-if="$slots.title || $slots.description" class="prose max-w-none">
       <div class="card card-side bg-base-300 shadow-sm border border-base-300">
-        <figure v-if="$slots.icon" class="shrink-0 flex items-center justify-center ps-4">
+        <figure v-if="$slots.icon" class="shrink-0 flex items-start justify-center pt-5.5 ps-4">
           <slot name="icon" />
         </figure>
         <div class="card-body p-4">
