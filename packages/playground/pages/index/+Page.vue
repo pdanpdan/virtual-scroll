@@ -342,6 +342,26 @@ const logoUrl = normalizeHref('logo.svg');
           </div>
         </div>
       </div>
+
+      <div class="card bg-base-300 shadow-md border-t-4 border-secondary">
+        <div class="card-body">
+          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-60">Feature</h2>
+          <h3 class="card-title mt-0">Spreadsheet</h3>
+          <p class="text-sm opacity-80">Excel-like bidirectional grid with sticky row and column headers.</p>
+          <div class="card-actions justify-end mt-2">
+            <AppLink v-slot="{ href }" href="/feature-spreadsheet">
+              <a
+                :href
+                class="btn btn-soft"
+                data-vike="false"
+                @click.prevent="navigateWithTransition(href, 'forward')"
+              >
+                View Example
+              </a>
+            </AppLink>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
