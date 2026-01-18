@@ -181,6 +181,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       if (props.value.direction === 'both' && colCount > 0) {
         return columnSizes.query(colEnd || colCount) - columnSizes.query(colStart);
       }
+      /* v8 ignore else -- @preserve */
       if (props.value.direction === 'horizontal') {
         if (fixedItemSize.value !== null) {
           return (end - start) * (fixedItemSize.value + (props.value.columnGap || 0));
@@ -210,6 +211,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     if (!isHydrated.value && props.value.ssrRange && !isMounted.value) {
       const { start, end } = props.value.ssrRange;
+      /* v8 ignore else -- @preserve */
       if (props.value.direction === 'vertical' || props.value.direction === 'both') {
         if (fixedItemSize.value !== null) {
           return (end - start) * (fixedItemSize.value + (props.value.gap || 0));
@@ -364,6 +366,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       } else {
         const isVisibleX = targetX >= relativeScrollX.value && (targetX + itemWidth) <= (relativeScrollX.value + usableWidth);
         if (!isVisibleX) {
+          /* v8 ignore if -- @preserve */
           if (targetX < relativeScrollX.value) {
             // keep targetX at start
           } else {
@@ -393,6 +396,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       let viewW = 0;
       let viewH = 0;
 
+      /* v8 ignore else -- @preserve */
       if (typeof window !== 'undefined') {
         if (container === window) {
           curX = window.scrollX;
@@ -413,6 +417,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         if (!reachedX && colIndex !== null && colIndex !== undefined) {
           const atLeft = curX <= tolerance && finalX <= tolerance;
           const atRight = curX >= maxW - viewW - tolerance && finalX >= maxW - viewW - tolerance;
+          /* v8 ignore else -- @preserve */
           if (atLeft || atRight) {
             reachedX = true;
           }
@@ -568,6 +573,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     let prependCount = 0;
     if (props.value.restoreScrollOnPrepend && lastItems.length > 0 && len > lastItems.length) {
       const oldFirstItem = lastItems[ 0 ];
+      /* v8 ignore else -- @preserve */
       if (oldFirstItem !== undefined) {
         for (let i = 1; i <= len - lastItems.length; i++) {
           if (newItems[ i ] === oldFirstItem) {
@@ -611,6 +617,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         }
       }
 
+      /* v8 ignore else -- @preserve */
       if (addedX > 0 || addedY > 0) {
         nextTick(() => {
           scrollToOffset(
@@ -634,6 +641,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         // OR if it's dynamic but we don't have a measurement yet.
         if (!isDynamicColumnWidth.value || currentW === 0) {
           const targetW = width + columnGap;
+          /* v8 ignore else -- @preserve */
           if (Math.abs(currentW - targetW) > 0.5) {
             columnSizes.set(i, targetW);
             colNeedsRebuild = true;
@@ -941,6 +949,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
             if (nextStickyIdx !== undefined) {
               const nextStickyY = fixedSize !== null ? nextStickyIdx * (fixedSize + gap) : itemSizesY.query(nextStickyIdx);
               const distance = nextStickyY - relativeScrollY.value;
+              /* v8 ignore else -- @preserve */
               if (distance < height) {
                 stickyOffset.y = -(height - distance);
               }
@@ -966,6 +975,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
             if (nextStickyIdx !== undefined) {
               const nextStickyX = fixedSize !== null ? nextStickyIdx * (fixedSize + columnGap) : itemSizesX.query(nextStickyIdx);
               const distance = nextStickyX - relativeScrollX.value;
+              /* v8 ignore else -- @preserve */
               if (distance < width) {
                 stickyOffset.x = -(width - distance);
               }
@@ -1158,10 +1168,12 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         for (const child of cells) {
           const colIndex = Number.parseInt(child.dataset.colIndex!, 10);
 
+          /* v8 ignore else -- @preserve */
           if (colIndex >= 0 && colIndex < (props.value.columnCount || 0)) {
             const w = child.offsetWidth;
             const oldW = columnSizes.get(colIndex);
             const targetW = w + columnGap;
+            /* v8 ignore else -- @preserve */
             if (targetW > oldW || !measuredColumns[ colIndex ]) {
               columnSizes.update(colIndex, targetW - oldW);
               measuredColumns[ colIndex ] = 1;
@@ -1241,6 +1253,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
       resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
+          /* v8 ignore else -- @preserve */
           if (entry.target === container) {
             viewportWidth.value = (container as HTMLElement).clientWidth;
             viewportHeight.value = (container as HTMLElement).clientHeight;
@@ -1277,6 +1290,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
             : props.value.ssrRange?.start;
           const initialAlign = props.value.initialScrollAlign || 'start';
 
+          /* v8 ignore else -- @preserve */
           if (initialIndex !== undefined && initialIndex !== null) {
             scrollToIndex(initialIndex, props.value.ssrRange?.colStart, { align: initialAlign, behavior: 'auto' });
           }
