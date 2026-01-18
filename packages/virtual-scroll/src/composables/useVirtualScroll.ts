@@ -144,9 +144,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     options: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
   } | null>(null);
 
-  const maxWidth = ref(0);
-  const maxHeight = ref(0);
-
   // Track if sizes are initialized
   const sizesInitialized = ref(false);
   let lastItems: T[] = [];
@@ -681,17 +678,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         itemSizesY.set(i, targetY);
         itemsNeedRebuild = true;
       }
-
-      // Max dimension tracking: determines scrollable area size
-      const w = isHorizontal ? size : (isBoth ? Math.max(size, viewportWidth.value) : 0);
-      const h = (isVertical || isBoth) ? size : 0;
-
-      if (w > maxWidth.value) {
-        maxWidth.value = w;
-      }
-      if (h > maxHeight.value) {
-        maxHeight.value = h;
-      }
     }
 
     if (itemsNeedRebuild) {
@@ -1131,13 +1117,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     for (const { index, inlineSize, blockSize, element } of updates) {
       if (isDynamicItemSize.value) {
-        if (inlineSize > maxWidth.value) {
-          maxWidth.value = inlineSize;
-        }
-        if (blockSize > maxHeight.value) {
-          maxHeight.value = blockSize;
-        }
-
         if (props.value.direction === 'horizontal') {
           const oldWidth = itemSizesX.get(index);
           const targetWidth = inlineSize + columnGap;
@@ -1328,8 +1307,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     measuredColumns.fill(0);
     measuredItemsX.fill(0);
     measuredItemsY.fill(0);
-    maxWidth.value = 0;
-    maxHeight.value = 0;
     initializeSizes();
   };
 
