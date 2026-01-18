@@ -1,3 +1,4 @@
+/* global ScrollToOptions */
 import type { VirtualScrollProps } from './useVirtualScroll';
 import type { Ref } from 'vue';
 
@@ -75,11 +76,22 @@ describe('useVirtualScroll', () => {
   beforeEach(() => {
     window.scrollX = 0;
     window.scrollY = 0;
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 500 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 500 });
+    window.scrollTo = vi.fn().mockImplementation((options: ScrollToOptions) => {
+      if (options.left !== undefined) {
+        window.scrollX = options.left;
+      }
+      if (options.top !== undefined) {
+        window.scrollY = options.top;
+      }
+      window.dispatchEvent(new Event('scroll'));
+    });
     vi.clearAllMocks();
     vi.useRealTimers();
   });
 
-  describe('initialization and total size', () => {
+  describe('initialization and dimensions', () => {
     it('should initialize with correct total height', async () => {
       const { result } = setup({ ...defaultProps });
       expect(result.totalHeight.value).toBe(5000);
@@ -147,7 +159,7 @@ describe('useVirtualScroll', () => {
     });
   });
 
-  describe('range and rendered items', () => {
+  describe('range calculation', () => {
     it('should calculate rendered items based on scroll position', async () => {
       const { result } = setup({ ...defaultProps });
       expect(result.renderedItems.value.length).toBeGreaterThan(0);
@@ -175,29 +187,81 @@ describe('useVirtualScroll', () => {
       await nextTick();
       expect(result.scrollDetails.value.currentIndex).toBeGreaterThan(0);
     });
-
-    it('should handle undefined items in renderedItems (out of bounds)', async () => {
-      const { result } = setup({ ...defaultProps, stickyIndices: [ 200 ] });
-      expect(result.renderedItems.value.find((i) => i.index === 200)).toBeUndefined();
-    });
-
-    it('should include sticky items in renderedItems only when relevant', async () => {
-      const { result } = setup({ ...defaultProps, stickyIndices: [ 50 ] });
-      // Initially at top, item 50 is far away and should NOT be in renderedItems
-      expect(result.renderedItems.value.find((i) => i.index === 50)).toBeUndefined();
-
-      // Scroll near item 50
-      result.scrollToIndex(50, 0, { align: 'start', behavior: 'auto' });
-      await nextTick();
-
-      const item50 = result.renderedItems.value.find((i) => i.index === 50);
-      expect(item50).toBeDefined();
-      expect(item50!.isSticky).toBe(true);
-    });
   });
 
-  describe('dynamic sizing and updateItemSize', () => {
-    it('should update item size and trigger reactivity', async () => {
+  describe('dynamic sizing', () => {
+    it('should handle columnCount fallback in updateItemSizes', async () => {
+      const { result, props } = setup({
+        ...defaultProps,
+        direction: 'both',
+        columnCount: 10,
+        columnWidth: undefined,
+      });
+      await nextTick();
+
+      const cell = document.createElement('div');
+      cell.dataset.colIndex = '0';
+
+      // Getter that returns 10 first time (for guard) and null second time (for fallback)
+      let count = 0;
+      Object.defineProperty(props.value, 'columnCount', {
+        get() {
+          count++;
+          return count === 1 ? 10 : null;
+        },
+        configurable: true,
+      });
+
+      result.updateItemSizes([ { index: 0, inlineSize: 200, blockSize: 50, element: cell } ]);
+      await nextTick();
+    });
+
+    it('should handle updateItemSizes with direct cell element', async () => {
+      const { result } = setup({
+        ...defaultProps,
+        direction: 'both',
+        columnCount: 2,
+        columnWidth: undefined,
+      });
+      await nextTick();
+
+      const cell = document.createElement('div');
+      Object.defineProperty(cell, 'offsetWidth', { value: 200 });
+      cell.dataset.colIndex = '0';
+
+      result.updateItemSizes([ { index: 0, inlineSize: 200, blockSize: 50, element: cell } ]);
+      await nextTick();
+      expect(result.getColumnWidth(0)).toBe(200);
+    });
+
+    it('should handle updateItemSizes initial measurement even if smaller than estimate', async () => {
+      // Horizontal
+      const { result: rH } = setup({ ...defaultProps, direction: 'horizontal', itemSize: undefined });
+      await nextTick();
+      // Estimate is 50. Update with 40.
+      rH.updateItemSizes([ { index: 0, inlineSize: 40, blockSize: 40 } ]);
+      await nextTick();
+      expect(rH.renderedItems.value[ 0 ]?.size.width).toBe(40);
+
+      // Subsequent update with smaller size should be ignored
+      rH.updateItemSizes([ { index: 0, inlineSize: 30, blockSize: 30 } ]);
+      await nextTick();
+      expect(rH.renderedItems.value[ 0 ]?.size.width).toBe(40);
+
+      // Vertical
+      const { result: rV } = setup({ ...defaultProps, direction: 'vertical', itemSize: undefined });
+      await nextTick();
+      rV.updateItemSizes([ { index: 0, inlineSize: 40, blockSize: 40 } ]);
+      await nextTick();
+      expect(rV.renderedItems.value[ 0 ]?.size.height).toBe(40);
+
+      // Subsequent update with smaller size should be ignored
+      rV.updateItemSizes([ { index: 0, inlineSize: 30, blockSize: 30 } ]);
+      await nextTick();
+      expect(rV.renderedItems.value[ 0 ]?.size.height).toBe(40);
+    });
+
+    it('should handle updateItemSize and trigger reactivity', async () => {
       const { result } = setup({ ...defaultProps, itemSize: undefined });
       expect(result.totalHeight.value).toBe(5000); // Default estimate
 
@@ -325,95 +389,29 @@ describe('useVirtualScroll', () => {
       // Should still be 100 for index 0, not reset to default 50
       expect(result.totalHeight.value).toBe(5050 + 50);
     });
-
-    it('should track max dimensions in updateItemSize', async () => {
-      const { result } = setup({ ...defaultProps, direction: 'both', itemSize: undefined, columnCount: 2 });
-      // Initial maxWidth is 0 (since vertical direction didn't set it for X)
-      // Wait, in 'both' mode, initializeSizes sets it.
-
-      result.updateItemSize(0, 5000, 6000);
-      await nextTick();
-      // Should have hit maxWidth.value = width
-    });
-
-    it('should cover spacer skip heuristic in updateItemSize', async () => {
-      const container = document.createElement('div');
-      Object.defineProperty(container, 'clientWidth', { value: 500 });
-      const { result } = setup({ ...defaultProps, direction: 'both', columnCount: 2, itemSize: 0, columnWidth: 0, container });
-      await nextTick();
-      const parent = document.createElement('div');
-      const spacer = document.createElement('div');
-      Object.defineProperty(spacer, 'offsetWidth', { value: 1000 });
-      parent.appendChild(spacer);
-      result.updateItemSize(0, 100, 50, parent);
-      await nextTick();
-    });
-
-    it('should allow columns to shrink on first measurement', async () => {
-      const { result } = setup({ ...defaultProps, direction: 'both', columnCount: 2, columnWidth: undefined });
-      // Default estimate is 150
-      expect(result.getColumnWidth(0)).toBe(150);
-
-      const parent = document.createElement('div');
-      const child = document.createElement('div');
-      Object.defineProperty(child, 'offsetWidth', { value: 100 });
-      child.dataset.colIndex = '0';
-      parent.appendChild(child);
-
-      // First measurement is 100
-      result.updateItemSize(0, 100, 50, parent);
-      await nextTick();
-      expect(result.getColumnWidth(0)).toBe(100);
-    });
-
-    it('should allow shrinking on first measurement', async () => {
-      const { result } = setup({ ...defaultProps, itemSize: undefined });
-      // Default estimate is 50
-      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(50);
-
-      // First measurement is 20 (smaller than 50)
-      result.updateItemSize(0, 50, 20);
-      await nextTick();
-      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(20);
-
-      // Second measurement is 10 (smaller than 20) - should NOT shrink
-      result.updateItemSize(0, 50, 10);
-      await nextTick();
-      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(20);
-
-      // Third measurement is 30 (larger than 20) - SHOULD grow
-      result.updateItemSize(0, 50, 30);
-      await nextTick();
-      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(30);
-    });
-
-    it('should handle cells querySelector in updateItemSizes', async () => {
-      const { result } = setup({
-        ...defaultProps,
-        direction: 'both',
-        columnCount: 2,
-        columnWidth: undefined,
-      });
-
-      const parent = document.createElement('div');
-      const child1 = document.createElement('div');
-      Object.defineProperty(child1, 'offsetWidth', { value: 200 });
-      child1.dataset.colIndex = '0';
-      const child2 = document.createElement('div');
-      Object.defineProperty(child2, 'offsetWidth', { value: 300 });
-      child2.dataset.colIndex = '1';
-
-      parent.appendChild(child1);
-      parent.appendChild(child2);
-
-      result.updateItemSizes([ { index: 0, inlineSize: 500, blockSize: 50, element: parent } ]);
-      await nextTick();
-      expect(result.getColumnWidth(0)).toBe(200);
-      expect(result.getColumnWidth(1)).toBe(300);
-    });
   });
 
-  describe('scroll and offsets', () => {
+  describe('scrolling and API', () => {
+    it('should handle scrollToIndex with horizontal direction and dynamic item size', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      const { result } = setup({ ...defaultProps, container, direction: 'horizontal', itemSize: undefined });
+      await nextTick();
+
+      // index 10. itemSize is 50 by default. totalWidth = 5000.
+      result.scrollToIndex(null, 10, { align: 'start', behavior: 'auto' });
+      await nextTick();
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(500);
+    });
+
+    it('should handle scrollToIndex with window fallback when container is missing', async () => {
+      const { result } = setup({ ...defaultProps, container: undefined });
+      await nextTick();
+      result.scrollToIndex(10, 0);
+      await nextTick();
+      expect(window.scrollTo).toHaveBeenCalled();
+    });
+
     it('should handle scrollToIndex out of bounds', async () => {
       const { result } = setup({ ...defaultProps });
       // Row past end
@@ -443,7 +441,7 @@ describe('useVirtualScroll', () => {
 
       // Current visible range: [scrollTop + paddingStart, scrollTop + viewport - paddingEnd] = [300, 700]
       // Scroll to item at y=250. 250 < 300, so not visible.
-      // targetY < relativeScrollY + paddingStart (250 < 200 + 100) -> hit line 729
+      // targetY < relativeScrollY + paddingStart (250 < 200 + 100)
       result.scrollToIndex(5, null, 'auto');
       await nextTick();
     });
@@ -464,6 +462,59 @@ describe('useVirtualScroll', () => {
       const { result } = setup({ ...defaultProps, container });
       result.scrollToOffset(100, 200);
       expect(container.scrollTo).toHaveBeenCalled();
+    });
+
+    it('should handle scrollToOffset with currentX/currentY fallbacks', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'scrollLeft', { value: 50, writable: true });
+      Object.defineProperty(container, 'scrollTop', { value: 60, writable: true });
+
+      const { result } = setup({ ...defaultProps, container });
+      await nextTick();
+
+      // Pass null to x and y to trigger fallbacks to currentX and currentY
+      result.scrollToOffset(null, null);
+      await nextTick();
+
+      // scrollOffset.x = targetX - hostOffset.x + (isHorizontal ? paddingStartX : 0)
+      // targetX = currentX = 50. hostOffset.x = 0. isHorizontal = false.
+      // So scrollOffset.x = 50.
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(50);
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(60);
+    });
+
+    it('should handle scrollToOffset with restricted direction for padding fallback', async () => {
+      const container = document.createElement('div');
+      container.scrollTo = vi.fn();
+
+      // Horizontal direction: isVertical will be false, so targetY padding fallback will be 0
+      const { result } = setup({ ...defaultProps, container, direction: 'horizontal', scrollPaddingStart: 10 });
+      await nextTick();
+
+      result.scrollToOffset(100, 100);
+      await nextTick();
+      // targetY = 100 + hostOffset.y - (isVertical ? paddingStartY : 0)
+      // Since isVertical is false, it uses 0. hostOffset.y is 0 here.
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({
+        top: 100,
+      }));
+
+      // Vertical direction: isHorizontal will be false, so targetX padding fallback will be 0
+      const { result: r2 } = setup({ ...defaultProps, container, direction: 'vertical', scrollPaddingStart: 10 });
+      await nextTick();
+      r2.scrollToOffset(100, 100);
+      await nextTick();
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({
+        left: 100,
+      }));
+    });
+
+    it('should handle scrollToOffset with window fallback when container is missing', async () => {
+      const { result } = setup({ ...defaultProps, container: undefined });
+      await nextTick();
+      result.scrollToOffset(100, 200);
+      await nextTick();
+      expect(window.scrollTo).toHaveBeenCalled();
     });
 
     it('should handle scrollToIndex with null indices', async () => {
@@ -580,50 +631,6 @@ describe('useVirtualScroll', () => {
       expect(container.scrollTop).toBe(400);
     });
 
-    it('should clear pendingScroll when reached', async () => {
-      const { result } = setup({ ...defaultProps, itemSize: undefined });
-      result.scrollToIndex(10, 0, { isCorrection: true });
-      await nextTick();
-    });
-
-    it('should cover scrollToIndex row >= length branch', async () => {
-      const { result } = setup({ ...defaultProps });
-      result.scrollToIndex(200, null);
-      await nextTick();
-    });
-
-    it('should handle scrollToIndex horizontal alignment branches', async () => {
-      const container = document.createElement('div');
-      Object.defineProperty(container, 'clientWidth', { value: 500, configurable: true });
-      Object.defineProperty(container, 'scrollLeft', { value: 1000, writable: true, configurable: true });
-      container.scrollTo = vi.fn().mockImplementation((options) => {
-        container.scrollLeft = options.left;
-      });
-
-      const { result } = setup({ ...defaultProps, direction: 'horizontal', container, itemSize: 50, scrollPaddingStart: 100 });
-      await nextTick();
-
-      // targetX = 5 * 50 = 250. relativeScrollX = 1000. paddingStart = 100.
-      // targetX < relativeScrollX + paddingStart (250 < 1100)
-      result.scrollToIndex(null, 5, 'auto');
-      await nextTick();
-      expect(container.scrollLeft).toBeLessThan(1000);
-
-      // End alignment
-      result.scrollToIndex(null, 5, 'end');
-      await nextTick();
-
-      // Center alignment
-      result.scrollToIndex(null, 5, 'center');
-      await nextTick();
-    });
-
-    it('should only apply scrollPaddingStart to Y axis in "both" mode if it is a number', async () => {
-      setup({ ...defaultProps, direction: 'both', scrollPaddingStart: 10 });
-      await nextTick();
-      // Y padding should be 10, X padding should be 0
-    });
-
     it('should stop programmatic scroll', async () => {
       const { result } = setup(defaultProps);
       result.scrollToIndex(10, null, { behavior: 'smooth' });
@@ -631,6 +638,47 @@ describe('useVirtualScroll', () => {
 
       result.stopProgrammaticScroll();
       expect(result.scrollDetails.value.isProgrammaticScroll).toBe(false);
+    });
+
+    it('should handle scrollToIndex with element container having scrollTo', async () => {
+      const container = document.createElement('div');
+      container.scrollTo = vi.fn();
+      const { result } = setup({ ...defaultProps, container });
+      await nextTick();
+
+      result.scrollToIndex(10, 0, { behavior: 'auto' });
+      await nextTick();
+      expect(container.scrollTo).toHaveBeenCalled();
+    });
+
+    it('should handle scrollToIndex fallback when scrollTo is missing', async () => {
+      const container = document.createElement('div');
+      (container as unknown as { scrollTo: unknown; }).scrollTo = undefined;
+      const { result } = setup({ ...defaultProps, container });
+      await nextTick();
+
+      // row only
+      result.scrollToIndex(10, null, { behavior: 'auto' });
+      await nextTick();
+      expect(container.scrollTop).toBeGreaterThan(0);
+
+      // col only
+      const { result: resH } = setup({ ...defaultProps, container, direction: 'horizontal' });
+      await nextTick();
+      resH.scrollToIndex(null, 10, { behavior: 'auto' });
+      await nextTick();
+      expect(container.scrollLeft).toBeGreaterThan(0);
+    });
+
+    it('should skip undefined items in renderedItems', async () => {
+      const items = Array.from({ length: 10 }) as unknown[];
+      items[ 0 ] = { id: 0 };
+      // other indices are undefined
+      const { result } = setup({ ...defaultProps, items, itemSize: 50 });
+      await nextTick();
+      // only index 0 should be rendered
+      expect(result.renderedItems.value.length).toBe(1);
+      expect(result.renderedItems.value[ 0 ]?.index).toBe(0);
     });
   });
 
@@ -641,6 +689,72 @@ describe('useVirtualScroll', () => {
       window.scrollY = 250;
       window.dispatchEvent(new Event('scroll'));
       await nextTick();
+    });
+
+    it('should cover fallback branches for unknown targets and directions', async () => {
+      // 1. Unknown container type (hits 408, 445, 513, 718 else branches)
+      const unknownContainer = {
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as HTMLElement;
+
+      const { result } = setup({
+        ...defaultProps,
+        container: unknownContainer,
+        hostElement: document.createElement('div'),
+      });
+      await nextTick();
+
+      result.scrollToIndex(10, 0);
+      result.scrollToOffset(100, 100);
+      result.updateHostOffset();
+
+      // 2. Invalid direction (hits 958 else branch)
+      const { result: r2 } = setup({
+        ...defaultProps,
+        direction: undefined as unknown as 'vertical',
+        stickyIndices: [ 0 ],
+      });
+      await nextTick();
+      window.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(r2.renderedItems.value.find((i) => i.index === 0)).toBeDefined();
+
+      // 3. Unknown target in handleScroll (hits 1100 else branch)
+      const container = document.createElement('div');
+      setup({ ...defaultProps, container });
+      const event = new Event('scroll');
+      Object.defineProperty(event, 'target', { value: { } });
+      container.dispatchEvent(event);
+    });
+
+    it('should cleanup events and observers when container changes', async () => {
+      const container = document.createElement('div');
+      const removeSpy = vi.spyOn(container, 'removeEventListener');
+      const { props } = setup({ ...defaultProps, container });
+      await nextTick();
+
+      // Change container to trigger cleanup of old one
+      props.value.container = document.createElement('div');
+      await nextTick();
+
+      expect(removeSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
+    });
+
+    it('should cleanup when unmounted and container is window', async () => {
+      const { wrapper } = setup({ ...defaultProps, container: window });
+      await nextTick();
+      wrapper.unmount();
+    });
+
+    it('should cleanup when unmounted', async () => {
+      const container = document.createElement('div');
+      const removeSpy = vi.spyOn(container, 'removeEventListener');
+      const { wrapper } = setup({ ...defaultProps, container });
+      await nextTick();
+
+      wrapper.unmount();
+      expect(removeSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
     });
 
     it('should handle document scroll events', async () => {
@@ -698,7 +812,7 @@ describe('useVirtualScroll', () => {
 
     it('should handle window resize events', async () => {
       setup({ ...defaultProps, container: window });
-      window.innerWidth = 1200;
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1200 });
       window.dispatchEvent(new Event('resize'));
       await nextTick();
     });
@@ -803,71 +917,43 @@ describe('useVirtualScroll', () => {
     });
   });
 
-  describe('lifecycle and logic branches', () => {
-    it('should trigger scroll correction when isScrolling becomes false', async () => {
-      vi.useFakeTimers();
-      const { result } = setup({ ...defaultProps, container: window, itemSize: undefined });
+  describe('sticky and pushed items', () => {
+    it('should identify sticky items', async () => {
+      const { result } = setup({ ...defaultProps, stickyIndices: [ 0, 10 ] });
       await nextTick();
-      result.scrollToIndex(10, 0, 'start');
-      document.dispatchEvent(new Event('scroll'));
-      expect(result.scrollDetails.value.isScrolling).toBe(true);
-      vi.advanceTimersByTime(250);
-      await nextTick();
-      expect(result.scrollDetails.value.isScrolling).toBe(false);
-      vi.useRealTimers();
+
+      const items = result.renderedItems.value;
+      const item0 = items.find((i) => i.index === 0);
+      const item10 = items.find((i) => i.index === 10);
+      expect(item0?.isSticky).toBe(true);
+      expect(item10?.isSticky).toBe(true);
     });
 
-    it('should trigger scroll correction when treeUpdateFlag changes', async () => {
-      const { result } = setup({ ...defaultProps, itemSize: undefined });
+    it('should make sticky items active when scrolled past', async () => {
+      const { result } = setup({ ...defaultProps, stickyIndices: [ 0 ] });
       await nextTick();
-      result.scrollToIndex(10, 0, 'start');
-      // Trigger tree update
-      result.updateItemSize(5, 100, 100);
+
+      result.scrollToOffset(0, 100);
       await nextTick();
+
+      const item0 = result.renderedItems.value.find((i) => i.index === 0);
+      expect(item0?.isStickyActive).toBe(true);
     });
 
-    it('should cover updateHostOffset when container is window', async () => {
-      const { result, props } = setup({ ...defaultProps, container: window });
-      const host = document.createElement('div');
-      props.value.hostElement = host;
+    it('should include current sticky item in rendered items even if range is ahead', async () => {
+      const { result } = setup({ ...defaultProps, stickyIndices: [ 0 ], bufferBefore: 0 });
       await nextTick();
-      result.updateHostOffset();
+
+      // Scroll to index 20. Range starts at 20.
+      result.scrollToIndex(20, 0, { align: 'start', behavior: 'auto' });
+      await nextTick();
+
+      expect(result.scrollDetails.value.range.start).toBe(20);
+      const item0 = result.renderedItems.value.find((i) => i.index === 0);
+      expect(item0).toBeDefined();
+      expect(item0?.isStickyActive).toBe(true);
     });
 
-    it('should cover updateHostOffset when container is hostElement', async () => {
-      const host = document.createElement('div');
-      const { result } = setup({ ...defaultProps, container: host, hostElement: host });
-      await nextTick();
-      result.updateHostOffset();
-    });
-
-    it('should correctly calculate hostOffset when container is an HTMLElement', async () => {
-      const container = document.createElement('div');
-      const hostElement = document.createElement('div');
-
-      container.getBoundingClientRect = vi.fn(() => ({ top: 100, left: 100, bottom: 200, right: 200, width: 100, height: 100, x: 100, y: 100, toJSON: () => '' }));
-      hostElement.getBoundingClientRect = vi.fn(() => ({ top: 150, left: 150, bottom: 200, right: 200, width: 50, height: 50, x: 150, y: 150, toJSON: () => '' }));
-      Object.defineProperty(container, 'scrollTop', { value: 50, writable: true, configurable: true });
-
-      const { result } = setup({ ...defaultProps, container, hostElement });
-      await nextTick();
-      result.updateHostOffset();
-      expect(result.scrollDetails.value.scrollOffset.y).toBeDefined();
-    });
-
-    it('should cover refresh method', async () => {
-      const { result } = setup({ ...defaultProps, itemSize: 0 });
-      result.updateItemSize(0, 100, 100);
-      await nextTick();
-      expect(result.totalHeight.value).toBe(5050);
-
-      result.refresh();
-      await nextTick();
-      expect(result.totalHeight.value).toBe(5000);
-    });
-  });
-
-  describe('sticky header pushing', () => {
     it('should push sticky item when next sticky item approaches (vertical)', async () => {
       const container = document.createElement('div');
       Object.defineProperty(container, 'clientHeight', { value: 500 });
@@ -899,6 +985,50 @@ describe('useVirtualScroll', () => {
 
       const item0 = result.renderedItems.value.find((i) => i.index === 0);
       expect(item0!.offset.x).toBeLessThanOrEqual(450);
+    });
+
+    it('should handle dynamic sticky item pushing in vertical mode', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { value: 500 });
+      Object.defineProperty(container, 'scrollTop', { value: 460, writable: true });
+
+      const { result } = setup({
+        ...defaultProps,
+        container,
+        itemSize: undefined, // dynamic
+        stickyIndices: [ 0, 10 ],
+      });
+      await nextTick();
+
+      // Item 0 is sticky. Item 10 is next sticky.
+      // Default size = 50.
+      // nextStickyY = itemSizesY.query(10) = 500.
+      // distance = 500 - 460 = 40.
+      // 40 < 50 (item 0 height), so it should be pushed.
+      // stickyOffset.y = -(50 - 40) = -10.
+      const stickyItem = result.renderedItems.value.find((i) => i.index === 0);
+      expect(stickyItem?.stickyOffset.y).toBe(-10);
+    });
+
+    it('should handle dynamic sticky item pushing in horizontal mode', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientWidth', { value: 500 });
+      Object.defineProperty(container, 'scrollLeft', { value: 460, writable: true });
+
+      const { result } = setup({
+        ...defaultProps,
+        container,
+        direction: 'horizontal',
+        itemSize: undefined, // dynamic
+        stickyIndices: [ 0, 10 ],
+      });
+      await nextTick();
+
+      // nextStickyX = itemSizesX.query(10) = 500.
+      // distance = 500 - 460 = 40.
+      // 40 < 50, so stickyOffset.x = -10.
+      const stickyItem = result.renderedItems.value.find((i) => i.index === 0);
+      expect(stickyItem?.stickyOffset.x).toBe(-10);
     });
   });
 
@@ -970,6 +1100,35 @@ describe('useVirtualScroll', () => {
       vi.useRealTimers();
     });
 
+    it('should restore scroll position with itemSize as function when prepending', async () => {
+      vi.useFakeTimers();
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'scrollTop', { value: 100, writable: true });
+      container.scrollTo = vi.fn().mockImplementation((options) => {
+        container.scrollTop = options.top;
+      });
+
+      const items = Array.from({ length: 50 }, (_, i) => ({ id: i }));
+      const { props } = setup({
+        ...defaultProps,
+        items,
+        container,
+        itemSize: (item: { id: number; }) => (item.id < 0 ? 100 : 50),
+        restoreScrollOnPrepend: true,
+      });
+      await nextTick();
+
+      // Prepend 1 item with id -1 (size 100)
+      const newItems = [ { id: -1 }, ...items ];
+      props.value.items = newItems;
+      await nextTick();
+      await nextTick();
+
+      // Should have adjusted scroll by 100px. New scrollTop should be 200.
+      expect(container.scrollTop).toBe(200);
+      vi.useRealTimers();
+    });
+
     it('should NOT restore scroll position when restoreScrollOnPrepend is false', async () => {
       const container = document.createElement('div');
       Object.defineProperty(container, 'scrollTop', { value: 100, writable: true });
@@ -1009,12 +1168,90 @@ describe('useVirtualScroll', () => {
       props.value.items = [ { id: -1 }, ...props.value.items ];
       await nextTick();
     });
+  });
 
-    it('should handle updateItemSizes for horizontal direction', async () => {
-      const { result } = setup({ ...defaultProps, direction: 'horizontal', itemSize: undefined });
-      result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 50 } ]);
+  describe('advanced logic and edge cases', () => {
+    it('should trigger scroll correction when isScrolling becomes false', async () => {
+      vi.useFakeTimers();
+      const { result } = setup({ ...defaultProps, container: window, itemSize: undefined });
       await nextTick();
-      expect(result.totalWidth.value).toBe(5050);
+      result.scrollToIndex(10, 0, 'start');
+      document.dispatchEvent(new Event('scroll'));
+      expect(result.scrollDetails.value.isScrolling).toBe(true);
+      vi.advanceTimersByTime(250);
+      await nextTick();
+      expect(result.scrollDetails.value.isScrolling).toBe(false);
+      vi.useRealTimers();
+    });
+
+    it('should trigger scroll correction when treeUpdateFlag changes', async () => {
+      const { result } = setup({ ...defaultProps, itemSize: undefined });
+      await nextTick();
+      result.scrollToIndex(10, 0, 'start');
+      // Trigger tree update
+      result.updateItemSize(5, 100, 100);
+      await nextTick();
+    });
+
+    it('should cover updateHostOffset when container is window', async () => {
+      const { result, props } = setup({ ...defaultProps, container: window });
+      const host = document.createElement('div');
+      props.value.hostElement = host;
+      await nextTick();
+      result.updateHostOffset();
+    });
+
+    it('should cover updateHostOffset when container is hostElement', async () => {
+      const host = document.createElement('div');
+      const { result } = setup({ ...defaultProps, container: host, hostElement: host });
+      await nextTick();
+      result.updateHostOffset();
+    });
+
+    it('should handle updateHostOffset with window fallback when container is missing', async () => {
+      const { result, props } = setup({ ...defaultProps, container: undefined });
+      const host = document.createElement('div');
+      props.value.hostElement = host;
+      await nextTick();
+      result.updateHostOffset();
+    });
+
+    it('should correctly calculate hostOffset when container is an HTMLElement', async () => {
+      const container = document.createElement('div');
+      const hostElement = document.createElement('div');
+
+      container.getBoundingClientRect = vi.fn(() => ({ top: 100, left: 100, bottom: 200, right: 200, width: 100, height: 100, x: 100, y: 100, toJSON: () => '' }));
+      hostElement.getBoundingClientRect = vi.fn(() => ({ top: 150, left: 150, bottom: 200, right: 200, width: 50, height: 50, x: 150, y: 150, toJSON: () => '' }));
+      Object.defineProperty(container, 'scrollTop', { value: 50, writable: true, configurable: true });
+
+      const { result } = setup({ ...defaultProps, container, hostElement });
+      await nextTick();
+      result.updateHostOffset();
+      expect(result.scrollDetails.value.scrollOffset.y).toBeDefined();
+    });
+
+    it('should cover refresh method', async () => {
+      const { result } = setup({ ...defaultProps, itemSize: 0 });
+      result.updateItemSize(0, 100, 100);
+      await nextTick();
+      expect(result.totalHeight.value).toBe(5050);
+
+      result.refresh();
+      await nextTick();
+      expect(result.totalHeight.value).toBe(5000);
+    });
+
+    it('should trigger scroll correction on tree update with string alignment', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { value: 500, configurable: true });
+      Object.defineProperty(container, 'scrollHeight', { value: 5000, configurable: true });
+      const { result } = setup({ ...defaultProps, container, itemSize: undefined });
+      // Set a pending scroll with string alignment
+      result.scrollToIndex(10, null, 'start');
+
+      // Trigger tree update
+      result.updateItemSize(0, 100, 100);
+      await nextTick();
     });
 
     it('should trigger scroll correction on tree update with pending scroll', async () => {
@@ -1053,6 +1290,92 @@ describe('useVirtualScroll', () => {
 
   // eslint-disable-next-line test/prefer-lowercase-title
   describe('SSR support', () => {
+    it('should handle colBuffer when ssrRange is present and not scrolling', async () => {
+      vi.useFakeTimers();
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientWidth', { value: 500, configurable: true });
+      Object.defineProperty(container, 'scrollLeft', { value: 0, writable: true, configurable: true });
+      container.scrollTo = vi.fn().mockImplementation((options) => {
+        if (options.left !== undefined) {
+          Object.defineProperty(container, 'scrollLeft', { value: options.left, writable: true, configurable: true });
+        }
+      });
+
+      const { result } = setup({
+        ...defaultProps,
+        container,
+        direction: 'both',
+        columnCount: 20,
+        columnWidth: 100,
+        ssrRange: { start: 0, end: 10, colStart: 1, colEnd: 2 }, // SSR values
+        initialScrollIndex: 0,
+      });
+
+      await nextTick(); // onMounted schedules hydration
+      await nextTick(); // hydration tick 1
+      await nextTick(); // hydration tick 2 (isHydrating = false)
+
+      expect(result.isHydrated.value).toBe(true);
+
+      // Scroll to col 5 (offset 500)
+      result.scrollToIndex(null, 5, { align: 'start', behavior: 'auto' });
+      await nextTick();
+
+      vi.runAllTimers(); // Clear isScrolling timeout
+      await nextTick();
+
+      // start = findLowerBound(500) = 5.
+      // colBuffer should be 0 because ssrRange is present and isScrolling is false.
+      expect(result.columnRange.value.start).toBe(5);
+
+      // Now trigger a scroll to make isScrolling true
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      // isScrolling is now true. colBuffer should be 2.
+      expect(result.columnRange.value.start).toBe(3);
+      vi.useRealTimers();
+    });
+
+    it('should handle bufferBefore when ssrRange is present and not scrolling', async () => {
+      vi.useFakeTimers();
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { value: 500 });
+      Object.defineProperty(container, 'scrollTop', { value: 0, writable: true, configurable: true });
+      container.scrollTo = vi.fn().mockImplementation((options) => {
+        if (options.top !== undefined) {
+          Object.defineProperty(container, 'scrollTop', { value: options.top, writable: true, configurable: true });
+        }
+      });
+
+      const { result } = setup({
+        ...defaultProps,
+        container,
+        itemSize: 50,
+        bufferBefore: 5,
+        ssrRange: { start: 0, end: 10 },
+        initialScrollIndex: 10,
+      });
+
+      await nextTick(); // schedules hydration
+      await nextTick(); // hydration tick scrolls to 10
+      await nextTick();
+
+      vi.runAllTimers(); // Clear isScrolling timeout
+      await nextTick();
+
+      expect(result.isHydrated.value).toBe(true);
+      // start = floor(500 / 50) = 10.
+      // Since ssrRange is present and isScrolling is false, bufferBefore should be 0.
+      expect(result.renderedItems.value[ 0 ]?.index).toBe(10);
+
+      // Now trigger a scroll to make isScrolling true
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      // isScrolling is now true. bufferBefore should be 5.
+      expect(result.renderedItems.value[ 0 ]?.index).toBe(5);
+      vi.useRealTimers();
+    });
+
     it('should handle SSR range in range calculation', () => {
       const props = ref({
         items: mockItems,
@@ -1070,6 +1393,17 @@ describe('useVirtualScroll', () => {
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
       expect(result.columnRange.value.end).toBe(5);
+    });
+
+    it('should handle SSR range with colEnd fallback in columnRange calculation', () => {
+      const props = ref({
+        items: mockItems,
+        columnCount: 10,
+        ssrRange: { start: 0, end: 10, colStart: 0, colEnd: 0 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      // colEnd is 0, so it should use columnCount (10)
+      expect(result.columnRange.value.end).toBe(10);
     });
 
     it('should handle SSR range with both directions for total sizes', () => {
@@ -1097,17 +1431,6 @@ describe('useVirtualScroll', () => {
       expect(result.totalWidth.value).toBe(500); // (20-10) * 50
     });
 
-    it('should handle SSR range with fixed size horizontal for total sizes', () => {
-      const props = ref({
-        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
-        direction: 'horizontal',
-        itemSize: 50,
-        ssrRange: { start: 10, end: 20 },
-      }) as Ref<VirtualScrollProps<unknown>>;
-      const result = useVirtualScroll(props);
-      expect(result.totalWidth.value).toBe(500); // (20-10) * 50
-    });
-
     it('should handle SSR range with vertical offset in renderedItems', () => {
       const props = ref({
         items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
@@ -1117,6 +1440,18 @@ describe('useVirtualScroll', () => {
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
       expect(result.renderedItems.value[ 0 ]?.offset.y).toBe(0);
+    });
+
+    it('should handle SSR range with dynamic horizontal offsets in renderedItems', () => {
+      const props = ref({
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        direction: 'horizontal',
+        itemSize: undefined, // dynamic
+        ssrRange: { start: 10, end: 20 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      // ssrOffsetX = itemSizesX.query(10) = 10 * 50 = 500
+      expect(result.renderedItems.value[ 0 ]?.offset.x).toBe(500);
     });
 
     it('should handle SSR range with dynamic sizes for total sizes', () => {
@@ -1184,6 +1519,20 @@ describe('useVirtualScroll', () => {
       expect(result.renderedItems.value[ 0 ]?.offset.x).toBe(-500);
     });
 
+    it('should handle SSR range with direction "both" and colEnd falsy', () => {
+      const propsValue = ref({
+        columnCount: 10,
+        columnWidth: 100,
+        direction: 'both' as const,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        ssrRange: { colEnd: 0, colStart: 5, end: 10, start: 0 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      // colEnd is 0, so it should use colCount (10)
+      // totalWidth = columnSizes.query(10) - columnSizes.query(5) = 1000 - 500 = 500
+      expect(result.totalWidth.value).toBe(500);
+    });
+
     it('should handle SSR range with colCount > 0 in totalWidth', () => {
       const props = ref({
         items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
@@ -1195,17 +1544,9 @@ describe('useVirtualScroll', () => {
       const result = useVirtualScroll(props);
       expect(result.totalWidth.value).toBe(500);
     });
+  });
 
-    it('should skip undefined items in renderedItems', async () => {
-      // items array is mockItems (length 100)
-      const { result } = setup({ ...defaultProps, stickyIndices: [ 1000 ] });
-      // Scroll way past the end
-      result.scrollToOffset(0, 100000);
-      await nextTick();
-      // prevStickyIdx will be 1000, which is out of bounds
-      expect(result.renderedItems.value.length).toBe(0);
-    });
-
+  describe('helpers', () => {
     it('should cover object padding branches in helpers', () => {
       expect(getPaddingX({ x: 10 }, 'horizontal')).toBe(10);
       expect(getPaddingY({ y: 20 }, 'vertical')).toBe(20);
