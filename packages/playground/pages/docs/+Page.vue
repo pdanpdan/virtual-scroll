@@ -6,8 +6,8 @@ const logoUrl = normalizeHref('logo.svg');
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto pb-10 px-2 md:px-6">
-    <div class="card bg-base-200 shadow-sm border border-base-300">
+  <div class="pb-10">
+    <div class="card bg-base-300 shadow-sm border border-primary/10">
       <div class="card-body flex-row items-center p-1 gap-3 md:p-6 md:gap-6">
         <img :src="logoUrl" class="size-16 md:size-20" alt="Logo" />
         <div>
@@ -115,7 +115,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
       <section id="usage-modes">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">Usage Modes</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="card max-md:-mx-2 bg-base-200 border border-base-300 shadow-sm overflow-hidden">
+          <div class="card max-md:-mx-2 bg-base-300 border border-primary/10 shadow-sm overflow-hidden">
             <div class="card-body">
               <h3 class="card-title text-lg md:text-xl text-primary">Compiled Component</h3>
               <p class="text-sm opacity-90 mb-4">The recommended way for most projects. Uses pre-compiled JS for faster builds.</p>
@@ -132,7 +132,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 border border-base-300 shadow-sm overflow-hidden">
+          <div class="card max-md:-mx-2 bg-base-300 border border-primary/10 shadow-sm overflow-hidden">
             <div class="card-body">
               <h3 class="card-title text-lg md:text-xl text-secondary">Original Vue SFC</h3>
               <p class="text-sm opacity-90 mb-4">Import the raw source for custom compilation and optimization.</p>
@@ -158,8 +158,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Core Configuration</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
-          <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
-            <thead class="bg-base-200">
+          <table class="table table-md table-zebra w-full border border-primary/10 rounded-box overflow-hidden">
+            <thead class="bg-base-300">
               <tr>
                 <th class="w-1/4">Prop</th>
                 <th class="w-1/4">Type</th>
@@ -201,8 +201,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Grid Configuration <span class="text-xs normal-case opacity-85">(direction="both")</span></h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
-          <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
-            <thead class="bg-base-200">
+          <table class="table table-md table-zebra w-full border border-primary/10 rounded-box overflow-hidden">
+            <thead class="bg-base-300">
               <tr>
                 <th class="w-1/4">Prop</th>
                 <th class="w-1/4">Type</th>
@@ -238,8 +238,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Feature-Specific Props</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
-          <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
-            <thead class="bg-base-200">
+          <table class="table table-md table-zebra w-full border border-primary/10 rounded-box overflow-hidden">
+            <thead class="bg-base-300">
               <tr>
                 <th class="w-1/4">Prop</th>
                 <th class="w-1/4">Type</th>
@@ -284,8 +284,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Advanced Configuration</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
-          <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
-            <thead class="bg-base-200">
+          <table class="table table-md table-zebra w-full border border-primary/10 rounded-box overflow-hidden">
+            <thead class="bg-base-300">
               <tr>
                 <th class="w-1/4">Prop</th>
                 <th class="w-1/4">Type</th>
@@ -336,8 +336,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Development</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
-          <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
-            <thead class="bg-base-200">
+          <table class="table table-md table-zebra w-full border border-primary/10 rounded-box overflow-hidden">
+            <thead class="bg-base-300">
               <tr>
                 <th class="w-1/4">Prop</th>
                 <th class="w-1/4">Type</th>
@@ -370,7 +370,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Slots</h3>
         <div class="space-y-6 mb-10">
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-3">#item</h4>
             <p class="mb-4 opacity-90">The main slot for rendering individual items.</p>
             <table class="table table-sm w-full">
@@ -421,15 +421,15 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </table>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-4 border border-base-300">
+            <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-4 border border-primary/10">
               <h4 class="font-bold mb-2">#header</h4>
               <p class="text-sm opacity-90">Content rendered above the list. Can be made sticky via CSS or <code>stickyHeader</code> prop.</p>
             </div>
-            <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-4 border border-base-300">
+            <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-4 border border-primary/10">
               <h4 class="font-bold mb-2">#footer</h4>
               <p class="text-sm opacity-90">Content rendered below the list.</p>
             </div>
-            <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-4 border border-base-300">
+            <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-4 border border-primary/10">
               <h4 class="font-bold mb-2">#loading</h4>
               <p class="text-sm opacity-90">Content rendered when <code>loading</code> prop is true. Appended after the last item.</p>
             </div>
@@ -455,7 +455,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Events</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-3 text-primary">scroll</h4>
             <p class="mb-4 opacity-90">Emitted when the container is scrolled.</p>
             <p class="text-sm mb-2 font-bold">Payload (<code>ScrollDetails&lt;T&gt;</code>):</p>
@@ -472,13 +472,13 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <li><code>items</code>: Array of currently rendered items with their offsets and sizes.</li>
             </ul>
           </div>
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-3 text-primary">load</h4>
             <p class="mb-4 opacity-90">Emitted when scrolling near the end of the content.</p>
             <p class="text-sm mb-2 font-bold">Payload (<code>direction</code>):</p>
             <p class="text-sm opacity-90">Either <code>'vertical'</code> or <code>'horizontal'</code> depending on which dimension triggered the load.</p>
           </div>
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300 md:col-span-2">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10 md:col-span-2">
             <h4 class="font-bold text-lg mb-3 text-primary">visibleRangeChange</h4>
             <p class="mb-4 opacity-90">Emitted whenever the rendered items range or column range changes (due to scrolling or resize).</p>
             <p class="text-sm mb-2 font-bold">Payload (<code>range</code>):</p>
@@ -500,7 +500,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Exposed Methods</h3>
 
         <div class="space-y-6 mb-10">
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">scrollToIndex(row, col, options?)</h4>
 
             <div class="text-sm opacity-90 space-y-2">
@@ -534,7 +534,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">scrollToOffset(x, y, options?)</h4>
 
             <div class="text-sm opacity-90">
@@ -550,7 +550,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">refresh()</h4>
 
             <div class="text-sm opacity-90">
@@ -578,8 +578,8 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
 
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Return Value</h3>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
-          <table class="table table-md table-zebra w-full border border-base-300">
-            <thead class="bg-base-200">
+          <table class="table table-md table-zebra w-full border border-primary/10">
+            <thead class="bg-base-300">
               <tr>
                 <th class="w-1/4">Member</th>
                 <th class="w-1/4">Type</th>
@@ -618,7 +618,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
 
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Functions</h3>
         <div class="space-y-6">
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">scrollToIndex(row, col, options?)</h4>
             <div class="text-sm opacity-90 space-y-2">
               <p>Programmatically scrolls to a specific row and/or column.</p>
@@ -631,7 +631,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">scrollToOffset(x, y, options?)</h4>
             <div class="text-sm opacity-90 space-y-2">
               <p>Programmatically scrolls to a specific pixel offset.</p>
@@ -644,7 +644,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">updateItemSize(index, width, height, element?)</h4>
             <div class="text-sm opacity-90 space-y-2">
               <p>Updates the stored size of an item. Should be called when an item is measured (e.g., via <code>ResizeObserver</code>).</p>
@@ -658,7 +658,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">updateHostOffset()</h4>
             <div class="text-sm opacity-90 space-y-2">
               <p>Recalculates the position of the host element relative to the scroll container. Useful if the container or host moves without a scroll event.</p>
@@ -666,7 +666,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">getColumnWidth(index)</h4>
             <div class="text-sm opacity-90 space-y-2">
               <p>Helper to get the width of a specific column based on the current <code>columnWidth</code> prop configuration.</p>
@@ -677,7 +677,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h4 class="font-bold text-lg mb-2">refresh()</h4>
             <div class="text-sm opacity-90 space-y-2">
               <p>Resets all dynamic measurements and re-initializes from props.</p>
@@ -696,7 +696,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h3 class="font-bold text-lg mb-2">isElement(container)</h3>
             <div class="text-sm opacity-90 space-y-2">
               <p>Type guard to check if a container is an <code>HTMLElement</code>.</p>
@@ -704,7 +704,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h3 class="font-bold text-lg mb-2">isScrollableElement(target)</h3>
             <div class="text-sm opacity-90 space-y-2">
               <p>Type guard to check if an event target is a scrollable <code>HTMLElement</code>.</p>
@@ -712,7 +712,7 @@ const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
             </div>
           </div>
 
-          <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
+          <div class="card max-md:-mx-2 bg-base-300 shadow-sm p-6 border border-primary/10">
             <h3 class="font-bold text-lg mb-2">isScrollToIndexOptions(options)</h3>
             <div class="text-sm opacity-90 space-y-2">
               <p>Type guard to check if an object matches the <code>ScrollToIndexOptions</code> interface.</p>

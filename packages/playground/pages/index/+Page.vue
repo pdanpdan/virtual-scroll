@@ -7,7 +7,7 @@ const logoUrl = normalizeHref('logo.svg');
 
 <template>
   <div>
-    <div class="card bg-base-200 shadow-sm border border-base-300">
+    <div class="card bg-base-300 shadow-sm border border-primary/10">
       <div class="card-body flex-row items-center p-1 gap-3 md:p-6 md:gap-6">
         <img :src="logoUrl" class="size-16 md:size-20" alt="Logo" />
         <div>
