@@ -103,17 +103,17 @@ const featureLinks: Link[] = [
       </main>
     </div>
 
-    <div class="drawer-side min-h-dvh border-r border-base-300">
+    <div class="drawer-side h-dvh border-r border-base-300">
       <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay" />
       <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
         <!-- Sidebar content here -->
-        <li class="menu-title text-lg font-bold mb-4 flex flex-row items-center justify-between">
+        <li class="menu-title text-lg font-bold mb-4 flex flex-row items-center justify-between text-base-content">
           <span>Virtual Scroll</span>
           <a
             href="https://github.com/pdanpdan/virtual-scroll"
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-ghost btn-sm btn-circle"
+            class="btn btn-ghost btn-sm btn-circle text-base-content"
             aria-label="GitHub Repository"
           >
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -136,9 +136,9 @@ const featureLinks: Link[] = [
           </AppLink>
         </li>
 
-        <div class="divider">
-          Examples
-        </div>
+        <li>
+          <div class="menu-title divider text-base-content">Examples</div>
+        </li>
 
         <li v-for="link in exampleLinks" :key="link.href">
           <AppLink v-slot="{ href, active }" :href="link.href">
@@ -154,9 +154,9 @@ const featureLinks: Link[] = [
           </AppLink>
         </li>
 
-        <div class="divider">
-          Features
-        </div>
+        <li>
+          <div class="menu-title divider text-base-content">Features</div>
+        </li>
 
         <li v-for="link in featureLinks" :key="link.href">
           <AppLink v-slot="{ href, active }" :href="link.href">
@@ -172,9 +172,9 @@ const featureLinks: Link[] = [
           </AppLink>
         </li>
 
-        <div class="divider">
-          Settings
-        </div>
+        <li>
+          <div class="menu-title divider text-base-content">Settings</div>
+        </li>
 
         <li>
           <label class="flex items-center justify-between p-2">
@@ -197,7 +197,7 @@ const featureLinks: Link[] = [
         <li>
           <label class="flex items-center justify-between p-2 cursor-pointer">
             <span class="text-sm font-medium">Debug Mode</span>
-            <input v-model="debugMode" type="checkbox" class="toggle toggle-primary toggle-sm" />
+            <input v-model="debugMode" type="checkbox" class="toggle toggle-error toggle-sm" />
           </label>
         </li>
       </ul>

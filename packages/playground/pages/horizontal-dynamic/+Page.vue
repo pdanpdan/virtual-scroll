@@ -49,7 +49,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer height="300px" :code="rawCode">
     <template #title>
-      <span class="text-accent font-bold uppercase opacity-60 pe-2 align-baseline">Horizontal Dynamic</span>
+      <span class="text-accent font-bold uppercase opacity-90 pe-2 align-baseline">Horizontal Dynamic</span>
     </template>
 
     <template #description>
@@ -106,7 +106,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
           <span class="badge badge-neutral mb-4">#{{ index }}</span>
           <span class="font-medium" :style="{ inlineSize: `${ itemSizeFn(null, index) }px` }">
             {{ item.text1 }}<br />
-            <span class="text-xs opacity-50">{{ item.text2 }}</span>
+            <span class="text-xs opacity-90">{{ item.text2 }}</span>
           </span>
         </div>
       </template>

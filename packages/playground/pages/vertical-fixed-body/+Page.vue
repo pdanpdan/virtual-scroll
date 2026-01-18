@@ -47,7 +47,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer height="auto" :code="rawCode">
     <template #title>
-      <span class="text-success font-bold uppercase opacity-60 pe-2 align-baseline">Vertical Fixed Body</span>
+      <span class="text-success font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Fixed Body</span>
     </template>
 
     <template #description>
@@ -102,7 +102,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       <template #header>
         <div class="bg-neutral text-neutral-content p-12 text-center rounded-t-box">
           <h2 class="text-3xl font-bold mb-2 uppercase">SCROLLABLE HEADER</h2>
-          <p class="opacity-80">This header and fixed height items scroll with the page</p>
+          <p class="opacity-90">This header and fixed height items scroll with the page</p>
         </div>
       </template>
 
@@ -111,7 +111,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
           <span class="badge badge-neutral mr-4">#{{ index }}</span>
           <div>
             <div class="font-bold">Item {{ index }}</div>
-            <div class="text-sm opacity-50">{{ item.text }}</div>
+            <div class="text-sm opacity-85">{{ item.text }}</div>
           </div>
         </div>
       </template>
@@ -119,7 +119,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       <template #footer>
         <div class="bg-neutral text-neutral-content p-12 text-center rounded-b-box">
           <h2 class="text-2xl font-bold uppercase">PAGE FOOTER</h2>
-          <p class="opacity-60 text-sm mt-2">End of the {{ itemCount }} fixed items list</p>
+          <p class="opacity-90 text-sm mt-2">End of the {{ itemCount }} fixed items list</p>
         </div>
       </template>
     </VirtualScroll>

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { usePageContext } from 'vike-vue/usePageContext';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 import { matchHref, navigateWithTransition } from '#/navigate';
+
+import CodeBlock from './CodeBlock.vue';
 
 const props = withDefaults(defineProps<{
   height?: string;
@@ -17,7 +19,6 @@ const props = withDefaults(defineProps<{
 
 const activeTab = ref<'preview' | 'code'>('preview');
 const copied = ref(false);
-const highlightedCode = ref('');
 
 const containerStyle = {
   blockSize: props.height,
@@ -38,44 +39,6 @@ async function copyCode() {
 
 const pageContext = usePageContext();
 const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchHref('/index', pageContext.urlPathname));
-
-let highlighter: import('shikiji').Highlighter | null = null;
-let highlighting = false;
-
-async function highlight() {
-  if (!props.code || highlighting) {
-    return;
-  }
-  highlighting = true;
-  try {
-    const { getHighlighter } = await import('shikiji/bundle/full');
-    const { createCssVariablesTheme } = await import('shikiji/theme-css-variables');
-    if (!highlighter) {
-      highlighter = await getHighlighter({
-        themes: [
-          createCssVariablesTheme({
-            name: 'css-variables',
-            variablePrefix: '--shiki-',
-            variableDefaults: {},
-          }),
-        ],
-        langs: [ 'vue' ],
-      });
-    }
-    highlightedCode.value = highlighter.codeToHtml(props.code, {
-      lang: 'vue',
-      theme: 'css-variables',
-    });
-  } catch (err) {
-    console.error('Shikiji highlighting failed:', err);
-    highlightedCode.value = `<pre><code>${ props.code }</code></pre>`;
-  } finally {
-    highlighting = false;
-  }
-}
-
-onMounted(highlight);
-watch(() => props.code, highlight);
 </script>
 
 <template>
@@ -93,7 +56,7 @@ watch(() => props.code, highlight);
             </h1>
             <button
               v-if="!isIndex"
-              class="btn btn-xs btn-ghost gap-1 opacity-50 hover:opacity-100"
+              class="btn btn-xs btn-ghost gap-1 opacity-90 hover:opacity-100"
               @click="navigateWithTransition('/', 'back')"
             >
               <svg
@@ -109,7 +72,7 @@ watch(() => props.code, highlight);
               <span class="max-sm:hidden">Back to Welcome</span>
             </button>
           </div>
-          <div v-if="$slots.description" class="opacity-70 m-0">
+          <div v-if="$slots.description" class="opacity-85 m-0">
             <slot name="description" />
           </div>
         </div>
@@ -118,8 +81,8 @@ watch(() => props.code, highlight);
 
     <slot name="controls" />
 
-    <div class="flex flex-col border border-base-300 rounded-box overflow-auto bg-base-300 resize" :style="containerStyle">
-      <div class="flex items-center justify-between px-4 py-2">
+    <div class="flex flex-col border border-base-300 rounded-box overflow-hidden bg-base-300 resize" :style="containerStyle">
+      <div class="flex items-center justify-between px-4 py-2 bg-base-200/50">
         <div class="tabs tabs-boxed bg-transparent p-0">
           <button
             class="tab tab-sm"
@@ -172,42 +135,14 @@ watch(() => props.code, highlight);
         <slot />
       </div>
 
-      <div
-        v-if="activeTab === 'code'"
-        data-theme="dark"
-        class="flex-1 mx-4 mb-4 p-4 bg-base-100 text-base-content overflow-auto font-mono text-sm leading-relaxed rounded-box shiki-container"
-        :style="{ blockSize: containerStyle.blockSize }"
-      >
-        <div v-if="highlightedCode" v-html="highlightedCode" />
-        <pre v-else><code>{{ code }}</code></pre>
-      </div>
+      <CodeBlock
+        v-if="code"
+        v-show="activeTab === 'code'"
+        class="flex-1 mx-4 rounded-box"
+        lang="vue"
+        :code="code"
+        line-numbers
+      />
     </div>
   </div>
 </template>
-
-<style scoped>
-.shiki-container pre {
-  margin: 0;
-  padding: 0;
-  background-color: transparent !important;
-}
-
-.shiki-container .shiki {
-  background-color: transparent !important;
-}
-
-/* Custom colors for css-variables theme in shiki */
-[data-theme="dark"] {
-  --shiki-foreground: oklch(95% 0 0);
-  --shiki-background: transparent;
-  --shiki-token-constant: oklch(80% 0.15 85);
-  --shiki-token-string: oklch(80% 0.15 170);
-  --shiki-token-comment: oklch(60% 0 0);
-  --shiki-token-keyword: oklch(75% 0.15 300);
-  --shiki-token-parameter: oklch(85% 0.1 170);
-  --shiki-token-function: oklch(75% 0.15 250);
-  --shiki-token-string-expression: oklch(80% 0.15 170);
-  --shiki-token-punctuation: oklch(90% 0 0);
-  --shiki-token-link: oklch(75% 0.15 250);
-}
-</style>

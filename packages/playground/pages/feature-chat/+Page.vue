@@ -164,7 +164,7 @@ function scrollToBottom() {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-secondary font-bold uppercase opacity-60 pe-2 align-baseline">Chat Interface</span>
+      <span class="text-secondary font-bold uppercase opacity-90 pe-2 align-baseline">Chat Interface</span>
     </template>
 
     <template #description>
@@ -244,7 +244,7 @@ function scrollToBottom() {
             >
               {{ item.text }}
             </div>
-            <span class="text-[10px] opacity-50 mt-1 px-1">{{ item.time }}</span>
+            <span class="text-[10px] opacity-85 mt-1 px-1">{{ item.time }}</span>
           </div>
         </template>
 

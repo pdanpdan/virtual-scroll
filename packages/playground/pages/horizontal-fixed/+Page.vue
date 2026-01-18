@@ -41,7 +41,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer height="350px" :code="rawCode">
     <template #title>
-      <span class="text-accent font-bold uppercase opacity-60 pe-2 align-baseline">Horizontal Fixed</span>
+      <span class="text-accent font-bold uppercase opacity-90 pe-2 align-baseline">Horizontal Fixed</span>
     </template>
 
     <template #description>

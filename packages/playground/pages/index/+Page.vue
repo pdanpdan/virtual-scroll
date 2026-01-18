@@ -6,13 +6,15 @@ const logoUrl = normalizeHref('logo.svg');
 </script>
 
 <template>
-  <div class="prose max-w-none">
+  <div>
     <div class="card bg-base-200 shadow-sm border border-base-300">
-      <div class="card-body p-6 flex-row items-center gap-6">
-        <img :src="logoUrl" class="w-16 h-16" alt="Logo" />
+      <div class="card-body flex-row items-center p-1 gap-3 md:p-6 md:gap-6">
+        <img :src="logoUrl" class="size-16 md:size-20" alt="Logo" />
         <div>
-          <h1 class="card-title m-0 text-3xl">Virtual Scroll Playground</h1>
-          <p class="opacity-70 m-0">A high-performance virtualization library for Vue 3.</p>
+          <h1 class="text-2xl md:text-3xl font-extrabold">Virtual Scroll</h1>
+          <p class="text-lg md:text-xl opacity-85">
+            A high-performance virtualization library for Vue 3.
+          </p>
         </div>
       </div>
     </div>
@@ -56,9 +58,9 @@ const logoUrl = normalizeHref('logo.svg');
       <!-- Vertical -->
       <div class="card bg-base-300 shadow-md border-t-4 border-primary">
         <div class="card-body">
-          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-60">Vertical</h2>
+          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-90">Vertical</h2>
           <h3 class="card-title mt-0">Vertical Fixed</h3>
-          <p class="text-sm opacity-80">Optimized for lists where every item has the same height.</p>
+          <p class="text-sm opacity-90">Optimized for lists where every item has the same height.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/vertical-fixed">
               <a
@@ -76,9 +78,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-primary">
         <div class="card-body">
-          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-60">Vertical</h2>
+          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-90">Vertical</h2>
           <h3 class="card-title mt-0">Vertical Dynamic</h3>
-          <p class="text-sm opacity-80">Handles variable item heights automatically using ResizeObserver.</p>
+          <p class="text-sm opacity-90">Handles variable item heights automatically using ResizeObserver.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/vertical-dynamic">
               <a
@@ -96,9 +98,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-success">
         <div class="card-body">
-          <h2 class="card-title text-success font-bold uppercase text-xs opacity-60">Vertical</h2>
+          <h2 class="card-title text-success font-bold uppercase text-xs opacity-90">Vertical</h2>
           <h3 class="card-title mt-0">Vertical Fixed Body</h3>
-          <p class="text-sm opacity-80">Use the browser window as the primary scroll container.</p>
+          <p class="text-sm opacity-90">Use the browser window as the primary scroll container.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/vertical-fixed-body">
               <a
@@ -116,9 +118,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-success">
         <div class="card-body">
-          <h2 class="card-title text-success font-bold uppercase text-xs opacity-60">Vertical</h2>
+          <h2 class="card-title text-success font-bold uppercase text-xs opacity-90">Vertical</h2>
           <h3 class="card-title mt-0">Vertical Dynamic Body</h3>
-          <p class="text-sm opacity-80">Native window scrolling with variable item heights.</p>
+          <p class="text-sm opacity-90">Native window scrolling with variable item heights.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/vertical-dynamic-body">
               <a
@@ -137,9 +139,9 @@ const logoUrl = normalizeHref('logo.svg');
       <!-- Horizontal -->
       <div class="card bg-base-300 shadow-md border-t-4 border-accent">
         <div class="card-body">
-          <h2 class="card-title text-accent font-bold uppercase text-xs opacity-60">Horizontal</h2>
+          <h2 class="card-title text-accent font-bold uppercase text-xs opacity-90">Horizontal</h2>
           <h3 class="card-title mt-0">Horizontal Fixed</h3>
-          <p class="text-sm opacity-80">Full support for horizontal-only virtualization with fixed widths.</p>
+          <p class="text-sm opacity-90">Full support for horizontal-only virtualization with fixed widths.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/horizontal-fixed">
               <a
@@ -157,9 +159,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-accent">
         <div class="card-body">
-          <h2 class="card-title text-accent font-bold uppercase text-xs opacity-60">Horizontal</h2>
+          <h2 class="card-title text-accent font-bold uppercase text-xs opacity-90">Horizontal</h2>
           <h3 class="card-title mt-0">Horizontal Dynamic</h3>
-          <p class="text-sm opacity-80">Horizontal scrolling with variable, measured item widths.</p>
+          <p class="text-sm opacity-90">Horizontal scrolling with variable, measured item widths.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/horizontal-dynamic">
               <a
@@ -178,9 +180,9 @@ const logoUrl = normalizeHref('logo.svg');
       <!-- Bidirectional -->
       <div class="card bg-base-300 shadow-md border-t-4 border-info">
         <div class="card-body">
-          <h2 class="card-title text-info font-bold uppercase text-xs opacity-60">Grid</h2>
+          <h2 class="card-title text-info font-bold uppercase text-xs opacity-90">Grid</h2>
           <h3 class="card-title mt-0">Grid Fixed</h3>
-          <p class="text-sm opacity-80">Scroll simultaneously in both X and Y axes with virtualized columns.</p>
+          <p class="text-sm opacity-90">Scroll simultaneously in both X and Y axes with virtualized columns.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/grid-fixed">
               <a
@@ -198,9 +200,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-info">
         <div class="card-body">
-          <h2 class="card-title text-info font-bold uppercase text-xs opacity-60">Grid</h2>
+          <h2 class="card-title text-info font-bold uppercase text-xs opacity-90">Grid</h2>
           <h3 class="card-title mt-0">Grid Dynamic</h3>
-          <p class="text-sm opacity-80">Bidirectional scroll with programmatic column widths using a function.</p>
+          <p class="text-sm opacity-90">Bidirectional scroll with programmatic column widths using a function.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/grid-dynamic">
               <a
@@ -218,9 +220,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-info">
         <div class="card-body">
-          <h2 class="card-title text-info font-bold uppercase text-xs opacity-60">Grid</h2>
+          <h2 class="card-title text-info font-bold uppercase text-xs opacity-90">Grid</h2>
           <h3 class="card-title mt-0">Grid SSR Support</h3>
-          <p class="text-sm opacity-80">Demonstrates pre-rendering and auto-scrolling to a specific range for SSR.</p>
+          <p class="text-sm opacity-90">Demonstrates pre-rendering and auto-scrolling to a specific range for SSR.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/grid-ssr">
               <a
@@ -239,9 +241,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-warning">
         <div class="card-body">
-          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-60">Table</h2>
+          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-90">Table</h2>
           <h3 class="card-title mt-0">Vertical Fixed Table</h3>
-          <p class="text-sm opacity-80">Semantic HTML <strong>&lt;table&gt;</strong> virtualization for accessible data grids.</p>
+          <p class="text-sm opacity-90">Semantic HTML <strong>&lt;table&gt;</strong> virtualization for accessible data grids.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/vertical-fixed-table">
               <a
@@ -265,9 +267,9 @@ const logoUrl = normalizeHref('logo.svg');
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
       <div class="card bg-base-300 shadow-md border-t-4 border-primary">
         <div class="card-body">
-          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-60">Feature</h2>
+          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-90">Feature</h2>
           <h3 class="card-title mt-0">Infinite Scroll</h3>
-          <p class="text-sm opacity-80">Automatic pagination and loading states when reaching end of content.</p>
+          <p class="text-sm opacity-90">Automatic pagination and loading states when reaching end of content.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-infinite-scroll">
               <a
@@ -285,9 +287,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-secondary">
         <div class="card-body">
-          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-60">Feature</h2>
+          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-90">Feature</h2>
           <h3 class="card-title mt-0">Sticky Sections</h3>
-          <p class="text-sm opacity-80">iOS-style pushing headers for segmented lists and grouped items.</p>
+          <p class="text-sm opacity-90">iOS-style pushing headers for segmented lists and grouped items.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-sticky-sections">
               <a
@@ -305,9 +307,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-warning">
         <div class="card-body">
-          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-60">Feature</h2>
+          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-90">Feature</h2>
           <h3 class="card-title mt-0">Scroll Restoration</h3>
-          <p class="text-sm opacity-80">Maintain scroll position seamlessly when items are prepended.</p>
+          <p class="text-sm opacity-90">Maintain scroll position seamlessly when items are prepended.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-scroll-restoration">
               <a
@@ -325,9 +327,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-error">
         <div class="card-body">
-          <h2 class="card-title text-error font-bold uppercase text-xs opacity-60">Feature</h2>
+          <h2 class="card-title text-error font-bold uppercase text-xs opacity-90">Feature</h2>
           <h3 class="card-title mt-0">Chat Interface</h3>
-          <p class="text-sm opacity-80">Smooth auto-scrolling, history loading, and dynamic message heights.</p>
+          <p class="text-sm opacity-90">Smooth auto-scrolling, history loading, and dynamic message heights.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-chat">
               <a
@@ -345,9 +347,9 @@ const logoUrl = normalizeHref('logo.svg');
 
       <div class="card bg-base-300 shadow-md border-t-4 border-secondary">
         <div class="card-body">
-          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-60">Feature</h2>
+          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-90">Feature</h2>
           <h3 class="card-title mt-0">Spreadsheet</h3>
-          <p class="text-sm opacity-80">Excel-like bidirectional grid with sticky row and column headers.</p>
+          <p class="text-sm opacity-90">Excel-like bidirectional grid with sticky row and column headers.</p>
           <div class="card-actions justify-end mt-2">
             <AppLink v-slot="{ href }" href="/feature-spreadsheet">
               <a

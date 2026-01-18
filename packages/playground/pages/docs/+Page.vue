@@ -1,22 +1,25 @@
 <script setup lang="ts">
+import CodeBlock from '#/components/CodeBlock.vue';
 import { normalizeHref } from '#/navigate';
 
 const logoUrl = normalizeHref('logo.svg');
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto py-10 px-2 md:px-6">
-    <header class="mb-12 border-b border-base-300 pb-8 flex items-center gap-4 md:gap-8">
-      <img :src="logoUrl" class="size-14 md:size-20" alt="Logo" />
-      <div>
-        <h1 class="text-3xl md:text-4xl font-extrabold md:mb-4">API Reference</h1>
-        <p class="text-base md:text-xl opacity-70">
-          Complete documentation for <code>@pdanpdan/virtual-scroll</code>.
-        </p>
+  <div class="max-w-7xl mx-auto pb-10 px-2 md:px-6">
+    <div class="card bg-base-200 shadow-sm border border-base-300">
+      <div class="card-body flex-row items-center p-1 gap-3 md:p-6 md:gap-6">
+        <img :src="logoUrl" class="size-16 md:size-20" alt="Logo" />
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold">API Reference</h1>
+          <p class="text-lg md:text-xl opacity-85">
+            Complete documentation for <code>@pdanpdan/virtual-scroll</code>.
+          </p>
+        </div>
       </div>
-    </header>
+    </div>
 
-    <div class="space-y-16">
+    <div class="space-y-16 mt-8">
       <section id="introduction">
         <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
           Introduction
@@ -30,18 +33,98 @@ const logoUrl = normalizeHref('logo.svg');
         </div>
       </section>
 
+      <section id="quick-start">
+        <h2 class="text-2xl md:text-3xl font-bold mb-6">Quick Start</h2>
+        <div class="prose prose-md max-w-none mb-6">
+          <p>Install the package using your favorite package manager:</p>
+        </div>
+        <CodeBlock code="pnpm add @pdanpdan/virtual-scroll" lang="bash" />
+        <div class="prose prose-md max-w-none mb-6">
+          <p>Basic usage in a Vue component:</p>
+        </div>
+        <CodeBlock
+          lang="vue"
+          line-numbers
+          code="<script setup>
+import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
+import &quot;@pdanpdan/virtual-scroll/style.css&quot;;
+
+const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}` }));
+</script>
+
+<template>
+  <VirtualScroll :items=&quot;items&quot; :item-size=&quot;50&quot; class=&quot;h-96&quot;>
+    <template #item=&quot;{ item }&quot;>
+      <div class=&quot;h-12.5 flex items-center px-4 border-b border-base-200&quot;>
+        {{ item.name }}
+      </div>
+    </template>
+  </VirtualScroll>
+</template>"
+        />
+      </section>
+
+      <section id="features">
+        <h2 class="text-2xl md:text-3xl font-bold mb-6">Key Features</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex items-start gap-3">
+            <div class="badge badge-primary badge-soft text-2xl ps-1 pe-0.5 mt-0.5">✓</div>
+            <div>
+              <p class="font-bold">Bidirectional Scrolling</p>
+              <p class="text-sm opacity-85">Virtualize both rows and columns for massive data grids and spreadsheets.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="badge badge-primary badge-soft text-2xl ps-1 pe-0.5 mt-0.5">✓</div>
+            <div>
+              <p class="font-bold">Dynamic Item Sizes</p>
+              <p class="text-sm opacity-85">Automatically measures item dimensions using ResizeObserver for precise scrolling.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="badge badge-primary badge-soft text-2xl ps-1 pe-0.5 mt-0.5">✓</div>
+            <div>
+              <p class="font-bold">Native Window Scroll</p>
+              <p class="text-sm opacity-85">Optionally use the browser window as the scroll container for better UX on mobile.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="badge badge-primary badge-soft text-2xl ps-1 pe-0.5 mt-0.5">✓</div>
+            <div>
+              <p class="font-bold">Sticky Headers/Footers</p>
+              <p class="text-sm opacity-85">iOS-style pushing headers for segmented lists and groups.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="badge badge-primary badge-soft text-2xl ps-1 pe-0.5 mt-0.5">✓</div>
+            <div>
+              <p class="font-bold">Scroll Restoration</p>
+              <p class="text-sm opacity-85">Maintains scroll position when prepending items, perfect for chat interfaces.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="badge badge-primary badge-soft text-2xl ps-1 pe-0.5 mt-0.5">✓</div>
+            <div>
+              <p class="font-bold">SSR & Hydration</p>
+              <p class="text-sm opacity-85">Support for server-side rendering with automatic client-side hydration.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="usage-modes">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">Usage Modes</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div class="card max-md:-mx-2 bg-base-200 border border-base-300 shadow-sm overflow-hidden">
             <div class="card-body">
               <h3 class="card-title text-lg md:text-xl text-primary">Compiled Component</h3>
-              <p class="text-sm opacity-80 mb-4">The recommended way for most projects. Uses pre-compiled JS for faster builds.</p>
-              <div class="mockup-code bg-base-300 text-xs mb-4">
-                <pre><code>import { VirtualScroll } from '@pdanpdan/virtual-scroll';</code></pre>
-                <pre><code>import '@pdanpdan/virtual-scroll/style.css';</code></pre>
-              </div>
-              <ul class="list-disc pl-5 text-sm space-y-1 opacity-70">
+              <p class="text-sm opacity-90 mb-4">The recommended way for most projects. Uses pre-compiled JS for faster builds.</p>
+              <CodeBlock
+                lang="ts"
+                code="import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
+import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
+              />
+              <ul class="list-disc pl-5 text-sm space-y-1 opacity-85">
                 <li>Compatible with all modern bundlers.</li>
                 <li><strong>Note:</strong> Manual CSS import is required.</li>
                 <li>Scoped CSS is preserved via data-attributes.</li>
@@ -52,11 +135,12 @@ const logoUrl = normalizeHref('logo.svg');
           <div class="card max-md:-mx-2 bg-base-200 border border-base-300 shadow-sm overflow-hidden">
             <div class="card-body">
               <h3 class="card-title text-lg md:text-xl text-secondary">Original Vue SFC</h3>
-              <p class="text-sm opacity-80 mb-4">Import the raw source for custom compilation and optimization.</p>
-              <div class="mockup-code bg-base-300 text-xs mb-4">
-                <pre><code>import VS from '@pdanpdan/virtual-scroll/VirtualScroll.vue';</code></pre>
-              </div>
-              <ul class="list-disc pl-5 text-sm space-y-1 opacity-70">
+              <p class="text-sm opacity-90 mb-4">Import the raw source for custom compilation and optimization.</p>
+              <CodeBlock
+                lang="ts"
+                code="import VS from &quot;@pdanpdan/virtual-scroll/VirtualScroll.vue&quot;;"
+              />
+              <ul class="list-disc pl-5 text-sm space-y-1 opacity-85">
                 <li>Enables better tree-shaking in your build.</li>
                 <li>Styles are handled automatically by your Vue loader.</li>
                 <li>Better source-map debugging in some IDEs.</li>
@@ -68,11 +152,11 @@ const logoUrl = normalizeHref('logo.svg');
 
       <section id="virtual-scroll">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">VirtualScroll Component</h2>
-        <p class="mb-8 opacity-80 text-lg">The main component provided by the library.</p>
+        <p class="mb-8 opacity-90 text-lg">The main component provided by the library.</p>
 
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Props</h3>
 
-        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-60 uppercase tracking-wider">Core Configuration</h4>
+        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Core Configuration</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
           <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
             <thead class="bg-base-200">
@@ -115,7 +199,7 @@ const logoUrl = normalizeHref('logo.svg');
           </table>
         </div>
 
-        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-60 uppercase tracking-wider">Grid Configuration <span class="text-xs normal-case opacity-50">(direction="both")</span></h4>
+        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Grid Configuration <span class="text-xs normal-case opacity-85">(direction="both")</span></h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
           <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
             <thead class="bg-base-200">
@@ -152,7 +236,7 @@ const logoUrl = normalizeHref('logo.svg');
           </table>
         </div>
 
-        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-60 uppercase tracking-wider">Feature-Specific Props</h4>
+        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Feature-Specific Props</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
           <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
             <thead class="bg-base-200">
@@ -198,7 +282,7 @@ const logoUrl = normalizeHref('logo.svg');
           </table>
         </div>
 
-        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-60 uppercase tracking-wider">Advanced Configuration</h4>
+        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Advanced Configuration</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
           <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
             <thead class="bg-base-200">
@@ -250,7 +334,7 @@ const logoUrl = normalizeHref('logo.svg');
           </table>
         </div>
 
-        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-60 uppercase tracking-wider">Development</h4>
+        <h4 class="text-lg md:text-xl font-bold mb-4 opacity-90 uppercase tracking-wider">Development</h4>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
           <table class="table table-md table-zebra w-full border border-base-300 rounded-box overflow-hidden">
             <thead class="bg-base-200">
@@ -288,7 +372,7 @@ const logoUrl = normalizeHref('logo.svg');
         <div class="space-y-6 mb-10">
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-3">#item</h4>
-            <p class="mb-4 opacity-80">The main slot for rendering individual items.</p>
+            <p class="mb-4 opacity-90">The main slot for rendering individual items.</p>
             <table class="table table-sm w-full">
               <thead>
                 <tr>
@@ -339,15 +423,15 @@ const logoUrl = normalizeHref('logo.svg');
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-4 border border-base-300">
               <h4 class="font-bold mb-2">#header</h4>
-              <p class="text-sm opacity-80">Content rendered above the list. Can be made sticky via CSS or <code>stickyHeader</code> prop.</p>
+              <p class="text-sm opacity-90">Content rendered above the list. Can be made sticky via CSS or <code>stickyHeader</code> prop.</p>
             </div>
             <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-4 border border-base-300">
               <h4 class="font-bold mb-2">#footer</h4>
-              <p class="text-sm opacity-80">Content rendered below the list.</p>
+              <p class="text-sm opacity-90">Content rendered below the list.</p>
             </div>
             <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-4 border border-base-300">
               <h4 class="font-bold mb-2">#loading</h4>
-              <p class="text-sm opacity-80">Content rendered when <code>loading</code> prop is true. Appended after the last item.</p>
+              <p class="text-sm opacity-90">Content rendered when <code>loading</code> prop is true. Appended after the last item.</p>
             </div>
           </div>
         </div>
@@ -373,9 +457,9 @@ const logoUrl = normalizeHref('logo.svg');
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-3 text-primary">scroll</h4>
-            <p class="mb-4 opacity-80">Emitted when the container is scrolled.</p>
+            <p class="mb-4 opacity-90">Emitted when the container is scrolled.</p>
             <p class="text-sm mb-2 font-bold">Payload (<code>ScrollDetails&lt;T&gt;</code>):</p>
-            <ul class="list-disc pl-6 text-sm space-y-1 opacity-80">
+            <ul class="list-disc pl-6 text-sm space-y-1 opacity-90">
               <li><code>currentIndex</code>: Index of the first visible row.</li>
               <li><code>currentColIndex</code>: Index of the first visible column.</li>
               <li><code>scrollOffset</code>: <code>{ x, y }</code> current scroll position.</li>
@@ -390,15 +474,15 @@ const logoUrl = normalizeHref('logo.svg');
           </div>
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-3 text-primary">load</h4>
-            <p class="mb-4 opacity-80">Emitted when scrolling near the end of the content.</p>
+            <p class="mb-4 opacity-90">Emitted when scrolling near the end of the content.</p>
             <p class="text-sm mb-2 font-bold">Payload (<code>direction</code>):</p>
-            <p class="text-sm opacity-80">Either <code>'vertical'</code> or <code>'horizontal'</code> depending on which dimension triggered the load.</p>
+            <p class="text-sm opacity-90">Either <code>'vertical'</code> or <code>'horizontal'</code> depending on which dimension triggered the load.</p>
           </div>
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300 md:col-span-2">
             <h4 class="font-bold text-lg mb-3 text-primary">visibleRangeChange</h4>
-            <p class="mb-4 opacity-80">Emitted whenever the rendered items range or column range changes (due to scrolling or resize).</p>
+            <p class="mb-4 opacity-90">Emitted whenever the rendered items range or column range changes (due to scrolling or resize).</p>
             <p class="text-sm mb-2 font-bold">Payload (<code>range</code>):</p>
-            <p class="text-sm opacity-80"><code>{ start: number, end: number, colStart: number, colEnd: number }</code></p>
+            <p class="text-sm opacity-90"><code>{ start: number, end: number, colStart: number, colEnd: number }</code></p>
           </div>
         </div>
 
@@ -419,7 +503,7 @@ const logoUrl = normalizeHref('logo.svg');
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">scrollToIndex(row, col, options?)</h4>
 
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Scrolls the container to bring a specific item into view.</p>
 
               <ul class="list-disc pl-6">
@@ -453,7 +537,7 @@ const logoUrl = normalizeHref('logo.svg');
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">scrollToOffset(x, y, options?)</h4>
 
-            <div class="text-sm opacity-80">
+            <div class="text-sm opacity-90">
               <p>Scrolls to a specific pixel offset. Pass <code>null</code> to keep current position on an axis.</p>
 
               <ul class="list-disc pl-6 mt-2">
@@ -469,7 +553,7 @@ const logoUrl = normalizeHref('logo.svg');
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">refresh()</h4>
 
-            <div class="text-sm opacity-80">
+            <div class="text-sm opacity-90">
               <p>Resets all dynamic measurements and re-initializes sizes from props. Useful if the items' content changed significantly.</p>
             </div>
           </div>
@@ -480,16 +564,17 @@ const logoUrl = normalizeHref('logo.svg');
 
       <section id="use-virtual-scroll">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">useVirtualScroll Composable</h2>
-        <p class="mb-6 opacity-80 text-lg">
+        <p class="mb-6 opacity-90 text-lg">
           The core logic for custom implementations. It handles all calculations and state management for virtualization.
         </p>
 
-        <div class="mockup-code bg-base-300 text-sm shadow-xl mb-10">
-          <pre data-prefix="1"><code>import { useVirtualScroll } from '@pdanpdan/virtual-scroll'</code></pre>
-          <pre data-prefix="2"><code /></pre>
-          <pre data-prefix="3"><code>// props must be a Vue Ref</code></pre>
-          <pre data-prefix="4"><code>const { renderedItems, scrollToIndex } = useVirtualScroll(props)</code></pre>
-        </div>
+        <CodeBlock
+          lang="ts"
+          code="import { useVirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;
+
+// props must be a Vue Ref
+const { renderedItems, scrollToIndex } = useVirtualScroll(props)"
+        />
 
         <h3 class="text-xl md:text-2xl font-semibold mb-4 pb-2 border-b border-base-200">Return Value</h3>
         <div class="overflow-x-auto mb-10 max-md:-mx-2">
@@ -535,7 +620,7 @@ const logoUrl = normalizeHref('logo.svg');
         <div class="space-y-6">
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">scrollToIndex(row, col, options?)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Programmatically scrolls to a specific row and/or column.</p>
               <ul class="list-disc pl-6">
                 <li><code>row</code>: <code>number | null | undefined</code> - Row index.</li>
@@ -548,7 +633,7 @@ const logoUrl = normalizeHref('logo.svg');
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">scrollToOffset(x, y, options?)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Programmatically scrolls to a specific pixel offset.</p>
               <ul class="list-disc pl-6">
                 <li><code>x</code>: <code>number | null | undefined</code> - Horizontal offset.</li>
@@ -561,7 +646,7 @@ const logoUrl = normalizeHref('logo.svg');
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">updateItemSize(index, width, height, element?)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Updates the stored size of an item. Should be called when an item is measured (e.g., via <code>ResizeObserver</code>).</p>
               <ul class="list-disc pl-6">
                 <li><code>index</code>: <code>number</code> - The item index.</li>
@@ -575,7 +660,7 @@ const logoUrl = normalizeHref('logo.svg');
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">updateHostOffset()</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Recalculates the position of the host element relative to the scroll container. Useful if the container or host moves without a scroll event.</p>
               <p><strong>Returns:</strong> <code>void</code></p>
             </div>
@@ -583,7 +668,7 @@ const logoUrl = normalizeHref('logo.svg');
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">getColumnWidth(index)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Helper to get the width of a specific column based on the current <code>columnWidth</code> prop configuration.</p>
               <ul class="list-disc pl-6">
                 <li><code>index</code>: <code>number</code> - The column index.</li>
@@ -594,7 +679,7 @@ const logoUrl = normalizeHref('logo.svg');
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
             <h4 class="font-bold text-lg mb-2">refresh()</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <div class="text-sm opacity-90 space-y-2">
               <p>Resets all dynamic measurements and re-initializes from props.</p>
               <p><strong>Returns:</strong> <code>void</code></p>
             </div>
@@ -606,30 +691,30 @@ const logoUrl = normalizeHref('logo.svg');
 
       <section id="utilities">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">Utilities</h2>
-        <p class="mb-6 opacity-80 text-lg">
+        <p class="mb-6 opacity-90 text-lg">
           Helper functions exported by the library.
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
-            <h4 class="font-bold text-lg mb-2">isElement(container)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <h3 class="font-bold text-lg mb-2">isElement(container)</h3>
+            <div class="text-sm opacity-90 space-y-2">
               <p>Type guard to check if a container is an <code>HTMLElement</code>.</p>
               <p><strong>Returns:</strong> <code>container is HTMLElement</code></p>
             </div>
           </div>
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
-            <h4 class="font-bold text-lg mb-2">isScrollableElement(target)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <h3 class="font-bold text-lg mb-2">isScrollableElement(target)</h3>
+            <div class="text-sm opacity-90 space-y-2">
               <p>Type guard to check if an event target is a scrollable <code>HTMLElement</code>.</p>
               <p><strong>Returns:</strong> <code>target is HTMLElement</code></p>
             </div>
           </div>
 
           <div class="card max-md:-mx-2 bg-base-200 shadow-sm p-6 border border-base-300">
-            <h4 class="font-bold text-lg mb-2">isScrollToIndexOptions(options)</h4>
-            <div class="text-sm opacity-80 space-y-2">
+            <h3 class="font-bold text-lg mb-2">isScrollToIndexOptions(options)</h3>
+            <div class="text-sm opacity-90 space-y-2">
               <p>Type guard to check if an object matches the <code>ScrollToIndexOptions</code> interface.</p>
               <p><strong>Returns:</strong> <code>options is ScrollToIndexOptions</code></p>
             </div>

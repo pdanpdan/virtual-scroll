@@ -47,7 +47,7 @@ function onScroll(details: ScrollDetails) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-warning font-bold uppercase opacity-60 pe-2 align-baseline">Scroll Restoration</span>
+      <span class="text-warning font-bold uppercase opacity-90 pe-2 align-baseline">Scroll Restoration</span>
     </template>
 
     <template #description>

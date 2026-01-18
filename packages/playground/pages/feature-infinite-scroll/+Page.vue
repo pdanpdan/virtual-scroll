@@ -49,7 +49,7 @@ function onScroll(details: ScrollDetails) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-primary font-bold uppercase opacity-60 pe-2 align-baseline">Infinite Scroll</span>
+      <span class="text-primary font-bold uppercase opacity-90 pe-2 align-baseline">Infinite Scroll</span>
     </template>
 
     <template #description>
@@ -109,7 +109,7 @@ function onScroll(details: ScrollDetails) {
       <template #loading>
         <div class="p-8 flex flex-col items-center justify-center gap-4 bg-base-200 border-t border-base-300">
           <span class="loading loading-spinner loading-lg text-primary" />
-          <span class="text-sm font-bold uppercase tracking-widest opacity-60">Fetching more items...</span>
+          <span class="text-sm font-bold uppercase tracking-widest opacity-90">Fetching more items...</span>
         </div>
       </template>
     </VirtualScroll>

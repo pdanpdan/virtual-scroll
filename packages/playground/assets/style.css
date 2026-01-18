@@ -10,24 +10,24 @@
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(98% 0.005 250);
-  --color-base-300: oklch(95% 0.01 250);
-  --color-base-content: oklch(15% 0.01 250);
-  --color-primary: oklch(55% 0.2 260);
+  --color-base-200: oklch(96% 0.005 250);
+  --color-base-300: oklch(92% 0.01 250);
+  --color-base-content: oklch(10% 0.01 250);
+  --color-primary: oklch(37% 0.25 260);
   --color-primary-content: oklch(100% 0 0);
-  --color-secondary: oklch(60% 0.15 180);
+  --color-secondary: oklch(37% 0.2 180);
   --color-secondary-content: oklch(100% 0 0);
-  --color-accent: oklch(65% 0.2 60);
-  --color-accent-content: oklch(100% 0 0);
+  --color-accent: oklch(80% 0.15 60);
+  --color-accent-content: oklch(10% 0.01 250);
   --color-neutral: oklch(25% 0.01 250);
-  --color-neutral-content: oklch(95% 0.01 250);
-  --color-info: oklch(60% 0.15 230);
+  --color-neutral-content: oklch(92% 0.01 250);
+  --color-info: oklch(37% 0.2 230);
   --color-info-content: oklch(100% 0 0);
-  --color-success: oklch(60% 0.15 140);
+  --color-success: oklch(37% 0.2 140);
   --color-success-content: oklch(100% 0 0);
   --color-warning: oklch(75% 0.15 70);
-  --color-warning-content: oklch(20% 0.05 70);
-  --color-error: oklch(55% 0.2 25);
+  --color-warning-content: oklch(10% 0.01 70);
+  --color-error: oklch(37% 0.25 25);
   --color-error-content: oklch(100% 0 0);
   --radius-selector: 0.125rem;
   --radius-field: 0.25rem;
@@ -44,26 +44,26 @@
   default: false;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: oklch(20% 0.01 250);
+  --color-base-100: oklch(21% 0.01 250);
   --color-base-200: oklch(17% 0.01 250);
-  --color-base-300: oklch(15% 0.01 250);
-  --color-base-content: oklch(95% 0.01 250);
+  --color-base-300: oklch(13% 0.01 250);
+  --color-base-content: oklch(98% 0.01 250);
   --color-primary: oklch(75% 0.15 260);
-  --color-primary-content: oklch(15% 0.01 250);
+  --color-primary-content: oklch(2% 0.01 250);
   --color-secondary: oklch(80% 0.12 180);
-  --color-secondary-content: oklch(15% 0.01 250);
+  --color-secondary-content: oklch(2% 0.01 250);
   --color-accent: oklch(80% 0.15 85);
-  --color-accent-content: oklch(15% 0.01 250);
+  --color-accent-content: oklch(2% 0.01 250);
   --color-neutral: oklch(35% 0.01 250);
-  --color-neutral-content: oklch(95% 0.01 250);
+  --color-neutral-content: oklch(98% 0.01 250);
   --color-info: oklch(75% 0.1 230);
-  --color-info-content: oklch(15% 0.01 250);
+  --color-info-content: oklch(2% 0.01 250);
   --color-success: oklch(75% 0.15 140);
-  --color-success-content: oklch(15% 0.01 250);
+  --color-success-content: oklch(2% 0.01 250);
   --color-warning: oklch(85% 0.15 70);
-  --color-warning-content: oklch(20% 0.05 70);
-  --color-error: oklch(70% 0.2 25);
-  --color-error-content: oklch(15% 0.01 250);
+  --color-warning-content: oklch(2% 0.01 70);
+  --color-error: oklch(72% 0.2 25);
+  --color-error-content: oklch(2% 0.01 250);
   --radius-selector: 0.125rem;
   --radius-field: 0.25rem;
   --radius-box: 0.25rem;
@@ -93,6 +93,21 @@
 
 .drawer-side {
   view-transition-name: VS-sidebar;
+}
+
+/* Shiki code highlighting variables */
+[data-theme="dark"] {
+  --shiki-foreground: oklch(95% 0 0);
+  --shiki-background: transparent;
+  --shiki-token-constant: oklch(80% 0.15 85);
+  --shiki-token-string: oklch(80% 0.15 170);
+  --shiki-token-comment: oklch(78% 0 0);
+  --shiki-token-keyword: oklch(78% 0.15 300);
+  --shiki-token-parameter: oklch(85% 0.1 170);
+  --shiki-token-function: oklch(78% 0.15 250);
+  --shiki-token-string-expression: oklch(80% 0.15 170);
+  --shiki-token-punctuation: oklch(90% 0 0);
+  --shiki-token-link: oklch(78% 0.15 250);
 }
 
 .navbar {

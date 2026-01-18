@@ -46,7 +46,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-info font-bold uppercase opacity-60 pe-2 align-baseline">Grid Fixed</span>
+      <span class="text-info font-bold uppercase opacity-90 pe-2 align-baseline">Grid Fixed</span>
     </template>
 
     <template #description>
@@ -130,9 +130,9 @@ function handleScrollToOffset(x: number | null, y: number | null) {
             class="flex flex-col items-center justify-center border-r border-base-200 shrink-0 hover:bg-base-300 transition-colors"
             :style="{ inlineSize: `${ getColumnWidth(columnRange.start + c - 1) }px` }"
           >
-            <div class="text-xs uppercase opacity-40 font-bold mb-1">Row {{ index }}</div>
-            <div class="text-xs uppercase opacity-40 font-bold mb-1">Col {{ columnRange.start + c - 1 }}</div>
-            <div class="text-xs opacity-40">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>
+            <div class="text-xs uppercase opacity-90 font-bold mb-1">Row {{ index }}</div>
+            <div class="text-xs uppercase opacity-90 font-bold mb-1">Col {{ columnRange.start + c - 1 }}</div>
+            <div class="text-xs opacity-90">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>
           </div>
 
           <div class="shrink-0" :style="{ inlineSize: `${ columnRange.padEnd }px` }" />

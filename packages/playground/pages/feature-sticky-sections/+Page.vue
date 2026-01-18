@@ -45,7 +45,7 @@ function onScroll(details: ScrollDetails) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-secondary font-bold uppercase opacity-60 pe-2 align-baseline">Sticky Sections</span>
+      <span class="text-secondary font-bold uppercase opacity-90 pe-2 align-baseline">Sticky Sections</span>
     </template>
 
     <template #description>

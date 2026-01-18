@@ -36,7 +36,7 @@ onUnmounted(stopDetection);
 <template>
   <ul class="max-sm:w-full min-w-84 list bg-base-300 rounded-box shadow-md text-sm pointer-events-auto">
     <li class="list-row py-4 items-center">
-      <div class="opacity-60 tracking-wide uppercase">Scroll Status</div>
+      <div class="opacity-90 tracking-wide uppercase">Scroll Status</div>
       <div class="grid *:[grid-area:1/1]">
         <div v-if="scrollDetails?.isScrolling" class="status status-lg animate-ping" :class="fpsClass" />
         <div class="status status-lg" :class="fpsClass" />
@@ -48,13 +48,13 @@ onUnmounted(stopDetection);
     </li>
 
     <li class="list-row py-1.5 items-center">
-      <div class="opacity-60">Direction</div>
+      <div class="opacity-85">Direction</div>
       <div />
       <div class="uppercase font-semibold">{{ direction || 'vertical' }}</div>
     </li>
 
     <li class="list-row py-1.5 items-center">
-      <div class="opacity-60">Total Size (px)</div>
+      <div class="opacity-85">Total Size (px)</div>
       <div />
       <div class="font-semibold">
         <template v-if="direction !== 'vertical'">
@@ -70,7 +70,7 @@ onUnmounted(stopDetection);
     </li>
 
     <li class="list-row py-1.5 items-center">
-      <div class="opacity-60">Viewport Size (px)</div>
+      <div class="opacity-85">Viewport Size (px)</div>
       <div />
       <div class="font-semibold">
         <template v-if="direction !== 'vertical'">
@@ -86,7 +86,7 @@ onUnmounted(stopDetection);
     </li>
 
     <li class="list-row py-1.5 items-center">
-      <div class="opacity-60">Scroll Offset (px)</div>
+      <div class="opacity-85">Scroll Offset (px)</div>
       <div />
       <div class="font-semibold">
         <template v-if="direction !== 'vertical'">
@@ -102,7 +102,7 @@ onUnmounted(stopDetection);
     </li>
 
     <li class="list-row py-1.5 items-center">
-      <div class="opacity-60">Current Item #</div>
+      <div class="opacity-85">Current Item #</div>
       <div />
       <div class="font-semibold">
         {{ scrollDetails?.currentIndex }}
@@ -114,7 +114,7 @@ onUnmounted(stopDetection);
     </li>
 
     <li class="list-row py-1.5 items-center">
-      <div class="opacity-60">Rendered Range #</div>
+      <div class="opacity-85">Rendered Range #</div>
       <div />
       <div class="font-semibold">
         {{ itemsRange.start }}:{{ itemsRange.end }}

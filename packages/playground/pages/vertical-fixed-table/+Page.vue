@@ -48,7 +48,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-warning font-bold uppercase opacity-60 pe-2 align-baseline">Vertical Fixed Table</span>
+      <span class="text-warning font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Fixed Table</span>
     </template>
 
     <template #description>
@@ -119,7 +119,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       </template>
 
       <template #item="{ item, index }">
-        <td class="w-16 text-right font-mono text-xs opacity-50">#{{ index }}</td>
+        <td class="w-16 text-right font-mono text-xs opacity-90">#{{ index }}</td>
         <td class="w-48 font-bold">{{ item.name }}</td>
         <td class="w-72 text-sm">{{ item.email }}</td>
         <td class="w-24 text-center">{{ item.age }}</td>

@@ -50,7 +50,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-primary font-bold uppercase opacity-60 pe-2 align-baseline">Vertical Dynamic</span>
+      <span class="text-primary font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Dynamic</span>
     </template>
 
     <template #description>

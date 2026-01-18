@@ -98,7 +98,7 @@ function handleScrollToOffset() {
   <ul class="max-sm:w-full min-w-80 list bg-base-300 rounded-box shadow-md text-sm pointer-events-auto">
     <li class="list-row py-0 items-center">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
-        <div class="py-4 opacity-60 tracking-wide uppercase">Controls</div>
+        <div class="py-4 opacity-90 tracking-wide uppercase">Controls</div>
 
         <div class="grow" />
 
