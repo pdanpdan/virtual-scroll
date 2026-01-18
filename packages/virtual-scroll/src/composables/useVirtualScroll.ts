@@ -504,10 +504,10 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     const usableHeight = viewportHeight.value - (isVertical ? (paddingStartY + paddingEndY) : 0);
 
     const clampedX = (x !== null && x !== undefined)
-      ? Math.max(0, Math.min(x, Math.max(0, totalWidth.value - usableWidth)))
+      ? (isHorizontal ? Math.max(0, Math.min(x, Math.max(0, totalWidth.value - usableWidth))) : Math.max(0, x))
       : null;
     const clampedY = (y !== null && y !== undefined)
-      ? Math.max(0, Math.min(y, Math.max(0, totalHeight.value - usableHeight)))
+      ? (isVertical ? Math.max(0, Math.min(y, Math.max(0, totalHeight.value - usableHeight))) : Math.max(0, y))
       : null;
 
     const currentX = (typeof window !== 'undefined' && container === window ? window.scrollX : (container as HTMLElement).scrollLeft);
