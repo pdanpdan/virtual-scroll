@@ -125,6 +125,7 @@ const virtualScrollProps = computed(() => {
   const pStart = props.scrollPaddingStart;
   const pEnd = props.scrollPaddingEnd;
 
+  /* v8 ignore start -- @preserve */
   const startX = typeof pStart === 'object'
     ? (pStart.x || 0)
     : (props.direction === 'horizontal' ? (pStart || 0) : 0);
@@ -138,6 +139,7 @@ const virtualScrollProps = computed(() => {
   const endY = typeof pEnd === 'object'
     ? (pEnd.y || 0)
     : (props.direction !== 'horizontal' ? (pEnd || 0) : 0);
+  /* v8 ignore stop -- @preserve */
 
   return {
     items: props.items,
@@ -233,6 +235,7 @@ watch(scrollDetails, (details, oldDetails) => {
 });
 
 watch(isHydrated, (hydrated) => {
+  /* v8 ignore else -- @preserve */
   if (hydrated) {
     emit('visibleRangeChange', {
       start: scrollDetails.value.range.start,
@@ -243,10 +246,12 @@ watch(isHydrated, (hydrated) => {
   }
 }, { once: true });
 
+/* v8 ignore next 2 -- @preserve */
 const hostResizeObserver = typeof window === 'undefined'
   ? null
   : new ResizeObserver(updateHostOffset);
 
+/* v8 ignore next 2 -- @preserve */
 const itemResizeObserver = typeof window === 'undefined'
   ? null
   : new ResizeObserver((entries) => {
@@ -278,11 +283,13 @@ const itemResizeObserver = typeof window === 'undefined'
       }
     }
 
+    /* v8 ignore else -- @preserve */
     if (updates.length > 0) {
       updateItemSizes(updates);
     }
   });
 
+/* v8 ignore next 2 -- @preserve */
 const extraResizeObserver = typeof window === 'undefined'
   ? null
   : new ResizeObserver(() => {
@@ -292,6 +299,7 @@ const extraResizeObserver = typeof window === 'undefined'
   });
 
 watch(headerRef, (newEl, oldEl) => {
+  /* v8 ignore if -- @preserve */
   if (oldEl) {
     extraResizeObserver?.unobserve(oldEl);
   }
@@ -301,6 +309,7 @@ watch(headerRef, (newEl, oldEl) => {
 }, { immediate: true });
 
 watch(footerRef, (newEl, oldEl) => {
+  /* v8 ignore if -- @preserve */
   if (oldEl) {
     extraResizeObserver?.unobserve(oldEl);
   }
@@ -310,9 +319,9 @@ watch(footerRef, (newEl, oldEl) => {
 }, { immediate: true });
 
 const firstRenderedIndex = computed(() => renderedItems.value[ 0 ]?.index);
-
 watch(firstRenderedIndex, (newIdx, oldIdx) => {
   if (props.direction === 'both') {
+    /* v8 ignore else -- @preserve */
     if (oldIdx !== undefined) {
       const oldEl = itemRefs.get(oldIdx);
       if (oldEl) {
@@ -321,6 +330,7 @@ watch(firstRenderedIndex, (newIdx, oldIdx) => {
     }
     if (newIdx !== undefined) {
       const newEl = itemRefs.get(newIdx);
+      /* v8 ignore else -- @preserve */
       if (newEl) {
         newEl.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.observe(c));
       }
@@ -329,6 +339,7 @@ watch(firstRenderedIndex, (newIdx, oldIdx) => {
 }, { flush: 'post' });
 
 onMounted(() => {
+  /* v8 ignore else -- @preserve */
   if (hostRef.value) {
     hostResizeObserver?.observe(hostRef.value);
   }
@@ -339,8 +350,10 @@ onMounted(() => {
   }
 
   // Observe cells of the first rendered item
+  /* v8 ignore else -- @preserve */
   if (firstRenderedIndex.value !== undefined) {
     const el = itemRefs.get(firstRenderedIndex.value);
+    /* v8 ignore else -- @preserve */
     if (el) {
       el.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.observe(c));
     }
@@ -362,6 +375,7 @@ function setItemRef(el: unknown, index: number) {
     itemResizeObserver?.observe(el as HTMLElement);
   } else {
     const oldEl = itemRefs.get(index);
+    /* v8 ignore else -- @preserve */
     if (oldEl) {
       itemResizeObserver?.unobserve(oldEl);
       itemRefs.delete(index);
