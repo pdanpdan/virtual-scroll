@@ -399,10 +399,14 @@ function handleKeyDown(event: KeyboardEvent) {
     const lastItemIndex = props.items.length - 1;
     const lastColIndex = (props.columnCount || 0) > 0 ? props.columnCount - 1 : 0;
 
-    if (isHorizontal && isVertical) {
-      scrollToIndex(lastItemIndex, lastColIndex, 'end');
+    if (isHorizontal) {
+      if (isVertical) {
+        scrollToIndex(lastItemIndex, lastColIndex, 'end');
+      } else {
+        scrollToIndex(0, lastItemIndex, 'end');
+      }
     } else {
-      scrollToIndex(0, lastItemIndex, 'end');
+      scrollToIndex(lastItemIndex, 0, 'end');
     }
     return;
   }
@@ -429,7 +433,7 @@ function handleKeyDown(event: KeyboardEvent) {
   if (event.key === 'PageUp') {
     event.preventDefault();
     scrollToOffset(
-      isHorizontal ? scrollOffset.x - viewportSize.width : null,
+      !isVertical && isHorizontal ? scrollOffset.x - viewportSize.width : null,
       isVertical ? scrollOffset.y - viewportSize.height : null,
     );
     return;
@@ -437,7 +441,7 @@ function handleKeyDown(event: KeyboardEvent) {
   if (event.key === 'PageDown') {
     event.preventDefault();
     scrollToOffset(
-      isHorizontal ? scrollOffset.x + viewportSize.width : null,
+      !isVertical && isHorizontal ? scrollOffset.x + viewportSize.width : null,
       isVertical ? scrollOffset.y + viewportSize.height : null,
     );
   }
