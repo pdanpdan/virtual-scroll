@@ -531,6 +531,25 @@ describe('VirtualScroll component', () => {
       expect(el.scrollTop).toBe(0);
     });
 
+    it('should not scroll past the end using PageDown', async () => {
+      // items: 100, itemSize: 50 -> totalHeight = 5000
+      // viewportHeight: 500 -> maxScroll = 4500
+      (wrapper.vm as unknown as VSInstance).scrollToOffset(null, 4400);
+      await nextTick();
+      await container.trigger('keydown', { key: 'PageDown' });
+      await nextTick();
+      expect(el.scrollTop).toBe(4500);
+    });
+
+    it('should not scroll past the end using ArrowDown', async () => {
+      // maxScroll = 4500
+      (wrapper.vm as unknown as VSInstance).scrollToOffset(null, 4480);
+      await nextTick();
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+      expect(el.scrollTop).toBe(4500);
+    });
+
     it('should handle unhandled keys', async () => {
       const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
       el.dispatchEvent(event);

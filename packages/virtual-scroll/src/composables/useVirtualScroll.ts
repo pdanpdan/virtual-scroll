@@ -497,12 +497,24 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     const paddingStartX = getPaddingX(props.value.scrollPaddingStart, props.value.direction);
     const paddingStartY = getPaddingY(props.value.scrollPaddingStart, props.value.direction);
+    const paddingEndX = getPaddingX(props.value.scrollPaddingEnd, props.value.direction);
+    const paddingEndY = getPaddingY(props.value.scrollPaddingEnd, props.value.direction);
+
+    const usableWidth = viewportWidth.value - (isHorizontal ? (paddingStartX + paddingEndX) : 0);
+    const usableHeight = viewportHeight.value - (isVertical ? (paddingStartY + paddingEndY) : 0);
+
+    const clampedX = (x !== null && x !== undefined)
+      ? Math.max(0, Math.min(x, Math.max(0, totalWidth.value - usableWidth)))
+      : null;
+    const clampedY = (y !== null && y !== undefined)
+      ? Math.max(0, Math.min(y, Math.max(0, totalHeight.value - usableHeight)))
+      : null;
 
     const currentX = (typeof window !== 'undefined' && container === window ? window.scrollX : (container as HTMLElement).scrollLeft);
     const currentY = (typeof window !== 'undefined' && container === window ? window.scrollY : (container as HTMLElement).scrollTop);
 
-    const targetX = (x !== null && x !== undefined) ? x + hostOffset.x - (isHorizontal ? paddingStartX : 0) : currentX;
-    const targetY = (y !== null && y !== undefined) ? y + hostOffset.y - (isVertical ? paddingStartY : 0) : currentY;
+    const targetX = (clampedX !== null) ? clampedX + hostOffset.x - (isHorizontal ? paddingStartX : 0) : currentX;
+    const targetY = (clampedY !== null) ? clampedY + hostOffset.y - (isVertical ? paddingStartY : 0) : currentY;
 
     if (typeof window !== 'undefined' && container === window) {
       window.scrollTo({
