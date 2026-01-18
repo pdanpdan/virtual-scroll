@@ -16,8 +16,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'VirtualScroll',
-      fileName: 'index',
-      formats: [ 'es' ],
+      fileName: (format) => `index.${ format === 'es' ? 'mjs' : format === 'cjs' ? 'cjs' : 'js' }`,
+      formats: [ 'es', 'cjs', 'umd' ],
     },
     rollupOptions: {
       external: [ 'vue' ],

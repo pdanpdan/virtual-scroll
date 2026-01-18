@@ -57,6 +57,45 @@ import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 -   Enables deep integration with your project's CSS-in-JS or specialized styling solutions.
 -   Easier debugging of the component source in some IDEs.
 
+### 3. CDN Usage
+
+You can use the library directly from a CDN like unpkg or jsdelivr.
+
+```html
+<!-- Import Vue 3 first -->
+<script src="https://unpkg.com/vue@3"></script>
+
+<!-- Import VirtualScroll CSS -->
+<link rel="stylesheet" href="https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css">
+
+<!-- Import VirtualScroll JavaScript -->
+<script src="https://unpkg.com/@pdanpdan/virtual-scroll"></script>
+
+<div id="app">
+  <div style="height: 400px; overflow: auto;">
+    <virtual-scroll :items="items" :item-size="50">
+      <template #item="{ item, index }">
+        <div style="height: 50px;">{{ index }}: {{ item.label }}</div>
+      </template>
+    </virtual-scroll>
+  </div>
+</div>
+
+<script>
+  const { createApp, ref } = Vue;
+  const { VirtualScroll } = window.VirtualScroll;
+
+  createApp({
+    setup() {
+      const items = ref(Array.from({ length: 1000 }, (_, i) => ({ label: `Item ${i}` })));
+      return { items };
+    }
+  })
+  .component('VirtualScroll', VirtualScroll)
+  .mount('#app');
+</script>
+```
+
 ## Basic Usage
 
 ```vue

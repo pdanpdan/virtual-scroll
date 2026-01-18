@@ -147,6 +147,38 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               </ul>
             </div>
           </div>
+
+          <div class="card max-md:-mx-2 bg-base-300 border border-primary/10 shadow-sm overflow-hidden md:col-span-2">
+            <div class="card-body">
+              <h3 class="card-title text-lg md:text-xl text-accent">CDN Usage</h3>
+              <p class="text-sm opacity-90 mb-4">Use the library directly in the browser without a build step.</p>
+              <CodeBlock
+                lang="html"
+                code="&lt;!-- Import Vue 3 first --&gt;
+&lt;script src=&quot;https://unpkg.com/vue@3&quot;&gt;&lt;/script&gt;
+
+&lt;!-- Import VirtualScroll CSS --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css&quot;&gt;
+
+&lt;!-- Import VirtualScroll JavaScript --&gt;
+&lt;script src=&quot;https://unpkg.com/@pdanpdan/virtual-scroll&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+  const { createApp, ref } = Vue;
+  const { VirtualScroll } = window.VirtualScroll;
+
+  createApp({
+    setup() {
+      const items = ref(Array.from({ length: 1000 }, (_, i) => ({ label: `Item ${i}` })));
+      return { items };
+    }
+  })
+  .component(&quot;VirtualScroll&quot;, VirtualScroll)
+  .mount(&quot;#app&quot;);
+&lt;/script&gt;"
+              />
+            </div>
+          </div>
         </div>
       </section>
 

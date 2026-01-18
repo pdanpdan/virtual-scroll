@@ -22,13 +22,16 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./VirtualScroll.vue": "./src/components/VirtualScroll.vue",
-    "./style.css": "./dist/index.css"
+    "./style.css": "./dist/virtual-scroll.css"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "unpkg": "./dist/index.js",
+  "jsdelivr": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
