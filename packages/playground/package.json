@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vike dev --host",
-    "build": "vike build",
+    "build": "node scripts/generate-sitemap.js && vike build",
     "preview": "vike build && vike preview",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix"
