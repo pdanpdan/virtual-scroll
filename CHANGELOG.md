@@ -1,5 +1,14 @@
 # Changelog
 
+# [0.3.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.2.1...v0.3.0) (2026-01-20)
+
+
+### Features
+
+* add cjs and umb build artifacts ([fa5c046](https://github.com/pdanpdan/virtual-scroll/commit/fa5c046188dbb1dd8596c4b2c98657c74be5dc34))
+* enhances dynamic sizing and refresh logic ([a113c83](https://github.com/pdanpdan/virtual-scroll/commit/a113c833ad4f091e8147df231aa00be580641a8b))
+* refactors slot handling using `defineSlots` ([fd47f28](https://github.com/pdanpdan/virtual-scroll/commit/fd47f28b74a9f3d8fc152e078e44f88310ead9f8))
+
 ## [0.2.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.2.0...v0.2.1) (2026-01-18)
 
 
