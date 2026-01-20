@@ -6,8 +6,9 @@ import type {
   ScrollDetails,
   VirtualScrollProps,
 } from '../composables/useVirtualScroll';
+import type { VNodeChild } from 'vue';
 
-import { computed, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, useSlots, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import {
   DEFAULT_ITEM_SIZE,
@@ -104,24 +105,35 @@ const emit = defineEmits<{
   (e: 'visibleRangeChange', range: { start: number; end: number; colStart: number; colEnd: number; }): void;
 }>();
 
+const slots = defineSlots<{
+  /** Content rendered at the top of the scrollable area. Can be made sticky. */
+  header?: (props: Record<string, never>) => VNodeChild;
+  /** Slot for rendering each individual item. */
+  item?: (props: {
+    /** The data item being rendered. */
+    item: T;
+    /** The index of the item in the items array. */
+    index: number;
+    /** The current visible range of columns (for grid mode). */
+    columnRange: { start: number; end: number; padStart: number; padEnd: number; };
+    /** Function to get the width of a specific column. */
+    getColumnWidth: (index: number) => number;
+    /** Whether this item is configured to be sticky. */
+    isSticky?: boolean | undefined;
+    /** Whether this item is currently in a sticky state. */
+    isStickyActive?: boolean | undefined;
+  }) => VNodeChild;
+  /** Content shown when `loading` prop is true. */
+  loading?: (props: Record<string, never>) => VNodeChild;
+  /** Content rendered at the bottom of the scrollable area. Can be made sticky. */
+  footer?: (props: Record<string, never>) => VNodeChild;
+}>();
+
 const hostRef = ref<HTMLElement | null>(null);
 const wrapperRef = ref<HTMLElement | null>(null);
 const headerRef = ref<HTMLElement | null>(null);
 const footerRef = ref<HTMLElement | null>(null);
 const itemRefs = new Map<number, HTMLElement>();
-
-const slots = useSlots();
-const hasHeaderSlot = ref(!!slots.header);
-const hasFooterSlot = ref(!!slots.footer);
-const hasLoadingSlot = ref(!!slots.loading);
-
-function updateSlotData() {
-  hasHeaderSlot.value = !!slots.header;
-  hasFooterSlot.value = !!slots.footer;
-  hasLoadingSlot.value = !!slots.loading;
-}
-
-onBeforeUpdate(updateSlotData);
 
 const measuredPaddingStart = ref(0);
 const measuredPaddingEnd = ref(0);
@@ -632,7 +644,7 @@ defineExpose({
     <!-- v8 ignore start -->
     <component
       :is="headerTag"
-      v-if="hasHeaderSlot"
+      v-if="slots.header"
       ref="headerRef"
       class="virtual-scroll-header"
       :class="{ 'virtual-scroll--sticky': stickyHeader }"
@@ -689,7 +701,7 @@ defineExpose({
 
     <!-- v8 ignore start -->
     <div
-      v-if="loading && hasLoadingSlot"
+      v-if="loading && slots.loading"
       class="virtual-scroll-loading"
       :style="loadingStyle"
     >
@@ -698,7 +710,7 @@ defineExpose({
 
     <component
       :is="footerTag"
-      v-if="hasFooterSlot"
+      v-if="slots.footer"
       ref="footerRef"
       class="virtual-scroll-footer"
       :class="{ 'virtual-scroll--sticky': stickyFooter }"
