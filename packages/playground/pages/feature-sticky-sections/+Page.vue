@@ -45,7 +45,7 @@ function onScroll(details: ScrollDetails) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-secondary font-bold uppercase opacity-90 pe-2 align-baseline">Sticky Sections</span>
+      <span class="example-title example-title--group-2">Sticky Sections</span>
     </template>
 
     <template #description>
@@ -59,7 +59,7 @@ function onScroll(details: ScrollDetails) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-secondary text-secondary-content shadow-lg"
+        class="example-icon example-icon--group-2"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
       </svg>
@@ -77,7 +77,7 @@ function onScroll(details: ScrollDetails) {
 
     <VirtualScroll
       :debug="debugMode"
-      class="bg-base-100"
+      class="example-container"
       :items="items"
       :item-size="50"
       :sticky-indices="stickyIndices"
@@ -86,12 +86,12 @@ function onScroll(details: ScrollDetails) {
       <template #item="{ item, isStickyActive }">
         <div
           v-if="item.type === 'header'"
-          class="h-full flex items-center px-6 bg-base-300 border-b border-base-300 font-bold uppercase tracking-wider text-primary"
-          :class="{ 'shadow-md': isStickyActive }"
+          class="example-sticky-header example-sticky-header--start h-full transition-shadow"
+          :class="{ 'shadow-md z-1': isStickyActive }"
         >
           {{ item.label }}
         </div>
-        <div v-else class="h-full flex items-center px-8 border-b border-base-200 hover:bg-base-300 transition-colors">
+        <div v-else class="example-vertical-item example-vertical-item--fixed">
           {{ item.label }}
         </div>
       </template>

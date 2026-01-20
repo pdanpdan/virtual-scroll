@@ -18,14 +18,14 @@ onMounted(() => {
 });
 
 const itemCount = ref(1000);
-const baseItemSize = ref(50); // Approximate base size
+const itemSize = ref(50); // Approximate base size
 const bufferBefore = ref(5);
 const bufferAfter = ref(5);
 
 // Use a deterministic function for item size
 // Pattern: base, base*2, base, base*2, ...
 const itemSizeFn = computed(() => {
-  const base = baseItemSize.value;
+  const base = itemSize.value;
   return (item: unknown, index: number) => index % 2 === 0 ? base : base * 2;
 });
 
@@ -54,7 +54,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer height="auto" :code="rawCode">
     <template #title>
-      <span class="text-success font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Dynamic Body</span>
+      <span class="example-title example-title--group-2">Vertical Dynamic Body</span>
     </template>
 
     <template #description>
@@ -68,7 +68,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-success text-success-content shadow-lg"
+        class="example-icon example-icon--group-2"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
       </svg>
@@ -79,15 +79,16 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #controls>
-      <div class="sticky top-0 z-100 flex flex-wrap gap-2 md:gap-4 items-start pointer-events-none">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <div class="sticky top-0 z-100 flex flex-wrap gap-4 items-start pointer-events-none py-4 -mx-4 px-4 backdrop-blur-sm bg-base-100/30">
+        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" class="shadow-strong" />
 
         <ScrollControls
           v-model:item-count="itemCount"
-          v-model:item-size="baseItemSize"
+          v-model:item-size="itemSize"
           v-model:buffer-before="bufferBefore"
           v-model:buffer-after="bufferAfter"
           direction="vertical"
+          class="shadow-strong"
           @scroll-to-index="handleScrollToIndex"
           @scroll-to-offset="handleScrollToOffset"
           @refresh="virtualScrollRef?.refresh()"
@@ -98,7 +99,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <VirtualScroll
       ref="virtualScrollRef"
       :debug="debugMode"
-      class="bg-base-100 border border-base-300 rounded-box overflow-hidden"
+      class="example-container"
       :items="items"
       :container="scrollContainer"
       :buffer-before="bufferBefore"
@@ -106,23 +107,23 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       @scroll="onScroll"
     >
       <template #header>
-        <div class="bg-neutral text-neutral-content p-12 text-center rounded-t-box">
-          <h2 class="text-3xl font-bold mb-2 uppercase">SCROLLABLE HEADER</h2>
-          <p class="opacity-90">This header and fixed height items scroll with the page</p>
+        <div class="example-body-header">
+          <h2>Scrollable Header</h2>
+          <p>This header and fixed height items scroll with the page</p>
         </div>
       </template>
 
       <template #item="{ item, index }">
-        <div class="flex items-center p-6 border-b border-base-200 hover:bg-base-300 transition-colors">
-          <span class="badge badge-neutral mr-4">#{{ index }}</span>
-          <span class="font-medium" :style="{ blockSize: `${ itemSizeFn(null, index) }px` }">{{ item.text }}</span>
+        <div class="example-vertical-item py-4">
+          <span class="example-badge me-8">#{{ index }}</span>
+          <div class="font-bold" :style="{ minBlockSize: `${ itemSizeFn(null, index) }px` }">{{ item.text }}</div>
         </div>
       </template>
 
       <template #footer>
-        <div class="bg-neutral text-neutral-content p-12 text-center rounded-b-box">
-          <h2 class="text-2xl font-bold uppercase">PAGE FOOTER</h2>
-          <p class="opacity-90 text-sm mt-2">End of the {{ itemCount }} dynamic items list</p>
+        <div class="example-body-footer">
+          <h2>Page Footer</h2>
+          <p>End of the {{ itemCount.toLocaleString() }} dynamic items list</p>
         </div>
       </template>
     </VirtualScroll>

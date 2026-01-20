@@ -17,6 +17,7 @@ const defaultRowHeight = ref(35);
 const defaultColWidth = ref(100);
 const bufferBefore = ref(5);
 const bufferAfter = ref(5);
+const stickyIndices = [ 0 ];
 
 const manualRowHeights = reactive<Record<number, number>>({});
 const manualColWidths = reactive<Record<number, number>>({});
@@ -130,7 +131,7 @@ function stopResizing() {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-secondary font-bold uppercase opacity-90 pe-2 align-baseline">Spreadsheet</span>
+      <span class="example-title example-title--group-5">Spreadsheet</span>
     </template>
 
     <template #description>
@@ -146,10 +147,14 @@ function stopResizing() {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-secondary text-secondary-content shadow-lg"
+        class="example-icon example-icon--group-5"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v16.5H3.75V3.75ZM12 3.75v16.5M3.75 12h16.5" />
       </svg>
+    </template>
+
+    <template #subtitle>
+      Bidirectional grid with header resizing
     </template>
 
     <template #controls>
@@ -171,133 +176,83 @@ function stopResizing() {
       </div>
     </template>
 
-    <div class="spreadsheet-wrapper border border-base-300 rounded-box overflow-hidden bg-base-200">
-      <VirtualScroll
-        ref="virtualScrollRef"
-        :items="items"
-        :item-size="getRowHeight"
-        direction="both"
-        :column-count="colCount"
-        :column-width="getColWidth"
-        :buffer-before="bufferBefore"
-        :buffer-after="bufferAfter"
-        :debug="debugMode"
-        :sticky-indices="[0]"
-        class="spreadsheet-grid"
-        @scroll="onScroll"
-      >
-        <template #item="{ index, columnRange, isStickyActive }">
+    <VirtualScroll
+      ref="virtualScrollRef"
+      :debug="debugMode"
+      class="example-container"
+      direction="both"
+      :items="items"
+      :item-size="getRowHeight"
+      :column-count="colCount"
+      :column-width="getColWidth"
+      :default-item-size="defaultRowHeight"
+      :default-column-width="defaultColWidth"
+      :buffer-before="bufferBefore"
+      :buffer-after="bufferAfter"
+      :sticky-indices="stickyIndices"
+      @scroll="onScroll"
+    >
+      <template #item="{ index, columnRange, isStickyActive }">
+        <div
+          class="example-spreadsheet-row"
+          :class="{ 'example-spreadsheet-row--header': index === 0, 'example-spreadsheet-row--sticky': isStickyActive }"
+          :style="{ height: `${ getRowHeight(null, index) }px` }"
+        >
+          <!-- Row Header (Column 0) - Always rendered and sticky -->
           <div
-            class="spreadsheet-row flex-nowrap"
-            :class="{ 'is-header-row': index === 0, 'is-sticky': isStickyActive }"
-            :style="{ height: `${ getRowHeight(null, index) }px` }"
+            class="example-spreadsheet-cell example-spreadsheet-cell--row-header"
+            data-col-index="0"
+            :style="{
+              width: `${ getColWidth(0) }px`,
+              height: `${ getRowHeight(null, index) }px`,
+            }"
           >
-            <!-- Row Header (Column 0) - Always rendered and sticky -->
+            {{ index === 0 ? '' : index }}
             <div
-              class="spreadsheet-cell row-header shrink-0"
+              v-if="index > 0"
+              class="example-spreadsheet-row-resizer"
+              @pointerdown="startResizing($event, 'row', index)"
+            />
+          </div>
+
+          <!-- Spacer for virtualized columns (accounting for the manually rendered Column 0) -->
+          <div
+            class="shrink-0"
+            :style="{
+              width: `${ Math.max(0, columnRange.padStart - getColWidth(0)) }px`,
+            }"
+          />
+
+          <!-- Visible Cells (excluding Column 0) -->
+          <template v-for="colIdx in (columnRange.end - columnRange.start)" :key="colIdx + columnRange.start">
+            <div
+              v-if="(colIdx - 1 + columnRange.start) > 0"
+              class="example-spreadsheet-cell"
+              :data-col-index="colIdx - 1 + columnRange.start"
+              :class="{ 'example-spreadsheet-cell--col-header': index === 0 }"
               :style="{
-                width: `${ getColWidth(0) }px`,
+                width: `${ getColWidth(colIdx - 1 + columnRange.start) }px`,
                 height: `${ getRowHeight(null, index) }px`,
               }"
             >
-              {{ index === 0 ? '' : index }}
+              {{ getCellContent(index, colIdx - 1 + columnRange.start) }}
               <div
-                v-if="index > 0"
-                class="row-resizer"
-                @pointerdown="startResizing($event, 'row', index)"
+                v-if="index === 0"
+                class="example-spreadsheet-col-resizer"
+                @pointerdown="startResizing($event, 'col', colIdx - 1 + columnRange.start)"
               />
             </div>
+          </template>
 
-            <!-- Spacer for virtualized columns (accounting for the manually rendered Column 0) -->
-            <div
-              class="shrink-0"
-              :style="{
-                width: `${ Math.max(0, columnRange.padStart - getColWidth(0)) }px`,
-              }"
-            />
-
-            <!-- Visible Cells (excluding Column 0) -->
-            <template v-for="colIdx in (columnRange.end - columnRange.start)" :key="colIdx + columnRange.start">
-              <div
-                v-if="(colIdx - 1 + columnRange.start) > 0"
-                class="spreadsheet-cell shrink-0"
-                :class="{ 'col-header': index === 0 }"
-                :style="{
-                  width: `${ getColWidth(colIdx - 1 + columnRange.start) }px`,
-                  height: `${ getRowHeight(null, index) }px`,
-                }"
-              >
-                {{ getCellContent(index, colIdx - 1 + columnRange.start) }}
-                <div
-                  v-if="index === 0"
-                  class="col-resizer"
-                  @pointerdown="startResizing($event, 'col', colIdx - 1 + columnRange.start)"
-                />
-              </div>
-            </template>
-
-            <!-- Spacer for end of row -->
-            <div
-              class="shrink-0"
-              :style="{
-                width: `${ columnRange.padEnd }px`,
-              }"
-            />
-          </div>
-        </template>
-      </VirtualScroll>
-    </div>
+          <!-- Spacer for end of row -->
+          <div
+            class="shrink-0"
+            :style="{
+              width: `${ columnRange.padEnd }px`,
+            }"
+          />
+        </div>
+      </template>
+    </VirtualScroll>
   </ExampleContainer>
 </template>
-
-<style scoped>
-@reference "../../assets/style.css";
-
-.spreadsheet-wrapper {
-  height: 100%;
-}
-
-.spreadsheet-grid {
-  @apply bg-base-100;
-}
-
-.spreadsheet-row {
-  @apply flex whitespace-nowrap bg-base-100 transition-colors;
-
-  &.is-header-row {
-    z-index: 30;
-  }
-
-  &.is-sticky {
-    z-index: 20;
-  }
-
-  &:hover {
-    @apply bg-base-200/50;
-  }
-}
-
-.spreadsheet-cell {
-  @apply relative inline-flex items-center justify-center border-r border-b border-base-300 text-sm px-2 box-border bg-inherit;
-}
-
-.row-header {
-  @apply sticky left-0 z-10 font-bold bg-base-300 border-r-2 border-base-300 text-base-content/60;
-
-  .is-header-row & {
-    @apply z-40 bg-base-300 text-neutral-content;
-  }
-}
-
-.col-header {
-  @apply font-bold bg-base-300 border-b-2 border-base-300 text-base-content/60;
-}
-
-.col-resizer {
-  @apply absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors z-50;
-}
-
-.row-resizer {
-  @apply absolute bottom-0 left-0 right-0 h-1 cursor-row-resize hover:bg-primary/50 transition-colors z-50;
-}
-</style>

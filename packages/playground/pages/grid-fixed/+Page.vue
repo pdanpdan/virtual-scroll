@@ -20,7 +20,7 @@ const bufferAfter = ref(5);
 const stickyHeader = ref(false);
 const stickyFooter = ref(false);
 
-const columnWidths = computed(() => [ Math.ceil(columnWidth.value * 1.5), columnWidth.value ]);
+const columnWidths = computed(() => [ columnWidth.value, Math.ceil(columnWidth.value * 1.5) ]);
 
 const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
   id: i,
@@ -46,7 +46,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-info font-bold uppercase opacity-90 pe-2 align-baseline">Grid Fixed</span>
+      <span class="example-title example-title--group-4">Grid Fixed</span>
     </template>
 
     <template #description>
@@ -60,7 +60,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-info text-info-content shadow-lg"
+        class="example-icon example-icon--group-4"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6.15a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
       </svg>
@@ -73,7 +73,6 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <template #controls>
       <div class="flex flex-wrap gap-4 items-start">
         <ScrollStatus
-
           :scroll-details="scrollDetails"
           direction="both"
           :column-range="virtualScrollRef?.columnRange"
@@ -98,7 +97,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <VirtualScroll
       ref="virtualScrollRef"
       :debug="debugMode"
-      class="bg-base-100"
+      class="example-container"
       direction="both"
       :items="items"
       :item-size="itemSize"
@@ -111,28 +110,24 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       @scroll="onScroll"
     >
       <template v-if="stickyHeader" #header>
-        <div class="bg-primary text-primary-content p-4 border-b border-primary-focus">
-          GRID HEADER (Row 0 is visible below this)
+        <div class="example-sticky-header">
+          Grid Header
         </div>
       </template>
 
       <template #item="{ index, columnRange, getColumnWidth }">
-        <div
-          :key="`r_${ index }`"
-          class="h-full flex items-stretch border-b border-base-200"
-        >
+        <div :key="`r_${ index }`" class="example-grid-row">
           <div class="shrink-0" :style="{ inlineSize: `${ columnRange.padStart }px` }" />
 
           <div
             v-for="c in (columnRange.end - columnRange.start)"
             :key="`r_${ index }_c_${ columnRange.start + c - 1 }`"
             :data-col-index="columnRange.start + c - 1"
-            class="flex flex-col items-center justify-center border-r border-base-200 shrink-0 hover:bg-base-300 transition-colors"
+            class="example-grid-cell"
             :style="{ inlineSize: `${ getColumnWidth(columnRange.start + c - 1) }px` }"
           >
-            <div class="text-xs uppercase opacity-90 font-bold mb-1">Row {{ index }}</div>
-            <div class="text-xs uppercase opacity-90 font-bold mb-1">Col {{ columnRange.start + c - 1 }}</div>
-            <div class="text-xs opacity-90">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>
+            <div class="example-badge mb-2">R{{ index }} &times; C{{ columnRange.start + c - 1 }}</div>
+            <div class="opacity-40 tabular-nums">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>
           </div>
 
           <div class="shrink-0" :style="{ inlineSize: `${ columnRange.padEnd }px` }" />
@@ -140,8 +135,8 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       </template>
 
       <template v-if="stickyFooter" #footer>
-        <div class="bg-secondary text-secondary-content p-4 border-t border-secondary-focus font-bold text-center">
-          GRID FOOTER (End of grid)
+        <div class="example-sticky-footer">
+          End of Grid
         </div>
       </template>
     </VirtualScroll>

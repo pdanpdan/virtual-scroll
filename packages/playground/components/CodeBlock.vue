@@ -108,7 +108,7 @@ watch(() => props.code, highlight);
 
 <template>
   <div
-    class="code-block bg-base-300 text-sm overflow-auto rounded-box border border-base-content/10 mb-4"
+    class="code-block text-sm overflow-auto"
     :class="{ 'has-line-numbers': lineNumbers, 'is-bash': lang === 'bash' }"
     data-theme="dark"
   >

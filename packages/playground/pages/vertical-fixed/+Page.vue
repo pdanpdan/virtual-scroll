@@ -43,7 +43,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-primary font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Fixed</span>
+      <span class="example-title example-title--group-1">Vertical Fixed</span>
     </template>
 
     <template #description>
@@ -57,7 +57,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-primary text-primary-content shadow-lg"
+        class="example-icon example-icon--group-1"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.25 21 21 17.25" />
       </svg>
@@ -89,7 +89,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <VirtualScroll
       ref="virtualScrollRef"
       :debug="debugMode"
-      class="bg-base-100"
+      class="example-container"
       :items="items"
       :item-size="itemSize"
       :buffer-before="bufferBefore"
@@ -99,21 +99,21 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       @scroll="onScroll"
     >
       <template v-if="stickyHeader" #header>
-        <div class="bg-primary text-primary-content p-4 border-b border-primary-focus">
-          STICKY HEADER (Measured Padding)
+        <div class="example-sticky-header">
+          Sticky Header
         </div>
       </template>
 
       <template #item="{ item, index }">
-        <div class="h-full flex items-center px-6 border-b border-base-200 hover:bg-base-300 transition-colors">
-          <span class="badge badge-neutral mr-4">#{{ index }}</span>
-          <span class="font-medium">{{ item.text }}</span>
+        <div class="example-vertical-item example-vertical-item--fixed">
+          <span class="example-badge me-8">#{{ index }}</span>
+          <span class="font-bold">{{ item.text }}</span>
         </div>
       </template>
 
       <template v-if="stickyFooter" #footer>
-        <div class="bg-secondary text-secondary-content p-4 border-t border-secondary-focus">
-          STICKY FOOTER (Measured Padding)
+        <div class="example-sticky-footer">
+          Sticky Footer
         </div>
       </template>
     </VirtualScroll>

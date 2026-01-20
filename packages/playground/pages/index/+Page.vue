@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import AppLink from '#/components/AppLink.vue';
-import { navigateWithTransition, normalizeHref } from '#/navigate';
-
-const logoUrl = normalizeHref('logo.svg');
+import AppLogo from '#/components/AppLogo.vue';
+import ExampleCard from '#/components/ExampleCard.vue';
+import { navigateWithTransition } from '#/navigate';
 </script>
 
 <template>
   <div>
-    <div class="card bg-base-300 shadow-sm border border-primary/10">
-      <div class="card-body flex-row items-center p-1 gap-3 md:p-6 md:gap-6">
-        <img :src="logoUrl" class="size-16 md:size-20" alt="Logo" />
+    <div class="card shadow-soft bg-base-300">
+      <div class="card-body flex-row items-center p-4 md:p-8 gap-4 md:gap-8">
+        <AppLogo class="size-16 md:size-24 drop-shadow-lg" />
         <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold">Virtual Scroll</h1>
-          <p class="text-lg md:text-xl opacity-85">
+          <h1 class="text-primary">Virtual Scroll</h1>
+          <p class="text-base md:text-xl opacity-60 font-medium">
             A high-performance virtualization library for Vue 3.
           </p>
         </div>
@@ -20,29 +20,35 @@ const logoUrl = normalizeHref('logo.svg');
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
-      <div class="card bg-base-300 shadow-md border-2 border-primary/20">
-        <div class="card-body">
-          <h2 class="card-title text-primary">
+      <div class="card bg-base-300 shadow-strong border-2 border-accent/30 md:col-span-2 2xl:col-span-2 overflow-hidden group">
+        <div class="card-body p-8 md:p-10 relative">
+          <div class="absolute top-0 right-0 p-8 opacity-5 transition-transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+            <AppLogo class="size-32" />
+          </div>
+          <h2 class="card-title text-accent text-2xl md:text-3xl mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke-width="1.5"
+              stroke-width="2"
               stroke="currentColor"
-              class="w-6 h-6"
+              class="size-8"
             ><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.967 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.967 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.967 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
             Documentation
           </h2>
-          <p>Comprehensive guide on how to use the VirtualScroll component and the underlying composable API.</p>
-          <div class="card-actions justify-end">
+          <p class="text-base md:text-lg opacity-80 max-w-xl">
+            Everything you need to know about integrating <code>@pdanpdan/virtual-scroll</code> into your Vue 3 applications.
+            From basic list virtualization to advanced grid and SSR setups.
+          </p>
+          <div class="card-actions justify-start mt-8">
             <AppLink v-slot="{ href }" href="/docs">
               <a
                 :href
-                class="btn btn-primary"
+                class="btn btn-accent btn-md md:btn-lg px-10 shadow-lg shadow-accent/20 font-black small-caps tracking-widest"
                 data-vike="false"
                 @click.prevent="navigateWithTransition(href, 'forward')"
               >
-                Read Documentation
+                Get Started
               </a>
             </AppLink>
           </div>
@@ -50,320 +56,140 @@ const logoUrl = normalizeHref('logo.svg');
       </div>
     </div>
 
-    <div class="divider my-8">
+    <div class="divider my-8 font-bold small-caps text-xs tracking-widest opacity-50">
       Examples
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
       <!-- Vertical -->
-      <div class="card bg-base-300 shadow-md border-t-4 border-primary">
-        <div class="card-body">
-          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-90">Vertical</h2>
-          <h3 class="card-title mt-0">Vertical Fixed</h3>
-          <p class="text-sm opacity-90">Optimized for lists where every item has the same height.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/vertical-fixed">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Vertical"
+        title="Vertical Fixed"
+        description="Optimized for lists where every item has the same height."
+        href="/vertical-fixed"
+        group="1"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-primary">
-        <div class="card-body">
-          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-90">Vertical</h2>
-          <h3 class="card-title mt-0">Vertical Dynamic</h3>
-          <p class="text-sm opacity-90">Handles variable item heights automatically using ResizeObserver.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/vertical-dynamic">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Vertical"
+        title="Vertical Dynamic"
+        description="Handles variable item heights automatically using ResizeObserver."
+        href="/vertical-dynamic"
+        group="1"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-success">
-        <div class="card-body">
-          <h2 class="card-title text-success font-bold uppercase text-xs opacity-90">Vertical</h2>
-          <h3 class="card-title mt-0">Vertical Fixed Body</h3>
-          <p class="text-sm opacity-90">Use the browser window as the primary scroll container.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/vertical-fixed-body">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Vertical"
+        title="Vertical Fixed Body"
+        description="Use the browser window as the primary scroll container."
+        href="/vertical-fixed-body"
+        group="2"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-success">
-        <div class="card-body">
-          <h2 class="card-title text-success font-bold uppercase text-xs opacity-90">Vertical</h2>
-          <h3 class="card-title mt-0">Vertical Dynamic Body</h3>
-          <p class="text-sm opacity-90">Native window scrolling with variable item heights.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/vertical-dynamic-body">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Vertical"
+        title="Vertical Dynamic Body"
+        description="Native window scrolling with variable item heights."
+        href="/vertical-dynamic-body"
+        group="2"
+      />
 
       <!-- Horizontal -->
-      <div class="card bg-base-300 shadow-md border-t-4 border-accent">
-        <div class="card-body">
-          <h2 class="card-title text-accent font-bold uppercase text-xs opacity-90">Horizontal</h2>
-          <h3 class="card-title mt-0">Horizontal Fixed</h3>
-          <p class="text-sm opacity-90">Full support for horizontal-only virtualization with fixed widths.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/horizontal-fixed">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Horizontal"
+        title="Horizontal Fixed"
+        description="Full support for horizontal-only virtualization with fixed widths."
+        href="/horizontal-fixed"
+        group="3"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-accent">
-        <div class="card-body">
-          <h2 class="card-title text-accent font-bold uppercase text-xs opacity-90">Horizontal</h2>
-          <h3 class="card-title mt-0">Horizontal Dynamic</h3>
-          <p class="text-sm opacity-90">Horizontal scrolling with variable, measured item widths.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/horizontal-dynamic">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Horizontal"
+        title="Horizontal Dynamic"
+        description="Horizontal scrolling with variable, measured item widths."
+        href="/horizontal-dynamic"
+        group="3"
+      />
 
       <!-- Bidirectional -->
-      <div class="card bg-base-300 shadow-md border-t-4 border-info">
-        <div class="card-body">
-          <h2 class="card-title text-info font-bold uppercase text-xs opacity-90">Grid</h2>
-          <h3 class="card-title mt-0">Grid Fixed</h3>
-          <p class="text-sm opacity-90">Scroll simultaneously in both X and Y axes with virtualized columns.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/grid-fixed">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Grid"
+        title="Grid Fixed"
+        description="Scroll simultaneously in both X and Y axes with virtualized columns."
+        href="/grid-fixed"
+        group="4"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-info">
-        <div class="card-body">
-          <h2 class="card-title text-info font-bold uppercase text-xs opacity-90">Grid</h2>
-          <h3 class="card-title mt-0">Grid Dynamic</h3>
-          <p class="text-sm opacity-90">Bidirectional scroll with programmatic column widths using a function.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/grid-dynamic">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Grid"
+        title="Grid Dynamic"
+        description="Bidirectional scroll with programmatic column widths using a function."
+        href="/grid-dynamic"
+        group="4"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-info">
-        <div class="card-body">
-          <h2 class="card-title text-info font-bold uppercase text-xs opacity-90">Grid</h2>
-          <h3 class="card-title mt-0">Grid SSR Support</h3>
-          <p class="text-sm opacity-90">Demonstrates pre-rendering and auto-scrolling to a specific range for SSR.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/grid-ssr">
-              <a
-                :href
-                rel="external"
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Grid"
+        title="Grid SSR Support"
+        description="Demonstrates pre-rendering and auto-scrolling to a specific range for SSR."
+        href="/grid-ssr"
+        group="4"
+        rel="external"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-warning">
-        <div class="card-body">
-          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-90">Table</h2>
-          <h3 class="card-title mt-0">Vertical Fixed Table</h3>
-          <p class="text-sm opacity-90">Semantic HTML <strong>&lt;table&gt;</strong> virtualization for accessible data grids.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/vertical-fixed-table">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Table"
+        title="Vertical Fixed Table"
+        description="Semantic HTML <table> virtualization for accessible data grids."
+        href="/vertical-fixed-table"
+        group="5"
+      />
     </div>
 
-    <div class="divider my-8">
+    <div class="divider my-8 font-bold small-caps text-xs tracking-widest opacity-50">
       Features
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
-      <div class="card bg-base-300 shadow-md border-t-4 border-primary">
-        <div class="card-body">
-          <h2 class="card-title text-primary font-bold uppercase text-xs opacity-90">Feature</h2>
-          <h3 class="card-title mt-0">Infinite Scroll</h3>
-          <p class="text-sm opacity-90">Automatic pagination and loading states when reaching end of content.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/feature-infinite-scroll">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Feature"
+        title="Infinite Scroll"
+        description="Automatic pagination and loading states when reaching end of content."
+        href="/feature-infinite-scroll"
+        group="1"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-secondary">
-        <div class="card-body">
-          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-90">Feature</h2>
-          <h3 class="card-title mt-0">Sticky Sections</h3>
-          <p class="text-sm opacity-90">iOS-style pushing headers for segmented lists and grouped items.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/feature-sticky-sections">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Feature"
+        title="Sticky Sections"
+        description="iOS-style pushing headers for segmented lists and grouped items."
+        href="/feature-sticky-sections"
+        group="2"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-warning">
-        <div class="card-body">
-          <h2 class="card-title text-warning font-bold uppercase text-xs opacity-90">Feature</h2>
-          <h3 class="card-title mt-0">Scroll Restoration</h3>
-          <p class="text-sm opacity-90">Maintain scroll position seamlessly when items are prepended.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/feature-scroll-restoration">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Feature"
+        title="Scroll Restoration"
+        description="Maintain scroll position seamlessly when items are prepended."
+        href="/feature-scroll-restoration"
+        group="3"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-error">
-        <div class="card-body">
-          <h2 class="card-title text-error font-bold uppercase text-xs opacity-90">Feature</h2>
-          <h3 class="card-title mt-0">Chat Interface</h3>
-          <p class="text-sm opacity-90">Smooth auto-scrolling, history loading, and dynamic message heights.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/feature-chat">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Feature"
+        title="Chat Interface"
+        description="Smooth auto-scrolling, history loading, and dynamic message heights."
+        href="/feature-chat"
+        group="4"
+      />
 
-      <div class="card bg-base-300 shadow-md border-t-4 border-secondary">
-        <div class="card-body">
-          <h2 class="card-title text-secondary font-bold uppercase text-xs opacity-90">Feature</h2>
-          <h3 class="card-title mt-0">Spreadsheet</h3>
-          <p class="text-sm opacity-90">Excel-like bidirectional grid with sticky row and column headers.</p>
-          <div class="card-actions justify-end mt-2">
-            <AppLink v-slot="{ href }" href="/feature-spreadsheet">
-              <a
-                :href
-                class="btn btn-soft"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
-              >
-                View Example
-              </a>
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <ExampleCard
+        type="Feature"
+        title="Spreadsheet"
+        description="Excel-like bidirectional grid with sticky row and column headers."
+        href="/feature-spreadsheet"
+        group="5"
+      />
     </div>
   </div>
 </template>

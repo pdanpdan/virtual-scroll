@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark;
   exclude: properties;
@@ -9,27 +10,27 @@
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(99% 0.0 0);
-  --color-base-200: oklch(97% 0.01 250);
-  --color-base-300: oklch(94% 0.02 250);
-  --color-base-content: oklch(10% 0.01 250);
-  --color-primary: oklch(50% 0.2 260);
-  --color-primary-content: oklch(99% 0 0);
-  --color-secondary: oklch(55% 0.25 180);
-  --color-secondary-content: oklch(99% 0 0);
-  --color-accent: oklch(60% 0.3 10);
-  --color-accent-content: oklch(99% 0 0);
-  --color-neutral: oklch(25% 0.01 250);
-  --color-neutral-content: oklch(92% 0.01 250);
-  --color-info: oklch(55% 0.2 230);
-  --color-info-content: oklch(99% 0 0);
-  --color-success: oklch(50% 0.2 140);
-  --color-success-content: oklch(99% 0 0);
-  --color-warning: oklch(70% 0.2 70);
-  --color-warning-content: oklch(10% 0.01 70);
-  --color-error: oklch(55% 0.25 25);
-  --color-error-content: oklch(99% 0 0);
-  --radius-selector: 0.125rem;
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(98% 0.005 260);
+  --color-base-300: oklch(95% 0.01 260);
+  --color-base-content: oklch(15% 0.02 260);
+  --color-primary: oklch(45% 0.2 260);
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(45% 0.12 165);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(45% 0.2 35);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(20% 0.02 260);
+  --color-neutral-content: oklch(95% 0.01 260);
+  --color-info: oklch(45% 0.15 210);
+  --color-info-content: oklch(100% 0 0);
+  --color-success: oklch(40% 0.15 145);
+  --color-success-content: oklch(100% 0 0);
+  --color-warning: oklch(45% 0.15 75);
+  --color-warning-content: oklch(100% 0 0);
+  --color-error: oklch(45% 0.2 25);
+  --color-error-content: oklch(100% 0 0);
+  --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.25rem;
   --size-selector: 0.25rem;
@@ -44,27 +45,27 @@
   default: false;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: oklch(16% 0.02 250);
-  --color-base-200: oklch(12% 0.03 250);
-  --color-base-300: oklch(5% 0.04 250);
-  --color-base-content: oklch(90% 0.01 250);
-  --color-primary: oklch(70% 0.2 260);
-  --color-primary-content: oklch(10% 0.01 250);
-  --color-secondary: oklch(65% 0.18 180);
-  --color-secondary-content: oklch(10% 0.01 250);
-  --color-accent: oklch(80% 0.25 10);
-  --color-accent-content: oklch(10% 0.01 10);
-  --color-neutral: oklch(35% 0.01 250);
-  --color-neutral-content: oklch(98% 0.01 250);
-  --color-info: oklch(65% 0.15 230);
-  --color-info-content: oklch(10% 0.01 250);
-  --color-success: oklch(60% 0.15 140);
-  --color-success-content: oklch(10% 0.01 250);
-  --color-warning: oklch(85% 0.25 70);
-  --color-warning-content: oklch(10% 0.01 70);
-  --color-error: oklch(65% 0.18 25);
-  --color-error-content: oklch(10% 0.01 250);
-  --radius-selector: 0.125rem;
+  --color-base-100: oklch(18% 0.02 260);
+  --color-base-200: oklch(14% 0.02 260);
+  --color-base-300: oklch(10% 0.03 260);
+  --color-base-content: oklch(98% 0.005 260);
+  --color-primary: oklch(70% 0.18 260);
+  --color-primary-content: oklch(10% 0.03 260);
+  --color-secondary: oklch(75% 0.12 165);
+  --color-secondary-content: oklch(10% 0.03 165);
+  --color-accent: oklch(80% 0.18 35);
+  --color-accent-content: oklch(10% 0.03 35);
+  --color-neutral: oklch(35% 0.02 260);
+  --color-neutral-content: oklch(98% 0.005 260);
+  --color-info: oklch(75% 0.1 210);
+  --color-info-content: oklch(10% 0.03 210);
+  --color-success: oklch(75% 0.1 145);
+  --color-success-content: oklch(10% 0.03 145);
+  --color-warning: oklch(85% 0.12 75);
+  --color-warning-content: oklch(10% 0.03 75);
+  --color-error: oklch(75% 0.15 25);
+  --color-error-content: oklch(10% 0.03 25);
+  --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.25rem;
   --size-selector: 0.25rem;
@@ -74,10 +75,39 @@
   --noise: 0;
 }
 
+/* Shiki code highlighting variables */
+[data-theme="dark"] {
+  --shiki-foreground: oklch(95% 0.01 260);
+  --shiki-background: transparent;
+  --shiki-token-constant: oklch(80% 0.15 85);
+  --shiki-token-string: oklch(80% 0.15 170);
+  --shiki-token-comment: oklch(60% 0 0);
+  --shiki-token-keyword: oklch(78% 0.15 300);
+  --shiki-token-parameter: oklch(85% 0.1 170);
+  --shiki-token-function: oklch(78% 0.15 250);
+  --shiki-token-string-expression: oklch(80% 0.15 170);
+  --shiki-token-punctuation: oklch(70% 0 0);
+  --shiki-token-link: oklch(78% 0.15 250);
+}
+
 @layer base {
   html, body {
     block-size: 100%;
     margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-2xl md:text-4xl font-black tracking-tight;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl font-extrabold tracking-tight;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl font-bold;
   }
 }
 
@@ -91,23 +121,247 @@
   }
 }
 
-.drawer-side {
-  view-transition-name: VS-sidebar;
+/* --- Example Card Utilities --- */
+
+@utility example-card {
+  @apply bg-base-300 shadow-md border-t-4;
+}
+@utility example-card--group-1 { @apply border-primary; }
+@utility example-card--group-2 { @apply border-secondary; }
+@utility example-card--group-3 { @apply border-accent; }
+@utility example-card--group-4 { @apply border-info; }
+@utility example-card--group-5 { @apply border-warning; }
+@utility example-card--group-6 { @apply border-success; }
+@utility example-card--group-7 { @apply border-error; }
+
+@utility example-card-title-type {
+  @apply font-bold text-sm tracking-widest opacity-70 mb-1 small-caps;
+}
+@utility example-card-title-type--group-1 { @apply text-primary; }
+@utility example-card-title-type--group-2 { @apply text-secondary; }
+@utility example-card-title-type--group-3 { @apply text-accent; }
+@utility example-card-title-type--group-4 { @apply text-info; }
+@utility example-card-title-type--group-5 { @apply text-warning; }
+@utility example-card-title-type--group-6 { @apply text-success; }
+@utility example-card-title-type--group-7 { @apply text-error; }
+
+/* --- Example Page Utilities --- */
+
+@utility example-title {
+  @apply text-primary font-bold opacity-90 pe-2 align-baseline small-caps;
+}
+@utility example-title--group-1 { @apply text-primary; }
+@utility example-title--group-2 { @apply text-secondary; }
+@utility example-title--group-3 { @apply text-accent; }
+@utility example-title--group-4 { @apply text-info; }
+@utility example-title--group-5 { @apply text-warning; }
+@utility example-title--group-6 { @apply text-success; }
+@utility example-title--group-7 { @apply text-error; }
+
+@utility example-icon {
+  @apply size-12 p-2 rounded-box bg-primary text-primary-content shadow-lg;
+}
+@utility example-icon--group-1 { @apply bg-primary text-primary-content; }
+@utility example-icon--group-2 { @apply bg-secondary text-secondary-content; }
+@utility example-icon--group-3 { @apply bg-accent text-accent-content; }
+@utility example-icon--group-4 { @apply bg-info text-info-content; }
+@utility example-icon--group-5 { @apply bg-warning text-warning-content; }
+@utility example-icon--group-6 { @apply bg-success text-success-content; }
+@utility example-icon--group-7 { @apply bg-error text-error-content; }
+
+@utility example-container {
+  @apply bg-base-100 border border-base-300 rounded-box overflow-hidden shadow-soft;
 }
 
-/* Shiki code highlighting variables */
-[data-theme="dark"] {
-  --shiki-foreground: oklch(90% 0.01 250);
-  --shiki-background: transparent;
-  --shiki-token-constant: oklch(80% 0.15 85);
-  --shiki-token-string: oklch(80% 0.15 170);
-  --shiki-token-comment: oklch(60% 0 0);
-  --shiki-token-keyword: oklch(78% 0.15 300);
-  --shiki-token-parameter: oklch(85% 0.1 170);
-  --shiki-token-function: oklch(78% 0.15 250);
-  --shiki-token-string-expression: oklch(80% 0.15 170);
-  --shiki-token-punctuation: oklch(70% 0 0);
-  --shiki-token-link: oklch(78% 0.15 250);
+/* --- Example Content Utilities --- */
+
+@utility example-badge {
+  @apply badge badge-neutral badge-sm tabular-nums;
+}
+
+@utility example-vertical-item {
+  @apply flex items-center px-6 border-b border-base-200 hover:bg-base-200 text-sm;
+}
+@utility example-vertical-item--fixed {
+  @apply h-full;
+}
+
+@utility example-horizontal-item {
+  @apply h-full flex flex-col items-center justify-center px-4 py-6 border-r border-base-200 hover:bg-base-200 transition-colors whitespace-normal text-center select-none;
+}
+@utility example-horizontal-item--fixed {
+  @apply w-full;
+}
+
+@utility example-sticky-header {
+  @apply bg-base-200 text-base-content/60 p-4 border-b border-base-300 font-bold text-xs tracking-widest text-center shadow-sm z-1 small-caps;
+}
+@utility example-sticky-header--start {
+  @apply text-start px-6;
+}
+@utility example-body-header {
+  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-t-box border-b border-base-300;
+
+  h2 {
+    @apply text-xl md:text-3xl font-extrabold mb-2 tracking-widest text-primary small-caps;
+  }
+
+  p {
+    @apply opacity-60 text-sm md:text-base;
+  }
+}
+
+@utility example-sticky-footer {
+  @apply bg-base-200 text-base-content/60 p-4 border-t border-base-300 font-bold text-xs tracking-widest text-center shadow-sm z-1 small-caps;
+}
+
+@utility example-body-footer {
+  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-b-box border-t border-base-300;
+
+  h2 {
+    @apply text-lg md:text-2xl font-bold tracking-widest opacity-60 small-caps;
+  }
+
+  p {
+    @apply opacity-40 text-xs md:text-sm mt-2 font-medium;
+  }
+}
+
+@utility example-grid-row {
+  @apply min-h-full flex items-stretch;
+}
+@utility example-grid-row--sticky {
+  @apply bg-base-200 shadow-sm z-1;
+}
+
+@utility example-grid-cell {
+  @apply flex flex-col items-center justify-center border-e border-b border-base-200 shrink-0 hover:bg-base-300 transition-colors text-xs md:text-xs box-border;
+}
+
+@utility example-spreadsheet {
+  @apply bg-base-100;
+}
+
+@utility example-spreadsheet-row {
+  @apply flex flex-nowrap whitespace-nowrap bg-base-100;
+
+  &:hover {
+    @apply bg-base-200/30;
+  }
+
+  &.example-spreadsheet-row--sticky {
+    @apply z-20;
+  }
+  &.example-spreadsheet-row--header {
+    @apply z-30;
+  }
+}
+
+@utility example-spreadsheet-cell {
+  @apply shrink-0 relative inline-flex items-center justify-center border-r border-b border-base-200 text-xs md:text-sm px-2 box-border bg-inherit;
+
+  &.example-spreadsheet-cell--row-header {
+    @apply sticky left-0 z-10 font-bold bg-base-200 border-r-2 border-base-300 text-base-content/50;
+
+    .example-spreadsheet-row--header & {
+      @apply z-40 bg-base-300 text-primary;
+    }
+  }
+
+  &.example-spreadsheet-cell--col-header {
+    @apply font-bold bg-base-200 border-b-2 border-base-300 text-base-content/50;
+
+    &:hover {
+      @apply text-base-content/80;
+    }
+  }
+}
+
+@utility example-spreadsheet-col-resizer {
+  @apply absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/40 transition-colors z-50;
+}
+
+@utility example-spreadsheet-row-resizer {
+  @apply absolute bottom-0 left-0 right-0 h-1 cursor-row-resize hover:bg-primary/40 transition-colors z-50;
+}
+
+/* --- General Utilities --- */
+
+@utility shadow-soft {
+  @apply shadow-lg border border-base-content/5;
+}
+
+@utility shadow-strong {
+  @apply shadow-xl border border-base-content/10;
+}
+
+@utility small-caps {
+  font-variant: small-caps;
+}
+
+@utility settings-item {
+  @apply flex items-center justify-between rounded-box active:text-base-content cursor-pointer;
+}
+
+@utility settings-label {
+  @apply text-xs font-bold tracking-widest opacity-50 group-hover:opacity-100 transition-opacity small-caps;
+}
+
+/* --- Drawer Utilities --- */
+
+@utility drawer-side-container {
+  @apply h-dvh border-r border-base-content/5 shadow-lg;
+}
+
+@utility drawer-link {
+  @apply rounded-selector font-bold text-sm tracking-wide py-2.5 hover:bg-base-content/5 active:bg-primary/95;
+}
+@utility drawer-link--active {
+  @apply bg-primary hover:bg-primary/90 text-primary-content shadow-md;
+}
+
+@utility drawer-header {
+  @apply py-6 px-2 mb-4 flex flex-row items-center justify-between text-base-content border-b border-base-content/5;
+}
+
+@utility drawer-menu-title {
+  @apply text-sm font-black tracking-[0.2em] opacity-80 my-6 small-caps;
+}
+
+/* --- Documentation Utilities --- */
+
+@utility docs-section-header {
+  @apply text-xl md:text-2xl font-bold mb-4 md:mb-6 tracking-widest text-primary small-caps;
+}
+
+@utility docs-code-block {
+  @apply rounded-box border border-base-content/10 mb-4;
+}
+
+@utility docs-prop-header {
+  @apply text-lg md:text-xl font-semibold mb-4 pb-2 border-b border-base-300 text-secondary;
+}
+
+@utility docs-prop-subheader {
+  @apply text-sm md:text-base font-bold mb-4 opacity-70 tracking-widest small-caps;
+}
+
+@utility docs-table-container {
+  @apply overflow-x-auto mb-10 card shadow-soft bg-base-300;
+}
+
+@utility docs-feature-card {
+  @apply card shadow-soft bg-base-300;
+}
+
+@utility docs-feature-card-body {
+  @apply card-body p-4 flex-row items-start gap-3;
+}
+
+/* --- Page Transitions --- */
+
+.drawer-side {
+  view-transition-name: VS-sidebar;
 }
 
 .navbar {

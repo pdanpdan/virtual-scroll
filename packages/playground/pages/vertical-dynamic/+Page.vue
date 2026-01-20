@@ -12,7 +12,7 @@ import ScrollStatus from '#/components/ScrollStatus.vue';
 import rawCode from './+Page.vue?raw';
 
 const itemCount = ref(1000);
-const baseItemSize = ref(50);
+const itemSize = ref(50);
 const bufferBefore = ref(5);
 const bufferAfter = ref(5);
 const stickyHeader = ref(false);
@@ -21,8 +21,8 @@ const stickyFooter = ref(false);
 // Use a deterministic function for item size
 // Pattern: base, base*2, base, base*2, ...
 const itemSizeFn = computed(() => {
-  const base = baseItemSize.value;
-  return (item: unknown, index: number) => index % 2 === 0 ? base : base * 2;
+  const base = itemSize.value;
+  return (_: unknown, index: number) => index % 2 === 0 ? base : base * 2;
 });
 
 const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
@@ -50,11 +50,11 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-primary font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Dynamic</span>
+      <span class="example-title example-title--group-1">Vertical Dynamic</span>
     </template>
 
     <template #description>
-      Vertical scrolling with variable item heights for {{ itemCount.toLocaleString() }} items. Automatically measures item sizes using <strong>ResizeObserver</strong>. Even items are {{ baseItemSize }}px, odd items are {{ baseItemSize * 2 }}px.
+      Vertical scrolling with variable item heights for {{ itemCount.toLocaleString() }} items. Automatically measures item sizes using <strong>ResizeObserver</strong>. Even items are {{ itemSize }}px, odd items are {{ itemSize * 2 }}px.
     </template>
 
     <template #icon>
@@ -64,7 +64,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-primary text-primary-content shadow-lg"
+        class="example-icon example-icon--group-1"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.45 4.5h14.25M3.45 9h9.75M3.45 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.7 21 21.45 17.25" />
       </svg>
@@ -80,7 +80,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 
         <ScrollControls
           v-model:item-count="itemCount"
-          v-model:item-size="baseItemSize"
+          v-model:item-size="itemSize"
           v-model:buffer-before="bufferBefore"
           v-model:buffer-after="bufferAfter"
           v-model:sticky-header="stickyHeader"
@@ -96,9 +96,8 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <VirtualScroll
       ref="virtualScrollRef"
       :debug="debugMode"
-      class="bg-base-100"
+      class="example-container"
       :items="items"
-      :default-item-size="75"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
       :sticky-header="stickyHeader"
@@ -106,21 +105,21 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       @scroll="onScroll"
     >
       <template v-if="stickyHeader" #header>
-        <div class="bg-primary text-primary-content p-4 border-b border-primary-focus">
-          STICKY HEADER (Measured Padding)
+        <div class="example-sticky-header">
+          Sticky Header
         </div>
       </template>
 
       <template #item="{ item, index }">
-        <div class="flex items-center p-6 border-b border-base-200 hover:bg-base-300 transition-colors">
-          <span class="badge badge-neutral mr-4">#{{ index }}</span>
-          <span class="font-medium" :style="{ blockSize: `${ itemSizeFn(null, index) }px` }">{{ item.text }}</span>
+        <div class="example-vertical-item py-4">
+          <span class="example-badge me-8">#{{ index }}</span>
+          <div class="font-bold" :style="{ minBlockSize: `${ itemSizeFn(null, index) }px` }">{{ item.text }}</div>
         </div>
       </template>
 
       <template v-if="stickyFooter" #footer>
-        <div class="bg-secondary text-secondary-content p-4 border-t border-secondary-focus">
-          STICKY FOOTER (Measured Padding)
+        <div class="example-sticky-footer">
+          Sticky Footer
         </div>
       </template>
     </VirtualScroll>

@@ -48,7 +48,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-warning font-bold uppercase opacity-90 pe-2 align-baseline">Vertical Fixed Table</span>
+      <span class="example-title example-title--group-5">Vertical Fixed Table</span>
     </template>
 
     <template #description>
@@ -62,7 +62,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-warning text-warning-content shadow-lg"
+        class="example-icon example-icon--group-5"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v16.5H3.75V3.75ZM12 3.75v16.5M3.75 12h16.5" />
       </svg>
@@ -94,7 +94,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <VirtualScroll
       ref="virtualScrollRef"
       :debug="debugMode"
-      class="table table-zebra bg-base-100"
+      class="example-container table table-zebra"
       :items="items"
       :item-size="itemSize"
       :buffer-before="bufferBefore"
@@ -107,30 +107,30 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       @scroll="onScroll"
     >
       <template #header>
-        <tr class="bg-base-200">
-          <th class="w-16 text-right border-b border-base-300">ID</th>
-          <th class="w-48 border-b border-base-300">Name</th>
-          <th class="w-72 border-b border-base-300">Email</th>
-          <th class="w-24 text-center border-b border-base-300">Age</th>
-          <th class="w-56 border-b border-base-300">City</th>
-          <th class="w-24 text-center border-b border-base-300">Role</th>
-          <th class="w-24 text-center border-b border-base-300">Status</th>
+        <tr class="bg-base-200 shadow-sm z-1">
+          <th class="w-16 text-right border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">ID</th>
+          <th class="w-48 border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Name</th>
+          <th class="w-72 border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Email</th>
+          <th class="w-24 text-center border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Age</th>
+          <th class="w-56 border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">City</th>
+          <th class="w-24 text-center border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Role</th>
+          <th class="w-24 text-center border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Status</th>
         </tr>
       </template>
 
       <template #item="{ item, index }">
-        <td class="w-16 text-right font-mono text-xs opacity-90">#{{ index }}</td>
-        <td class="w-48 font-bold">{{ item.name }}</td>
-        <td class="w-72 text-sm">{{ item.email }}</td>
-        <td class="w-24 text-center">{{ item.age }}</td>
-        <td class="w-56">{{ item.city }}</td>
+        <td class="w-16 text-right font-mono text-sm opacity-50">#{{ index }}</td>
+        <td class="w-48 font-bold text-sm">{{ item.name }}</td>
+        <td class="w-72 text-xs opacity-80">{{ item.email }}</td>
+        <td class="w-24 text-center text-sm tabular-nums">{{ item.age }}</td>
+        <td class="w-56 text-sm">{{ item.city }}</td>
         <td class="w-24 text-center">
           <span
-            class="badge badge-sm"
+            class="badge badge-xs md:badge-sm font-semibold"
             :class="{
               'badge-primary': item.role === 'Admin',
               'badge-secondary': item.role === 'Editor',
-              'badge-ghost': item.role === 'Viewer',
+              'badge-soft': item.role === 'Viewer',
             }"
           >
             {{ item.role }}
@@ -138,7 +138,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         </td>
         <td class="w-24 text-center">
           <span
-            class="badge badge-sm"
+            class="badge badge-xs md:badge-sm font-semibold"
             :class="item.status === 'Active' ? 'badge-success' : 'badge-error'"
           >
             {{ item.status }}
@@ -147,9 +147,9 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       </template>
 
       <template v-if="stickyFooter" #footer>
-        <tr class="bg-base-200">
-          <td class="w-full p-4 font-bold text-center border-t border-base-300" colspan="7">
-            TABLE FOOTER (End of {{ itemCount }} items)
+        <tr class="bg-base-200 shadow-sm z-1">
+          <td class="w-full p-4 font-bold text-center border-t border-base-300 text-xs small-caps tracking-widest opacity-60" colspan="7">
+            End of {{ itemCount.toLocaleString() }} items
           </td>
         </tr>
       </template>

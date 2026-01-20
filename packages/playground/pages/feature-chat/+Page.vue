@@ -164,7 +164,7 @@ function scrollToBottom() {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="text-secondary font-bold uppercase opacity-90 pe-2 align-baseline">Chat Interface</span>
+      <span class="example-title example-title--group-4">Chat Interface</span>
     </template>
 
     <template #description>
@@ -178,7 +178,7 @@ function scrollToBottom() {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-secondary text-secondary-content shadow-lg"
+        class="example-icon example-icon--group-4"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.152 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
       </svg>
@@ -194,37 +194,36 @@ function scrollToBottom() {
       </div>
     </template>
 
-    <div class="h-full border border-base-300 rounded-box overflow-hidden relative flex flex-col">
+    <div class="h-full border border-base-300 rounded-box overflow-hidden relative flex flex-col shadow-soft">
       <div v-if="isLoading" class="absolute top-2 left-0 right-0 flex justify-center z-10">
         <span class="loading loading-spinner loading-sm text-primary" />
       </div>
 
       <div
         v-if="hasNewMessages && !isAtBottom"
-        class="absolute bottom-20 left-0 right-0 flex justify-center z-10"
+        class="absolute bottom-20 left-0 right-0 flex justify-center z-10 px-4"
       >
         <button
-          class="btn btn-sm btn-primary shadow-lg gap-2"
+          class="btn btn-primary btn-sm md:btn-md shadow-strong shadow-primary/40 gap-2 rounded-full border-2 border-white/10"
           @click="scrollToBottom"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="1.5"
+            stroke-width="2.5"
             stroke="currentColor"
-            class="size-4"
+            class="size-4 mt-1 animate-bounce"
           >
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
           </svg>
-          New messages available
+          <span class="font-black text-xs small-caps tracking-tight">New messages</span>
         </button>
       </div>
 
       <VirtualScroll
         ref="virtualScrollRef"
         :debug="debugMode"
-        class="bg-base-200"
         :items="items"
         :restore-scroll-on-prepend="true"
         :ssr-range="ssrRange"
@@ -237,28 +236,25 @@ function scrollToBottom() {
         @scroll="onScroll"
       >
         <template #item="{ item }">
-          <div class="px-4 flex flex-col" :class="item.isMe ? 'items-end' : 'items-start'">
-            <div
-              class="max-w-[80%] p-3 rounded-2xl text-sm"
-              :class="item.isMe ? 'bg-secondary text-secondary-content rounded-br-none' : 'bg-primary text-primary-content text-tert rounded-bl-none'"
-            >
+          <div class="chat px-4" :class="item.isMe ? 'chat-end' : 'chat-start'">
+            <div class="chat-bubble text-sm shadow-sm" :class="item.isMe ? 'chat-bubble-primary' : ''">
               {{ item.text }}
             </div>
-            <span class="text-[10px] opacity-85 mt-1 px-1">{{ item.time }}</span>
+            <div class="chat-footer opacity-60 mt-1">{{ item.time }}</div>
           </div>
         </template>
 
         <template #footer>
-          <div class="p-4 bg-base-300 border-t border-base-300 flex gap-2">
+          <div class="p-3 md:p-4 bg-base-200 border-t border-base-300 flex gap-2">
             <input
               v-model="newMessage"
               type="text"
               placeholder="Type a message..."
-              class="input input-bordered w-full"
+              class="input input-bordered input-sm md:input-md w-full"
               aria-label="Message"
               @keydown.enter="sendMessage"
             />
-            <button class="btn btn-primary" @click="sendMessage">Send</button>
+            <button class="btn btn-primary btn-sm md:btn-md px-6" @click="sendMessage">Send</button>
           </div>
         </template>
       </VirtualScroll>

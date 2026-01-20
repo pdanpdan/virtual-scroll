@@ -41,7 +41,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer height="350px" :code="rawCode">
     <template #title>
-      <span class="text-accent font-bold uppercase opacity-90 pe-2 align-baseline">Horizontal Fixed</span>
+      <span class="example-title example-title--group-3">Horizontal Fixed</span>
     </template>
 
     <template #description>
@@ -55,7 +55,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-12 p-2 rounded-xl bg-accent text-accent-content shadow-lg"
+        class="example-icon example-icon--group-3"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.25 21 21 17.25" class="-rotate-90 origin-center" />
       </svg>
@@ -85,7 +85,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     <VirtualScroll
       ref="virtualScrollRef"
       :debug="debugMode"
-      class="bg-base-100"
+      class="example-container"
       direction="horizontal"
       :items="items"
       :item-size="itemSize"
@@ -94,9 +94,9 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       @scroll="onScroll"
     >
       <template #item="{ item, index }">
-        <div class="w-full h-full flex flex-col items-center justify-center py-6 border-r border-base-200 hover:bg-base-300 transition-colors whitespace-normal text-center">
-          <span class="badge badge-neutral mb-4">#{{ index }}</span>
-          <span class="font-medium">{{ item.text }}</span>
+        <div class="example-horizontal-item example-horizontal-item--fixed">
+          <span class="example-badge mb-4">#{{ index }}</span>
+          <div class="font-bold text-sm">{{ item.text }}</div>
         </div>
       </template>
     </VirtualScroll>

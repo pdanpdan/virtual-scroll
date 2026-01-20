@@ -34,34 +34,58 @@ onUnmounted(stopDetection);
 </script>
 
 <template>
-  <ul class="max-sm:w-full min-w-84 list bg-base-300 rounded-box shadow-md text-sm pointer-events-auto">
-    <li class="list-row py-4 items-center">
-      <div class="opacity-90 tracking-wide uppercase">Scroll Status</div>
+  <ul class="max-sm:w-full min-w-84 list bg-base-300 rounded-box shadow-soft text-sm pointer-events-auto">
+    <li class="list-row py-4 items-center border-b border-base-content/5">
+      <div class="font-bold text-xs small-caps tracking-widest opacity-50">Scroll Status</div>
       <div class="grid *:[grid-area:1/1]">
         <div v-if="scrollDetails?.isScrolling" class="status status-lg animate-ping" :class="fpsClass" />
         <div class="status status-lg" :class="fpsClass" />
       </div>
       <div />
-      <div v-if="refreshRate" class="font-bold flex items-center gap-2">
-        {{ currentFps }} / {{ refreshRate }} fps
+      <div v-if="refreshRate" class="font-mono font-extrabold flex items-center gap-2 text-base-content/80">
+        {{ currentFps }} / {{ refreshRate }} <span class="text-xs small-caps tracking-tighter opacity-50">fps</span>
       </div>
     </li>
 
-    <li class="list-row py-1.5 items-center">
-      <div class="opacity-85">Direction</div>
+    <li class="list-row py-2 items-center">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Direction</div>
       <div />
-      <div class="uppercase font-semibold">{{ direction || 'vertical' }}</div>
+      <div class="small-caps font-extrabold text-primary tracking-widest text-xs">{{ direction || 'vertical' }}</div>
     </li>
 
-    <li class="list-row py-1.5 items-center">
-      <div class="opacity-85">Total Size (px)</div>
+    <li class="list-row py-2 items-center border-t border-base-content/5">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Current Item #</div>
       <div />
-      <div class="font-semibold">
+      <div class="inline-flex font-mono font-bold text-primary">
+        {{ scrollDetails?.currentIndex }}
+        <template v-if="direction === 'both'">
+          <span class="opacity-50 mx-1">&times;</span>
+          {{ scrollDetails?.currentColIndex }}
+        </template>
+      </div>
+    </li>
+
+    <li class="list-row py-2 items-center border-t border-base-content/5">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Rendered Range #</div>
+      <div />
+      <div class="inline-flex font-mono font-bold text-secondary">
+        {{ itemsRange.start }}:{{ itemsRange.end }}
+        <template v-if="columnRange">
+          <span class="opacity-50 mx-1">&times;</span>
+          {{ columnRange.start }}:{{ columnRange.end }}
+        </template>
+      </div>
+    </li>
+
+    <li class="list-row py-2 items-center border-t border-base-content/5">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Total Size (px)</div>
+      <div />
+      <div class="inline-flex font-mono font-bold text-base-content/70">
         <template v-if="direction !== 'vertical'">
           {{ Math.round(scrollDetails?.totalSize.width || 0) }}
         </template>
         <template v-if="direction === 'both'">
-          &times;
+          <span class="opacity-50 mx-1">&times;</span>
         </template>
         <template v-if="direction !== 'horizontal'">
           {{ Math.round(scrollDetails?.totalSize.height || 0) }}
@@ -69,15 +93,15 @@ onUnmounted(stopDetection);
       </div>
     </li>
 
-    <li class="list-row py-1.5 items-center">
-      <div class="opacity-85">Viewport Size (px)</div>
+    <li class="list-row py-2 items-center border-t border-base-content/5">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Viewport Size (px)</div>
       <div />
-      <div class="font-semibold">
+      <div class="inline-flex font-mono font-bold text-base-content/70">
         <template v-if="direction !== 'vertical'">
           {{ Math.round(scrollDetails?.viewportSize.width || 0) }}
         </template>
         <template v-if="direction === 'both'">
-          &times;
+          <span class="opacity-50 mx-1">&times;</span>
         </template>
         <template v-if="direction !== 'horizontal'">
           {{ Math.round(scrollDetails?.viewportSize.height || 0) }}
@@ -85,42 +109,18 @@ onUnmounted(stopDetection);
       </div>
     </li>
 
-    <li class="list-row py-1.5 items-center">
-      <div class="opacity-85">Scroll Offset (px)</div>
+    <li class="list-row py-2 items-center border-t border-base-content/5">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Scroll Offset (px)</div>
       <div />
-      <div class="font-semibold">
+      <div class="inline-flex font-mono font-bold text-base-content/70">
         <template v-if="direction !== 'vertical'">
           {{ Math.round(scrollDetails?.scrollOffset.x || 0) }}
         </template>
         <template v-if="direction === 'both'">
-          &times;
+          <span class="opacity-50 mx-1">&times;</span>
         </template>
         <template v-if="direction !== 'horizontal'">
           {{ Math.round(scrollDetails?.scrollOffset.y || 0) }}
-        </template>
-      </div>
-    </li>
-
-    <li class="list-row py-1.5 items-center">
-      <div class="opacity-85">Current Item #</div>
-      <div />
-      <div class="font-semibold">
-        {{ scrollDetails?.currentIndex }}
-        <template v-if="direction === 'both'">
-          &times;
-          {{ scrollDetails?.currentColIndex }}
-        </template>
-      </div>
-    </li>
-
-    <li class="list-row py-1.5 items-center">
-      <div class="opacity-85">Rendered Range #</div>
-      <div />
-      <div class="font-semibold">
-        {{ itemsRange.start }}:{{ itemsRange.end }}
-        <template v-if="columnRange">
-          &times;
-          {{ columnRange.start }}:{{ columnRange.end }}
         </template>
       </div>
     </li>

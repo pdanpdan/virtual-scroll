@@ -34,7 +34,7 @@ const emit = defineEmits<{
 }>();
 
 const localItemCount = ref(props.itemCount);
-const localItemSize = ref(props.itemSize ?? 50);
+const localItemSize = ref(props.itemSize ?? 40);
 const localColumnCount = ref(props.columnCount ?? 0);
 const localColumnWidth = ref(props.columnWidth ?? 0);
 const localBufferBefore = ref(props.bufferBefore ?? 5);
@@ -64,7 +64,7 @@ watch(localStickyHeader, (val) => emit('update:stickyHeader', val));
 watch(localStickyFooter, (val) => emit('update:stickyFooter', val));
 
 watch(() => props.itemCount, (val) => localItemCount.value = val);
-watch(() => props.itemSize, (val) => localItemSize.value = val ?? 50);
+watch(() => props.itemSize, (val) => localItemSize.value = val ?? 40);
 watch(() => props.columnCount, (val) => localColumnCount.value = val ?? 0);
 watch(() => props.columnWidth, (val) => localColumnWidth.value = val ?? 0);
 watch(() => props.bufferBefore, (val) => localBufferBefore.value = val ?? 5);
@@ -95,81 +95,83 @@ function handleScrollToOffset() {
 </script>
 
 <template>
-  <ul class="max-sm:w-full min-w-80 list bg-base-300 rounded-box shadow-md text-sm pointer-events-auto">
-    <li class="list-row py-0 items-center">
+  <ul class="max-sm:w-full min-w-80 list bg-base-300 rounded-box shadow-soft text-sm pointer-events-auto">
+    <li class="list-row py-0 items-center border-b border-base-content/5">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
-        <div class="py-4 opacity-90 tracking-wide uppercase">Controls</div>
+        <div class="py-4 font-bold text-xs small-caps tracking-widest opacity-50">Controls</div>
 
         <div class="grow" />
 
-        <button class="btn btn-sm btn-soft btn-warning w-20 ml-2" @click="emit('refresh')">Refresh</button>
+        <button class="btn btn-sm btn-soft btn-warning w-20" @click="emit('refresh')">Refresh</button>
       </div>
     </li>
 
     <li class="list-row py-2">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label class="floating-label p-0">
-          <span>Items #</span>
-          <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">Items #</span>
+          <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <label class="floating-label p-0">
-          <span>Item Size</span>
-          <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">Item Size</span>
+          <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <template v-if="direction === 'both'">
           <div class="w-full sm:hidden" />
 
           <label class="floating-label p-0">
-            <span>Cols #</span>
-            <input v-model.number="localColumnCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+            <span class="text-xs font-bold small-caps text-base-content/50">Cols #</span>
+            <input v-model.number="localColumnCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
           </label>
           <label class="floating-label p-0">
-            <span>Col Width</span>
-            <input v-model.number="localColumnWidth" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+            <span class="text-xs font-bold small-caps text-base-content/50">Col Width</span>
+            <input v-model.number="localColumnWidth" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
           </label>
         </template>
 
         <div class="grow" />
 
-        <button class="btn btn-sm btn-soft w-20" @click="updateCounts">Update</button>
+        <button class="btn btn-sm btn-soft btn-primary w-20" @click="updateCounts">Update</button>
       </div>
     </li>
 
-    <li v-if="bufferBefore !== undefined || bufferAfter !== undefined || stickyHeader !== undefined || stickyFooter !== undefined" class="list-row py-2">
+    <li v-if="bufferBefore !== undefined || bufferAfter !== undefined || stickyHeader !== undefined || stickyFooter !== undefined" class="list-row py-2 border-t border-base-content/5">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="bufferBefore !== undefined" class="floating-label p-0">
-          <span>Buffer Pre</span>
-          <input v-model.number="localBufferBefore" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">Buffer Pre</span>
+          <input v-model.number="localBufferBefore" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
         <label v-if="bufferAfter !== undefined" class="floating-label p-0">
-          <span>Buffer Post</span>
-          <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">Buffer Post</span>
+          <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <div v-if="(bufferBefore !== undefined || bufferAfter !== undefined) && (stickyHeader !== undefined || stickyFooter !== undefined)" class="w-full sm:hidden" />
 
-        <label v-if="stickyHeader !== undefined" class="flex gap-2 items-center pl-1 cursor-pointer select-none">
-          <input v-model="localStickyHeader" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
-          <span>Sticky Header</span>
-        </label>
-        <label v-if="stickyFooter !== undefined" class="flex gap-2 items-center pl-1 cursor-pointer select-none">
-          <input v-model="localStickyFooter" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
-          <span>Sticky Footer</span>
-        </label>
+        <div class="flex gap-4 items-center pl-1">
+          <label v-if="stickyHeader !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
+            <input v-model="localStickyHeader" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+            <span class="text-xs font-semibold opacity-70">Sticky Header</span>
+          </label>
+          <label v-if="stickyFooter !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
+            <input v-model="localStickyFooter" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+            <span class="text-xs font-semibold opacity-70">Sticky Footer</span>
+          </label>
+        </div>
       </div>
     </li>
 
-    <li class="list-row py-2">
+    <li class="list-row py-2 border-t border-base-content/5">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
-          <span>{{ direction === 'both' ? 'Row' : 'Item' }} #</span>
-          <input v-model.number="targetIndex" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Row' : 'Item' }} #</span>
+          <input v-model.number="targetIndex" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
-          <span>Align Y</span>
+          <span class="text-xs font-bold small-caps text-base-content/50">Align Y</span>
           <select v-model="scrollAlignY" class="select select-bordered select-sm w-22">
             <option value="start">Start</option>
             <option value="center">Center</option>
@@ -181,12 +183,12 @@ function handleScrollToOffset() {
         <div v-if="direction === 'both'" class="w-full sm:hidden" />
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
-          <span>{{ direction === 'both' ? 'Col' : 'Item' }} #</span>
-          <input v-model.number="targetColumn" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Col' : 'Item' }} #</span>
+          <input v-model.number="targetColumn" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
-          <span>Align X</span>
+          <span class="text-xs font-bold small-caps text-base-content/50">Align X</span>
           <select v-model="scrollAlignX" class="select select-bordered select-sm w-22">
             <option value="start">Start</option>
             <option value="center">Center</option>
@@ -197,25 +199,25 @@ function handleScrollToOffset() {
 
         <div class="grow" />
 
-        <button class="btn btn-sm btn-soft w-20" @click="handleScrollToIndex">Scroll #</button>
+        <button class="btn btn-sm btn-soft btn-secondary w-20" @click="handleScrollToIndex">Scroll #</button>
       </div>
     </li>
 
-    <li class="list-row py-2">
+    <li class="list-row py-2 border-t border-base-content/5">
       <div class="list-col-grow flex flex-wrap gap-3 items-center justify-between">
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
-          <span>{{ direction === 'both' ? 'Y' : 'Offset' }} (px)</span>
-          <input v-model.number="targetOffsetY" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Y' : 'Offset' }} (px)</span>
+          <input v-model.number="targetOffsetY" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
-          <span>{{ direction === 'both' ? 'X' : 'Offset' }} (px)</span>
-          <input v-model.number="targetOffsetX" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22" />
+          <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'X' : 'Offset' }} (px)</span>
+          <input v-model.number="targetOffsetX" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
         </label>
 
         <div class="grow" />
 
-        <button class="btn btn-sm btn-soft w-20" @click="handleScrollToOffset">Scroll px</button>
+        <button class="btn btn-sm btn-soft btn-secondary w-20" @click="handleScrollToOffset">Scroll px</button>
       </div>
     </li>
   </ul>
