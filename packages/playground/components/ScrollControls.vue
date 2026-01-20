@@ -110,12 +110,12 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Items #</span>
-          <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <label class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Item Size</span>
-          <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <template v-if="direction === 'both'">
@@ -123,11 +123,11 @@ function handleScrollToOffset() {
 
           <label class="floating-label p-0">
             <span class="text-xs font-bold small-caps text-base-content/50">Cols #</span>
-            <input v-model.number="localColumnCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+            <input v-model.number="localColumnCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
           </label>
           <label class="floating-label p-0">
             <span class="text-xs font-bold small-caps text-base-content/50">Col Width</span>
-            <input v-model.number="localColumnWidth" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+            <input v-model.number="localColumnWidth" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
           </label>
         </template>
 
@@ -141,11 +141,11 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="bufferBefore !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Pre</span>
-          <input v-model.number="localBufferBefore" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="localBufferBefore" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
         <label v-if="bufferAfter !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Post</span>
-          <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <div v-if="(bufferBefore !== undefined || bufferAfter !== undefined) && (stickyHeader !== undefined || stickyFooter !== undefined)" class="w-full sm:hidden" />
@@ -167,12 +167,12 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Row' : 'Item' }} #</span>
-          <input v-model.number="targetIndex" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="targetIndex" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Align Y</span>
-          <select v-model="scrollAlignY" class="select select-bordered select-sm w-22">
+          <select v-model="scrollAlignY" class="select select-bordered select-sm w-24">
             <option value="start">Start</option>
             <option value="center">Center</option>
             <option value="end">End</option>
@@ -184,12 +184,12 @@ function handleScrollToOffset() {
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Col' : 'Item' }} #</span>
-          <input v-model.number="targetColumn" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="targetColumn" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Align X</span>
-          <select v-model="scrollAlignX" class="select select-bordered select-sm w-22">
+          <select v-model="scrollAlignX" class="select select-bordered select-sm w-24">
             <option value="start">Start</option>
             <option value="center">Center</option>
             <option value="end">End</option>
@@ -207,12 +207,12 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center justify-between">
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Y' : 'Offset' }} (px)</span>
-          <input v-model.number="targetOffsetY" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="targetOffsetY" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'X' : 'Offset' }} (px)</span>
-          <input v-model.number="targetOffsetX" type="number" placeholder=" " class="input input-bordered input-sm text-right w-22 font-mono" />
+          <input v-model.number="targetOffsetX" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
         </label>
 
         <div class="grow" />
