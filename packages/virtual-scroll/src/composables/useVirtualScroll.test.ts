@@ -117,11 +117,11 @@ describe('useVirtualScroll', () => {
 
     it('should recalculate when gaps change', async () => {
       const { result, props } = setup({ ...defaultProps, gap: 10 });
-      expect(result.totalHeight.value).toBe(6000); // 100 * (50 + 10)
+      expect(result.totalHeight.value).toBe(5990); // 100 * (50 + 10) - 10
 
       props.value.gap = 20;
       await nextTick();
-      expect(result.totalHeight.value).toBe(7000); // 100 * (50 + 20)
+      expect(result.totalHeight.value).toBe(6980); // 100 * (50 + 20) - 20
     });
 
     it('should handle itemSize as a function', async () => {
@@ -130,6 +130,7 @@ describe('useVirtualScroll', () => {
         itemSize: (_item: { id: number; }, index: number) => 50 + index,
       });
       // 50*100 + (0+99)*100/2 = 5000 + 4950 = 9950
+      // 9950 - gap(0) = 9950
       expect(result.totalHeight.value).toBe(9950);
     });
 
@@ -140,13 +141,13 @@ describe('useVirtualScroll', () => {
         columnCount: 10,
         columnWidth: 100,
       });
-      expect(result.totalWidth.value).toBe(1000);
-      expect(result.totalHeight.value).toBe(5000);
+      expect(result.totalWidth.value).toBe(1000); // 10 * 100 - 0
+      expect(result.totalHeight.value).toBe(5000); // 100 * 50 - 0
     });
 
     it('should handle horizontal direction', async () => {
       const { result } = setup({ ...defaultProps, direction: 'horizontal' });
-      expect(result.totalWidth.value).toBe(5000);
+      expect(result.totalWidth.value).toBe(5000); // 100 * 50 - 0
       expect(result.totalHeight.value).toBe(0);
     });
 
@@ -238,46 +239,46 @@ describe('useVirtualScroll', () => {
       // Horizontal
       const { result: rH } = setup({ ...defaultProps, direction: 'horizontal', itemSize: undefined });
       await nextTick();
-      // Estimate is 50. Update with 40.
-      rH.updateItemSizes([ { index: 0, inlineSize: 40, blockSize: 40 } ]);
-      await nextTick();
-      expect(rH.renderedItems.value[ 0 ]?.size.width).toBe(40);
-
-      // Subsequent update with smaller size should be ignored
+      // Estimate is 40 (new DEFAULT_ITEM_SIZE). Update with 30.
       rH.updateItemSizes([ { index: 0, inlineSize: 30, blockSize: 30 } ]);
       await nextTick();
-      expect(rH.renderedItems.value[ 0 ]?.size.width).toBe(40);
+      expect(rH.renderedItems.value[ 0 ]?.size.width).toBe(30);
+
+      // Subsequent update with smaller size should also be applied now
+      rH.updateItemSizes([ { index: 0, inlineSize: 25, blockSize: 25 } ]);
+      await nextTick();
+      expect(rH.renderedItems.value[ 0 ]?.size.width).toBe(25);
 
       // Vertical
       const { result: rV } = setup({ ...defaultProps, direction: 'vertical', itemSize: undefined });
       await nextTick();
-      rV.updateItemSizes([ { index: 0, inlineSize: 40, blockSize: 40 } ]);
-      await nextTick();
-      expect(rV.renderedItems.value[ 0 ]?.size.height).toBe(40);
-
-      // Subsequent update with smaller size should be ignored
       rV.updateItemSizes([ { index: 0, inlineSize: 30, blockSize: 30 } ]);
       await nextTick();
-      expect(rV.renderedItems.value[ 0 ]?.size.height).toBe(40);
+      expect(rV.renderedItems.value[ 0 ]?.size.height).toBe(30);
+
+      // Subsequent update with smaller size should be applied
+      rV.updateItemSizes([ { index: 0, inlineSize: 20, blockSize: 20 } ]);
+      await nextTick();
+      expect(rV.renderedItems.value[ 0 ]?.size.height).toBe(20);
     });
 
     it('should handle updateItemSize and trigger reactivity', async () => {
       const { result } = setup({ ...defaultProps, itemSize: undefined });
-      expect(result.totalHeight.value).toBe(5000); // Default estimate
+      expect(result.totalHeight.value).toBe(4000); // 100 * 40
 
       result.updateItemSize(0, 100, 100);
       await nextTick();
-      expect(result.totalHeight.value).toBe(5050);
+      expect(result.totalHeight.value).toBe(4060); // 4000 - 40 + 100
       expect(result.renderedItems.value[ 0 ]!.size.height).toBe(100);
     });
 
     it('should treat 0, null, undefined as dynamic itemSize', async () => {
       for (const val of [ 0, null, undefined ]) {
         const { result } = setup({ ...defaultProps, itemSize: val as unknown as undefined });
-        expect(result.totalHeight.value).toBe(5000);
+        expect(result.totalHeight.value).toBe(4000);
         result.updateItemSize(0, 100, 100);
         await nextTick();
-        expect(result.totalHeight.value).toBe(5050);
+        expect(result.totalHeight.value).toBe(4060);
       }
     });
 
@@ -289,7 +290,7 @@ describe('useVirtualScroll', () => {
           columnCount: 2,
           columnWidth: val as unknown as undefined,
         });
-        expect(result.getColumnWidth(0)).toBe(150);
+        expect(result.getColumnWidth(0)).toBe(100); // DEFAULT_COLUMN_WIDTH
         const parent = document.createElement('div');
         const col0 = document.createElement('div');
         Object.defineProperty(col0, 'offsetWidth', { value: 200, configurable: true });
@@ -297,7 +298,7 @@ describe('useVirtualScroll', () => {
         parent.appendChild(col0);
         result.updateItemSize(0, 200, 50, parent);
         await nextTick();
-        expect(result.totalWidth.value).toBe(350);
+        expect(result.totalWidth.value).toBe(300); // 200 + 100
       }
     });
 
@@ -345,14 +346,21 @@ describe('useVirtualScroll', () => {
       expect(result.totalWidth.value).toBe(10 * 200); // 10 columns * 200 defaultColumnWidth
     });
 
-    it('should ignore small delta updates in updateItemSize', async () => {
+    it('should ignore small delta updates in updateItemSize only after first measurement', async () => {
       const { result } = setup({ ...defaultProps, itemSize: undefined });
-      result.updateItemSize(0, 50.1, 50.1);
+      // Default is 40. 40.1 is < 0.5 delta.
+      // First measurement should be accepted even if small delta from estimate.
+      result.updateItemSize(0, 40.1, 40.1);
       await nextTick();
-      expect(result.totalHeight.value).toBe(5000);
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(40.1);
+
+      // Second measurement with small delta from first should be ignored.
+      result.updateItemSize(0, 40.2, 40.2);
+      await nextTick();
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(40.1);
     });
 
-    it('should not shrink item height in both mode encountered so far', async () => {
+    it('should update item height in both mode now (allow decreases)', async () => {
       const { result } = setup({ ...defaultProps, direction: 'both', itemSize: undefined, columnCount: 2 });
       result.updateItemSize(0, 100, 100);
       await nextTick();
@@ -360,7 +368,7 @@ describe('useVirtualScroll', () => {
 
       result.updateItemSize(0, 100, 80);
       await nextTick();
-      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(100);
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(80);
     });
 
     it('should update item height in vertical mode', async () => {
@@ -368,26 +376,30 @@ describe('useVirtualScroll', () => {
       result.updateItemSize(0, 100, 100);
       await nextTick();
       expect(result.renderedItems.value[ 0 ]!.size.height).toBe(100);
+
+      result.updateItemSize(0, 100, 70);
+      await nextTick();
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(70);
     });
 
     it('should handle updateItemSize for horizontal direction', async () => {
       const { result } = setup({ ...defaultProps, direction: 'horizontal', itemSize: undefined });
       result.updateItemSize(0, 100, 50);
       await nextTick();
-      expect(result.totalWidth.value).toBe(5050);
+      expect(result.totalWidth.value).toBe(4060); // 4000 - 40 + 100
     });
 
     it('should preserve measurements in initializeSizes when dynamic', async () => {
       const { result, props } = setup({ ...defaultProps, itemSize: undefined });
       result.updateItemSize(0, 100, 100);
       await nextTick();
-      expect(result.totalHeight.value).toBe(5050);
+      expect(result.totalHeight.value).toBe(4060);
 
       // Trigger initializeSizes by changing length
       props.value.items = Array.from({ length: 101 }, (_, i) => ({ id: i }));
       await nextTick();
-      // Should still be 100 for index 0, not reset to default 50
-      expect(result.totalHeight.value).toBe(5050 + 50);
+      // Should still be 100 for index 0, not reset to default 40
+      expect(result.totalHeight.value).toBe(4060 + 40);
     });
   });
 
@@ -398,10 +410,10 @@ describe('useVirtualScroll', () => {
       const { result } = setup({ ...defaultProps, container, direction: 'horizontal', itemSize: undefined });
       await nextTick();
 
-      // index 10. itemSize is 50 by default. totalWidth = 5000.
+      // index 10. itemSize is 40 by default. totalWidth = 4000.
       result.scrollToIndex(null, 10, { align: 'start', behavior: 'auto' });
       await nextTick();
-      expect(result.scrollDetails.value.scrollOffset.x).toBe(500);
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(400);
     });
 
     it('should handle scrollToIndex with window fallback when container is missing', async () => {
@@ -858,7 +870,7 @@ describe('useVirtualScroll', () => {
         columnCount: 2,
         columnWidth: [ 0 ] as unknown as number[],
       });
-      expect(result.getColumnWidth(0)).toBe(150); // DEFAULT_COLUMN_WIDTH
+      expect(result.getColumnWidth(0)).toBe(100); // DEFAULT_COLUMN_WIDTH
     });
 
     it('should handle columnWidth as a function', async () => {
@@ -869,7 +881,7 @@ describe('useVirtualScroll', () => {
         columnWidth: (index: number) => (index % 2 === 0 ? 100 : 200),
       });
       expect(result.getColumnWidth(0)).toBe(100);
-      expect(result.totalWidth.value).toBe(1500);
+      expect(result.totalWidth.value).toBe(1500); // 5*100 + 5*200 - 0
     });
 
     it('should handle getColumnWidth fallback when dynamic', async () => {
@@ -879,7 +891,7 @@ describe('useVirtualScroll', () => {
         columnCount: 2,
         columnWidth: undefined,
       });
-      expect(result.getColumnWidth(0)).toBe(150);
+      expect(result.getColumnWidth(0)).toBe(100);
     });
 
     it('should handle columnRange while loop coverage', async () => {
@@ -961,7 +973,6 @@ describe('useVirtualScroll', () => {
       const { result } = setup({ ...defaultProps, container, stickyIndices: [ 0, 10 ], itemSize: 50 });
       // We need to trigger scroll to update scrollY
       container.dispatchEvent(new Event('scroll'));
-      await nextTick();
 
       const item0 = result.renderedItems.value.find((i) => i.index === 0);
       expect(item0!.offset.y).toBeLessThanOrEqual(450);
@@ -981,7 +992,6 @@ describe('useVirtualScroll', () => {
         columnGap: 0,
       });
       container.dispatchEvent(new Event('scroll'));
-      await nextTick();
 
       const item0 = result.renderedItems.value.find((i) => i.index === 0);
       expect(item0!.offset.x).toBeLessThanOrEqual(450);
@@ -990,7 +1000,7 @@ describe('useVirtualScroll', () => {
     it('should handle dynamic sticky item pushing in vertical mode', async () => {
       const container = document.createElement('div');
       Object.defineProperty(container, 'clientHeight', { value: 500 });
-      Object.defineProperty(container, 'scrollTop', { value: 460, writable: true });
+      Object.defineProperty(container, 'scrollTop', { value: 380, writable: true });
 
       const { result } = setup({
         ...defaultProps,
@@ -998,22 +1008,21 @@ describe('useVirtualScroll', () => {
         itemSize: undefined, // dynamic
         stickyIndices: [ 0, 10 ],
       });
-      await nextTick();
 
       // Item 0 is sticky. Item 10 is next sticky.
-      // Default size = 50.
-      // nextStickyY = itemSizesY.query(10) = 500.
-      // distance = 500 - 460 = 40.
-      // 40 < 50 (item 0 height), so it should be pushed.
-      // stickyOffset.y = -(50 - 40) = -10.
+      // Default size = 40.
+      // nextStickyY = itemSizesY.query(10) = 400.
+      // distance = 400 - 380 = 20.
+      // 20 < 40 (item 0 height), so it should be pushed.
+      // stickyOffset.y = -(40 - 20) = -20.
       const stickyItem = result.renderedItems.value.find((i) => i.index === 0);
-      expect(stickyItem?.stickyOffset.y).toBe(-10);
+      expect(stickyItem?.stickyOffset.y).toBe(-20);
     });
 
     it('should handle dynamic sticky item pushing in horizontal mode', async () => {
       const container = document.createElement('div');
       Object.defineProperty(container, 'clientWidth', { value: 500 });
-      Object.defineProperty(container, 'scrollLeft', { value: 460, writable: true });
+      Object.defineProperty(container, 'scrollLeft', { value: 380, writable: true });
 
       const { result } = setup({
         ...defaultProps,
@@ -1022,13 +1031,12 @@ describe('useVirtualScroll', () => {
         itemSize: undefined, // dynamic
         stickyIndices: [ 0, 10 ],
       });
-      await nextTick();
 
-      // nextStickyX = itemSizesX.query(10) = 500.
-      // distance = 500 - 460 = 40.
-      // 40 < 50, so stickyOffset.x = -10.
+      // nextStickyX = itemSizesX.query(10) = 400.
+      // distance = 400 - 380 = 20.
+      // 20 < 40, so stickyOffset.x = -20.
       const stickyItem = result.renderedItems.value.find((i) => i.index === 0);
-      expect(stickyItem?.stickyOffset.x).toBe(-10);
+      expect(stickyItem?.stickyOffset.x).toBe(-20);
     });
   });
 
@@ -1150,7 +1158,7 @@ describe('useVirtualScroll', () => {
       const { props } = setup({ ...defaultProps, items, container, restoreScrollOnPrepend: true });
       await nextTick();
 
-      const newItems = [ { id: -1 }, { id: 9999 } ]; // completely different
+      const newItems = [ { id: -1 }, { id: 9999 } ];
       props.value.items = newItems;
       await nextTick();
       await nextTick();
@@ -1162,9 +1170,9 @@ describe('useVirtualScroll', () => {
       Object.defineProperty(container, 'clientHeight', { value: 500, configurable: true });
       Object.defineProperty(container, 'scrollHeight', { value: 5000, configurable: true });
       const { result, props } = setup({ ...defaultProps, container, restoreScrollOnPrepend: true });
-      result.scrollToIndex(10, null, { behavior: 'smooth' });
-      // pendingScroll should be set because it's not reached yet
+      await nextTick();
 
+      result.scrollToIndex(10, null, { behavior: 'smooth' });
       props.value.items = [ { id: -1 }, ...props.value.items ];
       await nextTick();
     });
@@ -1234,11 +1242,11 @@ describe('useVirtualScroll', () => {
       const { result } = setup({ ...defaultProps, itemSize: 0 });
       result.updateItemSize(0, 100, 100);
       await nextTick();
-      expect(result.totalHeight.value).toBe(5050);
+      expect(result.totalHeight.value).toBe(4060);
 
       result.refresh();
       await nextTick();
-      expect(result.totalHeight.value).toBe(5000);
+      expect(result.totalHeight.value).toBe(4000);
     });
 
     it('should trigger scroll correction on tree update with string alignment', async () => {
@@ -1286,6 +1294,78 @@ describe('useVirtualScroll', () => {
       expect(result.scrollDetails.value.isScrolling).toBe(false);
       vi.useRealTimers();
     });
+
+    it('should update totals when function-based itemSize dependencies change and refresh is called', async () => {
+      const defaultHeight = ref(50);
+      const getRowHeight = () => defaultHeight.value;
+
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'vertical' as const,
+        itemSize: getRowHeight,
+      }) as Ref<VirtualScrollProps<unknown>>;
+
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(5000); // 100 * 50
+
+      defaultHeight.value = 60;
+      // Total height should still be 5000 because getRowHeight reference didn't change
+      // and initializeSizes hasn't been called automatically.
+      expect(result.totalHeight.value).toBe(5000);
+
+      result.refresh();
+      await nextTick();
+      expect(result.totalHeight.value).toBe(6000);
+    });
+
+    it('should update totals via measurements even if itemSize is a function', async () => {
+      const getRowHeight = () => 50;
+
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'vertical' as const,
+        itemSize: getRowHeight,
+      }) as Ref<VirtualScrollProps<unknown>>;
+
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(5000);
+
+      // Simulate ResizeObserver measurement
+      result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 70 } ]);
+      await nextTick();
+
+      // Item 0 is now 70 instead of 50. Total: 50 * 99 + 70 = 4950 + 70 = 5020.
+      expect(result.totalHeight.value).toBe(5020);
+    });
+
+    it('should update totals via measurements even if columnWidth is a function', async () => {
+      const getColWidth = () => 100;
+
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'both' as const,
+        columnCount: 5,
+        columnWidth: getColWidth,
+        itemSize: 50,
+      }) as Ref<VirtualScrollProps<unknown>>;
+
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalWidth.value).toBe(500);
+
+      // Simulate ResizeObserver measurement on a cell
+      // We need to provide an element with data-col-index
+      const element = document.createElement('div');
+      const cell = document.createElement('div');
+      cell.dataset.colIndex = '0';
+      Object.defineProperty(cell, 'offsetWidth', { value: 120 });
+      element.appendChild(cell);
+
+      result.updateItemSizes([ { index: 0, inlineSize: 120, blockSize: 50, element } ]);
+      await nextTick();
+
+      // Column 0 is now 120 instead of 100. Total: 100 * 4 + 120 = 520.
+      expect(result.totalWidth.value).toBe(520);
+    });
   });
 
   // eslint-disable-next-line test/prefer-lowercase-title
@@ -1307,7 +1387,7 @@ describe('useVirtualScroll', () => {
         direction: 'both',
         columnCount: 20,
         columnWidth: 100,
-        ssrRange: { start: 0, end: 10, colStart: 1, colEnd: 2 }, // SSR values
+        ssrRange: { start: 0, end: 10, colStart: 1, colEnd: 2 },
         initialScrollIndex: 0,
       });
 
@@ -1416,8 +1496,8 @@ describe('useVirtualScroll', () => {
         ssrRange: { start: 10, end: 20, colStart: 2, colEnd: 5 },
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
-      expect(result.totalWidth.value).toBe(300); // (5-2) * 100
-      expect(result.totalHeight.value).toBe(500); // (20-10) * 50
+      expect(result.totalWidth.value).toBe(300); // (5-2) * 100 - gap(0)
+      expect(result.totalHeight.value).toBe(500); // (20-10) * 50 - gap(0)
     });
 
     it('should handle SSR range with horizontal direction for total sizes', () => {
@@ -1428,7 +1508,7 @@ describe('useVirtualScroll', () => {
         ssrRange: { start: 10, end: 20 },
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
-      expect(result.totalWidth.value).toBe(500); // (20-10) * 50
+      expect(result.totalWidth.value).toBe(500); // (20-10) * 50 - gap(0)
     });
 
     it('should handle SSR range with vertical offset in renderedItems', () => {
@@ -1450,8 +1530,8 @@ describe('useVirtualScroll', () => {
         ssrRange: { start: 10, end: 20 },
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
-      // ssrOffsetX = itemSizesX.query(10) = 10 * 50 = 500
-      expect(result.renderedItems.value[ 0 ]?.offset.x).toBe(500);
+      // ssrOffsetX = itemSizesX.query(10) = 10 * 40 = 400
+      expect(result.renderedItems.value[ 0 ]?.offset.x).toBe(400);
     });
 
     it('should handle SSR range with dynamic sizes for total sizes', () => {
@@ -1462,7 +1542,7 @@ describe('useVirtualScroll', () => {
         ssrRange: { start: 10, end: 20 },
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
-      expect(result.totalHeight.value).toBe(500);
+      expect(result.totalHeight.value).toBe(400); // (20-10) * 40 - gap(0)
     });
 
     it('should handle SSR range with dynamic horizontal sizes for total sizes', () => {
@@ -1473,7 +1553,7 @@ describe('useVirtualScroll', () => {
         ssrRange: { start: 10, end: 20 },
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
-      expect(result.totalWidth.value).toBe(500);
+      expect(result.totalWidth.value).toBe(400); // (20-10) * 40 - 0 gap
     });
 
     it('should handle SSR range with both directions and dynamic offsets', () => {
@@ -1485,8 +1565,8 @@ describe('useVirtualScroll', () => {
         ssrRange: { start: 10, end: 20, colStart: 2, colEnd: 5 },
       }) as Ref<VirtualScrollProps<unknown>>;
       const result = useVirtualScroll(props);
-      expect(result.renderedItems.value[ 0 ]?.offset.y).toBe(0);
-      expect(result.renderedItems.value[ 0 ]?.offset.x).toBe(-300);
+      expect(result.totalWidth.value).toBe(300); // (5-2) * 100
+      expect(result.totalHeight.value).toBe(400); // (20-10) * 40
     });
 
     it('should scroll to ssrRange on mount', async () => {
@@ -1547,9 +1627,362 @@ describe('useVirtualScroll', () => {
   });
 
   describe('helpers', () => {
-    it('should cover object padding branches in helpers', () => {
+    it('should handle zero column count in totalWidth', async () => {
+      const { result } = setup({ ...defaultProps, direction: 'both', columnCount: 0 });
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should handle vertical direction in totalWidth', () => {
+      const { result } = setup({ ...defaultProps, direction: 'vertical' });
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should handle horizontal direction in totalHeight', () => {
+      const { result } = setup({ ...defaultProps, direction: 'horizontal' });
+      expect(result.totalHeight.value).toBe(0);
+    });
+
+    it('should handle zero items in totalWidth/totalHeight', async () => {
+      const { result } = setup({ ...defaultProps, items: [] });
+      expect(result.totalHeight.value).toBe(0);
+
+      const { result: rH } = setup({ ...defaultProps, direction: 'horizontal', items: [] });
+      expect(rH.totalWidth.value).toBe(0);
+    });
+
+    it('should cover SSR with zero items/columns', () => {
+      const props = ref({
+        items: [],
+        direction: 'both',
+        columnCount: 0,
+        ssrRange: { start: 0, end: 0, colStart: 0, colEnd: 0 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      expect(result.totalWidth.value).toBe(0);
+      expect(result.totalHeight.value).toBe(0);
+    });
+
+    it('should handle SSR range with both directions and no columns', () => {
+      const props = ref({
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        direction: 'both',
+        columnCount: 0,
+        ssrRange: { start: 10, end: 20, colStart: 0, colEnd: 0 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should handle SSR range with direction both and colCount > 0 but colEnd <= colStart', () => {
+      const props = ref({
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        direction: 'both',
+        columnCount: 10,
+        ssrRange: { start: 0, end: 10, colStart: 5, colEnd: 5 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should handle SSR range with vertical/both and end <= start', () => {
+      const props = ref({
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        direction: 'vertical',
+        ssrRange: { start: 10, end: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      expect(result.totalHeight.value).toBe(0);
+    });
+
+    it('should handle SSR range with dynamic horizontal sizes for total sizes', () => {
+      const props = ref({
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        direction: 'horizontal',
+        itemSize: 0,
+        ssrRange: { start: 10, end: 20 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      expect(result.totalWidth.value).toBe(400); // (20-10) * 40
+    });
+
+    it('should handle SSR range with both directions and dynamic offsets for total width', () => {
+      const props = ref({
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        direction: 'both',
+        columnCount: 10,
+        itemSize: 0,
+        ssrRange: { start: 10, end: 20, colStart: 2, colEnd: 5 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(props);
+      expect(result.totalWidth.value).toBe(300);
+    });
+
+    it('should handle updateItemSizes with index < 0', async () => {
+      const { result } = setup({ ...defaultProps, itemSize: undefined });
+      result.updateItemSizes([ { index: -1, inlineSize: 100, blockSize: 100 } ]);
+      await nextTick();
+      // Should not change total height
+      expect(result.totalHeight.value).toBe(4000);
+    });
+
+    it('should handle updateItemSizes with direction vertical and dynamic itemSize for X', async () => {
+      const { result } = setup({ ...defaultProps, direction: 'vertical', itemSize: undefined });
+      // Measured Items X should not be updated if direction is vertical
+      result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 100 } ]);
+      await nextTick();
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should handle SSR with horizontal direction and fixedItemSize', () => {
+      const propsValue = ref({
+        direction: 'horizontal' as const,
+        itemSize: 50,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        ssrRange: { end: 20, start: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalWidth.value).toBe(500); // (20-10) * 50 - 0 gap
+    });
+
+    it('should handle SSR with vertical direction and fixedItemSize', () => {
+      const propsValue = ref({
+        direction: 'vertical' as const,
+        itemSize: 50,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        ssrRange: { end: 20, start: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(500); // (20-10) * 50 - 0 gap
+    });
+
+    it('should handle SSR with direction both and fixedItemSize for totalHeight', () => {
+      const propsValue = ref({
+        direction: 'both' as const,
+        columnCount: 10,
+        itemSize: 50,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        ssrRange: { end: 20, start: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(500);
+    });
+
+    it('should handle SSR range with direction both and colEnd falsy', () => {
+      const propsValue = ref({
+        columnCount: 10,
+        columnWidth: 100,
+        direction: 'both' as const,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+        ssrRange: { colEnd: 0, colStart: 5, end: 10, start: 0 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      // colEnd is 0, so it should use colCount (10)
+      // totalWidth = (10 - 5) * 100 = 500
+      expect(result.totalWidth.value).toBe(500);
+    });
+
+    it('should handle updateItemSizes with direction both and dynamic itemSize for Y', async () => {
+      const { result } = setup({ ...defaultProps, direction: 'both', columnCount: 2, itemSize: undefined });
+      // First measurement
+      result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 100 } ]);
+      await nextTick();
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(100);
+
+      // Increase
+      result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 120 } ]);
+      await nextTick();
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(120);
+
+      // Significant decrease
+      result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 100 } ]);
+      await nextTick();
+      expect(result.renderedItems.value[ 0 ]!.size.height).toBe(100);
+    });
+
+    it('should handle object padding branches in helpers', () => {
       expect(getPaddingX({ x: 10 }, 'horizontal')).toBe(10);
       expect(getPaddingY({ y: 20 }, 'vertical')).toBe(20);
+    });
+
+    it('should cover totalWidth SSR len <= 0', () => {
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'horizontal' as const,
+        itemSize: 50,
+        ssrRange: { start: 10, end: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should cover totalWidth SSR end <= start for dynamic sizes', () => {
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'horizontal' as const,
+        itemSize: undefined,
+        ssrRange: { start: 10, end: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should cover totalWidth non-SSR items.length <= 0 for dynamic sizes', () => {
+      const propsValue = ref({
+        items: [],
+        direction: 'horizontal' as const,
+        itemSize: undefined,
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalWidth.value).toBe(0);
+    });
+
+    it('should cover totalHeight SSR len <= 0', () => {
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'vertical' as const,
+        itemSize: 50,
+        ssrRange: { start: 10, end: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(0);
+    });
+
+    it('should cover totalHeight SSR end <= start for dynamic sizes', () => {
+      const propsValue = ref({
+        items: mockItems,
+        direction: 'vertical' as const,
+        itemSize: undefined,
+        ssrRange: { start: 10, end: 10 },
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(0);
+    });
+
+    it('should cover totalHeight non-SSR items.length <= 0 for dynamic sizes', () => {
+      const propsValue = ref({
+        items: [],
+        direction: 'vertical' as const,
+        itemSize: undefined,
+      }) as Ref<VirtualScrollProps<unknown>>;
+      const result = useVirtualScroll(propsValue);
+      expect(result.totalHeight.value).toBe(0);
+    });
+
+    describe('internal sizing stabilization and edge cases', () => {
+      const mockItems = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+
+      it('should skip re-initializing sizes for already measured dynamic items', async () => {
+        const props = ref({
+          items: mockItems,
+          direction: 'both' as const,
+          columnCount: 2,
+        }) as Ref<VirtualScrollProps<{ id: number; }>>;
+
+        const result = useVirtualScroll(props);
+        await nextTick();
+
+        // Measure item 0 and col 0
+        const parent = document.createElement('div');
+        const col0 = document.createElement('div');
+        col0.dataset.colIndex = '0';
+        Object.defineProperty(col0, 'offsetWidth', { value: 200 });
+        parent.appendChild(col0);
+
+        result.updateItemSizes([ { index: 0, inlineSize: 200, blockSize: 150, element: parent } ]);
+        await nextTick();
+
+        expect(result.getColumnWidth(0)).toBe(200);
+        expect(result.renderedItems.value[ 0 ]?.size.height).toBe(150);
+
+        // Trigger initializeSizes by changing items length
+        props.value.items = Array.from({ length: 11 }, (_, i) => ({ id: i }));
+        await nextTick();
+
+        // Should NOT reset already measured item 0
+        expect(result.getColumnWidth(0)).toBe(200);
+        expect(result.renderedItems.value[ 0 ]?.size.height).toBe(150);
+      });
+
+      it('should mark items as measured when fixed size matches current size within tolerance', async () => {
+        const props = ref({
+          items: mockItems,
+          direction: 'horizontal' as const,
+          itemSize: 50,
+        }) as Ref<VirtualScrollProps<{ id: number; }>>;
+
+        useVirtualScroll(props);
+        await nextTick();
+
+        // Trigger initializeSizes again with same prop
+        props.value.columnGap = 0;
+        await nextTick();
+        // Hits the branch where Math.abs(current - target) <= 0.5
+      });
+
+      it('should mark columns as measured when fixed width matches current width within tolerance', async () => {
+        const props = ref({
+          items: mockItems,
+          direction: 'both' as const,
+          columnCount: 2,
+          columnWidth: 100,
+        }) as Ref<VirtualScrollProps<{ id: number; }>>;
+
+        useVirtualScroll(props);
+        await nextTick();
+
+        props.value.columnGap = 0;
+        await nextTick();
+      });
+
+      it('should reset item sizes when switching between horizontal and vertical directions', async () => {
+        const props = ref({
+          items: mockItems,
+          direction: 'horizontal' as const,
+          itemSize: 50,
+        }) as Ref<VirtualScrollProps<{ id: number; }>>;
+
+        const result = useVirtualScroll(props);
+        await nextTick();
+        expect(result.totalWidth.value).toBe(500);
+
+        // Switch to vertical (resets X)
+        props.value.direction = 'vertical';
+        await nextTick();
+        expect(result.totalWidth.value).toBe(0);
+
+        // Switch to both
+        props.value.direction = 'both';
+        props.value.columnCount = 10;
+        props.value.columnWidth = 100;
+        await nextTick();
+        expect(result.totalHeight.value).toBe(500);
+        expect(result.totalWidth.value).toBe(1000);
+
+        // Switch to horizontal (resets Y)
+        props.value.direction = 'horizontal';
+        await nextTick();
+        await nextTick();
+        expect(result.totalHeight.value).toBe(0);
+      });
+
+      it('should skip re-initialization if dynamic size is already measured and non-zero', async () => {
+        const props = ref({
+          items: mockItems,
+          direction: 'horizontal' as const,
+          itemSize: undefined, // dynamic
+        }) as Ref<VirtualScrollProps<{ id: number; }>>;
+
+        const result = useVirtualScroll(props);
+        await nextTick();
+
+        result.updateItemSizes([ { index: 0, inlineSize: 100, blockSize: 50, element: document.createElement('div') } ]);
+        await nextTick();
+
+        props.value.gap = 1;
+        await nextTick();
+
+        expect(result.totalWidth.value).toBeGreaterThan(0);
+      });
     });
   });
 });

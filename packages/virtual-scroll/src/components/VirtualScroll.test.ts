@@ -53,6 +53,7 @@ describe('VirtualScroll component', () => {
     scrollToOffset: (x: number | null, y: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
     setItemRef: (el: unknown, index: number) => void;
     stopProgrammaticScroll: () => void;
+    refresh: () => void;
   }
 
   interface TestCompInstance {
@@ -249,21 +250,23 @@ describe('VirtualScroll component', () => {
 
     it('should cover all template branches for slots and tags', async () => {
       for (const tag of [ 'div', 'table' ] as const) {
-        for (const loading of [ true, false ]) {
-          for (const withSlots of [ true, false ]) {
-            const slots = withSlots
-              ? {
-                header: tag === 'table' ? '<tr><td>H</td></tr>' : '<div>H</div>',
-                footer: tag === 'table' ? '<tr><td>F</td></tr>' : '<div>F</div>',
-                loading: tag === 'table' ? '<tr><td>L</td></tr>' : '<div>L</div>',
-              }
-              : {};
-            const wrapper = mount(VirtualScroll, {
-              props: { items: mockItems.slice(0, 1), containerTag: tag, loading },
-              slots,
-            });
-            await nextTick();
-            wrapper.unmount();
+        for (const direction of [ 'vertical', 'horizontal', 'both' ] as const) {
+          for (const loading of [ true, false ]) {
+            for (const withSlots of [ true, false ]) {
+              const slots = withSlots
+                ? {
+                  header: tag === 'table' ? '<tr><td>H</td></tr>' : '<div>H</div>',
+                  footer: tag === 'table' ? '<tr><td>F</td></tr>' : '<div>F</div>',
+                  loading: tag === 'table' ? '<tr><td>L</td></tr>' : '<div>L</div>',
+                }
+                : {};
+              const wrapper = mount(VirtualScroll, {
+                props: { items: mockItems.slice(0, 1), containerTag: tag, loading, direction },
+                slots,
+              });
+              await nextTick();
+              wrapper.unmount();
+            }
           }
         }
       }
@@ -361,6 +364,19 @@ describe('VirtualScroll component', () => {
       });
       await nextTick();
       // This covers the branch where container is NOT host element and NOT window
+    });
+
+    it('should handle stickyHeader with window container', async () => {
+      const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+      mount(VirtualScroll, {
+        props: {
+          items,
+          container: window,
+          stickyHeader: true,
+        },
+        slots: { header: '<div>H</div>' },
+      });
+      await nextTick();
     });
 
     it('should cover object padding branches in virtualScrollProps', () => {
@@ -890,6 +906,37 @@ describe('VirtualScroll component', () => {
       const wrapper = mount(VirtualScroll, { props: { items: mockItems, itemSize: 50 } });
       expect(typeof (wrapper.vm as unknown as VSInstance).scrollToIndex).toBe('function');
       expect(typeof (wrapper.vm as unknown as VSInstance).scrollToOffset).toBe('function');
+    });
+
+    it('should manually re-measure items on refresh', async () => {
+      const items = [ { id: 1 } ];
+      const wrapper = mount(VirtualScroll, {
+        props: { items, itemSize: 0 }, // dynamic
+        slots: { item: '<template #item="{ index }"><div class="dynamic-item" :style="{ height: \'100px\' }">Item {{ index }}</div></template>' },
+      });
+      await nextTick();
+
+      const el = wrapper.find('.virtual-scroll-item').element as HTMLElement;
+      Object.defineProperty(el, 'offsetHeight', { value: 100 });
+      Object.defineProperty(el, 'offsetWidth', { value: 100 });
+
+      // First measurement via refresh (simulating manual trigger or initial measurement)
+      const vm = wrapper.vm as unknown as VSInstance;
+      vm.refresh();
+      await nextTick();
+      await nextTick();
+
+      expect(vm.scrollDetails.totalSize.height).toBe(100);
+    });
+
+    it('should handle refresh with no rendered items', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { items: [], itemSize: 0 },
+      });
+      await nextTick();
+      const vm = wrapper.vm as unknown as VSInstance;
+      vm.refresh();
+      await nextTick();
     });
 
     it('should emit visibleRangeChange on scroll and hydration', async () => {

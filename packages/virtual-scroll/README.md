@@ -130,54 +130,87 @@ const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ 
 </style>
 ```
 
-## Props
+## Sizing Guide
 
-### Core Configuration
+The component offers flexible ways to define item and column sizes. Understanding how these options interact is key to achieving smooth scrolling and correct layout.
+
+### Sizing Options
+
+| Option Type | `itemSize` / `columnWidth` | Performance | Description |
+|-------------|----------------------------|-------------|-------------|
+| **Fixed** | `number` (e.g., `50`) | **Best** | Every item has the exact same size. Calculations are *O(1)*. |
+| **Array** | `number[]` (cols only) | **Great** | Each column has a fixed size from the array (cycles if shorter). |
+| **Function** | `(item, index) => number` | **Good** | Size is known but varies per item. No `ResizeObserver` overhead unless it differs from measured size. |
+| **Dynamic** | `0`, `null`, or `undefined` | **Fair** | Sizes are measured automatically via `ResizeObserver` after rendering. |
+
+### How Sizing Works
+
+1.  **Initial Estimate**:
+    -   If a **fixed size** or **function** is provided, it's used as the initial size.
+    -   If **dynamic** is used, the component uses `defaultItemSize` (default: `40`) or `defaultColumnWidth` (default: `100`) as the initial estimate.
+2.  **Measurement**:
+    -   When an item is rendered, its actual size is measured using `ResizeObserver`.
+    -   If the measured size differs from the estimate (by more than 0.5px), the internal Fenwick Tree is updated.
+3.  **Refinement**:
+    -   All subsequent item positions are automatically adjusted based on the new measurement.
+    -   The total scrollable area (`totalWidth`/`totalHeight`) is updated to reflect the real content size.
+
+### Fallback Logic
+
+-   **Unset Props**: If `itemSize` or `columnWidth` are not provided, they default to `40` and `100` respectively (fixed).
+-   **Dynamic Fallback**: When using dynamic sizing, `defaultItemSize` and `defaultColumnWidth` act as the source of truth for items that haven't been rendered yet.
+-   **Function/Array Fallback**: If a function or array returns an invalid value, it falls back to the respective `default...` prop.
+
+### Recommendations for Smooth Scrolling
+
+1.  **Accurate Estimates**: When using dynamic sizing, set `defaultItemSize` as close as possible to the *average* height of your items. This minimizes scrollbar "jumping".
+2.  **Avoid 0 sizes**: Ensure your items have a minimum height/width (e.g., via CSS `min-height`). Items with 0 size might not be detected correctly by the virtualizer.
+3.  **Box Sizing**: Use `box-sizing: border-box` on your items to ensure padding and borders are included in the measured size.
+4.  **Manual Refresh**: If you change external state that affects a sizing function's output without changing the function reference itself, call `virtualScrollRef.refresh()` to force a full re-calculation.
+
+## Component Reference
+
+The `VirtualScroll` component provides a declarative interface for virtualizing lists and grids. It automatically manages the rendering lifecycle of items, measures dynamic sizes, and handles complex scroll behaviors like stickiness and restoration.
+
+### Props
+
+#### Core Configuration
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `items` | `T[]` | Required | Array of items to be virtualized. |
-| `itemSize` | `number \| ((item: T, index: number) => number) \| null` | `50` | Fixed size of each item or a function that returns the size. Pass `0`, `null` or `undefined` for dynamic size detection. |
-| `direction` | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Direction of the scroll. |
-| `gap` | `number` | `0` | Gap between items in pixels (vertical). |
+| `itemSize` | `number \| ((item: T, index: number) => number) \| null` | `40` | Fixed size or function. Pass `0`/`null` for dynamic. |
+| `direction` | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Scroll direction. |
+| `gap` | `number` | `0` | Spacing between items. |
 
 ### Grid Configuration (direction="both")
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `columnCount` | `number` | `0` | Number of columns for bidirectional (grid) scroll. |
-| `columnWidth` | `number \| number[] \| ((index: number) => number) \| null` | `150` | Fixed width of columns or an array/function for column widths. Pass `0`, `null` or `undefined` for dynamic width. |
-| `columnGap` | `number` | `0` | Gap between columns in pixels. |
+| `columnCount` | `number` | `0` | Number of columns. |
+| `columnWidth` | `num \| num[] \| fn \| null` | `100` | Width for columns. |
+| `columnGap` | `number` | `0` | Spacing between columns. |
 
-### Feature-Specific Props
+### Features & Behavior
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `stickyIndices` | `number[]` | `[]` | Indices of items that should stick to the top/start. Supports iOS-style pushing effect. |
-| `stickyHeader` | `boolean` | `false` | Whether the header slot content is sticky. If true, header size is measured and added to `scrollPaddingStart`. |
-| `stickyFooter` | `boolean` | `false` | Whether the footer slot content is sticky. If true, footer size is measured and added to `scrollPaddingEnd`. |
-| `loading` | `boolean` | `false` | Whether items are currently being loaded. Prevents multiple `load` events and displays the `#loading` slot. |
-| `loadDistance` | `number` | `200` | Distance from the end of the scrollable area to trigger `load` event. |
-| `restoreScrollOnPrepend` | `boolean` | `false` | Whether to automatically restore scroll position when items are prepended to the list. |
+| `stickyIndices` | `number[]` | `[]` | Indices of items that should remain sticky. |
+| `stickyHeader` / `stickyFooter` | `boolean` | `false` | If true, measures and adds slot size to padding. |
+| `ssrRange` | `object` | `undefined` | Items to pre-render on server. |
+| `loading` | `boolean` | `false` | Shows loading state and prevents duplicate events. |
+| `loadDistance` | `number` | `200` | Distance from end to trigger `load` event. |
+| `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
+| `initialScrollIndex` | `number` | `undefined` | Index to jump to on mount. |
+| `initialScrollAlign` | `string \| object` | `'start'` | Alignment for initial jump. |
 
-### Advanced Configuration
+### Advanced & Performance
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `container` | `HTMLElement \| Window \| null` | `host element` | The scrollable container element or window. |
-| `scrollPaddingStart` | `number \| { x?: number; y?: number; }` | `0` | Padding at the start of the scroll container. |
-| `scrollPaddingEnd` | `number \| { x?: number; y?: number; }` | `0` | Padding at the end of the scroll container. |
-| `containerTag` | `string` | `'div'` | The HTML tag to use for the root container. |
-| `wrapperTag` | `string` | `'div'` | The HTML tag to use for the items wrapper. |
-| `itemTag` | `string` | `'div'` | The HTML tag to use for each item. |
-| `bufferBefore` | `number` | `5` | Number of items to render before the visible viewport. |
-| `bufferAfter` | `number` | `5` | Number of items to render after the visible viewport. |
-| `ssrRange` | `{ start: number; end: number; colStart?: number; colEnd?: number; }` | `undefined` | Range of items to render for SSR. |
-| `initialScrollIndex` | `number` | `undefined` | Initial scroll index to jump to on mount. |
-| `initialScrollAlign` | `ScrollAlignment \| ScrollAlignmentOptions` | `'start'` | Alignment for the initial scroll index. |
-
-### Development
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `defaultItemSize` | `number` | `50` | Default size for items before they are measured. |
-| `defaultColumnWidth` | `number` | `150` | Default width for columns before they are measured. |
-| `debug` | `boolean` | `false` | Enables debug visualization showing item indices and offsets. |
+| `container` | `HTMLElement \| Window` | `host element` | The scrollable container element. |
+| `scrollPaddingStart` / `End` | `num \| {x, y}` | `0` | Padding for scroll calculations. |
+| `containerTag` / `wrapperTag` / `itemTag` | `string` | `'div'` | HTML tags for component parts. |
+| `bufferBefore` / `bufferAfter` | `number` | `5` | Items to render outside the viewport. |
+| `defaultItemSize` | `number` | `40` | Initial estimate for items. |
+| `defaultColumnWidth` | `number` | `100` | Initial estimate for columns. |
+| `debug` | `boolean` | `false` | Enables debug visualization. |
 
 ## Slots
 
@@ -204,72 +237,71 @@ const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ 
 ## Keyboard Navigation
 
 When the container is focused, it supports the following keys:
-- `Home` / `End`: Scroll to top/bottom or start/end of the list.
-- `ArrowUp` / `ArrowDown`: Scroll up/down by 40px.
-- `ArrowLeft` / `ArrowRight`: Scroll left/right by 40px.
+- `Home`: Scroll to the beginning of the list (index 0).
+- `End`: Scroll to the last item in the list.
+- `ArrowUp` / `ArrowDown`: Scroll up/down by 40px (or `DEFAULT_ITEM_SIZE`).
+- `ArrowLeft` / `ArrowRight`: Scroll left/right by 40px (or `DEFAULT_ITEM_SIZE`).
 - `PageUp` / `PageDown`: Scroll up/down (or left/right) by one viewport size.
 
 ## Methods (Exposed)
 
 - `scrollToIndex(rowIndex: number | null, colIndex: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions)`
-  - `rowIndex`: Row index to scroll to.
-  - `colIndex`: Column index to scroll to (for horizontal or grid).
+  - `rowIndex`: Row index to scroll to. Pass `null` to only scroll horizontally.
+  - `colIndex`: Column index to scroll to. Pass `null` to only scroll vertically.
   - `options`:
-    - `align`: `'start' | 'center' | 'end' | 'auto'` or `{ x, y }` alignments.
+    - `align`: `'start' | 'center' | 'end' | 'auto'` or `{ x: ScrollAlignment, y: ScrollAlignment }`.
     - `behavior`: `'auto' | 'smooth'`.
 - `scrollToOffset(x: number | null, y: number | null, options?: { behavior?: 'auto' | 'smooth' })`
-  - `x`: Pixel offset on X axis.
-  - `y`: Pixel offset on Y axis.
+  - `x`: Pixel offset on X axis. Pass `null` to keep current position.
+  - `y`: Pixel offset on Y axis. Pass `null` to keep current position.
+  - `options`:
+    - `behavior`: `'auto' | 'smooth'`.
 - `refresh()`: Resets all dynamic measurements and re-initializes sizes from current items and props.
+- `stopProgrammaticScroll()`: Immediately stops any active smooth scroll.
 
 ## Types
 
 ### ScrollDetails&lt;T&gt;
-```typescript
-/* eslint-disable unused-imports/no-unused-vars */
-interface ScrollDetails<T = unknown> {
-  items: Array<{
-    item: T;
-    index: number;
-    offset: { x: number; y: number; };
-    size: { width: number; height: number; };
-    originalX: number;
-    originalY: number;
-    isSticky?: boolean;
-    isStickyActive?: boolean;
-    stickyOffset: { x: number; y: number; };
-  }>;
-  currentIndex: number;
-  currentColIndex: number;
-  scrollOffset: { x: number; y: number; };
-  viewportSize: { width: number; height: number; };
-  totalSize: { width: number; height: number; };
-  isScrolling: boolean;
-  isProgrammaticScroll: boolean;
-  range: { start: number; end: number; };
-  columnRange: { start: number; end: number; padStart: number; padEnd: number; };
-}
-```
+
+The full state of the virtualizer, emitted in the `scroll` event and available via the `scrollDetails` ref.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `RenderedItem<T>[]` | List of items currently rendered with their offsets and sizes. |
+| `currentIndex` | `number` | Index of the first item partially or fully visible in the viewport. |
+| `currentColIndex` | `number` | Index of the first column partially or fully visible. |
+| `scrollOffset` | `{ x: number, y: number }` | Current scroll position relative to content start. |
+| `viewportSize` | `{ width: number, height: number }` | Dimensions of the visible area. |
+| `totalSize` | `{ width: number, height: number }` | Total calculated size of all items and gaps. |
+| `isScrolling` | `boolean` | Whether the container is currently being scrolled. |
+| `isProgrammaticScroll` | `boolean` | Whether the current scroll was initiated by a method call. |
+| `range` | `{ start: number, end: number }` | Current rendered item indices. |
+| `columnRange` | `{ start: number, end: number, padStart: number, padEnd: number }` | Visible column range and paddings. |
 
 ### RenderedItem&lt;T&gt;
-```typescript
-/* eslint-disable unused-imports/no-unused-vars */
-interface RenderedItem<T = unknown> {
-  item: T;
-  index: number;
-  offset: { x: number; y: number; };
-  size: { width: number; height: number; };
-  originalX: number;
-  originalY: number;
-  isSticky?: boolean;
-  isStickyActive?: boolean;
-  stickyOffset: { x: number; y: number; };
-}
-```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `item` | `T` | The data item. |
+| `index` | `number` | The item's index in the original array. |
+| `offset` | `{ x: number, y: number }` | Calculated position for rendering. |
+| `size` | `{ width: number, height: number }` | Measured or estimated size. |
+| `originalX` / `originalY` | `number` | Raw offsets before sticky adjustments. |
+| `isSticky` | `boolean` | Whether the item is configured to be sticky. |
+| `isStickyActive` | `boolean` | Whether the item is currently stuck. |
+| `stickyOffset` | `{ x: number, y: number }` | Offset applied for the pushing effect. |
+
+### ScrollAlignment
+
+- `'start'`: Aligns the item to the top/left of the viewport.
+- `'center'`: Aligns the item to the center of the viewport.
+- `'end'`: Aligns the item to the bottom/right of the viewport.
+- `'auto'`: Smart alignment - if the item is already visible, do nothing; if it's above/left, align to `start`; if it's below/right, align to `end`.
 
 ## CSS Classes
 
 - `.virtual-scroll-container`: Root container.
+- `.virtual-scroll--vertical`, `.virtual-scroll--horizontal`, `.virtual-scroll--both`: Direction modifier.
 - `.virtual-scroll-wrapper`: Items wrapper.
 - `.virtual-scroll-item`: Individual item.
 - `.virtual-scroll-header` / `.virtual-scroll-footer`: Header/Footer slots.
@@ -278,6 +310,7 @@ interface RenderedItem<T = unknown> {
 - `.virtual-scroll--hydrated`: Applied when client-side mount is complete.
 - `.virtual-scroll--window`: Applied when using window/body scroll.
 - `.virtual-scroll--table`: Applied when `containerTag="table"` is used.
+- `.virtual-scroll--debug`: Applied when debug mode is enabled.
 
 ## SSR Support
 
@@ -303,28 +336,50 @@ When `ssrRange` is provided:
 
 For advanced use cases, you can use the underlying logic via the `useVirtualScroll` composable.
 
+### Example
+
 ```typescript
+/* eslint-disable unused-imports/no-unused-vars */
 import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, ref } from 'vue';
 
 const items = ref([ { id: 1 }, { id: 2 } ]);
+const containerRef = ref<HTMLElement | null>(null);
+
 const props = computed(() => ({
   items: items.value,
   itemSize: 50,
+  container: containerRef.value,
   direction: 'vertical' as const,
 }));
 
-const { renderedItems, scrollDetails } = useVirtualScroll(props);
-console.log(renderedItems.value, scrollDetails.value);
+const { renderedItems, scrollDetails, totalHeight } = useVirtualScroll(props);
 ```
+
+### Return Values
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `renderedItems` | `Ref<RenderedItem<T>[]>` | List of items to be rendered. |
+| `scrollDetails` | `Ref<ScrollDetails<T>>` | Full state of the virtualizer. |
+| `totalWidth` / `totalHeight` | `Ref<number>` | Calculated total dimensions. |
+| `columnRange` | `Ref<object>` | Visible column range. |
+| `isHydrated` | `Ref<boolean>` | Whether hydration is complete. |
+| `scrollToIndex` | `Function` | Programmatic scroll to index. |
+| `scrollToOffset` | `Function` | Programmatic scroll to offset. |
+| `refresh` | `Function` | Resets and recalculates all sizes. |
+| `updateItemSize` | `Function` | Manually update an item's size. |
 
 ## Utilities
 
-The library exports several utility functions for scroll-related checks:
+The library exports several utility functions and classes:
 
-- `isElement(container: HTMLElement | Window | null | undefined): container is HTMLElement`: Checks if the container is an `HTMLElement` (and not `Window`).
-- `isScrollableElement(target: EventTarget | null): target is HTMLElement`: Checks if the target is an `HTMLElement` with scroll properties.
-- `isScrollToIndexOptions(options: unknown): options is ScrollToIndexOptions`: Checks if the options object is a full `ScrollToIndexOptions` object.
+- `isElement(val: any): val is HTMLElement`: Checks if value is an `HTMLElement` (excludes `window`).
+- `isScrollableElement(val: any): val is HTMLElement | Window`: Checks if value has scroll properties.
+- `isScrollToIndexOptions(val: any): val is ScrollToIndexOptions`: Type guard for scroll options.
+- `getPaddingX / getPaddingY`: Internal helpers for extraction of padding from props.
+- `FenwickTree`: The underlying data structure for efficient size and offset management.
+- `DEFAULT_ITEM_SIZE / DEFAULT_COLUMN_WIDTH / DEFAULT_BUFFER`: The default values used by the library.
 
 ## License
 

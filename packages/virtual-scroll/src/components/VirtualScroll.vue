@@ -7,9 +7,12 @@ import type {
   VirtualScrollProps,
 } from '../composables/useVirtualScroll';
 
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, useSlots, watch } from 'vue';
 
-import { useVirtualScroll } from '../composables/useVirtualScroll';
+import {
+  DEFAULT_ITEM_SIZE,
+  useVirtualScroll,
+} from '../composables/useVirtualScroll';
 import { getPaddingX, getPaddingY } from '../utils/scroll';
 
 export interface Props<T = unknown> {
@@ -89,7 +92,7 @@ const props = withDefaults(defineProps<Props<T>>(), {
   gap: 0,
   columnGap: 0,
   stickyIndices: () => [],
-  loadDistance: 50,
+  loadDistance: 200,
   loading: false,
   restoreScrollOnPrepend: false,
   debug: false,
@@ -101,13 +104,24 @@ const emit = defineEmits<{
   (e: 'visibleRangeChange', range: { start: number; end: number; colStart: number; colEnd: number; }): void;
 }>();
 
-const isDebug = computed(() => props.debug);
-
 const hostRef = ref<HTMLElement | null>(null);
 const wrapperRef = ref<HTMLElement | null>(null);
 const headerRef = ref<HTMLElement | null>(null);
 const footerRef = ref<HTMLElement | null>(null);
 const itemRefs = new Map<number, HTMLElement>();
+
+const slots = useSlots();
+const hasHeaderSlot = ref(!!slots.header);
+const hasFooterSlot = ref(!!slots.footer);
+const hasLoadingSlot = ref(!!slots.loading);
+
+function updateSlotData() {
+  hasHeaderSlot.value = !!slots.header;
+  hasFooterSlot.value = !!slots.footer;
+  hasLoadingSlot.value = !!slots.loading;
+}
+
+onBeforeUpdate(updateSlotData);
 
 const measuredPaddingStart = ref(0);
 const measuredPaddingEnd = ref(0);
@@ -172,7 +186,7 @@ const virtualScrollProps = computed(() => {
     initialScrollAlign: props.initialScrollAlign,
     defaultItemSize: props.defaultItemSize,
     defaultColumnWidth: props.defaultColumnWidth,
-    debug: isDebug.value,
+    debug: props.debug,
   } as VirtualScrollProps<T>;
 });
 
@@ -188,9 +202,36 @@ const {
   scrollToOffset,
   updateHostOffset,
   updateItemSizes,
-  refresh,
+  refresh: coreRefresh,
   stopProgrammaticScroll,
 } = useVirtualScroll(virtualScrollProps);
+
+/**
+ * Resets all dynamic measurements and re-initializes from props.
+ * Also triggers manual re-measurement of all currently rendered items.
+ */
+function refresh() {
+  coreRefresh();
+  nextTick(() => {
+    const updates: { index: number; inlineSize: number; blockSize: number; element?: HTMLElement; }[] = [];
+
+    for (const [ index, el ] of itemRefs.entries()) {
+      /* v8 ignore else -- @preserve */
+      if (el) {
+        updates.push({
+          index,
+          inlineSize: el.offsetWidth,
+          blockSize: el.offsetHeight,
+          element: el,
+        });
+      }
+    }
+
+    if (updates.length > 0) {
+      updateItemSizes(updates);
+    }
+  });
+}
 
 // Watch for scroll details and emit event
 watch(scrollDetails, (details, oldDetails) => {
@@ -412,22 +453,22 @@ function handleKeyDown(event: KeyboardEvent) {
   }
   if (event.key === 'ArrowUp') {
     event.preventDefault();
-    scrollToOffset(null, scrollOffset.y - 40);
+    scrollToOffset(null, scrollOffset.y - DEFAULT_ITEM_SIZE);
     return;
   }
   if (event.key === 'ArrowDown') {
     event.preventDefault();
-    scrollToOffset(null, scrollOffset.y + 40);
+    scrollToOffset(null, scrollOffset.y + DEFAULT_ITEM_SIZE);
     return;
   }
   if (event.key === 'ArrowLeft') {
     event.preventDefault();
-    scrollToOffset(scrollOffset.x - 40, null);
+    scrollToOffset(scrollOffset.x - DEFAULT_ITEM_SIZE, null);
     return;
   }
   if (event.key === 'ArrowRight') {
     event.preventDefault();
-    scrollToOffset(scrollOffset.x + 40, null);
+    scrollToOffset(scrollOffset.x + DEFAULT_ITEM_SIZE, null);
     return;
   }
   if (event.key === 'PageUp') {
@@ -526,10 +567,10 @@ function getItemStyle(item: RenderedItem<T>) {
 
   if (isDynamic) {
     if (!isVertical) {
-      style.minInlineSize = `${ item.size.width }px`;
+      style.minInlineSize = '1px';
     }
     if (!isHorizontal) {
-      style.minBlockSize = `${ item.size.height }px`;
+      style.minBlockSize = '1px';
     }
   }
 
@@ -552,6 +593,11 @@ function getItemStyle(item: RenderedItem<T>) {
   return style;
 }
 
+const isDebug = computed(() => props.debug);
+const isTable = computed(() => props.containerTag === 'table');
+const headerTag = computed(() => isTable.value ? 'thead' : 'div');
+const footerTag = computed(() => isTable.value ? 'tfoot' : 'div');
+
 defineExpose({
   scrollDetails,
   columnRange,
@@ -573,7 +619,7 @@ defineExpose({
       {
         'virtual-scroll--hydrated': isHydrated,
         'virtual-scroll--window': isWindowContainer,
-        'virtual-scroll--table': containerTag === 'table',
+        'virtual-scroll--table': isTable,
       },
     ]"
     :style="containerStyle"
@@ -583,15 +629,17 @@ defineExpose({
     @pointerdown.passive="stopProgrammaticScroll"
     @touchstart.passive="stopProgrammaticScroll"
   >
+    <!-- v8 ignore start -->
     <component
-      :is="containerTag === 'table' ? 'thead' : 'div'"
-      v-if="$slots.header"
+      :is="headerTag"
+      v-if="hasHeaderSlot"
       ref="headerRef"
       class="virtual-scroll-header"
       :class="{ 'virtual-scroll--sticky': stickyHeader }"
     >
       <slot name="header" />
     </component>
+    <!-- v8 ignore stop -->
 
     <component
       :is="wrapperTag"
@@ -600,14 +648,16 @@ defineExpose({
       :style="wrapperStyle"
     >
       <!-- Phantom element to push scroll height -->
+      <!-- v8 ignore start -->
       <component
         :is="itemTag"
-        v-if="containerTag === 'table'"
+        v-if="isTable"
         class="virtual-scroll-spacer"
         :style="spacerStyle"
       >
         <td style="padding: 0; border: none; block-size: inherit;" />
       </component>
+      <!-- v8 ignore stop -->
 
       <component
         :is="itemTag"
@@ -637,8 +687,9 @@ defineExpose({
       </component>
     </component>
 
+    <!-- v8 ignore start -->
     <div
-      v-if="loading && $slots.loading"
+      v-if="loading && hasLoadingSlot"
       class="virtual-scroll-loading"
       :style="loadingStyle"
     >
@@ -646,14 +697,15 @@ defineExpose({
     </div>
 
     <component
-      :is="containerTag === 'table' ? 'tfoot' : 'div'"
-      v-if="$slots.footer"
+      :is="footerTag"
+      v-if="hasFooterSlot"
       ref="footerRef"
       class="virtual-scroll-footer"
       :class="{ 'virtual-scroll--sticky': stickyFooter }"
     >
       <slot name="footer" />
     </component>
+    <!-- v8 ignore stop -->
   </component>
 </template>
 
