@@ -79,20 +79,34 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #controls>
-      <div class="sticky top-0 z-100 flex flex-wrap gap-4 items-start pointer-events-none py-4 -mx-4 px-4 backdrop-blur-sm bg-base-100/30">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" class="shadow-strong" />
+      <div id="essential-vertical-fixed-body-controls" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
+        <div class="sheet-content sheet-content-end h-fit top-1 translate-y-0 overflow-visible">
+          <button
+            class="sheet-handle appearance-none after:hidden h-30.5 w-8 top-19 translate-y-0"
+            popovertarget="essential-vertical-fixed-body-controls"
+            popovertargetaction="toggle"
+          >
+            <div class="w-full bg-accent text-accent-content small-caps text-lg tracking-wider rounded-r-box [writing-mode:vertical-lr] rotate-180">
+              Controls
+            </div>
+          </button>
 
-        <ScrollControls
-          v-model:item-count="itemCount"
-          v-model:item-size="itemSize"
-          v-model:buffer-before="bufferBefore"
-          v-model:buffer-after="bufferAfter"
-          direction="vertical"
-          class="shadow-strong"
-          @scroll-to-index="handleScrollToIndex"
-          @scroll-to-offset="handleScrollToOffset"
-          @refresh="virtualScrollRef?.refresh()"
-        />
+          <div class="flex flex-wrap gap-1 items-stretch pe-1">
+            <ScrollStatus :scroll-details="scrollDetails" direction="vertical" class="shadow-strong" />
+
+            <ScrollControls
+              v-model:item-count="itemCount"
+              v-model:item-size="itemSize"
+              v-model:buffer-before="bufferBefore"
+              v-model:buffer-after="bufferAfter"
+              direction="vertical"
+              class="shadow-strong"
+              @scroll-to-index="handleScrollToIndex"
+              @scroll-to-offset="handleScrollToOffset"
+              @refresh="virtualScrollRef?.refresh()"
+            />
+          </div>
+        </div>
       </div>
     </template>
 

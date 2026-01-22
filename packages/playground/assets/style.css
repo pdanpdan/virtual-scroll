@@ -359,6 +359,191 @@
   @apply card-body p-4 flex-row items-start gap-3;
 }
 
+/* --- Sheet --- */
+
+@utility sheet {
+  @layer daisyui.l1.l2.l3 {
+    @apply fixed inset-0 pointer-events-none overflow-clip;
+
+    --sheet-tr: 0.3s cubic-bezier(0.5, 1.2, 0.3, 1);
+
+    &:has(> [type="checkbox"]:checked) {
+      @apply z-100;
+    }
+
+    &[popover] {
+      @apply inline-flex size-full bg-transparent;
+    }
+
+    > [type="checkbox"] {
+      @apply fixed h-0 w-0 appearance-none opacity-0;
+
+      :has(&:focus-visible) label.sheet-button {
+        outline: 2px solid;
+        outline-offset: 2px;
+      }
+
+      &:focus-visible ~ label.sheet-handle,
+      &:focus-visible ~ * label.sheet-handle {
+        outline: 2px solid;
+        outline-offset: -2px;
+      }
+    }
+  }
+}
+
+@utility sheet-backdrop {
+  @layer daisyui.l1.l2.l3 {
+    @apply fixed inset-0 opacity-0 pointer-events-none invisible;
+
+    transition: opacity var(--sheet-tr);
+
+    input:checked ~ &,
+    :popover-open > & {
+      @apply opacity-100 pointer-events-auto visible;
+
+      :root:has(&) {
+        --page-has-backdrop: 1;
+        --page-scroll-bg: var(--page-scroll-bg-on);
+        --page-overflow: hidden;
+        --page-scroll-gutter: stable;
+        animation: set-page-has-scroll forwards;
+        animation-timeline: scroll();
+      }
+    }
+  }
+}
+
+@utility sheet-content {
+  @layer daisyui.l1.l2.l3 {
+    @apply absolute flex flex-col overflow-clip;
+
+    transition: translate var(--sheet-tr), display var(--sheet-tr) allow-discrete, overlay var(--sheet-tr) allow-discrete;
+
+    > * {
+      @apply invisible pointer-events-auto;
+
+      transition: visibility var(--sheet-tr) allow-discrete;
+    }
+
+    input:checked ~ & > *,
+    :popover-open > & > * {
+      @apply visible;
+    }
+
+    &:has(.sheet-handle) {
+      --sheet-peek: var(--sheet-handle-size, 1rem);
+    }
+  }
+}
+
+@utility sheet-handle {
+  @layer daisyui.l1.l2.l3 {
+    @apply visible absolute inline-grid rounded-full cursor-pointer p-1;
+
+    &:after {
+      @apply rounded-full bg-base-content/30;
+      content: var(--tw-content, '');
+    }
+  }
+}
+
+@utility sheet-content-top {
+  @layer daisyui.l1.l2 {
+    @apply top-0 w-full max-h-[98vh] -translate-y-full rounded-b-box;
+
+    --tw-translate-y: calc(var(--sheet-peek, 0px) - 100%);
+
+    input:checked ~ &,
+    :popover-open > & {
+      @apply translate-y-0;
+    }
+
+    &:has(.sheet-handle) {
+      @apply pb-(--sheet-peek);
+    }
+
+    .sheet-handle {
+      @apply bottom-0 left-[50%] -translate-x-[50%] w-20 max-w-full h-(--sheet-peek);
+    }
+  }
+}
+
+@utility sheet-content-bottom {
+  @layer daisyui.l1.l2 {
+    @apply bottom-0 w-full max-h-[98vh] translate-y-full rounded-t-box;
+
+    --tw-translate-y: calc(100% - var(--sheet-peek, 0px));
+
+    input:checked ~ &,
+    :popover-open > & {
+      @apply translate-y-0;
+    }
+
+    &:has(.sheet-handle) {
+      @apply pt-(--sheet-peek);
+    }
+
+    .sheet-handle {
+      @apply top-0 left-[50%] -translate-x-[50%] w-20 max-w-full h-(--sheet-peek);
+    }
+  }
+}
+
+@utility sheet-content-start {
+  @layer daisyui.l1.l2 {
+    @apply start-0 h-full max-w-[98vw] -translate-x-full rounded-e-box;
+
+    --tw-translate-x: calc(var(--sheet-peek, 0px) - 100%);
+
+    &:dir(rtl) {
+      @apply translate-x-full;
+
+      --tw-translate-x: calc(100% - var(--sheet-peek, 0px));
+    }
+
+    input:checked ~ &,
+    :popover-open > & {
+      @apply translate-x-0;
+    }
+
+    &:has(.sheet-handle) {
+      @apply pe-(--sheet-peek);
+    }
+
+    .sheet-handle {
+      @apply end-0 top-[50%] -translate-y-[50%] h-20 max-h-full w-(--sheet-peek);
+    }
+  }
+}
+
+@utility sheet-content-end {
+  @layer daisyui.l1.l2 {
+    @apply end-0 h-full max-w-[98vw] translate-x-full rounded-s-box;
+
+    --tw-translate-x: calc(100% - var(--sheet-peek, 0px));
+
+    &:dir(rtl) {
+      @apply -translate-x-full;
+
+      --tw-translate-x: calc(var(--sheet-peek, 0px) - 100%);
+    }
+
+    input:checked ~ &,
+    :popover-open > & {
+      @apply translate-x-0;
+    }
+
+    &:has(.sheet-handle) {
+      @apply ps-(--sheet-peek);
+    }
+
+    .sheet-handle {
+      @apply start-0 top-[50%] -translate-y-[50%] h-20 max-h-full w-(--sheet-peek);
+    }
+  }
+}
+
 /* --- Page Transitions --- */
 
 .drawer-side {

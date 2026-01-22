@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Ref } from 'vue';
+
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import { createSeededRandom } from '#/random';
@@ -12,6 +14,8 @@ interface MasonryItem {
   height: number;
   color: string;
 }
+
+const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const COLUMN_COUNT = 3;
 const random = createSeededRandom(6789);
@@ -81,6 +85,7 @@ const containerRef = ref<HTMLElement | null>(null);
             style="overflow: visible"
             :container="containerRef || undefined"
             :items="colItems"
+            :debug="debugMode"
           >
             <template #item="{ item }">
               <div

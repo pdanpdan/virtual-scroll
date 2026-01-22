@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Ref } from 'vue';
+
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { computed, reactive } from 'vue';
+import { computed, inject, reactive, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 
@@ -13,6 +15,8 @@ interface TreeNode {
   expanded: boolean;
   children: TreeNode[];
 }
+
+const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 /**
  * Generates a hierarchical tree structure for the example.
@@ -121,6 +125,7 @@ function toggle(node: TreeNode) {
     <VirtualScroll
       class="example-container"
       :items="visibleItems"
+      :debug="debugMode"
     >
       <template #item="{ item, index }">
         <div

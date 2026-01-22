@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Ref } from 'vue';
+
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 
@@ -12,6 +14,8 @@ interface Photo {
   full: string;
   author: string;
 }
+
+const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const itemCount = ref(2000);
 const columns = ref(4);
@@ -92,6 +96,7 @@ function closeLightbox() {
       class="example-container p-4"
       :items="photos"
       :gap="16"
+      :debug="debugMode"
     >
       <template #item="{ index: rowIndex, item: rowItems }">
         <div

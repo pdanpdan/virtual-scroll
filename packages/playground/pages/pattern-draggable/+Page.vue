@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
+import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 
@@ -21,6 +22,8 @@ const items = ref<DraggableItem[]>(
     color: `hsl(${ (i * 137.5) % 360 }, 70%, 60%)`,
   })),
 );
+
+const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const draggedIndex = ref<number | null>(null);
 const dropTargetIndex = ref<number | null>(null);
@@ -129,6 +132,7 @@ function handleDrop() {
       ref="virtualScrollRef"
       class="example-container"
       :items="items"
+      :debug="debugMode"
       @scroll="(details) => scrollDetails = details"
     >
       <template #item="{ item, index }">
