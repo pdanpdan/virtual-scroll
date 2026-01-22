@@ -1,3 +1,12 @@
+import type {
+  RenderedItem,
+  ScrollAlignment,
+  ScrollAlignmentOptions,
+  ScrollDetails,
+  ScrollDirection,
+  ScrollToIndexOptions,
+  VirtualScrollProps,
+} from '../types';
 import type { Ref } from 'vue';
 
 /* global ScrollToOptions */
@@ -5,138 +14,35 @@ import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, reactiv
 
 import { FenwickTree } from '../utils/fenwick-tree';
 import { getPaddingX, getPaddingY, isElement, isScrollableElement, isScrollToIndexOptions } from '../utils/scroll';
+import {
+  calculateColumnRange,
+  calculateItemPosition,
+  calculateRange,
+  calculateScrollTarget,
+  calculateStickyItem,
+  calculateTotalSize,
+} from '../utils/virtual-scroll-logic';
+
+export {
+  type RenderedItem,
+  type ScrollAlignment,
+  type ScrollAlignmentOptions,
+  type ScrollDetails,
+  type ScrollDirection,
+  type ScrollToIndexOptions,
+  type VirtualScrollProps,
+};
 
 export const DEFAULT_ITEM_SIZE = 40;
 export const DEFAULT_COLUMN_WIDTH = 100;
 export const DEFAULT_BUFFER = 5;
 
-export type ScrollDirection = 'vertical' | 'horizontal' | 'both';
-export type ScrollAlignment = 'start' | 'center' | 'end' | 'auto';
-
-/** Options for scroll alignment in a single axis or both axes. */
-export interface ScrollAlignmentOptions {
-  /** Alignment on the X axis. */
-  x?: ScrollAlignment;
-  /** Alignment on the Y axis. */
-  y?: ScrollAlignment;
-}
-
-/** Options for the scrollToIndex method. */
-export interface ScrollToIndexOptions {
-  /** Where to align the item in the viewport. */
-  align?: ScrollAlignment | ScrollAlignmentOptions;
-  /** Scroll behavior. */
-  behavior?: 'auto' | 'smooth';
-  /** Internal flag for recursive correction calls. */
-  isCorrection?: boolean;
-}
-
-/** Configuration properties for the useVirtualScroll composable. */
-export interface VirtualScrollProps<T = unknown> {
-  /** Array of items to be virtualized. */
-  items: T[];
-  /** Fixed size of each item or a function that returns the size of an item. */
-  itemSize?: number | ((item: T, index: number) => number) | undefined;
-  /** Direction of the scroll: 'vertical', 'horizontal', or 'both'. */
-  direction?: ScrollDirection | undefined;
-  /** Number of items to render before the visible viewport. */
-  bufferBefore?: number | undefined;
-  /** Number of items to render after the visible viewport. */
-  bufferAfter?: number | undefined;
-  /** The scrollable container element or window. */
-  container?: HTMLElement | Window | null | undefined;
-  /** The host element that contains the items. */
-  hostElement?: HTMLElement | null | undefined;
-  /** Range of items to render for SSR. */
-  ssrRange?: {
-    start: number;
-    end: number;
-    colStart?: number;
-    colEnd?: number;
-  } | undefined;
-  /** Number of columns for bidirectional scroll. */
-  columnCount?: number | undefined;
-  /** Fixed width of columns or an array/function for column widths. */
-  columnWidth?: number | number[] | ((index: number) => number) | undefined;
-  /** Padding at the start of the scroll container. */
-  scrollPaddingStart?: number | { x?: number; y?: number; } | undefined;
-  /** Padding at the end of the scroll container. */
-  scrollPaddingEnd?: number | { x?: number; y?: number; } | undefined;
-  /** Gap between items in pixels (vertical). */
-  gap?: number | undefined;
-  /** Gap between columns in pixels (horizontal/grid). */
-  columnGap?: number | undefined;
-  /** Indices of items that should stick to the top/start. */
-  stickyIndices?: number[] | undefined;
-  /** Distance from the end of the scrollable area to trigger 'load' event. */
-  loadDistance?: number | undefined;
-  /** Whether items are currently being loaded. */
-  loading?: boolean | undefined;
-  /** Whether to restore scroll position when items are prepended. */
-  restoreScrollOnPrepend?: boolean | undefined;
-  /** Initial scroll index to jump to on mount. */
-  initialScrollIndex?: number | undefined;
-  /** Alignment for the initial scroll index. */
-  initialScrollAlign?: ScrollAlignment | ScrollAlignmentOptions | undefined;
-  /** Default size for items before they are measured. */
-  defaultItemSize?: number | undefined;
-  /** Default width for columns before they are measured. */
-  defaultColumnWidth?: number | undefined;
-  /** Whether to enable debug mode. */
-  debug?: boolean | undefined;
-}
-
-/** Represents an item currently rendered in the virtual scroll area. */
-export interface RenderedItem<T = unknown> {
-  /** The original data item. */
-  item: T;
-  /** The index of the item in the original array. */
-  index: number;
-  /** The calculated offset relative to the host element. */
-  offset: { x: number; y: number; };
-  /** The current measured or estimated size. */
-  size: { width: number; height: number; };
-  /** The original X offset before sticky adjustments. */
-  originalX: number;
-  /** The original Y offset before sticky adjustments. */
-  originalY: number;
-  /** Whether this item is configured to be sticky. */
-  isSticky?: boolean;
-  /** Whether this item is currently stuck at the threshold. */
-  isStickyActive?: boolean;
-  /** The offset applied for the sticky pushing effect. */
-  stickyOffset: { x: number; y: number; };
-}
-
-/** Comprehensive state of the virtual scroll system. */
-export interface ScrollDetails<T = unknown> {
-  /** List of items currently rendered. */
-  items: RenderedItem<T>[];
-  /** Index of the first item partially or fully visible in the viewport. */
-  currentIndex: number;
-  /** Index of the first column partially or fully visible. */
-  currentColIndex: number;
-  /** Current scroll position relative to content start. */
-  scrollOffset: { x: number; y: number; };
-  /** Dimensions of the visible viewport. */
-  viewportSize: { width: number; height: number; };
-  /** Total calculated size of all items and gaps. */
-  totalSize: { width: number; height: number; };
-  /** Whether the container is currently being scrolled. */
-  isScrolling: boolean;
-  /** Whether the current scroll was initiated by a method call. */
-  isProgrammaticScroll: boolean;
-  /** Range of items currently being rendered. */
-  range: { start: number; end: number; };
-  /** Range of columns currently being rendered (for grid mode). */
-  columnRange: { start: number; end: number; padStart: number; padEnd: number; };
-}
-
 /**
  * Composable for virtual scrolling logic.
- * Handles calculation of visible items, scroll events, and dynamic item sizes.
+ * Handles calculation of visible items, scroll events, dynamic item sizes, and programmatic scrolling.
  *
- * @param props - Reactive properties for virtual scroll configuration
+ * @param props - A Ref to the configuration properties.
+ * @see VirtualScrollProps
  */
 export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>) {
   // --- State ---
@@ -188,11 +94,17 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     (typeof props.value.itemSize === 'number' && props.value.itemSize > 0) ? props.value.itemSize : null,
   );
 
+  const fixedColumnWidth = computed(() =>
+    (typeof props.value.columnWidth === 'number' && props.value.columnWidth > 0) ? props.value.columnWidth : null,
+  );
+
   const defaultSize = computed(() => props.value.defaultItemSize || fixedItemSize.value || DEFAULT_ITEM_SIZE);
 
   const sortedStickyIndices = computed(() =>
     [ ...(props.value.stickyIndices || []) ].sort((a, b) => a - b),
   );
+
+  const stickyIndicesSet = computed(() => new Set(sortedStickyIndices.value));
 
   // --- Size Calculations ---
   /**
@@ -213,7 +125,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         const total = columnSizes.query(effectiveColEnd) - columnSizes.query(colStart);
         return Math.max(0, total - (effectiveColEnd > colStart ? (props.value.columnGap || 0) : 0));
       }
-      /* v8 ignore else -- @preserve */
       if (props.value.direction === 'horizontal') {
         if (fixedItemSize.value !== null) {
           const len = end - start;
@@ -224,23 +135,20 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       }
     }
 
-    if (props.value.direction === 'both') {
-      const colCount = props.value.columnCount || 0;
-      if (colCount <= 0) {
-        return 0;
-      }
-      const total = columnSizes.query(colCount);
-      return Math.max(0, total - (props.value.columnGap || 0));
-    }
-    if (props.value.direction === 'vertical') {
-      return 0;
-    }
-    if (fixedItemSize.value !== null) {
-      const len = props.value.items.length;
-      return Math.max(0, len * (fixedItemSize.value + (props.value.columnGap || 0)) - (len > 0 ? (props.value.columnGap || 0) : 0));
-    }
-    const total = itemSizesX.query(props.value.items.length);
-    return Math.max(0, total - (props.value.items.length > 0 ? (props.value.columnGap || 0) : 0));
+    return calculateTotalSize({
+      direction: props.value.direction || 'vertical',
+      itemsLength: props.value.items.length,
+      columnCount: props.value.columnCount || 0,
+      fixedSize: fixedItemSize.value,
+      fixedWidth: fixedColumnWidth.value,
+      gap: props.value.gap || 0,
+      columnGap: props.value.columnGap || 0,
+      viewportWidth: viewportWidth.value,
+      viewportHeight: viewportHeight.value,
+      queryY: (idx) => itemSizesY.query(idx),
+      queryX: (idx) => itemSizesX.query(idx),
+      queryColumn: (idx) => columnSizes.query(idx),
+    }).width;
   });
 
   /**
@@ -252,7 +160,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     if (!isHydrated.value && props.value.ssrRange && !isMounted.value) {
       const { start, end } = props.value.ssrRange;
-      /* v8 ignore else -- @preserve */
       if (props.value.direction === 'vertical' || props.value.direction === 'both') {
         if (fixedItemSize.value !== null) {
           const len = end - start;
@@ -263,15 +170,20 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       }
     }
 
-    if (props.value.direction === 'horizontal') {
-      return 0;
-    }
-    if (fixedItemSize.value !== null) {
-      const len = props.value.items.length;
-      return Math.max(0, len * (fixedItemSize.value + (props.value.gap || 0)) - (len > 0 ? (props.value.gap || 0) : 0));
-    }
-    const total = itemSizesY.query(props.value.items.length);
-    return Math.max(0, total - (props.value.items.length > 0 ? (props.value.gap || 0) : 0));
+    return calculateTotalSize({
+      direction: props.value.direction || 'vertical',
+      itemsLength: props.value.items.length,
+      columnCount: props.value.columnCount || 0,
+      fixedSize: fixedItemSize.value,
+      fixedWidth: fixedColumnWidth.value,
+      gap: props.value.gap || 0,
+      columnGap: props.value.columnGap || 0,
+      viewportWidth: viewportWidth.value,
+      viewportHeight: viewportHeight.value,
+      queryY: (idx) => itemSizesY.query(idx),
+      queryX: (idx) => itemSizesX.query(idx),
+      queryColumn: (idx) => columnSizes.query(idx),
+    }).height;
   });
 
   const relativeScrollX = computed(() => {
@@ -298,7 +210,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       const val = cw[ index % cw.length ];
       return (val != null && val > 0) ? val : (props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH);
     }
-    /* v8 ignore else -- @preserve */
     if (typeof cw === 'function') {
       return cw(index);
     }
@@ -312,6 +223,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
    * @param rowIndex - The row index to scroll to. Pass null to only scroll horizontally.
    * @param colIndex - The column index to scroll to. Pass null to only scroll vertically.
    * @param options - Scroll options including alignment ('start', 'center', 'end', 'auto') and behavior ('auto', 'smooth').
+   *                  Defaults to { align: 'auto', behavior: 'auto' }.
    */
   const scrollToIndex = (
     rowIndex: number | null | undefined,
@@ -327,157 +239,45 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     }
 
     const container = props.value.container || window;
-    const fixedSize = fixedItemSize.value;
-    const gap = props.value.gap || 0;
-    const columnGap = props.value.columnGap || 0;
-
-    let align: ScrollAlignment | ScrollAlignmentOptions | undefined;
-    let behavior: 'auto' | 'smooth' | undefined;
-
-    if (isScrollToIndexOptions(options)) {
-      align = options.align;
-      behavior = options.behavior;
-    } else {
-      align = options as ScrollAlignment | ScrollAlignmentOptions;
-    }
-
-    const alignX = (typeof align === 'object' ? align.x : align) || 'auto';
-    const alignY = (typeof align === 'object' ? align.y : align) || 'auto';
-
     const paddingStartX = getPaddingX(props.value.scrollPaddingStart, props.value.direction);
-    const paddingEndX = getPaddingX(props.value.scrollPaddingEnd, props.value.direction);
     const paddingStartY = getPaddingY(props.value.scrollPaddingStart, props.value.direction);
-    const paddingEndY = getPaddingY(props.value.scrollPaddingEnd, props.value.direction);
 
     const isVertical = props.value.direction === 'vertical' || props.value.direction === 'both';
     const isHorizontal = props.value.direction === 'horizontal' || props.value.direction === 'both';
 
-    const usableWidth = viewportWidth.value - (isHorizontal ? (paddingStartX + paddingEndX) : 0);
-    const usableHeight = viewportHeight.value - (isVertical ? (paddingStartY + paddingEndY) : 0);
-
-    let targetX = relativeScrollX.value;
-    let targetY = relativeScrollY.value;
-    let itemWidth = 0;
-    let itemHeight = 0;
-
-    // Y calculation
-    if (rowIndex !== null && rowIndex !== undefined) {
-      if (rowIndex >= props.value.items.length) {
-        targetY = totalHeight.value;
-        itemHeight = 0;
-      } else {
-        targetY = fixedSize !== null ? rowIndex * (fixedSize + gap) : itemSizesY.query(rowIndex);
-        itemHeight = fixedSize !== null ? fixedSize : itemSizesY.get(rowIndex) - gap;
-      }
-
-      // Apply Y Alignment
-      if (alignY === 'start') {
-        // targetY is already at the start of the list
-      } else if (alignY === 'center') {
-        targetY -= (usableHeight - itemHeight) / 2;
-      } else if (alignY === 'end') {
-        targetY -= (usableHeight - itemHeight);
-      } else {
-        const isVisibleY = targetY >= relativeScrollY.value && (targetY + itemHeight) <= (relativeScrollY.value + usableHeight);
-        if (!isVisibleY) {
-          if (targetY < relativeScrollY.value) {
-            // keep targetY at start
-          } else {
-            targetY -= (usableHeight - itemHeight);
-          }
-        }
-      }
-    }
-
-    // X calculation
-    if (colIndex !== null && colIndex !== undefined) {
-      const totalCols = props.value.columnCount || 0;
-      if (colIndex >= totalCols && totalCols > 0) {
-        targetX = totalWidth.value;
-        itemWidth = 0;
-      } else if (props.value.direction === 'horizontal') {
-        targetX = fixedSize !== null ? colIndex * (fixedSize + columnGap) : itemSizesX.query(colIndex);
-        itemWidth = fixedSize !== null ? fixedSize : itemSizesX.get(colIndex) - columnGap;
-      } else {
-        targetX = columnSizes.query(colIndex);
-        itemWidth = columnSizes.get(colIndex) - columnGap;
-      }
-
-      // Apply X Alignment
-      if (alignX === 'start') {
-        // targetX is already at the start of the list
-      } else if (alignX === 'center') {
-        targetX -= (usableWidth - itemWidth) / 2;
-      } else if (alignX === 'end') {
-        targetX -= (usableWidth - itemWidth);
-      } else {
-        const isVisibleX = targetX >= relativeScrollX.value && (targetX + itemWidth) <= (relativeScrollX.value + usableWidth);
-        if (!isVisibleX) {
-          /* v8 ignore if -- @preserve */
-          if (targetX < relativeScrollX.value) {
-            // keep targetX at start
-          } else {
-            targetX -= (usableWidth - itemWidth);
-          }
-        }
-      }
-    }
-
-    // Clamp to valid range
-    targetX = Math.max(0, Math.min(targetX, Math.max(0, totalWidth.value - usableWidth)));
-    targetY = Math.max(0, Math.min(targetY, Math.max(0, totalHeight.value - usableHeight)));
+    const { targetX, targetY } = calculateScrollTarget({
+      rowIndex,
+      colIndex,
+      options,
+      itemsLength: props.value.items.length,
+      columnCount: props.value.columnCount || 0,
+      direction: props.value.direction || 'vertical',
+      viewportWidth: viewportWidth.value,
+      viewportHeight: viewportHeight.value,
+      totalWidth: totalWidth.value,
+      totalHeight: totalHeight.value,
+      scrollPaddingStart: props.value.scrollPaddingStart,
+      scrollPaddingEnd: props.value.scrollPaddingEnd,
+      gap: props.value.gap || 0,
+      columnGap: props.value.columnGap || 0,
+      fixedSize: fixedItemSize.value,
+      fixedWidth: fixedColumnWidth.value,
+      relativeScrollX: relativeScrollX.value,
+      relativeScrollY: relativeScrollY.value,
+      getItemSizeY: (idx) => itemSizesY.get(idx),
+      getItemSizeX: (idx) => itemSizesX.get(idx),
+      getItemQueryY: (idx) => itemSizesY.query(idx),
+      getItemQueryX: (idx) => itemSizesX.query(idx),
+      getColumnSize: (idx) => columnSizes.get(idx),
+      getColumnQuery: (idx) => columnSizes.query(idx),
+    });
 
     const finalX = targetX + hostOffset.x - (isHorizontal ? paddingStartX : 0);
     const finalY = targetY + hostOffset.y - (isVertical ? paddingStartY : 0);
 
-    // Check if we reached the target
-    const tolerance = 1;
-    let reachedX = (colIndex === null || colIndex === undefined) || Math.abs(relativeScrollX.value - targetX) < tolerance;
-    let reachedY = (rowIndex === null || rowIndex === undefined) || Math.abs(relativeScrollY.value - targetY) < tolerance;
-
-    if (!reachedX || !reachedY) {
-      let curX = 0;
-      let curY = 0;
-      let maxW = 0;
-      let maxH = 0;
-      let viewW = 0;
-      let viewH = 0;
-
-      /* v8 ignore else -- @preserve */
-      if (typeof window !== 'undefined') {
-        if (container === window) {
-          curX = window.scrollX;
-          curY = window.scrollY;
-          maxW = document.documentElement.scrollWidth;
-          maxH = document.documentElement.scrollHeight;
-          viewW = window.innerWidth;
-          viewH = window.innerHeight;
-        } else if (isElement(container)) {
-          curX = container.scrollLeft;
-          curY = container.scrollTop;
-          maxW = container.scrollWidth;
-          maxH = container.scrollHeight;
-          viewW = container.clientWidth;
-          viewH = container.clientHeight;
-        }
-
-        if (!reachedX && colIndex !== null && colIndex !== undefined) {
-          const atLeft = curX <= tolerance && finalX <= tolerance;
-          const atRight = curX >= maxW - viewW - tolerance && finalX >= maxW - viewW - tolerance;
-          /* v8 ignore else -- @preserve */
-          if (atLeft || atRight) {
-            reachedX = true;
-          }
-        }
-
-        if (!reachedY && rowIndex !== null && rowIndex !== undefined) {
-          const atTop = curY <= tolerance && finalY <= tolerance;
-          const atBottom = curY >= maxH - viewH - tolerance && finalY >= maxH - viewH - tolerance;
-          if (atTop || atBottom) {
-            reachedY = true;
-          }
-        }
-      }
+    let behavior: 'auto' | 'smooth' | undefined;
+    if (isScrollToIndexOptions(options)) {
+      behavior = options.behavior;
     }
 
     const scrollBehavior = isCorrection ? 'auto' : (behavior || 'smooth');
@@ -522,9 +322,9 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       }
     }
 
-    if (reachedX && reachedY && !isScrolling.value) {
-      pendingScroll.value = null;
-    }
+    // We do NOT clear pendingScroll here anymore.
+    // It will be cleared in checkPendingScroll when fully stable,
+    // or in handleScroll if the user manually scrolls.
   };
 
   /**
@@ -533,7 +333,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
    * @param x - The pixel offset to scroll to on the X axis. Pass null to keep current position.
    * @param y - The pixel offset to scroll to on the Y axis. Pass null to keep current position.
    * @param options - Scroll options (behavior)
-   * @param options.behavior - The scroll behavior ('auto' | 'smooth')
+   * @param options.behavior - The scroll behavior ('auto' | 'smooth'). Defaults to 'auto'.
    */
   const scrollToOffset = (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => {
     const container = props.value.container || window;
@@ -632,7 +432,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     let prependCount = 0;
     if (props.value.restoreScrollOnPrepend && lastItems.length > 0 && len > lastItems.length) {
       const oldFirstItem = lastItems[ 0 ];
-      /* v8 ignore else -- @preserve */
       if (oldFirstItem !== undefined) {
         for (let i = 1; i <= len - lastItems.length; i++) {
           if (newItems[ i ] === oldFirstItem) {
@@ -676,7 +475,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         }
       }
 
-      /* v8 ignore else -- @preserve */
       if (addedX > 0 || addedY > 0) {
         nextTick(() => {
           scrollToOffset(
@@ -688,18 +486,29 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       }
     }
 
-    // Initialize columns if fixed width is provided
+    // Initialize columns
     if (colCount > 0) {
       const columnGap = props.value.columnGap || 0;
       let colNeedsRebuild = false;
+      const cw = props.value.columnWidth;
+
       for (let i = 0; i < colCount; i++) {
-        const width = getColumnWidth(i);
         const currentW = columnSizes.get(i);
         const isMeasured = measuredColumns[ i ] === 1;
 
-        // If fixed/function, or if dynamic but not measured yet
-        if (!isDynamicColumnWidth.value || !isMeasured || currentW === 0) {
-          const targetW = width + columnGap;
+        if (!isDynamicColumnWidth.value || (!isMeasured && currentW === 0)) {
+          let baseWidth = 0;
+          if (typeof cw === 'number' && cw > 0) {
+            baseWidth = cw;
+          } else if (Array.isArray(cw) && cw.length > 0) {
+            baseWidth = cw[ i % cw.length ] || props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
+          } else if (typeof cw === 'function') {
+            baseWidth = cw(i);
+          } else {
+            baseWidth = props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
+          }
+
+          const targetW = baseWidth + columnGap;
           if (Math.abs(currentW - targetW) > 0.5) {
             columnSizes.set(i, targetW);
             measuredColumns[ i ] = isDynamicColumnWidth.value ? 0 : 1;
@@ -723,24 +532,21 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       const currentX = itemSizesX.get(i);
       const currentY = itemSizesY.get(i);
 
-      const size = typeof props.value.itemSize === 'function'
-        ? props.value.itemSize(item as T, i)
-        : defaultSize.value;
-
       const isVertical = props.value.direction === 'vertical';
       const isHorizontal = props.value.direction === 'horizontal';
       const isBoth = props.value.direction === 'both';
-
-      const targetX = isHorizontal ? size + columnGap : 0;
-      const targetY = (isVertical || isBoth) ? size + gap : 0;
 
       const isMeasuredX = measuredItemsX[ i ] === 1;
       const isMeasuredY = measuredItemsY[ i ] === 1;
 
       // Logic for X
       if (isHorizontal) {
-        // If fixed/function, or if dynamic but not measured yet
-        if (!isDynamicItemSize.value || !isMeasuredX || currentX === 0) {
+        if (!isDynamicItemSize.value || (!isMeasuredX && currentX === 0)) {
+          const baseSize = typeof props.value.itemSize === 'function'
+            ? props.value.itemSize(item as T, i)
+            : defaultSize.value;
+          const targetX = baseSize + columnGap;
+
           if (Math.abs(currentX - targetX) > 0.5) {
             itemSizesX.set(i, targetX);
             measuredItemsX[ i ] = isDynamicItemSize.value ? 0 : 1;
@@ -757,7 +563,12 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
       // Logic for Y
       if (isVertical || isBoth) {
-        if (!isDynamicItemSize.value || !isMeasuredY || currentY === 0) {
+        if (!isDynamicItemSize.value || (!isMeasuredY && currentY === 0)) {
+          const baseSize = typeof props.value.itemSize === 'function'
+            ? props.value.itemSize(item as T, i)
+            : defaultSize.value;
+          const targetY = baseSize + gap;
+
           if (Math.abs(currentY - targetY) > 0.5) {
             itemSizesY.set(i, targetY);
             measuredItemsY[ i ] = isDynamicItemSize.value ? 0 : 1;
@@ -815,6 +626,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
   watch([
     () => props.value.items,
+    () => props.value.items.length,
     () => props.value.direction,
     () => props.value.columnCount,
     () => props.value.columnWidth,
@@ -844,58 +656,28 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       };
     }
 
-    const direction = props.value.direction || 'vertical';
     const bufferBefore = (props.value.ssrRange && !isScrolling.value) ? 0 : (props.value.bufferBefore ?? DEFAULT_BUFFER);
     const bufferAfter = props.value.bufferAfter ?? DEFAULT_BUFFER;
-    const gap = props.value.gap || 0;
-    const columnGap = props.value.columnGap || 0;
-    const fixedSize = fixedItemSize.value;
-    const paddingStartX = getPaddingX(props.value.scrollPaddingStart, direction);
-    const paddingEndX = getPaddingX(props.value.scrollPaddingEnd, direction);
-    const paddingStartY = getPaddingY(props.value.scrollPaddingStart, direction);
-    const paddingEndY = getPaddingY(props.value.scrollPaddingEnd, direction);
 
-    const isVertical = direction === 'vertical' || direction === 'both';
-    const isHorizontal = direction === 'horizontal' || direction === 'both';
-
-    const usableWidth = viewportWidth.value - (isHorizontal ? (paddingStartX + paddingEndX) : 0);
-    const usableHeight = viewportHeight.value - (isVertical ? (paddingStartY + paddingEndY) : 0);
-
-    let start = 0;
-    let end = props.value.items.length;
-
-    if (isVertical) {
-      if (fixedSize !== null) {
-        start = Math.floor(relativeScrollY.value / (fixedSize + gap));
-        end = Math.ceil((relativeScrollY.value + usableHeight) / (fixedSize + gap));
-      } else {
-        start = itemSizesY.findLowerBound(relativeScrollY.value);
-        let currentY = itemSizesY.query(start);
-        let i = start;
-        while (i < props.value.items.length && currentY < relativeScrollY.value + usableHeight) {
-          currentY = itemSizesY.query(++i);
-        }
-        end = i;
-      }
-    } else {
-      if (fixedSize !== null) {
-        start = Math.floor(relativeScrollX.value / (fixedSize + columnGap));
-        end = Math.ceil((relativeScrollX.value + usableWidth) / (fixedSize + columnGap));
-      } else {
-        start = itemSizesX.findLowerBound(relativeScrollX.value);
-        let currentX = itemSizesX.query(start);
-        let i = start;
-        while (i < props.value.items.length && currentX < relativeScrollX.value + usableWidth) {
-          currentX = itemSizesX.query(++i);
-        }
-        end = i;
-      }
-    }
-
-    return {
-      start: Math.max(0, start - bufferBefore),
-      end: Math.min(props.value.items.length, end + bufferAfter),
-    };
+    return calculateRange({
+      direction: props.value.direction || 'vertical',
+      relativeScrollX: relativeScrollX.value,
+      relativeScrollY: relativeScrollY.value,
+      viewportWidth: viewportWidth.value,
+      viewportHeight: viewportHeight.value,
+      itemsLength: props.value.items.length,
+      bufferBefore,
+      bufferAfter,
+      gap: props.value.gap || 0,
+      columnGap: props.value.columnGap || 0,
+      fixedSize: fixedItemSize.value,
+      scrollPaddingStart: props.value.scrollPaddingStart,
+      scrollPaddingEnd: props.value.scrollPaddingEnd,
+      findLowerBoundY: (offset) => itemSizesY.findLowerBound(offset),
+      findLowerBoundX: (offset) => itemSizesX.findLowerBound(offset),
+      queryY: (idx) => itemSizesY.query(idx),
+      queryX: (idx) => itemSizesX.query(idx),
+    });
   });
 
   /**
@@ -924,6 +706,9 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
   /**
    * List of items to be rendered with their calculated offsets and sizes.
    */
+
+  let lastRenderedItems: RenderedItem<T>[] = [];
+
   const renderedItems = computed<RenderedItem<T>[]>(() => {
     // eslint-disable-next-line ts/no-unused-expressions
     treeUpdateFlag.value;
@@ -934,6 +719,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     const gap = props.value.gap || 0;
     const columnGap = props.value.columnGap || 0;
     const stickyIndices = sortedStickyIndices.value;
+    const stickySet = stickyIndicesSet.value;
 
     // Always include relevant sticky items
     const indicesToRender = new Set<number>();
@@ -988,102 +774,86 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       }
     }
 
+    const lastItemsMap = new Map(lastRenderedItems.map((it) => [ it.index, it ]));
+
     for (const i of sortedIndices) {
       const item = props.value.items[ i ];
       if (item === undefined) {
         continue;
       }
 
-      let x = 0;
-      let y = 0;
-      let width = 0;
-      let height = 0;
+      const { x, y, width, height } = calculateItemPosition({
+        index: i,
+        direction: props.value.direction || 'vertical',
+        fixedSize: fixedItemSize.value,
+        gap: props.value.gap || 0,
+        columnGap: props.value.columnGap || 0,
+        viewportWidth: viewportWidth.value,
+        viewportHeight: viewportHeight.value,
+        totalWidth: totalWidth.value,
+        queryY: (idx) => itemSizesY.query(idx),
+        queryX: (idx) => itemSizesX.query(idx),
+        getSizeY: (idx) => itemSizesY.get(idx),
+        getSizeX: (idx) => itemSizesX.get(idx),
+      });
 
-      if (props.value.direction === 'horizontal') {
-        x = fixedSize !== null ? i * (fixedSize + columnGap) : itemSizesX.query(i);
-        width = fixedSize !== null ? fixedSize : itemSizesX.get(i) - columnGap;
-        height = viewportHeight.value;
-      } else {
-        // vertical or both
-        y = (props.value.direction === 'vertical' || props.value.direction === 'both') && fixedSize !== null ? i * (fixedSize + gap) : itemSizesY.query(i);
-        height = fixedSize !== null ? fixedSize : itemSizesY.get(i) - gap;
-        width = props.value.direction === 'both' ? totalWidth.value : viewportWidth.value;
-      }
-
-      const isSticky = stickyIndices.includes(i);
+      const isSticky = stickySet.has(i);
       const originalX = x;
       const originalY = y;
-      let isStickyActive = false;
-      const stickyOffset = { x: 0, y: 0 };
 
-      if (isSticky) {
-        if (props.value.direction === 'vertical' || props.value.direction === 'both') {
-          if (relativeScrollY.value > originalY) {
-            isStickyActive = true;
-            // Check if next sticky item pushes this one
-            let nextStickyIdx: number | undefined;
-            let low = 0;
-            let high = stickyIndices.length - 1;
-            while (low <= high) {
-              const mid = (low + high) >>> 1;
-              if (stickyIndices[ mid ]! > i) {
-                nextStickyIdx = stickyIndices[ mid ];
-                high = mid - 1;
-              } else {
-                low = mid + 1;
-              }
-            }
-
-            if (nextStickyIdx !== undefined) {
-              const nextStickyY = fixedSize !== null ? nextStickyIdx * (fixedSize + gap) : itemSizesY.query(nextStickyIdx);
-              const distance = nextStickyY - relativeScrollY.value;
-              /* v8 ignore else -- @preserve */
-              if (distance < height) {
-                stickyOffset.y = -(height - distance);
-              }
-            }
-          }
-        } else if (props.value.direction === 'horizontal') {
-          if (relativeScrollX.value > originalX) {
-            isStickyActive = true;
-            // Check if next sticky item pushes this one
-            let nextStickyIdx: number | undefined;
-            let low = 0;
-            let high = stickyIndices.length - 1;
-            while (low <= high) {
-              const mid = (low + high) >>> 1;
-              if (stickyIndices[ mid ]! > i) {
-                nextStickyIdx = stickyIndices[ mid ];
-                high = mid - 1;
-              } else {
-                low = mid + 1;
-              }
-            }
-
-            if (nextStickyIdx !== undefined) {
-              const nextStickyX = fixedSize !== null ? nextStickyIdx * (fixedSize + columnGap) : itemSizesX.query(nextStickyIdx);
-              const distance = nextStickyX - relativeScrollX.value;
-              /* v8 ignore else -- @preserve */
-              if (distance < width) {
-                stickyOffset.x = -(width - distance);
-              }
-            }
-          }
-        }
-      }
-
-      items.push({
-        item,
+      const { isStickyActive, stickyOffset } = calculateStickyItem({
         index: i,
-        offset: { x: originalX - ssrOffsetX, y: originalY - ssrOffsetY },
-        size: { width, height },
+        isSticky,
+        direction: props.value.direction || 'vertical',
+        relativeScrollX: relativeScrollX.value,
+        relativeScrollY: relativeScrollY.value,
         originalX,
         originalY,
-        isSticky,
-        isStickyActive,
-        stickyOffset,
+        width,
+        height,
+        stickyIndices,
+        fixedSize: fixedItemSize.value,
+        fixedWidth: fixedColumnWidth.value,
+        gap: props.value.gap || 0,
+        columnGap: props.value.columnGap || 0,
+        getItemQueryY: (idx) => itemSizesY.query(idx),
+        getItemQueryX: (idx) => itemSizesX.query(idx),
       });
+
+      const offsetX = originalX - ssrOffsetX;
+      const offsetY = originalY - ssrOffsetY;
+      const last = lastItemsMap.get(i);
+
+      if (
+        last
+        && last.item === item
+        && last.offset.x === offsetX
+        && last.offset.y === offsetY
+        && last.size.width === width
+        && last.size.height === height
+        && last.isSticky === isSticky
+        && last.isStickyActive === isStickyActive
+        && last.stickyOffset.x === stickyOffset.x
+        && last.stickyOffset.y === stickyOffset.y
+      ) {
+        items.push(last);
+      } else {
+        items.push({
+          item,
+          index: i,
+          offset: { x: offsetX, y: offsetY },
+          size: { width, height },
+          originalX,
+          originalY,
+          isSticky,
+          isStickyActive,
+          stickyOffset,
+        });
+      }
     }
+
+    lastRenderedItems = items;
+
     return items;
   });
 
@@ -1109,28 +879,19 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       };
     }
 
-    const start = columnSizes.findLowerBound(relativeScrollX.value);
-    let currentX = columnSizes.query(start);
-    let end = start;
-
-    while (end < totalCols && currentX < relativeScrollX.value + viewportWidth.value) {
-      currentX = columnSizes.query(++end);
-    }
-
     const colBuffer = (props.value.ssrRange && !isScrolling.value) ? 0 : 2;
 
-    // Add buffer of columns
-    const safeStart = Math.max(0, start - colBuffer);
-    const safeEnd = Math.min(totalCols, end + colBuffer);
-
-    const padStart = columnSizes.query(safeStart);
-
-    return {
-      start: safeStart,
-      end: safeEnd,
-      padStart,
-      padEnd: columnSizes.query(totalCols) - columnSizes.query(safeEnd),
-    };
+    return calculateColumnRange({
+      columnCount: totalCols,
+      relativeScrollX: relativeScrollX.value,
+      viewportWidth: viewportWidth.value,
+      colBuffer,
+      fixedWidth: fixedColumnWidth.value,
+      columnGap: props.value.columnGap || 0,
+      findLowerBound: (offset) => columnSizes.findLowerBound(offset),
+      query: (idx) => columnSizes.query(idx),
+      totalColsQuery: () => columnSizes.query(totalCols),
+    });
   });
 
   /**
@@ -1144,12 +905,14 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     const columnGap = props.value.columnGap || 0;
 
     let currentColIndex = 0;
-    if (props.value.direction === 'horizontal' || props.value.direction === 'both') {
+    if (props.value.direction === 'horizontal') {
       if (fixedSize !== null) {
         currentColIndex = Math.floor(relativeScrollX.value / (fixedSize + columnGap));
       } else {
         currentColIndex = itemSizesX.findLowerBound(relativeScrollX.value);
       }
+    } else if (props.value.direction === 'both') {
+      currentColIndex = columnSizes.findLowerBound(relativeScrollX.value);
     }
 
     return {
@@ -1187,9 +950,13 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     if (target === window || target === document) {
       scrollX.value = window.scrollX;
       scrollY.value = window.scrollY;
+      viewportWidth.value = document.documentElement.clientWidth;
+      viewportHeight.value = document.documentElement.clientHeight;
     } else if (isScrollableElement(target)) {
       scrollX.value = target.scrollLeft;
       scrollY.value = target.scrollTop;
+      viewportWidth.value = target.clientWidth;
+      viewportHeight.value = target.clientHeight;
     }
 
     if (!isScrolling.value) {
@@ -1212,41 +979,61 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
    */
   const updateItemSizes = (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => {
     let needUpdate = false;
+    let deltaX = 0;
+    let deltaY = 0;
     const gap = props.value.gap || 0;
     const columnGap = props.value.columnGap || 0;
 
+    const currentRelX = relativeScrollX.value;
+    const currentRelY = relativeScrollY.value;
+    const firstRowIndex = props.value.direction === 'horizontal'
+      ? (fixedItemSize.value !== null ? Math.floor(currentRelX / (fixedItemSize.value + columnGap)) : itemSizesX.findLowerBound(currentRelX))
+      : (fixedItemSize.value !== null ? Math.floor(currentRelY / (fixedItemSize.value + gap)) : itemSizesY.findLowerBound(currentRelY));
+    const firstColIndex = props.value.direction === 'both'
+      ? columnSizes.findLowerBound(currentRelX)
+      : (props.value.direction === 'horizontal' ? firstRowIndex : 0);
+
+    const isHorizontalMode = props.value.direction === 'horizontal';
+    const isVerticalMode = props.value.direction === 'vertical';
+    const isBothMode = props.value.direction === 'both';
+
+    const processedRows = new Set<number>();
+    const processedCols = new Set<number>();
+
     for (const { index, inlineSize, blockSize, element } of updates) {
+      // Ignore 0-size measurements as they usually indicate hidden/detached elements
+      if (inlineSize <= 0 && blockSize <= 0) {
+        continue;
+      }
+
       const isMeasurable = isDynamicItemSize.value || typeof props.value.itemSize === 'function';
-      if (isMeasurable && index >= 0) {
-        if (props.value.direction === 'horizontal') {
+      if (index >= 0 && !processedRows.has(index) && isMeasurable && blockSize > 0) {
+        processedRows.add(index);
+        if (isHorizontalMode && inlineSize > 0) {
           const oldWidth = itemSizesX.get(index);
           const targetWidth = inlineSize + columnGap;
-          // Apply if:
-          // 1. It's the first measurement (measuredItemsX[index] is 0)
-          // 2. It's a significant change (> 0.5px)
-          /* v8 ignore else -- @preserve */
-          if (!measuredItemsX[ index ] || Math.abs(targetWidth - oldWidth) > 0.5) {
-            itemSizesX.update(index, targetWidth - oldWidth);
+          if (!measuredItemsX[ index ] || Math.abs(targetWidth - oldWidth) > 0.1) {
+            const d = targetWidth - oldWidth;
+            itemSizesX.update(index, d);
             measuredItemsX[ index ] = 1;
             needUpdate = true;
+            if (index < firstRowIndex) {
+              deltaX += d;
+            }
           }
         }
-        if (props.value.direction === 'vertical' || props.value.direction === 'both') {
+        if (isVerticalMode || isBothMode) {
           const oldHeight = itemSizesY.get(index);
           const targetHeight = blockSize + gap;
 
-          if (props.value.direction === 'both') {
-            // For grid, we should be careful with decreases because a row height is the max of all its cells.
-            /* v8 ignore else -- @preserve */
-            if (!measuredItemsY[ index ] || Math.abs(targetHeight - oldHeight) > 0.5) {
-              itemSizesY.update(index, targetHeight - oldHeight);
-              measuredItemsY[ index ] = 1;
-              needUpdate = true;
-            }
-          } else if (!measuredItemsY[ index ] || Math.abs(targetHeight - oldHeight) > 0.5) {
-            itemSizesY.update(index, targetHeight - oldHeight);
+          if (!measuredItemsY[ index ] || Math.abs(targetHeight - oldHeight) > 0.1) {
+            const d = targetHeight - oldHeight;
+            itemSizesY.update(index, d);
             measuredItemsY[ index ] = 1;
             needUpdate = true;
+            if (index < firstRowIndex) {
+              deltaY += d;
+            }
           }
         }
       }
@@ -1254,27 +1041,58 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       // Dynamic column width measurement
       const isColMeasurable = isDynamicColumnWidth.value || typeof props.value.columnWidth === 'function';
       if (
-        props.value.direction === 'both'
+        isBothMode
         && element
         && props.value.columnCount
         && isColMeasurable
+        && (inlineSize > 0 || element.dataset.colIndex === undefined)
       ) {
-        const cells = element.dataset.colIndex !== undefined
-          ? [ element ]
-          : Array.from(element.querySelectorAll('[data-col-index]')) as HTMLElement[];
-
-        for (const child of cells) {
-          const colIndex = Number.parseInt(child.dataset.colIndex!, 10);
-
-          /* v8 ignore else -- @preserve */
-          if (colIndex >= 0 && colIndex < (props.value.columnCount || 0)) {
-            const w = child.offsetWidth;
+        const colIndexAttr = element.dataset.colIndex;
+        if (colIndexAttr != null) {
+          const colIndex = Number.parseInt(colIndexAttr, 10);
+          if (colIndex >= 0 && colIndex < (props.value.columnCount || 0) && !processedCols.has(colIndex)) {
+            processedCols.add(colIndex);
             const oldW = columnSizes.get(colIndex);
-            const targetW = w + columnGap;
-            if (Math.abs(oldW - targetW) > 0.5) {
-              columnSizes.update(colIndex, targetW - oldW);
+            const targetW = inlineSize + columnGap;
+
+            if (!measuredColumns[ colIndex ] || Math.abs(oldW - targetW) > 0.1) {
+              const d = targetW - oldW;
+              if (Math.abs(d) > 0.1) {
+                columnSizes.update(colIndex, d);
+                needUpdate = true;
+                if (colIndex < firstColIndex) {
+                  deltaX += d;
+                }
+              }
               measuredColumns[ colIndex ] = 1;
-              needUpdate = true;
+            }
+          }
+        } else {
+          // If the element is a row, try to find cells with data-col-index
+          const cells = element.dataset.colIndex !== undefined
+            ? [ element ]
+            : Array.from(element.querySelectorAll('[data-col-index]')) as HTMLElement[];
+
+          for (const child of cells) {
+            const colIndex = Number.parseInt(child.dataset.colIndex!, 10);
+
+            if (colIndex >= 0 && colIndex < (props.value.columnCount || 0) && !processedCols.has(colIndex)) {
+              processedCols.add(colIndex);
+              const rect = child.getBoundingClientRect();
+              const w = rect.width;
+              const oldW = columnSizes.get(colIndex);
+              const targetW = w + columnGap;
+              if (!measuredColumns[ colIndex ] || Math.abs(oldW - targetW) > 0.1) {
+                const d = targetW - oldW;
+                if (Math.abs(d) > 0.1) {
+                  columnSizes.update(colIndex, d);
+                  needUpdate = true;
+                  if (colIndex < firstColIndex) {
+                    deltaX += d;
+                  }
+                }
+                measuredColumns[ colIndex ] = 1;
+              }
             }
           }
         }
@@ -1283,6 +1101,17 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     if (needUpdate) {
       treeUpdateFlag.value++;
+      // Only compensate if not in a programmatic scroll,
+      // as it would interrupt the browser animation or explicit alignment.
+      const hasPendingScroll = pendingScroll.value !== null || isProgrammaticScroll.value;
+
+      if (!hasPendingScroll && (deltaX !== 0 || deltaY !== 0)) {
+        scrollToOffset(
+          deltaX !== 0 ? currentRelX + deltaX : null,
+          deltaY !== 0 ? currentRelY + deltaY : null,
+          { behavior: 'auto' },
+        );
+      }
     }
   };
 
@@ -1302,14 +1131,63 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
   const checkPendingScroll = () => {
     if (pendingScroll.value && !isHydrating.value) {
       const { rowIndex, colIndex, options } = pendingScroll.value;
-      const correctionOptions: ScrollToIndexOptions = isScrollToIndexOptions(options)
-        ? { ...options, isCorrection: true }
-        : { align: options as ScrollAlignment | ScrollAlignmentOptions, isCorrection: true };
-      scrollToIndex(rowIndex, colIndex, correctionOptions);
+
+      const isSmooth = isScrollToIndexOptions(options) && options.behavior === 'smooth';
+
+      // If it's a smooth scroll, we wait until it's finished before correcting.
+      if (isSmooth && isScrolling.value) {
+        return;
+      }
+
+      // Re-calculate target with current (possibly updated) measurements
+      const { targetX, targetY } = calculateScrollTarget({
+        rowIndex,
+        colIndex,
+        options,
+        itemsLength: props.value.items.length,
+        columnCount: props.value.columnCount || 0,
+        direction: props.value.direction || 'vertical',
+        viewportWidth: viewportWidth.value,
+        viewportHeight: viewportHeight.value,
+        totalWidth: totalWidth.value,
+        totalHeight: totalHeight.value,
+        scrollPaddingStart: props.value.scrollPaddingStart,
+        scrollPaddingEnd: props.value.scrollPaddingEnd,
+        gap: props.value.gap || 0,
+        columnGap: props.value.columnGap || 0,
+        fixedSize: fixedItemSize.value,
+        fixedWidth: fixedColumnWidth.value,
+        relativeScrollX: relativeScrollX.value,
+        relativeScrollY: relativeScrollY.value,
+        getItemSizeY: (idx) => itemSizesY.get(idx),
+        getItemSizeX: (idx) => itemSizesX.get(idx),
+        getItemQueryY: (idx) => itemSizesY.query(idx),
+        getItemQueryX: (idx) => itemSizesX.query(idx),
+        getColumnSize: (idx) => columnSizes.get(idx),
+        getColumnQuery: (idx) => columnSizes.query(idx),
+      });
+
+      const tolerance = 1;
+      const reachedX = (colIndex === null || colIndex === undefined) || Math.abs(relativeScrollX.value - targetX) < tolerance;
+      const reachedY = (rowIndex === null || rowIndex === undefined) || Math.abs(relativeScrollY.value - targetY) < tolerance;
+
+      const isMeasuredX = colIndex == null || colIndex === undefined || measuredColumns[ colIndex ] === 1;
+      const isMeasuredY = rowIndex == null || rowIndex === undefined || measuredItemsY[ rowIndex ] === 1;
+
+      if (reachedX && reachedY) {
+        if (isMeasuredX && isMeasuredY) {
+          pendingScroll.value = null;
+        }
+      } else {
+        const correctionOptions: ScrollToIndexOptions = isScrollToIndexOptions(options)
+          ? { ...options, isCorrection: true }
+          : { align: options as ScrollAlignment | ScrollAlignmentOptions, isCorrection: true };
+        scrollToIndex(rowIndex, colIndex, correctionOptions);
+      }
     }
   };
 
-  watch(treeUpdateFlag, checkPendingScroll);
+  watch([ treeUpdateFlag, viewportWidth, viewportHeight ], checkPendingScroll);
 
   watch(isScrolling, (scrolling) => {
     if (!scrolling) {
@@ -1327,14 +1205,14 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
 
     if (container === window) {
-      viewportWidth.value = window.innerWidth;
-      viewportHeight.value = window.innerHeight;
+      viewportWidth.value = document.documentElement.clientWidth;
+      viewportHeight.value = document.documentElement.clientHeight;
       scrollX.value = window.scrollX;
       scrollY.value = window.scrollY;
 
       const onResize = () => {
-        viewportWidth.value = window.innerWidth;
-        viewportHeight.value = window.innerHeight;
+        viewportWidth.value = document.documentElement.clientWidth;
+        viewportHeight.value = document.documentElement.clientHeight;
         updateHostOffset();
       };
       window.addEventListener('resize', onResize);
@@ -1350,7 +1228,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
       resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          /* v8 ignore else -- @preserve */
           if (entry.target === container) {
             viewportWidth.value = (container as HTMLElement).clientWidth;
             viewportHeight.value = (container as HTMLElement).clientHeight;
@@ -1387,7 +1264,6 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
             : props.value.ssrRange?.start;
           const initialAlign = props.value.initialScrollAlign || 'start';
 
-          /* v8 ignore else -- @preserve */
           if (initialIndex !== undefined && initialIndex !== null) {
             scrollToIndex(initialIndex, props.value.ssrRange?.colStart, { align: initialAlign, behavior: 'auto' });
           }
@@ -1423,70 +1299,95 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
   return {
     /**
-     * Array of items to be rendered with their calculated offsets and sizes.
+     * Array of items currently rendered in the DOM with their calculated offsets and sizes.
+     * @see RenderedItem
      */
     renderedItems,
+
     /**
-     * Total calculated width of all items including gaps.
+     * Total calculated width of all items including gaps (in pixels).
      */
     totalWidth,
+
     /**
-     * Total calculated height of all items including gaps.
+     * Total calculated height of all items including gaps (in pixels).
      */
     totalHeight,
+
     /**
      * Detailed information about the current scroll state.
-     * Includes currentIndex, scrollOffset, viewportSize, totalSize, and isScrolling.
+     * Includes currentIndex, scrollOffset, viewportSize, totalSize, and scrolling status.
+     * @see ScrollDetails
      */
     scrollDetails,
+
     /**
      * Programmatically scroll to a specific row and/or column.
-     * @param rowIndex - The row index to scroll to
-     * @param colIndex - The column index to scroll to
-     * @param options - Alignment and behavior options
+     *
+     * @param rowIndex - The row index to scroll to. Pass null to only scroll horizontally.
+     * @param colIndex - The column index to scroll to. Pass null to only scroll vertically.
+     * @param options - Alignment and behavior options.
+     * @see ScrollAlignment
+     * @see ScrollToIndexOptions
      */
     scrollToIndex,
+
     /**
-     * Programmatically scroll to a specific pixel offset.
-     * @param x - The pixel offset to scroll to on the X axis
-     * @param y - The pixel offset to scroll to on the Y axis
-     * @param options - Behavior options
+     * Programmatically scroll to a specific pixel offset relative to the content start.
+     *
+     * @param x - The pixel offset to scroll to on the X axis. Pass null to keep current position.
+     * @param y - The pixel offset to scroll to on the Y axis. Pass null to keep current position.
+     * @param options - Scroll options (behavior).
      */
     scrollToOffset,
+
     /**
-     * Stops any currently active programmatic scroll and clears pending corrections.
+     * Stops any currently active smooth scroll animation and clears pending corrections.
      */
     stopProgrammaticScroll,
+
     /**
      * Updates the stored size of an item. Should be called when an item is measured (e.g., via ResizeObserver).
-     * @param index - The item index
-     * @param width - The measured width
-     * @param height - The measured height
-     * @param element - The measured element (optional, used for grid column detection)
+     *
+     * @param index - The item index.
+     * @param width - The measured inlineSize (width).
+     * @param height - The measured blockSize (height).
+     * @param element - The measured element (optional, used for robust grid column detection).
      */
     updateItemSize,
+
     /**
-     * Updates the stored size of multiple items. Should be called when items are measured (e.g., via ResizeObserver).
-     * @param updates - Array of item updates
+     * Updates the stored size of multiple items simultaneously.
+     *
+     * @param updates - Array of measurement updates.
      */
     updateItemSizes,
+
     /**
      * Recalculates the host element's offset relative to the scroll container.
+     * Useful if the container or host moves without a resize event.
      */
     updateHostOffset,
+
     /**
-     * Information about the current visible range of columns.
+     * Information about the current visible range of columns and their paddings.
+     * @see ColumnRange
      */
     columnRange,
+
     /**
-     * Helper to get the width of a specific column based on current configuration.
-     * @param index - The column index
+     * Helper to get the width of a specific column based on current configuration and measurements.
+     *
+     * @param index - The column index.
      */
     getColumnWidth,
+
     /**
      * Resets all dynamic measurements and re-initializes from props.
+     * Useful if item sizes have changed externally.
      */
     refresh,
+
     /**
      * Whether the component has finished its first client-side mount and hydration.
      */

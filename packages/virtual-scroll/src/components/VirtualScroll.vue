@@ -5,7 +5,7 @@ import type {
   ScrollAlignmentOptions,
   ScrollDetails,
   VirtualScrollProps,
-} from '../composables/useVirtualScroll';
+} from '../types';
 import type { VNodeChild } from 'vue';
 
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
@@ -14,67 +14,198 @@ import {
   DEFAULT_ITEM_SIZE,
   useVirtualScroll,
 } from '../composables/useVirtualScroll';
-import { getPaddingX, getPaddingY } from '../utils/scroll';
+import { isWindowLike } from '../utils/scroll';
+import { calculateItemStyle } from '../utils/virtual-scroll-logic';
 
 export interface Props<T = unknown> {
-  /** Array of items to be virtualized. */
+  /**
+   * Array of items to be virtualized.
+   * Required.
+   */
   items: T[];
-  /** Fixed size of each item or a function that returns the size of an item. Pass 0, null or undefined for dynamic size detection. */
+
+  /**
+   * Fixed size of each item (in pixels) or a function that returns the size of an item.
+   * Pass 0, null or undefined for dynamic size detection via ResizeObserver.
+   * @default 40
+   */
   itemSize?: number | ((item: T, index: number) => number) | null;
-  /** Direction of the scroll: 'vertical', 'horizontal', or 'both' (grid). */
+
+  /**
+   * Direction of the scroll.
+   * - 'vertical': Standard vertical list.
+   * - 'horizontal': Standard horizontal list.
+   * - 'both': Grid mode virtualizing both rows and columns.
+   * @default 'vertical'
+   */
   direction?: 'vertical' | 'horizontal' | 'both';
-  /** Number of items to render before the visible viewport. */
+
+  /**
+   * Number of items to render before the visible viewport.
+   * Useful for smoother scrolling and keyboard navigation.
+   * @default 5
+   */
   bufferBefore?: number;
-  /** Number of items to render after the visible viewport. */
+
+  /**
+   * Number of items to render after the visible viewport.
+   * @default 5
+   */
   bufferAfter?: number;
-  /** The scrollable container element or window. If not provided, the host element is used. */
+
+  /**
+   * The scrollable container element or window.
+   * If not provided, the host element (root of VirtualScroll) is used.
+   * @default hostRef
+   */
   container?: HTMLElement | Window | null;
-  /** Range of items to render for SSR. */
+
+  /**
+   * Range of items to render during Server-Side Rendering.
+   * When provided, these items will be rendered in-flow before hydration.
+   * @see SSRRange
+   */
   ssrRange?: {
+    /** First row index to render. */
     start: number;
+    /** Last row index to render (exclusive). */
     end: number;
+    /** First column index to render (for grid mode). */
     colStart?: number;
+    /** Last column index to render (exclusive, for grid mode). */
     colEnd?: number;
   };
-  /** Number of columns for bidirectional (grid) scroll. */
+
+  /**
+   * Number of columns for bidirectional (grid) scroll.
+   * Only applicable when direction="both".
+   * @default 0
+   */
   columnCount?: number;
-  /** Fixed width of columns or an array/function for column widths. Pass 0, null or undefined for dynamic width. */
+
+  /**
+   * Fixed width of columns (in pixels), an array of widths, or a function for column widths.
+   * Pass 0, null or undefined for dynamic width detection via ResizeObserver.
+   * Only applicable when direction="both".
+   * @default 100
+   */
   columnWidth?: number | number[] | ((index: number) => number) | null;
-  /** The HTML tag to use for the container. */
+
+  /**
+   * The HTML tag to use for the root container.
+   * @default 'div'
+   */
   containerTag?: string;
-  /** The HTML tag to use for the items wrapper. */
+
+  /**
+   * The HTML tag to use for the items wrapper.
+   * Useful for <table> integration (e.g. 'tbody').
+   * @default 'div'
+   */
   wrapperTag?: string;
-  /** The HTML tag to use for each item. */
+
+  /**
+   * The HTML tag to use for each item.
+   * Useful for <table> integration (e.g. 'tr').
+   * @default 'div'
+   */
   itemTag?: string;
-  /** Padding at the start of the scroll container. */
+
+  /**
+   * Additional padding at the start of the scroll container (top or left).
+   * Can be a number (applied to current direction) or an object with x/y.
+   * @default 0
+   */
   scrollPaddingStart?: number | { x?: number; y?: number; };
-  /** Padding at the end of the scroll container. */
+
+  /**
+   * Additional padding at the end of the scroll container (bottom or right).
+   * @default 0
+   */
   scrollPaddingEnd?: number | { x?: number; y?: number; };
-  /** Whether the header slot content is sticky and should be accounted for in scroll padding. If true, header size is automatically measured. */
+
+  /**
+   * Whether the content in the 'header' slot is sticky.
+   * If true, the header size is measured and accounted for in scroll padding.
+   * @default false
+   */
   stickyHeader?: boolean;
-  /** Whether the footer slot content is sticky and should be accounted for in scroll padding. If true, footer size is automatically measured. */
+
+  /**
+   * Whether the content in the 'footer' slot is sticky.
+   * @default false
+   */
   stickyFooter?: boolean;
-  /** Gap between items in pixels (vertical). */
+
+  /**
+   * Gap between items in pixels (vertical gap in vertical/grid mode, horizontal gap in horizontal mode).
+   * @default 0
+   */
   gap?: number;
-  /** Gap between columns in pixels (horizontal/grid). */
+
+  /**
+   * Gap between columns in pixels. Only applicable when direction="both" or "horizontal".
+   * @default 0
+   */
   columnGap?: number;
-  /** Indices of items that should stick to the top/start. Supports iOS-style pushing effect. */
+
+  /**
+   * Indices of items that should stick to the top/start of the viewport.
+   * Supports iOS-style pushing effect where the next sticky item pushes the previous one.
+   * @default []
+   */
   stickyIndices?: number[];
-  /** Distance from the end of the scrollable area to trigger 'load' event in pixels. */
+
+  /**
+   * Distance from the end of the scrollable area (in pixels) to trigger the 'load' event.
+   * @default 200
+   */
   loadDistance?: number;
-  /** Whether items are currently being loaded. Prevents multiple 'load' events and shows 'loading' slot. */
+
+  /**
+   * Whether items are currently being loaded.
+   * Prevents multiple 'load' events from triggering and shows the 'loading' slot.
+   * @default false
+   */
   loading?: boolean;
-  /** Whether to automatically restore scroll position when items are prepended to the list. */
+
+  /**
+   * Whether to automatically restore and maintain scroll position when items are prepended to the list.
+   * Perfect for chat applications.
+   * @default false
+   */
   restoreScrollOnPrepend?: boolean;
-  /** Initial scroll index to jump to on mount. */
+
+  /**
+   * Initial scroll index to jump to immediately after mount.
+   */
   initialScrollIndex?: number;
-  /** Alignment for the initial scroll index. */
+
+  /**
+   * Alignment for the initial scroll index.
+   * @default 'start'
+   * @see ScrollAlignment
+   */
   initialScrollAlign?: ScrollAlignment | ScrollAlignmentOptions;
-  /** Default size for items before they are measured. */
+
+  /**
+   * Default size for items before they are measured by ResizeObserver.
+   * Only used when itemSize is dynamic.
+   * @default 40
+   */
   defaultItemSize?: number;
-  /** Default width for columns before they are measured. */
+
+  /**
+   * Default width for columns before they are measured by ResizeObserver.
+   * Only used when columnWidth is dynamic.
+   * @default 100
+   */
   defaultColumnWidth?: number;
-  /** Whether to show debug information (buffers and offsets). */
+
+  /**
+   * Whether to show debug information (visible offsets and indices) over items.
+   * @default false
+   */
   debug?: boolean;
 }
 
@@ -106,26 +237,55 @@ const emit = defineEmits<{
 }>();
 
 const slots = defineSlots<{
-  /** Content rendered at the top of the scrollable area. Can be made sticky. */
+  /**
+   * Content rendered at the top of the scrollable area.
+   * Can be made sticky using the `stickyHeader` prop.
+   */
   header?: (props: Record<string, never>) => VNodeChild;
-  /** Slot for rendering each individual item. */
+
+  /**
+   * Scoped slot for rendering each individual item.
+   */
   item?: (props: {
-    /** The data item being rendered. */
+    /** The original data item from the `items` array. */
     item: T;
-    /** The index of the item in the items array. */
+    /** The original index of the item in the `items` array. */
     index: number;
-    /** The current visible range of columns (for grid mode). */
-    columnRange: { start: number; end: number; padStart: number; padEnd: number; };
-    /** Function to get the width of a specific column. */
+    /**
+     * Information about the current visible range of columns (for grid mode).
+     * @see ColumnRange
+     */
+    columnRange: {
+      /** Index of the first rendered column. */
+      start: number;
+      /** Index of the last rendered column (exclusive). */
+      end: number;
+      /** Pixel offset from the start of the row to the first rendered cell. */
+      padStart: number;
+      /** Pixel offset from the last rendered cell to the end of the row. */
+      padEnd: number;
+    };
+    /**
+     * Helper function to get the width of a specific column.
+     * Useful for setting consistent widths in grid mode.
+     */
     getColumnWidth: (index: number) => number;
-    /** Whether this item is configured to be sticky. */
+    /** Whether this item is configured to be sticky via `stickyIndices`. */
     isSticky?: boolean | undefined;
-    /** Whether this item is currently in a sticky state. */
+    /** Whether this item is currently in a sticky state (stuck at the top/start). */
     isStickyActive?: boolean | undefined;
   }) => VNodeChild;
-  /** Content shown when `loading` prop is true. */
+
+  /**
+   * Content shown at the end of the list when the `loading` prop is true.
+   * Also prevents additional 'load' events from triggering while visible.
+   */
   loading?: (props: Record<string, never>) => VNodeChild;
-  /** Content rendered at the bottom of the scrollable area. Can be made sticky. */
+
+  /**
+   * Content rendered at the bottom of the scrollable area.
+   * Can be made sticky using the `stickyFooter` prop.
+   */
   footer?: (props: Record<string, never>) => VNodeChild;
 }>();
 
@@ -151,21 +311,23 @@ const virtualScrollProps = computed(() => {
   const pStart = props.scrollPaddingStart;
   const pEnd = props.scrollPaddingEnd;
 
-  /* v8 ignore start -- @preserve */
+  /* Trigger re-evaluation on items array mutations */
+  // eslint-disable-next-line ts/no-unused-expressions
+  props.items.length;
+
   const startX = typeof pStart === 'object'
     ? (pStart.x || 0)
-    : (props.direction === 'horizontal' ? (pStart || 0) : 0);
+    : ((props.direction === 'horizontal' || props.direction === 'both') ? (pStart || 0) : 0);
   const startY = typeof pStart === 'object'
     ? (pStart.y || 0)
-    : (props.direction !== 'horizontal' ? (pStart || 0) : 0);
+    : ((props.direction === 'vertical' || props.direction === 'both') ? (pStart || 0) : 0);
 
   const endX = typeof pEnd === 'object'
     ? (pEnd.x || 0)
-    : (props.direction === 'horizontal' ? (pEnd || 0) : 0);
+    : ((props.direction === 'horizontal' || props.direction === 'both') ? (pEnd || 0) : 0);
   const endY = typeof pEnd === 'object'
     ? (pEnd.y || 0)
-    : (props.direction !== 'horizontal' ? (pEnd || 0) : 0);
-  /* v8 ignore stop -- @preserve */
+    : ((props.direction === 'vertical' || props.direction === 'both') ? (pEnd || 0) : 0);
 
   return {
     items: props.items,
@@ -228,7 +390,6 @@ function refresh() {
     const updates: { index: number; inlineSize: number; blockSize: number; element?: HTMLElement; }[] = [];
 
     for (const [ index, el ] of itemRefs.entries()) {
-      /* v8 ignore else -- @preserve */
       if (el) {
         updates.push({
           index,
@@ -288,7 +449,6 @@ watch(scrollDetails, (details, oldDetails) => {
 });
 
 watch(isHydrated, (hydrated) => {
-  /* v8 ignore else -- @preserve */
   if (hydrated) {
     emit('visibleRangeChange', {
       start: scrollDetails.value.range.start,
@@ -299,12 +459,10 @@ watch(isHydrated, (hydrated) => {
   }
 }, { once: true });
 
-/* v8 ignore next 2 -- @preserve */
 const hostResizeObserver = typeof window === 'undefined'
   ? null
   : new ResizeObserver(updateHostOffset);
 
-/* v8 ignore next 2 -- @preserve */
 const itemResizeObserver = typeof window === 'undefined'
   ? null
   : new ResizeObserver((entries) => {
@@ -315,34 +473,32 @@ const itemResizeObserver = typeof window === 'undefined'
       const index = Number(target.dataset.index);
       const colIndex = target.dataset.colIndex;
 
+      let inlineSize = entry.contentRect.width;
+      let blockSize = entry.contentRect.height;
+
+      if (entry.borderBoxSize && entry.borderBoxSize.length > 0) {
+        inlineSize = entry.borderBoxSize[ 0 ]!.inlineSize;
+        blockSize = entry.borderBoxSize[ 0 ]!.blockSize;
+      } else {
+        // Fallback for older browsers or if borderBoxSize is missing
+        inlineSize = target.offsetWidth;
+        blockSize = target.offsetHeight;
+      }
+
       if (colIndex !== undefined) {
         // It's a cell measurement. row index is not strictly needed for column width.
         // We use -1 as a placeholder for row index if it's a cell measurement.
-        updates.push({ index: -1, inlineSize: 0, blockSize: 0, element: target });
+        updates.push({ index: -1, inlineSize, blockSize, element: target });
       } else if (!Number.isNaN(index)) {
-        let inlineSize = entry.contentRect.width;
-        let blockSize = entry.contentRect.height;
-
-        if (entry.borderBoxSize && entry.borderBoxSize.length > 0) {
-          inlineSize = entry.borderBoxSize[ 0 ]!.inlineSize;
-          blockSize = entry.borderBoxSize[ 0 ]!.blockSize;
-        } else {
-          // Fallback for older browsers or if borderBoxSize is missing
-          inlineSize = target.offsetWidth;
-          blockSize = target.offsetHeight;
-        }
-
         updates.push({ index, inlineSize, blockSize, element: target });
       }
     }
 
-    /* v8 ignore else -- @preserve */
     if (updates.length > 0) {
       updateItemSizes(updates);
     }
   });
 
-/* v8 ignore next 2 -- @preserve */
 const extraResizeObserver = typeof window === 'undefined'
   ? null
   : new ResizeObserver(() => {
@@ -352,7 +508,6 @@ const extraResizeObserver = typeof window === 'undefined'
   });
 
 watch(headerRef, (newEl, oldEl) => {
-  /* v8 ignore if -- @preserve */
   if (oldEl) {
     extraResizeObserver?.unobserve(oldEl);
   }
@@ -362,7 +517,6 @@ watch(headerRef, (newEl, oldEl) => {
 }, { immediate: true });
 
 watch(footerRef, (newEl, oldEl) => {
-  /* v8 ignore if -- @preserve */
   if (oldEl) {
     extraResizeObserver?.unobserve(oldEl);
   }
@@ -371,28 +525,7 @@ watch(footerRef, (newEl, oldEl) => {
   }
 }, { immediate: true });
 
-const firstRenderedIndex = computed(() => renderedItems.value[ 0 ]?.index);
-watch(firstRenderedIndex, (newIdx, oldIdx) => {
-  if (props.direction === 'both') {
-    /* v8 ignore else -- @preserve */
-    if (oldIdx !== undefined) {
-      const oldEl = itemRefs.get(oldIdx);
-      if (oldEl) {
-        oldEl.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.unobserve(c));
-      }
-    }
-    if (newIdx !== undefined) {
-      const newEl = itemRefs.get(newIdx);
-      /* v8 ignore else -- @preserve */
-      if (newEl) {
-        newEl.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.observe(c));
-      }
-    }
-  }
-}, { flush: 'post' });
-
 onMounted(() => {
-  /* v8 ignore else -- @preserve */
   if (hostRef.value) {
     hostResizeObserver?.observe(hostRef.value);
   }
@@ -400,14 +533,7 @@ onMounted(() => {
   // Re-observe items that were set before observer was ready
   for (const el of itemRefs.values()) {
     itemResizeObserver?.observe(el);
-  }
-
-  // Observe cells of the first rendered item
-  /* v8 ignore else -- @preserve */
-  if (firstRenderedIndex.value !== undefined) {
-    const el = itemRefs.get(firstRenderedIndex.value);
-    /* v8 ignore else -- @preserve */
-    if (el) {
+    if (props.direction === 'both') {
       el.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.observe(c));
     }
   }
@@ -426,77 +552,86 @@ function setItemRef(el: unknown, index: number) {
   if (el) {
     itemRefs.set(index, el as HTMLElement);
     itemResizeObserver?.observe(el as HTMLElement);
+
+    if (props.direction === 'both') {
+      (el as HTMLElement).querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.observe(c));
+    }
   } else {
     const oldEl = itemRefs.get(index);
-    /* v8 ignore else -- @preserve */
     if (oldEl) {
       itemResizeObserver?.unobserve(oldEl);
+      if (props.direction === 'both') {
+        oldEl.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.unobserve(c));
+      }
       itemRefs.delete(index);
     }
   }
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-  stopProgrammaticScroll();
   const { viewportSize, scrollOffset } = scrollDetails.value;
   const isHorizontal = props.direction !== 'vertical';
   const isVertical = props.direction !== 'horizontal';
 
-  if (event.key === 'Home') {
-    event.preventDefault();
-    scrollToIndex(0, 0, 'start');
-    return;
-  }
-  if (event.key === 'End') {
-    event.preventDefault();
-    const lastItemIndex = props.items.length - 1;
-    const lastColIndex = (props.columnCount || 0) > 0 ? props.columnCount - 1 : 0;
+  switch (event.key) {
+    case 'Home':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToIndex(0, 0, 'start');
+      break;
+    case 'End': {
+      event.preventDefault();
+      stopProgrammaticScroll();
+      const lastItemIndex = props.items.length - 1;
+      const lastColIndex = (props.columnCount || 0) > 0 ? props.columnCount - 1 : 0;
 
-    if (isHorizontal) {
-      if (isVertical) {
-        scrollToIndex(lastItemIndex, lastColIndex, 'end');
+      if (isHorizontal) {
+        if (isVertical) {
+          scrollToIndex(lastItemIndex, lastColIndex, 'end');
+        } else {
+          scrollToIndex(0, lastItemIndex, 'end');
+        }
       } else {
-        scrollToIndex(0, lastItemIndex, 'end');
+        scrollToIndex(lastItemIndex, 0, 'end');
       }
-    } else {
-      scrollToIndex(lastItemIndex, 0, 'end');
+      break;
     }
-    return;
-  }
-  if (event.key === 'ArrowUp') {
-    event.preventDefault();
-    scrollToOffset(null, scrollOffset.y - DEFAULT_ITEM_SIZE);
-    return;
-  }
-  if (event.key === 'ArrowDown') {
-    event.preventDefault();
-    scrollToOffset(null, scrollOffset.y + DEFAULT_ITEM_SIZE);
-    return;
-  }
-  if (event.key === 'ArrowLeft') {
-    event.preventDefault();
-    scrollToOffset(scrollOffset.x - DEFAULT_ITEM_SIZE, null);
-    return;
-  }
-  if (event.key === 'ArrowRight') {
-    event.preventDefault();
-    scrollToOffset(scrollOffset.x + DEFAULT_ITEM_SIZE, null);
-    return;
-  }
-  if (event.key === 'PageUp') {
-    event.preventDefault();
-    scrollToOffset(
-      !isVertical && isHorizontal ? scrollOffset.x - viewportSize.width : null,
-      isVertical ? scrollOffset.y - viewportSize.height : null,
-    );
-    return;
-  }
-  if (event.key === 'PageDown') {
-    event.preventDefault();
-    scrollToOffset(
-      !isVertical && isHorizontal ? scrollOffset.x + viewportSize.width : null,
-      isVertical ? scrollOffset.y + viewportSize.height : null,
-    );
+    case 'ArrowUp':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToOffset(null, scrollOffset.y - DEFAULT_ITEM_SIZE);
+      break;
+    case 'ArrowDown':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToOffset(null, scrollOffset.y + DEFAULT_ITEM_SIZE);
+      break;
+    case 'ArrowLeft':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToOffset(scrollOffset.x - DEFAULT_ITEM_SIZE, null);
+      break;
+    case 'ArrowRight':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToOffset(scrollOffset.x + DEFAULT_ITEM_SIZE, null);
+      break;
+    case 'PageUp':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToOffset(
+        !isVertical && isHorizontal ? scrollOffset.x - viewportSize.width : null,
+        isVertical ? scrollOffset.y - viewportSize.height : null,
+      );
+      break;
+    case 'PageDown':
+      event.preventDefault();
+      stopProgrammaticScroll();
+      scrollToOffset(
+        !isVertical && isHorizontal ? scrollOffset.x + viewportSize.width : null,
+        isVertical ? scrollOffset.y + viewportSize.height : null,
+      );
+      break;
   }
 }
 
@@ -506,23 +641,7 @@ onUnmounted(() => {
   extraResizeObserver?.disconnect();
 });
 
-const isWindowContainer = computed(() => {
-  const c = props.container;
-  if (
-    c === null
-    // window
-    || (typeof window !== 'undefined' && c === window)
-  ) {
-    return true;
-  }
-
-  // body
-  if (c && typeof c === 'object' && 'tagName' in c) {
-    return (c as HTMLElement).tagName === 'BODY';
-  }
-
-  return false;
-});
+const isWindowContainer = computed(() => isWindowLike(props.container));
 
 const containerStyle = computed(() => {
   if (isWindowContainer.value) {
@@ -562,47 +681,14 @@ const spacerStyle = computed(() => ({
 }));
 
 function getItemStyle(item: RenderedItem<T>) {
-  const isVertical = props.direction === 'vertical';
-  const isHorizontal = props.direction === 'horizontal';
-  const isBoth = props.direction === 'both';
-  const isDynamic = props.itemSize === undefined || props.itemSize === null || props.itemSize === 0;
-
-  const style: Record<string, string | number | undefined> = {
-    blockSize: isHorizontal ? '100%' : (!isDynamic ? `${ item.size.height }px` : 'auto'),
-  };
-
-  if (isVertical && props.containerTag === 'table') {
-    style.minInlineSize = '100%';
-  } else {
-    style.inlineSize = isVertical ? '100%' : (!isDynamic ? `${ item.size.width }px` : 'auto');
-  }
-
-  if (isDynamic) {
-    if (!isVertical) {
-      style.minInlineSize = '1px';
-    }
-    if (!isHorizontal) {
-      style.minBlockSize = '1px';
-    }
-  }
-
-  if (isHydrated.value) {
-    if (item.isStickyActive) {
-      if (isVertical || isBoth) {
-        style.insetBlockStart = `${ getPaddingY(props.scrollPaddingStart, props.direction) }px`;
-      }
-
-      if (isHorizontal || isBoth) {
-        style.insetInlineStart = `${ getPaddingX(props.scrollPaddingStart, props.direction) }px`;
-      }
-
-      style.transform = `translate(${ item.stickyOffset.x }px, ${ item.stickyOffset.y }px)`;
-    } else {
-      style.transform = `translate(${ item.offset.x }px, ${ item.offset.y }px)`;
-    }
-  }
-
-  return style;
+  return calculateItemStyle({
+    containerTag: props.containerTag,
+    direction: props.direction,
+    isHydrated: isHydrated.value,
+    item,
+    itemSize: props.itemSize,
+    scrollPaddingStart: virtualScrollProps.value.scrollPaddingStart,
+  });
 }
 
 const isDebug = computed(() => props.debug);
@@ -611,12 +697,59 @@ const headerTag = computed(() => isTable.value ? 'thead' : 'div');
 const footerTag = computed(() => isTable.value ? 'tfoot' : 'div');
 
 defineExpose({
+  /**
+   * Detailed information about the current scroll state.
+   * @see ScrollDetails
+   * @see useVirtualScroll
+   */
   scrollDetails,
+
+  /**
+   * Information about the current visible range of columns.
+   * @see ColumnRange
+   * @see useVirtualScroll
+   */
   columnRange,
+
+  /**
+   * Helper to get the width of a specific column.
+   * @param index - The column index.
+   * @see useVirtualScroll
+   */
   getColumnWidth,
+
+  /**
+   * Programmatically scroll to a specific row and/or column.
+   *
+   * @param rowIndex - The row index to scroll to. Pass null to only scroll horizontally.
+   * @param colIndex - The column index to scroll to. Pass null to only scroll vertically.
+   * @param options - Alignment and behavior options. Defaults to { align: 'auto', behavior: 'auto' }.
+   * @see ScrollAlignment
+   * @see ScrollToIndexOptions
+   * @see useVirtualScroll
+   */
   scrollToIndex,
+
+  /**
+   * Programmatically scroll to a specific pixel offset.
+   *
+   * @param x - The pixel offset to scroll to on the X axis. Pass null to keep current position.
+   * @param y - The pixel offset to scroll to on the Y axis. Pass null to keep current position.
+   * @param options - Scroll options (behavior). Defaults to { behavior: 'auto' }.
+   * @see useVirtualScroll
+   */
   scrollToOffset,
+
+  /**
+   * Resets all dynamic measurements and re-initializes from props.
+   * @see useVirtualScroll
+   */
   refresh,
+
+  /**
+   * Immediately stops any currently active smooth scroll animation and clears pending corrections.
+   * @see useVirtualScroll
+   */
   stopProgrammaticScroll,
 });
 </script>
@@ -641,7 +774,6 @@ defineExpose({
     @pointerdown.passive="stopProgrammaticScroll"
     @touchstart.passive="stopProgrammaticScroll"
   >
-    <!-- v8 ignore start -->
     <component
       :is="headerTag"
       v-if="slots.header"
@@ -651,7 +783,6 @@ defineExpose({
     >
       <slot name="header" />
     </component>
-    <!-- v8 ignore stop -->
 
     <component
       :is="wrapperTag"
@@ -660,7 +791,6 @@ defineExpose({
       :style="wrapperStyle"
     >
       <!-- Phantom element to push scroll height -->
-      <!-- v8 ignore start -->
       <component
         :is="itemTag"
         v-if="isTable"
@@ -669,7 +799,6 @@ defineExpose({
       >
         <td style="padding: 0; border: none; block-size: inherit;" />
       </component>
-      <!-- v8 ignore stop -->
 
       <component
         :is="itemTag"
@@ -699,7 +828,6 @@ defineExpose({
       </component>
     </component>
 
-    <!-- v8 ignore start -->
     <div
       v-if="loading && slots.loading"
       class="virtual-scroll-loading"
@@ -717,7 +845,6 @@ defineExpose({
     >
       <slot name="footer" />
     </component>
-    <!-- v8 ignore stop -->
   </component>
 </template>
 
@@ -754,6 +881,7 @@ defineExpose({
 }
 
 .virtual-scroll-item {
+  display: grid;
   box-sizing: border-box;
   will-change: transform;
 

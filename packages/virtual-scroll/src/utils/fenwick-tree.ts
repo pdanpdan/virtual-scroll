@@ -1,20 +1,28 @@
 /**
  * Fenwick Tree (Binary Indexed Tree) implementation for efficient
  * prefix sum calculations and updates.
+ *
+ * Provides O(log n) time complexity for both point updates and prefix sum queries.
  */
 export class FenwickTree {
   private tree: Float64Array;
   private values: Float64Array;
 
+  /**
+   * Creates a new Fenwick Tree with the specified size.
+   *
+   * @param size - The number of elements in the tree.
+   */
   constructor(size: number) {
     this.tree = new Float64Array(size + 1);
     this.values = new Float64Array(size);
   }
 
   /**
-   * Update the value at a specific index and propagate changes.
-   * @param index 0-based index
-   * @param delta The change in value (new value - old value)
+   * Update the value at a specific index and propagate changes throughout the tree.
+   *
+   * @param index - The 0-based index to update.
+   * @param delta - The change in value (new value - old value).
    */
   update(index: number, delta: number): void {
     if (index < 0 || index >= this.values.length) {
@@ -31,8 +39,9 @@ export class FenwickTree {
 
   /**
    * Get the prefix sum up to a specific index (exclusive).
-   * @param index 0-based index. query(n) returns sum of values from 0 to n-1.
-   * @returns Sum of values in range [0, index)
+   *
+   * @param index - 0-based index. `query(n)` returns sum of values from index 0 to n-1.
+   * @returns Sum of values in range [0, index).
    */
   query(index: number): number {
     let sum = 0;
@@ -44,8 +53,11 @@ export class FenwickTree {
   }
 
   /**
-   * Set the individual value at an index without updating the tree.
-   * Call rebuild() after multiple sets to update the tree efficiently.
+   * Set the individual value at an index without updating the prefix sum tree.
+   * Call `rebuild()` after multiple sets to update the tree efficiently in O(n).
+   *
+   * @param index - The 0-based index.
+   * @param value - The new value.
    */
   set(index: number, value: number): void {
     if (index < 0 || index >= this.values.length) {
@@ -62,14 +74,19 @@ export class FenwickTree {
   }
 
   /**
-   * Get the individual value at an index.
+   * Get the individual value at a specific index.
+   *
+   * @param index - The 0-based index.
+   * @returns The value at the specified index.
    */
   get(index: number): number {
     return this.values[ index ] || 0;
   }
 
   /**
-   * Get the underlying values array.
+   * Get the underlying values array as a read-only Float64Array.
+   *
+   * @returns The read-only values array.
    */
   getValues(): Readonly<Float64Array> {
     return this.values;
@@ -77,9 +94,10 @@ export class FenwickTree {
 
   /**
    * Find the largest index such that the prefix sum is less than or equal to the given value.
-   * Useful for finding which item is at a specific scroll offset.
-   * @param value The prefix sum value to search for
-   * @returns The 0-based index
+   * Highly efficient search used to find which item is at a specific scroll offset.
+   *
+   * @param value - The prefix sum value to search for.
+   * @returns The 0-based index.
    */
   findLowerBound(value: number): number {
     let index = 0;
@@ -101,8 +119,8 @@ export class FenwickTree {
   }
 
   /**
-   * Rebuild the entire tree from the current values array in O(N).
-   * Useful after bulk updates to the values array.
+   * Rebuild the entire prefix sum tree from the current values array.
+   * Time complexity: O(n).
    */
   rebuild(): void {
     this.tree.fill(0);
@@ -118,8 +136,9 @@ export class FenwickTree {
   }
 
   /**
-   * Resize the tree while preserving existing values.
-   * @param size New size of the tree
+   * Resize the tree while preserving existing values and rebuilding the prefix sums.
+   *
+   * @param size - The new size of the tree.
    */
   resize(size: number): void {
     if (size === this.values.length) {
@@ -135,8 +154,9 @@ export class FenwickTree {
 
   /**
    * Shift values by a given offset and rebuild the tree.
-   * Useful when items are prepended to the list.
-   * @param offset Number of positions to shift (positive for prepending)
+   * Useful when items are prepended to the list to maintain existing measurements.
+   *
+   * @param offset - Number of positions to shift. Positive for prepending (shifts right).
    */
   shift(offset: number): void {
     if (offset === 0) {
