@@ -47,25 +47,32 @@ const navLinks: Link[] = [
   { href: '/docs', label: 'Documentation' },
 ];
 
-const exampleLinks: Link[] = [
-  { href: '/vertical-fixed', label: 'Vertical Fixed' },
-  { href: '/vertical-dynamic', label: 'Vertical Dynamic' },
-  { href: '/vertical-fixed-body', label: 'Vertical Fixed Body' },
-  { href: '/vertical-dynamic-body', label: 'Vertical Dynamic Body' },
-  { href: '/horizontal-fixed', label: 'Horizontal Fixed' },
-  { href: '/horizontal-dynamic', label: 'Horizontal Dynamic' },
-  { href: '/grid-fixed', label: 'Grid Fixed' },
-  { href: '/grid-dynamic', label: 'Grid Dynamic' },
-  { href: '/grid-ssr', label: 'Grid SSR', props: { rel: 'external' } },
-  { href: '/vertical-fixed-table', label: 'Vertical Fixed Table' },
+const essentialLinks: Link[] = [
+  { href: '/essential-vertical-fixed', label: 'Vertical Fixed' },
+  { href: '/essential-vertical-dynamic', label: 'Vertical Dynamic' },
+  { href: '/essential-vertical-fixed-body', label: 'Vertical Fixed Body' },
+  { href: '/essential-vertical-dynamic-body', label: 'Vertical Dynamic Body' },
+  { href: '/essential-horizontal-fixed', label: 'Horizontal Fixed' },
+  { href: '/essential-horizontal-dynamic', label: 'Horizontal Dynamic' },
+  { href: '/essential-grid-fixed', label: 'Grid Fixed' },
+  { href: '/essential-grid-dynamic', label: 'Grid Dynamic' },
 ];
 
 const featureLinks: Link[] = [
   { href: '/feature-infinite-scroll', label: 'Infinite Scroll' },
   { href: '/feature-sticky-sections', label: 'Sticky Sections' },
   { href: '/feature-scroll-restoration', label: 'Scroll Restoration' },
-  { href: '/feature-chat', label: 'Chat Interface' },
-  { href: '/feature-spreadsheet', label: 'Spreadsheet' },
+  { href: '/feature-ssr', label: 'SSR Support', props: { rel: 'external' } },
+];
+
+const patternLinks: Link[] = [
+  { href: '/pattern-chat', label: 'Chat Interface' },
+  { href: '/pattern-table', label: 'Table' },
+  { href: '/pattern-spreadsheet', label: 'Spreadsheet' },
+  { href: '/pattern-tree', label: 'Collapsible Tree' },
+  { href: '/pattern-draggable', label: 'Draggable List' },
+  { href: '/pattern-gallery', label: 'Photo Gallery' },
+  { href: '/pattern-masonry', label: 'Masonry Grid' },
 ];
 </script>
 
@@ -147,10 +154,10 @@ const featureLinks: Link[] = [
         </li>
 
         <li>
-          <div class="menu-title divider drawer-menu-title">Examples</div>
+          <div class="menu-title divider drawer-menu-title">Essentials</div>
         </li>
 
-        <li v-for="link in exampleLinks" :key="link.href">
+        <li v-for="link in essentialLinks" :key="link.href">
           <AppLink v-slot="{ href, active }" :href="link.href">
             <a
               :href
@@ -170,6 +177,25 @@ const featureLinks: Link[] = [
         </li>
 
         <li v-for="link in featureLinks" :key="link.href">
+          <AppLink v-slot="{ href, active }" :href="link.href">
+            <a
+              :href
+              class="drawer-link"
+              :class="{ 'drawer-link--active': active }"
+              v-bind="link.props"
+              data-vike="false"
+              @click.prevent="navigateWithTransition(href, 'forward')"
+            >
+              {{ link.label }}
+            </a>
+          </AppLink>
+        </li>
+
+        <li>
+          <div class="menu-title divider drawer-menu-title">Patterns</div>
+        </li>
+
+        <li v-for="link in patternLinks" :key="link.href">
           <AppLink v-slot="{ href, active }" :href="link.href">
             <a
               :href

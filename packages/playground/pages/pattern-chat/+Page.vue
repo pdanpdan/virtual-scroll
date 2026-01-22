@@ -6,7 +6,6 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
-import ScrollStatus from '#/components/ScrollStatus.vue';
 import { createSeededRandom } from '#/random';
 
 import rawCode from './+Page.vue?raw';
@@ -122,16 +121,21 @@ const newMessage = ref('');
 
 function addMessage(text: string, isMe: boolean) {
   const id = (items.value[ items.value.length - 1 ]?.id || 0) + 1;
-  items.value.push({
-    id,
-    text,
-    isMe,
-    time: (new Date()).toLocaleTimeString('en-US', {
-      timeZone: 'Europe/Bucharest',
-    }),
-  });
+  const wasAtBottom = isAtBottom.value;
 
-  if (isAtBottom.value) {
+  items.value = [
+    ...items.value,
+    {
+      id,
+      text,
+      isMe,
+      time: (new Date()).toLocaleTimeString('en-US', {
+        timeZone: 'Europe/Bucharest',
+      }),
+    },
+  ];
+
+  if (wasAtBottom || isMe) {
     nextTick(() => {
       virtualScrollRef.value?.scrollToIndex(items.value.length - 1, 0, { align: 'end', behavior: 'smooth' });
     });
@@ -164,7 +168,7 @@ function scrollToBottom() {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="example-title example-title--group-4">Chat Interface</span>
+      <span class="example-title example-title--group-1">Chat Interface</span>
     </template>
 
     <template #description>
@@ -178,7 +182,7 @@ function scrollToBottom() {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-4"
+        class="example-icon example-icon--group-1"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.152 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
       </svg>
@@ -186,12 +190,6 @@ function scrollToBottom() {
 
     <template #subtitle>
       Chat with history loading and auto-scroll
-    </template>
-
-    <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start w-full">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
-      </div>
     </template>
 
     <div class="h-full border border-base-300 rounded-box overflow-hidden relative flex flex-col shadow-soft">

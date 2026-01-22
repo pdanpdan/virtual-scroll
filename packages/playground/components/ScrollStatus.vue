@@ -42,8 +42,8 @@ onUnmounted(stopDetection);
         <div class="status status-lg" :class="fpsClass" />
       </div>
       <div />
-      <div v-if="refreshRate" class="font-mono font-extrabold flex items-center gap-2 text-base-content/80">
-        {{ currentFps }} / {{ refreshRate }} <span class="text-xs small-caps tracking-tighter opacity-50">fps</span>
+      <div v-if="refreshRate" class="font-mono -mb-1 text-sm font-extrabold flex items-center gap-2 text-base-content/80">
+        {{ currentFps }} / {{ refreshRate }} <span class="small-caps tracking-tighter opacity-50">fps</span>
       </div>
     </li>
 

@@ -49,12 +49,12 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="example-title example-title--group-4">Grid SSR Support</span>
+      <span class="example-title example-title--group-4">SSR Support</span>
     </template>
 
     <template #description>
       Demonstrates the <strong>ssrRange</strong> prop. The grid is configured to start pre-rendered at <strong>Row {{ ssrRange.start }}, Column {{ ssrRange.colStart }}</strong>. On the client, it automatically scrolls to match this range on mount.<br /><br />
-      <div class="alert alert-info">
+      <div class="alert alert-info alert-soft">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

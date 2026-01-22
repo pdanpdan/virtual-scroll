@@ -57,92 +57,72 @@ import { navigateWithTransition } from '#/navigate';
     </div>
 
     <div class="divider my-8 font-bold small-caps text-xs tracking-widest opacity-50">
-      Examples
+      Essentials
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
-      <!-- Vertical -->
       <ExampleCard
-        type="Vertical"
+        type="Essential"
         title="Vertical Fixed"
         description="Optimized for lists where every item has the same height."
-        href="/vertical-fixed"
+        href="/essential-vertical-fixed"
         group="1"
       />
 
       <ExampleCard
-        type="Vertical"
+        type="Essential"
         title="Vertical Dynamic"
         description="Handles variable item heights automatically using ResizeObserver."
-        href="/vertical-dynamic"
+        href="/essential-vertical-dynamic"
         group="1"
       />
 
       <ExampleCard
-        type="Vertical"
+        type="Essential"
         title="Vertical Fixed Body"
         description="Use the browser window as the primary scroll container."
-        href="/vertical-fixed-body"
+        href="/essential-vertical-fixed-body"
         group="2"
       />
 
       <ExampleCard
-        type="Vertical"
+        type="Essential"
         title="Vertical Dynamic Body"
         description="Native window scrolling with variable item heights."
-        href="/vertical-dynamic-body"
+        href="/essential-vertical-dynamic-body"
         group="2"
       />
 
-      <!-- Horizontal -->
       <ExampleCard
-        type="Horizontal"
+        type="Essential"
         title="Horizontal Fixed"
         description="Full support for horizontal-only virtualization with fixed widths."
-        href="/horizontal-fixed"
+        href="/essential-horizontal-fixed"
         group="3"
       />
 
       <ExampleCard
-        type="Horizontal"
+        type="Essential"
         title="Horizontal Dynamic"
         description="Horizontal scrolling with variable, measured item widths."
-        href="/horizontal-dynamic"
+        href="/essential-horizontal-dynamic"
         group="3"
       />
 
-      <!-- Bidirectional -->
       <ExampleCard
-        type="Grid"
+        type="Essential"
         title="Grid Fixed"
         description="Scroll simultaneously in both X and Y axes with virtualized columns."
-        href="/grid-fixed"
+        href="/essential-grid-fixed"
         group="4"
       />
 
       <ExampleCard
-        type="Grid"
+        type="Essential"
         title="Grid Dynamic"
         description="Bidirectional scroll with programmatic column widths using a function."
-        href="/grid-dynamic"
+        href="/essential-grid-dynamic"
         group="4"
-      />
-
-      <ExampleCard
-        type="Grid"
-        title="Grid SSR Support"
-        description="Demonstrates pre-rendering and auto-scrolling to a specific range for SSR."
-        href="/grid-ssr"
-        group="4"
-        rel="external"
-      />
-
-      <ExampleCard
-        type="Table"
-        title="Vertical Fixed Table"
-        description="Semantic HTML <table> virtualization for accessible data grids."
-        href="/vertical-fixed-table"
-        group="5"
       />
     </div>
 
@@ -177,18 +157,73 @@ import { navigateWithTransition } from '#/navigate';
 
       <ExampleCard
         type="Feature"
+        title="SSR Support"
+        description="Demonstrates pre-rendering and auto-scrolling to a specific range for SSR."
+        href="/feature-ssr"
+        group="4"
+        rel="external"
+      />
+    </div>
+
+    <div class="divider my-8 font-bold small-caps text-xs tracking-widest opacity-50">
+      Patterns & Recipes
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
+      <ExampleCard
+        type="Pattern"
         title="Chat Interface"
         description="Smooth auto-scrolling, history loading, and dynamic message heights."
-        href="/feature-chat"
+        href="/pattern-chat"
+        group="1"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Table"
+        description="Semantic HTML <table> virtualization for accessible data grids."
+        href="/pattern-table"
+        group="2"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Spreadsheet"
+        description="Excel-like bidirectional grid with sticky row and column headers."
+        href="/pattern-spreadsheet"
+        group="3"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Collapsible Tree"
+        description="Virtualized hierarchical list with expandable/collapsible nodes."
+        href="/pattern-tree"
         group="4"
       />
 
       <ExampleCard
-        type="Feature"
-        title="Spreadsheet"
-        description="Excel-like bidirectional grid with sticky row and column headers."
-        href="/feature-spreadsheet"
+        type="Pattern"
+        title="Draggable List"
+        description="Reorder virtualized items using native drag and drop."
+        href="/pattern-draggable"
         group="5"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Photo Gallery"
+        description="Lazy-loaded image grid with bidirectional virtualization."
+        href="/pattern-gallery"
+        group="6"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Masonry Grid"
+        description="Achieve masonry layout by combining multiple columns."
+        href="/pattern-masonry"
+        group="7"
       />
     </div>
   </div>

@@ -1,5 +1,5 @@
 import type { Config } from 'vike/types';
 
 export default {
-  title: 'Vertical Fixed Table | Virtual Scroll',
+  title: 'Photo Gallery | Virtual Scroll',
 } satisfies Config;

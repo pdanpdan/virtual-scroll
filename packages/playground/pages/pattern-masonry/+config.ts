@@ -1,5 +1,5 @@
 import type { Config } from 'vike/types';
 
 export default {
-  title: 'Infinite Scroll | Virtual Scroll',
+  title: 'Masonry Grid | Virtual Scroll',
 } satisfies Config;

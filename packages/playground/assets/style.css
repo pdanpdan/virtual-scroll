@@ -180,14 +180,14 @@
 }
 
 @utility example-vertical-item {
-  @apply flex items-center px-6 border-b border-base-200 hover:bg-base-200 text-sm;
+  @apply flex items-center px-6 border-b border-base-content/5 hover:bg-base-200 text-sm;
 }
 @utility example-vertical-item--fixed {
   @apply h-full;
 }
 
 @utility example-horizontal-item {
-  @apply h-full flex flex-col items-center justify-center px-4 py-6 border-r border-base-200 hover:bg-base-200 transition-colors whitespace-normal text-center select-none;
+  @apply h-full flex flex-col items-center justify-center px-4 py-6 border-r border-base-content/5 hover:bg-base-200 transition-colors whitespace-normal text-center select-none;
 }
 @utility example-horizontal-item--fixed {
   @apply w-full;
@@ -235,7 +235,7 @@
 }
 
 @utility example-grid-cell {
-  @apply flex flex-col items-center justify-center border-e border-b border-base-200 shrink-0 hover:bg-base-300 transition-colors text-xs md:text-xs box-border;
+  @apply flex flex-col items-center justify-center border-e border-b border-base-content/5 shrink-0 hover:bg-base-300 transition-colors text-xs md:text-xs box-border;
 }
 
 @utility example-spreadsheet {
@@ -258,7 +258,7 @@
 }
 
 @utility example-spreadsheet-cell {
-  @apply shrink-0 relative inline-flex items-center justify-center border-r border-b border-base-200 text-xs md:text-sm px-2 box-border bg-inherit;
+  @apply shrink-0 relative inline-flex items-center justify-center border-r border-b border-base-content/5 text-xs md:text-sm px-2 box-border bg-inherit;
 
   &.example-spreadsheet-cell--row-header {
     @apply sticky left-0 z-10 font-bold bg-base-200 border-r-2 border-base-300 text-base-content/50;
@@ -311,6 +311,7 @@
 
 @utility drawer-side-container {
   @apply h-dvh border-r border-base-content/5 shadow-lg;
+  scrollbar-gutter: stable;
 }
 
 @utility drawer-link {

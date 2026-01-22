@@ -46,8 +46,8 @@ const targetIndex = ref(0);
 const targetColumn = ref(0);
 const targetOffsetX = ref(0);
 const targetOffsetY = ref(0);
-const scrollAlignX = ref<ScrollAlignment>('start');
-const scrollAlignY = ref<ScrollAlignment>('start');
+const scrollAlignX = ref<ScrollAlignment>('auto');
+const scrollAlignY = ref<ScrollAlignment>('auto');
 
 function updateCounts() {
   emit('update:itemCount', localItemCount.value);

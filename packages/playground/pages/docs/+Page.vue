@@ -185,101 +185,52 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <div class="divider opacity-30" />
 
-      <!-- 4. Core Concepts -->
-      <section id="core-concepts">
-        <h2 class="docs-section-header">Core Concepts</h2>
-
-        <section id="sizing-guide" class="mb-12">
-          <h3 class="text-secondary small-caps tracking-wider mb-4">Sizing Guide</h3>
-          <div class="prose prose-sm md:prose-md max-w-none text-base-content/90">
-            <p>
-              The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
-            </p>
-            <div class="docs-table-container mt-4">
-              <table class="table table-sm md:table-md table-zebra w-full border border-base-content/5">
-                <thead class="bg-base-300">
-                  <tr>
-                    <th>Type</th>
-                    <th><code>itemSize</code> / <code>columnWidth</code></th>
-                    <th>Perf</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody class="text-xs md:text-sm">
-                  <tr>
-                    <td><strong>Fixed</strong></td>
-                    <td><code>number</code></td>
-                    <td><span class="badge badge-success badge-soft badge-xs">Best</span></td>
-                    <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Array</strong></td>
-                    <td><code>number[]</code> (cols only)</td>
-                    <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
-                    <td>Fixed sizes from array (cycles if shorter). <em>O(log n)</em>.</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Function</strong></td>
-                    <td><code>(item, idx) => number</code></td>
-                    <td><span class="badge badge-warning badge-soft badge-xs">Good</span></td>
-                    <td>Known but variable sizes. No <code>ResizeObserver</code> overhead unless measured size differs.</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Dynamic</strong></td>
-                    <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
-                    <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
-                    <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="alignments">
-          <h3 class="text-secondary small-caps tracking-wider mb-4">Scroll Alignments</h3>
-          <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-6">
-            <p>
-              When scrolling to a specific index, you can control the item's final position in the viewport using the <code>align</code> option.
-            </p>
-          </div>
-          <div class="docs-table-container">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300">
+      <!-- 4. Sizing Guide -->
+      <section id="sizing-guide">
+        <h2 class="docs-section-header">Sizing Guide</h2>
+        <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-12">
+          <p>
+            The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
+          </p>
+          <div class="docs-table-container mt-4">
+            <table class="table table-sm md:table-md table-zebra w-full border border-base-content/5">
+              <thead class="bg-base-300 text-base-content">
                 <tr>
-                  <th class="w-1/4">Alignment</th>
-                  <th>Behavior</th>
+                  <th>Type</th>
+                  <th><code>itemSize</code> / <code>columnWidth</code></th>
+                  <th>Perf</th>
+                  <th>Description</th>
                 </tr>
               </thead>
-              <tbody class="text-xs md:text-sm">
+              <tbody class="text-xs md:text-sm text-base-content/80">
                 <tr>
-                  <td><code class="text-primary font-bold">'start'</code></td>
-                  <td>Aligns the item to the top (vertical) or left (horizontal) of the viewport.</td>
+                  <td><strong>Fixed</strong></td>
+                  <td><code>number</code></td>
+                  <td><span class="badge badge-success badge-soft badge-xs">Best</span></td>
+                  <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-primary font-bold">'center'</code></td>
-                  <td>Aligns the item to the center of the viewport.</td>
+                  <td><strong>Array</strong></td>
+                  <td><code>number[]</code> (cols only)</td>
+                  <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
+                  <td>Fixed sizes from array (cycles if shorter). <em>O(log n)</em>.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-primary font-bold">'end'</code></td>
-                  <td>Aligns the item to the bottom (vertical) or right (horizontal) of the viewport.</td>
+                  <td><strong>Function</strong></td>
+                  <td><code>(item, idx) => number</code></td>
+                  <td><span class="badge badge-warning badge-soft badge-xs">Good</span></td>
+                  <td>Known but variable sizes. No <code>ResizeObserver</code> overhead unless measured size differs.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ml-2">Default</span></td>
-                  <td>
-                    <strong>Smart Alignment:</strong> If the item is already fully visible, no scroll occurs.
-                    If it's above/left, it scrolls to <code>'start'</code>. If it's below/right, it scrolls to <code>'end'</code>.
-                  </td>
+                  <td><strong>Dynamic</strong></td>
+                  <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
+                  <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
+                  <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="card bg-base-300 p-4 mt-4 border-l-4 border-info">
-            <p class="text-xs md:text-sm opacity-90 italic">
-              <strong>Note:</strong> You can provide a single value for both axes or a <a href="#scroll-alignment-options" class="link link-primary">ScrollAlignmentOptions</a> object for axis-specific alignment.
-            </p>
-          </div>
-        </section>
+        </div>
       </section>
 
       <div class="divider opacity-30" />
@@ -502,23 +453,23 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           <div class="card shadow-soft bg-base-300 p-4 border-l-4 border-primary">
             <h4 class="font-bold text-primary mb-2">#item</h4>
             <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
-            <ul class="text-xs opacity-80 list-disc pl-5 space-y-1">
+            <ul class="text-xs opacity-80 list-disc pl-5 space-y-1 text-base-content/80">
               <li><code>item: T</code>: The data item from the source array.</li>
-              <li><code>index: number</code>: The original index of the item.</li>
-              <li><code>isSticky: boolean</code>: True if the item is configured to be sticky.</li>
-              <li><code>isStickyActive: boolean</code>: True if the item is currently stuck at the threshold.</li>
-              <li><code>columnRange: object</code>: Visible column range. See <a href="#column-range" class="link">ColumnRange</a>.</li>
-              <li><code>getColumnWidth: (idx) => number</code>: Helper to get width of any column.</li>
+              <li><code>index: number</code>: The original 0-based index of the item.</li>
+              <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
+              <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
+              <li><code>columnRange: <a href="#column-range" class="link">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
+              <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
             </ul>
           </div>
           <div class="space-y-4">
             <div class="card shadow-soft bg-base-300 p-4 border-l-4 border-secondary">
               <h4 class="font-bold text-secondary mb-2">#header / #footer</h4>
-              <p class="text-xs md:text-sm opacity-90">Content above/below the list. Can be made sticky.</p>
+              <p class="text-xs md:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
             </div>
             <div class="card shadow-soft bg-base-300 p-4 border-l-4 border-accent">
               <h4 class="font-bold text-accent mb-2">#loading</h4>
-              <p class="text-xs md:text-sm opacity-90">Shown at the end when <code>loading</code> prop is true.</p>
+              <p class="text-xs md:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
             </div>
           </div>
         </div>
@@ -536,18 +487,18 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <tbody class="text-xs md:text-sm">
               <tr>
                 <td><code>scroll</code></td>
-                <td><code><a href="#scroll-details">ScrollDetails&lt;T&gt;</a></code></td>
-                <td>Emitted on every scroll change.</td>
+                <td><code><a href="#scroll-details" class="link">ScrollDetails&lt;T&gt;</a></code></td>
+                <td>Emitted on every scroll position change.</td>
               </tr>
               <tr>
                 <td><code>load</code></td>
                 <td><code>'vertical' | 'horizontal'</code></td>
-                <td>Triggered near the end of content.</td>
+                <td>Triggered when the user scrolls within <code>loadDistance</code> of the end.</td>
               </tr>
               <tr>
                 <td><code>visibleRangeChange</code></td>
-                <td><code>{ start, end, ... }</code></td>
-                <td>Emitted when the set of rendered items changes.</td>
+                <td><code>{ start, end, colStart, colEnd }</code></td>
+                <td>Emitted when the set of rendered indices changes.</td>
               </tr>
             </tbody>
           </table>
@@ -555,29 +506,29 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h3 id="keyboard-navigation" class="docs-prop-header">Keyboard Navigation</h3>
         <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-10">
-          <p>When the component container is focused, it supports the following keys for navigation:</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose">
+          <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mt-4">
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <kbd class="kbd kbd-sm md:kbd-md">Home</kbd>
-              <span class="text-xs md:text-sm opacity-80">Scroll to the very beginning (index 0).</span>
+              <span class="text-xs md:text-sm opacity-80">Scroll to the very beginning (Index 0,0).</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <kbd class="kbd kbd-sm md:kbd-md">End</kbd>
-              <span class="text-xs md:text-sm opacity-80">Scroll to the very end of the list.</span>
+              <span class="text-xs md:text-sm opacity-80">Scroll to the very last row and column.</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <span class="flex gap-1">
                 <kbd class="kbd kbd-sm md:kbd-md">↑</kbd>
                 <kbd class="kbd kbd-sm md:kbd-md">↓</kbd>
               </span>
-              <span class="text-xs md:text-sm opacity-80">Scroll up/down by {{ DEFAULT_ITEM_SIZE }} pixels.</span>
+              <span class="text-xs md:text-sm opacity-80">Scroll vertically by {{ DEFAULT_ITEM_SIZE }}px.</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <span class="flex gap-1">
                 <kbd class="kbd kbd-sm md:kbd-md">←</kbd>
                 <kbd class="kbd kbd-sm md:kbd-md">→</kbd>
               </span>
-              <span class="text-xs md:text-sm opacity-80">Scroll left/right by {{ DEFAULT_ITEM_SIZE }} pixels.</span>
+              <span class="text-xs md:text-sm opacity-80">Scroll horizontally by {{ DEFAULT_ITEM_SIZE }}px.</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <kbd class="kbd kbd-sm md:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm md:kbd-md">PgDn</kbd>
@@ -587,9 +538,9 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <h3 id="css-classes" class="docs-prop-header">CSS Classes</h3>
-        <div class="docs-table-container mb-10">
+        <div class="docs-table-container mb-10 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
+            <thead class="bg-base-300 text-base-content">
               <tr>
                 <th class="w-1/3">Class</th>
                 <th>Description</th>
@@ -598,19 +549,19 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <tbody class="text-xs md:text-sm">
               <tr>
                 <td><code>.virtual-scroll-container</code></td>
-                <td>The root container element of the component.</td>
+                <td>The root scrollable container element.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll-wrapper</code></td>
-                <td>The element that wraps all rendered items and provides the total scrollable area.</td>
+                <td>Wraps rendered items and provides total scrollable dimensions.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll-item</code></td>
-                <td>Applied to each individual rendered item.</td>
+                <td>Applied to each individual rendered item. Use for general item styling.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll-header</code> / <code>.virtual-scroll-footer</code></td>
-                <td>Containers for the header and footer slots.</td>
+                <td>Containers for header and footer slots.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll-loading</code></td>
@@ -622,11 +573,11 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               </tr>
               <tr>
                 <td><code>.virtual-scroll--hydrated</code></td>
-                <td>Applied after the component has finished client-side hydration.</td>
+                <td>Applied after client-side mount and hydration is complete.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll--window</code></td>
-                <td>Applied when using the window/body as the scroll container.</td>
+                <td>Applied when scrolling via the global window object.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll--table</code></td>
@@ -634,36 +585,51 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               </tr>
               <tr>
                 <td><code>.virtual-scroll--sticky</code></td>
-                <td>Applied to items currently stuck at the threshold.</td>
+                <td>Applied to items that are currently stuck to the viewport edge.</td>
               </tr>
               <tr>
                 <td><code>.virtual-scroll--debug</code></td>
-                <td>Applied when <code>debug</code> prop is true.</td>
+                <td>Visible when <code>debug</code> prop is active.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <h3 id="methods" class="docs-prop-header">Exposed Methods</h3>
+        <h3 id="methods" class="docs-prop-header">Exposed Members</h3>
         <div class="prose prose-sm max-w-none mb-6 opacity-80">
-          <p>The component exposes several methods for programmatic control. See the <a href="#composable-methods" class="link link-primary">detailed documentation</a> in the composable section for parameter types and behaviors.</p>
+          <p>
+            The <code>VirtualScroll</code> component exposes several reactive properties and methods from the underlying logic.
+            You can access these via a template <code>ref</code>.
+          </p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+          <a href="#scroll-details" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">scrollDetails</code>
+            <p class="text-[10px] opacity-60 mt-1">Full reactive state of the virtualizer.</p>
+          </a>
+          <a href="#column-range" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">columnRange</code>
+            <p class="text-[10px] opacity-60 mt-1">Visible column indices and paddings.</p>
+          </a>
+          <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getColumnWidth()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
+          </a>
           <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">scrollToIndex()</code>
-            <p class="text-[10px] opacity-60 mt-1">Scroll to a specific item</p>
+            <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
           </a>
           <a href="#method-scrolltooffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">scrollToOffset()</code>
-            <p class="text-[10px] opacity-60 mt-1">Scroll to pixel position</p>
+            <p class="text-[10px] opacity-60 mt-1">Scroll to precise pixel position.</p>
           </a>
           <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">refresh()</code>
-            <p class="text-[10px] opacity-60 mt-1">Reset all measurements</p>
+            <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
           </a>
           <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">stopProgrammaticScroll()</code>
-            <p class="text-[10px] opacity-60 mt-1">Cancel smooth scrolling</p>
+            <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
           </a>
         </div>
       </section>
@@ -675,84 +641,316 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <h2 class="docs-section-header">useVirtualScroll Composable</h2>
         <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            The core logic for custom implementations. Handles all calculations and state management for virtualization.
+            The <code>useVirtualScroll</code> composable provides the core virtualization logic. It's recommended for advanced use cases or when building custom wrappers.
           </p>
         </div>
 
         <CodeBlock
-          class="docs-code-block mb-8"
+          class="docs-code-block mb-8 font-mono"
           lang="ts"
           code="import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, ref } from 'vue';
 
 const items = ref([...]);
-const props = computed(() => ({ items: items.value, itemSize: 50 }));
+const props = computed(() => ({
+  items: items.value,
+  itemSize: 50,
+  direction: 'vertical'
+}));
 
-const { renderedItems, scrollDetails, totalHeight, scrollToIndex } = useVirtualScroll(props);"
+const {
+  renderedItems,
+  scrollDetails,
+  totalHeight,
+  scrollToIndex
+} = useVirtualScroll(props);"
         />
 
         <h3 id="composable-parameters" class="docs-prop-header">Parameters</h3>
-        <div class="prose prose-sm max-w-none mb-6">
-          <p>The composable accepts a single <code>Ref</code> to a <a href="#virtual-scroll-props" class="link link-primary">VirtualScrollProps</a> object.</p>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts a single <code>Ref</code> to a <a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a> object.</p>
         </div>
 
-        <h3 id="composable-state" class="docs-prop-header">Return Value: State</h3>
-        <div class="docs-table-container mb-10">
+        <h3 id="composable-state" class="docs-prop-header">Return Value</h3>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>
+            Returns a set of reactive references and methods for managing the virtual scroll state:
+          </p>
+        </div>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs md:text-sm">
           <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
+            <thead class="bg-base-300 text-base-content">
               <tr>
                 <th class="w-1/4">Member</th>
                 <th class="w-1/4">Type</th>
                 <th>Description</th>
               </tr>
             </thead>
-            <tbody class="text-xs md:text-sm">
+            <tbody>
               <tr>
-                <td><code class="text-secondary font-bold">renderedItems</code></td>
-                <td><code>Ref&lt;<a href="#rendered-item">RenderedItem</a>[]&gt;</code></td>
-                <td>List of items to be rendered in the DOM.</td>
+                <td><a href="#rendered-item" class="link font-bold text-secondary">renderedItems</a></td>
+                <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
+                <td>List of items to render in the current buffer.</td>
               </tr>
               <tr>
-                <td><code class="text-secondary font-bold">scrollDetails</code></td>
-                <td><code>Ref&lt;<a href="#scroll-details">ScrollDetails</a>&gt;</code></td>
-                <td>Comprehensive reactive state of the virtualizer.</td>
+                <td><a href="#scroll-details" class="link font-bold text-secondary">scrollDetails</a></td>
+                <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
+                <td>Full reactive state of the virtual scroll system.</td>
               </tr>
               <tr>
                 <td><code class="text-secondary font-bold">totalWidth</code> / <code class="text-secondary font-bold">totalHeight</code></td>
                 <td><code>Ref&lt;number&gt;</code></td>
-                <td>The total calculated content dimensions.</td>
+                <td>Calculated dimensions of the entire list/grid.</td>
               </tr>
               <tr>
-                <td><code class="text-secondary font-bold">columnRange</code></td>
-                <td><code>Ref&lt;object&gt;</code></td>
-                <td>Visible column indices and paddings (for grid).</td>
+                <td><a href="#column-range" class="link font-bold text-secondary">columnRange</a></td>
+                <td><code>Ref&lt;ColumnRange&gt;</code></td>
+                <td>Visible columns and their associated paddings.</td>
               </tr>
               <tr>
                 <td><code class="text-secondary font-bold">isHydrated</code></td>
                 <td><code>Ref&lt;boolean&gt;</code></td>
-                <td>True after first client-side mount.</td>
+                <td><code>true</code> when the component is mounted and hydrated.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-scrolltoindex" class="link font-bold text-primary">scrollToIndex</a></td>
+                <td><code>Function</code></td>
+                <td>Programmatic scroll to a specific index.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-scrolltooffset" class="link font-bold text-primary">scrollToOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Programmatic scroll to a pixel offset.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-primary">stopProgrammaticScroll</a></td>
+                <td><code>Function</code></td>
+                <td>Cancel any active smooth scroll animation.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updateitemsize" class="link font-bold text-primary">updateItemSize</a></td>
+                <td><code>Function</code></td>
+                <td>Register a manual item measurement.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updateitemsizes" class="link font-bold text-primary">updateItemSizes</a></td>
+                <td><code>Function</code></td>
+                <td>Register multiple manual item measurements.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updatehostoffset" class="link font-bold text-primary">updateHostOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Force update the container's relative position.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-getcolumnwidth" class="link font-bold text-primary">getColumnWidth</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get a column's width.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-refresh" class="link font-bold text-primary">refresh</a></td>
+                <td><code>Function</code></td>
+                <td>Resets all measurements and state.</td>
               </tr>
             </tbody>
           </table>
         </div>
+      </section>
 
-        <h3 id="composable-methods" class="docs-prop-header">Return Value: Methods</h3>
+      <div class="divider opacity-30" />
+
+      <!-- 7. API Reference -->
+      <section id="api-reference">
+        <h2 class="docs-section-header">API Reference</h2>
+
+        <h3 class="docs-section-header text-2xl mt-16">Types</h3>
+
+        <!-- ScrollDetails -->
+        <section id="scroll-details" class="mb-12">
+          <h4 class="docs-prop-subheader">ScrollDetails&lt;T&gt;</h4>
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr><td><code>items</code></td><td><code><a href="#rendered-item" class="link">RenderedItem&lt;T&gt;</a>[]</code></td><td>Rendered items in the buffer.</td></tr>
+                <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index.</td></tr>
+                <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index.</td></tr>
+                <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Relative pixel scroll position.</td></tr>
+                <tr><td><code>viewportSize</code></td><td><code>{ width, height }</code></td><td>Dimensions of the visible viewport.</td></tr>
+                <tr><td><code>totalSize</code></td><td><code>{ width, height }</code></td><td>Estimated total content dimensions.</td></tr>
+                <tr><td><code>isScrolling</code></td><td><code>boolean</code></td><td>Active scrolling state.</td></tr>
+                <tr><td><code>isProgrammaticScroll</code></td><td><code>boolean</code></td><td>True if triggered by <code>scrollToIndex/Offset</code>.</td></tr>
+                <tr><td><code>range</code></td><td><code>{ start, end }</code></td><td>Visible row range (inclusive start, exclusive end).</td></tr>
+                <tr><td><code>columnRange</code></td><td><code><a href="#column-range" class="link">ColumnRange</a></code></td><td>Visible column range (grid).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- RenderedItem -->
+        <section id="rendered-item" class="mb-12">
+          <h4 class="docs-prop-subheader">RenderedItem&lt;T&gt;</h4>
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr><td><code>item</code></td><td><code>T</code></td><td>The source data item.</td></tr>
+                <tr><td><code>index</code></td><td><code>number</code></td><td>Item's position in the array.</td></tr>
+                <tr><td><code>offset</code></td><td><code>{ x, y }</code></td><td>Absolute pixel position within the wrapper.</td></tr>
+                <tr><td><code>size</code></td><td><code>{ width, height }</code></td><td>Current dimensions (measured or estimated).</td></tr>
+                <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>Offets before any sticky adjustments.</td></tr>
+                <tr><td><code>isSticky</code></td><td><code>boolean</code></td><td>Is configured as sticky.</td></tr>
+                <tr><td><code>isStickyActive</code></td><td><code>boolean</code></td><td>Currently stuck to the edge.</td></tr>
+                <tr><td><code>stickyOffset</code></td><td><code>{ x, y }</code></td><td>Translation applied for sticky pushing effect.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ColumnRange -->
+        <section id="column-range" class="mb-12">
+          <h4 class="docs-prop-subheader">ColumnRange</h4>
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr><td><code>start</code></td><td><code>number</code></td><td>Index of first rendered column.</td></tr>
+                <tr><td><code>end</code></td><td><code>number</code></td><td>Index of last rendered column (exclusive).</td></tr>
+                <tr><td><code>padStart</code></td><td><code>number</code></td><td>Pixel space to maintain before columns.</td></tr>
+                <tr><td><code>padEnd</code></td><td><code>number</code></td><td>Pixel space to maintain after columns.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VirtualScrollProps -->
+        <section id="virtual-scroll-props" class="mb-12">
+          <h4 class="docs-prop-subheader">VirtualScrollProps&lt;T&gt;</h4>
+          <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+            <p>Full property configuration shared between the component and composable.</p>
+          </div>
+          <div class="docs-table-container overflow-x-auto text-base-content/80">
+            <table class="table table-xs md:table-sm table-zebra w-full min-w-150">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs opacity-90">
+                <tr><td><code>items</code></td><td><code>T[]</code></td><td>Data source. Required.</td></tr>
+                <tr><td><code>itemSize</code></td><td><code>num | fn | null</code></td><td>Sizing logic. Default: {{ DEFAULT_ITEM_SIZE }}px.</td></tr>
+                <tr><td><code>direction</code></td><td><code>ScrollDirection</code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
+                <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
+                <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
+                <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation.</td></tr>
+                <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
+                <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
+                <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Default: {{ DEFAULT_COLUMN_WIDTH }}px.</td></tr>
+                <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
+                <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
+                <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
+                <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
+                <tr><td><code>initialScrollAlign</code></td><td><code><a href="#alignments" class="link">ScrollAlignment</a> | ...</code></td><td>Alignment for initial jump.</td></tr>
+                <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
+                <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
+                <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ScrollToIndexOptions -->
+        <section id="scroll-to-index-options" class="mb-12">
+          <h4 class="docs-prop-subheader">ScrollToIndexOptions</h4>
+          <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+            <p>Full configuration for index-based scrolling.</p>
+          </div>
+          <CodeBlock
+            class="docs-code-block font-mono text-xs mb-4"
+            lang="ts"
+            code="{
+  align?: ScrollAlignment | ScrollAlignmentOptions; // default: 'auto'
+  behavior?: 'auto' | 'smooth'; // default: 'auto'
+}"
+          />
+        </section>
+
+        <!-- ScrollAlignmentOptions -->
+        <section id="scroll-alignment-options" class="mb-12">
+          <h4 class="docs-prop-subheader">ScrollAlignmentOptions</h4>
+          <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+            <p>Allows axis-specific alignment in <code>scrollToIndex</code>.</p>
+          </div>
+          <CodeBlock class="docs-code-block font-mono text-xs mb-4" lang="ts" code="{ x?: ScrollAlignment; y?: ScrollAlignment; }" />
+        </section>
+
+        <!-- ScrollAlignment -->
+        <section id="alignments" class="mb-12">
+          <h4 class="docs-prop-subheader">ScrollAlignment</h4>
+          <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+            <p>Controls the item's final position in the viewport during <code>scrollToIndex</code>.</p>
+          </div>
+          <CodeBlock class="docs-code-block font-mono text-xs mb-4" lang="ts" code="'start' | 'center' | 'end' | 'auto'" />
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr>
+                  <th class="w-1/4">Alignment</th>
+                  <th>Behavior</th>
+                </tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr>
+                  <td><code class="text-primary font-bold">'start'</code></td>
+                  <td>Aligns to top (vertical) or left (horizontal) edge.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-primary font-bold">'center'</code></td>
+                  <td>Aligns to viewport center.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-primary font-bold">'end'</code></td>
+                  <td>Aligns to bottom (vertical) or right (horizontal) edge.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ml-1">Default</span></td>
+                  <td><strong>Smart:</strong> If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <h3 class="docs-section-header text-2xl mt-24">Methods</h3>
+
         <div class="space-y-8 mb-10">
           <!-- Method: scrollToIndex -->
           <div id="method-scrolltoindex" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
             <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
               <span class="badge badge-primary">Method</span> scrollToIndex()
             </h4>
-            <CodeBlock class="docs-code-block mb-4" lang="ts" code="scrollToIndex(rowIndex: number | null, colIndex: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions): void" />
+            <CodeBlock
+              class="docs-code-block mb-4 font-mono text-xs"
+              lang="ts"
+              code="scrollToIndex(
+  rowIndex: number | null,
+  colIndex: number | null,
+  options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
+): void"
+            />
             <div class="prose prose-sm max-w-none opacity-90 space-y-4">
-              <p>Scrolls the container to bring a specific item into view. If only one index is provided, the other axis remains unchanged.</p>
+              <p>Ensures a specific item is visible within the viewport. If the item's size is dynamic and not yet measured, the scroll position will be automatically corrected after rendering.</p>
               <div class="overflow-x-auto">
                 <table class="table table-xs w-full bg-base-200">
-                  <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                  <thead class="text-base-content"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
                   <tbody>
-                    <tr><td><code>rowIndex</code></td><td>Target row index. <code>null</code> to ignore.</td></tr>
-                    <tr><td><code>colIndex</code></td><td>Target column index. <code>null</code> to ignore.</td></tr>
-                    <tr><td><code>options</code></td><td>Detailed options. See <a href="#scroll-to-index-options" class="link">ScrollToIndexOptions</a> and <a href="#alignments" class="link">Alignments</a>.</td></tr>
+                    <tr><td><code>rowIndex</code></td><td><code>number | null</code></td><td>Target row. <code>null</code> to keep current Y.</td></tr>
+                    <tr><td><code>colIndex</code></td><td><code>number | null</code></td><td>Target column. <code>null</code> to keep current X.</td></tr>
+                    <tr><td><code>options</code></td><td><code><a href="#scroll-to-index-options" class="link">Options</a></code></td><td>Alignment and behavior settings.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -764,9 +962,17 @@ const { renderedItems, scrollDetails, totalHeight, scrollToIndex } = useVirtualS
             <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
               <span class="badge badge-primary">Method</span> scrollToOffset()
             </h4>
-            <CodeBlock class="docs-code-block mb-4" lang="ts" code="scrollToOffset(x: number | null, y: number | null, options?: { behavior?: 'auto' | 'smooth' }): void" />
+            <CodeBlock
+              class="docs-code-block mb-4 font-mono text-xs"
+              lang="ts"
+              code="scrollToOffset(
+  x: number | null,
+  y: number | null,
+  options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
+): void"
+            />
             <div class="prose prose-sm max-w-none opacity-90">
-              <p>Scrolls to an absolute pixel position relative to the content start. Clamps to valid scroll range.</p>
+              <p>Scrolls the container to an absolute pixel position. Clamped between <code>0</code> and the calculated total size.</p>
             </div>
           </div>
 
@@ -776,7 +982,7 @@ const { renderedItems, scrollDetails, totalHeight, scrollToIndex } = useVirtualS
               <span class="badge badge-primary">Method</span> refresh()
             </h4>
             <div class="prose prose-sm max-w-none opacity-90">
-              <p>Resets the internal Fenwick tree and all dynamic measurements. Use this if item sizes have changed but the <code>items</code> array reference stayed the same.</p>
+              <p>Invalidates all cached measurements and triggers a full re-initialization. Use this if your item source data changes in a way that affects sizes without changing the <code>items</code> array reference.</p>
             </div>
           </div>
 
@@ -785,9 +991,54 @@ const { renderedItems, scrollDetails, totalHeight, scrollToIndex } = useVirtualS
             <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
               <span class="badge badge-primary">Method</span> updateItemSize()
             </h4>
-            <CodeBlock class="docs-code-block mb-4" lang="ts" code="updateItemSize(index: number, width: number, height: number, element?: HTMLElement): void" />
+            <CodeBlock
+              class="docs-code-block mb-4 font-mono text-xs"
+              lang="ts"
+              code="updateItemSize(
+  index: number,
+  width: number,
+  height: number,
+  element?: HTMLElement
+): void"
+            />
             <div class="prose prose-sm max-w-none opacity-90">
-              <p>Manually updates the measured size of a single item. Usually called via <code>ResizeObserver</code>.</p>
+              <p>Manually registers a new measurement for a single item. The <code>element</code> parameter allows the virtualizer to detect columns from any internal structure using <code>data-col-index</code> attributes.</p>
+            </div>
+          </div>
+
+          <!-- Method: updateItemSizes -->
+          <div id="method-updateitemsizes" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
+            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
+              <span class="badge badge-primary">Method</span> updateItemSizes()
+            </h4>
+            <CodeBlock
+              class="docs-code-block mb-4 font-mono text-xs"
+              lang="ts"
+              code="updateItemSizes(updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement }>): void"
+            />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Batched version of <code>updateItemSize</code>. More efficient when many items are measured simultaneously.</p>
+            </div>
+          </div>
+
+          <!-- Method: updateHostOffset -->
+          <div id="method-updatehostoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
+            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
+              <span class="badge badge-primary">Method</span> updateHostOffset()
+            </h4>
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Forces a recalculation of the host element's position relative to the scroll container. Call this if the layout changes in a way that shifts the component without triggering a resize event.</p>
+            </div>
+          </div>
+
+          <!-- Method: getColumnWidth -->
+          <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
+            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
+              <span class="badge badge-primary">Method</span> getColumnWidth()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnWidth(index: number): number" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the currently calculated width for a specific column index, taking measurements and gaps into account.</p>
             </div>
           </div>
 
@@ -805,153 +1056,31 @@ const { renderedItems, scrollDetails, totalHeight, scrollToIndex } = useVirtualS
 
       <div class="divider opacity-30" />
 
-      <!-- 7. API Reference (Types) -->
-      <section id="api-reference">
-        <h2 class="docs-section-header">API Reference: Types</h2>
-
-        <!-- ScrollDetails -->
-        <section id="scroll-details" class="mb-12">
-          <h3 class="docs-prop-subheader">ScrollDetails&lt;T&gt;</h3>
-          <div class="docs-table-container">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>items</code></td><td><code><a href="#rendered-item">RenderedItem</a>[]</code></td><td>Items in the current buffer.</td></tr>
-                <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index.</td></tr>
-                <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index.</td></tr>
-                <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Current scroll position.</td></tr>
-                <tr><td><code>viewportSize</code></td><td><code>{ width, height }</code></td><td>Visible area dimensions.</td></tr>
-                <tr><td><code>totalSize</code></td><td><code>{ width, height }</code></td><td>Total calculated dimensions.</td></tr>
-                <tr><td><code>isScrolling</code></td><td><code>boolean</code></td><td>True if active scroll is occurring.</td></tr>
-                <tr><td><code>isProgrammaticScroll</code></td><td><code>boolean</code></td><td>True if scroll was triggered by method.</td></tr>
-                <tr><td><code>range</code></td><td><code>{ start, end }</code></td><td>Rendered item range.</td></tr>
-                <tr><td><code>columnRange</code></td><td><code>{ start, end, ... }</code></td><td>Rendered column range (grid).</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- RenderedItem -->
-        <section id="rendered-item" class="mb-12">
-          <h3 class="docs-prop-subheader">RenderedItem&lt;T&gt;</h3>
-          <div class="docs-table-container">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>item</code></td><td><code>T</code></td><td>The original data item.</td></tr>
-                <tr><td><code>index</code></td><td><code>number</code></td><td>Original index in items array.</td></tr>
-                <tr><td><code>offset</code></td><td><code>{ x, y }</code></td><td>Render position relative to wrapper (includes sticky/SSR adjustments).</td></tr>
-                <tr><td><code>size</code></td><td><code>{ width, height }</code></td><td>Measured or estimated dimensions.</td></tr>
-                <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>The raw offsets before any sticky adjustments.</td></tr>
-                <tr><td><code>isSticky</code></td><td><code>boolean</code></td><td>True if configured as sticky.</td></tr>
-                <tr><td><code>isStickyActive</code></td><td><code>boolean</code></td><td>True if currently stuck.</td></tr>
-                <tr><td><code>stickyOffset</code></td><td><code>{ x, y }</code></td><td>Offset applied for pushing effect.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ColumnRange -->
-        <section id="column-range" class="mb-12">
-          <h3 class="docs-prop-subheader">ColumnRange</h3>
-          <div class="docs-table-container">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>start</code></td><td><code>number</code></td><td>Index of the first rendered column.</td></tr>
-                <tr><td><code>end</code></td><td><code>number</code></td><td>Index of the last rendered column.</td></tr>
-                <tr><td><code>padStart</code></td><td><code>number</code></td><td>Pixel offset from the left to the first rendered column.</td></tr>
-                <tr><td><code>padEnd</code></td><td><code>number</code></td><td>Pixel space remaining after the last rendered column.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- VirtualScrollProps -->
-        <section id="virtual-scroll-props" class="mb-12">
-          <h3 class="docs-prop-subheader">VirtualScrollProps</h3>
-          <div class="prose prose-sm max-w-none mb-4 opacity-80 italic">
-            <p>Describes the configuration object passed to <code>useVirtualScroll</code> or as props to <code>VirtualScroll</code> component.</p>
-          </div>
-          <div class="docs-table-container overflow-x-auto">
-            <table class="table table-xs md:table-sm table-zebra w-full min-w-[600px]">
-              <thead class="bg-base-300">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs opacity-90">
-                <tr><td><code>items</code></td><td><code>T[]</code></td><td>Required. The data source.</td></tr>
-                <tr><td><code>itemSize</code></td><td><code>num | fn</code></td><td>Fixed size or size function.</td></tr>
-                <tr><td><code>direction</code></td><td><code>ScrollDirection</code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
-                <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Buffer count (Default: {{ DEFAULT_BUFFER }}).</td></tr>
-                <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scrollable element. Defaults to component root.</td></tr>
-                <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>The element containing the items (for offset calculation).</td></tr>
-                <tr><td><code>ssrRange</code></td><td><code>{ start, end, ... }</code></td><td>Items to pre-render on server.</td></tr>
-                <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
-                <tr><td><code>columnWidth</code></td><td><code>num | arr | fn</code></td><td>Sizing for columns.</td></tr>
-                <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Offsets for scroll calculations.</td></tr>
-                <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Spacings between items.</td></tr>
-                <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain position when items added at start.</td></tr>
-                <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Jump to index on mount.</td></tr>
-                <tr><td><code>initialScrollAlign</code></td><td><code>ScrollAlignment | ...</code></td><td>Alignment for initial jump.</td></tr>
-                <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate (Default: {{ DEFAULT_ITEM_SIZE }}).</td></tr>
-                <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate (Default: {{ DEFAULT_COLUMN_WIDTH }}).</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Options Objects -->
-        <section id="options-objects" class="mb-12">
-          <h3 class="docs-prop-subheader">Options & Configuration Objects</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div id="scroll-alignment-options" class="card bg-base-300 p-4 border border-base-content/5">
-              <h4 class="font-bold text-primary mb-2">ScrollAlignmentOptions</h4>
-              <p class="text-[10px] opacity-70 mb-3">Allows axis-specific alignment in <code>scrollToIndex</code>.</p>
-              <CodeBlock class="docs-code-block" lang="ts" code="{ x?: ScrollAlignment; y?: ScrollAlignment; }" />
-            </div>
-            <div id="scroll-to-index-options" class="card bg-base-300 p-4 border border-base-content/5">
-              <h4 class="font-bold text-primary mb-2">ScrollToIndexOptions</h4>
-              <p class="text-[10px] opacity-70 mb-3">Full configuration for index-based scrolling.</p>
-              <CodeBlock
-                class="docs-code-block"
-                lang="ts"
-                code="{
-  align?: ScrollAlignment | ScrollAlignmentOptions;
-  behavior?: 'auto' | 'smooth';
-}"
-              />
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <div class="divider opacity-30" />
-
       <!-- 8. Utility Functions -->
       <section id="utility-functions">
         <h2 class="docs-section-header">Utility Functions</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
-            <h4 class="font-bold text-accent mb-2">isElement(val)</h4>
-            <p class="text-xs md:text-sm opacity-80">Checks if a value is an <code>HTMLElement</code> (excludes <code>window</code>).</p>
+            <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
+              isElement(val)
+              <span class="badge badge-accent badge-outline badge-xs">Type Guard</span>
+            </h4>
+            <p class="text-xs md:text-sm opacity-80">Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding the global <code>window</code> object).</p>
           </div>
           <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
-            <h4 class="font-bold text-accent mb-2">isScrollableElement(val)</h4>
-            <p class="text-xs md:text-sm opacity-80">Checks if a value is an <code>HTMLElement</code> or <code>window</code> with scroll properties.</p>
+            <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
+              isScrollableElement(val)
+              <span class="badge badge-accent badge-outline badge-xs">Type Guard</span>
+            </h4>
+            <p class="text-xs md:text-sm opacity-80">Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>.</p>
           </div>
           <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
             <h4 class="font-bold text-accent mb-2">getPaddingX / getPaddingY</h4>
-            <p class="text-xs md:text-sm opacity-80">Extracts padding values from <code>scrollPadding</code> props, accounting for scroll direction.</p>
+            <p class="text-xs md:text-sm opacity-80">Extracts effective pixel padding from <code>scrollPadding</code> props, taking the current <code>direction</code> into account.</p>
           </div>
           <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
             <h4 class="font-bold text-accent mb-2">FenwickTree</h4>
-            <p class="text-xs md:text-sm opacity-80">The optimized data structure used for <em>O(log n)</em> prefix sum calculations and updates.</p>
+            <p class="text-xs md:text-sm opacity-80">Highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates. Used internally for all position tracking.</p>
           </div>
         </div>
       </section>

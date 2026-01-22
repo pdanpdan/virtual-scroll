@@ -48,7 +48,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="example-title example-title--group-5">Vertical Fixed Table</span>
+      <span class="example-title example-title--group-2">Table</span>
     </template>
 
     <template #description>
@@ -62,7 +62,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-5"
+        class="example-icon example-icon--group-2"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v16.5H3.75V3.75ZM12 3.75v16.5M3.75 12h16.5" />
       </svg>

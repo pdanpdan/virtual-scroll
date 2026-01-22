@@ -1,5 +1,5 @@
 import type { Config } from 'vike/types';
 
 export default {
-  title: 'Grid SSR | Virtual Scroll',
+  title: 'Table | Virtual Scroll',
 } satisfies Config;

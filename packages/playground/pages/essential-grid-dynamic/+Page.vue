@@ -140,11 +140,11 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         </div>
       </template>
 
-      <template #item="{ index, columnRange, getColumnWidth, isSticky }">
+      <template #item="{ index, columnRange, getColumnWidth, isStickyActive }">
         <div
           :key="`r_${ index }`"
           class="example-grid-row"
-          :class="{ 'example-grid-row--sticky': isSticky }"
+          :class="{ 'example-grid-row--sticky': isStickyActive }"
         >
           <div class="shrink-0" :style="{ inlineSize: `${ columnRange.padStart }px` }" />
 
