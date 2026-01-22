@@ -26,8 +26,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(5990);
       expect(result.width).toBe(500);
@@ -45,8 +45,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.width).toBe(5990);
       expect(result.height).toBe(500);
@@ -64,8 +64,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: (idx) => idx * 105,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(5990);
       expect(result.width).toBe(520);
@@ -83,8 +83,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(5990);
       expect(result.width).toBe(520);
@@ -102,8 +102,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: (idx) => idx * 105,
         queryX: () => 0,
         queryY: (idx) => idx * 60,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(5990);
       expect(result.width).toBe(520);
@@ -121,8 +121,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: (idx) => idx * 60,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.width).toBe(5990);
     });
@@ -139,8 +139,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: (idx) => idx * 45,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(445);
     });
@@ -157,8 +157,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       // columnCount=1 * (100 + 10) - 10 = 100.
       // itemsLength=1 * (50 + 10) - 10 = 50.
@@ -178,8 +178,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.width).toBe(50);
     });
@@ -196,8 +196,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: (idx) => idx * 60,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       // queryX(1) = 60. gap = 10. total = 60 - 10 = 50.
       expect(result.width).toBe(50);
@@ -215,8 +215,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: (idx) => idx * 60,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       // queryY(1) = 60. gap = 10. total = 60 - 10 = 50.
       expect(result.height).toBe(50);
@@ -234,8 +234,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: (idx) => (idx === 0 ? 0 : 5),
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(0);
     });
@@ -252,8 +252,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: (idx) => (idx === 0 ? 0 : 5),
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.width).toBe(0);
     });
@@ -270,8 +270,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: (idx) => (idx === 0 ? 0 : 110),
         queryX: () => 0,
         queryY: (idx) => (idx === 0 ? 0 : 60),
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(500);
       expect(result.width).toBe(500);
@@ -289,8 +289,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: (idx) => (idx === 0 ? 0 : 110),
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(500);
       expect(result.width).toBe(500);
@@ -308,8 +308,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(500);
       expect(result.width).toBe(500);
@@ -327,8 +327,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.width).toBe(0);
     });
@@ -345,8 +345,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(0);
     });
@@ -363,8 +363,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(500);
       expect(result.width).toBe(500);
@@ -382,8 +382,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.width).toBe(0);
     });
@@ -400,8 +400,8 @@ describe('virtual-scroll-logic', () => {
         queryColumn: () => 0,
         queryX: () => 0,
         queryY: () => 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.height).toBe(0);
     });
@@ -423,8 +423,8 @@ describe('virtual-scroll-logic', () => {
         queryY: (idx) => idx * 50,
         relativeScrollX: 0,
         relativeScrollY: 100,
-        viewportHeight: 200,
-        viewportWidth: 500,
+        usableHeight: 200,
+        usableWidth: 500,
       });
       expect(result.start).toBe(2);
       expect(result.end).toBe(6);
@@ -445,8 +445,8 @@ describe('virtual-scroll-logic', () => {
         queryY: () => 0,
         relativeScrollX: 120,
         relativeScrollY: 0,
-        viewportHeight: 500,
-        viewportWidth: 100,
+        usableHeight: 500,
+        usableWidth: 100,
       });
       // item 0: 0-50, gap 50-60
       // item 1: 60-110, gap 110-120
@@ -472,8 +472,8 @@ describe('virtual-scroll-logic', () => {
         queryY: () => 0,
         relativeScrollX: 0,
         relativeScrollY: 1000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.start).toBe(15);
       expect(result.end).toBe(35);
@@ -494,11 +494,41 @@ describe('virtual-scroll-logic', () => {
         queryY: () => 0,
         relativeScrollX: 1000,
         relativeScrollY: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.start).toBe(20);
       expect(result.end).toBe(30);
+    });
+
+    it('calculates horizontal range with dynamic size where end item is partially visible (edge case)', () => {
+      // Setup:
+      // Item 0: 0-100
+      // Item 1: 100-200
+      // Viewport: 0-150.
+      // Target end = 150.
+      // findLowerBoundX(150) -> returns 1 because queryX(1)=100 <= 150, queryX(2)=200 > 150.
+      // queryX(1) = 100 < 150.
+      // So end should increment to 2.
+      const result = calculateRange({
+        bufferAfter: 0,
+        bufferBefore: 0,
+        columnGap: 0,
+        direction: 'horizontal',
+        findLowerBoundX: (val) => val >= 200 ? 2 : (val >= 100 ? 1 : 0),
+        findLowerBoundY: () => 0,
+        fixedSize: null,
+        gap: 0,
+        itemsLength: 2,
+        queryX: (idx) => idx * 100,
+        queryY: () => 0,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        usableHeight: 500,
+        usableWidth: 150,
+      });
+      expect(result.start).toBe(0);
+      expect(result.end).toBe(2);
     });
   });
 
@@ -525,8 +555,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: null,
         totalHeight: 0,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       // item 10 at 500. ends at 550. viewport 500 -> targetX = 550 - 500 = 50.
       expect(result.targetX).toBe(50);
@@ -554,8 +584,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: null,
         totalHeight: 0,
         totalWidth: 5500,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetX).toBe(1100);
     });
@@ -582,8 +612,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: 10,
         totalHeight: 5000,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetY).toBe(500);
       expect(result.targetX).toBe(50); // auto, already visible
@@ -611,8 +641,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: 10,
         totalHeight: 5000,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetX).toBe(500);
       expect(result.targetY).toBe(50); // auto, already visible
@@ -640,8 +670,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: null,
         totalHeight: 0,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetX).toBe(500);
     });
@@ -668,8 +698,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: 10,
         totalHeight: 6000,
         totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetY).toBe(600);
       expect(result.itemHeight).toBe(50);
@@ -697,8 +727,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: null,
         totalHeight: 0,
         totalWidth: 6000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetX).toBe(600);
       expect(result.itemWidth).toBe(50);
@@ -726,8 +756,8 @@ describe('virtual-scroll-logic', () => {
         rowIndex: 20,
         totalHeight: 5000,
         totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetY).toBe(775);
     });
@@ -754,327 +784,10 @@ describe('virtual-scroll-logic', () => {
         rowIndex: 200,
         totalHeight: 5000,
         totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.targetY).toBe(4500);
-    });
-
-    it('calculates target for vertical auto alignment (already visible)', () => {
-      const result = calculateScrollTarget({
-        colIndex: null,
-        columnCount: 0,
-        columnGap: 0,
-        direction: 'vertical',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: () => 0,
-        getItemQueryY: (idx) => idx * 50,
-        getItemSizeX: () => 0,
-        getItemSizeY: () => 50,
-        itemsLength: 100,
-        options: 'auto',
-        relativeScrollX: 0,
-        relativeScrollY: 1000, // item 20 is at 1000
-        rowIndex: 20,
-        totalHeight: 5000,
-        totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // Should stay at current scroll position
-      expect(result.targetY).toBe(1000);
-    });
-
-    it('calculates target for vertical auto alignment (partially visible at top)', () => {
-      const result = calculateScrollTarget({
-        colIndex: null,
-        columnCount: 0,
-        columnGap: 0,
-        direction: 'vertical',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: () => 0,
-        getItemQueryY: (idx) => idx * 50,
-        getItemSizeX: () => 0,
-        getItemSizeY: () => 50,
-        itemsLength: 100,
-        options: 'auto',
-        relativeScrollX: 0,
-        relativeScrollY: 1020, // item 20 at 1000
-        rowIndex: 20,
-        totalHeight: 5000,
-        totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      expect(result.targetY).toBe(1000);
-    });
-
-    it('calculates target for vertical auto alignment (partially visible at bottom)', () => {
-      const result = calculateScrollTarget({
-        colIndex: null,
-        columnCount: 0,
-        columnGap: 0,
-        direction: 'vertical',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: () => 0,
-        getItemQueryY: (idx) => idx * 50,
-        getItemSizeX: () => 0,
-        getItemSizeY: () => 50,
-        itemsLength: 100,
-        options: 'auto',
-        relativeScrollX: 0,
-        relativeScrollY: 530, // item 20 at 1000. viewport ends at 1030. item ends at 1050.
-        rowIndex: 20,
-        totalHeight: 5000,
-        totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // item 20 ends at 1050. targetY = 1050 - 500 = 550.
-      expect(result.targetY).toBe(550);
-    });
-
-    it('calculates target for vertical auto alignment (larger than viewport, covering it)', () => {
-      const result = calculateScrollTarget({
-        colIndex: null,
-        columnCount: 0,
-        columnGap: 0,
-        direction: 'vertical',
-        fixedSize: 1000,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: () => 0,
-        getItemQueryY: (idx) => idx * 1000,
-        getItemSizeX: () => 0,
-        getItemSizeY: () => 1000,
-        itemsLength: 10,
-        options: 'auto',
-        relativeScrollX: 0,
-        relativeScrollY: 200, // item 0 starts at 0, ends at 1000. Viewport is 200 to 700.
-        rowIndex: 0,
-        totalHeight: 10000,
-        totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // Should stay at 200
-      expect(result.targetY).toBe(200);
-    });
-
-    it('calculates target for vertical auto alignment (larger than viewport, below)', () => {
-      const result = calculateScrollTarget({
-        colIndex: null,
-        columnCount: 0,
-        columnGap: 0,
-        direction: 'vertical',
-        fixedSize: 1000,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: () => 0,
-        getItemQueryY: (idx) => idx * 1000,
-        getItemSizeX: () => 0,
-        getItemSizeY: () => 1000,
-        itemsLength: 10,
-        options: 'auto',
-        relativeScrollX: 0,
-        relativeScrollY: 0,
-        rowIndex: 2, // starts at 2000.
-        totalHeight: 10000,
-        totalWidth: 0,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // targetStart = 2000. targetEnd = 2000 - (500 - 1000) = 2500.
-      // Minimal movement from 0 is targetStart = 2000.
-      expect(result.targetY).toBe(2000);
-    });
-
-    it('calculates target for horizontal auto alignment (larger than viewport, covering it)', () => {
-      const result = calculateScrollTarget({
-        colIndex: 0,
-        columnCount: 10,
-        columnGap: 0,
-        direction: 'horizontal',
-        fixedSize: 1000,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: (idx) => idx * 1000,
-        getItemQueryY: () => 0,
-        getItemSizeX: () => 1000,
-        getItemSizeY: () => 0,
-        itemsLength: 10,
-        options: 'auto',
-        relativeScrollX: 200, // item 0 starts at 0, ends at 1000. Viewport is 200 to 700.
-        relativeScrollY: 0,
-        rowIndex: null,
-        totalHeight: 0,
-        totalWidth: 10000,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // Should stay at 200
-      expect(result.targetX).toBe(200);
-    });
-
-    it('calculates target for horizontal auto alignment (larger than viewport, move to nearest edge)', () => {
-      const result = calculateScrollTarget({
-        colIndex: 2,
-        columnCount: 10,
-        columnGap: 0,
-        direction: 'horizontal',
-        fixedSize: 1000,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: (idx) => idx * 1000,
-        getItemQueryY: () => 0,
-        getItemSizeX: () => 1000,
-        getItemSizeY: () => 0,
-        itemsLength: 10,
-        options: 'auto',
-        relativeScrollX: 0,
-        relativeScrollY: 0,
-        rowIndex: null,
-        totalHeight: 0,
-        totalWidth: 10000,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // item 2 starts at 2000. targetStart = 2000. targetEnd = 2000 - (500 - 1000) = 2500.
-      // Nearest to 0 is 2000.
-      expect(result.targetX).toBe(2000);
-    });
-
-    it('calculates target for horizontal auto alignment (already visible)', () => {
-      const result = calculateScrollTarget({
-        colIndex: 20,
-        columnCount: 100,
-        columnGap: 0,
-        direction: 'horizontal',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: (idx) => idx * 50,
-        getItemQueryY: () => 0,
-        getItemSizeX: () => 50,
-        getItemSizeY: () => 0,
-        itemsLength: 100,
-        options: 'auto',
-        relativeScrollX: 1000, // item 20 is at 1000
-        relativeScrollY: 0,
-        rowIndex: null,
-        totalHeight: 0,
-        totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      expect(result.targetX).toBe(1000);
-    });
-
-    it('calculates target when colIndex is past columnCount', () => {
-      const result = calculateScrollTarget({
-        colIndex: 200,
-        columnCount: 100,
-        columnGap: 10,
-        direction: 'horizontal',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: (idx) => idx * 60,
-        getItemQueryY: () => 0,
-        getItemSizeX: () => 50,
-        getItemSizeY: () => 0,
-        itemsLength: 100,
-        options: 'start',
-        relativeScrollX: 0,
-        relativeScrollY: 0,
-        rowIndex: null,
-        totalHeight: 0,
-        totalWidth: 6000,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      expect(result.targetX).toBe(5500);
-    });
-
-    it('calculates target for horizontal auto alignment (not visible, move to start)', () => {
-      const result = calculateScrollTarget({
-        colIndex: 20,
-        columnCount: 100,
-        columnGap: 0,
-        direction: 'horizontal',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: (idx) => idx * 50,
-        getItemQueryY: () => 0,
-        getItemSizeX: () => 50,
-        getItemSizeY: () => 0,
-        itemsLength: 100,
-        options: 'auto',
-        relativeScrollX: 1100, // item 20 is at 1000
-        relativeScrollY: 0,
-        rowIndex: null,
-        totalHeight: 0,
-        totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      expect(result.targetX).toBe(1000);
-    });
-
-    it('calculates target for horizontal auto alignment (not visible, move to end)', () => {
-      const result = calculateScrollTarget({
-        colIndex: 20,
-        columnCount: 100,
-        columnGap: 0,
-        direction: 'horizontal',
-        fixedSize: 50,
-        fixedWidth: null,
-        gap: 0,
-        getColumnQuery: () => 0,
-        getColumnSize: () => 0,
-        getItemQueryX: (idx) => idx * 50,
-        getItemQueryY: () => 0,
-        getItemSizeX: () => 50,
-        getItemSizeY: () => 0,
-        itemsLength: 100,
-        options: 'auto',
-        relativeScrollX: 400, // item 20 is at 1000, viewport ends at 900.
-        relativeScrollY: 0,
-        rowIndex: null,
-        totalHeight: 0,
-        totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
-      });
-      // item 20 ends at 1050. targetEnd = 1050 - 500 = 550.
-      expect(result.targetX).toBe(550);
     });
 
     it('calculates target for grid bidirectional alignment', () => {
@@ -1099,13 +812,941 @@ describe('virtual-scroll-logic', () => {
         rowIndex: 20,
         totalHeight: 5000,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       // rowIndex 20 -> y=1000. end align -> 1000 - (500 - 50) = 550.
       // colIndex 10 -> x=1000. center align -> 1000 - (500 - 100) / 2 = 1000 - 200 = 800.
       expect(result.targetY).toBe(550);
       expect(result.targetX).toBe(800);
+    });
+
+    it('calculates target accounting for active sticky item (vertical start alignment)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: 150,
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Item 100 is sticky
+      });
+      // Item 150 is at 150 * 50 = 7500.
+      // Sticky item 100 is active. Height = 50.
+      // Target should be 7500 - 50 = 7450.
+      expect(result.targetY).toBe(7450);
+    });
+
+    it('calculates target accounting for active sticky item (horizontal start alignment)', () => {
+      const result = calculateScrollTarget({
+        colIndex: 150,
+        columnCount: 200,
+        columnGap: 0,
+        direction: 'horizontal',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: (idx) => idx * 50,
+        getItemQueryY: () => 0,
+        getItemSizeX: () => 50,
+        getItemSizeY: () => 0,
+        itemsLength: 200,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: null,
+        totalHeight: 0,
+        totalWidth: 10000,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Item 100 is sticky
+      });
+      // Item 150 is at 150 * 50 = 7500.
+      // Sticky item 100 is active. Width = 50.
+      // Target should be 7500 - 50 = 7450.
+      expect(result.targetX).toBe(7450);
+    });
+
+    it('calculates target for vertical start alignment (sticky indices present but none active)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: 50, // Target 50 (2500)
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Sticky 100 is AFTER target 50
+      });
+      // Should align to 2500 without adjustment
+      expect(result.targetY).toBe(2500);
+    });
+
+    it('calculates target accounting for active sticky item (vertical start alignment, dynamic size)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: 150, // Target 150 (7500)
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Sticky 100 is active. Height 50.
+      });
+      // Target 7500 - 50 = 7450.
+      expect(result.targetY).toBe(7450);
+    });
+
+    it('calculates target accounting for active sticky item (vertical auto alignment, scrolling up)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: 'auto',
+        relativeScrollX: 0,
+        relativeScrollY: 8000, // Currently at item 160 (8000)
+        rowIndex: 120, // Target item 120 (6000)
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Item 100 is sticky
+      });
+      // Target 120 is at 6000.
+      // It is above viewport (8000). So it aligns to start.
+      // Sticky item 100 is active (index < 120). Height = 50.
+      // Target should be 6000 - 50 = 5950.
+      expect(result.targetY).toBe(5950);
+    });
+
+    it('calculates target accounting for active sticky item (grid start alignment, fixed width)', () => {
+      const result = calculateScrollTarget({
+        colIndex: 150,
+        columnCount: 200,
+        columnGap: 0,
+        direction: 'both',
+        fixedSize: 50,
+        fixedWidth: 100,
+        gap: 0,
+        getColumnQuery: (idx) => idx * 100,
+        getColumnSize: () => 100,
+        getItemQueryX: () => 0,
+        getItemQueryY: () => 0,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: { x: 'start' },
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: null,
+        totalHeight: 10000,
+        totalWidth: 20000,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Item 100 is sticky
+      });
+      // Target col 150 is at 150 * 100 = 15000.
+      // Sticky item 100 is active. Width = 100.
+      // Target should be 15000 - 100 = 14900.
+      expect(result.targetX).toBe(14900);
+    });
+
+    it('calculates target accounting for active sticky item (horizontal start alignment, dynamic size)', () => {
+      const result = calculateScrollTarget({
+        colIndex: 150,
+        columnCount: 200,
+        columnGap: 0,
+        direction: 'horizontal',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: (idx) => idx * 50,
+        getItemQueryY: () => 0,
+        getItemSizeX: () => 50,
+        getItemSizeY: () => 0,
+        itemsLength: 200,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: null,
+        totalHeight: 0,
+        totalWidth: 10000,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ],
+      });
+      // Target 150 at 7500. Sticky 100 at 5000, width 50.
+      // Target = 7500 - 50 = 7450.
+      expect(result.targetX).toBe(7450);
+    });
+
+    it('calculates target accounting for active sticky item (grid start alignment, dynamic width)', () => {
+      const result = calculateScrollTarget({
+        colIndex: 150,
+        columnCount: 200,
+        columnGap: 0,
+        direction: 'both',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: (idx) => idx * 100,
+        getColumnSize: () => 100,
+        getItemQueryX: () => 0,
+        getItemQueryY: () => 0,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: { x: 'start' },
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: null,
+        totalHeight: 10000,
+        totalWidth: 20000,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ],
+      });
+      expect(result.targetX).toBe(14900);
+    });
+
+    it('calculates target accounting for active sticky item (vertical auto alignment, dynamic size)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: 'auto',
+        relativeScrollX: 0,
+        relativeScrollY: 8000,
+        rowIndex: 120,
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ],
+      });
+      expect(result.targetY).toBe(5950);
+    });
+
+    it('calculates target for vertical auto alignment (item taller than viewport)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 1000,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 1000,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 1000,
+        itemsLength: 10,
+        options: 'auto',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: 5, // Starts at 5000
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+      });
+      // Item 5 starts at 5000, ends 6000.
+      // Viewport 0-500.
+      // Item > Viewport.
+      // 5000 > 0 + 0.5 && 6000 >= 500 - 0.5. (Visible check for large items)
+      // Actually, if it's not visible, auto align.
+      // targetStart = 5000. targetEnd = 5000 - (500 - 1000) = 5500.
+      // Nearest to 0 is 5000.
+      expect(result.targetY).toBe(5000);
+    });
+
+    it('calculates target for vertical auto alignment (sticky indices present but none active)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        itemsLength: 200,
+        options: 'auto',
+        relativeScrollX: 0,
+        relativeScrollY: 8000,
+        rowIndex: 50, // Target 50 (2500).
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Sticky 100 is AFTER target 50.
+      });
+      // Should align to 2500 normally without sticky adjustment.
+      expect(result.targetY).toBe(2500);
+    });
+
+    it('calculates target for horizontal start alignment (sticky indices present but none active)', () => {
+      const result = calculateScrollTarget({
+        colIndex: 50,
+        columnCount: 200,
+        columnGap: 0,
+        direction: 'horizontal',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: (idx) => idx * 50,
+        getItemQueryY: () => 0,
+        getItemSizeX: () => 50,
+        getItemSizeY: () => 0,
+        itemsLength: 200,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: null,
+        totalHeight: 0,
+        totalWidth: 10000,
+        usableHeight: 500,
+        usableWidth: 500,
+        stickyIndices: [ 100 ], // Sticky 100 is AFTER target 50.
+      });
+      // Target 50 at 2500. No sticky adjustment.
+      expect(result.targetX).toBe(2500);
+    });
+
+    it('calculates target for vertical auto alignment (large item already visible)', () => {
+      const result = calculateScrollTarget({
+        colIndex: null,
+        columnCount: 0,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 1000,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 1000,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 1000,
+        itemsLength: 10,
+        options: 'auto',
+        relativeScrollX: 0,
+        relativeScrollY: 200, // Item 0 (0-1000) covers viewport (200-700).
+        rowIndex: 0,
+        totalHeight: 10000,
+        totalWidth: 0,
+        usableHeight: 500,
+        usableWidth: 500,
+      });
+      // Should stay at 200.
+      expect(result.targetY).toBe(200);
+    });
+
+    it('detects visibility correctly when under a sticky item (auto alignment)', () => {
+      const getItemQueryY = (index: number) => index * 100;
+      const getItemSizeY = () => 100;
+
+      const params = {
+        colIndex: null,
+        columnCount: 100,
+        columnGap: 0,
+        direction: 'vertical' as const,
+        fixedSize: 100,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: (idx: number) => idx * 100,
+        getColumnSize: () => 100,
+        getItemQueryX: (idx: number) => idx * 100,
+        getItemQueryY,
+        getItemSizeX: () => 100,
+        getItemSizeY,
+        itemsLength: 1000,
+        options: 'auto' as const,
+        relativeScrollX: 0,
+        relativeScrollY: 14950, // Row 150 is at 15000. It's at 50px from top.
+        rowIndex: 150,
+        stickyIndices: [ 100 ], // Sticky item at row 100 (10000), height 100.
+        totalHeight: 120000,
+        totalWidth: 10000,
+        usableHeight: 800,
+        usableWidth: 1000,
+      };
+
+      const result = calculateScrollTarget(params);
+
+      // Row 150 starts at 15000. Viewport position = 15000 - 14950 = 50.
+      // Sticky row 100 is at 0..100 in viewport.
+      // Row 150 is hidden under sticky row 100.
+      // Expected: detects it's covered and scrolls to 15000 - 100 = 14900.
+      expect(result.targetY).toBe(14900);
+    });
+
+    it('aligns correctly under a sticky item (start alignment)', () => {
+      const getItemQueryY = (index: number) => {
+        if (index <= 100) {
+          return index * 120;
+        }
+        let sum = 12000;
+        for (let i = 100; i < index; i++) {
+          sum += (i % 2 === 0 ? 80 : 160);
+        }
+        return sum;
+      };
+
+      const getItemSizeY = (index: number) => (index % 2 === 0 ? 80 : 160);
+
+      const params = {
+        colIndex: 50,
+        columnCount: 100,
+        columnGap: 0,
+        direction: 'both' as const,
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: (idx: number) => idx * 100,
+        getColumnSize: () => 100,
+        getItemQueryX: (idx: number) => idx * 100,
+        getItemQueryY,
+        getItemSizeX: () => 100,
+        getItemSizeY,
+        itemsLength: 1000,
+        options: 'start' as const,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: 150,
+        stickyIndices: [ 100, 200, 300 ],
+        totalHeight: 120000,
+        totalWidth: 10000,
+        usableHeight: 800,
+        usableWidth: 1000,
+      };
+
+      const result = calculateScrollTarget(params);
+
+      // itemY(150) = 18000.
+      // activeStickyIdx = 100. stickyHeight = 80.
+      // targetY = 18000 - 80 = 17920.
+      expect(result.targetY).toBe(17920);
+    });
+
+    it('aligns to end when scrolling forward (vertical)', () => {
+      const params = {
+        rowIndex: 150,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 1000,
+        totalHeight: 100000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 100,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemY(150) = 15000. viewportHeight = 800. itemHeight = 100.
+      // targetEnd = 15000 - (800 - 100) = 14300.
+      // current relativeScrollY = 0.
+      // minimal movement would pick 14300 anyway.
+      expect(result.targetY).toBe(14300);
+      expect(result.effectiveAlignY).toBe('end');
+    });
+
+    it('aligns to start when scrolling backward (vertical)', () => {
+      const params = {
+        rowIndex: 10,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 1000,
+        totalHeight: 100000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 15000, // We are at row 150
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 100,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemY(10) = 1000.
+      // relativeScrollY = 15000.
+      // minimal movement picks 1000.
+      expect(result.targetY).toBe(1000);
+      expect(result.effectiveAlignY).toBe('start');
+    });
+
+    it('stays put if already visible (vertical)', () => {
+      const params = {
+        rowIndex: 150,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 1000,
+        totalHeight: 100000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 14500, // item 150 is at 15000. Viewport is 14500 to 15300.
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 100,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      expect(result.targetY).toBe(14500);
+      expect(result.effectiveAlignY).toBe('auto');
+    });
+
+    it('aligns to start if partially visible at top (backward scroll effect)', () => {
+      const params = {
+        rowIndex: 150,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 1000,
+        totalHeight: 100000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 15050, // item 150 starts at 15000. Viewport is 15050 to 15850. Item is partially visible at top.
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 100,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // targetY should be 15000 (start alignment)
+      expect(result.targetY).toBe(15000);
+      expect(result.effectiveAlignY).toBe('start');
+    });
+
+    it('aligns to end if partially visible at bottom (forward scroll effect)', () => {
+      const params = {
+        rowIndex: 150,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 1000,
+        totalHeight: 100000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 14250, // item 150 is at 15000. Viewport ends at 15050. Item is partially visible at bottom.
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 100,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // targetY should be 15000 - (800 - 100) = 14300 (end alignment)
+      expect(result.targetY).toBe(14300);
+      expect(result.effectiveAlignY).toBe('end');
+    });
+
+    it('aligns large item correctly when scrolling forward (minimal movement)', () => {
+      const params = {
+        rowIndex: 150,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 500,
+        totalWidth: 1000,
+        totalHeight: 1000000, // Large enough
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 1000, // Large item
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 1000,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemY(150) = 150000. relativeScrollY = 0.
+      // targetStart = 150000.
+      // targetEnd = 150000 - (500 - 1000) = 150500.
+      // Minimal movement picks 150000.
+      expect(result.targetY).toBe(150000);
+      expect(result.effectiveAlignY).toBe('start');
+    });
+
+    it('aligns large item correctly when scrolling backward (minimal movement)', () => {
+      const params = {
+        rowIndex: 10,
+        colIndex: null,
+        options: 'auto' as const,
+        itemsLength: 1000,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 500,
+        totalWidth: 1000,
+        totalHeight: 1000000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 1000, // Large item
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 100000,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 1000,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemY(10) = 10000. relativeScrollY = 100000.
+      // targetStart = 10000.
+      // targetEnd = 10000 - (500 - 1000) = 10500.
+      // Minimal movement picks 10500.
+      expect(result.targetY).toBe(10500);
+      expect(result.effectiveAlignY).toBe('end');
+    });
+
+    it('aligns large item correctly on X axis (minimal movement)', () => {
+      const params = {
+        rowIndex: null,
+        colIndex: 150,
+        options: 'auto' as const,
+        itemsLength: 0,
+        columnCount: 1000,
+        direction: 'horizontal' as const,
+        usableWidth: 500,
+        usableHeight: 1000,
+        totalWidth: 1000000,
+        totalHeight: 1000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 1000, // In horizontal mode, fixedSize is the width
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 1000,
+        getItemQueryY: () => 0,
+        getItemQueryX: (idx: number) => idx * 1000,
+        getColumnSize: () => 1000,
+        getColumnQuery: (idx: number) => idx * 1000,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemX(150) = 150000. relativeScrollX = 0.
+      // targetStart = 150000.
+      // targetEnd = 150000 - (500 - 1000) = 150500.
+      // Minimal movement picks 150000.
+      expect(result.targetX).toBe(150000);
+      expect(result.effectiveAlignX).toBe('start');
+    });
+
+    it('aligns large item correctly on X axis scrolling backward (minimal movement)', () => {
+      const params = {
+        rowIndex: null,
+        colIndex: 10,
+        options: 'auto' as const,
+        itemsLength: 0,
+        columnCount: 1000,
+        direction: 'horizontal' as const,
+        usableWidth: 500,
+        usableHeight: 1000,
+        totalWidth: 1000000,
+        totalHeight: 1000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 1000,
+        fixedWidth: null,
+        relativeScrollX: 100000,
+        relativeScrollY: 0,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 1000,
+        getItemQueryY: () => 0,
+        getItemQueryX: (idx: number) => idx * 1000,
+        getColumnSize: () => 1000,
+        getColumnQuery: (idx: number) => idx * 1000,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemX(10) = 10000. relativeScrollX = 100000.
+      // targetStart = 10000.
+      // targetEnd = 10000 - (500 - 1000) = 10500.
+      // Minimal movement picks 10500.
+      expect(result.targetX).toBe(10500);
+      expect(result.effectiveAlignX).toBe('end');
+    });
+
+    it('calculates target when colIndex is past columnCount', () => {
+      const result = calculateScrollTarget({
+        colIndex: 200,
+        columnCount: 100,
+        columnGap: 10,
+        direction: 'horizontal',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: (idx) => idx * 60,
+        getItemQueryY: () => 0,
+        getItemSizeX: () => 50,
+        getItemSizeY: () => 0,
+        itemsLength: 100,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: null,
+        totalHeight: 0,
+        totalWidth: 6000,
+        usableHeight: 500,
+        usableWidth: 500,
+      });
+      expect(result.targetX).toBe(5500);
+    });
+
+    it('aligns to start when scrolling backward on X axis (horizontal)', () => {
+      const params = {
+        rowIndex: null,
+        colIndex: 10,
+        options: 'auto' as const,
+        itemsLength: 0,
+        columnCount: 1000,
+        direction: 'horizontal' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 100000,
+        totalHeight: 1000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 15000, // item 10 is at 1000
+        relativeScrollY: 0,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 100,
+        getItemQueryY: () => 0,
+        getItemQueryX: (idx: number) => idx * 100,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      expect(result.targetX).toBe(1000);
+      expect(result.effectiveAlignX).toBe('start');
+    });
+
+    it('aligns to end when scrolling forward on X axis (horizontal)', () => {
+      const params = {
+        rowIndex: null,
+        colIndex: 150,
+        options: 'auto' as const,
+        itemsLength: 0,
+        columnCount: 1000,
+        direction: 'horizontal' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 100000,
+        totalHeight: 1000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 100,
+        getItemQueryY: () => 0,
+        getItemQueryX: (idx: number) => idx * 100,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      // itemX(150) = 15000. viewportWidth = 1000. itemWidth = 100.
+      // targetEnd = 15000 - (1000 - 100) = 14100.
+      expect(result.targetX).toBe(14100);
+      expect(result.effectiveAlignX).toBe('end');
+    });
+
+    it('stays put if colIndex already visible (horizontal)', () => {
+      const params = {
+        rowIndex: null,
+        colIndex: 150,
+        options: 'auto' as const,
+        itemsLength: 0,
+        columnCount: 1000,
+        direction: 'horizontal' as const,
+        usableWidth: 1000,
+        usableHeight: 800,
+        totalWidth: 100000,
+        totalHeight: 1000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 14500, // item 150 is at 15000. Viewport is 14500 to 15500.
+        relativeScrollY: 0,
+        getItemSizeY: () => 1000,
+        getItemSizeX: () => 100,
+        getItemQueryY: () => 0,
+        getItemQueryX: (idx: number) => idx * 100,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+      };
+
+      const result = calculateScrollTarget(params);
+      expect(result.targetX).toBe(14500);
+      expect(result.effectiveAlignX).toBe('auto');
     });
   });
 
@@ -1120,7 +1761,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 0,
         totalColsQuery: () => 0,
-        viewportWidth: 200,
+        usableWidth: 200,
       });
       expect(result.padStart).toBe(0);
       expect(result.padEnd).toBe(0);
@@ -1136,7 +1777,7 @@ describe('virtual-scroll-logic', () => {
         query: (idx) => idx * 110,
         relativeScrollX: 220,
         totalColsQuery: () => 100 * 110,
-        viewportWidth: 200,
+        usableWidth: 200,
       });
       expect(result.start).toBe(2);
       expect(result.end).toBe(4);
@@ -1154,7 +1795,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 0,
         totalColsQuery: () => 1090,
-        viewportWidth: 0,
+        usableWidth: 0,
       });
       // safeEnd will be 0 if viewportWidth is 0 and colBuffer is 0
       expect(result.end).toBe(0);
@@ -1171,7 +1812,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 0,
         totalColsQuery: () => 100,
-        viewportWidth: 200,
+        usableWidth: 200,
       });
       expect(result.padStart).toBe(0);
       expect(result.padEnd).toBe(0);
@@ -1187,7 +1828,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 0,
         totalColsQuery: () => 0,
-        viewportWidth: 200,
+        usableWidth: 200,
       });
       expect(result.padStart).toBe(0);
       expect(result.padEnd).toBe(0);
@@ -1203,7 +1844,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 220,
         totalColsQuery: () => 100 * 110,
-        viewportWidth: 200,
+        usableWidth: 200,
       });
       // item 0: 0-100, gap 100-110
       // item 1: 110-210, gap 210-220
@@ -1226,7 +1867,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 0,
         totalColsQuery: () => 0,
-        viewportWidth: 500,
+        usableWidth: 500,
       });
       expect(result.end).toBe(0);
     });
@@ -1241,7 +1882,7 @@ describe('virtual-scroll-logic', () => {
         query: (idx) => idx * 100,
         relativeScrollX: 1000,
         totalColsQuery: () => 10000,
-        viewportWidth: 500,
+        usableWidth: 500,
       });
       expect(result.start).toBe(8);
       expect(result.end).toBe(17);
@@ -1257,7 +1898,7 @@ describe('virtual-scroll-logic', () => {
         query: () => 0,
         relativeScrollX: 1000,
         totalColsQuery: () => 1090,
-        viewportWidth: 500,
+        usableWidth: 500,
       });
 
       // item 0: 0-100, gap 100-110, ... item 9: 990-1090.
@@ -1279,7 +1920,7 @@ describe('virtual-scroll-logic', () => {
         query: (idx) => idx * 110,
         relativeScrollX: 1000,
         totalColsQuery: () => 10 * 110,
-        viewportWidth: 500,
+        usableWidth: 500,
       });
       expect(result.start).toBe(9);
       expect(result.end).toBe(10);
@@ -1301,8 +1942,8 @@ describe('virtual-scroll-logic', () => {
         queryX: () => 0,
         queryY: () => 0,
         totalWidth: 500,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.y).toBe(600);
       expect(result.height).toBe(50);
@@ -1321,8 +1962,8 @@ describe('virtual-scroll-logic', () => {
         queryX: () => 0,
         queryY: (idx) => idx * 60,
         totalWidth: 500,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.y).toBe(600);
       expect(result.height).toBe(50);
@@ -1341,8 +1982,8 @@ describe('virtual-scroll-logic', () => {
         queryX: () => 0,
         queryY: () => 0,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.x).toBe(600);
       expect(result.width).toBe(50);
@@ -1361,8 +2002,8 @@ describe('virtual-scroll-logic', () => {
         queryX: (idx) => idx * 60,
         queryY: () => 0,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.x).toBe(600);
       expect(result.width).toBe(50);
@@ -1381,8 +2022,8 @@ describe('virtual-scroll-logic', () => {
         queryX: () => 0,
         queryY: (idx) => idx * 60,
         totalWidth: 5000,
-        viewportHeight: 500,
-        viewportWidth: 500,
+        usableHeight: 500,
+        usableWidth: 500,
       });
       expect(result.y).toBe(600);
       expect(result.height).toBe(50);
@@ -1706,6 +2347,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: 0, y: 0 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
+        paddingStartX: 0,
+        paddingStartY: 0,
       });
       expect(result.minInlineSize).toBe('100%');
     });
@@ -1723,6 +2366,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: 0, y: 0 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 0,
+        paddingStartX: 0,
+        paddingStartY: 0,
       });
       expect(result.blockSize).toBe('auto');
       expect(result.minBlockSize).toBe('1px');
@@ -1741,6 +2386,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: 0, y: 0 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 0,
+        paddingStartX: 0,
+        paddingStartY: 0,
       });
       expect(result.inlineSize).toBe('auto');
       expect(result.minInlineSize).toBe('1px');
@@ -1759,7 +2406,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: 0, y: -10 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
-        scrollPaddingStart: 10,
+        paddingStartX: 10,
+        paddingStartY: 10,
       });
       expect(result.insetBlockStart).toBe('10px');
       expect(result.insetInlineStart).toBeUndefined();
@@ -1778,7 +2426,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: -10, y: -10 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
-        scrollPaddingStart: { x: 10, y: 10 },
+        paddingStartX: 10,
+        paddingStartY: 10,
       });
       expect(result.insetBlockStart).toBe('10px');
       expect(result.insetInlineStart).toBe('10px');
@@ -1797,7 +2446,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: -10, y: -10 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
-        scrollPaddingStart: { x: 10, y: 10 },
+        paddingStartX: 10,
+        paddingStartY: 10,
       });
       expect(result.insetBlockStart).toBe('10px');
       expect(result.insetInlineStart).toBe('10px');
@@ -1817,6 +2467,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: 0, y: 0 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
+        paddingStartX: 0,
+        paddingStartY: 0,
       });
       expect(result.transform).toBeUndefined();
     });
@@ -1834,7 +2486,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: -10, y: 0 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
-        scrollPaddingStart: 10,
+        paddingStartX: 10,
+        paddingStartY: 10,
       });
       expect(result.insetInlineStart).toBe('10px');
       expect(result.transform).toBe('translate(-10px, 0px)');
@@ -1853,7 +2506,8 @@ describe('virtual-scroll-logic', () => {
           stickyOffset: { x: -10, y: -20 },
         } as unknown as RenderedItem<unknown>,
         itemSize: 50,
-        scrollPaddingStart: { x: 10, y: 20 },
+        paddingStartX: 10,
+        paddingStartY: 20,
       });
       expect(result.insetBlockStart).toBe('20px');
       expect(result.insetInlineStart).toBe('10px');

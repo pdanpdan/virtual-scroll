@@ -113,7 +113,9 @@ describe('scroll utils', () => {
   describe('getPaddingX', () => {
     it('should handle numeric padding', () => {
       expect(getPaddingX(10, 'horizontal')).toBe(10);
+      expect(getPaddingX(10, 'both')).toBe(10);
       expect(getPaddingX(10, 'vertical')).toBe(0);
+      expect(getPaddingX(0, 'horizontal')).toBe(0);
     });
 
     it('should handle object padding', () => {
@@ -131,6 +133,7 @@ describe('scroll utils', () => {
       expect(getPaddingY(10, 'vertical')).toBe(10);
       expect(getPaddingY(10, 'both')).toBe(10);
       expect(getPaddingY(10, 'horizontal')).toBe(0);
+      expect(getPaddingY(0, 'vertical')).toBe(0);
     });
 
     it('should handle object padding', () => {

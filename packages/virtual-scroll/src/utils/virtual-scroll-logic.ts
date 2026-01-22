@@ -7,11 +7,12 @@ import type {
   ScrollAlignmentOptions,
   ScrollTargetParams,
   ScrollTargetResult,
+  ScrollToIndexOptions,
   StickyParams,
   TotalSizeParams,
 } from '../types';
 
-import { getPaddingX, getPaddingY, isScrollToIndexOptions } from './scroll';
+import { isScrollToIndexOptions } from './scroll';
 
 /**
  * Calculates the target scroll position (relative to content) for a given row/column index and alignment.
@@ -29,15 +30,14 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
     itemsLength,
     columnCount,
     direction,
-    viewportWidth,
-    viewportHeight,
+    usableWidth,
+    usableHeight,
     totalWidth,
     totalHeight,
-    scrollPaddingStart,
-    scrollPaddingEnd,
     gap,
     columnGap,
     fixedSize,
+    fixedWidth,
     relativeScrollX,
     relativeScrollY,
     getItemSizeY,
@@ -46,9 +46,10 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
     getItemQueryX,
     getColumnSize,
     getColumnQuery,
+    stickyIndices,
   } = params;
 
-  let align: ScrollAlignment | ScrollAlignmentOptions | undefined;
+  let align: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
 
   if (isScrollToIndexOptions(options)) {
     align = options.align;
@@ -62,21 +63,35 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
   const isVertical = direction === 'vertical' || direction === 'both';
   const isHorizontal = direction === 'horizontal' || direction === 'both';
 
-  const paddingStartX = getPaddingX(scrollPaddingStart, direction);
-  const paddingEndX = getPaddingX(scrollPaddingEnd, direction);
-  const paddingStartY = getPaddingY(scrollPaddingStart, direction);
-  const paddingEndY = getPaddingY(scrollPaddingEnd, direction);
-
-  const usableWidth = viewportWidth - (isHorizontal ? (paddingStartX + paddingEndX) : 0);
-  const usableHeight = viewportHeight - (isVertical ? (paddingStartY + paddingEndY) : 0);
-
   let targetX = relativeScrollX;
   let targetY = relativeScrollY;
   let itemWidth = 0;
   let itemHeight = 0;
+  let effectiveAlignX: ScrollAlignment = alignX === 'auto' ? 'auto' : alignX;
+  let effectiveAlignY: ScrollAlignment = alignY === 'auto' ? 'auto' : alignY;
 
   // Y calculation
   if (rowIndex != null) {
+    let stickyOffsetY = 0;
+    if (isVertical && stickyIndices && stickyIndices.length > 0) {
+      let activeStickyIdx: number | undefined;
+      let low = 0;
+      let high = stickyIndices.length - 1;
+      while (low <= high) {
+        const mid = (low + high) >>> 1;
+        if (stickyIndices[ mid ]! < rowIndex) {
+          activeStickyIdx = stickyIndices[ mid ];
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }
+
+      if (activeStickyIdx !== undefined) {
+        stickyOffsetY = fixedSize !== null ? fixedSize : getItemSizeY(activeStickyIdx) - gap;
+      }
+    }
+
     let itemY = 0;
     if (rowIndex >= itemsLength) {
       itemY = totalHeight;
@@ -88,24 +103,38 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
 
     // Apply Y Alignment
     if (alignY === 'start') {
-      targetY = itemY;
+      targetY = itemY - stickyOffsetY;
     } else if (alignY === 'center') {
       targetY = itemY - (usableHeight - itemHeight) / 2;
     } else if (alignY === 'end') {
       targetY = itemY - (usableHeight - itemHeight);
     } else {
       // Auto alignment: stay if visible, otherwise align to nearest edge (minimal movement)
-      const isVisibleY = itemHeight <= usableHeight
-        ? (itemY >= relativeScrollY - 0.5 && (itemY + itemHeight) <= (relativeScrollY + usableHeight + 0.5))
-        : (itemY <= relativeScrollY + 0.5 && (itemY + itemHeight) >= (relativeScrollY + usableHeight - 0.5));
+      const isVisibleY = itemHeight <= (usableHeight - stickyOffsetY)
+        ? (itemY >= relativeScrollY + stickyOffsetY - 0.5 && (itemY + itemHeight) <= (relativeScrollY + usableHeight + 0.5))
+        : (itemY <= relativeScrollY + stickyOffsetY + 0.5 && (itemY + itemHeight) >= (relativeScrollY + usableHeight - 0.5));
 
       if (!isVisibleY) {
-        const targetStart = itemY;
+        const targetStart = itemY - stickyOffsetY;
         const targetEnd = itemY - (usableHeight - itemHeight);
-        if (Math.abs(targetStart - relativeScrollY) < Math.abs(targetEnd - relativeScrollY)) {
-          targetY = targetStart;
+
+        if (itemHeight <= usableHeight - stickyOffsetY) {
+          if (itemY < relativeScrollY + stickyOffsetY) {
+            targetY = targetStart;
+            effectiveAlignY = 'start';
+          } else {
+            targetY = targetEnd;
+            effectiveAlignY = 'end';
+          }
         } else {
-          targetY = targetEnd;
+          // Large item: minimal movement
+          if (Math.abs(targetStart - relativeScrollY) < Math.abs(targetEnd - relativeScrollY)) {
+            targetY = targetStart;
+            effectiveAlignY = 'start';
+          } else {
+            targetY = targetEnd;
+            effectiveAlignY = 'end';
+          }
         }
       }
     }
@@ -113,6 +142,28 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
 
   // X calculation
   if (colIndex != null) {
+    let stickyOffsetX = 0;
+    if (isHorizontal && stickyIndices && stickyIndices.length > 0 && (direction === 'horizontal' || direction === 'both')) {
+      let activeStickyIdx: number | undefined;
+      let low = 0;
+      let high = stickyIndices.length - 1;
+      while (low <= high) {
+        const mid = (low + high) >>> 1;
+        if (stickyIndices[ mid ]! < colIndex) {
+          activeStickyIdx = stickyIndices[ mid ];
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }
+
+      if (activeStickyIdx !== undefined) {
+        stickyOffsetX = direction === 'horizontal'
+          ? (fixedSize !== null ? fixedSize : getItemSizeX(activeStickyIdx) - columnGap)
+          : (fixedWidth !== null ? fixedWidth : getColumnSize(activeStickyIdx) - columnGap);
+      }
+    }
+
     let itemX = 0;
     if (colIndex >= columnCount && columnCount > 0) {
       itemX = totalWidth;
@@ -127,24 +178,38 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
 
     // Apply X Alignment
     if (alignX === 'start') {
-      targetX = itemX;
+      targetX = itemX - stickyOffsetX;
     } else if (alignX === 'center') {
       targetX = itemX - (usableWidth - itemWidth) / 2;
     } else if (alignX === 'end') {
       targetX = itemX - (usableWidth - itemWidth);
     } else {
       // Auto alignment: stay if visible, otherwise align to nearest edge (minimal movement)
-      const isVisibleX = itemWidth <= usableWidth
-        ? (itemX >= relativeScrollX - 0.5 && (itemX + itemWidth) <= (relativeScrollX + usableWidth + 0.5))
-        : (itemX <= relativeScrollX + 0.5 && (itemX + itemWidth) >= (relativeScrollX + usableWidth - 0.5));
+      const isVisibleX = itemWidth <= (usableWidth - stickyOffsetX)
+        ? (itemX >= relativeScrollX + stickyOffsetX - 0.5 && (itemX + itemWidth) <= (relativeScrollX + usableWidth + 0.5))
+        : (itemX <= relativeScrollX + stickyOffsetX + 0.5 && (itemX + itemWidth) >= (relativeScrollX + usableWidth - 0.5));
 
       if (!isVisibleX) {
-        const targetStart = itemX;
+        const targetStart = itemX - stickyOffsetX;
         const targetEnd = itemX - (usableWidth - itemWidth);
-        if (Math.abs(targetStart - relativeScrollX) < Math.abs(targetEnd - relativeScrollX)) {
-          targetX = targetStart;
+
+        if (itemWidth <= usableWidth - stickyOffsetX) {
+          if (itemX < relativeScrollX + stickyOffsetX) {
+            targetX = targetStart;
+            effectiveAlignX = 'start';
+          } else {
+            targetX = targetEnd;
+            effectiveAlignX = 'end';
+          }
         } else {
-          targetX = targetEnd;
+          // Large item: minimal movement
+          if (Math.abs(targetStart - relativeScrollX) < Math.abs(targetEnd - relativeScrollX)) {
+            targetX = targetStart;
+            effectiveAlignX = 'start';
+          } else {
+            targetX = targetEnd;
+            effectiveAlignX = 'end';
+          }
         }
       }
     }
@@ -154,7 +219,7 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
   targetX = Math.max(0, Math.min(targetX, Math.max(0, totalWidth - usableWidth)));
   targetY = Math.max(0, Math.min(targetY, Math.max(0, totalHeight - usableHeight)));
 
-  return { targetX, targetY, itemWidth, itemHeight };
+  return { targetX, targetY, itemWidth, itemHeight, effectiveAlignX, effectiveAlignY };
 }
 
 /**
@@ -169,16 +234,14 @@ export function calculateRange(params: RangeParams) {
     direction,
     relativeScrollX,
     relativeScrollY,
-    viewportWidth,
-    viewportHeight,
+    usableWidth,
+    usableHeight,
     itemsLength,
     bufferBefore,
     bufferAfter,
     gap,
     columnGap,
     fixedSize,
-    scrollPaddingStart,
-    scrollPaddingEnd,
     findLowerBoundY,
     findLowerBoundX,
     queryY,
@@ -186,15 +249,6 @@ export function calculateRange(params: RangeParams) {
   } = params;
 
   const isVertical = direction === 'vertical' || direction === 'both';
-  const isHorizontal = direction === 'horizontal' || direction === 'both';
-
-  const paddingStartX = getPaddingX(scrollPaddingStart, direction);
-  const paddingEndX = getPaddingX(scrollPaddingEnd, direction);
-  const paddingStartY = getPaddingY(scrollPaddingStart, direction);
-  const paddingEndY = getPaddingY(scrollPaddingEnd, direction);
-
-  const usableWidth = viewportWidth - (isHorizontal ? (paddingStartX + paddingEndX) : 0);
-  const usableHeight = viewportHeight - (isVertical ? (paddingStartY + paddingEndY) : 0);
 
   let start = 0;
   let end = itemsLength;
@@ -205,12 +259,11 @@ export function calculateRange(params: RangeParams) {
       end = Math.ceil((relativeScrollY + usableHeight) / (fixedSize + gap));
     } else {
       start = findLowerBoundY(relativeScrollY);
-      let currentY = queryY(start);
-      let i = start;
-      while (i < itemsLength && currentY < relativeScrollY + usableHeight) {
-        currentY = queryY(++i);
+      const targetY = relativeScrollY + usableHeight;
+      end = findLowerBoundY(targetY);
+      if (end < itemsLength && queryY(end) < targetY) {
+        end++;
       }
-      end = i;
     }
   } else {
     if (fixedSize !== null) {
@@ -218,12 +271,11 @@ export function calculateRange(params: RangeParams) {
       end = Math.ceil((relativeScrollX + usableWidth) / (fixedSize + columnGap));
     } else {
       start = findLowerBoundX(relativeScrollX);
-      let currentX = queryX(start);
-      let i = start;
-      while (i < itemsLength && currentX < relativeScrollX + usableWidth) {
-        currentX = queryX(++i);
+      const targetX = relativeScrollX + usableWidth;
+      end = findLowerBoundX(targetX);
+      if (end < itemsLength && queryX(end) < targetX) {
+        end++;
       }
-      end = i;
     }
   }
 
@@ -245,7 +297,7 @@ export function calculateColumnRange(params: ColumnRangeParams) {
   const {
     columnCount,
     relativeScrollX,
-    viewportWidth,
+    usableWidth,
     colBuffer,
     fixedWidth,
     columnGap,
@@ -263,12 +315,12 @@ export function calculateColumnRange(params: ColumnRangeParams) {
 
   if (fixedWidth !== null) {
     start = Math.floor(relativeScrollX / (fixedWidth + columnGap));
-    end = Math.ceil((relativeScrollX + viewportWidth) / (fixedWidth + columnGap));
+    end = Math.ceil((relativeScrollX + usableWidth) / (fixedWidth + columnGap));
   } else {
     start = findLowerBound(relativeScrollX);
     let currentX = query(start);
     let i = start;
-    while (i < columnCount && currentX < relativeScrollX + viewportWidth) {
+    while (i < columnCount && currentX < relativeScrollX + usableWidth) {
       currentX = query(++i);
     }
     end = i;
@@ -406,8 +458,8 @@ export function calculateItemPosition(params: ItemPositionParams) {
     fixedSize,
     gap,
     columnGap,
-    viewportWidth,
-    viewportHeight,
+    usableWidth,
+    usableHeight,
     totalWidth,
     queryY,
     queryX,
@@ -423,12 +475,12 @@ export function calculateItemPosition(params: ItemPositionParams) {
   if (direction === 'horizontal') {
     x = fixedSize !== null ? index * (fixedSize + columnGap) : queryX(index);
     width = fixedSize !== null ? fixedSize : getSizeX(index) - columnGap;
-    height = viewportHeight;
+    height = usableHeight;
   } else {
     // vertical or both
     y = (direction === 'vertical' || direction === 'both') && fixedSize !== null ? index * (fixedSize + gap) : queryY(index);
     height = fixedSize !== null ? fixedSize : getSizeY(index) - gap;
-    width = direction === 'both' ? totalWidth : viewportWidth;
+    width = direction === 'both' ? totalWidth : usableWidth;
   }
 
   return { height, width, x, y };
@@ -447,7 +499,8 @@ export function calculateItemStyle<T = unknown>(params: ItemStyleParams<T>) {
     direction,
     itemSize,
     containerTag,
-    scrollPaddingStart,
+    paddingStartX,
+    paddingStartY,
     isHydrated,
   } = params;
 
@@ -478,11 +531,11 @@ export function calculateItemStyle<T = unknown>(params: ItemStyleParams<T>) {
   if (isHydrated) {
     if (item.isStickyActive) {
       if (isVertical || isBoth) {
-        style.insetBlockStart = `${ getPaddingY(scrollPaddingStart, direction) }px`;
+        style.insetBlockStart = `${ paddingStartY }px`;
       }
 
       if (isHorizontal || isBoth) {
-        style.insetInlineStart = `${ getPaddingX(scrollPaddingStart, direction) }px`;
+        style.insetInlineStart = `${ paddingStartX }px`;
       }
 
       style.transform = `translate(${ item.stickyOffset.x }px, ${ item.stickyOffset.y }px)`;
@@ -510,8 +563,8 @@ export function calculateTotalSize(params: TotalSizeParams) {
     fixedWidth,
     gap,
     columnGap,
-    viewportWidth,
-    viewportHeight,
+    usableWidth,
+    usableHeight,
     queryY,
     queryX,
     queryColumn,
@@ -529,18 +582,18 @@ export function calculateTotalSize(params: TotalSizeParams) {
     } else {
       height = Math.max(0, queryY(itemsLength) - (itemsLength > 0 ? gap : 0));
     }
-    width = Math.max(width, viewportWidth);
-    height = Math.max(height, viewportHeight);
+    width = Math.max(width, usableWidth);
+    height = Math.max(height, usableHeight);
   } else if (direction === 'horizontal') {
     if (fixedSize !== null) {
       width = Math.max(0, itemsLength * (fixedSize + columnGap) - (itemsLength > 0 ? columnGap : 0));
     } else {
       width = Math.max(0, queryX(itemsLength) - (itemsLength > 0 ? columnGap : 0));
     }
-    height = viewportHeight;
+    height = usableHeight;
   } else {
     // vertical
-    width = viewportWidth;
+    width = usableWidth;
     if (fixedSize !== null) {
       height = Math.max(0, itemsLength * (fixedSize + gap) - (itemsLength > 0 ? gap : 0));
     } else {

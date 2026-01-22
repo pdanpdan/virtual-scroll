@@ -725,5 +725,48 @@ describe('virtualScroll', () => {
       expect(wrapper.element.tagName).toBe('TABLE');
       expect(wrapper.find('tbody').exists()).toBe(true);
     });
+
+    it('triggers refresh and updates items', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems.slice(0, 10),
+        },
+      });
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as { scrollDetails: ScrollDetails<MockItem>; refresh: () => void; };
+      vs.refresh();
+      await nextTick();
+      // Should not crash
+      expect(vs.scrollDetails.items.length).toBeGreaterThan(0);
+    });
+
+    it('handles sticky header and footer measurements', async () => {
+      mount(VirtualScroll, {
+        props: {
+          items: mockItems.slice(0, 10),
+          stickyFooter: true,
+          stickyHeader: true,
+        },
+        slots: {
+          footer: () => h('div', { class: 'footer', style: 'height: 30px' }, 'FOOTER'),
+          header: () => h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
+        },
+      });
+      await nextTick();
+    });
+
+    it('works with window as container', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          container: window,
+          itemSize: 50,
+          items: mockItems,
+        },
+      });
+      await nextTick();
+      expect(wrapper.classes()).toContain('virtual-scroll--window');
+    });
   });
 });

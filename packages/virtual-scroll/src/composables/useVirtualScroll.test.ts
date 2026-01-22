@@ -10,6 +10,12 @@ import { useVirtualScroll } from './useVirtualScroll';
 
 // --- Mocks ---
 
+globalThis.ResizeObserver = class ResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+};
+
 Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, value: 500 });
 Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 500 });
 Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 500 });
@@ -202,5 +208,142 @@ describe('useVirtualScroll', () => {
 
     // It should have corrected to: 2500 - (485 - 50) = 2500 - 435 = 2065.
     expect(window.scrollY).toBe(2065);
+  });
+
+  it('renders sticky indices correctly using optimized search', async () => {
+    // Use an isolated container to avoid window pollution
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientHeight', { configurable: true, value: 200 });
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+    // Mock scrollTo on container
+    container.scrollTo = vi.fn().mockImplementation((options: ScrollToOptions) => {
+      if (options.left !== undefined) {
+        container.scrollLeft = options.left;
+      }
+      if (options.top !== undefined) {
+        container.scrollTop = options.top;
+      }
+      container.dispatchEvent(new Event('scroll'));
+    });
+
+    const { result } = setup({
+      container,
+      direction: 'vertical',
+      itemSize: 50,
+      items: Array.from({ length: 20 }, (_, i) => ({ id: i })),
+      stickyIndices: [ 0, 10, 19 ],
+      bufferBefore: 0,
+      bufferAfter: 0,
+    });
+
+    await nextTick();
+    await nextTick();
+
+    // 1. Initial scroll 0. Range [0, 4].
+    expect(result.renderedItems.value.map((i) => i.index)).toEqual([ 0, 1, 2, 3 ]);
+
+    // 2. Scroll to 100 (item 2). Range [2, 6].
+    container.scrollTop = 100;
+    container.dispatchEvent(new Event('scroll'));
+    await nextTick();
+    await nextTick();
+
+    const indices2 = result.renderedItems.value.map((i) => i.index).sort((a, b) => a - b);
+    expect(indices2).toEqual([ 0, 2, 3, 4, 5 ]);
+    expect(result.renderedItems.value.find((i) => i.index === 0)?.isStickyActive).toBe(true);
+
+    // 3. Scroll to 500 (item 10). Range [10, 14].
+    container.scrollTop = 500;
+    container.dispatchEvent(new Event('scroll'));
+    await nextTick();
+    await nextTick();
+
+    const indices3 = result.renderedItems.value.map((i) => i.index).sort((a, b) => a - b);
+    expect(indices3).toContain(0);
+    expect(indices3).toContain(10);
+    expect(indices3).toContain(11);
+    expect(indices3).toContain(12);
+    expect(indices3).toContain(13);
+  });
+
+  it('updates item sizes and compensates scroll position', async () => {
+    const { result } = setup({
+      container: window,
+      direction: 'vertical',
+      itemSize: 0,
+      items: mockItems,
+    });
+
+    await nextTick();
+    await nextTick();
+
+    // Scroll to item 10 (10 * 40 = 400px)
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 400, writable: true });
+    document.dispatchEvent(new Event('scroll'));
+    await nextTick();
+
+    // Update item 0 (above viewport) from 40 to 100
+    result.updateItemSize(0, 100, 100);
+    await nextTick();
+
+    // Scroll position should have been adjusted by 60px
+    expect(window.scrollY).toBe(460);
+  });
+
+  it('supports refresh method', async () => {
+    const { result } = setup({
+      container: window,
+      direction: 'vertical',
+      itemSize: 50,
+      items: mockItems,
+    });
+
+    await nextTick();
+    result.refresh();
+    await nextTick();
+    expect(result.totalHeight.value).toBe(5000);
+  });
+
+  it('supports getColumnWidth with various types', async () => {
+    const { result } = setup({
+      columnCount: 10,
+      columnWidth: [ 100, 200 ],
+      direction: 'both',
+      items: mockItems,
+    });
+
+    await nextTick();
+    expect(result.getColumnWidth(0)).toBe(100);
+    expect(result.getColumnWidth(1)).toBe(200);
+    expect(result.getColumnWidth(2)).toBe(100);
+  });
+
+  it('updates column sizes from row element', async () => {
+    const { result } = setup({
+      columnCount: 5,
+      columnWidth: 0, // dynamic
+      direction: 'both',
+      items: mockItems,
+    });
+
+    await nextTick();
+
+    const rowEl = document.createElement('div');
+    const cell0 = document.createElement('div');
+    cell0.dataset.colIndex = '0';
+    Object.defineProperty(cell0, 'getBoundingClientRect', {
+      value: () => ({ width: 150 }),
+    });
+    rowEl.appendChild(cell0);
+
+    result.updateItemSizes([ {
+      blockSize: 100,
+      element: rowEl,
+      index: 0,
+      inlineSize: 0,
+    } ]);
+
+    await nextTick();
+    expect(result.getColumnWidth(0)).toBe(150);
   });
 });

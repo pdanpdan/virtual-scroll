@@ -316,18 +316,14 @@ export interface ScrollTargetParams {
   columnCount: number;
   /** Current scroll direction. */
   direction: ScrollDirection;
-  /** Viewport width. */
-  viewportWidth: number;
-  /** Viewport height. */
-  viewportHeight: number;
+  /** Usable viewport width (excluding padding). */
+  usableWidth: number;
+  /** Usable viewport height (excluding padding). */
+  usableHeight: number;
   /** Current total estimated width. */
   totalWidth: number;
   /** Current total estimated height. */
   totalHeight: number;
-  /** Padding start. */
-  scrollPaddingStart?: number | { x?: number; y?: number; } | undefined;
-  /** Padding end. */
-  scrollPaddingEnd?: number | { x?: number; y?: number; } | undefined;
   /** Item gap. */
   gap: number;
   /** Column gap. */
@@ -352,6 +348,8 @@ export interface ScrollTargetParams {
   getColumnSize: (index: number) => number;
   /** Prefix sum resolver for column width. */
   getColumnQuery: (index: number) => number;
+  /** List of sticky indices. */
+  stickyIndices?: number[] | undefined;
 }
 
 /** Calculated scroll target result. */
@@ -364,6 +362,10 @@ export interface ScrollTargetResult {
   itemWidth: number;
   /** Resolved height of the target item. */
   itemHeight: number;
+  /** Effective alignment used for X axis. */
+  effectiveAlignX: ScrollAlignment;
+  /** Effective alignment used for Y axis. */
+  effectiveAlignY: ScrollAlignment;
 }
 
 /** Parameters for calculating the visible range of items. */
@@ -374,10 +376,10 @@ export interface RangeParams {
   relativeScrollX: number;
   /** Relative vertical scroll position. */
   relativeScrollY: number;
-  /** Viewport width. */
-  viewportWidth: number;
-  /** Viewport height. */
-  viewportHeight: number;
+  /** Usable viewport width. */
+  usableWidth: number;
+  /** Usable viewport height. */
+  usableHeight: number;
   /** Total item count. */
   itemsLength: number;
   /** Buffer items before. */
@@ -390,10 +392,6 @@ export interface RangeParams {
   columnGap: number;
   /** Fixed item size. */
   fixedSize: number | null;
-  /** Padding start. */
-  scrollPaddingStart?: number | { x?: number; y?: number; } | undefined;
-  /** Padding end. */
-  scrollPaddingEnd?: number | { x?: number; y?: number; } | undefined;
   /** Binary search for row index. */
   findLowerBoundY: (offset: number) => number;
   /** Binary search for row index (horizontal). */
@@ -410,8 +408,8 @@ export interface ColumnRangeParams {
   columnCount: number;
   /** Relative horizontal scroll position. */
   relativeScrollX: number;
-  /** Viewport width. */
-  viewportWidth: number;
+  /** Usable viewport width. */
+  usableWidth: number;
   /** Column buffer count. */
   colBuffer: number;
   /** Fixed column width. */
@@ -474,10 +472,10 @@ export interface ItemPositionParams {
   gap: number;
   /** Column gap. */
   columnGap: number;
-  /** Viewport width. */
-  viewportWidth: number;
-  /** Viewport height. */
-  viewportHeight: number;
+  /** Usable viewport width. */
+  usableWidth: number;
+  /** Usable viewport height. */
+  usableHeight: number;
   /** Total estimated width. */
   totalWidth: number;
   /** Prefix sum for row height. */
@@ -500,8 +498,10 @@ export interface ItemStyleParams<T = unknown> {
   itemSize: number | ((item: T, index: number) => number) | null | undefined;
   /** Parent container tag. */
   containerTag: string;
-  /** Resolved padding start. */
-  scrollPaddingStart?: number | { x?: number; y?: number; } | undefined;
+  /** Padding start on X axis. */
+  paddingStartX: number;
+  /** Padding start on Y axis. */
+  paddingStartY: number;
   /** Hydration state. */
   isHydrated: boolean;
 }
@@ -522,10 +522,10 @@ export interface TotalSizeParams {
   gap: number;
   /** The gap between columns. */
   columnGap: number;
-  /** The current width of the viewport. */
-  viewportWidth: number;
-  /** The current height of the viewport. */
-  viewportHeight: number;
+  /** Usable viewport width. */
+  usableWidth: number;
+  /** Usable viewport height. */
+  usableHeight: number;
   /** Function to query the prefix sum of item heights. */
   queryY: (index: number) => number;
   /** Function to query the prefix sum of item widths. */

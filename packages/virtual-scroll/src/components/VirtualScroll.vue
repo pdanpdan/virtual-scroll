@@ -687,7 +687,8 @@ function getItemStyle(item: RenderedItem<T>) {
     isHydrated: isHydrated.value,
     item,
     itemSize: props.itemSize,
-    scrollPaddingStart: virtualScrollProps.value.scrollPaddingStart,
+    paddingStartX: (virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; }).x,
+    paddingStartY: (virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; }).y,
   });
 }
 
