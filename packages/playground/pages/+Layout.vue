@@ -134,7 +134,7 @@ const patternLinks: Link[] = [
       <label for="app-drawer-main" aria-label="close sidebar" class="drawer-overlay" />
       <ul class="menu px-4 py-0 w-76 min-h-full bg-base-300 text-base-content gap-0.5">
         <!-- Sidebar content here -->
-        <li class="menu-title drawer-header px-0 sticky top-0 bg-inherit z-1">
+        <li class="menu-title drawer-header px-0 max-lg:py-2 sticky top-0 bg-inherit z-1">
           <div class="flex items-center gap-3">
             <div class="transition-transform hover:scale-105 drop-shadow-md">
               <AppLogo class="shrink-0 size-12" />
