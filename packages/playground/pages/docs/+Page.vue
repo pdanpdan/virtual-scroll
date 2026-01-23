@@ -9,10 +9,10 @@ import CodeBlock from '#/components/CodeBlock.vue';
   <div class="pb-10">
     <div class="card shadow-soft bg-base-300">
       <div class="card-body flex-row items-center p-4 md:p-8 gap-4 md:gap-8">
-        <AppLogo class="size-16 md:size-24 drop-shadow-lg" />
+        <AppLogo class="shrink-0 size-24 hidden md:block drop-shadow-lg" />
         <div>
           <h1 class="text-primary">API Reference</h1>
-          <p class="text-base md:text-xl opacity-60 font-medium">
+          <p class="text-base md:text-xl opacity-60 font-medium mt-1">
             Complete documentation for <code>@pdanpdan/virtual-scroll</code>.
           </p>
         </div>

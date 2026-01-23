@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { changelog } from './changelog-data';
+import AppLogo from '#/components/AppLogo.vue';
+import { changelog } from '#/pages/changelog/changelog-data';
 </script>
 
 <template>
   <div class="pb-10">
-    <div class="card shadow-soft bg-base-300 mb-12">
-      <div class="card-body p-4 md:p-8">
-        <h1 class="text-primary mb-2">Changelog</h1>
-        <p class="text-base md:text-xl opacity-60 font-medium">
-          All notable changes to the project.
-        </p>
+    <div class="card shadow-soft bg-base-300">
+      <div class="card-body flex-row items-center p-4 md:p-8 gap-4 md:gap-8">
+        <AppLogo class="shrink-0 size-24 hidden md:block drop-shadow-lg" />
+        <div>
+          <h1 class="text-primary">Changelog</h1>
+          <p class="text-base md:text-xl opacity-60 font-medium mt-1">
+            All notable changes to the project.
+          </p>
+        </div>
       </div>
     </div>
 
-    <div class="px-4">
+    <div class="px-4 mt-8">
       <ul class="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical">
         <li v-for="(version, index) in changelog" :key="version.version">
           <hr v-if="index > 0" class="bg-primary/20" />

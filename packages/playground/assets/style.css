@@ -119,6 +119,10 @@
       @apply ms-3;
     }
   }
+
+  .drawer-side-container {
+    overscroll-behavior: contain;
+  }
 }
 
 /* --- Example Card Utilities --- */
