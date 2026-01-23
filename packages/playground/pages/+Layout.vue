@@ -22,6 +22,16 @@ function toggleTheme() {
   }
 }
 
+const drawerOpen = ref(false);
+
+async function navigateAndCloseDrawer(url: string, type?: string) {
+  await navigateWithTransition(url, type);
+
+  setTimeout(() => {
+    drawerOpen.value = false;
+  }, 100);
+}
+
 onMounted(() => {
   const savedTheme = localStorage.getItem('vs-theme');
   if (savedTheme === 'light' || savedTheme === 'dark') {
@@ -81,7 +91,7 @@ const patternLinks: Link[] = [
 
 <template>
   <div class="drawer lg:drawer-open">
-    <input id="app-drawer-main" type="checkbox" class="drawer-toggle" />
+    <input id="app-drawer-main" v-model="drawerOpen" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content flex flex-col">
       <!-- Navbar -->
       <div class="navbar sticky top-0 z-1 bg-base-300 shadow-sm w-full lg:hidden">
@@ -158,7 +168,7 @@ const patternLinks: Link[] = [
               :class="{ 'drawer-link--active': active }"
               v-bind="link.props"
               data-vike="false"
-              @click.prevent="navigateWithTransition(href, link.href === '/' ? 'back' : 'forward')"
+              @click.prevent="navigateAndCloseDrawer(href, link.href === '/' ? 'back' : 'forward')"
             >
               {{ link.label }}
             </a>
@@ -177,7 +187,7 @@ const patternLinks: Link[] = [
               :class="{ 'drawer-link--active': active }"
               v-bind="link.props"
               data-vike="false"
-              @click.prevent="navigateWithTransition(href, 'forward')"
+              @click.prevent="navigateAndCloseDrawer(href, 'forward')"
             >
               {{ link.label }}
             </a>
@@ -196,7 +206,7 @@ const patternLinks: Link[] = [
               :class="{ 'drawer-link--active': active }"
               v-bind="link.props"
               data-vike="false"
-              @click.prevent="navigateWithTransition(href, 'forward')"
+              @click.prevent="navigateAndCloseDrawer(href, 'forward')"
             >
               {{ link.label }}
             </a>
@@ -215,7 +225,7 @@ const patternLinks: Link[] = [
               :class="{ 'drawer-link--active': active }"
               v-bind="link.props"
               data-vike="false"
-              @click.prevent="navigateWithTransition(href, 'forward')"
+              @click.prevent="navigateAndCloseDrawer(href, 'forward')"
             >
               {{ link.label }}
             </a>

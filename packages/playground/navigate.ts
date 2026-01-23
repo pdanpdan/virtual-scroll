@@ -19,12 +19,20 @@ export function matchHref(href: string, urlPathname: string) {
 }
 
 export function navigateWithTransition(url: string, type: string = 'generic') {
+  const { promise, resolve } = Promise.withResolvers();
+
   if (document.startViewTransition) {
     document.startViewTransition({
-      update: () => navigate(url),
+      update: () => {
+        navigate(url);
+        resolve(true);
+      },
       types: [ type ],
     });
   } else {
     navigate(url);
+    resolve(true);
   }
+
+  return promise;
 }
