@@ -1,5 +1,13 @@
 # Changelog
 
+# [0.4.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.3.0...v0.4.0) (2026-01-23)
+
+
+### Features
+
+* improve scroll logic and add tests ([a66862f](https://github.com/pdanpdan/virtual-scroll/commit/a66862fcb56ef28b87224d91025adaae20e52025))
+* refactor virtual scroll logic and enhance DX ([f6ca3f0](https://github.com/pdanpdan/virtual-scroll/commit/f6ca3f091fbaa654a0db78945d61d3ada97f2b29))
+
 # [0.3.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.2.1...v0.3.0) (2026-01-20)
 
 
