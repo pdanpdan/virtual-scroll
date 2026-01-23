@@ -318,12 +318,11 @@ export function calculateColumnRange(params: ColumnRangeParams) {
     end = Math.ceil((relativeScrollX + usableWidth) / (fixedWidth + columnGap));
   } else {
     start = findLowerBound(relativeScrollX);
-    let currentX = query(start);
-    let i = start;
-    while (i < columnCount && currentX < relativeScrollX + usableWidth) {
-      currentX = query(++i);
+    const targetX = relativeScrollX + usableWidth;
+    end = findLowerBound(targetX);
+    if (end < columnCount && query(end) < targetX) {
+      end++;
     }
-    end = i;
   }
 
   // Add buffer of columns

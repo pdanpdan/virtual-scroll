@@ -123,31 +123,60 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
   // --- Size Calculations ---
   /**
-   * Total width of all items in the scrollable area.
+   * Total size (width and height) of all items in the scrollable area.
    */
-  const totalWidth = computed(() => {
+  const totalSize = computed(() => {
     // eslint-disable-next-line ts/no-unused-expressions
     treeUpdateFlag.value;
 
     if (!isHydrated.value && props.value.ssrRange && !isMounted.value) {
       const { start = 0, end = 0, colStart = 0, colEnd = 0 } = props.value.ssrRange;
       const colCount = props.value.columnCount || 0;
-      if (props.value.direction === 'both') {
-        if (colCount <= 0) {
-          return 0;
+      const gap = props.value.gap || 0;
+      const columnGap = props.value.columnGap || 0;
+      const direction = props.value.direction || 'vertical';
+
+      let width = 0;
+      let height = 0;
+
+      if (direction === 'both') {
+        if (colCount > 0) {
+          const effectiveColEnd = colEnd || colCount;
+          const total = columnSizes.query(effectiveColEnd) - columnSizes.query(colStart);
+          width = Math.max(0, total - (effectiveColEnd > colStart ? columnGap : 0));
         }
-        const effectiveColEnd = colEnd || colCount;
-        const total = columnSizes.query(effectiveColEnd) - columnSizes.query(colStart);
-        return Math.max(0, total - (effectiveColEnd > colStart ? (props.value.columnGap || 0) : 0));
-      }
-      if (props.value.direction === 'horizontal') {
         if (fixedItemSize.value !== null) {
           const len = end - start;
-          return Math.max(0, len * (fixedItemSize.value + (props.value.columnGap || 0)) - (len > 0 ? (props.value.columnGap || 0) : 0));
+          height = Math.max(0, len * (fixedItemSize.value + gap) - (len > 0 ? gap : 0));
+        } else {
+          const total = itemSizesY.query(end) - itemSizesY.query(start);
+          height = Math.max(0, total - (end > start ? gap : 0));
         }
-        const total = itemSizesX.query(end) - itemSizesX.query(start);
-        return Math.max(0, total - (end > start ? (props.value.columnGap || 0) : 0));
+      } else if (direction === 'horizontal') {
+        if (fixedItemSize.value !== null) {
+          const len = end - start;
+          width = Math.max(0, len * (fixedItemSize.value + columnGap) - (len > 0 ? columnGap : 0));
+        } else {
+          const total = itemSizesX.query(end) - itemSizesX.query(start);
+          width = Math.max(0, total - (end > start ? columnGap : 0));
+        }
+        height = usableHeight.value;
+      } else {
+        // vertical
+        width = usableWidth.value;
+        if (fixedItemSize.value !== null) {
+          const len = end - start;
+          height = Math.max(0, len * (fixedItemSize.value + gap) - (len > 0 ? gap : 0));
+        } else {
+          const total = itemSizesY.query(end) - itemSizesY.query(start);
+          height = Math.max(0, total - (end > start ? gap : 0));
+        }
       }
+
+      return {
+        width: Math.max(width, usableWidth.value),
+        height: Math.max(height, usableHeight.value),
+      };
     }
 
     return calculateTotalSize({
@@ -163,43 +192,11 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       queryY: (idx) => itemSizesY.query(idx),
       queryX: (idx) => itemSizesX.query(idx),
       queryColumn: (idx) => columnSizes.query(idx),
-    }).width;
+    });
   });
 
-  /**
-   * Total height of all items in the scrollable area.
-   */
-  const totalHeight = computed(() => {
-    // eslint-disable-next-line ts/no-unused-expressions
-    treeUpdateFlag.value;
-
-    if (!isHydrated.value && props.value.ssrRange && !isMounted.value) {
-      const { start, end } = props.value.ssrRange;
-      if (props.value.direction === 'vertical' || props.value.direction === 'both') {
-        if (fixedItemSize.value !== null) {
-          const len = end - start;
-          return Math.max(0, len * (fixedItemSize.value + (props.value.gap || 0)) - (len > 0 ? (props.value.gap || 0) : 0));
-        }
-        const total = itemSizesY.query(end) - itemSizesY.query(start);
-        return Math.max(0, total - (end > start ? (props.value.gap || 0) : 0));
-      }
-    }
-
-    return calculateTotalSize({
-      direction: props.value.direction || 'vertical',
-      itemsLength: props.value.items.length,
-      columnCount: props.value.columnCount || 0,
-      fixedSize: fixedItemSize.value,
-      fixedWidth: fixedColumnWidth.value,
-      gap: props.value.gap || 0,
-      columnGap: props.value.columnGap || 0,
-      usableWidth: usableWidth.value,
-      usableHeight: usableHeight.value,
-      queryY: (idx) => itemSizesY.query(idx),
-      queryX: (idx) => itemSizesX.query(idx),
-      queryColumn: (idx) => columnSizes.query(idx),
-    }).height;
-  });
+  const totalWidth = computed(() => totalSize.value.width);
+  const totalHeight = computed(() => totalSize.value.height);
 
   const relativeScrollX = computed(() => {
     const isHorizontal = props.value.direction === 'horizontal' || props.value.direction === 'both';
@@ -416,11 +413,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
   };
 
   // --- Measurement & Initialization ---
-  const initializeSizes = () => {
-    const newItems = props.value.items;
-    const len = newItems.length;
-    const colCount = props.value.columnCount || 0;
-
+  const resizeMeasurements = (len: number, colCount: number) => {
     itemSizesX.resize(len);
     itemSizesY.resize(len);
     columnSizes.resize(colCount);
@@ -440,6 +433,113 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       newMeasuredCols.set(measuredColumns.subarray(0, Math.min(colCount, measuredColumns.length)));
       measuredColumns = newMeasuredCols;
     }
+  };
+
+  const initializeMeasurements = () => {
+    const newItems = props.value.items;
+    const len = newItems.length;
+    const colCount = props.value.columnCount || 0;
+    const gap = props.value.gap || 0;
+    const columnGap = props.value.columnGap || 0;
+    const cw = props.value.columnWidth;
+
+    let colNeedsRebuild = false;
+    let itemsNeedRebuild = false;
+
+    // Initialize columns
+    if (colCount > 0) {
+      for (let i = 0; i < colCount; i++) {
+        const currentW = columnSizes.get(i);
+        const isMeasured = measuredColumns[ i ] === 1;
+
+        if (!isDynamicColumnWidth.value || (!isMeasured && currentW === 0)) {
+          let baseWidth = 0;
+          if (typeof cw === 'number' && cw > 0) {
+            baseWidth = cw;
+          } else if (Array.isArray(cw) && cw.length > 0) {
+            baseWidth = cw[ i % cw.length ] || props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
+          } else if (typeof cw === 'function') {
+            baseWidth = cw(i);
+          } else {
+            baseWidth = props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
+          }
+
+          const targetW = baseWidth + columnGap;
+          if (Math.abs(currentW - targetW) > 0.5) {
+            columnSizes.set(i, targetW);
+            measuredColumns[ i ] = isDynamicColumnWidth.value ? 0 : 1;
+            colNeedsRebuild = true;
+          } else if (!isDynamicColumnWidth.value) {
+            measuredColumns[ i ] = 1;
+          }
+        }
+      }
+    }
+
+    // Initialize items
+    const isVertical = props.value.direction === 'vertical';
+    const isHorizontal = props.value.direction === 'horizontal';
+    const isBoth = props.value.direction === 'both';
+
+    for (let i = 0; i < len; i++) {
+      const item = props.value.items[ i ];
+      const currentX = itemSizesX.get(i);
+      const currentY = itemSizesY.get(i);
+      const isMeasuredX = measuredItemsX[ i ] === 1;
+      const isMeasuredY = measuredItemsY[ i ] === 1;
+
+      if (isHorizontal) {
+        if (!isDynamicItemSize.value || (!isMeasuredX && currentX === 0)) {
+          const baseSize = typeof props.value.itemSize === 'function' ? props.value.itemSize(item as T, i) : defaultSize.value;
+          const targetX = baseSize + columnGap;
+          if (Math.abs(currentX - targetX) > 0.5) {
+            itemSizesX.set(i, targetX);
+            measuredItemsX[ i ] = isDynamicItemSize.value ? 0 : 1;
+            itemsNeedRebuild = true;
+          } else if (!isDynamicItemSize.value) {
+            measuredItemsX[ i ] = 1;
+          }
+        }
+      } else if (currentX !== 0) {
+        itemSizesX.set(i, 0);
+        measuredItemsX[ i ] = 0;
+        itemsNeedRebuild = true;
+      }
+
+      if (isVertical || isBoth) {
+        if (!isDynamicItemSize.value || (!isMeasuredY && currentY === 0)) {
+          const baseSize = typeof props.value.itemSize === 'function' ? props.value.itemSize(item as T, i) : defaultSize.value;
+          const targetY = baseSize + gap;
+          if (Math.abs(currentY - targetY) > 0.5) {
+            itemSizesY.set(i, targetY);
+            measuredItemsY[ i ] = isDynamicItemSize.value ? 0 : 1;
+            itemsNeedRebuild = true;
+          } else if (!isDynamicItemSize.value) {
+            measuredItemsY[ i ] = 1;
+          }
+        }
+      } else if (currentY !== 0) {
+        itemSizesY.set(i, 0);
+        measuredItemsY[ i ] = 0;
+        itemsNeedRebuild = true;
+      }
+    }
+
+    if (colNeedsRebuild) {
+      columnSizes.rebuild();
+    }
+    if (itemsNeedRebuild) {
+      itemSizesX.rebuild();
+      itemSizesY.rebuild();
+    }
+  };
+
+  const initializeSizes = () => {
+    const newItems = props.value.items;
+    const len = newItems.length;
+    const colCount = props.value.columnCount || 0;
+
+    resizeMeasurements(len, colCount);
 
     let prependCount = 0;
     if (props.value.restoreScrollOnPrepend && lastItems.length > 0 && len > lastItems.length) {
@@ -476,15 +576,10 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       let addedY = 0;
 
       for (let i = 0; i < prependCount; i++) {
-        const size = typeof props.value.itemSize === 'function'
-          ? props.value.itemSize(newItems[ i ] as T, i)
-          : defaultSize.value;
-
+        const size = typeof props.value.itemSize === 'function' ? props.value.itemSize(newItems[ i ] as T, i) : defaultSize.value;
         if (props.value.direction === 'horizontal') {
           addedX += size + columnGap;
-        } else {
-          addedY += size + gap;
-        }
+        } else { addedY += size + gap; }
       }
 
       if (addedX > 0 || addedY > 0) {
@@ -498,108 +593,7 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
       }
     }
 
-    // Initialize columns
-    if (colCount > 0) {
-      const columnGap = props.value.columnGap || 0;
-      let colNeedsRebuild = false;
-      const cw = props.value.columnWidth;
-
-      for (let i = 0; i < colCount; i++) {
-        const currentW = columnSizes.get(i);
-        const isMeasured = measuredColumns[ i ] === 1;
-
-        if (!isDynamicColumnWidth.value || (!isMeasured && currentW === 0)) {
-          let baseWidth = 0;
-          if (typeof cw === 'number' && cw > 0) {
-            baseWidth = cw;
-          } else if (Array.isArray(cw) && cw.length > 0) {
-            baseWidth = cw[ i % cw.length ] || props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
-          } else if (typeof cw === 'function') {
-            baseWidth = cw(i);
-          } else {
-            baseWidth = props.value.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
-          }
-
-          const targetW = baseWidth + columnGap;
-          if (Math.abs(currentW - targetW) > 0.5) {
-            columnSizes.set(i, targetW);
-            measuredColumns[ i ] = isDynamicColumnWidth.value ? 0 : 1;
-            colNeedsRebuild = true;
-          } else if (!isDynamicColumnWidth.value) {
-            measuredColumns[ i ] = 1;
-          }
-        }
-      }
-      if (colNeedsRebuild) {
-        columnSizes.rebuild();
-      }
-    }
-
-    const gap = props.value.gap || 0;
-    const columnGap = props.value.columnGap || 0;
-    let itemsNeedRebuild = false;
-
-    for (let i = 0; i < len; i++) {
-      const item = props.value.items[ i ];
-      const currentX = itemSizesX.get(i);
-      const currentY = itemSizesY.get(i);
-
-      const isVertical = props.value.direction === 'vertical';
-      const isHorizontal = props.value.direction === 'horizontal';
-      const isBoth = props.value.direction === 'both';
-
-      const isMeasuredX = measuredItemsX[ i ] === 1;
-      const isMeasuredY = measuredItemsY[ i ] === 1;
-
-      // Logic for X
-      if (isHorizontal) {
-        if (!isDynamicItemSize.value || (!isMeasuredX && currentX === 0)) {
-          const baseSize = typeof props.value.itemSize === 'function'
-            ? props.value.itemSize(item as T, i)
-            : defaultSize.value;
-          const targetX = baseSize + columnGap;
-
-          if (Math.abs(currentX - targetX) > 0.5) {
-            itemSizesX.set(i, targetX);
-            measuredItemsX[ i ] = isDynamicItemSize.value ? 0 : 1;
-            itemsNeedRebuild = true;
-          } else if (!isDynamicItemSize.value) {
-            measuredItemsX[ i ] = 1;
-          }
-        }
-      } else if (currentX !== 0) {
-        itemSizesX.set(i, 0);
-        measuredItemsX[ i ] = 0;
-        itemsNeedRebuild = true;
-      }
-
-      // Logic for Y
-      if (isVertical || isBoth) {
-        if (!isDynamicItemSize.value || (!isMeasuredY && currentY === 0)) {
-          const baseSize = typeof props.value.itemSize === 'function'
-            ? props.value.itemSize(item as T, i)
-            : defaultSize.value;
-          const targetY = baseSize + gap;
-
-          if (Math.abs(currentY - targetY) > 0.5) {
-            itemSizesY.set(i, targetY);
-            measuredItemsY[ i ] = isDynamicItemSize.value ? 0 : 1;
-            itemsNeedRebuild = true;
-          } else if (!isDynamicItemSize.value) {
-            measuredItemsY[ i ] = 1;
-          }
-        }
-      } else if (currentY !== 0) {
-        itemSizesY.set(i, 0);
-        measuredItemsY[ i ] = 0;
-        itemsNeedRebuild = true;
-      }
-    }
-
-    if (itemsNeedRebuild) {
-      itemSizesX.rebuild();
-      itemSizesY.rebuild();
-    }
+    initializeMeasurements();
 
     lastItems = [ ...newItems ];
     sizesInitialized.value = true;
@@ -654,6 +648,34 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
   });
 
   // --- Range & Visible Items ---
+  const getRowIndexAt = (offset: number) => {
+    const isHorizontal = props.value.direction === 'horizontal';
+    const gap = props.value.gap || 0;
+    const columnGap = props.value.columnGap || 0;
+    const fixedSize = fixedItemSize.value;
+
+    if (isHorizontal) {
+      if (fixedSize !== null) {
+        return Math.floor(offset / (fixedSize + columnGap));
+      }
+      return itemSizesX.findLowerBound(offset);
+    }
+    if (fixedSize !== null) {
+      return Math.floor(offset / (fixedSize + gap));
+    }
+    return itemSizesY.findLowerBound(offset);
+  };
+
+  const getColIndexAt = (offset: number, rowIndex: number) => {
+    if (props.value.direction === 'both') {
+      return columnSizes.findLowerBound(offset);
+    }
+    if (props.value.direction === 'horizontal') {
+      return rowIndex;
+    }
+    return 0;
+  };
+
   /**
    * Current range of items that should be rendered.
    */
@@ -697,20 +719,9 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     // eslint-disable-next-line ts/no-unused-expressions
     treeUpdateFlag.value;
 
-    const fixedSize = fixedItemSize.value;
-    const gap = props.value.gap || 0;
-    const columnGap = props.value.columnGap || 0;
-
-    if (props.value.direction === 'horizontal') {
-      if (fixedSize !== null) {
-        return Math.floor(relativeScrollX.value / (fixedSize + columnGap));
-      }
-      return itemSizesX.findLowerBound(relativeScrollX.value);
-    }
-    if (fixedSize !== null) {
-      return Math.floor(relativeScrollY.value / (fixedSize + gap));
-    }
-    return itemSizesY.findLowerBound(relativeScrollY.value);
+    const direction = props.value.direction || 'vertical';
+    const offset = direction === 'horizontal' ? relativeScrollX.value : relativeScrollY.value;
+    return getRowIndexAt(offset);
   });
 
   /**
@@ -731,15 +742,10 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     const stickyIndices = sortedStickyIndices.value;
     const stickySet = stickyIndicesSet.value;
 
-    // Always include relevant sticky items
-    const indicesToRender = new Set<number>();
-    for (let i = start; i < end; i++) {
-      indicesToRender.add(i);
-    }
+    const sortedIndices: number[] = [];
 
     if (isHydrated.value || !props.value.ssrRange) {
       const activeIdx = currentIndex.value;
-      // find the largest index in stickyIndices that is < activeIdx
       let prevStickyIdx: number | undefined;
       let low = 0;
       let high = stickyIndices.length - 1;
@@ -753,39 +759,17 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         }
       }
 
-      if (prevStickyIdx !== undefined) {
-        indicesToRender.add(prevStickyIdx);
-      }
-
-      // Optimize: Use binary search to find the first sticky index in range
-      let stickyLow = 0;
-      let stickyHigh = stickyIndices.length - 1;
-      let firstInRange = -1;
-
-      while (stickyLow <= stickyHigh) {
-        const mid = (stickyLow + stickyHigh) >>> 1;
-        if (stickyIndices[ mid ]! >= start) {
-          firstInRange = mid;
-          stickyHigh = mid - 1;
-        } else {
-          stickyLow = mid + 1;
-        }
-      }
-
-      if (firstInRange !== -1) {
-        for (let i = firstInRange; i < stickyIndices.length; i++) {
-          const idx = stickyIndices[ i ]!;
-          if (idx >= end) {
-            break;
-          }
-          indicesToRender.add(idx);
-        }
+      if (prevStickyIdx !== undefined && prevStickyIdx < start) {
+        sortedIndices.push(prevStickyIdx);
       }
     }
 
-    const sortedIndices = Array.from(indicesToRender).sort((a, b) => a - b);
+    for (let i = start; i < end; i++) {
+      sortedIndices.push(i);
+    }
 
     const ssrStartRow = props.value.ssrRange?.start || 0;
+
     const ssrStartCol = props.value.ssrRange?.colStart || 0;
 
     let ssrOffsetX = 0;
@@ -923,26 +907,11 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
     });
   });
 
-  /**
-   * Detailed information about the current scroll state.
-   */
   const scrollDetails = computed<ScrollDetails<T>>(() => {
     // eslint-disable-next-line ts/no-unused-expressions
     treeUpdateFlag.value;
 
-    const fixedSize = fixedItemSize.value;
-    const columnGap = props.value.columnGap || 0;
-
-    let currentColIndex = 0;
-    if (props.value.direction === 'horizontal') {
-      if (fixedSize !== null) {
-        currentColIndex = Math.floor(relativeScrollX.value / (fixedSize + columnGap));
-      } else {
-        currentColIndex = itemSizesX.findLowerBound(relativeScrollX.value);
-      }
-    } else if (props.value.direction === 'both') {
-      currentColIndex = columnSizes.findLowerBound(relativeScrollX.value);
-    }
+    const currentColIndex = getColIndexAt(relativeScrollX.value, currentIndex.value);
 
     return {
       items: renderedItems.value,
@@ -1015,12 +984,9 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     const currentRelX = relativeScrollX.value;
     const currentRelY = relativeScrollY.value;
-    const firstRowIndex = props.value.direction === 'horizontal'
-      ? (fixedItemSize.value !== null ? Math.floor(currentRelX / (fixedItemSize.value + columnGap)) : itemSizesX.findLowerBound(currentRelX))
-      : (fixedItemSize.value !== null ? Math.floor(currentRelY / (fixedItemSize.value + gap)) : itemSizesY.findLowerBound(currentRelY));
-    const firstColIndex = props.value.direction === 'both'
-      ? columnSizes.findLowerBound(currentRelX)
-      : (props.value.direction === 'horizontal' ? firstRowIndex : 0);
+
+    const firstRowIndex = getRowIndexAt(props.value.direction === 'horizontal' ? currentRelX : currentRelY);
+    const firstColIndex = getColIndexAt(currentRelX, firstRowIndex);
 
     const isHorizontalMode = props.value.direction === 'horizontal';
     const isVerticalMode = props.value.direction === 'vertical';
