@@ -144,6 +144,9 @@ dist
 # Sentry Vite Plugin
 .env.sentry-build-plugin
 
+# Generated files
+pages/changelog/changelog-data.ts
+
 # aws-cdk
 .cdk.staging
 cdk.out

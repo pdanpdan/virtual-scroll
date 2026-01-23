@@ -3,8 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vike dev --host",
-    "build": "node scripts/generate-sitemap.js && vike build",
+    "dev": "node scripts/sync-changelog.js && vike dev --host",
+    "build": "node scripts/sync-changelog.js && node scripts/generate-sitemap.js && vike build",
     "preview": "vike build && vike preview",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix"

@@ -5,6 +5,8 @@ import AppLink from '#/components/AppLink.vue';
 import AppLogo from '#/components/AppLogo.vue';
 import { navigateWithTransition } from '#/navigate';
 
+import { version } from '../../virtual-scroll/package.json';
+
 import '#/assets/style.css';
 
 const debugMode = ref(false);
@@ -45,6 +47,7 @@ interface Link {
 const navLinks: Link[] = [
   { href: '/', label: 'Welcome' },
   { href: '/docs', label: 'Documentation' },
+  { href: '/changelog', label: 'Changelog' },
 ];
 
 const essentialLinks: Link[] = [
@@ -89,8 +92,13 @@ const patternLinks: Link[] = [
         </div>
         <div class="flex items-center px-4 gap-2 mr-auto">
           <AppLogo class="size-8" />
-          <div class="font-black small-caps tracking-wide italic text-primary">
-            Virtual Scroll
+          <div class="flex flex-col gap-0">
+            <div class="font-black small-caps tracking-wide italic text-primary leading-none">
+              Virtual Scroll
+            </div>
+            <div class="text-[10px] font-mono opacity-40 leading-none mt-1 uppercase tracking-tighter">
+              v{{ version }}
+            </div>
           </div>
         </div>
         <div class="flex-none">
@@ -123,10 +131,14 @@ const patternLinks: Link[] = [
             <div class="transition-transform hover:scale-105 drop-shadow-md">
               <AppLogo class="size-10" />
             </div>
-            <span class="text-xl font-black tracking-wide small-caps italic text-primary">Virtual Scroll</span>
+            <div class="flex flex-col gap-0">
+              <span class="text-xl font-black tracking-wide small-caps italic text-primary leading-none">Virtual Scroll</span>
+              <span class="text-[10px] font-mono opacity-40 uppercase tracking-tighter leading-none mt-1">v{{ version }}</span>
+            </div>
           </div>
           <a
             href="https://github.com/pdanpdan/virtual-scroll"
+
             target="_blank"
             rel="noopener noreferrer"
             class="btn btn-ghost btn-md btn-circle opacity-60 hover:opacity-100 transition-opacity"
