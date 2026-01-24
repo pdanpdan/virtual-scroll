@@ -14,41 +14,218 @@ import type {
 
 import { isScrollToIndexOptions } from './scroll';
 
+// --- Internal Helper Types ---
+
+interface GenericRangeParams {
+  scrollPos: number;
+  containerSize: number;
+  count: number;
+  bufferBefore: number;
+  bufferAfter: number;
+  gap: number;
+  fixedSize: number | null;
+  findLowerBound: (offset: number) => number;
+  query: (index: number) => number;
+  // Optional for total size calculation optimization if needed, currently unused in generic
+}
+
+interface AxisAlignmentParams {
+  align: ScrollAlignment;
+  targetPos: number;
+  itemSize: number;
+  scrollPos: number;
+  viewSize: number;
+  stickyOffset: number;
+}
+
+// --- Internal Helpers ---
+
+/**
+ * Generic range calculation for a single axis (row or column).
+ */
+function calculateGenericRange({
+  scrollPos,
+  containerSize,
+  count,
+  bufferBefore,
+  bufferAfter,
+  gap,
+  fixedSize,
+  findLowerBound,
+  query,
+}: GenericRangeParams) {
+  let start = 0;
+  let end = count;
+
+  if (fixedSize !== null) {
+    start = Math.floor(scrollPos / (fixedSize + gap));
+    end = Math.ceil((scrollPos + containerSize) / (fixedSize + gap));
+  } else {
+    start = findLowerBound(scrollPos);
+    const target = scrollPos + containerSize;
+    end = findLowerBound(target);
+    if (end < count && query(end) < target) {
+      end++;
+    }
+  }
+
+  return {
+    start: Math.max(0, start - bufferBefore),
+    end: Math.min(count, end + bufferAfter),
+  };
+}
+
+/**
+ * Binary search for the next sticky index after the current index.
+ */
+function findNextStickyIndex(stickyIndices: number[], index: number): number | undefined {
+  let low = 0;
+  let high = stickyIndices.length - 1;
+  let nextStickyIdx: number | undefined;
+
+  while (low <= high) {
+    const mid = (low + high) >>> 1;
+    if (stickyIndices[ mid ]! > index) {
+      nextStickyIdx = stickyIndices[ mid ];
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+  return nextStickyIdx;
+}
+
+/**
+ * Binary search for the previous sticky index before the current index.
+ */
+function findPrevStickyIndex(stickyIndices: number[], index: number): number | undefined {
+  let low = 0;
+  let high = stickyIndices.length - 1;
+  let prevStickyIdx: number | undefined;
+
+  while (low <= high) {
+    const mid = (low + high) >>> 1;
+    if (stickyIndices[ mid ]! < index) {
+      prevStickyIdx = stickyIndices[ mid ];
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return prevStickyIdx;
+}
+
+/**
+ * Generic alignment calculation for a single axis.
+ */
+function calculateAxisAlignment({
+  align,
+  targetPos,
+  itemSize,
+  scrollPos,
+  viewSize,
+  stickyOffset,
+}: AxisAlignmentParams) {
+  let target = scrollPos;
+  let effectiveAlign: ScrollAlignment = align === 'auto' ? 'auto' : align;
+
+  if (align === 'start') {
+    target = targetPos - stickyOffset;
+  } else if (align === 'center') {
+    target = targetPos - (viewSize - itemSize) / 2;
+  } else if (align === 'end') {
+    target = targetPos - (viewSize - itemSize);
+  } else {
+    // Auto alignment: stay if visible, otherwise align to nearest edge (minimal movement)
+    const isVisible = itemSize <= (viewSize - stickyOffset)
+      ? (targetPos >= scrollPos + stickyOffset - 0.5 && (targetPos + itemSize) <= (scrollPos + viewSize + 0.5))
+      : (targetPos <= scrollPos + stickyOffset + 0.5 && (targetPos + itemSize) >= (scrollPos + viewSize - 0.5));
+
+    if (!isVisible) {
+      const targetStart = targetPos - stickyOffset;
+      const targetEnd = targetPos - (viewSize - itemSize);
+
+      if (itemSize <= viewSize - stickyOffset) {
+        if (targetPos < scrollPos + stickyOffset) {
+          target = targetStart;
+          effectiveAlign = 'start';
+        } else {
+          target = targetEnd;
+          effectiveAlign = 'end';
+        }
+      } else {
+        // Large item: minimal movement
+        if (Math.abs(targetStart - scrollPos) < Math.abs(targetEnd - scrollPos)) {
+          target = targetStart;
+          effectiveAlign = 'start';
+        } else {
+          target = targetEnd;
+          effectiveAlign = 'end';
+        }
+      }
+    }
+  }
+  return { target, effectiveAlign };
+}
+
+// --- Exported Functions ---
+
 /**
  * Calculates the target scroll position (relative to content) for a given row/column index and alignment.
  *
  * @param params - The parameters for calculation.
+ * @param params.rowIndex - Row index to target.
+ * @param params.colIndex - Column index to target.
+ * @param params.options - Scroll options including alignment.
+ * @param params.itemsLength - Total items count.
+ * @param params.columnCount - Total columns count.
+ * @param params.direction - Current scroll direction.
+ * @param params.usableWidth - Usable viewport width.
+ * @param params.usableHeight - Usable viewport height.
+ * @param params.totalWidth - Total estimated width.
+ * @param params.totalHeight - Total estimated height.
+ * @param params.gap - Item gap.
+ * @param params.columnGap - Column gap.
+ * @param params.fixedSize - Fixed item size.
+ * @param params.fixedWidth - Fixed column width.
+ * @param params.relativeScrollX - Current relative X scroll.
+ * @param params.relativeScrollY - Current relative Y scroll.
+ * @param params.getItemSizeY - Resolver for item height.
+ * @param params.getItemSizeX - Resolver for item width.
+ * @param params.getItemQueryY - Prefix sum resolver for item height.
+ * @param params.getItemQueryX - Prefix sum resolver for item width.
+ * @param params.getColumnSize - Resolver for column size.
+ * @param params.getColumnQuery - Prefix sum resolver for column width.
+ * @param params.stickyIndices - List of sticky indices.
  * @returns The target X and Y positions and item dimensions.
  * @see ScrollTargetParams
  * @see ScrollTargetResult
  */
-export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetResult {
-  const {
-    rowIndex,
-    colIndex,
-    options,
-    itemsLength,
-    columnCount,
-    direction,
-    usableWidth,
-    usableHeight,
-    totalWidth,
-    totalHeight,
-    gap,
-    columnGap,
-    fixedSize,
-    fixedWidth,
-    relativeScrollX,
-    relativeScrollY,
-    getItemSizeY,
-    getItemSizeX,
-    getItemQueryY,
-    getItemQueryX,
-    getColumnSize,
-    getColumnQuery,
-    stickyIndices,
-  } = params;
-
+export function calculateScrollTarget({
+  rowIndex,
+  colIndex,
+  options,
+  itemsLength,
+  columnCount,
+  direction,
+  usableWidth,
+  usableHeight,
+  totalWidth,
+  totalHeight,
+  gap,
+  columnGap,
+  fixedSize,
+  fixedWidth,
+  relativeScrollX,
+  relativeScrollY,
+  getItemSizeY,
+  getItemSizeX,
+  getItemQueryY,
+  getItemQueryX,
+  getColumnSize,
+  getColumnQuery,
+  stickyIndices,
+}: ScrollTargetParams): ScrollTargetResult {
   let align: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
 
   if (isScrollToIndexOptions(options)) {
@@ -74,18 +251,7 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
   if (rowIndex != null) {
     let stickyOffsetY = 0;
     if (isVertical && stickyIndices && stickyIndices.length > 0) {
-      let activeStickyIdx: number | undefined;
-      let low = 0;
-      let high = stickyIndices.length - 1;
-      while (low <= high) {
-        const mid = (low + high) >>> 1;
-        if (stickyIndices[ mid ]! < rowIndex) {
-          activeStickyIdx = stickyIndices[ mid ];
-          low = mid + 1;
-        } else {
-          high = mid - 1;
-        }
-      }
+      const activeStickyIdx = findPrevStickyIndex(stickyIndices, rowIndex);
 
       if (activeStickyIdx !== undefined) {
         stickyOffsetY = fixedSize !== null ? fixedSize : getItemSizeY(activeStickyIdx) - gap;
@@ -102,60 +268,23 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
     }
 
     // Apply Y Alignment
-    if (alignY === 'start') {
-      targetY = itemY - stickyOffsetY;
-    } else if (alignY === 'center') {
-      targetY = itemY - (usableHeight - itemHeight) / 2;
-    } else if (alignY === 'end') {
-      targetY = itemY - (usableHeight - itemHeight);
-    } else {
-      // Auto alignment: stay if visible, otherwise align to nearest edge (minimal movement)
-      const isVisibleY = itemHeight <= (usableHeight - stickyOffsetY)
-        ? (itemY >= relativeScrollY + stickyOffsetY - 0.5 && (itemY + itemHeight) <= (relativeScrollY + usableHeight + 0.5))
-        : (itemY <= relativeScrollY + stickyOffsetY + 0.5 && (itemY + itemHeight) >= (relativeScrollY + usableHeight - 0.5));
-
-      if (!isVisibleY) {
-        const targetStart = itemY - stickyOffsetY;
-        const targetEnd = itemY - (usableHeight - itemHeight);
-
-        if (itemHeight <= usableHeight - stickyOffsetY) {
-          if (itemY < relativeScrollY + stickyOffsetY) {
-            targetY = targetStart;
-            effectiveAlignY = 'start';
-          } else {
-            targetY = targetEnd;
-            effectiveAlignY = 'end';
-          }
-        } else {
-          // Large item: minimal movement
-          if (Math.abs(targetStart - relativeScrollY) < Math.abs(targetEnd - relativeScrollY)) {
-            targetY = targetStart;
-            effectiveAlignY = 'start';
-          } else {
-            targetY = targetEnd;
-            effectiveAlignY = 'end';
-          }
-        }
-      }
-    }
+    const { target, effectiveAlign } = calculateAxisAlignment({
+      align: alignY,
+      targetPos: itemY,
+      itemSize: itemHeight,
+      scrollPos: relativeScrollY,
+      viewSize: usableHeight,
+      stickyOffset: stickyOffsetY,
+    });
+    targetY = target;
+    effectiveAlignY = effectiveAlign;
   }
 
   // X calculation
   if (colIndex != null) {
     let stickyOffsetX = 0;
     if (isHorizontal && stickyIndices && stickyIndices.length > 0 && (direction === 'horizontal' || direction === 'both')) {
-      let activeStickyIdx: number | undefined;
-      let low = 0;
-      let high = stickyIndices.length - 1;
-      while (low <= high) {
-        const mid = (low + high) >>> 1;
-        if (stickyIndices[ mid ]! < colIndex) {
-          activeStickyIdx = stickyIndices[ mid ];
-          low = mid + 1;
-        } else {
-          high = mid - 1;
-        }
-      }
+      const activeStickyIdx = findPrevStickyIndex(stickyIndices, colIndex);
 
       if (activeStickyIdx !== undefined) {
         stickyOffsetX = direction === 'horizontal'
@@ -177,42 +306,16 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
     }
 
     // Apply X Alignment
-    if (alignX === 'start') {
-      targetX = itemX - stickyOffsetX;
-    } else if (alignX === 'center') {
-      targetX = itemX - (usableWidth - itemWidth) / 2;
-    } else if (alignX === 'end') {
-      targetX = itemX - (usableWidth - itemWidth);
-    } else {
-      // Auto alignment: stay if visible, otherwise align to nearest edge (minimal movement)
-      const isVisibleX = itemWidth <= (usableWidth - stickyOffsetX)
-        ? (itemX >= relativeScrollX + stickyOffsetX - 0.5 && (itemX + itemWidth) <= (relativeScrollX + usableWidth + 0.5))
-        : (itemX <= relativeScrollX + stickyOffsetX + 0.5 && (itemX + itemWidth) >= (relativeScrollX + usableWidth - 0.5));
-
-      if (!isVisibleX) {
-        const targetStart = itemX - stickyOffsetX;
-        const targetEnd = itemX - (usableWidth - itemWidth);
-
-        if (itemWidth <= usableWidth - stickyOffsetX) {
-          if (itemX < relativeScrollX + stickyOffsetX) {
-            targetX = targetStart;
-            effectiveAlignX = 'start';
-          } else {
-            targetX = targetEnd;
-            effectiveAlignX = 'end';
-          }
-        } else {
-          // Large item: minimal movement
-          if (Math.abs(targetStart - relativeScrollX) < Math.abs(targetEnd - relativeScrollX)) {
-            targetX = targetStart;
-            effectiveAlignX = 'start';
-          } else {
-            targetX = targetEnd;
-            effectiveAlignX = 'end';
-          }
-        }
-      }
-    }
+    const { target, effectiveAlign } = calculateAxisAlignment({
+      align: alignX,
+      targetPos: itemX,
+      itemSize: itemWidth,
+      scrollPos: relativeScrollX,
+      viewSize: usableWidth,
+      stickyOffset: stickyOffsetX,
+    });
+    targetX = target;
+    effectiveAlignX = effectiveAlign;
   }
 
   // Clamp to valid range
@@ -226,108 +329,103 @@ export function calculateScrollTarget(params: ScrollTargetParams): ScrollTargetR
  * Calculates the range of items to render based on scroll position and viewport size.
  *
  * @param params - The parameters for calculation.
+ * @param params.direction - Scroll direction.
+ * @param params.relativeScrollX - Relative horizontal scroll position.
+ * @param params.relativeScrollY - Relative vertical scroll position.
+ * @param params.usableWidth - Usable viewport width.
+ * @param params.usableHeight - Usable viewport height.
+ * @param params.itemsLength - Total item count.
+ * @param params.bufferBefore - Buffer items before.
+ * @param params.bufferAfter - Buffer items after.
+ * @param params.gap - Item gap.
+ * @param params.columnGap - Column gap.
+ * @param params.fixedSize - Fixed item size.
+ * @param params.findLowerBoundY - Binary search for row index.
+ * @param params.findLowerBoundX - Binary search for row index (horizontal).
+ * @param params.queryY - Prefix sum for row height.
+ * @param params.queryX - Prefix sum for row width.
  * @returns The start and end indices of the items to render.
  * @see RangeParams
  */
-export function calculateRange(params: RangeParams) {
-  const {
-    direction,
-    relativeScrollX,
-    relativeScrollY,
-    usableWidth,
-    usableHeight,
-    itemsLength,
-    bufferBefore,
-    bufferAfter,
-    gap,
-    columnGap,
-    fixedSize,
-    findLowerBoundY,
-    findLowerBoundX,
-    queryY,
-    queryX,
-  } = params;
-
+export function calculateRange({
+  direction,
+  relativeScrollX,
+  relativeScrollY,
+  usableWidth,
+  usableHeight,
+  itemsLength,
+  bufferBefore,
+  bufferAfter,
+  gap,
+  columnGap,
+  fixedSize,
+  findLowerBoundY,
+  findLowerBoundX,
+  queryY,
+  queryX,
+}: RangeParams) {
   const isVertical = direction === 'vertical' || direction === 'both';
 
-  let start = 0;
-  let end = itemsLength;
-
-  if (isVertical) {
-    if (fixedSize !== null) {
-      start = Math.floor(relativeScrollY / (fixedSize + gap));
-      end = Math.ceil((relativeScrollY + usableHeight) / (fixedSize + gap));
-    } else {
-      start = findLowerBoundY(relativeScrollY);
-      const targetY = relativeScrollY + usableHeight;
-      end = findLowerBoundY(targetY);
-      if (end < itemsLength && queryY(end) < targetY) {
-        end++;
-      }
-    }
-  } else {
-    if (fixedSize !== null) {
-      start = Math.floor(relativeScrollX / (fixedSize + columnGap));
-      end = Math.ceil((relativeScrollX + usableWidth) / (fixedSize + columnGap));
-    } else {
-      start = findLowerBoundX(relativeScrollX);
-      const targetX = relativeScrollX + usableWidth;
-      end = findLowerBoundX(targetX);
-      if (end < itemsLength && queryX(end) < targetX) {
-        end++;
-      }
-    }
-  }
-
-  return {
-    start: Math.max(0, start - bufferBefore),
-    end: Math.min(itemsLength, end + bufferAfter),
-  };
+  return calculateGenericRange({
+    scrollPos: isVertical ? relativeScrollY : relativeScrollX,
+    containerSize: isVertical ? usableHeight : usableWidth,
+    count: itemsLength,
+    bufferBefore,
+    bufferAfter,
+    gap: isVertical ? gap : columnGap,
+    fixedSize,
+    findLowerBound: isVertical ? findLowerBoundY : findLowerBoundX,
+    query: isVertical ? queryY : queryX,
+  });
 }
 
 /**
  * Calculates the range of columns to render for bidirectional scroll.
  *
  * @param params - The parameters for calculation.
+ * @param params.columnCount - Column count.
+ * @param params.relativeScrollX - Relative horizontal scroll position.
+ * @param params.usableWidth - Usable viewport width.
+ * @param params.colBuffer - Column buffer count.
+ * @param params.fixedWidth - Fixed column width.
+ * @param params.columnGap - Column gap.
+ * @param params.findLowerBound - Binary search for column index.
+ * @param params.query - Prefix sum for column width.
+ * @param params.totalColsQuery - Resolver for total column width.
  * @returns The start and end indices and paddings for columns.
  * @see ColumnRangeParams
  * @see ColumnRange
  */
-export function calculateColumnRange(params: ColumnRangeParams) {
-  const {
-    columnCount,
-    relativeScrollX,
-    usableWidth,
-    colBuffer,
-    fixedWidth,
-    columnGap,
-    findLowerBound,
-    query,
-    totalColsQuery,
-  } = params;
-
+export function calculateColumnRange({
+  columnCount,
+  relativeScrollX,
+  usableWidth,
+  colBuffer,
+  fixedWidth,
+  columnGap,
+  findLowerBound,
+  query,
+  totalColsQuery,
+}: ColumnRangeParams) {
   if (!columnCount) {
     return { start: 0, end: 0, padStart: 0, padEnd: 0 };
   }
 
-  let start = 0;
-  let end = columnCount;
+  // Use generic range to find start/end
+  const { start, end } = calculateGenericRange({
+    scrollPos: relativeScrollX,
+    containerSize: usableWidth,
+    count: columnCount,
+    bufferBefore: colBuffer,
+    bufferAfter: colBuffer,
+    gap: columnGap,
+    fixedSize: fixedWidth,
+    findLowerBound,
+    query,
+  });
 
-  if (fixedWidth !== null) {
-    start = Math.floor(relativeScrollX / (fixedWidth + columnGap));
-    end = Math.ceil((relativeScrollX + usableWidth) / (fixedWidth + columnGap));
-  } else {
-    start = findLowerBound(relativeScrollX);
-    const targetX = relativeScrollX + usableWidth;
-    end = findLowerBound(targetX);
-    if (end < columnCount && query(end) < targetX) {
-      end++;
-    }
-  }
-
-  // Add buffer of columns
-  const safeStart = Math.max(0, start - colBuffer);
-  const safeEnd = Math.min(columnCount, end + colBuffer);
+  const safeStart = start; // calculated by generic range with buffer
+  const safeEnd = end;
 
   const padStart = fixedWidth !== null ? safeStart * (fixedWidth + columnGap) : query(safeStart);
   const totalWidth = fixedWidth !== null ? columnCount * (fixedWidth + columnGap) - columnGap : Math.max(0, totalColsQuery() - columnGap);
@@ -348,29 +446,43 @@ export function calculateColumnRange(params: ColumnRangeParams) {
  * Calculates the sticky state and offset for a single item.
  *
  * @param params - The parameters for calculation.
+ * @param params.index - Item index.
+ * @param params.isSticky - Is sticky configured.
+ * @param params.direction - Scroll direction.
+ * @param params.relativeScrollX - Relative horizontal scroll.
+ * @param params.relativeScrollY - Relative vertical scroll.
+ * @param params.originalX - Original X offset.
+ * @param params.originalY - Original Y offset.
+ * @param params.width - Current width.
+ * @param params.height - Current height.
+ * @param params.stickyIndices - All sticky indices.
+ * @param params.fixedSize - Fixed item size.
+ * @param params.fixedWidth - Fixed column width.
+ * @param params.gap - Item gap.
+ * @param params.columnGap - Column gap.
+ * @param params.getItemQueryY - Prefix sum resolver for rows.
+ * @param params.getItemQueryX - Prefix sum resolver for rows (horizontal).
  * @returns Sticky state and offset.
  * @see StickyParams
  */
-export function calculateStickyItem(params: StickyParams) {
-  const {
-    index,
-    isSticky,
-    direction,
-    relativeScrollX,
-    relativeScrollY,
-    originalX,
-    originalY,
-    width,
-    height,
-    stickyIndices,
-    fixedSize,
-    fixedWidth,
-    gap,
-    columnGap,
-    getItemQueryY,
-    getItemQueryX,
-  } = params;
-
+export function calculateStickyItem({
+  index,
+  isSticky,
+  direction,
+  relativeScrollX,
+  relativeScrollY,
+  originalX,
+  originalY,
+  width,
+  height,
+  stickyIndices,
+  fixedSize,
+  fixedWidth,
+  gap,
+  columnGap,
+  getItemQueryY,
+  getItemQueryX,
+}: StickyParams) {
   let isStickyActive = false;
   const stickyOffset = { x: 0, y: 0 };
 
@@ -378,21 +490,10 @@ export function calculateStickyItem(params: StickyParams) {
     return { isStickyActive, stickyOffset };
   }
 
+  // Y Axis (Sticky Rows)
   if (direction === 'vertical' || direction === 'both') {
     if (relativeScrollY > originalY) {
-      // Check if next sticky item pushes this one
-      let nextStickyIdx: number | undefined;
-      let low = 0;
-      let high = stickyIndices.length - 1;
-      while (low <= high) {
-        const mid = (low + high) >>> 1;
-        if (stickyIndices[ mid ]! > index) {
-          nextStickyIdx = stickyIndices[ mid ];
-          high = mid - 1;
-        } else {
-          low = mid + 1;
-        }
-      }
+      const nextStickyIdx = findNextStickyIndex(stickyIndices, index);
 
       if (nextStickyIdx !== undefined) {
         const nextStickyY = fixedSize !== null ? nextStickyIdx * (fixedSize + gap) : getItemQueryY(nextStickyIdx);
@@ -408,20 +509,10 @@ export function calculateStickyItem(params: StickyParams) {
     }
   }
 
+  // X Axis (Sticky Columns / Items)
   if (direction === 'horizontal' || (direction === 'both' && !isStickyActive)) {
     if (relativeScrollX > originalX) {
-      let nextStickyIdx: number | undefined;
-      let low = 0;
-      let high = stickyIndices.length - 1;
-      while (low <= high) {
-        const mid = (low + high) >>> 1;
-        if (stickyIndices[ mid ]! > index) {
-          nextStickyIdx = stickyIndices[ mid ];
-          high = mid - 1;
-        } else {
-          low = mid + 1;
-        }
-      }
+      const nextStickyIdx = findNextStickyIndex(stickyIndices, index);
 
       if (nextStickyIdx !== undefined) {
         const nextStickyX = direction === 'horizontal'
@@ -447,25 +538,35 @@ export function calculateStickyItem(params: StickyParams) {
  * Calculates the position and size of a single item.
  *
  * @param params - The parameters for calculation.
+ * @param params.index - Item index.
+ * @param params.direction - Scroll direction.
+ * @param params.fixedSize - Fixed item size.
+ * @param params.gap - Item gap.
+ * @param params.columnGap - Column gap.
+ * @param params.usableWidth - Usable viewport width.
+ * @param params.usableHeight - Usable viewport height.
+ * @param params.totalWidth - Total estimated width.
+ * @param params.queryY - Prefix sum for row height.
+ * @param params.queryX - Prefix sum for row width.
+ * @param params.getSizeY - Height resolver.
+ * @param params.getSizeX - Width resolver.
  * @returns Item position and size.
  * @see ItemPositionParams
  */
-export function calculateItemPosition(params: ItemPositionParams) {
-  const {
-    index,
-    direction,
-    fixedSize,
-    gap,
-    columnGap,
-    usableWidth,
-    usableHeight,
-    totalWidth,
-    queryY,
-    queryX,
-    getSizeY,
-    getSizeX,
-  } = params;
-
+export function calculateItemPosition({
+  index,
+  direction,
+  fixedSize,
+  gap,
+  columnGap,
+  usableWidth,
+  usableHeight,
+  totalWidth,
+  queryY,
+  queryX,
+  getSizeY,
+  getSizeX,
+}: ItemPositionParams) {
   let x = 0;
   let y = 0;
   let width = 0;
@@ -489,20 +590,25 @@ export function calculateItemPosition(params: ItemPositionParams) {
  * Calculates the style object for a rendered item.
  *
  * @param params - The parameters for calculation.
+ * @param params.item - The rendered item state.
+ * @param params.direction - Scroll direction.
+ * @param params.itemSize - Configured item size logic.
+ * @param params.containerTag - Parent container tag.
+ * @param params.paddingStartX - Padding start on X axis.
+ * @param params.paddingStartY - Padding start on Y axis.
+ * @param params.isHydrated - Hydration state.
  * @returns Style object.
  * @see ItemStyleParams
  */
-export function calculateItemStyle<T = unknown>(params: ItemStyleParams<T>) {
-  const {
-    item,
-    direction,
-    itemSize,
-    containerTag,
-    paddingStartX,
-    paddingStartY,
-    isHydrated,
-  } = params;
-
+export function calculateItemStyle<T = unknown>({
+  item,
+  direction,
+  itemSize,
+  containerTag,
+  paddingStartX,
+  paddingStartY,
+  isHydrated,
+}: ItemStyleParams<T>) {
   const isVertical = direction === 'vertical';
   const isHorizontal = direction === 'horizontal';
   const isBoth = direction === 'both';
@@ -550,25 +656,35 @@ export function calculateItemStyle<T = unknown>(params: ItemStyleParams<T>) {
  * Calculates the total width and height of the virtualized content.
  *
  * @param params - The parameters for calculation.
+ * @param params.direction - The scroll direction.
+ * @param params.itemsLength - The number of items in the list.
+ * @param params.columnCount - The number of columns (for grid mode).
+ * @param params.fixedSize - The fixed size of items, if applicable.
+ * @param params.fixedWidth - The fixed width of columns, if applicable.
+ * @param params.gap - The gap between items.
+ * @param params.columnGap - The gap between columns.
+ * @param params.usableWidth - Usable viewport width.
+ * @param params.usableHeight - Usable viewport height.
+ * @param params.queryY - Function to query the prefix sum of item heights.
+ * @param params.queryX - Function to query the prefix sum of item widths.
+ * @param params.queryColumn - Function to query the prefix sum of column widths.
  * @returns Total width and height.
  * @see TotalSizeParams
  */
-export function calculateTotalSize(params: TotalSizeParams) {
-  const {
-    direction,
-    itemsLength,
-    columnCount,
-    fixedSize,
-    fixedWidth,
-    gap,
-    columnGap,
-    usableWidth,
-    usableHeight,
-    queryY,
-    queryX,
-    queryColumn,
-  } = params;
-
+export function calculateTotalSize({
+  direction,
+  itemsLength,
+  columnCount,
+  fixedSize,
+  fixedWidth,
+  gap,
+  columnGap,
+  usableWidth,
+  usableHeight,
+  queryY,
+  queryX,
+  queryColumn,
+}: TotalSizeParams) {
   let width = 0;
   let height = 0;
 

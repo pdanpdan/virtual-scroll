@@ -789,6 +789,34 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
 
     const lastItemsMap = new Map(lastRenderedItems.map((it) => [ it.index, it ]));
 
+    // Optimization: Cache sequential queries to avoid O(log N) tree traversal for every item
+    let lastIndexX = -1;
+    let lastOffsetX = 0;
+    let lastIndexY = -1;
+    let lastOffsetY = 0;
+
+    const queryXCached = (idx: number) => {
+      if (idx === lastIndexX + 1) {
+        lastOffsetX += itemSizesX.get(lastIndexX);
+        lastIndexX = idx;
+        return lastOffsetX;
+      }
+      lastOffsetX = itemSizesX.query(idx);
+      lastIndexX = idx;
+      return lastOffsetX;
+    };
+
+    const queryYCached = (idx: number) => {
+      if (idx === lastIndexY + 1) {
+        lastOffsetY += itemSizesY.get(lastIndexY);
+        lastIndexY = idx;
+        return lastOffsetY;
+      }
+      lastOffsetY = itemSizesY.query(idx);
+      lastIndexY = idx;
+      return lastOffsetY;
+    };
+
     for (const i of sortedIndices) {
       const item = props.value.items[ i ];
       if (item === undefined) {
@@ -804,8 +832,8 @@ export function useVirtualScroll<T = unknown>(props: Ref<VirtualScrollProps<T>>)
         usableWidth: usableWidth.value,
         usableHeight: usableHeight.value,
         totalWidth: totalWidth.value,
-        queryY: (idx) => itemSizesY.query(idx),
-        queryX: (idx) => itemSizesX.query(idx),
+        queryY: queryYCached,
+        queryX: queryXCached,
         getSizeY: (idx) => itemSizesY.get(idx),
         getSizeX: (idx) => itemSizesX.get(idx),
       });
