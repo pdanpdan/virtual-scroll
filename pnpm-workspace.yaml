@@ -33,6 +33,6 @@ catalogs:
     vite-plugin-dts: ^4.5.4
     vitest: ^4.0.18
     vue: 3.6.0-beta.3
-    vue-tsc: ^3.2.2
+    vue-tsc: ^3.2.3
 onlyBuiltDependencies:
   - esbuild
