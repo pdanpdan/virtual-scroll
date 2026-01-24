@@ -103,7 +103,7 @@ function toggle(node: TreeNode) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-4 items-center">
+      <div class="bg-base-300 p-2 rounded-box border border-base-content/5 shadow-sm inline-flex items-center gap-2">
         <button
           class="btn btn-soft btn-secondary btn-sm"
           @click="visibleItems.forEach(n => n.expanded = true)"
@@ -116,7 +116,7 @@ function toggle(node: TreeNode) {
         >
           Collapse All
         </button>
-        <div class="text-xs opacity-60 font-mono">
+        <div class="text-xs opacity-60 font-mono px-2">
           Visible Nodes: {{ visibleItems.length }}
         </div>
       </div>

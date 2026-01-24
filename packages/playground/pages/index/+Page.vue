@@ -225,6 +225,14 @@ import { navigateWithTransition } from '#/navigate';
         href="/pattern-masonry"
         group="7"
       />
+
+      <ExampleCard
+        type="Pattern"
+        title="Search & Highlight"
+        description="Implement high-performance search across thousands of virtualized items."
+        href="/pattern-search"
+        group="1"
+      />
     </div>
   </div>
 </template>

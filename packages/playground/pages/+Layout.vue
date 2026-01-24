@@ -86,6 +86,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-draggable', label: 'Draggable List' },
   { href: '/pattern-gallery', label: 'Photo Gallery' },
   { href: '/pattern-masonry', label: 'Masonry Grid' },
+  { href: '/pattern-search', label: 'Search & Highlight' },
 ];
 </script>
 

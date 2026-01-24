@@ -57,7 +57,7 @@ onUnmounted(stopDetection);
       <div class="text-xs font-bold small-caps opacity-40 tracking-wider">Current Item #</div>
       <div />
       <div class="inline-flex font-mono font-bold text-primary">
-        {{ scrollDetails?.currentIndex }}
+        {{ scrollDetails?.currentIndex || '-' }}
         <template v-if="direction === 'both'">
           <span class="opacity-50 mx-1">&times;</span>
           {{ scrollDetails?.currentColIndex }}

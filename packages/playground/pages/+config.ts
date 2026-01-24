@@ -7,8 +7,8 @@ export default {
   prerender: true,
   trailingSlash: true,
 
-  title: 'Virtual Scroll Playground',
-  description: 'Showcase of @pdanpdan/virtual-scroll component',
+  title: 'Virtual Scroll',
+  description: 'A high-performance virtualization library for Vue 3.',
 
   extends: [ vikeVue ],
 } as Config;
