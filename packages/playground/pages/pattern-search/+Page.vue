@@ -176,9 +176,9 @@ function getHighlightedContent(text: string, query: string) {
   return text.replace(regex, '<mark class="search-highlight-fallback">$1</mark>');
 }
 
-// Redirect native search (Ctrl+F)
+// Activate search (Ctrl+K)
 function handleGlobalKeyDown(e: KeyboardEvent) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault();
     searchInputRef.value?.focus();
     searchInputRef.value?.select();
@@ -211,8 +211,8 @@ onUnmounted(() => {
     </template>
 
     <template #description>
-      Demonstrates intercepting native browser search (<kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">F</kbd>) and redirecting it to the virtual scroll logic.
-      Highlights are rendered with <strong>CSS Custom Highlight API</strong>.
+      Generic way to provide native search in virtualized content using data-layer searching and CSS Custom Highlight API.
+      Triggered by (<kbd class="kbd">⌘</kbd>+<kbd class="kbd">K</kbd>).
     </template>
 
     <template #icon>
@@ -233,51 +233,51 @@ onUnmounted(() => {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+    </template>
 
-        <div class="bg-base-300 p-2 rounded-box border border-base-content/5 shadow-sm min-w-64">
-          <label for="search-input" class="block text-sm text-base-content/80 m-1">
-            Find in list (<kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">F</kbd>)
-          </label>
-          <div class="join bg-base-100 rounded-field border border-base-content/10">
+    <template #example-controls>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+        <div class="join bg-base-100 rounded-field border border-base-content/10">
+          <label class="input input-ghost join-item grow">
+            <div>
+              <kbd class="kbd kbd-sm">⌘</kbd> + <kbd class="kbd kbd-sm">K</kbd>
+            </div>
             <input
-              id="search-input"
               ref="searchInputRef"
               v-model="searchQuery"
               type="text"
               placeholder="Type to search..."
-              class="input input-ghost join-item flex-1"
               @keydown.enter="nextMatch"
             />
-            <div class="join-item bg-base-200 flex items-center px-3 border-x border-base-content/5 opacity-70 text-xs font-mono tabular-nums pt-1">
+            <span class="badge badge-primary badge-sm">
               {{ currentMatchNumber }}/{{ matches.length }}
-            </div>
-            <button
-              class="btn btn-soft btn-primary btn-square join-item"
-              :disabled="matches.length === 0"
-              aria-label="Previous match"
-              @click="prevMatch"
-            >
-              ↑
-            </button>
-            <button
-              class="btn btn-soft btn-primary btn-square join-item"
-              :disabled="matches.length === 0"
-              aria-label="Next match"
-              @click="nextMatch"
-            >
-              ↓
-            </button>
-          </div>
-          <div class="text-sm opacity-50 italic m-1">
-            <template v-if="matches.length > 0">
-              Found {{ matches.length }} matches. Use arrows or <kbd class="kbd">Enter</kbd> to navigate.
-            </template>
-            <template v-else>
-              Try searching for <strong>Bingo</strong> or <strong>Ultimate</strong>
-            </template>
-          </div>
+            </span>
+          </label>
+          <button
+            class="btn btn-soft btn-primary btn-square join-item"
+            :disabled="matches.length === 0"
+            aria-label="Previous match"
+            @click="prevMatch"
+          >
+            ↑
+          </button>
+          <button
+            class="btn btn-soft btn-primary btn-square join-item"
+            :disabled="matches.length === 0"
+            aria-label="Next match"
+            @click="nextMatch"
+          >
+            ↓
+          </button>
+        </div>
+        <div class="text-sm opacity-50 italic">
+          <template v-if="matches.length > 0">
+            Found {{ matches.length }} matches. Use arrows or <kbd class="kbd">Enter</kbd> to navigate.
+          </template>
+          <template v-else>
+            Try searching for <strong>Bingo</strong> or <strong>Ultimate</strong>
+          </template>
         </div>
       </div>
     </template>
@@ -293,16 +293,13 @@ onUnmounted(() => {
     >
       <template #item="{ item, index }">
         <div
-          class="example-vertical-item example-vertical-item--fixed transition-colors duration-300"
+          class="example-vertical-item example-vertical-item--fixed"
           :class="{ 'search-match-active bg-primary/10 ring-inset ring-1 ring-primary/30': index === matches[currentMatchIndex] }"
         >
-          <span class="example-badge mr-4" :class="{ 'badge-primary': index === matches[currentMatchIndex] }">
+          <span class="example-badge me-4" :class="{ 'badge-primary': index === matches[currentMatchIndex] }">
             #{{ index }}
           </span>
-          <div
-            class="text-sm md:text-base truncate"
-            v-html="getHighlightedContent(item.text, searchQuery)"
-          />
+          <div class="text-sm md:text-base" v-html="getHighlightedContent(item.text, searchQuery)" />
         </div>
       </template>
     </VirtualScroll>

@@ -45,7 +45,7 @@ function onScroll(details: ScrollDetails) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="example-title example-title--group-2">Sticky Sections</span>
+      <span class="example-title example-title--group-3">Sticky Sections</span>
     </template>
 
     <template #description>
@@ -59,7 +59,7 @@ function onScroll(details: ScrollDetails) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-2"
+        class="example-icon example-icon--group-3"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
       </svg>
@@ -70,9 +70,7 @@ function onScroll(details: ScrollDetails) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
-      </div>
+      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
     </template>
 
     <VirtualScroll

@@ -73,22 +73,20 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
 
-        <ScrollControls
-          v-model:item-count="itemCount"
-          v-model:item-size="itemSize"
-          v-model:buffer-before="bufferBefore"
-          v-model:buffer-after="bufferAfter"
-          v-model:sticky-header="stickyHeader"
-          v-model:sticky-footer="stickyFooter"
-          direction="vertical"
-          @scroll-to-index="handleScrollToIndex"
-          @scroll-to-offset="handleScrollToOffset"
-          @refresh="virtualScrollRef?.refresh()"
-        />
-      </div>
+      <ScrollControls
+        v-model:item-count="itemCount"
+        v-model:item-size="itemSize"
+        v-model:buffer-before="bufferBefore"
+        v-model:buffer-after="bufferAfter"
+        v-model:sticky-header="stickyHeader"
+        v-model:sticky-footer="stickyFooter"
+        direction="vertical"
+        @scroll-to-index="handleScrollToIndex"
+        @scroll-to-offset="handleScrollToOffset"
+        @refresh="virtualScrollRef?.refresh()"
+      />
     </template>
 
     <VirtualScroll
@@ -108,7 +106,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     >
       <template #header>
         <tr class="bg-base-200 shadow-sm z-1">
-          <th class="w-16 text-right border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">ID</th>
+          <th class="w-16 text-end border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">ID</th>
           <th class="w-48 border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Name</th>
           <th class="w-72 border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Email</th>
           <th class="w-24 text-center border-b border-base-300 py-3 text-sm small-caps tracking-widest opacity-60">Age</th>
@@ -119,7 +117,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
       </template>
 
       <template #item="{ item, index }">
-        <td class="w-16 text-right font-mono text-sm opacity-50">#{{ index }}</td>
+        <td class="w-16 text-end font-mono text-sm opacity-50">#{{ index }}</td>
         <td class="w-48 font-bold text-sm">{{ item.name }}</td>
         <td class="w-72 text-xs opacity-80">{{ item.email }}</td>
         <td class="w-24 text-center text-sm tabular-nums">{{ item.age }}</td>

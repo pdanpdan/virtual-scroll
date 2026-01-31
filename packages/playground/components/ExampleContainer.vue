@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { usePageContext } from 'vike-vue/usePageContext';
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 
-import { matchHref, navigateWithTransition } from '#/navigate';
+import { matchHref } from '#/navigate';
 
+import AppLink from './AppLink.vue';
 import CodeBlock from './CodeBlock.vue';
 
 const props = withDefaults(defineProps<{
@@ -16,6 +17,8 @@ const props = withDefaults(defineProps<{
   minHeight: 'min(10dvh, 50px)',
   minWidth: 'min(10vw, 50px)',
 });
+
+const rtlMode = inject('rtlMode', ref(false));
 
 const activeTab = ref<'preview' | 'code'>('preview');
 const copied = ref(false);
@@ -44,7 +47,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
 <template>
   <div class="space-y-2 md:space-y-4">
     <div v-if="$slots.title || $slots.description" class="prose max-w-none mb-6">
-      <div class="card card-side bg-base-300 shadow-soft overflow-hidden">
+      <div class="card card-side bg-base-300 shadow-soft">
         <figure v-if="$slots.icon" class="shrink-0 items-start justify-center pt-7 ps-5 hidden sm:flex">
           <slot name="icon" />
         </figure>
@@ -58,23 +61,21 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
                 <slot name="subtitle" />
               </div>
             </div>
-            <button
-              v-if="!isIndex"
-              class="btn btn-sm btn-soft gap-1.5"
-              @click="navigateWithTransition('/', 'back')"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="size-3"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-              </svg>
-              <span class="hidden md:inline">Back to Welcome</span>
-            </button>
+            <AppLink v-if="!isIndex" v-slot="{ href }" href="/">
+              <a :href class="btn btn-sm btn-soft gap-1.5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="size-3"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                </svg>
+                <span class="hidden md:inline">Back to Welcome</span>
+              </a>
+            </AppLink>
           </div>
           <div v-if="$slots.description" class="opacity-70 m-0 mt-4 text-sm md:text-base leading-relaxed max-w-3xl">
             <slot name="description" />
@@ -83,9 +84,35 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
       </div>
     </div>
 
-    <slot name="controls" />
+    <div v-if="$slots.controls" id="virtual-scroll-controls" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
+      <div class="sheet-content sheet-content-end h-fit top-1 translate-y-0 overflow-visible">
+        <button
+          class="sheet-handle appearance-none after:hidden h-34.5 w-8 top-19 translate-y-0"
+          popovertarget="virtual-scroll-controls"
+          popovertargetaction="toggle"
+        >
+          <div class="bg-accent text-accent-content small-caps text-lg tracking-wider rounded-l-box flex flex-col flex-nowrap items-center justify-center">
+            <svg
+              class="sheet-handle-icon sheet-handle-icon--right"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+            </svg>
+            <div class="me-1 [writing-mode:vertical-lr] rotate-180">Controls</div>
+          </div>
+        </button>
 
-    <div class="flex flex-col bg-base-300 border border-base-content/10 rounded-box shadow-soft overflow-hidden resize" :style="containerStyle">
+        <div class="flex flex-wrap gap-1 items-stretch pe-1">
+          <slot name="controls" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card flex flex-col bg-base-300 shadow-soft overflow-auto resize" :style="containerStyle">
       <div class="flex items-center justify-between gap-2 m-2">
         <div class="join">
           <button
@@ -139,15 +166,19 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
 
       <div
         v-show="activeTab === 'preview'"
-        class="flex-1 mx-2 mb-2 overflow-auto rounded-[inherit] bg-base-100 border border-base-content/5 shadow-inner"
+        class="flex-1 mx-2 mb-2 rounded-[inherit] overflow-auto flex flex-col"
+        :dir="rtlMode ? 'rtl' : 'ltr'"
       >
+        <div v-if="$slots['example-controls']" class="p-2 md:px-4 bg-base-200" dir="ltr">
+          <slot name="example-controls" />
+        </div>
         <slot />
       </div>
 
       <CodeBlock
         v-if="code"
         v-show="activeTab === 'code'"
-        class="flex-1 mx-2 mb-2 rounded-[inherit] shadow-inner border border-base-content/10"
+        class="flex-1 mx-2 mb-2 rounded-[inherit]"
         lang="vue"
         :code="code"
         line-numbers

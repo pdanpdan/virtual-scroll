@@ -110,12 +110,12 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Items #</span>
-          <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <label class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Item Size</span>
-          <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <template v-if="direction === 'both'">
@@ -123,11 +123,11 @@ function handleScrollToOffset() {
 
           <label class="floating-label p-0">
             <span class="text-xs font-bold small-caps text-base-content/50">Cols #</span>
-            <input v-model.number="localColumnCount" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+            <input v-model.number="localColumnCount" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
           </label>
           <label class="floating-label p-0">
             <span class="text-xs font-bold small-caps text-base-content/50">Col Width</span>
-            <input v-model.number="localColumnWidth" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+            <input v-model.number="localColumnWidth" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
           </label>
         </template>
 
@@ -141,16 +141,16 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="bufferBefore !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Pre</span>
-          <input v-model.number="localBufferBefore" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="localBufferBefore" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
         <label v-if="bufferAfter !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Post</span>
-          <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <div v-if="(bufferBefore !== undefined || bufferAfter !== undefined) && (stickyHeader !== undefined || stickyFooter !== undefined)" class="w-full sm:hidden" />
 
-        <div class="flex gap-4 items-center pl-1">
+        <div class="flex gap-4 items-center ps-1">
           <label v-if="stickyHeader !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
             <input v-model="localStickyHeader" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
             <span class="text-xs font-semibold opacity-70">Sticky Header</span>
@@ -167,7 +167,7 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Row' : 'Item' }} #</span>
-          <input v-model.number="targetIndex" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="targetIndex" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
@@ -184,7 +184,7 @@ function handleScrollToOffset() {
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Col' : 'Item' }} #</span>
-          <input v-model.number="targetColumn" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="targetColumn" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
@@ -207,12 +207,12 @@ function handleScrollToOffset() {
       <div class="list-col-grow flex flex-wrap gap-3 items-center justify-between">
         <label v-if="direction !== 'horizontal'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Y' : 'Offset' }} (px)</span>
-          <input v-model.number="targetOffsetY" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="targetOffsetY" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'X' : 'Offset' }} (px)</span>
-          <input v-model.number="targetOffsetX" type="number" placeholder=" " class="input input-bordered input-sm text-right w-24 font-mono" />
+          <input v-model.number="targetOffsetX" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
         <div class="grow" />

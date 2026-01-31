@@ -5,7 +5,7 @@ import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { useData } from 'vike-vue/useData';
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
@@ -28,6 +28,15 @@ const columnWidths = computed(() => [ Math.ceil(columnWidth.value * 1.5), column
 
 // SSR Range: from data (simulates state from a store)
 const { items, ssrRange } = data;
+
+watch(itemCount, (count) => {
+  items.length = 0;
+  for (let i = 0; i < count; i += 1) {
+    items[ i ] = {
+      id: i,
+    };
+  }
+});
 
 const virtualScrollRef = ref();
 const scrollDetails = ref<ScrollDetails | null>(null);
@@ -76,7 +85,9 @@ function handleScrollToOffset(x: number | null, y: number | null) {
         stroke="currentColor"
         class="example-icon example-icon--group-4"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6.15a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v13.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V4.5a2.25 2.25 0 0 0-2.25-2.25Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h9m-9-3h9m-9-3h3.75" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 2.625 3 3L12 15l-3 1 1-3 9.375-10.375Z" />
       </svg>
     </template>
 
@@ -85,27 +96,25 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-4 items-start">
-        <ScrollStatus
-          :scroll-details="scrollDetails"
-          direction="both"
-          :column-range="virtualScrollRef?.columnRange"
-        />
-        <ScrollControls
-          v-model:item-count="itemCount"
-          v-model:item-size="itemSize"
-          v-model:column-count="columnCount"
-          v-model:column-width="columnWidth"
-          v-model:buffer-before="bufferBefore"
-          v-model:buffer-after="bufferAfter"
-          v-model:sticky-header="stickyHeader"
-          v-model:sticky-footer="stickyFooter"
-          direction="both"
-          @scroll-to-index="handleScrollToIndex"
-          @scroll-to-offset="handleScrollToOffset"
-          @refresh="virtualScrollRef?.refresh()"
-        />
-      </div>
+      <ScrollStatus
+        :scroll-details="scrollDetails"
+        direction="both"
+        :column-range="virtualScrollRef?.columnRange"
+      />
+      <ScrollControls
+        v-model:item-count="itemCount"
+        v-model:item-size="itemSize"
+        v-model:column-count="columnCount"
+        v-model:column-width="columnWidth"
+        v-model:buffer-before="bufferBefore"
+        v-model:buffer-after="bufferAfter"
+        v-model:sticky-header="stickyHeader"
+        v-model:sticky-footer="stickyFooter"
+        direction="both"
+        @scroll-to-index="handleScrollToIndex"
+        @scroll-to-offset="handleScrollToOffset"
+        @refresh="virtualScrollRef?.refresh()"
+      />
     </template>
 
     <VirtualScroll
@@ -132,8 +141,6 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 
       <template #item="{ index, columnRange, getColumnWidth }">
         <div :key="`r_${ index }`" class="example-grid-row">
-          <div class="shrink-0" :style="{ inlineSize: `${ columnRange.padStart }px` }" />
-
           <div
             v-for="c in (columnRange.end - columnRange.start)"
             :key="`r_${ index }_c_${ columnRange.start + c - 1 }`"
@@ -144,8 +151,6 @@ function handleScrollToOffset(x: number | null, y: number | null) {
             <div class="example-badge mb-2">R{{ index }} &times; C{{ columnRange.start + c - 1 }}</div>
             <div class="opacity-40 tabular-nums">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>
           </div>
-
-          <div class="shrink-0" :style="{ inlineSize: `${ columnRange.padEnd }px` }" />
         </div>
       </template>
 

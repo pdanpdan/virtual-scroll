@@ -1,5 +1,3 @@
-import { navigate } from 'vike/client/router';
-
 const BASE_URL = import.meta.env.BASE_URL;
 
 export function normalizeHref(href: string, addBase: boolean = true) {
@@ -16,23 +14,4 @@ export function matchHref(href: string, urlPathname: string) {
   return urlPathname === href
     || urlPathname === normalizedHref
     || (normalizedHref !== '/' && typeof urlPathname === 'string' && urlPathname.startsWith(normalizedHref) && /[^#\w\s-]/.test(urlPathname[ normalizedHref.length ]));
-}
-
-export function navigateWithTransition(url: string, type: string = 'generic') {
-  const { promise, resolve } = Promise.withResolvers();
-
-  if (document.startViewTransition) {
-    document.startViewTransition({
-      update: () => {
-        navigate(url);
-        resolve(true);
-      },
-      types: [ type ],
-    });
-  } else {
-    navigate(url);
-    resolve(true);
-  }
-
-  return promise;
 }

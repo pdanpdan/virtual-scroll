@@ -6,6 +6,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ScrollStatus from '#/components/ScrollStatus.vue';
 
 import rawCode from './+Page.vue?raw';
 
@@ -27,7 +28,10 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const draggedIndex = ref<number | null>(null);
 const dropTargetIndex = ref<number | null>(null);
-const virtualScrollRef = ref();
+const virtualScrollRef = ref<{
+  scrollDetails: ScrollDetails;
+  scrollToOffset: (x: number | null, y: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
+} | null>(null);
 const scrollDetails = ref<ScrollDetails | null>(null);
 
 let scrollInterval: ReturnType<typeof setInterval> | null = null;
@@ -57,9 +61,26 @@ function startAutoScroll(direction: 'up' | 'down') {
  * Handles the start of a drag operation.
  *
  * @param index - The index of the item being dragged.
+ * @param event - The native drag event.
  */
-function handleDragStart(index: number) {
+function handleDragStart(index: number, event: DragEvent) {
   draggedIndex.value = index;
+
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', index.toString());
+
+    // Fix for mobile browsers that might center the drag image on the touch point.
+    // We explicitly set the drag image and the offset where the finger/cursor is.
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    if (event.dataTransfer.setDragImage) {
+      event.dataTransfer.setDragImage(target, x, y);
+    }
+  }
 }
 
 /**
@@ -99,6 +120,15 @@ function handleDrop() {
   draggedIndex.value = null;
   dropTargetIndex.value = null;
 }
+
+/**
+ * Handles the drag end event to clean up.
+ */
+function handleDragEnd() {
+  draggedIndex.value = null;
+  dropTargetIndex.value = null;
+  stopAutoScroll();
+}
 </script>
 
 <template>
@@ -124,6 +154,10 @@ function handleDrop() {
       </svg>
     </template>
 
+    <template #controls>
+      <ScrollStatus :scroll-details="scrollDetails" />
+    </template>
+
     <template #subtitle>
       Reorder virtualized items using native drag and drop
     </template>
@@ -141,19 +175,18 @@ function handleDrop() {
           tabindex="0"
           class="example-vertical-item py-2 outline-none focus-visible:bg-base-300"
           :class="{
-            'opacity-30 scale-95': draggedIndex === index,
+            'opacity-30': draggedIndex === index,
             'border-t-4 border-t-primary': dropTargetIndex === index && draggedIndex !== index,
           }"
-          draggable="true"
-          @dragstart="handleDragStart(index)"
+          @dragstart="handleDragStart(index, $event)"
           @dragover.prevent="handleDragOver(index, $event)"
           @drop="handleDrop"
-          @dragend="draggedIndex = null; dropTargetIndex = null; stopAutoScroll()"
+          @dragend="handleDragEnd"
           @keydown.enter.prevent
           @keydown.space.prevent
         >
           <div
-            class="size-10 rounded-lg mr-4 flex items-center justify-center text-white font-bold shadow-sm"
+            class="size-10 rounded-lg me-4 flex items-center justify-center text-white font-bold shadow-sm"
             :style="{ backgroundColor: item.color }"
           >
             {{ item.label[0] }}
@@ -162,7 +195,10 @@ function handleDrop() {
             <div class="font-bold text-sm">{{ item.label }}</div>
             <div class="text-xs opacity-40 font-mono">ID: {{ item.id }}</div>
           </div>
-          <div class="ml-auto cursor-grab active:cursor-grabbing opacity-30 hover:opacity-100">
+          <div
+            class="ms-auto cursor-grab active:cursor-grabbing opacity-30 hover:opacity-100"
+            draggable="true"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

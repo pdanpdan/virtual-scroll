@@ -1,16 +1,21 @@
 <script lang="ts" setup>
+import { usePageContext } from 'vike-vue/usePageContext';
 import { onMounted, provide, ref, watch } from 'vue';
 
 import AppLink from '#/components/AppLink.vue';
 import AppLogo from '#/components/AppLogo.vue';
-import { navigateWithTransition } from '#/navigate';
 
 import { version } from '../../virtual-scroll/package.json';
 
 import '#/assets/style.css';
 
+const pageContext = usePageContext();
+
 const debugMode = ref(false);
 provide('debugMode', debugMode);
+
+const rtlMode = ref(false);
+provide('rtlMode', rtlMode);
 
 const theme = ref<'light' | 'dark' | null>(null);
 
@@ -23,13 +28,38 @@ function toggleTheme() {
 }
 
 const drawerOpen = ref(false);
+const drawerRef = ref<HTMLElement | null>(null);
 
-async function navigateAndCloseDrawer(url: string, type?: string) {
-  await navigateWithTransition(url, type);
-
+watch(() => pageContext.urlPathname, () => {
   setTimeout(() => {
     drawerOpen.value = false;
+    scrollToActiveLink();
   }, 100);
+});
+
+watch(drawerOpen, (open) => {
+  if (open) {
+    setTimeout(() => {
+      scrollToActiveLink();
+    }, 100);
+  }
+});
+
+function scrollToActiveLink() {
+  if (drawerRef.value != null) {
+    const activeLink = drawerRef.value.querySelector('.drawer-link--active') as HTMLElement;
+
+    if (activeLink) {
+      const containerRect = drawerRef.value.getBoundingClientRect();
+      const itemRect = activeLink.getBoundingClientRect();
+      const relativeTop = itemRect.top - containerRect.top - window.innerHeight * 0.8;
+
+      drawerRef.value.scrollTo({
+        top: relativeTop,
+        behavior: 'smooth',
+      });
+    }
+  }
 }
 
 onMounted(() => {
@@ -39,6 +69,8 @@ onMounted(() => {
   } else {
     theme.value = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
+
+  scrollToActiveLink();
 });
 
 watch(theme, (newTheme) => {
@@ -73,9 +105,11 @@ const essentialLinks: Link[] = [
 
 const featureLinks: Link[] = [
   { href: '/feature-infinite-scroll', label: 'Infinite Scroll' },
-  { href: '/feature-sticky-sections', label: 'Sticky Sections' },
   { href: '/feature-scroll-restoration', label: 'Scroll Restoration' },
+  { href: '/feature-sticky-sections', label: 'Sticky Sections' },
   { href: '/feature-ssr', label: 'SSR Support', props: { rel: 'external' } },
+  { href: '/feature-custom-scrollbar', label: 'Custom Scrollbar' },
+  { href: '/feature-independent-scrollbars', label: 'Independent Scrollbars' },
 ];
 
 const patternLinks: Link[] = [
@@ -101,7 +135,7 @@ const patternLinks: Link[] = [
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
           </label>
         </div>
-        <div class="flex items-center px-4 gap-3 mr-auto">
+        <div class="flex items-center px-4 gap-3 me-auto">
           <div class="transition-transform hover:scale-105 drop-shadow-md">
             <AppLogo class="shrink-0 size-12" />
           </div>
@@ -129,13 +163,62 @@ const patternLinks: Link[] = [
       <main class="p-3 md:p-6 lg:p-8 max-w-full">
         <slot />
       </main>
+
+      <div id="app-settings" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
+        <div class="sheet-content sheet-content-end h-fit bottom-3 translate-y-0 overflow-visible pe-1">
+          <button
+            class="sheet-handle appearance-none after:hidden h-34.5 w-8"
+            popovertarget="app-settings"
+            popovertargetaction="toggle"
+          >
+            <div class="bg-accent text-accent-content small-caps text-lg tracking-wider rounded-l-box flex flex-col flex-nowrap items-center justify-center">
+              <svg
+                class="sheet-handle-icon sheet-handle-icon--right"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2.5"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+              </svg>
+              <div class="me-1 [writing-mode:vertical-lr] rotate-180">Settings</div>
+            </div>
+          </button>
+
+          <div class="flex flex-col gap-1 items-stretch px-2 bg-base-300 rounded-box shadow-soft text-sm">
+            <label class="settings-item group p-3">
+              <span class="settings-label me-2">Theme</span>
+              <div class="swap swap-rotate me-1.5">
+                <input type="checkbox" class="theme-controller" :checked="theme === 'dark'" @change="toggleTheme" />
+                <svg class="swap-off size-6 fill-primary transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+                </svg>
+                <svg class="swap-on size-6 fill-primary transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+                </svg>
+              </div>
+            </label>
+
+            <label class="settings-item group p-3">
+              <span class="settings-label me-2">RTL Mode</span>
+              <input v-model="rtlMode" type="checkbox" class="toggle toggle-secondary" />
+            </label>
+
+            <label class="settings-item group p-3">
+              <span class="settings-label me-2">Debug Mode</span>
+              <input v-model="debugMode" type="checkbox" class="toggle toggle-error" />
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="drawer-side drawer-side-container">
+    <div ref="drawerRef" class="drawer-side drawer-side-container z-50">
       <label for="app-drawer-main" aria-label="close sidebar" class="drawer-overlay" />
-      <ul class="menu px-4 py-0 w-76 min-h-full bg-base-300 text-base-content gap-0.5">
+      <ul class="menu p-0 pb-6 w-76 min-h-full bg-base-300 text-base-content gap-0.5">
         <!-- Sidebar content here -->
-        <li class="menu-title drawer-header px-0 max-lg:py-2 sticky top-0 bg-inherit z-1">
+        <li class="menu-title drawer-header max-lg:py-2 sticky top-0 bg-inherit z-1">
           <div class="flex items-center gap-3">
             <div class="transition-transform hover:scale-105 drop-shadow-md">
               <AppLogo class="shrink-0 size-12" />
@@ -159,22 +242,21 @@ const patternLinks: Link[] = [
           </a>
         </li>
 
-        <li v-for="link in navLinks" :key="link.href">
+        <li v-for="link in navLinks" :key="link.href" class="px-2">
           <AppLink v-slot="{ href, active }" :href="link.href">
             <a
               :href
               class="drawer-link"
               :class="{ 'drawer-link--active': active }"
               v-bind="link.props"
-              data-vike="false"
-              @click.prevent="navigateAndCloseDrawer(href, link.href === '/' ? 'back' : 'forward')"
+              :data-vike="link.props?.rel === 'external' ? 'false' : undefined"
             >
               {{ link.label }}
             </a>
           </AppLink>
         </li>
 
-        <li>
+        <li class="px-2">
           <div class="menu-title divider drawer-menu-title">Essentials</div>
           <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
             <li v-for="link in essentialLinks" :key="link.href">
@@ -184,8 +266,7 @@ const patternLinks: Link[] = [
                   class="drawer-link"
                   :class="{ 'drawer-link--active': active }"
                   v-bind="link.props"
-                  data-vike="false"
-                  @click.prevent="navigateAndCloseDrawer(href, 'forward')"
+                  :data-vike="link.props?.rel === 'external' ? 'false' : undefined"
                 >
                   {{ link.label }}
                 </a>
@@ -194,7 +275,7 @@ const patternLinks: Link[] = [
           </ul>
         </li>
 
-        <li>
+        <li class="px-2">
           <div class="menu-title divider drawer-menu-title">Features</div>
           <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
             <li v-for="link in featureLinks" :key="link.href">
@@ -204,8 +285,7 @@ const patternLinks: Link[] = [
                   class="drawer-link"
                   :class="{ 'drawer-link--active': active }"
                   v-bind="link.props"
-                  data-vike="false"
-                  @click.prevent="navigateAndCloseDrawer(href, 'forward')"
+                  :data-vike="link.props?.rel === 'external' ? 'false' : undefined"
                 >
                   {{ link.label }}
                 </a>
@@ -214,7 +294,7 @@ const patternLinks: Link[] = [
           </ul>
         </li>
 
-        <li>
+        <li class="px-2">
           <div class="menu-title divider drawer-menu-title">Patterns</div>
           <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
             <li v-for="link in patternLinks" :key="link.href">
@@ -224,42 +304,11 @@ const patternLinks: Link[] = [
                   class="drawer-link"
                   :class="{ 'drawer-link--active': active }"
                   v-bind="link.props"
-                  data-vike="false"
-                  @click.prevent="navigateAndCloseDrawer(href, 'forward')"
+                  :data-vike="link.props?.rel === 'external' ? 'false' : undefined"
                 >
                   {{ link.label }}
                 </a>
               </AppLink>
-            </li>
-          </ul>
-        </li>
-
-        <li class="sticky bottom-0 pb-4 bg-inherit z-1">
-          <div class="menu-title divider drawer-menu-title">Settings</div>
-          <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
-            <li>
-              <label class="settings-item group p-3 hover:bg-base-content/5 active:bg-base-content/5">
-                <span class="settings-label">Theme</span>
-
-                <div class="swap swap-rotate me-1.5">
-                  <input type="checkbox" class="theme-controller" :checked="theme === 'dark'" @change="toggleTheme" />
-
-                  <svg class="swap-off size-6 fill-primary transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-                  </svg>
-
-                  <svg class="swap-on size-6 fill-primary transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-                  </svg>
-                </div>
-              </label>
-            </li>
-
-            <li>
-              <label class="settings-item group p-3 hover:bg-base-content/5 active:bg-base-content/5">
-                <span class="settings-label">Debug Mode</span>
-                <input v-model="debugMode" type="checkbox" class="toggle toggle-error" />
-              </label>
             </li>
           </ul>
         </li>

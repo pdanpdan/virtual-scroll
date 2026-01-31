@@ -3,6 +3,7 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark;
   exclude: properties;
+  logs: false;
 }
 
 @plugin "daisyui/theme" {
@@ -90,13 +91,20 @@
   --shiki-token-link: oklch(78% 0.15 250);
 }
 
-@layer base {
-  html, body {
-    block-size: 100%;
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+html, body {
+  block-size: 100%;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
+  scroll-padding-top: 72px;
+
+  @media (width >= 64rem /* 1024px */) {
+    scroll-padding-top: 24px;
   }
+}
+
+@layer base {
 
   h1 {
     @apply text-2xl md:text-4xl font-black tracking-tight;
@@ -174,7 +182,7 @@
 @utility example-icon--group-7 { @apply bg-error text-error-content; }
 
 @utility example-container {
-  @apply bg-base-100 border border-base-300 rounded-box overflow-hidden shadow-soft;
+  @apply flex-1 relative bg-base-100 bg-clip-border border border-base-300 rounded-[inherit];
 }
 
 /* --- Example Content Utilities --- */
@@ -191,7 +199,7 @@
 }
 
 @utility example-horizontal-item {
-  @apply h-full flex flex-col items-center justify-center px-4 py-6 border-r border-base-content/5 hover:bg-base-200 transition-colors whitespace-normal text-center select-none;
+  @apply h-full flex flex-col items-center justify-center px-4 py-6 border-e border-base-content/5 hover:bg-base-200 transition-colors whitespace-normal text-center select-none;
 }
 @utility example-horizontal-item--fixed {
   @apply w-full;
@@ -204,7 +212,7 @@
   @apply text-start px-6;
 }
 @utility example-body-header {
-  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-t-box border-b border-base-300;
+  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-t-[inherit] border-b border-base-300;
 
   h2 {
     @apply text-xl md:text-3xl font-extrabold mb-2 tracking-widest text-primary small-caps;
@@ -220,7 +228,7 @@
 }
 
 @utility example-body-footer {
-  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-b-box border-t border-base-300;
+  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-b-[inherit] border-t border-base-300;
 
   h2 {
     @apply text-lg md:text-2xl font-bold tracking-widest opacity-60 small-caps;
@@ -262,10 +270,10 @@
 }
 
 @utility example-spreadsheet-cell {
-  @apply shrink-0 relative inline-flex items-center justify-center border-r border-b border-base-content/5 text-xs md:text-sm px-2 box-border bg-inherit;
+  @apply shrink-0 relative inline-flex items-center justify-center border-e border-b border-base-content/5 text-xs md:text-sm px-2 box-border bg-inherit;
 
   &.example-spreadsheet-cell--row-header {
-    @apply sticky left-0 z-10 font-bold bg-base-200 border-r-2 border-base-300 text-base-content/50;
+    @apply sticky start-0 z-10 font-bold bg-base-200 border-e-2 border-base-300 text-base-content/50;
 
     .example-spreadsheet-row--header & {
       @apply z-40 bg-base-300 text-primary;
@@ -282,11 +290,11 @@
 }
 
 @utility example-spreadsheet-col-resizer {
-  @apply absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/40 transition-colors z-50;
+  @apply absolute end-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/40 transition-colors z-50;
 }
 
 @utility example-spreadsheet-row-resizer {
-  @apply absolute bottom-0 left-0 right-0 h-1 cursor-row-resize hover:bg-primary/40 transition-colors z-50;
+  @apply absolute bottom-0 start-0 end-0 h-1 cursor-row-resize hover:bg-primary/40 transition-colors z-50;
 }
 
 /* --- General Utilities --- */
@@ -314,7 +322,7 @@
 /* --- Drawer Utilities --- */
 
 @utility drawer-side-container {
-  @apply h-dvh border-r border-base-content/5 shadow-lg;
+  @apply h-dvh border-e border-base-content/5 shadow-lg;
   scrollbar-gutter: stable;
 }
 
@@ -340,7 +348,7 @@
 }
 
 @utility docs-code-block {
-  @apply rounded-box border border-base-content/10 mb-4;
+  @apply rounded-[inherit] border border-base-content/10 mb-4;
 }
 
 @utility docs-prop-header {
@@ -367,7 +375,7 @@
 
 @utility sheet {
   @layer daisyui.l1.l2.l3 {
-    @apply fixed inset-0 pointer-events-none overflow-clip;
+    @apply fixed inset-0 pointer-events-none overflow-clip contain-strict;
 
     --sheet-tr: 0.3s cubic-bezier(0.5, 1.2, 0.3, 1);
 
@@ -420,7 +428,7 @@
 
 @utility sheet-content {
   @layer daisyui.l1.l2.l3 {
-    @apply absolute flex flex-col overflow-clip;
+    @apply absolute flex flex-col overflow-clip contain-layout;
 
     transition: translate var(--sheet-tr), display var(--sheet-tr) allow-discrete, overlay var(--sheet-tr) allow-discrete;
 
@@ -468,7 +476,7 @@
     }
 
     .sheet-handle {
-      @apply bottom-0 left-[50%] -translate-x-[50%] w-20 max-w-full h-(--sheet-peek);
+      @apply bottom-0 start-[50%] -translate-x-[50%] w-20 max-w-full h-(--sheet-peek);
     }
   }
 }
@@ -489,7 +497,7 @@
     }
 
     .sheet-handle {
-      @apply top-0 left-[50%] -translate-x-[50%] w-20 max-w-full h-(--sheet-peek);
+      @apply top-0 start-[50%] -translate-x-[50%] w-20 max-w-full h-(--sheet-peek);
     }
   }
 }
@@ -548,6 +556,19 @@
   }
 }
 
+.sheet-handle-icon {
+  @apply size-4 transition-transform duration-300 delay-300;
+
+  &.sheet-handle-icon--right {
+    @apply ms-px my-2 rotate-0;
+
+    :popover-open & {
+      @apply rotate-180;
+    }
+  }
+}
+
+
 /* --- Page Transitions --- */
 
 .drawer-side {
@@ -571,19 +592,19 @@ main {
 }
 
 @keyframes VS-slide-to-left {
-  to { transform: translateX(-30px); }
+  to { transform: translateX(-100px); }
 }
 
 @keyframes VS-slide-from-right {
-  from { transform: translateX(30px); }
+  from { transform: translateX(100px); }
 }
 
 @keyframes VS-slide-to-right {
-  to { transform: translateX(30px); }
+  to { transform: translateX(100px); }
 }
 
 @keyframes VS-slide-from-left {
-  from { transform: translateX(-30px); }
+  from { transform: translateX(-100px); }
 }
 
 ::view-transition-old(VS-main) {
@@ -594,22 +615,27 @@ main {
   animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in;
 }
 
-html:active-view-transition-type(forward) ::view-transition-old(VS-main) {
-  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+html.page-forward-transition::view-transition-old(VS-main),
+html:active-view-transition-type(forward)::view-transition-old(VS-main) {
+  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
              250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-left;
 }
 
-html:active-view-transition-type(forward) ::view-transition-new(VS-main) {
-  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+html.page-forward-transition::view-transition-new(VS-main),
+html:active-view-transition-type(forward)::view-transition-new(VS-main) {
+  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
              250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-right;
 }
 
-html:active-view-transition-type(back) ::view-transition-old(VS-main) {
-  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+/* Backward transition */
+html.page-back-transition::view-transition-old(VS-main),
+html:active-view-transition-type(back)::view-transition-old(VS-main) {
+  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
              250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-right;
 }
 
-html:active-view-transition-type(back) ::view-transition-new(VS-main) {
-  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+html.page-back-transition::view-transition-new(VS-main),
+html:active-view-transition-type(back)::view-transition-new(VS-main) {
+  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
              250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-left;
 }

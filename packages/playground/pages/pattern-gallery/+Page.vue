@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ScrollStatus from '#/components/ScrollStatus.vue';
 
 import rawCode from './+Page.vue?raw';
 
@@ -33,6 +35,8 @@ const photos = computed(() => Array.from(
     } as Photo;
   }),
 ));
+
+const scrollDetails = ref<ScrollDetails | null>(null);
 </script>
 
 <template>
@@ -63,19 +67,23 @@ const photos = computed(() => Array.from(
     </template>
 
     <template #controls>
+      <ScrollStatus :scroll-details="scrollDetails" />
+    </template>
+
+    <template #example-controls>
       <div class="flex flex-wrap gap-4 items-center">
-        <div class="bg-base-300 p-4 rounded-box border border-base-content/5 shadow-sm flex flex-col gap-2 min-w-64">
-          <div class="flex justify-between items-center px-1">
-            <span class="text-xs font-bold small-caps tracking-widest opacity-70">Grid Columns</span>
+        <div class="flex flex-col gap-1">
+          <span class="flex justify-between items-center">
+            <span class="text-xs font-bold opacity-50 small-caps tracking-wider">Grid Columns</span>
             <span class="badge badge-sm badge-primary font-mono">{{ columns }}</span>
-          </div>
+          </span>
           <input
             v-model.number="columns"
             type="range"
             min="1"
             max="8"
             step="1"
-            class="range range-primary range-xs"
+            class="range range-xs range-primary w-48"
             aria-label="Grid Columns"
           />
         </div>
@@ -87,6 +95,7 @@ const photos = computed(() => Array.from(
       :items="photos"
       :gap="16"
       :debug="debugMode"
+      @scroll="(details) => scrollDetails = details"
     >
       <template #item="{ index: rowIndex, item: rowItems }">
         <div

@@ -146,9 +146,9 @@ watch(() => props.code, highlight);
     content: "$";
     width: 1rem;
     flex-shrink: 0;
-    margin-right: 0.5rem;
+    margin-inline-end: 0.5rem;
     opacity: 0.5;
-    text-align: right;
+    text-align: end;
     user-select: none;
   }
 
@@ -157,9 +157,9 @@ watch(() => props.code, highlight);
     content: counter(line);
     width: 1rem;
     flex-shrink: 0;
-    margin-right: 1rem;
+    margin-inline-end: 1rem;
     opacity: 0.3;
-    text-align: right;
+    text-align: end;
     user-select: none;
   }
 }

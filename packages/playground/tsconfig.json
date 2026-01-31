@@ -29,7 +29,9 @@
   "include": [
     "**/*.ts",
     "**/*.vue",
-    "**/*.json"
+    "**/*.json",
+    "../virtual-scroll/src/**/*.ts",
+    "../virtual-scroll/src/**/*.vue"
   ],
   "exclude": [
     "node_modules",

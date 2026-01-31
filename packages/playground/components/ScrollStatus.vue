@@ -17,8 +17,8 @@ const props = defineProps<{
 }>();
 
 const itemsRange = computed(() => ({
-  start: props.scrollDetails?.items[ 0 ]?.index ?? 0,
-  end: props.scrollDetails?.items[ props.scrollDetails?.items.length - 1 ]?.index ?? 0,
+  start: props.scrollDetails?.items?.[ 0 ]?.index ?? 0,
+  end: props.scrollDetails?.items?.[ (props.scrollDetails?.items?.length || 0) - 1 ]?.index ?? 0,
 }));
 
 const fpsClass = computed(() => {
@@ -82,13 +82,13 @@ onUnmounted(stopDetection);
       <div />
       <div class="inline-flex font-mono font-bold text-base-content/70">
         <template v-if="direction !== 'vertical'">
-          {{ Math.round(scrollDetails?.totalSize.width || 0) }}
+          {{ Math.round(scrollDetails?.totalSize.width || 0) }}w
         </template>
-        <template v-if="direction === 'both'">
+        <template v-if="direction !== 'vertical' && direction !== 'horizontal'">
           <span class="opacity-50 mx-1">&times;</span>
         </template>
         <template v-if="direction !== 'horizontal'">
-          {{ Math.round(scrollDetails?.totalSize.height || 0) }}
+          {{ Math.round(scrollDetails?.totalSize.height || 0) }}h
         </template>
       </div>
     </li>
@@ -98,13 +98,13 @@ onUnmounted(stopDetection);
       <div />
       <div class="inline-flex font-mono font-bold text-base-content/70">
         <template v-if="direction !== 'vertical'">
-          {{ Math.round(scrollDetails?.viewportSize.width || 0) }}
+          {{ Math.round(scrollDetails?.viewportSize.width || 0) }}w
         </template>
-        <template v-if="direction === 'both'">
+        <template v-if="direction !== 'vertical' && direction !== 'horizontal'">
           <span class="opacity-50 mx-1">&times;</span>
         </template>
         <template v-if="direction !== 'horizontal'">
-          {{ Math.round(scrollDetails?.viewportSize.height || 0) }}
+          {{ Math.round(scrollDetails?.viewportSize.height || 0) }}h
         </template>
       </div>
     </li>
@@ -114,13 +114,13 @@ onUnmounted(stopDetection);
       <div />
       <div class="inline-flex font-mono font-bold text-base-content/70">
         <template v-if="direction !== 'vertical'">
-          {{ Math.round(scrollDetails?.scrollOffset.x || 0) }}
+          {{ Math.round(scrollDetails?.scrollOffset.x || 0) }}x
         </template>
-        <template v-if="direction === 'both'">
+        <template v-if="direction !== 'vertical' && direction !== 'horizontal'">
           <span class="opacity-50 mx-1">&times;</span>
         </template>
         <template v-if="direction !== 'horizontal'">
-          {{ Math.round(scrollDetails?.scrollOffset.y || 0) }}
+          {{ Math.round(scrollDetails?.scrollOffset.y || 0) }}y
         </template>
       </div>
     </li>

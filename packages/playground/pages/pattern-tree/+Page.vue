@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, reactive, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ScrollStatus from '#/components/ScrollStatus.vue';
 
 import rawCode from './+Page.vue?raw';
 
@@ -65,6 +67,8 @@ function flatten(nodes: TreeNode[], result: TreeNode[] = []): TreeNode[] {
 
 const visibleItems = computed(() => flatten(tree));
 
+const scrollDetails = ref<ScrollDetails | null>(null);
+
 /**
  * Toggles the expanded state of a node.
  *
@@ -72,6 +76,21 @@ const visibleItems = computed(() => flatten(tree));
  */
 function toggle(node: TreeNode) {
   node.expanded = !node.expanded;
+}
+
+/**
+ * Toggles the expanded state of all nodes in a list recursively.
+ *
+ * @param nodes - The nodes to update.
+ * @param expanded - Whether to expand or collapse.
+ */
+function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
+  for (const node of nodes) {
+    node.expanded = expanded;
+    if (node.children.length > 0) {
+      setAllExpanded(node.children, expanded);
+    }
+  }
 }
 </script>
 
@@ -94,7 +113,10 @@ function toggle(node: TreeNode) {
         stroke="currentColor"
         class="example-icon example-icon--group-4"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.967 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.967 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.967 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 8v10m0-5h6m-6 5h6" />
+        <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+        <circle cx="14" cy="13" r="1.5" fill="currentColor" />
+        <circle cx="14" cy="18" r="1.5" fill="currentColor" />
       </svg>
     </template>
 
@@ -103,16 +125,20 @@ function toggle(node: TreeNode) {
     </template>
 
     <template #controls>
-      <div class="bg-base-300 p-2 rounded-box border border-base-content/5 shadow-sm inline-flex items-center gap-2">
+      <ScrollStatus :scroll-details="scrollDetails" />
+    </template>
+
+    <template #example-controls>
+      <div class="flex flex-wrap gap-4 items-center">
         <button
           class="btn btn-soft btn-secondary btn-sm"
-          @click="visibleItems.forEach(n => n.expanded = true)"
+          @click="setAllExpanded(tree, true)"
         >
           Expand All
         </button>
         <button
           class="btn btn-soft btn-secondary btn-sm"
-          @click="tree.forEach(n => n.expanded = false)"
+          @click="setAllExpanded(tree, false)"
         >
           Collapse All
         </button>
@@ -126,18 +152,19 @@ function toggle(node: TreeNode) {
       class="example-container"
       :items="visibleItems"
       :debug="debugMode"
+      @scroll="(details) => scrollDetails = details"
     >
       <template #item="{ item, index }">
         <div
           role="button"
           tabindex="0"
           class="example-vertical-item py-2 outline-none focus-visible:bg-base-300 cursor-pointer"
-          :style="{ paddingLeft: `${ item.level * 24 + 16 }px` }"
+          :style="{ paddingInlineStart: `${ item.level * 24 + 16 }px` }"
           @click="toggle(item)"
           @keydown.enter="toggle(item)"
           @keydown.space.prevent="toggle(item)"
         >
-          <div class="size-6 flex items-center justify-center mr-2">
+          <div class="size-6 flex items-center justify-center me-2">
             <svg
               v-if="item.children.length > 0"
               xmlns="http://www.w3.org/2000/svg"
@@ -145,16 +172,14 @@ function toggle(node: TreeNode) {
               viewBox="0 0 24 24"
               stroke-width="2.5"
               stroke="currentColor"
-              class="size-4"
+              class="size-3.5 transition-transform duration-300"
+              :class="item.expanded ? 'rotate-0' : '-rotate-90 rtl:rotate-90'"
             >
-              <path v-if="item.expanded" stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              <path v-else stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
             </svg>
-            <div v-else class="size-1 rounded-full bg-base-content/30" />
           </div>
-
-          <span class="font-medium text-sm">{{ item.label }}</span>
-          <span class="ml-auto text-xs opacity-40 font-mono">#{{ index }}</span>
+          <span class="font-bold text-sm">{{ item.label }}</span>
+          <span class="ms-auto text-xs opacity-40 font-mono">#{{ index }}</span>
         </div>
       </template>
     </VirtualScroll>

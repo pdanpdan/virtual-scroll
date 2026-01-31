@@ -27,7 +27,7 @@ import CodeBlock from '#/components/CodeBlock.vue';
           <p>
             <code>@pdanpdan/virtual-scroll</code> is a high-performance Vue 3 virtual scroll library designed to handle massive lists with ease.
             It supports vertical, horizontal, and bidirectional (grid) scrolling, dynamic item sizes using <code>ResizeObserver</code>,
-            and integration with the browser's native window scroll.
+            and full support for Right-to-Left (RTL) layouts.
           </p>
         </div>
       </section>
@@ -51,6 +51,15 @@ import CodeBlock from '#/components/CodeBlock.vue';
               <div>
                 <h4 class="font-bold text-sm">Dynamic Item Sizes</h4>
                 <p class="text-xs opacity-70">Automatic measurement via ResizeObserver for precise scrolling.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card bg-base-300 shadow-sm border border-base-content/5">
+            <div class="card-body p-4 flex-row gap-4">
+              <div class="text-primary text-2xl font-bold">✓</div>
+              <div>
+                <h4 class="font-bold text-sm">RTL Support</h4>
+                <p class="text-xs opacity-70">Automatic direction detection and correct coordinate mapping for RTL layouts.</p>
               </div>
             </div>
           </div>
@@ -87,6 +96,24 @@ import CodeBlock from '#/components/CodeBlock.vue';
               <div>
                 <h4 class="font-bold text-sm">SSR & Hydration</h4>
                 <p class="text-xs opacity-70">Full support for server-side rendering and client hydration.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card bg-base-300 shadow-sm border border-base-content/5">
+            <div class="card-body p-4 flex-row gap-4">
+              <div class="text-primary text-2xl font-bold">✓</div>
+              <div>
+                <h4 class="font-bold text-sm">Massive List Support</h4>
+                <p class="text-xs opacity-70">Handles 10M+ items via automatic coordinate scaling (except for window/body containers).</p>
+              </div>
+            </div>
+          </div>
+          <div class="card bg-base-300 shadow-sm border border-base-content/5">
+            <div class="card-body p-4 flex-row gap-4">
+              <div class="text-primary text-2xl font-bold">✓</div>
+              <div>
+                <h4 class="font-bold text-sm">Virtual Scrollbars</h4>
+                <p class="text-xs opacity-70">Fully customizable virtual scrollbars that replace native ones.</p>
               </div>
             </div>
           </div>
@@ -140,7 +167,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
                 code="import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
 import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               />
-              <ul class="list-disc pl-5 text-xs md:text-sm space-y-1 opacity-80">
+              <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80">
                 <li>Compatible with all modern bundlers.</li>
                 <li><strong>Note:</strong> Manual CSS import is required.</li>
               </ul>
@@ -156,7 +183,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 lang="ts"
                 code="import VS from &quot;@pdanpdan/virtual-scroll/VirtualScroll.vue&quot;;"
               />
-              <ul class="list-disc pl-5 text-xs md:text-sm space-y-1 opacity-80">
+              <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80">
                 <li>Enables better tree-shaking in your build.</li>
                 <li>Styles handled by your Vue loader.</li>
               </ul>
@@ -171,10 +198,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 class="docs-code-block"
                 lang="html"
                 code="&lt;script src=&quot;https://unpkg.com/vue@3&quot;&gt;&lt;/script&gt;
-&lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css&quot;&gt;
 &lt;script src=&quot;https://unpkg.com/@pdanpdan/virtual-scroll&quot;&gt;&lt;/script&gt;"
               />
-              <ul class="list-disc pl-5 text-xs md:text-sm space-y-1 opacity-80 mt-2">
+              <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80 mt-2">
                 <li>No installation required.</li>
                 <li>Available via <code>window.VirtualScroll</code>.</li>
               </ul>
@@ -242,8 +269,6 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           <p>
             The <code>VirtualScroll</code> component is the primary way to use this library. It provides a declarative Vue interface
             for virtualizing large lists and grids, handling all rendering, recycling, and scroll logic automatically.
-            It is designed to be flexible, supporting uniform or dynamic item sizes, sticky headers, infinite scroll,
-            and custom HTML structures via the <code>containerTag</code>, <code>wrapperTag</code>, and <code>itemTag</code> props.
           </p>
         </div>
 
@@ -366,6 +391,12 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <td>Distance from end to trigger <code>load</code> event.</td>
               </tr>
               <tr>
+                <td><code class="text-primary font-bold">virtualScrollbar</code></td>
+                <td><code>boolean</code></td>
+                <td><code>false</code></td>
+                <td>Whether to force use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window/body</code> as container.</td>
+              </tr>
+              <tr>
                 <td><code class="text-primary font-bold">restoreScrollOnPrepend</code></td>
                 <td><code>boolean</code></td>
                 <td><code>false</code></td>
@@ -379,12 +410,17 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               </tr>
               <tr>
                 <td><code class="text-primary font-bold">initialScrollAlign</code></td>
-                <td><code>ScrollAlignment | ...</code></td>
+                <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link">Options</a></code></td>
                 <td><code>'start'</code></td>
-                <td>Alignment for initial index. See <a href="#alignments" class="link">Alignments</a>.</td>
+                <td>Alignment for initial index.</td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <h4 id="scroll-alignment" class="docs-prop-subheader text-secondary">ScrollAlignment</h4>
+        <div class="prose prose-sm mb-4 text-base-content/70">
+          <p>Controls the item's final position in the viewport: <code>'start' | 'center' | 'end' | 'auto'</code>.</p>
         </div>
 
         <h4 class="docs-prop-subheader">Advanced & Performance</h4>
@@ -450,29 +486,98 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
         <h3 id="slots" class="docs-prop-header">Slots</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          <div class="card shadow-soft bg-base-300 p-4 border-l-4 border-primary">
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-primary">
             <h4 class="font-bold text-primary mb-2">#item</h4>
             <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
-            <ul class="text-xs opacity-80 list-disc pl-5 space-y-1 text-base-content/80">
+            <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
               <li><code>item: T</code>: The data item from the source array.</li>
               <li><code>index: number</code>: The original 0-based index of the item.</li>
               <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
               <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
               <li><code>columnRange: <a href="#column-range" class="link">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
               <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
+              <li><code>gap: number</code>: Vertical gap between items.</li>
+              <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
             </ul>
           </div>
           <div class="space-y-4">
-            <div class="card shadow-soft bg-base-300 p-4 border-l-4 border-secondary">
+            <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-secondary">
               <h4 class="font-bold text-secondary mb-2">#header / #footer</h4>
               <p class="text-xs md:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
             </div>
-            <div class="card shadow-soft bg-base-300 p-4 border-l-4 border-accent">
+            <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
               <h4 class="font-bold text-accent mb-2">#loading</h4>
               <p class="text-xs md:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
             </div>
+            <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-info">
+              <h4 class="font-bold text-info mb-2">#scrollbar</h4>
+              <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
+              <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
+                <li><code>positionPercent: number</code>: Current scroll position (0 to 1).</li>
+                <li><code>viewportPercent: number</code>: Viewport as percentage of total size.</li>
+                <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element.</li>
+                <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element.</li>
+                <li>
+                  <code>scrollbarProps: object</code>: Grouped properties for <code>VirtualScrollbar</code>.
+                  <ul class="list-disc ps-5 mt-1">
+                    <li><code>axis: 'vertical' | 'horizontal'</code></li>
+                    <li><code>totalSize: number</code></li>
+                    <li><code>position: number</code></li>
+                    <li><code>viewportSize: number</code></li>
+                    <li><code>scrollToOffset: (offset: number) => void</code></li>
+                    <li><code>containerId: string</code></li>
+                    <li><code>isRtl: boolean</code></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
+
+        <section id="scrollbar-slot-props" class="mb-12">
+          <h4 class="docs-prop-subheader">ScrollbarSlotProps</h4>
+          <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+            <p>Properties passed to the 'scrollbar' scoped slot and useVirtualScrollbar return value.</p>
+          </div>
+
+          <CodeBlock
+            class="docs-code-block mb-8"
+            lang="vue"
+            code="<VirtualScroll :items=&quot;items&quot; direction=&quot;both&quot; virtual-scrollbar>
+  <template #scrollbar=&quot;{ trackProps, thumbProps, axis }&quot;>
+    <!-- Vertical Track -->
+    <div v-if=&quot;axis === 'vertical'&quot; v-bind=&quot;trackProps&quot; class=&quot;w-2 bg-base-300&quot;>
+      <div v-bind=&quot;thumbProps&quot; class=&quot;bg-primary rounded&quot; />
+    </div>
+
+    <!-- Horizontal Track -->
+    <div v-else v-bind=&quot;trackProps&quot; class=&quot;h-2 bg-base-300&quot;>
+      <div v-bind=&quot;thumbProps&quot; class=&quot;bg-secondary rounded&quot; />
+    </div>
+  </template>
+</VirtualScroll>"
+          />
+
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>The scrollbar axis.</td></tr>
+                <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total scrollable content size.</td></tr>
+                <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll offset.</td></tr>
+                <tr><td><code>positionPercent</code></td><td><code>number</code></td><td>Scroll position percentage (0-1).</td></tr>
+                <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible viewport size.</td></tr>
+                <tr><td><code>viewportPercent</code></td><td><code>number</code></td><td>Viewport percentage of total (0-1).</td></tr>
+                <tr><td><code>scrollToOffset</code></td><td><code>Function</code></td><td>Scroll to pixel offset on this axis.</td></tr>
+                <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Current RTL state.</td></tr>
+                <tr><td><code>trackProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the track. Bind with <code>v-bind="trackProps"</code>.</td></tr>
+                <tr><td><code>thumbProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the thumb. Bind with <code>v-bind="thumbProps"</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <h3 id="events" class="docs-prop-header">Events</h3>
         <div class="docs-table-container mb-10">
@@ -521,14 +626,14 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <kbd class="kbd kbd-sm md:kbd-md">↑</kbd>
                 <kbd class="kbd kbd-sm md:kbd-md">↓</kbd>
               </span>
-              <span class="text-xs md:text-sm opacity-80">Scroll vertically by {{ DEFAULT_ITEM_SIZE }}px.</span>
+              <span class="text-xs md:text-sm opacity-80">Scroll vertically by item height.</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <span class="flex gap-1">
                 <kbd class="kbd kbd-sm md:kbd-md">←</kbd>
                 <kbd class="kbd kbd-sm md:kbd-md">→</kbd>
               </span>
-              <span class="text-xs md:text-sm opacity-80">Scroll horizontally by {{ DEFAULT_ITEM_SIZE }}px.</span>
+              <span class="text-xs md:text-sm opacity-80">Scroll horizontally by column width.</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <kbd class="kbd kbd-sm md:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm md:kbd-md">PgDn</kbd>
@@ -591,6 +696,37 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <td><code>.virtual-scroll--debug</code></td>
                 <td>Visible when <code>debug</code> prop is active.</td>
               </tr>
+              <tr>
+                <td><code>.virtual-scroll--hide-scrollbar</code></td>
+                <td>Applied when virtual scrollbars are enabled or content is massive.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="css-variables" class="docs-prop-header">CSS Variables</h3>
+        <div class="prose prose-sm max-w-none mb-6 opacity-80">
+          <p>
+            The default <code>VirtualScrollbar</code> can be styled using the following CSS variables:
+          </p>
+        </div>
+        <div class="docs-table-container mb-10 text-base-content/80">
+          <table class="table table-sm md:table-md table-zebra w-full text-xs md:text-sm">
+            <thead class="bg-base-300">
+              <tr>
+                <th class="w-1/3">Variable</th>
+                <th>Default (Light/Dark)</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>--vs-scrollbar-bg</code></td><td><code>rgba(230,230,230,0.9) / rgba(30,30,30,0.9)</code></td><td>Track background color.</td></tr>
+              <tr><td><code>--vs-scrollbar-thumb-bg</code></td><td><code>rgba(0,0,0,0.3) / rgba(255,255,255,0.3)</code></td><td>Thumb background color.</td></tr>
+              <tr><td><code>--vs-scrollbar-thumb-hover-bg</code></td><td><code>rgba(0,0,0,0.6) / rgba(255,255,255,0.6)</code></td><td>Thumb background on hover/active.</td></tr>
+              <tr><td><code>--vs-scrollbar-size</code></td><td><code>8px</code></td><td>Width (vertical) or height (horizontal) of the scrollbar.</td></tr>
+              <tr><td><code>--vs-scrollbar-radius</code></td><td><code>4px</code></td><td>Border radius for track and thumb.</td></tr>
+              <tr><td><code>--vs-scrollbar-cross-gap</code></td><td><code>var(--vs-scrollbar-size)</code></td><td>Size of gap to use where scrollbars meet.</td></tr>
+              <tr><td><code>--vs-scrollbar-has-cross-gap</code></td><td><code>0</code></td><td>If gap should be shown where scrollbars meet.</td></tr>
             </tbody>
           </table>
         </div>
@@ -602,7 +738,13 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             You can access these via a template <code>ref</code>.
           </p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+
+        <h4 class="docs-prop-subheader text-secondary">Properties</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">All Props</code>
+            <p class="text-[10px] opacity-60 mt-1">All component props are available on the instance.</p>
+          </div>
           <a href="#scroll-details" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-secondary font-bold text-xs">scrollDetails</code>
             <p class="text-[10px] opacity-60 mt-1">Full reactive state of the virtualizer.</p>
@@ -611,10 +753,38 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <code class="text-secondary font-bold text-xs">columnRange</code>
             <p class="text-[10px] opacity-60 mt-1">Visible column indices and paddings.</p>
           </a>
-          <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getColumnWidth()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
+          <a href="#is-hydrated" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">isHydrated</code>
+            <p class="text-[10px] opacity-60 mt-1">Mounted and ready for virtualization.</p>
           </a>
+          <a href="#is-rtl" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">isRtl</code>
+            <p class="text-[10px] opacity-60 mt-1">Right-to-Left mode active.</p>
+          </a>
+          <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">scrollbarPropsVertical</code>
+            <p class="text-[10px] opacity-60 mt-1">Reactive vertical scrollbar properties.</p>
+          </a>
+          <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">scrollbarPropsHorizontal</code>
+            <p class="text-[10px] opacity-60 mt-1">Reactive horizontal scrollbar properties.</p>
+          </a>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">scaleX / scaleY</code>
+            <p class="text-[10px] opacity-60 mt-1">Current coordinate scaling factors.</p>
+          </div>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">componentOffset</code>
+            <p class="text-[10px] opacity-60 mt-1">Absolute offset of the component within its container.</p>
+          </div>
+          <a href="#rendered-dimensions" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">renderedWidth / renderedHeight</code>
+            <p class="text-[10px] opacity-60 mt-1">Physical dimensions in DOM (clamped).</p>
+          </a>
+        </div>
+
+        <h4 class="docs-prop-subheader text-primary">Methods</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
           <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">scrollToIndex()</code>
             <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
@@ -623,32 +793,190 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <code class="text-primary font-bold text-xs">scrollToOffset()</code>
             <p class="text-[10px] opacity-60 mt-1">Scroll to precise pixel position.</p>
           </a>
+          <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">stopProgrammaticScroll()</code>
+            <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
+          </a>
+          <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getColumnWidth()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
+          </a>
+          <a href="#method-getrowheight" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getRowHeight()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get calculated height of a row.</p>
+          </a>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getRowOffset()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a row.</p>
+          </div>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getColumnOffset()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a column.</p>
+          </div>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getItemOffset()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get virtual offset of an item.</p>
+          </div>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <code class="text-primary font-bold text-xs">getItemSize()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get item size along scroll axis.</p>
+          </div>
           <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">refresh()</code>
             <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
           </a>
-          <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">stopProgrammaticScroll()</code>
-            <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
+          <a href="#method-updatedirection" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">updateDirection()</code>
+            <p class="text-[10px] opacity-60 mt-1">Trigger RTL/LTR detection.</p>
+          </a>
+          <a href="#method-updatehostoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">updateHostOffset()</code>
+            <p class="text-[10px] opacity-60 mt-1">Recalculate container position.</p>
+          </a>
+          <a href="#method-updateitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">updateItemSize()</code>
+            <p class="text-[10px] opacity-60 mt-1">Manually register measurement.</p>
+          </a>
+          <a href="#method-updateitemsizes" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">updateItemSizes()</code>
+            <p class="text-[10px] opacity-60 mt-1">Batch register measurements.</p>
           </a>
         </div>
       </section>
 
       <div class="divider opacity-30" />
 
-      <!-- 6. useVirtualScroll Composable -->
-      <section id="use-virtual-scroll">
-        <h2 class="docs-section-header">useVirtualScroll Composable</h2>
+      <!-- 5.1 VirtualScrollbar Component -->
+      <section id="virtual-scrollbar">
+        <h2 class="docs-section-header">VirtualScrollbar Component</h2>
         <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            The <code>useVirtualScroll</code> composable provides the core virtualization logic. It's recommended for advanced use cases or when building custom wrappers.
+            The <code>VirtualScrollbar</code> component provides a cross-browser consistent scrollbar that can be used independently or within the <code>VirtualScroll</code> component.
+            Check out the <a href="/feature-independent-scrollbars" class="link link-primary font-bold">Independent Scrollbars example</a> to see it in action without virtualization.
           </p>
         </div>
 
         <CodeBlock
-          class="docs-code-block mb-8 font-mono"
-          lang="ts"
-          code="import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
+          class="docs-code-block mb-8"
+          lang="vue"
+          line-numbers
+          code="<script setup>
+import { VirtualScrollbar } from &quot;@pdanpdan/virtual-scroll&quot;;
+import { ref } from &quot;vue&quot;;
+
+const scrollX = ref(0);
+const scrollY = ref(0);
+</script>
+
+<template>
+  <div class=&quot;relative overflow-hidden h-96&quot;>
+    <!-- Vertical Scrollbar -->
+    <VirtualScrollbar
+      axis=&quot;vertical&quot;
+      :total-size=&quot;10000&quot;
+      :viewport-size=&quot;400&quot;
+      :position=&quot;scrollY&quot;
+      @scroll-to-offset=&quot;val => scrollY = val&quot;
+    />
+
+    <!-- Horizontal Scrollbar -->
+    <VirtualScrollbar
+      axis=&quot;horizontal&quot;
+      :total-size=&quot;10000&quot;
+      :viewport-size=&quot;800&quot;
+      :position=&quot;scrollX&quot;
+      @scroll-to-offset=&quot;val => scrollX = val&quot;
+    />
+  </div>
+</template>"
+        />
+
+        <h3 id="scrollbar-props" class="docs-prop-header">Props</h3>
+        <div class="docs-table-container mb-8">
+          <table class="table table-sm md:table-md table-zebra w-full">
+            <thead class="bg-base-300">
+              <tr>
+                <th class="w-1/4">Prop</th>
+                <th class="w-1/4">Type</th>
+                <th class="w-1/6">Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs md:text-sm">
+              <tr>
+                <td><code class="text-primary font-bold">axis</code></td>
+                <td><code>'vertical' | 'horizontal'</code></td>
+                <td>-</td>
+                <td>The axis of the scrollbar. Required.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">totalSize</code></td>
+                <td><code>number</code></td>
+                <td>-</td>
+                <td>Total size of the scrollable content in pixels. Required.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">viewportSize</code></td>
+                <td><code>number</code></td>
+                <td>-</td>
+                <td>Size of the visible viewport in pixels. Required.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">position</code></td>
+                <td><code>number</code></td>
+                <td>-</td>
+                <td>Current scroll position in pixels. Required.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">containerId</code></td>
+                <td><code>string</code></td>
+                <td><code>undefined</code></td>
+                <td>ID of the container element for accessibility.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="scrollbar-events" class="docs-prop-header">Events</h3>
+        <div class="docs-table-container mb-10">
+          <table class="table table-sm md:table-md table-zebra w-full">
+            <thead class="bg-base-300">
+              <tr>
+                <th>Event</th>
+                <th>Payload</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs md:text-sm">
+              <tr>
+                <td><code>scroll-to-offset</code></td>
+                <td><code>number</code></td>
+                <td>Emitted when the user interacts with the scrollbar to change position.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="divider opacity-30" />
+
+      <!-- 6. Composables -->
+      <section id="composables">
+        <h2 class="docs-section-header">Composables</h2>
+
+        <!-- useVirtualScroll -->
+        <section id="use-virtual-scroll" class="mb-16">
+          <h3 class="docs-prop-header">useVirtualScroll</h3>
+          <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
+            <p>
+              Provides the core virtualization logic. Recommended for advanced use cases or when building custom wrappers.
+            </p>
+          </div>
+
+          <CodeBlock
+            class="docs-code-block mb-8 font-mono"
+            lang="ts"
+            code="import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, ref } from 'vue';
 
 const items = ref([...]);
@@ -664,97 +992,202 @@ const {
   totalHeight,
   scrollToIndex
 } = useVirtualScroll(props);"
-        />
+          />
 
-        <h3 id="composable-parameters" class="docs-prop-header">Parameters</h3>
-        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
-          <p>Accepts a single <code>Ref</code> to a <a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a> object.</p>
-        </div>
+          <h4 class="docs-prop-subheader">Parameters</h4>
+          <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+            <p>Accepts a single <code>MaybeRefOrGetter</code> to a <a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a> object.</p>
+          </div>
 
-        <h3 id="composable-state" class="docs-prop-header">Return Value</h3>
-        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
-          <p>
-            Returns a set of reactive references and methods for managing the virtual scroll state:
-          </p>
-        </div>
-        <div class="docs-table-container mb-12 text-base-content/80 text-xs md:text-sm">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300 text-base-content">
-              <tr>
-                <th class="w-1/4">Member</th>
-                <th class="w-1/4">Type</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><a href="#rendered-item" class="link font-bold text-secondary">renderedItems</a></td>
-                <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
-                <td>List of items to render in the current buffer.</td>
-              </tr>
-              <tr>
-                <td><a href="#scroll-details" class="link font-bold text-secondary">scrollDetails</a></td>
-                <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
-                <td>Full reactive state of the virtual scroll system.</td>
-              </tr>
-              <tr>
-                <td><code class="text-secondary font-bold">totalWidth</code> / <code class="text-secondary font-bold">totalHeight</code></td>
-                <td><code>Ref&lt;number&gt;</code></td>
-                <td>Calculated dimensions of the entire list/grid.</td>
-              </tr>
-              <tr>
-                <td><a href="#column-range" class="link font-bold text-secondary">columnRange</a></td>
-                <td><code>Ref&lt;ColumnRange&gt;</code></td>
-                <td>Visible columns and their associated paddings.</td>
-              </tr>
-              <tr>
-                <td><code class="text-secondary font-bold">isHydrated</code></td>
-                <td><code>Ref&lt;boolean&gt;</code></td>
-                <td><code>true</code> when the component is mounted and hydrated.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-scrolltoindex" class="link font-bold text-primary">scrollToIndex</a></td>
-                <td><code>Function</code></td>
-                <td>Programmatic scroll to a specific index.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-scrolltooffset" class="link font-bold text-primary">scrollToOffset</a></td>
-                <td><code>Function</code></td>
-                <td>Programmatic scroll to a pixel offset.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-primary">stopProgrammaticScroll</a></td>
-                <td><code>Function</code></td>
-                <td>Cancel any active smooth scroll animation.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-updateitemsize" class="link font-bold text-primary">updateItemSize</a></td>
-                <td><code>Function</code></td>
-                <td>Register a manual item measurement.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-updateitemsizes" class="link font-bold text-primary">updateItemSizes</a></td>
-                <td><code>Function</code></td>
-                <td>Register multiple manual item measurements.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-updatehostoffset" class="link font-bold text-primary">updateHostOffset</a></td>
-                <td><code>Function</code></td>
-                <td>Force update the container's relative position.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-getcolumnwidth" class="link font-bold text-primary">getColumnWidth</a></td>
-                <td><code>Function</code></td>
-                <td>Helper to get a column's width.</td>
-              </tr>
-              <tr>
-                <td><a href="#method-refresh" class="link font-bold text-primary">refresh</a></td>
-                <td><code>Function</code></td>
-                <td>Resets all measurements and state.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <h4 class="docs-prop-subheader">Return Value</h4>
+          <div class="docs-table-container mb-12 text-base-content/80 text-xs md:text-sm">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr>
+                  <th class="w-1/4">Member</th>
+                  <th class="w-1/4">Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a href="#rendered-item" class="link font-bold text-secondary">renderedItems</a></td>
+                  <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
+                  <td>List of items to render in the current buffer.</td>
+                </tr>
+                <tr>
+                  <td><a href="#scroll-details" class="link font-bold text-secondary">scrollDetails</a></td>
+                  <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
+                  <td>Full reactive state of the virtual scroll system.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">totalWidth</code> / <code class="text-secondary font-bold">totalHeight</code></td>
+                  <td><code>Ref&lt;number&gt;</code></td>
+                  <td>Calculated dimensions of the entire list/grid.</td>
+                </tr>
+                <tr id="rendered-dimensions">
+                  <td><code class="text-secondary font-bold">renderedWidth</code> / <code class="text-secondary font-bold">renderedHeight</code></td>
+                  <td><code>Ref&lt;number&gt;</code></td>
+                  <td>Total dimensions to be rendered in the DOM (clamped to 15Mpx).</td>
+                </tr>
+                <tr>
+                  <td><a href="#column-range" class="link font-bold text-secondary">columnRange</a></td>
+                  <td><code>Ref&lt;ColumnRange&gt;</code></td>
+                  <td>Visible columns and their associated paddings.</td>
+                </tr>
+                <tr id="is-hydrated">
+                  <td><code class="text-secondary font-bold">isHydrated</code></td>
+                  <td><code>Ref&lt;boolean&gt;</code></td>
+                  <td><code>true</code> when the component is mounted and hydrated.</td>
+                </tr>
+                <tr id="is-rtl">
+                  <td><code class="text-secondary font-bold">isRtl</code></td>
+                  <td><code>Ref&lt;boolean&gt;</code></td>
+                  <td><code>true</code> if the scroll container is in Right-to-Left mode.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-scrolltoindex" class="link font-bold text-primary">scrollToIndex</a></td>
+                  <td><code>Function</code></td>
+                  <td>Programmatic scroll to a specific index.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-scrolltooffset" class="link font-bold text-primary">scrollToOffset</a></td>
+                  <td><code>Function</code></td>
+                  <td>Programmatic scroll to a pixel offset.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-primary">stopProgrammaticScroll</a></td>
+                  <td><code>Function</code></td>
+                  <td>Cancel any active smooth scroll animation.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-updateitemsize" class="link font-bold text-primary">updateItemSize</a></td>
+                  <td><code>Function</code></td>
+                  <td>Register a manual item measurement.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-updateitemsizes" class="link font-bold text-primary">updateItemSizes</a></td>
+                  <td><code>Function</code></td>
+                  <td>Register multiple manual item measurements.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-updatehostoffset" class="link font-bold text-primary">updateHostOffset</a></td>
+                  <td><code>Function</code></td>
+                  <td>Force update the container's relative position.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-updatedirection" class="link font-bold text-primary">updateDirection</a></td>
+                  <td><code>Function</code></td>
+                  <td>Manually trigger direction (LTR/RTL) detection.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-getcolumnwidth" class="link font-bold text-primary">getColumnWidth</a></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get a column's width.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-getrowheight" class="link font-bold text-primary">getRowHeight</a></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get a row's height.</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-refresh" class="link font-bold text-primary">refresh</a></td>
+                  <td><code>Function</code></td>
+                  <td>Resets all measurements and state.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">scaleX</code> / <code class="text-secondary font-bold">scaleY</code></td>
+                  <td><code>Ref&lt;number&gt;</code></td>
+                  <td>Current coordinate scaling factors.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">componentOffset</code></td>
+                  <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
+                  <td>Absolute offset of the component in its container.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- useVirtualScrollbar -->
+        <section id="use-virtual-scrollbar">
+          <h3 class="docs-prop-header">useVirtualScrollbar</h3>
+          <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
+            <p>
+              Provides the logic for virtual scrollbar interactions. It handles track clicks, thumb dragging, and coordinate mapping (including RTL).
+            </p>
+          </div>
+
+          <CodeBlock
+            class="docs-code-block mb-8 font-mono"
+            lang="ts"
+            code="import { useVirtualScrollbar } from '@pdanpdan/virtual-scroll';
+
+const {
+  trackProps,
+  thumbProps,
+  thumbSizePercent,
+  thumbPositionPercent
+} = useVirtualScrollbar({
+  axis: 'vertical',
+  totalSize: 10000,
+  viewportSize: 500,
+  position: scrollPos,
+  scrollToOffset: (val) => { scrollPos = val; }
+});"
+          />
+
+          <h4 class="docs-prop-subheader">Parameters</h4>
+          <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+            <p>Accepts a <code>UseVirtualScrollbarProps</code> object where each property can be a <code>MaybeRefOrGetter</code>.</p>
+          </div>
+
+          <h4 class="docs-prop-subheader">Return Value</h4>
+          <div class="docs-table-container mb-12 text-base-content/80 text-xs md:text-sm">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr>
+                  <th class="w-1/4">Member</th>
+                  <th class="w-1/4">Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code class="text-secondary font-bold">trackProps</code></td>
+                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link">object</a>&gt;</code></td>
+                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">thumbProps</code></td>
+                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link">object</a>&gt;</code></td>
+                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">viewportPercent</code></td>
+                  <td><code>ComputedRef&lt;number&gt;</code></td>
+                  <td>Viewport size as percentage of total size (0-1).</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">positionPercent</code></td>
+                  <td><code>ComputedRef&lt;number&gt;</code></td>
+                  <td>Scroll position as percentage of scrollable range (0-1).</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">thumbSizePercent</code></td>
+                  <td><code>ComputedRef&lt;number&gt;</code></td>
+                  <td>Calculated thumb size (percentage of track, min 10%).</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">thumbPositionPercent</code></td>
+                  <td><code>ComputedRef&lt;number&gt;</code></td>
+                  <td>Calculated thumb position (percentage of track).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </section>
 
       <div class="divider opacity-30" />
@@ -764,6 +1197,19 @@ const {
         <h2 class="docs-section-header">API Reference</h2>
 
         <h3 class="docs-section-header text-2xl mt-16">Types</h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
+            <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
+            <p class="text-[10px] opacity-60 mt-2 italic">Defines the virtualization axes for the VirtualScroll component.</p>
+          </div>
+          <div class="card bg-base-300 p-4 border border-base-content/5">
+            <h4 class="docs-prop-subheader text-primary mb-2">ScrollAxis</h4>
+            <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal'" />
+            <p class="text-[10px] opacity-60 mt-2 italic">Used specifically for individual scrollbar instances.</p>
+          </div>
+        </div>
 
         <!-- ScrollDetails -->
         <section id="scroll-details" class="mb-12">
@@ -775,11 +1221,13 @@ const {
               </thead>
               <tbody class="text-xs md:text-sm">
                 <tr><td><code>items</code></td><td><code><a href="#rendered-item" class="link">RenderedItem&lt;T&gt;</a>[]</code></td><td>Rendered items in the buffer.</td></tr>
-                <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index.</td></tr>
-                <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index.</td></tr>
-                <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Relative pixel scroll position.</td></tr>
-                <tr><td><code>viewportSize</code></td><td><code>{ width, height }</code></td><td>Dimensions of the visible viewport.</td></tr>
-                <tr><td><code>totalSize</code></td><td><code>{ width, height }</code></td><td>Estimated total content dimensions.</td></tr>
+                <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index below any sticky header.</td></tr>
+                <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index after any sticky column.</td></tr>
+                <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Current relative scroll position in virtual units (VU).</td></tr>
+                <tr><td><code>displayScrollOffset</code></td><td><code>{ x, y }</code></td><td>Current physical scroll position in display pixels (DU).</td></tr>
+                <tr><td><code>viewportSize</code></td><td><code>{ width, height }</code></td><td>Dimensions of the visible viewport in virtual units (VU).</td></tr>
+                <tr><td><code>displayViewportSize</code></td><td><code>{ width, height }</code></td><td>Physical dimensions of the visible viewport in display pixels (DU).</td></tr>
+                <tr><td><code>totalSize</code></td><td><code>{ width, height }</code></td><td>Estimated total content dimensions (VU).</td></tr>
                 <tr><td><code>isScrolling</code></td><td><code>boolean</code></td><td>Active scrolling state.</td></tr>
                 <tr><td><code>isProgrammaticScroll</code></td><td><code>boolean</code></td><td>True if triggered by <code>scrollToIndex/Offset</code>.</td></tr>
                 <tr><td><code>range</code></td><td><code>{ start, end }</code></td><td>Visible row range (inclusive start, exclusive end).</td></tr>
@@ -800,12 +1248,12 @@ const {
               <tbody class="text-xs md:text-sm">
                 <tr><td><code>item</code></td><td><code>T</code></td><td>The source data item.</td></tr>
                 <tr><td><code>index</code></td><td><code>number</code></td><td>Item's position in the array.</td></tr>
-                <tr><td><code>offset</code></td><td><code>{ x, y }</code></td><td>Absolute pixel position within the wrapper.</td></tr>
-                <tr><td><code>size</code></td><td><code>{ width, height }</code></td><td>Current dimensions (measured or estimated).</td></tr>
-                <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>Offets before any sticky adjustments.</td></tr>
+                <tr><td><code>offset</code></td><td><code>{ x, y }</code></td><td>Absolute pixel position within the wrapper (DU).</td></tr>
+                <tr><td><code>size</code></td><td><code>{ width, height }</code></td><td>Current dimensions (VU).</td></tr>
+                <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>Offsets before any sticky adjustments (VU).</td></tr>
                 <tr><td><code>isSticky</code></td><td><code>boolean</code></td><td>Is configured as sticky.</td></tr>
                 <tr><td><code>isStickyActive</code></td><td><code>boolean</code></td><td>Currently stuck to the edge.</td></tr>
-                <tr><td><code>stickyOffset</code></td><td><code>{ x, y }</code></td><td>Translation applied for sticky pushing effect.</td></tr>
+                <tr><td><code>stickyOffset</code></td><td><code>{ x, y }</code></td><td>Translation applied for sticky pushing effect (DU).</td></tr>
               </tbody>
             </table>
           </div>
@@ -822,8 +1270,8 @@ const {
               <tbody class="text-xs md:text-sm">
                 <tr><td><code>start</code></td><td><code>number</code></td><td>Index of first rendered column.</td></tr>
                 <tr><td><code>end</code></td><td><code>number</code></td><td>Index of last rendered column (exclusive).</td></tr>
-                <tr><td><code>padStart</code></td><td><code>number</code></td><td>Pixel space to maintain before columns.</td></tr>
-                <tr><td><code>padEnd</code></td><td><code>number</code></td><td>Pixel space to maintain after columns.</td></tr>
+                <tr><td><code>padStart</code></td><td><code>number</code></td><td>Pixel space to maintain before columns (VU).</td></tr>
+                <tr><td><code>padEnd</code></td><td><code>number</code></td><td>Pixel space to maintain after columns (VU).</td></tr>
               </tbody>
             </table>
           </div>
@@ -846,7 +1294,7 @@ const {
                 <tr><td><code>direction</code></td><td><code>ScrollDirection</code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
                 <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
                 <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
-                <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation.</td></tr>
+                <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation (DU).</td></tr>
                 <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
                 <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
                 <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Default: {{ DEFAULT_COLUMN_WIDTH }}px.</td></tr>
@@ -854,10 +1302,31 @@ const {
                 <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
                 <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
                 <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
-                <tr><td><code>initialScrollAlign</code></td><td><code><a href="#alignments" class="link">ScrollAlignment</a> | ...</code></td><td>Alignment for initial jump.</td></tr>
+                <tr><td><code>initialScrollAlign</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link">Options</a></code></td><td>Alignment for initial jump.</td></tr>
                 <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
                 <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
                 <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- UseVirtualScrollbarProps -->
+        <section id="use-virtual-scrollbar-props" class="mb-12">
+          <h4 class="docs-prop-subheader">UseVirtualScrollbarProps</h4>
+          <div class="docs-table-container overflow-x-auto text-base-content/80">
+            <table class="table table-xs md:table-sm table-zebra w-full min-w-150">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs opacity-90">
+                <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>Axis of the scrollbar.</td></tr>
+                <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total size of content in pixels.</td></tr>
+                <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll position in pixels.</td></tr>
+                <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible area size in pixels.</td></tr>
+                <tr><td><code>scrollToOffset</code></td><td><code>(offset: number) => void</code></td><td>Callback to update position.</td></tr>
+                <tr><td><code>containerId</code></td><td><code>string</code></td><td>ID for accessibility.</td></tr>
+                <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Enable RTL mapping.</td></tr>
               </tbody>
             </table>
           </div>
@@ -869,14 +1338,17 @@ const {
           <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
             <p>Full configuration for index-based scrolling.</p>
           </div>
-          <CodeBlock
-            class="docs-code-block font-mono text-xs mb-4"
-            lang="ts"
-            code="{
-  align?: ScrollAlignment | ScrollAlignmentOptions; // default: 'auto'
-  behavior?: 'auto' | 'smooth'; // default: 'auto'
-}"
-          />
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr><td><code>align</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
+                <tr><td><code>behavior</code></td><td><code>'auto' | 'smooth'</code></td><td>Scroll behavior (default: <code>'smooth'</code>).</td></tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <!-- ScrollAlignmentOptions -->
@@ -885,7 +1357,17 @@ const {
           <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
             <p>Allows axis-specific alignment in <code>scrollToIndex</code>.</p>
           </div>
-          <CodeBlock class="docs-code-block font-mono text-xs mb-4" lang="ts" code="{ x?: ScrollAlignment; y?: ScrollAlignment; }" />
+          <div class="docs-table-container text-base-content/80">
+            <table class="table table-sm md:table-md table-zebra w-full">
+              <thead class="bg-base-300 text-base-content">
+                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+              </thead>
+              <tbody class="text-xs md:text-sm">
+                <tr><td><code>x</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
+                <tr><td><code>y</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <!-- ScrollAlignment -->
@@ -894,12 +1376,11 @@ const {
           <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
             <p>Controls the item's final position in the viewport during <code>scrollToIndex</code>.</p>
           </div>
-          <CodeBlock class="docs-code-block font-mono text-xs mb-4" lang="ts" code="'start' | 'center' | 'end' | 'auto'" />
           <div class="docs-table-container text-base-content/80">
             <table class="table table-sm md:table-md table-zebra w-full">
               <thead class="bg-base-300 text-base-content">
                 <tr>
-                  <th class="w-1/4">Alignment</th>
+                  <th class="w-1/4">Value</th>
                   <th>Behavior</th>
                 </tr>
               </thead>
@@ -917,7 +1398,7 @@ const {
                   <td>Aligns to bottom (vertical) or right (horizontal) edge.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ml-1">Default</span></td>
+                  <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default</span></td>
                   <td><strong>Smart:</strong> If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
                 </tr>
               </tbody>
@@ -1031,6 +1512,16 @@ const {
             </div>
           </div>
 
+          <!-- Method: updateDirection -->
+          <div id="method-updatedirection" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
+            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
+              <span class="badge badge-primary">Method</span> updateDirection()
+            </h4>
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Manually triggers the detection of the scroll direction (LTR or RTL). The component also performs this automatically on mount and whenever the <code>container</code> prop changes.</p>
+            </div>
+          </div>
+
           <!-- Method: getColumnWidth -->
           <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
             <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
@@ -1039,6 +1530,17 @@ const {
             <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnWidth(index: number): number" />
             <div class="prose prose-sm max-w-none opacity-90">
               <p>Returns the currently calculated width for a specific column index, taking measurements and gaps into account.</p>
+            </div>
+          </div>
+
+          <!-- Method: getRowHeight -->
+          <div id="method-getrowheight" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
+            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
+              <span class="badge badge-primary">Method</span> getRowHeight()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowHeight(index: number): number" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the currently calculated height for a specific row index, taking measurements and gaps into account.</p>
             </div>
           </div>
 
@@ -1060,27 +1562,62 @@ const {
       <section id="utility-functions">
         <h2 class="docs-section-header">Utility Functions</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
             <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
-              isElement(val)
-              <span class="badge badge-accent badge-outline badge-xs">Type Guard</span>
+              Type Guards
             </h4>
-            <p class="text-xs md:text-sm opacity-80">Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding the global <code>window</code> object).</p>
+            <div class="space-y-1 text-xs md:text-sm opacity-80">
+              <p><code>isElement(val)</code>: Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding <code>window</code>).</p>
+              <p><code>isWindow(val)</code>: Checks for global <code>window</code> object.</p>
+              <p><code>isBody(val)</code>: Checks for <code>document.body</code>.</p>
+              <p><code>isWindowLike(val)</code>: Matches <code>window</code> or <code>body</code>.</p>
+              <p><code>isScrollableElement(val)</code>: Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>.</p>
+              <p><code>isScrollToIndexOptions(val)</code>: Type guard for <code>ScrollToIndexOptions</code> object.</p>
+            </div>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
-            <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
-              isScrollableElement(val)
-              <span class="badge badge-accent badge-outline badge-xs">Type Guard</span>
-            </h4>
-            <p class="text-xs md:text-sm opacity-80">Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>.</p>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
             <h4 class="font-bold text-accent mb-2">getPaddingX / getPaddingY</h4>
+            <p class="text-[10px] opacity-60 mb-2"><code>(p: number | object, dir: string): number</code></p>
             <p class="text-xs md:text-sm opacity-80">Extracts effective pixel padding from <code>scrollPadding</code> props, taking the current <code>direction</code> into account.</p>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-l-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+            <h4 class="font-bold text-accent mb-2">Coordinate Mapping</h4>
+            <div class="space-y-1 text-xs md:text-sm opacity-80 mb-2">
+              <p><code>displayToVirtual(displayPos, hostOffset, scale)</code>: Maps display pixels (DU) to virtual content position (VU).</p>
+              <p><code>virtualToDisplay(virtualPos, hostOffset, scale)</code>: Maps virtual content position (VU) to display pixels (DU).</p>
+            </div>
+            <h4 class="font-bold text-accent mb-2">isItemVisible</h4>
+            <p class="text-[10px] opacity-60 mb-2"><code>(pos, size, scroll, view, sticky?): boolean</code></p>
+            <p class="text-xs md:text-sm opacity-80">Highly accurate visibility check (VU) used for auto-alignment and rendering ranges.</p>
+          </div>
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
             <h4 class="font-bold text-accent mb-2">FenwickTree</h4>
+            <p class="text-[10px] opacity-60 mb-2"><code>class FenwickTree(size: number)</code></p>
             <p class="text-xs md:text-sm opacity-80">Highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates. Used internally for all position tracking.</p>
+          </div>
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+            <h4 class="font-bold text-accent mb-2">Default Values & Constants</h4>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-xs md:text-sm">
+                <code class="text-primary">DEFAULT_ITEM_SIZE</code>
+                <code class="opacity-60">{{ DEFAULT_ITEM_SIZE }}px</code>
+              </div>
+              <div class="flex items-center justify-between text-xs md:text-sm">
+                <code class="text-primary">DEFAULT_COLUMN_WIDTH</code>
+                <code class="opacity-60">{{ DEFAULT_COLUMN_WIDTH }}px</code>
+              </div>
+              <div class="flex items-center justify-between text-xs md:text-sm">
+                <code class="text-primary">DEFAULT_BUFFER</code>
+                <code class="opacity-60">{{ DEFAULT_BUFFER }} items</code>
+              </div>
+              <div class="flex items-center justify-between text-xs md:text-sm pt-2 border-t border-base-content/5">
+                <code class="text-primary">BROWSER_MAX_SIZE</code>
+                <code class="opacity-60">10,000,000px</code>
+              </div>
+            </div>
+            <p class="text-[10px] opacity-60 mt-4 italic">
+              Values applied when props are omitted or dynamic estimates are needed. <code>BROWSER_MAX_SIZE</code> defines the scaling threshold.
+            </p>
           </div>
         </div>
       </section>
@@ -1090,9 +1627,9 @@ const {
         <h2 class="docs-section-header">SSR & Hydration</h2>
         <div class="prose prose-sm md:prose-md max-w-none text-base-content/90">
           <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
-          <div class="card bg-base-300 p-6 mt-6 border-l-4 border-warning">
+          <div class="card bg-base-300 p-6 mt-6 border-s-4 border-warning">
             <h4 class="font-bold mb-2">Hydration Logic</h4>
-            <ol class="list-decimal pl-5 space-y-2 opacity-90">
+            <ol class="list-decimal ps-5 space-y-2 opacity-90">
               <li><strong>Server</strong>: Renders a static block of items at <code>ssrRange</code>.</li>
               <li><strong>Client (Pre-mount)</strong>: Renders the same items to match server HTML.</li>
               <li><strong>Client (Mounted)</strong>: Calculates total dimensions, scrolls to exactly match the pre-rendered range, and then transitions to absolute positioning for virtualization.</li>

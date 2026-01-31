@@ -44,6 +44,7 @@ const items = computed(() => Array.from({ length: rowCount.value }, (_, i) => ({
 const virtualScrollRef = ref();
 const scrollDetails = ref<ScrollDetails | null>(null);
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
+const rtlMode = inject<Ref<boolean>>('rtlMode', ref(false));
 
 function onScroll(details: ScrollDetails) {
   scrollDetails.value = details;
@@ -98,7 +99,7 @@ function handlePointerMove(e: PointerEvent) {
 
   const { type, index, initialPos, initialSize } = resizing.value;
   const currentPos = type === 'row' ? e.clientY : e.clientX;
-  const delta = currentPos - initialPos;
+  const delta = (type === 'col' && rtlMode.value) ? initialPos - currentPos : currentPos - initialPos;
   const newSize = Math.max(20, initialSize + delta);
 
   if (type === 'row') {
@@ -158,22 +159,20 @@ function stopResizing() {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="both" />
+      <ScrollStatus :scroll-details="scrollDetails" direction="both" />
 
-        <ScrollControls
-          v-model:item-count="rowCount"
-          v-model:item-size="defaultRowHeight"
-          v-model:column-count="colCount"
-          v-model:column-width="defaultColWidth"
-          v-model:buffer-before="bufferBefore"
-          v-model:buffer-after="bufferAfter"
-          direction="both"
-          @scroll-to-index="handleScrollToIndex"
-          @scroll-to-offset="handleScrollToOffset"
-          @refresh="virtualScrollRef?.refresh()"
-        />
-      </div>
+      <ScrollControls
+        v-model:item-count="rowCount"
+        v-model:item-size="defaultRowHeight"
+        v-model:column-count="colCount"
+        v-model:column-width="defaultColWidth"
+        v-model:buffer-before="bufferBefore"
+        v-model:buffer-after="bufferAfter"
+        direction="both"
+        @scroll-to-index="handleScrollToIndex"
+        @scroll-to-offset="handleScrollToOffset"
+        @refresh="virtualScrollRef?.refresh()"
+      />
     </template>
 
     <VirtualScroll
@@ -215,14 +214,6 @@ function stopResizing() {
             />
           </div>
 
-          <!-- Spacer for virtualized columns (accounting for the manually rendered Column 0) -->
-          <div
-            class="shrink-0"
-            :style="{
-              width: `${ Math.max(0, columnRange.padStart - getColWidth(0)) }px`,
-            }"
-          />
-
           <!-- Visible Cells (excluding Column 0) -->
           <template v-for="colIdx in (columnRange.end - columnRange.start)" :key="colIdx + columnRange.start">
             <div
@@ -243,14 +234,6 @@ function stopResizing() {
               />
             </div>
           </template>
-
-          <!-- Spacer for end of row -->
-          <div
-            class="shrink-0"
-            :style="{
-              width: `${ columnRange.padEnd }px`,
-            }"
-          />
         </div>
       </template>
     </VirtualScroll>

@@ -6,6 +6,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ScrollStatus from '#/components/ScrollStatus.vue';
 import { createSeededRandom } from '#/random';
 
 import rawCode from './+Page.vue?raw';
@@ -192,14 +193,18 @@ function scrollToBottom() {
       Chat with history loading and auto-scroll
     </template>
 
-    <div class="h-full border border-base-300 rounded-box overflow-hidden relative flex flex-col shadow-soft">
-      <div v-if="isLoading" class="absolute top-2 left-0 right-0 flex justify-center z-10">
+    <template #controls>
+      <ScrollStatus :scroll-details="scrollDetails" />
+    </template>
+
+    <div class="example-container flex flex-col overflow-auto">
+      <div v-if="isLoading" class="absolute top-2 inset-x-0 flex justify-center z-10">
         <span class="loading loading-spinner loading-sm text-primary" />
       </div>
 
       <div
         v-if="hasNewMessages && !isAtBottom"
-        class="absolute bottom-20 left-0 right-0 flex justify-center z-10 px-4"
+        class="absolute bottom-20 inset-x-0 flex justify-center z-10 px-4"
       >
         <button
           class="btn btn-primary btn-sm md:btn-md shadow-strong shadow-primary/40 gap-2 rounded-full border-2 border-white/10"
@@ -221,6 +226,7 @@ function scrollToBottom() {
 
       <VirtualScroll
         ref="virtualScrollRef"
+        class="flex-1"
         :debug="debugMode"
         :items="items"
         :restore-scroll-on-prepend="true"

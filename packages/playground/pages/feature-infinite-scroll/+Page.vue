@@ -74,20 +74,18 @@ function onScroll(details: ScrollDetails) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+    </template>
 
-        <div class="flex flex-col items-stretch gap-4 p-5 bg-base-300 rounded-box border border-base-content/5 shadow-md">
-          <label class="settings-item group">
-            <span class="settings-label">Auto-loading</span>
-            <input v-model="autoLoad" type="checkbox" class="toggle toggle-primary toggle-sm" />
-          </label>
+    <template #example-controls>
+      <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Auto-loading</span>
+          <input v-model="autoLoad" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
 
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <button class="btn btn-sm btn-primary" :disabled="loading" @click="loadMore">Load More</button>
-            <button class="btn btn-sm btn-error btn-soft" @click="items = []">Clear</button>
-          </div>
-        </div>
+        <button class="btn btn-sm btn-soft btn-primary" :disabled="loading" @click="loadMore">Load More</button>
+        <button class="btn btn-sm btn-soft btn-error" @click="items = []">Clear</button>
       </div>
     </template>
 
@@ -103,7 +101,7 @@ function onScroll(details: ScrollDetails) {
     >
       <template #item="{ item, index }">
         <div class="example-vertical-item example-vertical-item--fixed">
-          <span class="example-badge mr-4">#{{ index }}</span>
+          <span class="example-badge me-4">#{{ index }}</span>
           <span class="font-medium">{{ item.label }}</span>
         </div>
       </template>

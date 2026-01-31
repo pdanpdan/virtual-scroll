@@ -68,22 +68,20 @@ function handleScrollToOffset(x: number | null, y: number | null) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
 
-        <ScrollControls
-          v-model:item-count="itemCount"
-          v-model:item-size="itemSize"
-          v-model:buffer-before="bufferBefore"
-          v-model:buffer-after="bufferAfter"
-          v-model:sticky-header="stickyHeader"
-          v-model:sticky-footer="stickyFooter"
-          direction="vertical"
-          @scroll-to-index="handleScrollToIndex"
-          @scroll-to-offset="handleScrollToOffset"
-          @refresh="virtualScrollRef?.refresh()"
-        />
-      </div>
+      <ScrollControls
+        v-model:item-count="itemCount"
+        v-model:item-size="itemSize"
+        v-model:buffer-before="bufferBefore"
+        v-model:buffer-after="bufferAfter"
+        v-model:sticky-header="stickyHeader"
+        v-model:sticky-footer="stickyFooter"
+        direction="vertical"
+        @scroll-to-index="handleScrollToIndex"
+        @scroll-to-offset="handleScrollToOffset"
+        @refresh="virtualScrollRef?.refresh()"
+      />
     </template>
 
     <VirtualScroll

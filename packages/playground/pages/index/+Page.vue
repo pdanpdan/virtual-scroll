@@ -2,7 +2,6 @@
 import AppLink from '#/components/AppLink.vue';
 import AppLogo from '#/components/AppLogo.vue';
 import ExampleCard from '#/components/ExampleCard.vue';
-import { navigateWithTransition } from '#/navigate';
 </script>
 
 <template>
@@ -22,7 +21,7 @@ import { navigateWithTransition } from '#/navigate';
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
       <div class="card bg-base-300 shadow-strong border-2 border-accent/30 md:col-span-2 2xl:col-span-2 overflow-hidden group">
         <div class="card-body p-8 md:p-10 relative">
-          <div class="absolute top-0 right-0 p-8 opacity-5 transition-transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+          <div class="absolute top-0 end-0 p-8 opacity-5 transition-transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
             <AppLogo class="size-32" />
           </div>
           <h2 class="card-title text-accent text-2xl md:text-3xl mb-4">
@@ -45,8 +44,6 @@ import { navigateWithTransition } from '#/navigate';
               <a
                 :href
                 class="btn btn-accent btn-md md:btn-lg px-10 shadow-lg shadow-accent/20 font-black small-caps tracking-widest"
-                data-vike="false"
-                @click.prevent="navigateWithTransition(href, 'forward')"
               >
                 Get Started
               </a>
@@ -141,17 +138,17 @@ import { navigateWithTransition } from '#/navigate';
 
       <ExampleCard
         type="Feature"
-        title="Sticky Sections"
-        description="iOS-style pushing headers for segmented lists and grouped items."
-        href="/feature-sticky-sections"
+        title="Scroll Restoration"
+        description="Maintain scroll position seamlessly when items are prepended."
+        href="/feature-scroll-restoration"
         group="2"
       />
 
       <ExampleCard
         type="Feature"
-        title="Scroll Restoration"
-        description="Maintain scroll position seamlessly when items are prepended."
-        href="/feature-scroll-restoration"
+        title="Sticky Sections"
+        description="iOS-style pushing headers for segmented lists and grouped items."
+        href="/feature-sticky-sections"
         group="3"
       />
 
@@ -162,6 +159,22 @@ import { navigateWithTransition } from '#/navigate';
         href="/feature-ssr"
         group="4"
         rel="external"
+      />
+
+      <ExampleCard
+        type="Feature"
+        title="Custom Scrollbar"
+        description="Replace native scrollbars with highly customizable virtual ones."
+        href="/feature-custom-scrollbar"
+        group="5"
+      />
+
+      <ExampleCard
+        type="Feature"
+        title="Independent Scrollbars"
+        description="Use VirtualScrollbar components standalone to control any scrollable element."
+        href="/feature-independent-scrollbars"
+        group="6"
       />
     </div>
 

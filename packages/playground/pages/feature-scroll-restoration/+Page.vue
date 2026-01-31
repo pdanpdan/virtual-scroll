@@ -47,7 +47,7 @@ function onScroll(details: ScrollDetails) {
 <template>
   <ExampleContainer :code="rawCode">
     <template #title>
-      <span class="example-title example-title--group-3">Scroll Restoration</span>
+      <span class="example-title example-title--group-2">Scroll Restoration</span>
     </template>
 
     <template #description>
@@ -61,7 +61,7 @@ function onScroll(details: ScrollDetails) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-3"
+        class="example-icon example-icon--group-2"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" class="rotate-180 origin-center" />
       </svg>
@@ -72,21 +72,19 @@ function onScroll(details: ScrollDetails) {
     </template>
 
     <template #controls>
-      <div class="flex flex-wrap gap-2 md:gap-4 items-start">
-        <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+    </template>
 
-        <div class="flex flex-col items-stretch gap-4 p-5 bg-base-300 rounded-box border border-base-content/5 shadow-md">
-          <label class="settings-item group">
-            <span class="settings-label">Restore on Prepend</span>
-            <input v-model="restoreScrollOnPrepend" type="checkbox" class="toggle toggle-primary toggle-sm" />
-          </label>
+    <template #example-controls>
+      <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Restore on Prepend</span>
+          <input v-model="restoreScrollOnPrepend" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
 
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <button class="btn btn-sm btn-primary" @click="prependItems">Prepend 5</button>
-            <button class="btn btn-sm btn-primary" @click="appendItems">Append 5</button>
-            <button class="btn btn-sm btn-error btn-soft col-span-2" @click="items = []">Clear Items</button>
-          </div>
-        </div>
+        <button class="btn btn-sm btn-soft btn-primary" @click="prependItems">Prepend 5</button>
+        <button class="btn btn-sm btn-soft btn-primary" @click="appendItems">Append 5</button>
+        <button class="btn btn-sm btn-soft btn-error" @click="items = []">Clear Items</button>
       </div>
     </template>
 
@@ -100,7 +98,7 @@ function onScroll(details: ScrollDetails) {
     >
       <template #item="{ item, index }">
         <div class="example-vertical-item example-vertical-item--fixed">
-          <span class="example-badge mr-4">#{{ index }}</span>
+          <span class="example-badge me-4">#{{ index }}</span>
           <span class="font-medium">{{ item.label }}</span>
         </div>
       </template>

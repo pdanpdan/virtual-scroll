@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { navigateWithTransition } from '#/navigate';
-
 import AppLink from './AppLink.vue';
 
 const props = defineProps<{
@@ -67,8 +65,7 @@ const buttonClass = computed(() => {
             class="btn btn-soft"
             :class="buttonClass"
             :rel="rel"
-            data-vike="false"
-            @click.prevent="navigateWithTransition(appHref, 'forward')"
+            :data-vike="rel === 'external' ? 'false' : undefined"
           >
             View Example
           </a>
