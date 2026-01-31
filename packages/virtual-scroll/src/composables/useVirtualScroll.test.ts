@@ -214,6 +214,10 @@ describe('useVirtualScroll', () => {
       await nextTick();
       // In horizontal, getItemSize uses itemSizesX - columnGap
       expect(result.getItemSize(0)).toBe(100);
+
+      // Test fallback to default when not measured yet
+      expect(result.getItemSize(1)).toBe(40);
+
       wrapper.unmount();
 
       const { result: res2, wrapper: w2 } = setup({
@@ -259,6 +263,99 @@ describe('useVirtualScroll', () => {
       props.value.items = [ { id: 1 } ];
       // renderedItems will filter out index 1 if it's still in range.end
       expect(result.renderedItems.value.length).toBe(1);
+      wrapper.unmount();
+    });
+
+    it('handles sparse items array', async () => {
+      const sparseItems: unknown[] = [];
+      sparseItems[ 0 ] = { id: 0 };
+      sparseItems[ 10 ] = { id: 10 }; // hole between 1 and 9
+
+      const { result, wrapper } = setup({
+        direction: 'vertical',
+        itemSize: 50,
+        items: sparseItems,
+      });
+
+      await nextTick();
+      await nextTick();
+
+      // Should only render the defined items
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      expect(result.renderedItems.value.every((i) => i.item !== undefined)).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('uses sequential query optimization in renderedItems', async () => {
+      const { result, wrapper } = setup({
+        direction: 'vertical',
+        itemSize: 50,
+        items: mockItems,
+        bufferBefore: 0,
+        bufferAfter: 10,
+      });
+
+      await nextTick();
+      await nextTick();
+
+      // accessing renderedItems will trigger queryYCached sequentially
+      const items = result.renderedItems.value;
+      expect(items.length).toBeGreaterThan(5);
+      expect(items[ 0 ]!.index).toBe(0);
+      expect(items[ 1 ]!.index).toBe(1);
+
+      wrapper.unmount();
+    });
+
+    it('handles non-sequential prefix sum queries and sticky item queries', async () => {
+      const { result, wrapper } = setup({
+        direction: 'vertical',
+        items: mockItems,
+        itemSize: 50,
+        stickyIndices: [ 0, 50, 99 ],
+      });
+
+      await nextTick();
+      await nextTick();
+
+      // Scroll to end (4500)
+      result.scrollToOffset(null, 4500);
+      await nextTick();
+      await nextTick();
+
+      // renderedItems will query indices around 99.
+      // Sticky logic will query index 50 non-sequentially.
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      wrapper.unmount();
+    });
+
+    it('calculates column range and offsets correctly during ssr', async () => {
+      const { result, wrapper } = setup({
+        direction: 'both',
+        items: mockItems,
+        columnCount: 10,
+        columnWidth: 100,
+        itemSize: 50,
+        ssrRange: { start: 10, end: 20, colStart: 2, colEnd: 5 },
+      });
+
+      // isHydrated is false initially
+      expect(result.isHydrated.value).toBe(false);
+
+      // columnRange during SSR
+      expect(result.columnRange.value.start).toBe(2);
+      expect(result.columnRange.value.end).toBe(5);
+      expect(result.columnRange.value.padStart).toBe(200);
+
+      // renderedItems offsets during SSR
+      // ssrOffsetY = 10 * 50 = 500. ssrOffsetX = columnSizes.query(2) = 200.
+      // Item (10, 2) is at VU(200, 500).
+      // offsetX = (originalX - ssrOffsetX) = (200 - 200) = 0
+      const item = result.renderedItems.value.find((i) => i.index === 10);
+      expect(item).toBeDefined();
+      expect(item?.offset.x).toBe(0);
+      expect(item?.offset.y).toBe(0);
+
       wrapper.unmount();
     });
 
@@ -501,6 +598,43 @@ describe('useVirtualScroll', () => {
       result.updateItemSize(1000, 100, 100); // Out of bounds
       await nextTick();
       expect(result.scrollDetails.value.totalSize.height).toBe(initialHeight);
+      wrapper.unmount();
+    });
+
+    it('updates column sizes from row element children', async () => {
+      const { result, wrapper } = setup({
+        columnCount: 5,
+        columnWidth: 0,
+        direction: 'both',
+        items: mockItems,
+      });
+
+      await nextTick();
+
+      const rowEl = document.createElement('div');
+      const cell0 = document.createElement('div');
+      cell0.dataset.colIndex = '0';
+      Object.defineProperty(cell0, 'getBoundingClientRect', {
+        value: () => ({ width: 120 }),
+      });
+      const cell1 = document.createElement('div');
+      cell1.dataset.colIndex = '1';
+      Object.defineProperty(cell1, 'getBoundingClientRect', {
+        value: () => ({ width: 180 }),
+      });
+      rowEl.appendChild(cell0);
+      rowEl.appendChild(cell1);
+
+      result.updateItemSizes([ {
+        blockSize: 50,
+        element: rowEl,
+        index: 0,
+        inlineSize: 0,
+      } ]);
+
+      await nextTick();
+      expect(result.getColumnWidth(0)).toBe(120);
+      expect(result.getColumnWidth(1)).toBe(180);
       wrapper.unmount();
     });
 

@@ -830,6 +830,14 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     scrollToOffset(oldRelativeScrollX, null, { behavior: 'auto' });
   }, { flush: 'sync' });
 
+  watch([ scaleX, scaleY ], () => {
+    if (!isMounted.value || isScrolling.value || isProgrammaticScroll.value) {
+      return;
+    }
+    // Sync display scroll to maintain logical position
+    scrollToOffset(internalScrollX.value, internalScrollY.value, { behavior: 'auto' });
+  });
+
   watch([ () => props.value.items.length, () => props.value.columnCount ], ([ newLen, newColCount ], [ oldLen, oldColCount ]) => {
     nextTick(() => {
       const maxRelX = Math.max(0, totalWidth.value - viewportWidth.value);
@@ -943,11 +951,25 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       const { colStart = 0, colEnd = 0 } = props.value.ssrRange;
       const safeStart = Math.max(0, colStart);
       const safeEnd = Math.min(totalCols, colEnd || totalCols);
+
+      const columnGap = props.value.columnGap || 0;
+      const padStart = fixedColumnWidth.value !== null
+        ? safeStart * (fixedColumnWidth.value + columnGap)
+        : columnSizes.query(safeStart);
+
+      const totalColWidth = fixedColumnWidth.value !== null
+        ? totalCols * (fixedColumnWidth.value + columnGap) - columnGap
+        : Math.max(0, columnSizes.query(totalCols) - columnGap);
+
+      const contentEnd = fixedColumnWidth.value !== null
+        ? (safeEnd * (fixedColumnWidth.value + columnGap) - (safeEnd > 0 ? columnGap : 0))
+        : (columnSizes.query(safeEnd) - (safeEnd > 0 ? columnGap : 0));
+
       return {
         start: safeStart,
         end: safeEnd,
-        padStart: 0,
-        padEnd: 0,
+        padStart,
+        padEnd: Math.max(0, totalColWidth - contentEnd),
       };
     }
 

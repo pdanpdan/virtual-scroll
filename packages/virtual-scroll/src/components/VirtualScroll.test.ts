@@ -29,7 +29,7 @@ HTMLElement.prototype.scrollTo = function (this: HTMLElement, options?: number |
     this.scrollLeft = options;
     this.scrollTop = y;
   }
-  this.dispatchEvent(new Event('scroll'));
+  this.dispatchEvent(new (this.ownerDocument?.defaultView?.Event || Event)('scroll'));
 };
 
 HTMLElement.prototype.setPointerCapture = vi.fn();
