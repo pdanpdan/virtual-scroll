@@ -29,519 +29,497 @@ if (typeof HTMLElement !== 'undefined') {
 }
 
 describe('useVirtualScrollbar', () => {
-  it('calculates percentages correctly for vertical LTR', () => {
-    const { result } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 200,
-      viewportSize: 200,
-      scrollToOffset: vi.fn(),
+  describe('core calculations', () => {
+    it('calculates percentages correctly for vertical ltr', () => {
+      const { result } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 200,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+      });
+
+      expect(result.viewportPercent.value).toBe(0.2);
+      // position 200, scrollable range (1000 - 200) = 800. 200/800 = 0.25
+      expect(result.positionPercent.value).toBe(0.25);
+      expect(result.thumbSizePercent.value).toBe(20);
+      // positionPercent * (100 - thumbSizePercent) = 0.25 * 80 = 20
+      expect(result.thumbPositionPercent.value).toBe(20);
+
+      expect(result.thumbStyle.value).toMatchObject({
+        position: 'absolute',
+      });
     });
 
-    expect(result.viewportPercent.value).toBe(0.2);
-    // position 200, scrollable range (1000 - 200) = 800. 200/800 = 0.25
-    expect(result.positionPercent.value).toBe(0.25);
-    expect(result.thumbSizePercent.value).toBe(20);
-    // positionPercent * (100 - thumbSizePercent) = 0.25 * 80 = 20
-    expect(result.thumbPositionPercent.value).toBe(20);
+    it('handles small content where totalsize <= viewportsize', () => {
+      const { result } = setup({
+        axis: 'vertical',
+        totalSize: 500,
+        position: 0,
+        viewportSize: 600,
+        scrollToOffset: vi.fn(),
+      });
 
-    expect(result.thumbStyle.value).toMatchObject({
-      position: 'absolute',
+      expect(result.viewportPercent.value).toBe(1);
+      expect(result.positionPercent.value).toBe(0);
+      expect(result.thumbSizePercent.value).toBe(100);
+      expect(result.thumbPositionPercent.value).toBe(0);
+    });
+
+    it('handles totalsize <= 0', () => {
+      const { result } = setup({
+        axis: 'vertical',
+        totalSize: 0,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+      });
+
+      expect(result.viewportPercent.value).toBe(0);
+    });
+
+    it('handles viewportsize <= 0 in thumbsizepercent', () => {
+      const { result } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 0,
+        scrollToOffset: vi.fn(),
+      });
+
+      // When viewportSize is 0, minPercent should be 0.1, so thumbSizePercent should be 10.
+      expect(result.thumbSizePercent.value).toBe(10);
+    });
+
+    it('detects rtl mode from props', () => {
+      const { result } = setup({
+        axis: 'horizontal',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+        isRtl: true,
+      });
+
+      expect(result.trackProps.value.style).toBeDefined();
     });
   });
 
-  it('handles small content where totalSize <= viewportSize', () => {
-    const { result } = setup({
-      axis: 'vertical',
-      totalSize: 500,
-      position: 0,
-      viewportSize: 600,
-      scrollToOffset: vi.fn(),
+  describe('reactivity', () => {
+    it('updates when props change reactively', async () => {
+      const position = ref(0);
+      const { result } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+      });
+
+      expect(result.positionPercent.value).toBe(0);
+
+      position.value = 400;
+      await nextTick();
+      expect(result.positionPercent.value).toBe(0.5);
+    });
+  });
+
+  describe('track interactions', () => {
+    it('calls scrolltooffset on track click (vertical)', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+      });
+
+      const track = wrapper.find('.track');
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        bottom: 200,
+        height: 100,
+        left: 0,
+        right: 10,
+        top: 100,
+        width: 10,
+        x: 0,
+        y: 100,
+        toJSON: () => {},
+      } as DOMRect);
+
+      // Click at y=150 (50px from track top)
+      // trackSize 100, thumbSize 20% = 20px
+      // targetPercent = (50 - 10) / (100 - 20) = 40 / 80 = 0.5
+      // scrollableRange = 800. 0.5 * 800 = 400
+      await track.trigger('mousedown', { clientY: 150 });
+      await nextTick();
+      expect(scrollToOffset).toHaveBeenCalledWith(400);
     });
 
-    expect(result.viewportPercent.value).toBe(1);
-    expect(result.positionPercent.value).toBe(0);
-    expect(result.thumbSizePercent.value).toBe(100);
-    expect(result.thumbPositionPercent.value).toBe(0);
-  });
+    it('calls scrolltooffset on track click (horizontal ltr)', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'horizontal',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+        isRtl: false,
+      });
 
-  it('detects RTL mode from props', () => {
-    const { result } = setup({
-      axis: 'horizontal',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset: vi.fn(),
-      isRtl: true,
+      const track = wrapper.find('.track');
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        bottom: 10,
+        height: 10,
+        left: 100,
+        right: 200,
+        top: 0,
+        width: 100,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      // Click at x=150 (50px from track left)
+      await track.trigger('mousedown', { clientX: 150 });
+      expect(scrollToOffset).toHaveBeenCalledWith(400);
     });
 
-    // We can't directly check internal isRtl, but we can verify behavior
-    expect(result.trackProps.value.style).toBeDefined();
-  });
+    it('calls scrolltooffset on track click (horizontal rtl)', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'horizontal',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+        isRtl: true,
+      });
 
-  it('calls scrollToOffset on track click (vertical)', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
+      const track = wrapper.find('.track');
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        bottom: 10,
+        height: 10,
+        left: 100,
+        right: 200,
+        top: 0,
+        width: 100,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      // Click at x=125. Since RTL, distance from right is (200 - 125) = 75px.
+      // trackSize 100, thumbSize 20% = 20px
+      // targetPercent = (75 - 10) / (100 - 20) = 65 / 80 = 0.8125
+      // scrollableRange = 800. 0.8125 * 800 = 650
+      await track.trigger('mousedown', { clientX: 125 });
+      expect(scrollToOffset).toHaveBeenCalledWith(650);
     });
 
-    const track = wrapper.find('.track');
-    vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
-      bottom: 200,
-      height: 100,
-      left: 0,
-      right: 10,
-      top: 100,
-      width: 10,
-      x: 0,
-      y: 100,
-      toJSON: () => {},
-    } as DOMRect);
+    it('scrolls to absolute end when clicking near the end of the track', async () => {
+      const scrollToOffset = vi.fn();
+      const props = {
+        axis: 'vertical' as const,
+        position: 0,
+        scrollToOffset,
+        totalSize: 1000,
+        viewportSize: 500,
+      };
 
-    // Click at y=150 (50px from track top)
-    // trackSize 100, thumbSize 20% = 20px
-    // targetPercent = (50 - 10) / (100 - 20) = 40 / 80 = 0.5
-    // scrollableRange = 800. 0.5 * 800 = 400
-    await track.trigger('mousedown', { clientY: 150 });
-    await nextTick();
-    expect(scrollToOffset).toHaveBeenCalledWith(400);
+      const { trackProps } = useVirtualScrollbar(props);
+
+      const track = document.createElement('div');
+      vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({
+        bottom: 500,
+        height: 500,
+        left: 0,
+        right: 10,
+        top: 0,
+        width: 10,
+      } as DOMRect);
+
+      // Click at 499px (very bottom)
+      trackProps.value.onMousedown({
+        clientY: 499,
+        currentTarget: track,
+        target: track,
+      } as unknown as MouseEvent);
+
+      // scrollableRange = 1000 - 500 = 500.
+      expect(scrollToOffset).toHaveBeenCalledWith(500);
+    });
   });
 
-  it('scrolls to absolute end when clicking near the end of the track', async () => {
-    const scrollToOffset = vi.fn();
-    const props = {
-      axis: 'vertical' as const,
-      position: 0,
-      scrollToOffset,
-      totalSize: 1000,
-      viewportSize: 500,
-    };
+  describe('thumb interactions & dragging', () => {
+    it('handles dragging (vertical)', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 100,
+        viewportSize: 200,
+        scrollToOffset,
+      });
 
-    const { trackProps } = useVirtualScrollbar(props);
+      const thumb = wrapper.find('.thumb');
 
-    const track = document.createElement('div');
-    vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({
-      bottom: 500,
-      height: 500,
-      left: 0,
-      right: 10,
-      top: 0,
-      width: 10,
-    } as DOMRect);
+      vi.spyOn(wrapper.element as HTMLElement, 'getBoundingClientRect').mockReturnValue({
+        bottom: 100,
+        height: 100,
+        left: 0,
+        right: 10,
+        top: 0,
+        width: 10,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
 
-    // Click at 499px (very bottom)
-    trackProps.value.onMousedown({
-      clientY: 499,
-      currentTarget: track,
-      target: track,
-    } as unknown as MouseEvent);
+      // Mock pointer capture
+      thumb.element.setPointerCapture = vi.fn();
+      thumb.element.releasePointerCapture = vi.fn();
 
-    // scrollableRange = 1000 - 500 = 500.
-    // Near end should snap to max.
-    expect(scrollToOffset).toHaveBeenCalledWith(500);
-  });
+      // Start drag at y=20
+      thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientY: 20, pointerId: 1 }));
+      expect(thumb.element.setPointerCapture).toHaveBeenCalledWith(1);
 
-  it('calls scrollToOffset on track click (horizontal RTL)', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'horizontal',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
-      isRtl: true,
+      // Move to y=60 (delta +40)
+      thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 60 }));
+      expect(scrollToOffset).toHaveBeenCalledWith(500);
+
+      // End drag
+      thumb.element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+      expect(thumb.element.releasePointerCapture).toHaveBeenCalledWith(1);
     });
 
-    const track = wrapper.find('.track');
-    vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
-      bottom: 10,
-      height: 10,
-      left: 100,
-      right: 200,
-      top: 0,
-      width: 100,
-      x: 100,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
+    it('handles dragging (horizontal ltr)', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'horizontal',
+        totalSize: 1000,
+        position: 100,
+        viewportSize: 200,
+        scrollToOffset,
+        isRtl: false,
+      });
 
-    // Click at x=125. Since RTL, distance from right is (200 - 125) = 75px.
-    // trackSize 100, thumbSize 20% = 20px
-    // targetPercent = (75 - 10) / (100 - 20) = 65 / 80 = 0.8125
-    // scrollableRange = 800. 0.8125 * 800 = 650
-    await track.trigger('mousedown', { clientX: 125 });
-    expect(scrollToOffset).toHaveBeenCalledWith(650);
-  });
+      const thumb = wrapper.find('.thumb');
+      const track = wrapper.find('.track');
 
-  it('handles dragging (vertical)', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 100,
-      viewportSize: 200,
-      scrollToOffset,
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        bottom: 10,
+        height: 10,
+        left: 0,
+        right: 100,
+        top: 0,
+        width: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      thumb.element.setPointerCapture = vi.fn();
+
+      // Start drag at x=20
+      thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 20, pointerId: 1 }));
+
+      // Move to x=60 (delta +40)
+      thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 60 }));
+      expect(scrollToOffset).toHaveBeenCalledWith(500);
     });
 
-    const thumb = wrapper.find('.thumb');
+    it('handles dragging (horizontal rtl)', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'horizontal',
+        totalSize: 1000,
+        position: 100,
+        viewportSize: 200,
+        scrollToOffset,
+        isRtl: true,
+      });
 
-    vi.spyOn(wrapper.element as HTMLElement, 'getBoundingClientRect').mockReturnValue({
-      bottom: 100,
-      height: 100,
-      left: 0,
-      right: 10,
-      top: 0,
-      width: 10,
-      x: 0,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
+      const thumb = wrapper.find('.thumb');
 
-    // Mock pointer capture
-    thumb.element.setPointerCapture = vi.fn();
-    thumb.element.releasePointerCapture = vi.fn();
+      vi.spyOn(wrapper.element as HTMLElement, 'getBoundingClientRect').mockReturnValue({
+        bottom: 10,
+        height: 10,
+        left: 0,
+        right: 100,
+        top: 0,
+        width: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
 
-    // Start drag at y=20
-    thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientY: 20, pointerId: 1 }));
-    expect(thumb.element.setPointerCapture).toHaveBeenCalledWith(1);
+      thumb.element.setPointerCapture = vi.fn();
 
-    // Move to y=60 (delta +40)
-    // trackSize 100, thumbSize 20. scrollableTrackRange = 80
-    // scrollableContentRange = 800
-    // delta 40 / 80 * 800 = 400
-    // newPos = 100 + 400 = 500
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 60 }));
-    expect(scrollToOffset).toHaveBeenCalledWith(500);
+      // Start drag at x=80
+      thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 80, pointerId: 1 }));
 
-    // End drag
-    thumb.element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
-    expect(thumb.element.releasePointerCapture).toHaveBeenCalledWith(1);
-  });
-
-  it('handles dragging (horizontal RTL)', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'horizontal',
-      totalSize: 1000,
-      position: 100,
-      viewportSize: 200,
-      scrollToOffset,
-      isRtl: true,
+      // Move to x=40
+      thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 40 }));
+      await nextTick();
+      expect(scrollToOffset).toHaveBeenCalledWith(500);
     });
 
-    const thumb = wrapper.find('.thumb');
+    it('clamps targetoffset to scrollablecontentrange when dragging thumb to the absolute end', async () => {
+      const scrollToOffset = vi.fn();
+      const props = {
+        axis: 'vertical' as const,
+        position: 0,
+        scrollToOffset,
+        totalSize: 1000,
+        viewportSize: 500,
+      };
 
-    vi.spyOn(wrapper.element as HTMLElement, 'getBoundingClientRect').mockReturnValue({
-      bottom: 10,
-      height: 10,
-      left: 0,
-      right: 100,
-      top: 0,
-      width: 100,
-      x: 0,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
+      const { thumbProps } = useVirtualScrollbar(props);
 
-    thumb.element.setPointerCapture = vi.fn();
+      const thumb = document.createElement('div');
+      const track = document.createElement('div');
+      track.appendChild(thumb);
 
-    // Start drag at x=80
-    // In RTL startPos = -clientX = -80
-    thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 80, pointerId: 1 }));
+      vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({
+        bottom: 500,
+        height: 500,
+        top: 0,
+      } as DOMRect);
 
-    // Move to x=40 (delta clientX = -40, delta startPos equivalent = -40 - (-80) = +40)
-    // Moving left in RTL is "forward" scroll
-    // delta 40 / 80 * 800 = 400
-    // newPos = 100 + 400 = 500
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 40 }));
-    await nextTick();
-    expect(scrollToOffset).toHaveBeenCalledWith(500);
-  });
+      thumbProps.value.onPointerdown({
+        clientX: 0,
+        clientY: 0,
+        currentTarget: thumb,
+        pointerId: 1,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      } as unknown as PointerEvent);
 
-  it('clamps targetOffset to scrollableContentRange when dragging thumb to the absolute end', async () => {
-    const scrollToOffset = vi.fn();
-    const props = {
-      axis: 'vertical' as const,
-      position: 0,
-      scrollToOffset,
-      totalSize: 1000,
-      viewportSize: 500,
-    };
+      // Drag down 300px (more than scrollableTrackRange 250px)
+      thumbProps.value.onPointermove({
+        clientX: 0,
+        clientY: 300,
+        currentTarget: thumb,
+        pointerId: 1,
+      } as unknown as PointerEvent);
 
-    const { thumbProps } = useVirtualScrollbar(props);
-
-    const thumb = document.createElement('div');
-    const track = document.createElement('div');
-    track.appendChild(thumb);
-
-    vi.spyOn(track, 'getBoundingClientRect').mockReturnValue({
-      bottom: 500,
-      height: 500,
-      top: 0,
-    } as DOMRect);
-
-    // Initial thumbSizePercent = 50% (500/1000). thumbSize = 250px.
-    // scrollableTrackRange = 500 - 250 = 250px.
-
-    thumbProps.value.onPointerdown({
-      clientX: 0,
-      clientY: 0,
-      currentTarget: thumb,
-      pointerId: 1,
-      preventDefault: vi.fn(),
-      stopPropagation: vi.fn(),
-    } as unknown as PointerEvent);
-
-    // Drag down 300px (more than scrollableTrackRange 250px)
-    thumbProps.value.onPointermove({
-      clientX: 0,
-      clientY: 300,
-      currentTarget: thumb,
-      pointerId: 1,
-    } as unknown as PointerEvent);
-
-    // scrollableContentRange = 1000 - 500 = 500.
-    // targetOffset = 0 + (300/250) * 500 = 600.
-    // Clamped to 500.
-    expect(scrollToOffset).toHaveBeenCalledWith(500);
-  });
-
-  it('updates when props change reactively', async () => {
-    const position = ref(0);
-    const { result } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position,
-      viewportSize: 200,
-      scrollToOffset: vi.fn(),
+      expect(scrollToOffset).toHaveBeenCalledWith(500);
     });
 
-    expect(result.positionPercent.value).toBe(0);
+    it('ignores thumb move when not dragging', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+      });
 
-    position.value = 400;
-    await nextTick();
-    expect(result.positionPercent.value).toBe(0.5);
-  });
-
-  it('ignores thumb move when not dragging', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
+      const thumb = wrapper.find('.thumb');
+      thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
+      expect(scrollToOffset).not.toHaveBeenCalled();
     });
 
-    const thumb = wrapper.find('.thumb');
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
-    expect(scrollToOffset).not.toHaveBeenCalled();
+    it('ignores track click when thumb is clicked', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+      });
+
+      const thumb = wrapper.find('.thumb');
+
+      // mousedown on thumb bubbles up to track
+      await thumb.trigger('mousedown');
+      expect(scrollToOffset).not.toHaveBeenCalled();
+    });
   });
 
-  it('ignores track click when thumb is clicked', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
+  describe('edge cases & cleanup', () => {
+    it('handles scrollabletrackrange <= 0', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+      });
+
+      const thumb = wrapper.find('.thumb');
+      const track = wrapper.find('.track');
+
+      thumb.element.setPointerCapture = vi.fn();
+
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        height: 0,
+        width: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+      thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
+      expect(scrollToOffset).not.toHaveBeenCalled();
     });
 
-    const thumb = wrapper.find('.thumb');
+    it('handles missing track element during move', () => {
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+      });
 
-    // mousedown on thumb bubbles up to track
-    await thumb.trigger('mousedown');
-    expect(scrollToOffset).not.toHaveBeenCalled();
-  });
-
-  it('handles totalSize <= 0', () => {
-    const { result } = setup({
-      axis: 'vertical',
-      totalSize: 0,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset: vi.fn(),
+      wrapper.unmount();
     });
 
-    expect(result.viewportPercent.value).toBe(0);
-  });
+    it('handles move with missing parent track', async () => {
+      const scrollToOffset = vi.fn();
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset,
+      });
 
-  it('handles scrollableTrackRange <= 0', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
+      const thumb = wrapper.find('.thumb');
+      thumb.element.setPointerCapture = vi.fn();
+
+      thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+
+      // Manually remove thumb from DOM so it has no parent
+      const el = thumb.element as HTMLElement;
+      const parent = el.parentElement;
+      if (parent) {
+        parent.removeChild(el);
+      }
+
+      thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
+      expect(scrollToOffset).not.toHaveBeenCalled();
     });
 
-    const thumb = wrapper.find('.thumb');
-    const track = wrapper.find('.track');
+    it('handles release capture when not dragging', () => {
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+      });
 
-    thumb.element.setPointerCapture = vi.fn();
+      const thumb = wrapper.find('.thumb');
+      thumb.element.releasePointerCapture = vi.fn();
 
-    // To get range <= 0 we need trackSize <= 0.
-    vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
-      height: 0,
-      width: 0,
-      toJSON: () => {},
-    } as DOMRect);
-
-    thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
-    expect(scrollToOffset).not.toHaveBeenCalled();
-  });
-
-  it('handles missing track element during move', () => {
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset: vi.fn(),
+      thumb.element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+      expect(thumb.element.releasePointerCapture).not.toHaveBeenCalled();
     });
-
-    wrapper.unmount();
-  });
-
-  it('handles move when not dragging', () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
-    });
-
-    const thumb = wrapper.find('.thumb');
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
-    expect(scrollToOffset).not.toHaveBeenCalled();
-  });
-
-  it('handles move with missing parent track', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
-    });
-
-    const thumb = wrapper.find('.thumb');
-    thumb.element.setPointerCapture = vi.fn();
-
-    thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
-
-    // Manually remove thumb from DOM so it has no parent
-    const el = thumb.element as HTMLElement;
-    const parent = el.parentElement;
-    if (parent) {
-      parent.removeChild(el);
-    }
-
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
-    expect(scrollToOffset).not.toHaveBeenCalled();
-  });
-
-  it('handles dragging (horizontal LTR)', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'horizontal',
-      totalSize: 1000,
-      position: 100,
-      viewportSize: 200,
-      scrollToOffset,
-      isRtl: false,
-    });
-
-    const thumb = wrapper.find('.thumb');
-    const track = wrapper.find('.track');
-
-    vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
-      bottom: 10,
-      height: 10,
-      left: 0,
-      right: 100,
-      top: 0,
-      width: 100,
-      x: 0,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
-
-    thumb.element.setPointerCapture = vi.fn();
-
-    // Start drag at x=20
-    thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 20, pointerId: 1 }));
-
-    // Move to x=60 (delta +40)
-    thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 60 }));
-    expect(scrollToOffset).toHaveBeenCalledWith(500);
-  });
-
-  it('calls scrollToOffset on track click (horizontal LTR)', async () => {
-    const scrollToOffset = vi.fn();
-    const { wrapper } = setup({
-      axis: 'horizontal',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset,
-      isRtl: false,
-    });
-
-    const track = wrapper.find('.track');
-    vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
-      bottom: 10,
-      height: 10,
-      left: 100,
-      right: 200,
-      top: 0,
-      width: 100,
-      x: 100,
-      y: 0,
-      toJSON: () => {},
-    } as DOMRect);
-
-    // Click at x=150 (50px from track left)
-    await track.trigger('mousedown', { clientX: 150 });
-    expect(scrollToOffset).toHaveBeenCalledWith(400);
-  });
-
-  it('handles release capture when not dragging', () => {
-    const { wrapper } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 200,
-      scrollToOffset: vi.fn(),
-    });
-
-    const thumb = wrapper.find('.thumb');
-    thumb.element.releasePointerCapture = vi.fn();
-
-    thumb.element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
-    expect(thumb.element.releasePointerCapture).not.toHaveBeenCalled();
-  });
-
-  it('handles viewportSize <= 0 in thumbSizePercent', () => {
-    const { result } = setup({
-      axis: 'vertical',
-      totalSize: 1000,
-      position: 0,
-      viewportSize: 0,
-      scrollToOffset: vi.fn(),
-    });
-
-    // When viewportSize is 0, minPercent should be 0.1, so thumbSizePercent should be 10.
-    expect(result.thumbSizePercent.value).toBe(10);
   });
 });

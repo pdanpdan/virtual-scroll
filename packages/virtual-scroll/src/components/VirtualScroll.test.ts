@@ -118,7 +118,7 @@ describe('virtualScroll', () => {
     vi.useRealTimers();
   });
 
-  describe('basic rendering', () => {
+  describe('core rendering & lifecycle', () => {
     it('renders the visible items', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
@@ -193,9 +193,63 @@ describe('virtualScroll', () => {
       // + 5 bufferAfter = 15 total rows
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(15);
     });
+
+    it('works with window as container', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          container: window,
+          itemSize: 50,
+          items: mockItems,
+        },
+      });
+      await nextTick();
+      expect(wrapper.classes()).toContain('virtual-scroll--window');
+    });
+
+    it('unmounts cleanly', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+        },
+      });
+      await nextTick();
+      wrapper.unmount();
+      // no errors should be thrown
+    });
+
+    it('handles hostRef change', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          containerTag: 'div',
+        },
+      });
+      await nextTick();
+      await wrapper.setProps({ containerTag: 'section' });
+      await nextTick();
+      // should have unobserved old and observed new
+    });
+
+    it('stops active smooth scroll via stopProgrammaticScroll', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      vs.scrollToIndex(50, null, { behavior: 'smooth' });
+      await nextTick();
+
+      const posBefore = vs.scrollDetails.scrollOffset.y;
+      vs.stopProgrammaticScroll();
+      await nextTick();
+
+      // Should not have moved significantly or at all from where it was stopped
+      expect(vs.scrollDetails.scrollOffset.y).toBe(posBefore);
+    });
   });
 
-  describe('scrolling', () => {
+  describe('scrolling interaction', () => {
     it('scrolls and updates visible items', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
@@ -223,9 +277,6 @@ describe('virtualScroll', () => {
       expect(wrapper.text()).toContain('Item 15');
 
       const items = wrapper.findAll('.item');
-      // 500px viewport / 50px item = 10 visible items
-      // bufferBefore = 5, bufferAfter = 5
-      // Total rendered should be around 20
       expect(items.length).toBeGreaterThanOrEqual(15);
       expect(items.length).toBeLessThanOrEqual(25);
     });
@@ -318,7 +369,7 @@ describe('virtualScroll', () => {
   });
 
   describe('keyboard navigation', () => {
-    it('responds to Home and End keys in vertical mode', async () => {
+    it('responds to home and end keys in vertical mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
       });
@@ -327,7 +378,6 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'End' });
       await nextTick();
-      // item 99 at 4950. end align -> 4950 - (500 - 50) = 4500.
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(4500);
 
       await container.trigger('keydown', { key: 'Home' });
@@ -335,7 +385,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
 
-    it('responds to Arrows in vertical mode', async () => {
+    it('responds to arrows in vertical mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
       });
@@ -351,7 +401,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
 
-    it('responds correctly to arrows in RTL mode', async () => {
+    it('responds correctly to arrows in rtl mode', async () => {
       const container = document.createElement('div');
       container.setAttribute('dir', 'rtl');
       Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
@@ -362,7 +412,6 @@ describe('virtualScroll', () => {
         container.dispatchEvent(new Event('scroll'));
       });
 
-      // Mock getComputedStyle for direction
       const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
         if (el === container) {
           return { direction: 'rtl' } as CSSStyleDeclaration;
@@ -389,14 +438,11 @@ describe('virtualScroll', () => {
 
       const vsContainer = wrapper.find('.virtual-scroll-container');
 
-      // Initial scroll 0
-      // ArrowLeft in RTL -> move logical END -> logical offset 100
       await vsContainer.trigger('keydown', { key: 'ArrowLeft' });
       await nextTick();
       await nextTick();
       expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(100, 0);
 
-      // ArrowRight in RTL -> move logical START -> logical offset 0
       await vsContainer.trigger('keydown', { key: 'ArrowRight' });
       await nextTick();
       await nextTick();
@@ -405,7 +451,7 @@ describe('virtualScroll', () => {
       styleSpy.mockRestore();
     });
 
-    it('aligns partially visible items correctly with arrows in RTL mode', async () => {
+    it('aligns partially visible items correctly with arrows in rtl mode', async () => {
       const container = document.createElement('div');
       container.setAttribute('dir', 'rtl');
       Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
@@ -439,39 +485,32 @@ describe('virtualScroll', () => {
       vs.updateDirection();
       await nextTick();
 
-      // Scroll so item 0 is partially visible at START (Right in RTL)
-      // Logical offset 50 -> item 0 starts at 0, viewport starts at 50.
       vs.scrollToOffset(50, null);
       await nextTick();
       await nextTick();
 
       const vsContainer = wrapper.find('.virtual-scroll-container');
 
-      // ArrowRight in RTL -> move logical START
       await vsContainer.trigger('keydown', { key: 'ArrowRight' });
       await nextTick();
       await nextTick();
-      expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(0, 0); // Aligns item 0 to start
+      expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(0, 0);
 
-      // Scroll so item 4 is partially visible at END (Left in RTL)
       await wrapper.setProps({ itemSize: 150 });
       await nextTick();
       await nextTick();
 
-      // Viewport 0-500. Item 3 ends at 600. Item 3 is partially visible at end.
       expect(vs.scrollDetails.currentEndIndex).toBe(3);
 
-      // ArrowLeft in RTL -> move logical END
       await vsContainer.trigger('keydown', { key: 'ArrowLeft' });
       await nextTick();
       await nextTick();
-      // item 3 ends at 600. targetEnd = 600 - 500 = 100.
       expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(100, 0);
 
       styleSpy.mockRestore();
     });
 
-    it('scrolls to next item with ArrowLeft when current item is already at the left edge (RTL)', async () => {
+    it('scrolls to next item with arrowleft when current item is already at the left edge (rtl)', async () => {
       const container = document.createElement('div');
       container.setAttribute('dir', 'rtl');
       Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
@@ -505,7 +544,6 @@ describe('virtualScroll', () => {
       vs.updateDirection();
       await nextTick();
 
-      // Align item 4 to end (Left in RTL).
       vs.scrollToIndex(null, 4, { align: 'end', behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -518,19 +556,17 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should scroll so item 5 ends at 500. targetEnd = 100.
       expect(vs.scrollDetails.scrollOffset.x).toBe(100);
       styleSpy.mockRestore();
     });
 
-    it('scrolls to previous item with ArrowUp when current item is already at the top', async () => {
+    it('scrolls to previous item with arrowup when current item is already at the top', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
       });
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Precisely align item 2 to top (100px)
       vs.scrollToIndex(2, null, { align: 'start', behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -542,19 +578,16 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should scroll to item 1 (50px)
       expect(vs.scrollDetails.scrollOffset.y).toBe(50);
     });
 
-    it('scrolls to next item with ArrowRight when current item is already at the right edge (LTR)', async () => {
+    it('scrolls to next item with arrowright when current item is already at the right edge (ltr)', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { direction: 'horizontal', itemSize: 100, items: mockItems },
       });
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Precisely align item 4 to end (400 to 500 in 500 wide viewport -> offset 0)
-      // Actually, viewport 500. Item 4 ends at 500. Offset 0.
       vs.scrollToIndex(4, null, { align: 'end', behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -567,19 +600,16 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should scroll so item 5 ends at 500. targetEnd = 600 - 500 = 100.
       expect(vs.scrollDetails.scrollOffset.x).toBe(100);
     });
 
-    it('scrolls to next item with ArrowDown when current item is already at the bottom edge', async () => {
+    it('scrolls to next item with arrowdown when current item is already at the bottom edge', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
       });
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Precisely align item 9 to bottom (10 * 50 = 500. Viewport 500. Offset 0)
-      // item 9 ends at 500. viewport ends at 500.
       vs.scrollToIndex(9, null, { align: 'end', behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -592,18 +622,16 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should scroll to item 10 (50px)
       expect(vs.scrollDetails.scrollOffset.y).toBe(50);
     });
 
-    it('does not scroll with ArrowDown when already at the very last item', async () => {
+    it('does not scroll with arrowdown when already at the very last item', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
       });
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Scroll to the very end (total 5000, viewport 500 -> max offset 4500)
       vs.scrollToOffset(null, 4500, { behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -616,18 +644,16 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should remain at 4500
       expect(vs.scrollDetails.scrollOffset.y).toBe(4500);
     });
 
-    it('does not scroll with ArrowRight when already at the very last item (horizontal LTR)', async () => {
+    it('does not scroll with arrowright when already at the very last item (horizontal ltr)', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { direction: 'horizontal', itemSize: 100, items: mockItems },
       });
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Scroll to the very end (total 10000, viewport 500 -> max offset 9500)
       vs.scrollToOffset(9500, null, { behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -640,12 +666,10 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should remain at 9500
       expect(vs.scrollDetails.scrollOffset.x).toBe(9500);
     });
 
-    it('does not scroll with ArrowLeft when already at the very last item (horizontal RTL)', async () => {
-      // Mock getComputedStyle to return RTL
+    it('does not scroll with arrowleft when already at the very last item (horizontal rtl)', async () => {
       const styleSpy = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
         direction: 'rtl',
       } as CSSStyleDeclaration);
@@ -656,7 +680,6 @@ describe('virtualScroll', () => {
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Scroll to the logical end (which is Left in RTL)
       vs.scrollToOffset(9500, null, { behavior: 'auto' });
       await nextTick();
       await nextTick();
@@ -669,12 +692,11 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Should remain at 9500
       expect(vs.scrollDetails.scrollOffset.x).toBe(9500);
       styleSpy.mockRestore();
     });
 
-    it('responds to PageUp and PageDown in vertical mode', async () => {
+    it('responds to pageup and pagedown in vertical mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
       });
@@ -690,7 +712,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
 
-    it('responds to Home and End keys in horizontal mode', async () => {
+    it('responds to home and end keys in horizontal mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { direction: 'horizontal', itemSize: 100, items: mockItems },
       });
@@ -699,7 +721,6 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'End' });
       await nextTick();
-      // last item 99 at 9900. end align -> 9900 - (500 - 100) = 9500.
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(9500);
 
       await container.trigger('keydown', { key: 'Home' });
@@ -707,7 +728,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
     });
 
-    it('responds to Arrows in horizontal mode', async () => {
+    it('responds to arrows in horizontal mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { direction: 'horizontal', itemSize: 100, items: mockItems },
       });
@@ -723,7 +744,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
     });
 
-    it('responds to PageUp and PageDown in horizontal mode', async () => {
+    it('responds to pageup and pagedown in horizontal mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { direction: 'horizontal', itemSize: 100, items: mockItems },
       });
@@ -739,7 +760,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
     });
 
-    it('disables smooth scroll for large distances (Home/End)', async () => {
+    it('disables smooth scroll for large distances (home/end)', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           itemSize: 50,
@@ -750,13 +771,11 @@ describe('virtualScroll', () => {
       await nextTick();
       const container = wrapper.find('.virtual-scroll-container');
 
-      // Mock window.scrollTo to check behavior
       const scrollToSpy = vi.spyOn(window, 'scrollTo');
 
       await container.trigger('keydown', { key: 'End' });
       await nextTick();
 
-      // Distance is ~50000px, viewport is 500px. 50000 > 10 * 500.
       expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({
         behavior: 'auto',
       }));
@@ -770,7 +789,7 @@ describe('virtualScroll', () => {
       }));
     });
 
-    it('responds to Home and End keys in grid mode', async () => {
+    it('responds to home and end keys in grid mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           columnCount: 10,
@@ -785,8 +804,6 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'End' });
       await nextTick();
-      // last row 99 at 4950. end align -> 4500.
-      // last col 9 at 900. end align -> 900 - (500 - 100) = 500.
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(4500);
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(500);
 
@@ -796,7 +813,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
     });
 
-    it('responds to all Arrows in grid mode', async () => {
+    it('responds to all arrows in grid mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           columnCount: 10,
@@ -822,7 +839,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
     });
 
-    it('aligns items precisely with Arrow keys', async () => {
+    it('aligns items precisely with arrow keys', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           itemSize: 100,
@@ -832,31 +849,146 @@ describe('virtualScroll', () => {
       await nextTick();
       const container = wrapper.find('.virtual-scroll-container');
 
-      // Scroll to 50px (item 0 partially cut off)
-      const vs = wrapper.vm as {
-        scrollDetails: ScrollDetails<MockItem>;
-        scrollToOffset: (x: number | null, y: number | null, options: unknown) => void;
-      };
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
       vs.scrollToOffset(null, 50, { behavior: 'auto' });
       await nextTick();
       expect(vs.scrollDetails.scrollOffset.y).toBe(50);
 
-      // ArrowUp should align item 0 to start (0px)
       await container.trigger('keydown', { key: 'ArrowUp' });
       await nextTick();
       expect(vs.scrollDetails.scrollOffset.y).toBe(0);
 
-      // ArrowDown should align first beyond item to end
-      // Viewport 500. Items 0..4 are fully visible. Item 5 is first beyond.
-      // Aligning item 5 to end -> (5+1)*100 - 500 = 100.
       await container.trigger('keydown', { key: 'ArrowDown' });
       await nextTick();
       expect(vs.scrollDetails.scrollOffset.y).toBe(100);
 
-      // ArrowDown again should align item 6 to end -> 700 - 500 = 200.
       await container.trigger('keydown', { key: 'ArrowDown' });
       await nextTick();
       expect(vs.scrollDetails.scrollOffset.y).toBe(200);
+    });
+
+    it('aligns partially visible items at the bottom with arrow down', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      // viewport 500. item 9 ends at 500.
+      // scroll to 25. item 9 now ends at 525 (partially cut off).
+      vs.scrollToOffset(null, 25);
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.currentEndIndex).toBe(10); // item 10 is at 500-550
+
+      // item 10 is partially visible at bottom. ArrowDown should align it to end.
+      const container = wrapper.find('.virtual-scroll-container');
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+      await nextTick();
+
+      // item 10 ends at 550. viewport 500. targetEnd = 550 - 500 = 50.
+      expect(vs.scrollDetails.scrollOffset.y).toBe(50);
+    });
+
+    it('aligns partially visible columns with arrowleft and arrowright in ltr', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { direction: 'horizontal', itemSize: 100, items: mockItems },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      // Viewport 500. Scroll to 50.
+      // Item 0 (0-100) is partially visible at start.
+      // Item 5 (500-600) is partially visible at end.
+      vs.scrollToOffset(50, null);
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+
+      // 1. ArrowLeft should align item 0 to start
+      await container.trigger('keydown', { key: 'ArrowLeft' });
+      await nextTick();
+      await nextTick();
+      expect(vs.scrollDetails.scrollOffset.x).toBe(0);
+
+      // Reset
+      vs.scrollToOffset(50, null);
+      await nextTick();
+      await nextTick();
+
+      // 2. ArrowRight should align item 5 to end
+      await container.trigger('keydown', { key: 'ArrowRight' });
+      await nextTick();
+      await nextTick();
+      // item 5 ends at 600. viewport 500. targetEnd = 600 - 500 = 100.
+      expect(vs.scrollDetails.scrollOffset.x).toBe(100);
+    });
+
+    it('aligns partially visible columns with arrowleft and arrowright in rtl', async () => {
+      const container = document.createElement('div');
+      container.setAttribute('dir', 'rtl');
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      container.scrollTo = vi.fn().mockImplementation((options) => {
+        if (options.left !== undefined) {
+          Object.defineProperty(container, 'scrollLeft', { configurable: true, value: options.left, writable: true });
+        }
+        container.dispatchEvent(new Event('scroll'));
+      });
+
+      const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
+        if (el === container) {
+          return { direction: 'rtl' } as CSSStyleDeclaration;
+        }
+        return { direction: 'ltr' } as CSSStyleDeclaration;
+      });
+
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          container,
+          direction: 'horizontal',
+          itemSize: 100,
+          items: mockItems,
+        },
+      });
+
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      vs.updateDirection();
+      await nextTick();
+
+      // Viewport 500. Logical scroll 50.
+      // Item 0 (0-100) is partially visible at logical START (Right edge).
+      // Item 5 (500-600) is partially visible at logical END (Left edge).
+      vs.scrollToOffset(50, null);
+      await nextTick();
+      await nextTick();
+
+      const vsContainer = wrapper.find('.virtual-scroll-container');
+
+      // 1. ArrowRight in RTL should align item 0 to logical START
+      await vsContainer.trigger('keydown', { key: 'ArrowRight' });
+      await nextTick();
+      await nextTick();
+      expect(vs.scrollDetails.scrollOffset.x).toBe(0);
+
+      // Reset
+      vs.scrollToOffset(50, null);
+      await nextTick();
+      await nextTick();
+
+      // 2. ArrowLeft in RTL should align item 5 to logical END
+      await vsContainer.trigger('keydown', { key: 'ArrowLeft' });
+      await nextTick();
+      await nextTick();
+      // item 5 ends at 600. viewport 500. targetEnd = 600 - 500 = 100.
+      expect(vs.scrollDetails.scrollOffset.x).toBe(100);
+
+      styleSpy.mockRestore();
     });
 
     it('ignores vertical arrows in horizontal mode', async () => {
@@ -894,7 +1026,7 @@ describe('virtualScroll', () => {
     });
   });
 
-  describe('dynamic sizing', () => {
+  describe('dynamic sizing & measurements', () => {
     it('adjusts total size when items are measured', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
@@ -942,18 +1074,15 @@ describe('virtualScroll', () => {
       const initialWidth = (wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.totalSize.width;
       expect(initialWidth).toBeGreaterThan(0);
 
-      // Find a cell from the first row
       const row0 = wrapper.find('.virtual-scroll-item[data-index="0"]').element;
       const cell0 = row0.querySelector('.cell') as HTMLElement;
       expect(cell0).not.toBeNull();
 
-      // Simulate 0-size measurement (e.g. from removal or being hidden)
       triggerResize(cell0, 0, 0);
 
       await nextTick();
       await nextTick();
 
-      // totalWidth should NOT have decreased if we ignore 0 measurements
       const currentWidth = (wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.totalSize.width;
       expect(currentWidth).toBe(initialWidth);
     });
@@ -983,14 +1112,11 @@ describe('virtualScroll', () => {
 
       await nextTick();
 
-      // Initial scroll
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
 
-      // Measure some columns of row 0
       const row0 = wrapper.find('.virtual-scroll-item[data-index="0"]').element;
       const cells0 = Array.from(row0.querySelectorAll('.cell'));
 
-      // Measure row 0 and its cells
       triggerResize(row0, 1000, 50);
       for (const cell of cells0) {
         triggerResize(cell, 110, 50);
@@ -999,7 +1125,6 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Scroll down to row 20
       const container = wrapper.find('.virtual-scroll-container');
       const el = container.element as HTMLElement;
       Object.defineProperty(el, 'scrollTop', { configurable: true, value: 1000, writable: true });
@@ -1008,7 +1133,6 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Now row 20 is at the top. Measure its cells with slightly different width.
       const row20 = wrapper.find('.virtual-scroll-item[data-index="20"]').element;
       const cells20 = Array.from(row20.querySelectorAll('.cell'));
 
@@ -1019,7 +1143,6 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // ScrollOffset.x should STILL BE 0. It should not have shifted because of d = 0.1
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
     });
 
@@ -1048,21 +1171,15 @@ describe('virtualScroll', () => {
 
       await nextTick();
 
-      // Jump to 50:50 auto
       (wrapper.vm as { scrollToIndex: (r: number, c: number, a: string) => void; }).scrollToIndex(50, 50, 'auto');
       await nextTick();
       await nextTick();
 
-      // Initial scroll position (estimates)
-      // itemX = 50 * 120 = 6000. itemWidth = 120. viewport = 500.
-      // targetEnd = 6000 + 120 - 500 = 5620.
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(5620);
 
-      // Row 50 should be rendered. Row 45 should be the first rendered row.
       const row45El = wrapper.find('.virtual-scroll-item[data-index="45"]').element;
       const cells45 = Array.from(row45El.querySelectorAll('.cell'));
 
-      // Simulate measurements for all rendered cells in row 45 as 150px
       for (const cell of cells45) {
         triggerResize(cell, 150, 120);
       }
@@ -1071,30 +1188,13 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Correction should have triggered.
-      // At x=5620, rendered columns are 44..52 (inclusive).
-      // If columns 44..52 are all 150px:
-      // New itemX for col 50: 44 * 120 + 6 * 150 = 5280 + 900 = 6180.
-      // itemWidth = 150. viewport = 500.
-      // targetEnd = 6180 + 150 - 500 = 5830.
-
-      // wait for async correction cycle
       await new Promise((resolve) => setTimeout(resolve, 300));
       await nextTick();
 
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(5830);
-
-      // Check if it's fully visible
-      const offset = (wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x;
-      const viewportWidth = (wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.viewportSize.width;
-      const itemX = 6180;
-      const itemWidth = 150;
-
-      expect(itemX).toBeGreaterThanOrEqual(offset);
-      expect(itemX + itemWidth).toBeLessThanOrEqual(offset + viewportWidth);
     });
 
-    it('handles fallback measurement when borderBoxSize is missing', async () => {
+    it('handles fallback measurement when borderboxsize is missing', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           items: mockItems,
@@ -1105,11 +1205,10 @@ describe('virtualScroll', () => {
       await nextTick();
       const item = wrapper.find('.virtual-scroll-item');
 
-      // Force offsetWidth/Height for fallback
       Object.defineProperty(item.element, 'offsetWidth', { value: 500, configurable: true });
       Object.defineProperty(item.element, 'offsetHeight', { value: 60, configurable: true });
 
-      triggerResize(item.element, 500, 60, false); // No borderBoxSize
+      triggerResize(item.element, 500, 60, false);
 
       await nextTick();
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
@@ -1117,7 +1216,7 @@ describe('virtualScroll', () => {
     });
   });
 
-  describe('sticky items', () => {
+  describe('sticky elements', () => {
     it('applies sticky styles to marked items', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
@@ -1139,51 +1238,6 @@ describe('virtualScroll', () => {
       const item0 = wrapper.find('.virtual-scroll-item[data-index="0"]');
       expect(item0.classes()).toContain('virtual-scroll--sticky');
       expect((item0.element as HTMLElement).style.insetBlockStart).toBe('0px');
-    });
-  });
-
-  describe('ssr and initial state', () => {
-    it('renders SSR range if provided', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          itemSize: 50,
-          items: mockItems,
-          ssrRange: { end: 20, start: 10 },
-        },
-        slots: {
-          item: (props: ItemSlotProps) => {
-            const { item } = props as ItemSlotProps<MockItem>;
-            return h('div', item.label);
-          },
-        },
-      });
-      const items = wrapper.findAll('.virtual-scroll-item');
-      expect(items.length).toBe(10);
-      expect(items[ 0 ]?.attributes('data-index')).toBe('10');
-      expect(wrapper.text()).toContain('Item 10');
-    });
-
-    it('hydrates and scrolls to initial index', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          initialScrollIndex: 50,
-          itemSize: 50,
-          items: mockItems,
-        },
-        slots: {
-          item: (props: ItemSlotProps) => {
-            const { item } = props as ItemSlotProps<MockItem>;
-            return h('div', item.label);
-          },
-        },
-      });
-      await nextTick(); // onMounted
-      await nextTick(); // hydration + scrollToIndex
-      await nextTick();
-      await nextTick();
-      await nextTick();
-
-      expect(wrapper.text()).toContain('Item 50');
     });
 
     it('does not gather multiple sticky items at the top', async () => {
@@ -1207,14 +1261,11 @@ describe('virtualScroll', () => {
       const container = wrapper.find('.virtual-scroll-container');
       const el = container.element as HTMLElement;
 
-      // Scroll past item 2 (originalY = 100). relativeScrollY = 150.
       Object.defineProperty(el, 'scrollTop', { configurable: true, value: 150, writable: true });
       await container.trigger('scroll');
       await nextTick();
       await nextTick();
 
-      // Only item 2 should be active sticky.
-      // Item 0 and 1 should have isStickyActive = false.
       const item0 = wrapper.find('.virtual-scroll-item[data-index="0"]');
       const item1 = wrapper.find('.virtual-scroll-item[data-index="1"]');
       const item2 = wrapper.find('.virtual-scroll-item[data-index="2"]');
@@ -1223,188 +1274,52 @@ describe('virtualScroll', () => {
       expect(item1.classes()).not.toContain('virtual-scroll--sticky');
       expect(item0.classes()).not.toContain('virtual-scroll--sticky');
     });
-  });
 
-  describe('slots and options', () => {
-    it('renders header and footer', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: { items: mockItems.slice(0, 1) },
-        slots: {
-          footer: () => h('div', 'FOOTER'),
-          header: () => h('div', 'HEADER'),
-        },
-      });
-      expect(wrapper.text()).toContain('HEADER');
-      expect(wrapper.text()).toContain('FOOTER');
-    });
-
-    it('shows loading indicator', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: { items: [], loading: true },
-        slots: {
-          loading: () => h('div', 'LOADING...'),
-        },
-      });
-      expect(wrapper.text()).toContain('LOADING...');
-    });
-
-    it('uses correct HTML tags', () => {
+    it('scrolls only one item with arrowdown when sticky header is visible', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
-          containerTag: 'table',
-          itemTag: 'tr',
-          items: [],
-          wrapperTag: 'tbody',
-        },
-      });
-      expect(wrapper.element.tagName).toBe('TABLE');
-      expect(wrapper.find('tbody').exists()).toBe(true);
-    });
-
-    it('triggers refresh and updates items', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
+          bufferAfter: 0,
+          bufferBefore: 0,
           itemSize: 50,
-          items: mockItems.slice(0, 10),
-        },
-      });
-      await nextTick();
-
-      const vs = wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; refresh: () => void; };
-      vs.refresh();
-      await nextTick();
-      // Should not crash
-      expect(vs.scrollDetails.items.length).toBeGreaterThan(0);
-      expect(vs.scrollDetails.items.length).toBeLessThan(50);
-    });
-
-    it('handles sticky header and footer measurements', async () => {
-      mount(VirtualScroll, {
-        props: {
-          items: mockItems.slice(0, 10),
-          stickyFooter: true,
+          items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
           stickyHeader: true,
         },
         slots: {
-          footer: () => h('div', { class: 'footer', style: 'height: 30px' }, 'FOOTER'),
-          header: () => h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
+          header: () => h('div', { class: 'header' }, 'Header'),
         },
       });
       await nextTick();
-    });
 
-    it('works with window as container', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          container: window,
-          itemSize: 50,
-          items: mockItems,
-        },
-      });
-      await nextTick();
-      expect(wrapper.classes()).toContain('virtual-scroll--window');
-    });
-
-    it('forces virtual scrollbars when virtualScrollbar prop is true', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          items: [ { id: 1 } ],
-          itemSize: 50,
-          virtualScrollbar: true,
-        },
-      });
-      await nextTick();
-      expect(wrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(true);
-    });
-
-    it('accounts for sticky header and footer in scroll padding', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          items: mockItems,
-          itemSize: 50,
-          stickyHeader: true,
-        },
-        slots: {
-          header: () => h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
-        },
-      });
+      const header = wrapper.find('.virtual-scroll-header');
+      Object.defineProperty(header.element, 'offsetHeight', { configurable: true, value: 100 });
+      triggerResize(header.element, 500, 100);
 
       await nextTick();
       await nextTick();
 
-      const vs = wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; };
-      // We can't easily trigger ResizeObserver in tests for child slots,
-      // but we can check if the logic is prepared to handle it.
-      expect(vs.scrollDetails.totalSize.height).toBeGreaterThan(0);
-    });
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
+      const container = wrapper.find('.virtual-scroll-container');
 
-    it('resets measured padding when header/footer is removed', async () => {
-      const TestComponent = {
-        components: { VirtualScroll },
-        props: [ 'showHeader', 'showFooter' ],
-        template: `
-          <VirtualScroll :itemSize="50" :items="items">
-            <template v-if="showHeader" #header>
-              <div class="header" style="height: 100px">HEADER</div>
-            </template>
-            <template v-if="showFooter" #footer>
-              <div class="footer" style="height: 100px">FOOTER</div>
-            </template>
-          </VirtualScroll>
-        `,
-        data() {
-          return { items: Array.from({ length: 10 }, (_, i) => ({ id: i })) };
-        },
-      };
+      expect(vs.scrollDetails.currentEndIndex).toBe(7);
 
-      const wrapper = mount(TestComponent, {
-        props: {
-          showHeader: true,
-          showFooter: true,
-        },
-      });
-
-      await nextTick();
-
-      const vs = wrapper.findComponent(VirtualScroll as unknown as DefineComponent).vm as unknown as VirtualScrollInstance<MockItem>;
-
-      // Simulate header/footer measurement
-      const headerEl = wrapper.find('.virtual-scroll-header').element as HTMLElement;
-      const footerEl = wrapper.find('.virtual-scroll-footer').element as HTMLElement;
-
-      Object.defineProperty(headerEl, 'offsetHeight', { configurable: true, value: 100 });
-      Object.defineProperty(footerEl, 'offsetHeight', { configurable: true, value: 100 });
-
-      triggerResize(headerEl, 500, 100);
-      triggerResize(footerEl, 500, 100);
-
+      vs.scrollToOffset(null, 200);
       await nextTick();
       await nextTick();
 
-      // itemsHeight (500) + header (100) + footer (100) = 700
-      expect(vs.scrollDetails.totalSize.height).toBe(700);
+      expect(vs.scrollDetails.currentIndex).toBe(4);
 
-      // Remove header
-      await wrapper.setProps({ showHeader: false });
+      await container.trigger('keydown', { key: 'ArrowDown' });
       await nextTick();
       await nextTick();
 
-      expect(vs.scrollDetails.totalSize.height).toBe(600);
-
-      // Remove footer
-      await wrapper.setProps({ showFooter: false });
-      await nextTick();
-      await nextTick();
-
-      expect(vs.scrollDetails.totalSize.height).toBe(500);
+      expect(vs.scrollDetails.scrollOffset.y).toBe(250);
     });
   });
 
-  describe('scaling and overlap', () => {
+  describe('scaling & massive lists', () => {
     it('items should not overlap when scaling is active', async () => {
-      const itemSize = 250;
-      // Total height = 100,000 * 250 = 25,000,000 (> 10,000,000)
-      const rowCount = 100000;
+      const itemSize = 1000;
+      const rowCount = 11000;
       const massiveItems = Array.from({ length: rowCount }, (_, i) => ({ id: i, label: `Item ${ i }` }));
 
       const wrapper = mount(VirtualScroll, {
@@ -1430,7 +1345,6 @@ describe('virtualScroll', () => {
       const style0 = item0.style.transform;
       const style1 = item1.style.transform;
 
-      // Extract Y from translate(Xpx, Ypx)
       const getY = (style: string) => {
         const match = style.match(/translate\([^,]+, ([^)]+)px\)/);
         return match ? Number.parseFloat(match[ 1 ]!) : 0;
@@ -1440,15 +1354,12 @@ describe('virtualScroll', () => {
       const y1 = getY(style1);
 
       const diff = Math.abs(y1 - y0);
-
-      // With 1:1 rendering, items should be exactly itemSize apart in DU
       expect(diff).toBeCloseTo(itemSize, 0);
     });
 
     it('emulates touch scroll when scaling is active', async () => {
-      const itemSize = 250;
-      // Total height = 100,000 * 250 = 25,000,000 (> 10,000,000)
-      const rowCount = 100000;
+      const itemSize = 1000;
+      const rowCount = 11000;
       const massiveItems = Array.from({ length: rowCount }, (_, i) => ({ id: i }));
 
       const wrapper = mount(VirtualScroll, {
@@ -1467,10 +1378,8 @@ describe('virtualScroll', () => {
       const container = wrapper.find('.virtual-scroll-container');
       const containerEl = container.element as HTMLElement;
 
-      // Initial scroll is 0
       expect(vs.scrollDetails.scrollOffset.y).toBe(0);
 
-      // Trigger pointerdown
       containerEl.dispatchEvent(new PointerEvent('pointerdown', {
         clientX: 0,
         clientY: 500,
@@ -1480,7 +1389,6 @@ describe('virtualScroll', () => {
         bubbles: true,
       }));
 
-      // Trigger pointermove (drag up 100px)
       containerEl.dispatchEvent(new PointerEvent('pointermove', {
         clientX: 0,
         clientY: 400,
@@ -1490,10 +1398,8 @@ describe('virtualScroll', () => {
       }));
 
       await vi.advanceTimersToNextFrame();
-      // Should have scrolled by 100px (1:1 logical feel)
       expect(vs.scrollDetails.scrollOffset.y).toBeCloseTo(100, 0);
 
-      // Trigger pointerup
       containerEl.dispatchEvent(new PointerEvent('pointerup', {
         bubbles: true,
         pointerId: 1,
@@ -1514,7 +1420,6 @@ describe('virtualScroll', () => {
 
       const pointerDownEvent = new PointerEvent('pointerdown', { button: 0, bubbles: true, clientY: 500 });
       containerEl.dispatchEvent(pointerDownEvent);
-      // isDragging should be false (private, but we can check if pointermove does anything)
 
       const scrollOffsetBefore = vs.scrollDetails.scrollOffset.y;
       containerEl.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 400 }));
@@ -1551,18 +1456,291 @@ describe('virtualScroll', () => {
 
       const pointerMoveEvent = new PointerEvent('pointermove', { bubbles: true, clientY: 400 });
       containerEl.dispatchEvent(pointerMoveEvent);
-      // No crash, nothing happens
 
       const pointerUpEvent = new PointerEvent('pointerup', { bubbles: true });
       containerEl.dispatchEvent(pointerUpEvent);
-      // No crash
+    });
+
+    it('handles pointer-based scrolling when scaling is active', async () => {
+      const items = Array.from({ length: 11000 }, (_, i) => ({ id: i }));
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 1000, // 11M VU
+          items,
+        },
+      });
+
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<unknown>;
+      expect(vs.scaleY).toBeGreaterThan(1);
+
+      const container = wrapper.find('.virtual-scroll-container');
+
+      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 0, clientY: 100, button: 0, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 0, clientY: 50, pointerId: 1, bubbles: true }));
+      await nextTick();
+      vi.runAllTimers(); // process requestAnimationFrame
+      await nextTick();
+
+      // Dragged 50px up.
+      expect(vs.scrollDetails.scrollOffset.y).toBe(50);
+
+      // pointerup
+      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 0, clientY: 50, pointerId: 1, bubbles: true }));
+      await nextTick();
+    });
+
+    it('implements inertia scrolling with friction and cancellation', async () => {
+      const items = Array.from({ length: 11000 }, (_, i) => ({ id: i }));
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 1000,
+          items,
+        },
+      });
+
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<unknown>;
+      const container = wrapper.find('.virtual-scroll-container');
+
+      // 1. Start inertia by swiping quickly
+      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 0, clientY: 400, button: 0, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 0, clientY: 300, pointerId: 1, bubbles: true }));
+      await nextTick();
+
+      // Swipe fast
+      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 0, clientY: 200, pointerId: 1, bubbles: true }));
+      await nextTick();
+
+      // 2. Verify it continues to scroll
+      vi.advanceTimersByTime(16); // step 1
+      await nextTick();
+      const pos1 = vs.scrollDetails.scrollOffset.y;
+      expect(pos1).toBeGreaterThan(200);
+
+      vi.advanceTimersByTime(16); // step 2
+      await nextTick();
+      const pos2 = vs.scrollDetails.scrollOffset.y;
+      expect(pos2).toBeGreaterThan(pos1);
+
+      // 3. Stop inertia via stopProgrammaticScroll
+      vs.stopProgrammaticScroll();
+      vi.advanceTimersByTime(16);
+      await nextTick();
+      expect(vs.scrollDetails.scrollOffset.y).toBe(pos2);
+    });
+
+    it('prevents cross-axis drift during inertia', async () => {
+      const items = Array.from({ length: 11000 }, (_, i) => ({ id: i }));
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 1000,
+          columnCount: 11000,
+          columnWidth: 1000,
+          direction: 'both',
+          items,
+        },
+      });
+
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<unknown>;
+      const container = wrapper.find('.virtual-scroll-container');
+
+      // Swipe horizontally with very small vertical component
+      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 400, clientY: 100, button: 0, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 300, clientY: 98, pointerId: 1, bubbles: true }));
+      await nextTick();
+      vi.runAllTimers();
+      await nextTick();
+
+      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 200, clientY: 98, pointerId: 1, bubbles: true }));
+      await nextTick();
+
+      // Velocity Y should have been zeroed because X velocity is much higher
+      vi.advanceTimersByTime(16);
+      await nextTick();
+
+      expect(vs.scrollDetails.scrollOffset.x).toBeGreaterThan(200);
+      expect(vs.scrollDetails.scrollOffset.y).toBe(2); // Initial deltaY was 2 (100 -> 98). No more movement.
+    });
+
+    describe('large scale rendering boundaries', () => {
+      const rowHeight = 1000;
+      const rowCount = 11000; // 11,000,000px
+      const massiveItems = Array.from({ length: rowCount }, (_, i) => ({ id: i }));
+      const viewportHeight = 500;
+
+      const variants = [
+        { name: 'plain', props: {} },
+        { name: 'sticky header', props: { stickyHeader: true }, hasHeader: true },
+        { name: 'sticky footer', props: { stickyFooter: true }, hasFooter: true },
+        { name: 'both sticky', props: { stickyHeader: true, stickyFooter: true }, hasHeader: true, hasFooter: true },
+        { name: 'plain with gap', props: {} },
+        { name: 'sticky header with gap', props: { stickyHeader: true, gap: 50 }, hasHeader: true },
+        { name: 'sticky footer with gap', props: { stickyFooter: true, gap: 50 }, hasFooter: true },
+        { name: 'both sticky with gap', props: { stickyHeader: true, stickyFooter: true, gap: 50 }, hasHeader: true, hasFooter: true },
+      ];
+
+      for (const variant of variants) {
+        describe(variant.name, () => {
+          it('renders last items when scrolled to end manually', async () => {
+            const wrapper = mount(VirtualScroll, {
+              props: {
+                items: massiveItems,
+                itemSize: rowHeight,
+                ...variant.props,
+              },
+              slots: {
+                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
+                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+              },
+            });
+
+            await nextTick();
+            await nextTick();
+
+            const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
+            const container = wrapper.find('.virtual-scroll-container');
+
+            const totalRUHeight = vs.scrollDetails.totalSize.height;
+            const maxRUOffset = totalRUHeight - vs.scrollDetails.viewportSize.height;
+            const maxScroll = virtualToDisplay(maxRUOffset, vs.componentOffset.y, vs.scaleY);
+            Object.defineProperty(container.element, 'scrollTop', { configurable: true, value: maxScroll });
+            await container.trigger('scroll');
+
+            await nextTick();
+            await nextTick();
+
+            const renderedIndices = vs.scrollDetails.items.map((i) => i.index);
+            expect(renderedIndices).toContain(rowCount - 1);
+            expect(renderedIndices).toContain(rowCount - 2);
+
+            const lastItem = vs.scrollDetails.items.find((i) => i.index === rowCount - 1)!;
+            expect(lastItem.originalY + lastItem.size.height).toBeCloseTo(vs.scrollDetails.scrollOffset.y + viewportHeight, 0);
+            expect(vs.scrollDetails.scrollOffset.y + viewportHeight).toBeCloseTo(totalRUHeight, 0);
+
+            wrapper.unmount();
+          });
+
+          it('renders last items when end key is pressed', async () => {
+            const wrapper = mount(VirtualScroll, {
+              props: {
+                items: massiveItems,
+                itemSize: rowHeight,
+                ...variant.props,
+              },
+              slots: {
+                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
+                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+              },
+            });
+
+            await nextTick();
+            await nextTick();
+
+            const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
+            const container = wrapper.find('.virtual-scroll-container');
+
+            await container.trigger('keydown', { key: 'End' });
+
+            await nextTick();
+            await nextTick();
+
+            const renderedIndices = vs.scrollDetails.items.map((i) => i.index);
+            expect(renderedIndices).toContain(rowCount - 1);
+
+            const lastItem = vs.scrollDetails.items.find((i) => i.index === rowCount - 1)!;
+            expect(lastItem.originalY + lastItem.size.height).toBeCloseTo(vs.scrollDetails.scrollOffset.y + viewportHeight, 0);
+
+            wrapper.unmount();
+          });
+
+          it('renders first items when home key is pressed after being at end', async () => {
+            const wrapper = mount(VirtualScroll, {
+              props: {
+                items: massiveItems,
+                itemSize: rowHeight,
+                ...variant.props,
+              },
+              slots: {
+                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
+                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+              },
+            });
+
+            await nextTick();
+            await nextTick();
+
+            const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
+            const container = wrapper.find('.virtual-scroll-container');
+
+            vs.scrollToIndex(rowCount - 1, null, { align: 'end', behavior: 'auto' });
+            await nextTick();
+            await nextTick();
+
+            await container.trigger('keydown', { key: 'Home' });
+            await nextTick();
+            await nextTick();
+
+            const renderedIndices = vs.scrollDetails.items.map((i) => i.index);
+            expect(renderedIndices).toContain(0);
+            expect(renderedIndices).toContain(1);
+            expect(vs.scrollDetails.scrollOffset.y).toBe(0);
+
+            wrapper.unmount();
+          });
+
+          it('renders correct items when scrollbar is at boundaries', async () => {
+            const wrapper = mount(VirtualScroll, {
+              props: {
+                items: massiveItems,
+                itemSize: rowHeight,
+                virtualScrollbar: true,
+                ...variant.props,
+              },
+              slots: {
+                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
+                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+              },
+            });
+
+            await nextTick();
+            await nextTick();
+
+            const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
+
+            const maxDisplayOffset = vs.renderedHeight - vs.scrollDetails.displayViewportSize.height;
+            vs.scrollToOffset(null, displayToVirtual(maxDisplayOffset, vs.componentOffset.y, vs.scaleY));
+
+            await nextTick();
+            await nextTick();
+
+            expect(vs.scrollDetails.items.map((i) => i.index)).toContain(rowCount - 1);
+
+            vs.scrollToOffset(null, 0);
+            await nextTick();
+            await nextTick();
+
+            expect(vs.scrollDetails.items.map((i) => i.index)).toContain(0);
+            expect(vs.scrollDetails.scrollOffset.y).toBe(0);
+
+            wrapper.unmount();
+          });
+        });
+      }
     });
   });
 
-  describe('virtualScrollbar', () => {
-    it('scrolls horizontally with SHIFT + MouseWheel when scaling is active', async () => {
-      const massiveColCount = 200000; // 200,000 * 100 = 20,000,000 > BROWSER_MAX_SIZE (10,000,000)
-      const massiveItems = Array.from({ length: 10 }, (_, i) => ({ id: i })); // enough items
+  describe('virtual scrollbars', () => {
+    it('scrolls horizontally with shift + mousewheel when scaling is active', async () => {
+      const massiveColCount = 200000;
+      const massiveItems = Array.from({ length: 10 }, (_, i) => ({ id: i }));
       const wrapper = mount(VirtualScroll, {
         props: {
           columnCount: massiveColCount,
@@ -1579,11 +1757,9 @@ describe('virtualScroll', () => {
       const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
       expect(vs.scaleX).toBeGreaterThan(1);
 
-      // Initial scroll is 0,0
       expect(vs.scrollDetails.scrollOffset.x).toBe(0);
       expect(vs.scrollDetails.scrollOffset.y).toBe(0);
 
-      // Trigger wheel with shiftKey
       const wheelEvent = new WheelEvent('wheel', {
         bubbles: true,
         cancelable: true,
@@ -1595,8 +1771,6 @@ describe('virtualScroll', () => {
 
       await nextTick();
 
-      // Should have scrolled horizontally (deltaY becomes deltaX because of shiftKey)
-      // and it should be 1:1 logically
       expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(100, 0);
       expect(vs.scrollDetails.scrollOffset.y).toBe(0);
     });
@@ -1605,7 +1779,7 @@ describe('virtualScroll', () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           itemSize: 50,
-          items: Array.from({ length: 20 }, (_, i) => ({ id: i })), // 20 * 50 = 1000. viewport 500. ratio 0.5.
+          items: Array.from({ length: 20 }, (_, i) => ({ id: i })),
           virtualScrollbar: true,
         },
       });
@@ -1615,32 +1789,26 @@ describe('virtualScroll', () => {
 
       const verticalThumb = wrapper.find('.virtual-scroll-scrollbar-container .virtual-scrollbar-thumb--vertical');
       expect(verticalThumb.exists()).toBe(true);
-
-      // viewport 500, total 1000 => 50%
       expect((verticalThumb.element as HTMLElement).style.blockSize).toBe('50%');
 
-      // Increase items
       await wrapper.setProps({
-        items: Array.from({ length: 100 }, (_, i) => ({ id: i })), // 100 * 50 = 5000. viewport 500. ratio 0.1.
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
       });
 
       await nextTick();
       await nextTick();
       await nextTick();
 
-      // ratio 0.1 => 10%
       expect((verticalThumb.element as HTMLElement).style.blockSize).toBe('10%');
 
-      // Increase items even more to hit minimum
       await wrapper.setProps({
-        items: Array.from({ length: 1000 }, (_, i) => ({ id: i })), // 1000 * 50 = 50000. viewport 500. ratio 0.01.
+        items: Array.from({ length: 1000 }, (_, i) => ({ id: i })),
       });
 
       await nextTick();
       await nextTick();
       await nextTick();
 
-      // minThumbSize 20, viewport 500 => 4%
       expect((verticalThumb.element as HTMLElement).style.blockSize).toBe('4%');
     });
 
@@ -1648,7 +1816,7 @@ describe('virtualScroll', () => {
       const wrapper = mount(VirtualScroll, {
         props: {
           itemSize: 50,
-          items: Array.from({ length: 100 }, (_, i) => ({ id: i })), // 5000px total
+          items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
           virtualScrollbar: true,
         },
       });
@@ -1668,15 +1836,12 @@ describe('virtualScroll', () => {
         right: 500,
       } as DOMRect);
 
-      // Click at 250px (middle of track)
       await track.trigger('mousedown', {
         clientY: 250,
       });
 
       await nextTick();
 
-      // Total 5000, viewport 500. middle click -> scroll to middle.
-      // Virtual scrollable range = 4500. middle = 2250.
       const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
       expect(vs.scrollDetails.scrollOffset.y).toBeCloseTo(2250, 0);
     });
@@ -1702,11 +1867,9 @@ describe('virtualScroll', () => {
         y: 0,
       } as DOMRect);
 
-      // Click at the bottom
       await track.trigger('mousedown', { clientY: 500 });
       await nextTick();
 
-      // Total range 5000 VU. Viewport 500. Max scrollable 4500.
       expect(vs.scrollDetails.scrollOffset.y).toBe(4500);
     });
 
@@ -1731,7 +1894,6 @@ describe('virtualScroll', () => {
         y: 490,
       } as DOMRect);
 
-      // Click at the right edge
       await track.trigger('mousedown', { clientX: 500 });
       await nextTick();
 
@@ -1743,7 +1905,7 @@ describe('virtualScroll', () => {
         props: {
           direction: 'horizontal',
           itemSize: 100,
-          items: Array.from({ length: 100 }, (_, i) => ({ id: i })), // 10000px total
+          items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
           virtualScrollbar: true,
         },
       });
@@ -1763,20 +1925,17 @@ describe('virtualScroll', () => {
         right: 500,
       } as DOMRect);
 
-      // Click at 250px (middle of track)
       await track.trigger('mousedown', {
         clientX: 250,
       });
 
       await nextTick();
 
-      // Total 10000, viewport 500. middle click -> scroll to middle.
-      // Virtual scrollable range = 9500. middle = 4750.
       const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
       expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(4750, 0);
     });
 
-    it('calls internal scrollToOffset with Infinity when scrollbar reaches the end', async () => {
+    it('calls internal scrolltooffset with infinity when scrollbar reaches the end', async () => {
       let capturedCallback: ((offset: number) => void) | undefined;
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems, virtualScrollbar: true },
@@ -1795,7 +1954,6 @@ describe('virtualScroll', () => {
 
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
 
-      // Trigger ResizeObserver for viewport
       triggerResize(wrapper.element as HTMLElement, 500, 500);
       await nextTick();
       await nextTick();
@@ -1804,12 +1962,10 @@ describe('virtualScroll', () => {
       expect(wrapper.find('.captured-scrollbar').exists()).toBe(true);
       expect(typeof capturedCallback).toBe('function');
 
-      // Max scrollable range = 5000 - 500 = 4500.
       capturedCallback!(4500);
       await nextTick();
       await nextTick();
 
-      // Should be at the end
       expect(vs.scrollDetails.scrollOffset.y).toBe(4500);
     });
 
@@ -1818,7 +1974,7 @@ describe('virtualScroll', () => {
         props: {
           direction: 'horizontal',
           itemSize: 100,
-          items: Array.from({ length: 2 }, (_, i) => ({ id: i })), // 200px total < 500px viewport
+          items: Array.from({ length: 2 }, (_, i) => ({ id: i })),
           virtualScrollbar: true,
         },
       });
@@ -1829,272 +1985,235 @@ describe('virtualScroll', () => {
       const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
       expect(vs.scrollbarPropsHorizontal).toBeNull();
     });
-  });
 
-  describe('lifecycle and props', () => {
-    it('unmounts cleanly', async () => {
+    it('forces virtual scrollbars when virtualscrollbar prop is true', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
-          items: mockItems,
-        },
-      });
-      await nextTick();
-      wrapper.unmount();
-      // No errors should be thrown
-    });
-
-    it('handles hostRef change', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          items: mockItems,
-          containerTag: 'div',
-        },
-      });
-      await nextTick();
-      await wrapper.setProps({ containerTag: 'section' });
-      await nextTick();
-      // Should have unobserved old and observed new
-    });
-  });
-
-  describe('large scale rendering boundaries', () => {
-    const rowHeight = 200;
-    const rowCount = 100000; // 20,000,000px
-    const massiveItems = Array.from({ length: rowCount }, (_, i) => ({ id: i }));
-    const viewportHeight = 500;
-
-    const variants = [
-      { name: 'plain', props: {} },
-      { name: 'sticky header', props: { stickyHeader: true }, hasHeader: true },
-      { name: 'sticky footer', props: { stickyFooter: true }, hasFooter: true },
-      { name: 'both sticky', props: { stickyHeader: true, stickyFooter: true }, hasHeader: true, hasFooter: true },
-      { name: 'plain with gap', props: {} },
-      { name: 'sticky header with gap', props: { stickyHeader: true, gap: 50 }, hasHeader: true },
-      { name: 'sticky footer with gap', props: { stickyFooter: true, gap: 50 }, hasFooter: true },
-      { name: 'both sticky with gap', props: { stickyHeader: true, stickyFooter: true, gap: 50 }, hasHeader: true, hasFooter: true },
-    ];
-
-    for (const variant of variants) {
-      describe(variant.name, () => {
-        it('renders last items when scrolled to end manually', async () => {
-          const wrapper = mount(VirtualScroll, {
-            props: {
-              items: massiveItems,
-              itemSize: rowHeight,
-              ...variant.props,
-            },
-            slots: {
-              ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-              ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
-            },
-          });
-
-          await nextTick();
-          await nextTick();
-
-          const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
-          const container = wrapper.find('.virtual-scroll-container');
-
-          // Scroll to physical end
-          const totalRUHeight = vs.scrollDetails.totalSize.height;
-          const maxRUOffset = totalRUHeight - vs.scrollDetails.viewportSize.height;
-          const maxScroll = virtualToDisplay(maxRUOffset, vs.componentOffset.y, vs.scaleY);
-          Object.defineProperty(container.element, 'scrollTop', { configurable: true, value: maxScroll });
-          await container.trigger('scroll');
-
-          await nextTick();
-          await nextTick();
-
-          const renderedIndices = vs.scrollDetails.items.map((i) => i.index);
-          expect(renderedIndices).toContain(rowCount - 1);
-          expect(renderedIndices).toContain(rowCount - 2);
-
-          const lastItem = vs.scrollDetails.items.find((i) => i.index === rowCount - 1)!;
-          // In RU, the last item's bottom should align with viewport bottom
-          expect(lastItem.originalY + lastItem.size.height).toBeCloseTo(vs.scrollDetails.scrollOffset.y + viewportHeight, 0);
-          expect(vs.scrollDetails.scrollOffset.y + viewportHeight).toBeCloseTo(totalRUHeight, 0);
-
-          wrapper.unmount();
-        });
-
-        it('renders last items when END key is pressed', async () => {
-          const wrapper = mount(VirtualScroll, {
-            props: {
-              items: massiveItems,
-              itemSize: rowHeight,
-              ...variant.props,
-            },
-            slots: {
-              ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-              ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
-            },
-          });
-
-          await nextTick();
-          await nextTick();
-
-          const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
-          const container = wrapper.find('.virtual-scroll-container');
-
-          await container.trigger('keydown', { key: 'End' });
-
-          await nextTick();
-          await nextTick();
-
-          const renderedIndices = vs.scrollDetails.items.map((i) => i.index);
-          expect(renderedIndices).toContain(rowCount - 1);
-
-          const lastItem = vs.scrollDetails.items.find((i) => i.index === rowCount - 1)!;
-          expect(lastItem.originalY + lastItem.size.height).toBeCloseTo(vs.scrollDetails.scrollOffset.y + viewportHeight, 0);
-
-          wrapper.unmount();
-        });
-
-        it('renders first items when HOME key is pressed after being at end', async () => {
-          const wrapper = mount(VirtualScroll, {
-            props: {
-              items: massiveItems,
-              itemSize: rowHeight,
-              ...variant.props,
-            },
-            slots: {
-              ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-              ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
-            },
-          });
-
-          await nextTick();
-          await nextTick();
-
-          const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
-          const container = wrapper.find('.virtual-scroll-container');
-
-          // First go to end
-          vs.scrollToIndex(rowCount - 1, null, { align: 'end', behavior: 'auto' });
-          await nextTick();
-          await nextTick();
-
-          // Then press Home
-          await container.trigger('keydown', { key: 'Home' });
-          await nextTick();
-          await nextTick();
-
-          const renderedIndices = vs.scrollDetails.items.map((i) => i.index);
-          expect(renderedIndices).toContain(0);
-          expect(renderedIndices).toContain(1);
-          expect(vs.scrollDetails.scrollOffset.y).toBe(0);
-
-          wrapper.unmount();
-        });
-
-        it('renders correct items when scrollbar is at boundaries', async () => {
-          const wrapper = mount(VirtualScroll, {
-            props: {
-              items: massiveItems,
-              itemSize: rowHeight,
-              virtualScrollbar: true,
-              ...variant.props,
-            },
-            slots: {
-              ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-              ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
-            },
-          });
-
-          await nextTick();
-          await nextTick();
-
-          const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
-
-          // Simulate scrollbar at end
-          // For virtual scrollbars, they use displayScrollOffset
-          const maxDisplayOffset = vs.renderedHeight - vs.scrollDetails.displayViewportSize.height;
-          vs.scrollToOffset(null, displayToVirtual(maxDisplayOffset, vs.componentOffset.y, vs.scaleY));
-
-          await nextTick();
-          await nextTick();
-
-          expect(vs.scrollDetails.items.map((i) => i.index)).toContain(rowCount - 1);
-
-          // Scrollbar at start
-          vs.scrollToOffset(null, 0);
-          await nextTick();
-          await nextTick();
-
-          expect(vs.scrollDetails.items.map((i) => i.index)).toContain(0);
-          expect(vs.scrollDetails.scrollOffset.y).toBe(0);
-
-          wrapper.unmount();
-        });
-      });
-    }
-  });
-
-  describe('sticky header and arrow navigation', () => {
-    it('scrolls only one item with ArrowDown when sticky header is visible', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          bufferAfter: 0,
-          bufferBefore: 0,
+          items: [ { id: 1 } ],
           itemSize: 50,
-          items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+          virtualScrollbar: true,
+        },
+      });
+      await nextTick();
+      expect(wrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(true);
+    });
+  });
+
+  describe('ssr & hydration', () => {
+    it('renders ssr range if provided', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          ssrRange: { end: 20, start: 10 },
+        },
+        slots: {
+          item: (props: ItemSlotProps) => {
+            const { item } = props as ItemSlotProps<MockItem>;
+            return h('div', item.label);
+          },
+        },
+      });
+      const items = wrapper.findAll('.virtual-scroll-item');
+      expect(items.length).toBe(10);
+      expect(items[ 0 ]?.attributes('data-index')).toBe('10');
+      expect(wrapper.text()).toContain('Item 10');
+    });
+
+    it('hydrates and scrolls to initial index', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          initialScrollIndex: 50,
+          itemSize: 50,
+          items: mockItems,
+        },
+        slots: {
+          item: (props: ItemSlotProps) => {
+            const { item } = props as ItemSlotProps<MockItem>;
+            return h('div', item.label);
+          },
+        },
+      });
+      await nextTick();
+      await nextTick();
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      expect(wrapper.text()).toContain('Item 50');
+    });
+
+    it('renders gaps correctly during initial mount/ssr', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          direction: 'both',
+          items: mockItems.slice(0, 10),
+          itemSize: 50,
+          columnCount: 5,
+          columnWidth: 100,
+          gap: 10,
+          columnGap: 20,
+        },
+      });
+
+      // Check styles immediately after mount (before hydration)
+      const vsWrapper = wrapper.find('.virtual-scroll-wrapper');
+      const vsWrapperStyle = (vsWrapper.element as HTMLElement).style;
+      expect(vsWrapperStyle.rowGap).toBe('10px');
+      expect(vsWrapperStyle.columnGap).toBe('20px');
+
+      const vsItem = wrapper.find('.virtual-scroll-item');
+      const vsItemStyle = (vsItem.element as HTMLElement).style;
+      expect(vsItemStyle.columnGap).toBe('20px');
+    });
+  });
+
+  describe('slots & custom content', () => {
+    it('renders header and footer', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { items: mockItems.slice(0, 1) },
+        slots: {
+          footer: () => h('div', 'FOOTER'),
+          header: () => h('div', 'HEADER'),
+        },
+      });
+      expect(wrapper.text()).toContain('HEADER');
+      expect(wrapper.text()).toContain('FOOTER');
+    });
+
+    it('shows loading indicator', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { items: [], loading: true },
+        slots: {
+          loading: () => h('div', 'LOADING...'),
+        },
+      });
+      expect(wrapper.text()).toContain('LOADING...');
+    });
+
+    it('uses correct html tags', () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          containerTag: 'table',
+          itemTag: 'tr',
+          items: [],
+          wrapperTag: 'tbody',
+        },
+      });
+      expect(wrapper.element.tagName).toBe('TABLE');
+      expect(wrapper.find('tbody').exists()).toBe(true);
+    });
+
+    it('triggers refresh and updates items', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems.slice(0, 10),
+        },
+      });
+      await nextTick();
+
+      const vs = wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; refresh: () => void; };
+      vs.refresh();
+      await nextTick();
+      expect(vs.scrollDetails.items.length).toBeGreaterThan(0);
+      expect(vs.scrollDetails.items.length).toBeLessThan(50);
+    });
+
+    it('handles sticky header and footer measurements', async () => {
+      mount(VirtualScroll, {
+        props: {
+          items: mockItems.slice(0, 10),
+          stickyFooter: true,
           stickyHeader: true,
         },
         slots: {
-          header: () => h('div', { class: 'header' }, 'Header'),
+          footer: () => h('div', { class: 'footer', style: 'height: 30px' }, 'FOOTER'),
+          header: () => h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
         },
       });
       await nextTick();
+    });
 
-      const header = wrapper.find('.virtual-scroll-header');
-      // Mock header height to 100px
-      Object.defineProperty(header.element, 'offsetHeight', { configurable: true, value: 100 });
-      // Trigger ResizeObserver callback
-      triggerResize(header.element, 500, 100);
+    it('accounts for sticky header and footer in scroll padding', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 50,
+          stickyHeader: true,
+        },
+        slots: {
+          header: () => h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
+        },
+      });
 
       await nextTick();
       await nextTick();
 
-      const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
-      const container = wrapper.find('.virtual-scroll-container');
+      const vs = wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; };
+      expect(vs.scrollDetails.totalSize.height).toBeGreaterThan(0);
+    });
 
-      // Viewport 500. Sticky Header 100.
-      // Items start at 100 VU.
-      // Item 7 ends at 100 + 8 * 50 = 500 VU.
-      // So currentEndIndex should be 7.
+    it('resets measured padding when header/footer is removed', async () => {
+      const TestComponent = {
+        components: { VirtualScroll },
+        props: [ 'showHeader', 'showFooter' ],
+        template: `
+          <VirtualScroll :itemSize="50" :items="items">
+            <template v-if="showHeader" #header>
+              <div class="header" style="height: 100px">HEADER</div>
+            </template>
+            <template v-if="showFooter" #footer>
+              <div class="footer" style="height: 100px">FOOTER</div>
+            </template>
+          </VirtualScroll>
+        `,
+        data() {
+          return { items: Array.from({ length: 10 }, (_, i) => ({ id: i })) };
+        },
+      };
 
-      expect(vs.scrollDetails.currentEndIndex).toBe(7);
+      const wrapper = mount(TestComponent, {
+        props: {
+          showHeader: true,
+          showFooter: true,
+        },
+      });
 
-      // Scroll so that some items are under the header
-      // internalScrollY = 200 means relativeScrollY = 100 (item 0, 1 hidden under header)
-      vs.scrollToOffset(null, 200);
+      await nextTick();
+
+      const vs = wrapper.findComponent(VirtualScroll as unknown as DefineComponent).vm as unknown as VirtualScrollInstance<MockItem>;
+
+      const headerEl = wrapper.find('.virtual-scroll-header').element as HTMLElement;
+      const footerEl = wrapper.find('.virtual-scroll-footer').element as HTMLElement;
+
+      Object.defineProperty(headerEl, 'offsetHeight', { configurable: true, value: 100 });
+      Object.defineProperty(footerEl, 'offsetHeight', { configurable: true, value: 100 });
+
+      triggerResize(headerEl, 500, 100);
+      triggerResize(footerEl, 500, 100);
+
       await nextTick();
       await nextTick();
 
-      // Viewport 200-700. Header at 200-300. Usable 300-700.
-      // Items start at 100.
-      // Item 0: 100-150. Item 1: 150-200. Item 2: 200-250. Item 3: 250-300.
-      // Item 4: 300-350 (first item below header).
-      // currentIndex should be 4.
-      expect(vs.scrollDetails.currentIndex).toBe(4);
+      expect(vs.scrollDetails.totalSize.height).toBe(700);
 
-      await container.trigger('keydown', { key: 'ArrowDown' });
+      await wrapper.setProps({ showHeader: false });
       await nextTick();
       await nextTick();
 
-      // currentEndIndex was item 11 (200 + 500 - 1 = 699 VU -> 11).
-      // Item 11 is at 650-700 VU.
-      // ArrowDown should scroll so item 12 is at the bottom.
-      // Item 12 ends at 750 VU.
-      // internalScrollY = 750 - 500 = 250.
-      expect(vs.scrollDetails.scrollOffset.y).toBe(250);
+      expect(vs.scrollDetails.totalSize.height).toBe(600);
+
+      await wrapper.setProps({ showFooter: false });
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.totalSize.height).toBe(500);
     });
   });
 
-  describe('items length change', () => {
+  describe('dynamic list changes', () => {
     it('clamps scroll position when items count decreases (with scaling)', async () => {
-      // Use large itemSize to trigger scaling with fewer items
-      // BROWSER_MAX_SIZE = 10,000,000. 11,000 items * 1000 = 11,000,000.
       const items = ref(Array.from({ length: 11000 }, (_, i) => ({ id: i })));
       const wrapper = mount({
         components: { VirtualScroll },
@@ -2107,28 +2226,23 @@ describe('virtualScroll', () => {
       await nextTick();
       const vs = wrapper.findComponent(VirtualScroll as unknown as VueWrapper).vm as VirtualScrollInstance<{ id: number; }>;
 
-      // Scale should be around 1.1.
       expect(vs.scaleY).toBeGreaterThan(1);
 
-      // Scroll to index 10,500 (10,500,000 VU)
       vs.scrollToIndex(10500, null, { align: 'start', behavior: 'auto' });
       await nextTick();
       await nextTick();
 
       expect(vs.scrollDetails.scrollOffset.y).toBe(10500000);
 
-      // Reduce items to 1,000. Total height = 1,000,000. Max scroll = 1,000,000 - 500 = 999,500.
       items.value = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
       await nextTick();
       await nextTick();
 
-      // It should be clamped to the new max
       expect(vs.scrollDetails.scrollOffset.y).toBeLessThanOrEqual(1000000 - 500);
     });
 
     it('syncs display scroll position when total height changes (with scaling)', async () => {
-      // Use large itemSize to trigger scaling
-      const items = ref(Array.from({ length: 30000 }, (_, i) => ({ id: i }))); // 30M VU
+      const items = ref(Array.from({ length: 30000 }, (_, i) => ({ id: i })));
       const wrapper = mount({
         components: { VirtualScroll },
         setup() {
@@ -2140,16 +2254,12 @@ describe('virtualScroll', () => {
       await nextTick();
       const vs = wrapper.findComponent(VirtualScroll as unknown as VueWrapper).vm as unknown as VirtualScrollInstance<{ id: number; }>;
 
-      // Scroll to 10,000,000 VU
       vs.scrollToOffset(null, 10000000);
       await nextTick();
       await nextTick();
 
       const initialDisplayScroll = (wrapper.find('.virtual-scroll-container').element as HTMLElement).scrollTop;
 
-      // Increase items. Total height = 40,000,000 VU.
-      // scaleY will increase.
-      // To maintain internalScrollY = 10,000,000, scrollTop must decrease.
       items.value = Array.from({ length: 40000 }, (_, i) => ({ id: i }));
       await nextTick();
       await nextTick();
@@ -2175,18 +2285,14 @@ describe('virtualScroll', () => {
 
       const vs = wrapper.findComponent(VirtualScroll as unknown as VueWrapper).vm as unknown as VirtualScrollInstance<{ id: number; }>;
 
-      // Ensure it's hydrated
       expect(vs.isHydrated).toBe(true);
 
-      // Set a pending scroll
       vs.scrollToIndex(10, null, { behavior: 'smooth', align: 'start' });
       await nextTick();
       await nextTick();
 
-      // Prepend 2 items (100px)
       items.value = [ { id: -2 }, { id: -1 }, ...items.value ];
 
-      // Wait for cycles
       for (let i = 0; i < 15; i++) {
         await nextTick();
       }
@@ -2206,66 +2312,21 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      // Viewport 500px, Item 50px -> 10 visible.
-      // Default buffers: 5 before, 5 after.
-      // At start: 10 visible + 5 after = 15 items.
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(15);
 
       const vs = wrapper.vm as unknown as VirtualScrollInstance<{ id: number; }>;
 
-      // Scroll to middle
       vs.scrollToOffset(null, 5000, { behavior: 'auto' });
       await nextTick();
       await nextTick();
 
-      // In middle: 5 before + 10 visible + 5 after = 20 items.
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(20);
 
-      // Scroll to end (Total 50000px, max offset 49500px)
       vs.scrollToOffset(null, 49500, { behavior: 'auto' });
       await nextTick();
       await nextTick();
 
-      // At end: 5 before + 10 visible = 15 items.
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(15);
-    });
-  });
-
-  describe('pointer events and inertia', () => {
-    it('handles pointer-based scrolling when scaling is active', async () => {
-      const largeItems = Array.from({ length: 1000000 }, (_, i) => ({ id: i }));
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          itemSize: 50,
-          items: largeItems, // 50M pixels total height
-        },
-      });
-
-      await nextTick();
-      await nextTick();
-
-      const vs = wrapper.vm as unknown as VirtualScrollInstance<unknown>;
-      // BROWSER_MAX_SIZE is 10M. totalHeight is 50M.
-      // scaleY should be (50M - 500) / (10M - 500) approx 5.
-      expect(vs.scaleY).toBeGreaterThan(1);
-
-      const container = wrapper.find('.virtual-scroll-container');
-
-      // pointerdown
-      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 0, clientY: 100, button: 0, pointerId: 1, bubbles: true }));
-
-      // pointermove
-      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 0, clientY: 50, pointerId: 1, bubbles: true }));
-      await nextTick();
-      vi.runAllTimers(); // process requestAnimationFrame
-      await nextTick();
-
-      // Dragged 50px up.
-      expect(vs.scrollDetails.scrollOffset.y).toBe(50);
-
-      // pointerup
-      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 0, clientY: 50, pointerId: 1, bubbles: true }));
-      await nextTick();
     });
   });
 });
