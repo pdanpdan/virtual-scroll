@@ -12,9 +12,17 @@ describe('scroll utils', () => {
       expect(isWindow(window)).toBe(true);
     });
 
+    it('should return true for document.documentElement object', () => {
+      expect(isWindow(document.documentElement)).toBe(true);
+    });
+
     it('should return false for an element', () => {
       const el = document.createElement('div');
       expect(isWindow(el)).toBe(false);
+    });
+
+    it('should return false for undefined', () => {
+      expect(isWindow(undefined)).toBe(false);
     });
   });
 
@@ -49,11 +57,19 @@ describe('scroll utils', () => {
     it('should return false for window', () => {
       expect(isBody(window)).toBe(false);
     });
+
+    it('should return false for document.documentElement', () => {
+      expect(isBody(document.documentElement)).toBe(false);
+    });
   });
 
   describe('isWindowLike', () => {
     it('should return true for window', () => {
       expect(isWindowLike(window)).toBe(true);
+    });
+
+    it('should return true for document.documentElement', () => {
+      expect(isWindowLike(document.documentElement)).toBe(true);
     });
 
     it('should return true for body', () => {
@@ -74,6 +90,10 @@ describe('scroll utils', () => {
     it('should return true for a div', () => {
       const el = document.createElement('div');
       expect(isElement(el)).toBe(true);
+    });
+
+    it('should return true for document.documentElement', () => {
+      expect(isElement(document.documentElement)).toBe(true);
     });
 
     it('should return false for window', () => {

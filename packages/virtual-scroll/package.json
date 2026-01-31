@@ -19,6 +19,9 @@
     "virtual-scroll",
     "typescript"
   ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -26,6 +29,7 @@
       "require": "./dist/index.cjs"
     },
     "./VirtualScroll.vue": "./src/components/VirtualScroll.vue",
+    "./VirtualScrollbar.vue": "./src/components/VirtualScrollbar.vue",
     "./style.css": "./dist/virtual-scroll.css"
   },
   "main": "./dist/index.cjs",

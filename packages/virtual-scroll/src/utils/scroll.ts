@@ -1,13 +1,20 @@
 import type { ScrollDirection, ScrollToIndexOptions } from '../types';
 
 /**
+ * Maximum size (in pixels) for an element that most browsers can handle reliably.
+ * Beyond this size, we use scaling for the scrollable area.
+ * @default 10000000
+ */
+export const BROWSER_MAX_SIZE = 10000000;
+
+/**
  * Checks if the container is the window object.
  *
  * @param container - The container element or window to check.
  * @returns `true` if the container is the global window object.
  */
 export function isWindow(container: HTMLElement | Window | null | undefined): container is Window {
-  return container === null || (typeof window !== 'undefined' && container === window);
+  return container === null || container === document.documentElement || (typeof window !== 'undefined' && container === window);
 }
 
 /**
@@ -17,7 +24,7 @@ export function isWindow(container: HTMLElement | Window | null | undefined): co
  * @returns `true` if the container is the `<body>` element.
  */
 export function isBody(container: HTMLElement | Window | null | undefined): container is HTMLElement {
-  return !!container && typeof container === 'object' && 'tagName' in container && container.tagName === 'BODY';
+  return container != null && typeof container === 'object' && 'tagName' in container && container.tagName === 'BODY';
 }
 
 /**
@@ -37,7 +44,7 @@ export function isWindowLike(container: HTMLElement | Window | null | undefined)
  * @returns `true` if the container is an `HTMLElement`.
  */
 export function isElement(container: HTMLElement | Window | null | undefined): container is HTMLElement {
-  return !!container && 'getBoundingClientRect' in container;
+  return container != null && 'getBoundingClientRect' in container;
 }
 
 /**
@@ -47,7 +54,7 @@ export function isElement(container: HTMLElement | Window | null | undefined): c
  * @returns `true` if the target is an `HTMLElement` with scroll properties.
  */
 export function isScrollableElement(target: EventTarget | null): target is HTMLElement {
-  return !!target && 'scrollLeft' in target;
+  return target != null && 'scrollLeft' in target;
 }
 
 /**
@@ -57,7 +64,7 @@ export function isScrollableElement(target: EventTarget | null): target is HTMLE
  * @returns `true` if the options object contains scroll-to-index specific properties.
  */
 export function isScrollToIndexOptions(options: unknown): options is ScrollToIndexOptions {
-  return typeof options === 'object' && options !== null && ('align' in options || 'behavior' in options || 'isCorrection' in options);
+  return typeof options === 'object' && options != null && ('align' in options || 'behavior' in options || 'isCorrection' in options);
 }
 
 /**
