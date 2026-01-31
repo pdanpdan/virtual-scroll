@@ -320,13 +320,15 @@ function refresh() {
 
 // Watch for scroll details and emit event
 watch(scrollDetails, (details, oldDetails) => {
-  if (!isHydrated.value) {
+  if (!isHydrated.value || !details) {
     return;
   }
   emit('scroll', details);
 
   if (
     !oldDetails
+    || !oldDetails.range
+    || !oldDetails.columnRange
     || details.range.start !== oldDetails.range.start
     || details.range.end !== oldDetails.range.end
     || details.columnRange.start !== oldDetails.columnRange.start
@@ -345,14 +347,14 @@ watch(scrollDetails, (details, oldDetails) => {
   }
 
   // vertical or both
-  if (props.direction !== 'horizontal') {
+  if (props.direction !== 'horizontal' && details.totalSize) {
     const remaining = details.totalSize.height - (details.scrollOffset.y + details.viewportSize.height);
     if (remaining <= props.loadDistance) {
       emit('load', 'vertical');
     }
   }
   // horizontal or both
-  if (props.direction !== 'vertical') {
+  if (props.direction !== 'vertical' && details.totalSize) {
     const remaining = details.totalSize.width - (details.scrollOffset.x + details.viewportSize.width);
     if (remaining <= props.loadDistance) {
       emit('load', 'horizontal');
@@ -361,7 +363,7 @@ watch(scrollDetails, (details, oldDetails) => {
 });
 
 watch(isHydrated, (hydrated) => {
-  if (hydrated) {
+  if (hydrated && scrollDetails.value?.range && scrollDetails.value?.columnRange) {
     emit('visibleRangeChange', {
       start: scrollDetails.value.range.start,
       end: scrollDetails.value.range.end,

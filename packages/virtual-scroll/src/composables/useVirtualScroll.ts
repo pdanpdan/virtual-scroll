@@ -857,13 +857,15 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     const fixedSize = fixedItemSize.value;
 
     if (direction.value === 'horizontal') {
-      if (fixedSize !== null) {
-        return Math.floor(offset / (fixedSize + columnGap));
+      const step = (fixedSize || 0) + columnGap;
+      if (fixedSize !== null && step > 0) {
+        return Math.floor(offset / step);
       }
       return itemSizesX.findLowerBound(offset);
     }
-    if (fixedSize !== null) {
-      return Math.floor(offset / (fixedSize + gap));
+    const step = (fixedSize || 0) + gap;
+    if (fixedSize !== null && step > 0) {
+      return Math.floor(offset / step);
     }
     return itemSizesY.findLowerBound(offset);
   };
@@ -1694,7 +1696,7 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
      */
     getItemSize: (index: number) => {
       if (direction.value === 'horizontal') {
-        return itemSizesX.get(index) - (props.value.columnGap || 0);
+        return Math.max(0, itemSizesX.get(index) - (props.value.columnGap || 0));
       }
       const itemSize = props.value.itemSize;
       if (typeof itemSize === 'number' && itemSize > 0) {
@@ -1704,7 +1706,7 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         const item = props.value.items[ index ];
         return item !== undefined ? itemSize(item, index) : (props.value.defaultItemSize || DEFAULT_ITEM_SIZE);
       }
-      return itemSizesY.get(index) - (props.value.gap || 0);
+      return Math.max(0, itemSizesY.get(index) - (props.value.gap || 0));
     },
 
     /**
