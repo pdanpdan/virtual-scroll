@@ -13,19 +13,19 @@ catalogs:
     '@antfu/eslint-config': ^7.2.0
     '@release-it/conventional-changelog': ^10.0.4
     '@tailwindcss/vite': ^4.1.18
-    '@types/node': ^25.1.0
+    '@types/node': ^25.2.0
     '@vitejs/plugin-vue': ^6.0.3
     '@vitest/coverage-v8': ^4.0.18
     '@vitest/ui': ^4.0.18
     '@vue/compiler-dom': ^3.5.27
     '@vue/test-utils': ^2.4.6
     '@vue/tsconfig': ^0.8.1
-    daisyui: ^5.5.14
+    daisyui: ^5.5.16
     eslint: ^9.39.2
     eslint-plugin-vuejs-accessibility: ^2.4.1
     jsdom: ^27.4.0
     release-it: ^19.2.4
-    shikiji: ^0.10.2
+    shiki: ^3.22.0
     tailwindcss: ^4.1.18
     typescript: ^5.9.3
     vike: ^0.4.252

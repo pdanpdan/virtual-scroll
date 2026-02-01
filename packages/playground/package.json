@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@pdanpdan/virtual-scroll": "workspace:*",
-    "shikiji": "catalog:",
+    "@vue/compiler-dom": "catalog:",
+    "shiki": "catalog:",
     "vike": "catalog:",
     "vike-vue": "catalog:",
     "vue": "catalog:"

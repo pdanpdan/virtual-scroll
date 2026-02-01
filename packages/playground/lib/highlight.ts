@@ -2,14 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { parse, transform } from '@vue/compiler-dom';
-import { getHighlighter } from 'shikiji';
-import { createCssVariablesTheme } from 'shikiji/theme-css-variables';
+import { createCssVariablesTheme, createHighlighter } from 'shiki';
 
-let highlighterPromise: ReturnType<typeof getHighlighter> | null = null;
+let highlighterPromise: ReturnType<typeof createHighlighter> | null = null;
 
 export async function highlight(code: string, lang: string) {
   if (!highlighterPromise) {
-    highlighterPromise = getHighlighter({
+    highlighterPromise = createHighlighter({
       themes: [
         createCssVariablesTheme({
           name: 'css-variables',
