@@ -8,7 +8,7 @@ import { inject, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 interface DraggableItem {
   id: number;
@@ -134,7 +134,7 @@ function handleDragEnd() {
 </script>
 
 <template>
-  <ExampleContainer :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-5">Draggable List</span>
     </template>

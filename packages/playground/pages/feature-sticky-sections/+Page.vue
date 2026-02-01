@@ -8,7 +8,7 @@ import { computed, inject, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 const sectionCount = 20;
 const itemsPerSection = 10;
@@ -43,7 +43,7 @@ function onScroll(details: ScrollDetails) {
 </script>
 
 <template>
-  <ExampleContainer :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-3">Sticky Sections</span>
     </template>

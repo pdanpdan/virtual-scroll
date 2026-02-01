@@ -8,7 +8,7 @@ import { computed, inject, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 interface Photo {
   id: number;
@@ -40,7 +40,7 @@ const scrollDetails = ref<ScrollDetails | null>(null);
 </script>
 
 <template>
-  <ExampleContainer :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-6">Photo Gallery</span>
     </template>

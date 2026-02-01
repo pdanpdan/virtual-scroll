@@ -14,7 +14,6 @@ export async function onRenderClient(pageContext: PageContextClient) {
   const isPrefix = oldUrl != null && oldUrl !== newUrl && oldUrl.startsWith(newUrl);
 
   const type = (pageContext.isBackwardNavigation || isPrefix) ? 'back' : 'forward';
-  console.log(type, oldUrl, newUrl);
 
   const transition = document.startViewTransition({
     update: async () => {

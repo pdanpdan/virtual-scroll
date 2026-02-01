@@ -35,7 +35,7 @@ import CodeBlock from '#/components/CodeBlock.vue';
       <!-- 1.1 Key Features -->
       <section id="features">
         <h2 class="docs-section-header">Key Features</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <div class="card bg-base-300 shadow-sm border border-base-content/5">
             <div class="card-body p-4 flex-row gap-4">
               <div class="text-primary text-2xl font-bold">✓</div>
@@ -156,17 +156,18 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
       <!-- 3. Usage Modes -->
       <section id="usage-modes">
         <h2 class="docs-section-header">Usage Modes</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6 md:gap-8">
           <div class="card shadow-soft bg-base-300 border-primary/10 overflow-hidden">
             <div class="card-body p-5">
               <h3 class="card-title text-base md:text-lg text-primary">Compiled Component</h3>
-              <p class="text-xs md:text-sm opacity-90 mb-4">Recommended for most projects. Uses pre-compiled JS.</p>
+              <p class="text-xs md:text-sm opacity-90 mb-4 grow-0">Recommended for most projects. Uses pre-compiled JS.</p>
               <CodeBlock
                 class="docs-code-block"
                 lang="ts"
                 code="import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
 import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               />
+              <p />
               <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80">
                 <li>Compatible with all modern bundlers.</li>
                 <li><strong>Note:</strong> Manual CSS import is required.</li>
@@ -177,12 +178,13 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           <div class="card shadow-soft bg-base-300 border-secondary/10 overflow-hidden">
             <div class="card-body p-5">
               <h3 class="card-title text-base md:text-lg text-secondary">Original Vue SFC</h3>
-              <p class="text-xs md:text-sm opacity-90 mb-4">Import raw source for custom compilation.</p>
+              <p class="text-xs md:text-sm opacity-90 mb-4 grow-0">Import raw source for custom compilation.</p>
               <CodeBlock
                 class="docs-code-block"
                 lang="ts"
                 code="import VS from &quot;@pdanpdan/virtual-scroll/VirtualScroll.vue&quot;;"
               />
+              <p />
               <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80">
                 <li>Enables better tree-shaking in your build.</li>
                 <li>Styles handled by your Vue loader.</li>
@@ -190,10 +192,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </div>
           </div>
 
-          <div class="card shadow-soft bg-base-300 border-accent/10 overflow-hidden">
+          <div class="2xl:col-span-full card shadow-soft bg-base-300 border-accent/10 overflow-hidden">
             <div class="card-body p-5">
               <h3 class="card-title text-base md:text-lg text-accent">CDN Usage</h3>
-              <p class="text-xs md:text-sm opacity-90 mb-4">Use directly in browser without build step.</p>
+              <p class="text-xs md:text-sm opacity-90 mb-4 grow-0">Use directly in browser without build step.</p>
               <CodeBlock
                 class="docs-code-block"
                 lang="html"
@@ -201,6 +203,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 &lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css&quot;&gt;
 &lt;script src=&quot;https://unpkg.com/@pdanpdan/virtual-scroll&quot;&gt;&lt;/script&gt;"
               />
+              <p />
               <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80 mt-2">
                 <li>No installation required.</li>
                 <li>Available via <code>window.VirtualScroll</code>.</li>
@@ -485,7 +488,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <h3 id="slots" class="docs-prop-header">Slots</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+        <div class="grid grid-cols-1 2xl:grid-cols-2 gap-4 mb-10">
           <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-primary">
             <h4 class="font-bold text-primary mb-2">#item</h4>
             <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
@@ -500,37 +503,35 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
             </ul>
           </div>
-          <div class="space-y-4">
-            <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-secondary">
-              <h4 class="font-bold text-secondary mb-2">#header / #footer</h4>
-              <p class="text-xs md:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
-            </div>
-            <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
-              <h4 class="font-bold text-accent mb-2">#loading</h4>
-              <p class="text-xs md:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
-            </div>
-            <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-info">
-              <h4 class="font-bold text-info mb-2">#scrollbar</h4>
-              <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
-              <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
-                <li><code>positionPercent: number</code>: Current scroll position (0 to 1).</li>
-                <li><code>viewportPercent: number</code>: Viewport as percentage of total size.</li>
-                <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element.</li>
-                <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element.</li>
-                <li>
-                  <code>scrollbarProps: object</code>: Grouped properties for <code>VirtualScrollbar</code>.
-                  <ul class="list-disc ps-5 mt-1">
-                    <li><code>axis: 'vertical' | 'horizontal'</code></li>
-                    <li><code>totalSize: number</code></li>
-                    <li><code>position: number</code></li>
-                    <li><code>viewportSize: number</code></li>
-                    <li><code>scrollToOffset: (offset: number) => void</code></li>
-                    <li><code>containerId: string</code></li>
-                    <li><code>isRtl: boolean</code></li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-info">
+            <h4 class="font-bold text-info mb-2">#scrollbar</h4>
+            <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
+            <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
+              <li><code>positionPercent: number</code>: Current scroll position (0 to 1).</li>
+              <li><code>viewportPercent: number</code>: Viewport as percentage of total size.</li>
+              <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element.</li>
+              <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element.</li>
+              <li>
+                <code>scrollbarProps: object</code>: Grouped properties for <code>VirtualScrollbar</code>.
+                <ul class="list-disc ps-5 mt-1">
+                  <li><code>axis: 'vertical' | 'horizontal'</code></li>
+                  <li><code>totalSize: number</code></li>
+                  <li><code>position: number</code></li>
+                  <li><code>viewportSize: number</code></li>
+                  <li><code>scrollToOffset: (offset: number) => void</code></li>
+                  <li><code>containerId: string</code></li>
+                  <li><code>isRtl: boolean</code></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-secondary">
+            <h4 class="font-bold text-secondary mb-2">#header / #footer</h4>
+            <p class="text-xs md:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
+          </div>
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+            <h4 class="font-bold text-accent mb-2">#loading</h4>
+            <p class="text-xs md:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
           </div>
         </div>
 
@@ -543,19 +544,21 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           <CodeBlock
             class="docs-code-block mb-8"
             lang="vue"
-            code="<VirtualScroll :items=&quot;items&quot; direction=&quot;both&quot; virtual-scrollbar>
-  <template #scrollbar=&quot;{ trackProps, thumbProps, axis }&quot;>
-    <!-- Vertical Track -->
-    <div v-if=&quot;axis === 'vertical'&quot; v-bind=&quot;trackProps&quot; class=&quot;w-2 bg-base-300&quot;>
-      <div v-bind=&quot;thumbProps&quot; class=&quot;bg-primary rounded&quot; />
-    </div>
+            code="<template>
+  <VirtualScroll :items=&quot;items&quot; direction=&quot;both&quot; virtual-scrollbar>
+    <template #scrollbar=&quot;{ trackProps, thumbProps, axis }&quot;>
+      &amp;lt;!-- Vertical Track -->
+      <div v-if=&quot;axis === 'vertical'&quot; v-bind=&quot;trackProps&quot; class=&quot;w-2 bg-base-300&quot;>
+        <div v-bind=&quot;thumbProps&quot; class=&quot;bg-primary rounded&quot; />
+      </div>
 
-    <!-- Horizontal Track -->
-    <div v-else v-bind=&quot;trackProps&quot; class=&quot;h-2 bg-base-300&quot;>
-      <div v-bind=&quot;thumbProps&quot; class=&quot;bg-secondary rounded&quot; />
-    </div>
-  </template>
-</VirtualScroll>"
+      &amp;lt;!-- Horizontal Track -->
+      <div v-else v-bind=&quot;trackProps&quot; class=&quot;h-2 bg-base-300&quot;>
+        <div v-bind=&quot;thumbProps&quot; class=&quot;bg-secondary rounded&quot; />
+      </div>
+    </template>
+  </VirtualScroll>
+</template>"
           />
 
           <div class="docs-table-container text-base-content/80">
@@ -615,7 +618,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <h3 id="keyboard-navigation" class="docs-prop-header">Keyboard Navigation</h3>
         <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-10">
           <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mt-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose mt-4">
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <kbd class="kbd kbd-sm md:kbd-md">Home</kbd>
               <span class="text-xs md:text-sm opacity-80">Scroll to the very beginning (Index 0,0).</span>
@@ -623,6 +626,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <kbd class="kbd kbd-sm md:kbd-md">End</kbd>
               <span class="text-xs md:text-sm opacity-80">Scroll to the very last row and column.</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+              <kbd class="kbd kbd-sm md:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm md:kbd-md">PgDn</kbd>
+              <span class="text-xs md:text-sm opacity-80">Scroll by one full viewport height/width.</span>
             </div>
             <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
               <span class="flex gap-1">
@@ -637,10 +644,6 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <kbd class="kbd kbd-sm md:kbd-md">→</kbd>
               </span>
               <span class="text-xs md:text-sm opacity-80">Scroll horizontally by column width.</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-              <kbd class="kbd kbd-sm md:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm md:kbd-md">PgDn</kbd>
-              <span class="text-xs md:text-sm opacity-80">Scroll by one full viewport height/width.</span>
             </div>
           </div>
         </div>
@@ -743,7 +746,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <h4 class="docs-prop-subheader text-secondary">Properties</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-8">
           <div class="card bg-base-300 p-4 border border-base-content/5">
             <code class="text-secondary font-bold text-xs">All Props</code>
             <p class="text-[10px] opacity-60 mt-1">All component props are available on the instance.</p>
@@ -787,7 +790,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <h4 class="docs-prop-subheader text-primary">Methods</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-10">
           <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-primary font-bold text-xs">scrollToIndex()</code>
             <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
@@ -873,7 +876,7 @@ const scrollY = ref(0);
 
 <template>
   <div class=&quot;relative overflow-hidden h-96&quot;>
-    <!-- Vertical Scrollbar -->
+    &amp;lt;!-- Vertical Scrollbar -->
     <VirtualScrollbar
       axis=&quot;vertical&quot;
       :total-size=&quot;10000&quot;
@@ -882,7 +885,7 @@ const scrollY = ref(0);
       @scroll-to-offset=&quot;val => scrollY = val&quot;
     />
 
-    <!-- Horizontal Scrollbar -->
+    &amp;lt;!-- Horizontal Scrollbar -->
     <VirtualScrollbar
       axis=&quot;horizontal&quot;
       :total-size=&quot;10000&quot;
@@ -1206,7 +1209,7 @@ const {
 
         <h3 class="docs-section-header text-2xl mt-16">Types</h3>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
           <div class="card bg-base-300 p-4 border border-base-content/5">
             <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
             <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
@@ -1569,7 +1572,7 @@ const {
       <!-- 8. Utility Functions -->
       <section id="utility-functions">
         <h2 class="docs-section-header">Utility Functions</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6">
           <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
             <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
               Type Guards
@@ -1618,7 +1621,7 @@ const {
                 <code class="text-primary">DEFAULT_BUFFER</code>
                 <code class="opacity-60">{{ DEFAULT_BUFFER }} items</code>
               </div>
-              <div class="flex items-center justify-between text-xs md:text-sm pt-2 border-t border-base-content/5">
+              <div class="flex items-center justify-between text-xs md:text-sm">
                 <code class="text-primary">BROWSER_MAX_SIZE</code>
                 <code class="opacity-60">10,000,000px</code>
               </div>

@@ -9,7 +9,7 @@ import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 const scrollContainer = ref<Window | null>(null);
 
@@ -45,7 +45,7 @@ function handleScrollToOffset(x: number | null, y: number | null) {
 </script>
 
 <template>
-  <ExampleContainer height="auto" :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-2">Vertical Fixed Body</span>
     </template>

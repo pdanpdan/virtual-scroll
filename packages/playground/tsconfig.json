@@ -30,6 +30,7 @@
     "**/*.ts",
     "**/*.vue",
     "**/*.json",
+    "env.d.ts",
     "../virtual-scroll/src/**/*.ts",
     "../virtual-scroll/src/**/*.vue"
   ],

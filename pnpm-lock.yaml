@@ -27,6 +27,9 @@ catalogs:
     '@vitest/ui':
       specifier: ^4.0.18
       version: 4.0.18
+    '@vue/compiler-dom':
+      specifier: ^3.5.27
+      version: 3.5.27
     '@vue/test-utils':
       specifier: ^2.4.6
       version: 2.4.6
@@ -98,6 +101,9 @@ importers:
       '@vitest/ui':
         specifier: 'catalog:'
         version: 4.0.18(vitest@4.0.18)
+      '@vue/compiler-dom':
+        specifier: 'catalog:'
+        version: 3.5.27
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)

@@ -9,7 +9,7 @@ import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { createSeededRandom } from '#/lib/random';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 interface Message {
   id: number;
@@ -167,7 +167,7 @@ function scrollToBottom() {
 </script>
 
 <template>
-  <ExampleContainer :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-1">Chat Interface</span>
     </template>

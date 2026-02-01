@@ -8,7 +8,7 @@ import { inject, onMounted, onUnmounted, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 const containerRef = ref<HTMLElement | null>(null);
 const scrollX = ref(0);
@@ -87,7 +87,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <ExampleContainer :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-5">Independent Scrollbars</span>
     </template>

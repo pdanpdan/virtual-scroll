@@ -8,7 +8,7 @@ import { computed, inject, reactive, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 
-import rawCode from './+Page.vue?raw';
+import { html as highlightedCode } from './+Page.vue?highlight';
 
 interface TreeNode {
   id: string;
@@ -95,7 +95,7 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
 </script>
 
 <template>
-  <ExampleContainer :code="rawCode">
+  <ExampleContainer :code="highlightedCode">
     <template #title>
       <span class="example-title example-title--group-4">Collapsible Tree</span>
     </template>
