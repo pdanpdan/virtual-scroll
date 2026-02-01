@@ -3,7 +3,7 @@ import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 
 import { computed, onMounted, onUnmounted } from 'vue';
 
-import { currentFps, efficiency, refreshRate, startDetection, stopDetection } from '#/fps';
+import { currentFps, efficiency, refreshRate, startDetection, stopDetection } from '#/lib/fps';
 
 const props = defineProps<{
   scrollDetails: ScrollDetails | null;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { normalizeHref } from '#/navigate';
+import { normalizeHref } from '#/lib/url';
 
 const themeUrl = normalizeHref('theme.js');
 const logoUrl = normalizeHref('logo.svg');

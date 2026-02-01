@@ -7,7 +7,7 @@ import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
-import { createSeededRandom } from '#/random';
+import { createSeededRandom } from '#/lib/random';
 
 import rawCode from './+Page.vue?raw';
 

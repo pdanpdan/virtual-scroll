@@ -2,20 +2,17 @@
 import { usePageContext } from 'vike-vue/usePageContext';
 import { computed } from 'vue';
 
-import { matchHref, normalizeHref } from '#/navigate';
+import { matchHref, normalizeHref } from '#/lib/url';
 
-const { href } = defineProps<{
+const props = defineProps<{
   href: string;
 }>();
 
 const pageContext = usePageContext();
 
-const normalizedHref = computed(() => normalizeHref(href));
+const normalizedHref = computed(() => normalizeHref(props.href));
 
-const active = computed(() => {
-  const { urlPathname } = pageContext;
-  return matchHref(href, urlPathname);
-});
+const active = computed(() => matchHref(props.href, pageContext.urlPathname));
 </script>
 
 <template>

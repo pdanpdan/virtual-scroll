@@ -2,7 +2,7 @@
 import { usePageContext } from 'vike-vue/usePageContext';
 import { computed, inject, ref } from 'vue';
 
-import { matchHref } from '#/navigate';
+import { matchHref } from '#/lib/url';
 
 import AppLink from './AppLink.vue';
 import CodeBlock from './CodeBlock.vue';

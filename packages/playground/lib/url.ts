@@ -5,13 +5,13 @@ export function normalizeHref(href: string, addBase: boolean = true) {
   return `/${ url.split('/').filter((t) => t.length > 0).join('/') }`;
 }
 
-export function extractUrlPathname(href: string) {
-  return normalizeHref(href.startsWith(BASE_URL) ? href.slice(BASE_URL.length) : href, false);
-}
-
 export function matchHref(href: string, urlPathname: string) {
   const normalizedHref = normalizeHref(href, false);
   return urlPathname === href
     || urlPathname === normalizedHref
     || (normalizedHref !== '/' && typeof urlPathname === 'string' && urlPathname.startsWith(normalizedHref) && /[^#\w\s-]/.test(urlPathname[ normalizedHref.length ]));
+}
+
+export function extractUrlPathname(href: string) {
+  return normalizeHref(href.startsWith(BASE_URL) ? href.slice(BASE_URL.length) : href, false);
 }
