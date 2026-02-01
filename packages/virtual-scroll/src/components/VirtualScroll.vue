@@ -1287,137 +1287,139 @@ defineExpose({
 </template>
 
 <style scoped>
-.virtual-scroll-container {
-  position: relative;
-  block-size: 100%;
-  inline-size: 100%;
-  outline-offset: 1px;
+@layer components {
+  .virtual-scroll-container {
+    position: relative;
+    block-size: 100%;
+    inline-size: 100%;
+    outline-offset: 1px;
 
-  &:not(.virtual-scroll--window) {
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
+    &:not(.virtual-scroll--window) {
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
 
-  &.virtual-scroll--table {
-    display: block;
-  }
+    &.virtual-scroll--table {
+      display: block;
+    }
 
-  &.virtual-scroll--hide-scrollbar {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    &.virtual-scroll--hide-scrollbar {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
 
-    &::-webkit-scrollbar {
-      display: none;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &.virtual-scroll--horizontal,
+    &.virtual-scroll--both {
+      white-space: nowrap;
     }
   }
 
-  &.virtual-scroll--horizontal,
-  &.virtual-scroll--both {
-    white-space: nowrap;
+  .virtual-scroll-scrollbar-container {
+    position: sticky;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    block-size: 0;
+    z-index: 30;
+    pointer-events: none;
+    overflow: visible;
   }
-}
 
-.virtual-scroll-scrollbar-container {
-  position: sticky;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: 100%;
-  block-size: 0;
-  z-index: 30;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.virtual-scroll-scrollbar-viewport {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  pointer-events: none;
-}
-
-.virtual-scroll-wrapper {
-  contain: layout;
-  position: relative;
-
-  :where(.virtual-scroll--hydrated > & > .virtual-scroll-item) {
+  .virtual-scroll-scrollbar-viewport {
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: 0;
+    pointer-events: none;
   }
-}
 
-.virtual-scroll-item {
-  display: grid;
-  box-sizing: border-box;
-  will-change: transform;
+  .virtual-scroll-wrapper {
+    contain: layout;
+    position: relative;
 
-  &:where(.virtual-scroll--debug) {
-    outline: 1px dashed rgba(255, 0, 0, 0.5);
-    background-color: rgba(255, 0, 0, 0.05);
-
-    &:where(:hover) {
-      background-color: rgba(255, 0, 0, 0.1);
-      z-index: 100;
+    :where(.virtual-scroll--hydrated > & > .virtual-scroll-item) {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
     }
   }
-}
 
-.virtual-scroll-debug-info {
-  position: absolute;
-  inset-block-start: 2px;
-  inset-inline-end: 2px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 10px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  pointer-events: none;
-  z-index: 100;
-  font-family: monospace;
-}
-
-.virtual-scroll-spacer {
-  pointer-events: none;
-}
-
-.virtual-scroll-header,
-.virtual-scroll-footer {
-  position: relative;
-  z-index: 20;
-}
-
-.virtual-scroll--sticky {
-  position: sticky;
-
-  &:where(.virtual-scroll-header) {
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    min-inline-size: 100%;
+  .virtual-scroll-item {
+    display: grid;
     box-sizing: border-box;
+    will-change: transform;
+
+    &:where(.virtual-scroll--debug) {
+      outline: 1px dashed rgba(255, 0, 0, 0.5);
+      background-color: rgba(255, 0, 0, 0.05);
+
+      &:where(:hover) {
+        background-color: rgba(255, 0, 0, 0.1);
+        z-index: 100;
+      }
+    }
   }
 
-  &:where(.virtual-scroll-footer) {
-    inset-block-end: 0;
-    inset-inline-start: 0;
-    min-inline-size: 100%;
-    box-sizing: border-box;
+  .virtual-scroll-debug-info {
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-end: 2px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 100;
+    font-family: monospace;
   }
 
-  &:where(.virtual-scroll-item) {
-    z-index: 10;
+  .virtual-scroll-spacer {
+    pointer-events: none;
   }
-}
 
-:is(tbody.virtual-scroll-wrapper, thead.virtual-scroll-header, tfoot.virtual-scroll-footer) {
-  display: inline-flex;
-  min-inline-size: 100%;
-  & > :deep(tr) {
+  .virtual-scroll-header,
+  .virtual-scroll-footer {
+    position: relative;
+    z-index: 20;
+  }
+
+  .virtual-scroll--sticky {
+    position: sticky;
+
+    &:where(.virtual-scroll-header) {
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      min-inline-size: 100%;
+      box-sizing: border-box;
+    }
+
+    &:where(.virtual-scroll-footer) {
+      inset-block-end: 0;
+      inset-inline-start: 0;
+      min-inline-size: 100%;
+      box-sizing: border-box;
+    }
+
+    &:where(.virtual-scroll-item) {
+      z-index: 10;
+    }
+  }
+
+  :is(tbody.virtual-scroll-wrapper, thead.virtual-scroll-header, tfoot.virtual-scroll-footer) {
     display: inline-flex;
     min-inline-size: 100%;
+    & > :deep(tr) {
+      display: inline-flex;
+      min-inline-size: 100%;
 
-    & > :is(td, th) {
-      display: inline-block;
-      align-items: center;
+      & > :is(td, th) {
+        display: inline-block;
+        align-items: center;
+      }
     }
   }
 }
