@@ -1,5 +1,25 @@
 # Changelog
 
+# [0.5.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.4.0...v0.5.0) (2026-02-01)
+
+
+### Bug Fixes
+
+* add defensive guards to watchers and safety checks for calculations ([f5da01f](https://github.com/pdanpdan/virtual-scroll/commit/f5da01f17ba51ad7f9b84c3b6fc7c07f10377638))
+* **playground:** improve active link scrolling logic in navigation drawer ([468f837](https://github.com/pdanpdan/virtual-scroll/commit/468f8374148c08ae1bb411b4b3561224a14c21a7))
+
+
+### Features
+
+* add VirtualScrollbar component and useVirtualScrollbar composable ([ef3c183](https://github.com/pdanpdan/virtual-scroll/commit/ef3c1838b7564bfe2d1d747191ff8e17debed6bb))
+* code optimization - reduce duplication ([a064de8](https://github.com/pdanpdan/virtual-scroll/commit/a064de868a4ca2241e9c204790e6b7d98a92080c))
+* enhance VirtualScroll component with scrollbars and emulated touch ([0937c06](https://github.com/pdanpdan/virtual-scroll/commit/0937c06150366ce7c10308d6a0b0b66743a055a7))
+* implement coordinate scaling and RTL support for massive lists ([12799ab](https://github.com/pdanpdan/virtual-scroll/commit/12799aba4d81563b983f28c4af107e1651db3d80))
+* remove duplicate code ([1cb985e](https://github.com/pdanpdan/virtual-scroll/commit/1cb985ea430f85c5ee4775af1354723708fed284))
+* **virtual-scrollbar:** reorganize props exported by useVirtualScrollbar composable ([2115f3c](https://github.com/pdanpdan/virtual-scroll/commit/2115f3c65eaf96a7cd77ce0c05c7e1c09cb83454))
+* **virtual-scroll:** improve SSR visual accuracy and scaling synchronization ([54117ea](https://github.com/pdanpdan/virtual-scroll/commit/54117eaa41627e41f4901554cbf40f1fa7d69fa8))
+* **virtual-scroll:** move styles in components layer ([bd153fd](https://github.com/pdanpdan/virtual-scroll/commit/bd153fd90104d8902c30121b8e524e452ba0aea5))
+
 # [0.4.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.3.0...v0.4.0) (2026-01-23)
 
 
