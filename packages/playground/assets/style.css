@@ -566,6 +566,14 @@ html, body {
       @apply rotate-180;
     }
   }
+
+  &.sheet-handle-icon--bottom {
+    @apply mx-2 rotate-90;
+
+    :popover-open & {
+      @apply rotate-270;
+    }
+  }
 }
 
 

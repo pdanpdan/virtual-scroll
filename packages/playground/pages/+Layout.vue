@@ -165,15 +165,16 @@ const patternLinks: Link[] = [
       </main>
 
       <div id="app-settings" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
-        <div class="sheet-content sheet-content-end h-fit bottom-3 translate-y-0 overflow-visible pe-1">
+        <div class="sheet-content sheet-content-bottom w-fit start-1/2 -translate-x-1/2 overflow-visible pb-1">
           <button
-            class="sheet-handle appearance-none after:hidden h-34.5 w-8"
+            class="sheet-handle appearance-none after:hidden h-8 w-36"
             popovertarget="app-settings"
             popovertargetaction="toggle"
           >
-            <div class="bg-accent text-accent-content small-caps text-lg tracking-wider rounded-l-box flex flex-col flex-nowrap items-center justify-center">
+            <div class="bg-accent text-accent-content small-caps text-lg tracking-wider rounded-t-box flex flex-nowrap items-center justify-center">
+              <div class="ms-2">Settings</div>
               <svg
-                class="sheet-handle-icon sheet-handle-icon--right"
+                class="sheet-handle-icon sheet-handle-icon--bottom"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -182,14 +183,13 @@ const patternLinks: Link[] = [
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
               </svg>
-              <div class="me-1 [writing-mode:vertical-lr] rotate-180">Settings</div>
             </div>
           </button>
 
-          <div class="flex flex-col gap-1 items-stretch px-2 bg-base-300 rounded-box shadow-soft text-sm">
-            <label class="settings-item group p-3">
+          <div class="flex max-md:flex-col max-md:items-stretch max-md:gap-1 items-center gap-2 p-2 min-w-64 bg-base-300 rounded-box shadow-soft text-sm">
+            <label class="settings-item group p-2 min-w-32">
               <span class="settings-label me-2">Theme</span>
-              <div class="swap swap-rotate me-1.5">
+              <div class="swap swap-rotate me-2">
                 <input type="checkbox" class="theme-controller" :checked="theme === 'dark'" @change="toggleTheme" />
                 <svg class="swap-off size-6 fill-primary transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
@@ -200,14 +200,14 @@ const patternLinks: Link[] = [
               </div>
             </label>
 
-            <label class="settings-item group p-3">
+            <label class="settings-item group p-2 min-w-32">
               <span class="settings-label me-2">RTL Mode</span>
-              <input v-model="rtlMode" type="checkbox" class="toggle toggle-secondary" />
+              <input v-model="rtlMode" type="checkbox" class="toggle toggle-primary" />
             </label>
 
-            <label class="settings-item group p-3">
+            <label class="settings-item group p-2 min-w-32">
               <span class="settings-label me-2">Debug Mode</span>
-              <input v-model="debugMode" type="checkbox" class="toggle toggle-error" />
+              <input v-model="debugMode" type="checkbox" class="toggle toggle-primary" />
             </label>
           </div>
         </div>

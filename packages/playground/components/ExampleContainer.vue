@@ -87,7 +87,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
     <div v-if="$slots.controls" id="virtual-scroll-controls" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
       <div class="sheet-content sheet-content-end h-fit top-1 translate-y-0 overflow-visible">
         <button
-          class="sheet-handle appearance-none after:hidden h-34.5 w-8 top-19 translate-y-0"
+          class="sheet-handle appearance-none after:hidden h-36 w-8 top-19 translate-y-0"
           popovertarget="virtual-scroll-controls"
           popovertargetaction="toggle"
         >
@@ -102,7 +102,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
             >
               <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
             </svg>
-            <div class="me-1 [writing-mode:vertical-lr] rotate-180">Controls</div>
+            <div class="me-2 [writing-mode:vertical-lr] rotate-180">Controls</div>
           </div>
         </button>
 
