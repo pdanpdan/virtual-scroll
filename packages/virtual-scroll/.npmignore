@@ -1,7 +1,11 @@
 # Workspace files
+.git/
+.github/
 .vscode/
 coverage/
 node_modules/
+dist/
+*.log
 
 # Source exclusions
 src/**/*.test.ts
