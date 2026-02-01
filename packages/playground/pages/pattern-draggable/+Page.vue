@@ -67,19 +67,21 @@ function handleDragStart(index: number, event: DragEvent) {
   draggedIndex.value = index;
 
   if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', index.toString());
-
-    // Fix for mobile browsers that might center the drag image on the touch point.
-    // We explicitly set the drag image and the offset where the finger/cursor is.
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+
+    const clientX = (event as unknown as TouchEvent).touches ? (event as unknown as TouchEvent).touches[ 0 ].clientX : event.clientX;
+    const clientY = (event as unknown as TouchEvent).touches ? (event as unknown as TouchEvent).touches[ 0 ].clientY : event.clientY;
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
     if (event.dataTransfer.setDragImage) {
       event.dataTransfer.setDragImage(target, x, y);
     }
+
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', index.toString());
   }
 }
 
@@ -173,7 +175,7 @@ function handleDragEnd() {
         <div
           role="button"
           tabindex="0"
-          class="example-vertical-item py-2 outline-none focus-visible:bg-base-300"
+          class="example-vertical-item py-2 outline-none bg-base-100 focus-visible:bg-base-300"
           :class="{
             'opacity-30': draggedIndex === index,
             'border-t-4 border-t-primary': dropTargetIndex === index && draggedIndex !== index,
@@ -196,7 +198,7 @@ function handleDragEnd() {
             <div class="text-xs opacity-40 font-mono">ID: {{ item.id }}</div>
           </div>
           <div
-            class="ms-auto cursor-grab active:cursor-grabbing opacity-30 hover:opacity-100"
+            class="ms-auto p-2 cursor-grab active:cursor-grabbing opacity-30 hover:opacity-100 touch-pan-y select-none"
             draggable="true"
           >
             <svg

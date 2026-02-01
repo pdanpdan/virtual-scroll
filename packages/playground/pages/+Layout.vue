@@ -34,14 +34,14 @@ watch(() => pageContext.urlPathname, () => {
   setTimeout(() => {
     drawerOpen.value = false;
     scrollToActiveLink();
-  }, 100);
-});
+  }, 60);
+}, { immediate: true });
 
 watch(drawerOpen, (open) => {
   if (open) {
     setTimeout(() => {
       scrollToActiveLink();
-    }, 100);
+    }, 60);
   }
 });
 
@@ -51,11 +51,17 @@ function scrollToActiveLink() {
 
     if (activeLink) {
       const containerRect = drawerRef.value.getBoundingClientRect();
-      const itemRect = activeLink.getBoundingClientRect();
-      const relativeTop = itemRect.top - containerRect.top - window.innerHeight * 0.8;
+      const linkRect = activeLink.getBoundingClientRect();
+
+      if (linkRect.top >= containerRect.top && linkRect.bottom <= containerRect.bottom) {
+        return;
+      }
+
+      const relativeTop = linkRect.top - containerRect.top;
+      const targetScrollTop = drawerRef.value.scrollTop + relativeTop - (containerRect.height / 2) + (linkRect.height / 2);
 
       drawerRef.value.scrollTo({
-        top: relativeTop,
+        top: targetScrollTop,
         behavior: 'smooth',
       });
     }
@@ -69,8 +75,6 @@ onMounted(() => {
   } else {
     theme.value = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
-
-  scrollToActiveLink();
 });
 
 watch(theme, (newTheme) => {
