@@ -1,0 +1,1 @@
+function e(e){let t=e;return function(){return t=t*16807%2147483647,t/2147483647}}export{e as t};
