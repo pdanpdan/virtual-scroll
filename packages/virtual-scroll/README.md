@@ -13,7 +13,8 @@ The library automatically calculates a scaling factor and applies a specialized 
 
 ### Core Rendering Rule
 Items are rendered at their VU size and positioned using `translateY()` based on the current display scroll position and their virtual offset. This prevents "jumping" and maintains sub-pixel precision even at extreme scales.
-- **Virtual Scrollbars**: Fully customizable virtual scrollbars that replace native ones, perfect for consistent cross-browser styling.
+- **Virtual Scrollbars**: Highly optimized virtual scrollbars that replace native ones, providing consistent cross-browser styling and handling massive content scales. Supports custom slots for complete UI control.
+- **Performance Optimized**: Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
 - **Dynamic & Fixed Sizes**: Supports both uniform item sizes and variable sizes via `ResizeObserver`.
 - **Multi-Directional**: Works in `vertical`, `horizontal`, or `both` (grid) directions.
 - **Container Flexibility**: Can use a custom element or the browser `window`/`body` as the scroll container.
@@ -130,12 +131,13 @@ const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ 
 - `item`: Scoped slot for individual items. Provides `item`, `index`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
 - `loading`: Content shown at the end when `loading` prop is true.
-- `scrollbar`: Scoped slot for custom scrollbar.
+- `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.
+    - `axis`: `'vertical' | 'horizontal'`
     - `positionPercent`: current position (0-1).
     - `viewportPercent`: viewport percentage (0-1).
-    - `trackProps`: attributes/listeners for track. Bind with `v-bind="trackProps"`. See [ScrollbarSlotProps](#scrollbarslotprops).
-    - `thumbProps`: attributes/listeners for thumb. Bind with `v-bind="thumbProps"`. See [ScrollbarSlotProps](#scrollbarslotprops).
-    - `scrollbarProps`: grouped props for `VirtualScrollbar` component.
+    - `trackProps`: Attributes/listeners for the track. Bind with `v-bind="trackProps"`.
+    - `thumbProps`: Attributes/listeners for the thumb. Bind with `v-bind="thumbProps"`.
+    - `scrollbarProps`: Grouped props for the `VirtualScrollbar` component.
         - `axis`: `'vertical' | 'horizontal'`
         - `totalSize`: virtual content size in pixels.
         - `position`: current virtual scroll offset.
@@ -233,6 +235,8 @@ The `scrollbar` slot provides everything needed to build a fully custom interfac
 
 ### CSS Variables for Default Scrollbar
 
+The default scrollbar uses CSS `@layer components` for better isolation and customization.
+
 | Variable | Default (Light/Dark) | Description |
 |----------|-----------------|-------------|
 | `--vs-scrollbar-bg` | `rgba(230,230,230,0.9) / rgba(30,30,30,0.9)` | Track background color. |
@@ -309,6 +313,8 @@ Values: `'start' | 'center' | 'end' | 'auto'`
 #### `ScrollbarSlotProps`
 - `positionPercent`: current position as a percentage (0 to 1).
 - `viewportPercent`: viewport as a percentage of total size (0 to 1).
+- `thumbSizePercent`: calculated thumb size as a percentage of the track (0 to 100).
+- `thumbPositionPercent`: calculated thumb position as a percentage of the track (0 to 100).
 - `trackProps`: attributes/listeners for track. Bind with `v-bind="trackProps"`.
 - `thumbProps`: attributes/listeners for thumb. Bind with `v-bind="thumbProps"`.
 - `scrollbarProps`: grouped props for `VirtualScrollbar` component.
@@ -319,6 +325,7 @@ Values: `'start' | 'center' | 'end' | 'auto'`
     - `scrollToOffset`: `(offset: number) => void`
     - `containerId`: unique ID of the container.
     - `isRtl`: `boolean`
+- `isDragging`: whether the scrollbar thumb is currently being dragged.
 
 #### `ScrollDetails`
 - `items`: `RenderedItem<T>[]`

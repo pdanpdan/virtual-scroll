@@ -191,21 +191,21 @@ function onScroll(details: ScrollDetails) {
         <div
           v-if="axis === 'vertical'"
           v-bind="trackProps"
-          class="w-2 bg-primary/10 rounded-full z-30"
+          class="w-4 bg-primary/25 end-0 rounded-e-none rounded-s-xl overflow-clip"
         >
           <div
             v-bind="thumbProps"
-            class="bg-primary/60 rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
+            class="bg-primary/60 hover:bg-primary/90 transition-colors rounded-sm"
           />
         </div>
         <div
           v-else-if="axis === 'horizontal'"
           v-bind="trackProps"
-          class="h-2 bg-secondary/10 rounded-full z-30"
+          class="h-4 bg-secondary/25 bottom-0 rounded-b-none rounded-t-xl overflow-clip"
         >
           <div
             v-bind="thumbProps"
-            class="bg-secondary/60 h-full rounded-full cursor-pointer hover:bg-secondary/90 transition-colors"
+            class="bg-secondary/60 hover:bg-secondary/90 transition-colors rounded-sm"
           />
         </div>
       </template>

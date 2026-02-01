@@ -570,10 +570,13 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <tr><td><code>positionPercent</code></td><td><code>number</code></td><td>Scroll position percentage (0-1).</td></tr>
                 <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible viewport size.</td></tr>
                 <tr><td><code>viewportPercent</code></td><td><code>number</code></td><td>Viewport percentage of total (0-1).</td></tr>
+                <tr><td><code>thumbSizePercent</code></td><td><code>number</code></td><td>Calculated thumb size percentage (0-100).</td></tr>
+                <tr><td><code>thumbPositionPercent</code></td><td><code>number</code></td><td>Calculated thumb position percentage (0-100).</td></tr>
                 <tr><td><code>scrollToOffset</code></td><td><code>Function</code></td><td>Scroll to pixel offset on this axis.</td></tr>
                 <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Current RTL state.</td></tr>
-                <tr><td><code>trackProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the track. Bind with <code>v-bind="trackProps"</code>.</td></tr>
-                <tr><td><code>thumbProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the thumb. Bind with <code>v-bind="thumbProps"</code>.</td></tr>
+                <tr><td><code>trackProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the track. Bind with <code>v-bind="trackProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
+                <tr><td><code>thumbProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the thumb. Bind with <code>v-bind="thumbProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
+                <tr><td><code>isDragging</code></td><td><code>boolean</code></td><td>Whether the thumb is currently being dragged.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1157,12 +1160,12 @@ const {
                 <tr>
                   <td><code class="text-secondary font-bold">trackProps</code></td>
                   <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link">object</a>&gt;</code></td>
-                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element.</td>
+                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element. Includes <code>class</code> and <code>style</code>.</td>
                 </tr>
                 <tr>
                   <td><code class="text-secondary font-bold">thumbProps</code></td>
                   <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link">object</a>&gt;</code></td>
-                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element.</td>
+                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element. Includes <code>class</code> and <code>style</code>.</td>
                 </tr>
                 <tr>
                   <td><code class="text-secondary font-bold">viewportPercent</code></td>
@@ -1177,12 +1180,17 @@ const {
                 <tr>
                   <td><code class="text-secondary font-bold">thumbSizePercent</code></td>
                   <td><code>ComputedRef&lt;number&gt;</code></td>
-                  <td>Calculated thumb size (percentage of track, min 10%).</td>
+                  <td>Calculated thumb size (percentage of track, 0-100).</td>
                 </tr>
                 <tr>
                   <td><code class="text-secondary font-bold">thumbPositionPercent</code></td>
                   <td><code>ComputedRef&lt;number&gt;</code></td>
-                  <td>Calculated thumb position (percentage of track).</td>
+                  <td>Calculated thumb position (percentage of track, 0-100).</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">isDragging</code></td>
+                  <td><code>Ref&lt;boolean&gt;</code></td>
+                  <td>Whether the thumb is currently being dragged.</td>
                 </tr>
               </tbody>
             </table>

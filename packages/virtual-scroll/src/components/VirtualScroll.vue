@@ -912,9 +912,12 @@ const verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => {
   return {
     positionPercent: verticalScrollbar.positionPercent.value,
     viewportPercent: verticalScrollbar.viewportPercent.value,
+    thumbSizePercent: verticalScrollbar.thumbSizePercent.value,
+    thumbPositionPercent: verticalScrollbar.thumbPositionPercent.value,
     trackProps: verticalScrollbar.trackProps.value,
     thumbProps: verticalScrollbar.thumbProps.value,
     scrollbarProps,
+    isDragging: verticalScrollbar.isDragging.value,
   };
 });
 
@@ -940,9 +943,12 @@ const horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => {
   return {
     positionPercent: horizontalScrollbar.positionPercent.value,
     viewportPercent: horizontalScrollbar.viewportPercent.value,
+    thumbSizePercent: horizontalScrollbar.thumbSizePercent.value,
+    thumbPositionPercent: horizontalScrollbar.thumbPositionPercent.value,
     trackProps: horizontalScrollbar.trackProps.value,
     thumbProps: horizontalScrollbar.thumbProps.value,
     scrollbarProps,
+    isDragging: horizontalScrollbar.isDragging.value,
   };
 });
 

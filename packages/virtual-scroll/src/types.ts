@@ -378,6 +378,10 @@ export interface ScrollbarSlotProps {
   positionPercent: number;
   /** Viewport size as a percentage of total size (0 to 1). */
   viewportPercent: number;
+  /** Calculated thumb size as a percentage of the track size (0 to 100). */
+  thumbSizePercent: number;
+  /** Calculated thumb position as a percentage of the track size (0 to 100). */
+  thumbPositionPercent: number;
 
   /**
    * Attributes and event listeners to be bound to the scrollbar track element.
@@ -396,6 +400,9 @@ export interface ScrollbarSlotProps {
    * Useful for passing directly to `<VirtualScrollbar v-bind="scrollbarProps" />`.
    */
   scrollbarProps: VirtualScrollbarProps;
+
+  /** Whether the thumb is currently being dragged. */
+  isDragging: boolean;
 }
 
 /** Properties passed to the 'item' scoped slot. */

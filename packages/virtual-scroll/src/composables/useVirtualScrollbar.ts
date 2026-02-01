@@ -56,47 +56,40 @@ export function useVirtualScrollbar(props: UseVirtualScrollbarProps) {
   });
 
   const thumbSizePercent = computed(() => {
-    // Minimum thumb size in pixels
-    const minThumbSize = 20;
+    // Minimum thumb size in pixels (32px for better touch targets and visibility)
+    const minThumbSize = 32;
     const minPercent = viewportSize.value > 0 ? (minThumbSize / viewportSize.value) : 0.1;
     return Math.max(Math.min(minPercent, 0.1), viewportPercent.value) * 100;
   });
+  /** Calculated thumb position as a percentage of the track size (0 to 100). */
   const thumbPositionPercent = computed(() => positionPercent.value * (100 - thumbSizePercent.value));
 
+  /** Reactive style object for the scrollbar thumb. */
   const thumbStyle = computed(() => {
     if (isHorizontal.value) {
       return {
-        position: 'absolute' as const,
         inlineSize: `${ thumbSizePercent.value }%`,
         insetInlineStart: `${ thumbPositionPercent.value }%`,
-        blockSize: '100%',
       };
     }
     return {
-      position: 'absolute' as const,
       blockSize: `${ thumbSizePercent.value }%`,
       insetBlockStart: `${ thumbPositionPercent.value }%`,
-      inlineSize: '100%',
     };
   });
 
+  /** Reactive style object for the scrollbar track. */
   const trackStyle = computed(() => {
     const displayViewportSize = viewportSize.value;
     const scrollbarGap = 'var(--vs-scrollbar-has-cross-gap, var(--vsi-scrollbar-has-cross-gap, 0)) * var(--vs-scrollbar-cross-gap, var(--vsi-scrollbar-size, 8px))';
-    if (isHorizontal.value) {
-      return {
+
+    return isHorizontal.value
+      ? {
         inlineSize: `calc(${ Math.max(0, displayViewportSize - 4) }px - ${ scrollbarGap })`,
-        position: 'absolute' as const,
-        insetInlineStart: '2px',
-        insetBlockEnd: '2px',
+      }
+      : {
+        blockSize: `calc(${ Math.max(0, displayViewportSize - 4) }px - ${ scrollbarGap })`,
       };
-    }
-    return {
-      blockSize: `calc(${ Math.max(0, displayViewportSize - 4) }px - ${ scrollbarGap })`,
-      position: 'absolute' as const,
-      insetBlockStart: '2px',
-      insetInlineEnd: '2px',
-    };
   });
 
   const isDragging = ref(false);
@@ -193,10 +186,11 @@ export function useVirtualScrollbar(props: UseVirtualScrollbarProps) {
   }
 
   const trackProps = computed(() => ({
-    style: {
-      ...trackStyle.value,
-      pointerEvents: 'auto' as const,
-    },
+    class: [
+      'virtual-scrollbar-track',
+      `virtual-scrollbar-track--${ isHorizontal.value ? 'horizontal' : 'vertical' }`,
+    ],
+    style: trackStyle.value,
     role: 'scrollbar',
     'aria-orientation': axis.value,
     'aria-valuenow': Math.round(position.value),
@@ -208,10 +202,14 @@ export function useVirtualScrollbar(props: UseVirtualScrollbarProps) {
   }));
 
   const thumbProps = computed(() => ({
-    style: {
-      ...thumbStyle.value,
-      pointerEvents: 'auto' as const,
-    },
+    class: [
+      'virtual-scrollbar-thumb',
+      `virtual-scrollbar-thumb--${ isHorizontal.value ? 'horizontal' : 'vertical' }`,
+      {
+        'virtual-scrollbar-thumb--active': isDragging.value,
+      },
+    ],
+    style: thumbStyle.value,
     onPointerdown: handleThumbPointerDown,
     onPointermove: handleThumbPointerMove,
     onPointerup: handleThumbPointerUp,
@@ -231,9 +229,9 @@ export function useVirtualScrollbar(props: UseVirtualScrollbarProps) {
     trackStyle,
     /** Reactive style object for the scrollbar thumb. */
     thumbStyle,
-    /** attributes and event listeners to be bound to the track element. */
+    /** Attributes and event listeners to be bound to the track element. */
     trackProps,
-    /** attributes and event listeners to be bound to the thumb element. */
+    /** Attributes and event listeners to be bound to the thumb element. */
     thumbProps,
     /** Whether the thumb is currently being dragged. */
     isDragging,

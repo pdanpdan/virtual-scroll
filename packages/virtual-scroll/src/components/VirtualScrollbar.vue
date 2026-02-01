@@ -19,7 +19,7 @@ const emit = defineEmits<{
   (e: 'scrollToOffset', offset: number): void;
 }>();
 
-const { trackProps, thumbProps, isDragging } = useVirtualScrollbar({
+const { trackProps, thumbProps } = useVirtualScrollbar({
   axis: () => props.axis,
   totalSize: () => props.totalSize,
   position: () => props.position,
@@ -34,70 +34,69 @@ const { trackProps, thumbProps, isDragging } = useVirtualScrollbar({
 </script>
 
 <template>
-  <div
-    class="virtual-scrollbar-track"
-    :class="[`virtual-scrollbar-track--${ axis }`]"
-    v-bind="trackProps"
-  >
-    <div
-      class="virtual-scrollbar-thumb"
-      :class="[
-        `virtual-scrollbar-thumb--${ axis }`,
-        { 'virtual-scrollbar-thumb--active': isDragging },
-      ]"
-      v-bind="thumbProps"
-    />
+  <div v-bind="trackProps">
+    <div v-bind="thumbProps" />
   </div>
 </template>
 
-<style scoped>
-.virtual-scrollbar-track {
-  --vsi-scrollbar-bg: var(--vs-scrollbar-bg, rgba(230, 230, 230, 0.9));
-  --vsi-scrollbar-thumb-bg: var(--vs-scrollbar-thumb-bg, rgba(0, 0, 0, 0.3));
-  --vsi-scrollbar-thumb-hover-bg: var(--vs-scrollbar-thumb-hover-bg, rgba(0, 0, 0, 0.6));
+<style>
+@layer components {
+  .virtual-scrollbar-track {
+    --vsi-scrollbar-bg: var(--vs-scrollbar-bg, rgba(230, 230, 230, 0.9));
+    --vsi-scrollbar-thumb-bg: var(--vs-scrollbar-thumb-bg, rgba(0, 0, 0, 0.3));
+    --vsi-scrollbar-thumb-hover-bg: var(--vs-scrollbar-thumb-hover-bg, rgba(0, 0, 0, 0.6));
 
-  --vsi-scrollbar-bg: var(--vs-scrollbar-bg, light-dark(rgba(230, 230, 230, 0.9), rgba(30, 30, 30, 0.9)));
-  --vsi-scrollbar-thumb-bg: var(--vs-scrollbar-thumb-bg, light-dark(rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3)));
-  --vsi-scrollbar-thumb-hover-bg: var(--vs-scrollbar-thumb-hover-bg, light-dark(rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.6)));
+    --vsi-scrollbar-bg: var(--vs-scrollbar-bg, light-dark(rgba(230, 230, 230, 0.9), rgba(30, 30, 30, 0.9)));
+    --vsi-scrollbar-thumb-bg: var(--vs-scrollbar-thumb-bg, light-dark(rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3)));
+    --vsi-scrollbar-thumb-hover-bg: var(--vs-scrollbar-thumb-hover-bg, light-dark(rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.6)));
 
-  --vsi-scrollbar-radius: var(--vs-scrollbar-radius, 4px);
-  --vsi-scrollbar-size: var(--vs-scrollbar-size, 8px);
+    --vsi-scrollbar-radius: var(--vs-scrollbar-radius, 4px);
+    --vsi-scrollbar-size: var(--vs-scrollbar-size, 8px);
 
-  position: absolute;
-  background-color: var(--vsi-scrollbar-bg);
-  border-radius: var(--vsi-scrollbar-radius);
-  z-index: 30;
-  transition: opacity 0.2s;
-  user-select: none;
-  -webkit-user-select: none;
+    position: absolute;
+    contain: layout;
+    background-color: var(--vsi-scrollbar-bg);
+    border-radius: var(--vsi-scrollbar-radius);
+    z-index: 30;
+    transition: opacity 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: auto;
 
-  &.virtual-scrollbar-track--vertical {
-    inline-size: var(--vsi-scrollbar-size);
+    &.virtual-scrollbar-track--vertical {
+      inline-size: var(--vsi-scrollbar-size);
+      inset-block-start: 2px;
+      inset-inline-end: 2px;
+    }
+
+    &.virtual-scrollbar-track--horizontal {
+      block-size: var(--vsi-scrollbar-size);
+      inset-inline-start: 2px;
+      inset-block-end: 2px;
+    }
   }
 
-  &.virtual-scrollbar-track--horizontal {
-    block-size: var(--vsi-scrollbar-size);
-  }
-}
+  .virtual-scrollbar-thumb {
+    position: absolute;
+    background-color: var(--vsi-scrollbar-thumb-bg);
+    border-radius: var(--vsi-scrollbar-radius);
+    touch-action: none;
+    pointer-events: auto;
+    cursor: pointer;
 
-.virtual-scrollbar-thumb {
-  position: absolute;
-  background-color: var(--vsi-scrollbar-thumb-bg);
-  border-radius: var(--vsi-scrollbar-radius);
-  touch-action: none;
+    &:hover,
+    &:active,
+    &.virtual-scrollbar-thumb--active {
+      background-color: var(--vsi-scrollbar-thumb-hover-bg);
+    }
 
-  &:hover,
-  &:active,
-  &.virtual-scrollbar-thumb--active {
-    background-color: var(--vsi-scrollbar-thumb-hover-bg);
-  }
+    &.virtual-scrollbar-thumb--vertical {
+      inline-size: 100%;
+    }
 
-  &.virtual-scrollbar-thumb--vertical {
-    inline-size: 100%;
-  }
-
-  &.virtual-scrollbar-thumb--horizontal {
-    block-size: 100%;
+    &.virtual-scrollbar-thumb--horizontal {
+      block-size: 100%;
+    }
   }
 }
 </style>

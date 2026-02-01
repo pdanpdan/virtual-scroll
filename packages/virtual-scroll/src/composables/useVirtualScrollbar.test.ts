@@ -13,8 +13,8 @@ function setup(propsValue: UseVirtualScrollbarProps) {
   const TestComponent = defineComponent({
     setup() {
       result = useVirtualScrollbar(propsValue);
-      return () => h('div', { class: 'track', ...result.trackProps.value }, [
-        h('div', { class: 'thumb', ...result.thumbProps.value }),
+      return () => h('div', result.trackProps.value, [
+        h('div', result.thumbProps.value),
       ]);
     },
   });
@@ -47,7 +47,8 @@ describe('useVirtualScrollbar', () => {
       expect(result.thumbPositionPercent.value).toBe(20);
 
       expect(result.thumbStyle.value).toMatchObject({
-        position: 'absolute',
+        blockSize: '20%',
+        insetBlockStart: '20%',
       });
     });
 
@@ -135,7 +136,7 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset,
       });
 
-      const track = wrapper.find('.track');
+      const track = wrapper.find('.virtual-scrollbar-track');
       vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
         bottom: 200,
         height: 100,
@@ -168,7 +169,7 @@ describe('useVirtualScrollbar', () => {
         isRtl: false,
       });
 
-      const track = wrapper.find('.track');
+      const track = wrapper.find('.virtual-scrollbar-track');
       vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
         bottom: 10,
         height: 10,
@@ -197,7 +198,7 @@ describe('useVirtualScrollbar', () => {
         isRtl: true,
       });
 
-      const track = wrapper.find('.track');
+      const track = wrapper.find('.virtual-scrollbar-track');
       vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
         bottom: 10,
         height: 10,
@@ -263,7 +264,7 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset,
       });
 
-      const thumb = wrapper.find('.thumb');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
 
       vi.spyOn(wrapper.element as HTMLElement, 'getBoundingClientRect').mockReturnValue({
         bottom: 100,
@@ -305,8 +306,8 @@ describe('useVirtualScrollbar', () => {
         isRtl: false,
       });
 
-      const thumb = wrapper.find('.thumb');
-      const track = wrapper.find('.track');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
+      const track = wrapper.find('.virtual-scrollbar-track');
 
       vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
         bottom: 10,
@@ -341,7 +342,7 @@ describe('useVirtualScrollbar', () => {
         isRtl: true,
       });
 
-      const thumb = wrapper.find('.thumb');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
 
       vi.spyOn(wrapper.element as HTMLElement, 'getBoundingClientRect').mockReturnValue({
         bottom: 10,
@@ -418,7 +419,7 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset,
       });
 
-      const thumb = wrapper.find('.thumb');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
       thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
       expect(scrollToOffset).not.toHaveBeenCalled();
     });
@@ -433,7 +434,7 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset,
       });
 
-      const thumb = wrapper.find('.thumb');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
 
       // mousedown on thumb bubbles up to track
       await thumb.trigger('mousedown');
@@ -452,8 +453,8 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset,
       });
 
-      const thumb = wrapper.find('.thumb');
-      const track = wrapper.find('.track');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
+      const track = wrapper.find('.virtual-scrollbar-track');
 
       thumb.element.setPointerCapture = vi.fn();
 
@@ -490,7 +491,7 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset,
       });
 
-      const thumb = wrapper.find('.thumb');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
       thumb.element.setPointerCapture = vi.fn();
 
       thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
@@ -515,7 +516,7 @@ describe('useVirtualScrollbar', () => {
         scrollToOffset: vi.fn(),
       });
 
-      const thumb = wrapper.find('.thumb');
+      const thumb = wrapper.find('.virtual-scrollbar-thumb');
       thumb.element.releasePointerCapture = vi.fn();
 
       thumb.element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));

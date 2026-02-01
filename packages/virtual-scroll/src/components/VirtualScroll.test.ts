@@ -1809,7 +1809,7 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      expect((verticalThumb.element as HTMLElement).style.blockSize).toBe('4%');
+      expect((verticalThumb.element as HTMLElement).style.blockSize).toBe('6.4%');
     });
 
     it('scrolls when clicking on vertical scrollbar track', async () => {
