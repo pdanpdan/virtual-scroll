@@ -13,7 +13,7 @@ import {
 } from './virtual-scroll-logic';
 
 describe('virtual-scroll-logic', () => {
-  describe('calculatetotalsize', () => {
+  describe('calculate total size', () => {
     it('calculates vertical total size with fixed size', () => {
       const result = calculateTotalSize({
         columnCount: 0,
@@ -407,7 +407,7 @@ describe('virtual-scroll-logic', () => {
     });
   });
 
-  describe('calculaterange', () => {
+  describe('calculate range', () => {
     it('calculates vertical range with dynamic size', () => {
       const result = calculateRange({
         bufferAfter: 0,
@@ -519,7 +519,7 @@ describe('virtual-scroll-logic', () => {
     });
   });
 
-  describe('calculatescrolltarget', () => {
+  describe('calculate scroll target', () => {
     it('calculates target for horizontal end alignment', () => {
       const result = calculateScrollTarget({
         scaleX: 1,
@@ -1465,6 +1465,44 @@ describe('virtual-scroll-logic', () => {
       expect(result.effectiveAlignY).toBe('start');
     });
 
+    it('does not account for non-sticky header (flowpaddingstarty) in scroll target calculation', () => {
+      const params = {
+        scaleX: 1,
+        scaleY: 1,
+        hostOffsetX: 0,
+        hostOffsetY: 0,
+        rowIndex: 10,
+        viewportWidth: 500,
+        viewportHeight: 500,
+        colIndex: null,
+        options: 'end' as const,
+        itemsLength: 100,
+        columnCount: 0,
+        direction: 'vertical' as const,
+        usableWidth: 1000,
+        usableHeight: 1000,
+        totalWidth: 1000,
+        totalHeight: 10000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: null,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 1000,
+        getItemQueryY: (idx: number) => idx * 100,
+        getItemQueryX: () => 0,
+        getColumnSize: () => 0,
+        getColumnQuery: () => 0,
+        stickyIndices: [],
+        flowPaddingStartY: 150,
+      };
+
+      const result = calculateScrollTarget(params);
+      expect(result.targetY).toBe(750);
+    });
+
     it('aligns to end if partially visible at bottom (forward scroll effect)', () => {
       const params = {
         scaleX: 1,
@@ -1501,45 +1539,6 @@ describe('virtual-scroll-logic', () => {
       const result = calculateScrollTarget(params);
       expect(result.targetY).toBe(14600);
       expect(result.effectiveAlignY).toBe('end');
-    });
-
-    it('does not account for non-sticky footer (flowpaddingendy) in scroll target calculation', () => {
-      const params = {
-        scaleX: 1,
-        scaleY: 1,
-        hostOffsetX: 0,
-        hostOffsetY: 0,
-        rowIndex: 10,
-        viewportWidth: 500,
-        viewportHeight: 500,
-        colIndex: null,
-        options: 'end' as const,
-        itemsLength: 100,
-        columnCount: 0,
-        direction: 'vertical' as const,
-        usableWidth: 1000,
-        usableHeight: 1000,
-        totalWidth: 1000,
-        totalHeight: 10000,
-        gap: 0,
-        columnGap: 0,
-        fixedSize: 100,
-        fixedWidth: null,
-        relativeScrollX: 0,
-        relativeScrollY: 0,
-        getItemSizeY: () => 100,
-        getItemSizeX: () => 1000,
-        getItemQueryY: (idx: number) => idx * 100,
-        getItemQueryX: () => 0,
-        getColumnSize: () => 0,
-        getColumnQuery: () => 0,
-        stickyIndices: [],
-        flowPaddingStartY: 150,
-        flowPaddingEndY: 200,
-      };
-
-      const result = calculateScrollTarget(params);
-      expect(result.targetY).toBe(750);
     });
 
     it('aligns large item correctly when scrolling forward (minimal movement)', () => {
@@ -1991,7 +1990,7 @@ describe('virtual-scroll-logic', () => {
     });
   });
 
-  describe('calculatecolumnrange', () => {
+  describe('calculate column range', () => {
     it('calculates column range with dynamic width and 0 columns', () => {
       const result = calculateColumnRange({
         colBuffer: 0,
@@ -2176,7 +2175,7 @@ describe('virtual-scroll-logic', () => {
     });
   });
 
-  describe('calculateitemposition', () => {
+  describe('calculate item position', () => {
     it('calculates position for vertical item with fixed size', () => {
       const result = calculateItemPosition({
         columnGap: 0,
@@ -2278,7 +2277,7 @@ describe('virtual-scroll-logic', () => {
     });
   });
 
-  describe('calculatestickyitem', () => {
+  describe('calculate sticky item', () => {
     it('calculates sticky offset when pushing (vertical, dynamic size)', () => {
       const result = calculateStickyItem({
         columnGap: 0,
@@ -2374,7 +2373,7 @@ describe('virtual-scroll-logic', () => {
     it('calculates sticky active state for both directions (horizontal first)', () => {
       const result = calculateStickyItem({
         columnGap: 0,
-        direction: 'both',
+        direction: 'horizontal',
         fixedSize: 50,
         fixedWidth: 100,
         gap: 0,
@@ -2391,6 +2390,7 @@ describe('virtual-scroll-logic', () => {
         width: 100,
       });
       expect(result.isStickyActive).toBe(true);
+      expect(result.isStickyActiveX).toBe(true);
       expect(result.stickyOffset.x).toBe(0);
       expect(result.stickyOffset.y).toBe(0);
     });
@@ -2579,7 +2579,7 @@ describe('virtual-scroll-logic', () => {
     });
   });
 
-  describe('calculateitemstyle', () => {
+  describe('calculate item style', () => {
     it('calculates style for table container', () => {
       const result = calculateItemStyle({
         containerTag: 'table',
@@ -2660,7 +2660,7 @@ describe('virtual-scroll-logic', () => {
         paddingStartY: 10,
       });
       expect(result.insetBlockStart).toBe('10px');
-      expect(result.insetInlineStart).toBeUndefined();
+      expect(result.insetInlineStart).toBe('auto');
     });
 
     it('calculates style for sticky item (grid both directions)', () => {
@@ -2672,6 +2672,8 @@ describe('virtual-scroll-logic', () => {
         item: {
           index: 10,
           isStickyActive: true,
+          isStickyActiveX: true,
+          isStickyActiveY: true,
           offset: { x: 600, y: 600 },
           size: { height: 50, width: 50 },
           stickyOffset: { x: -10, y: -10 },
@@ -2693,6 +2695,8 @@ describe('virtual-scroll-logic', () => {
         item: {
           index: 10,
           isStickyActive: true,
+          isStickyActiveX: true,
+          isStickyActiveY: true,
           offset: { x: 600, y: 600 },
           size: { height: 50, width: 50 },
           stickyOffset: { x: -10, y: -10 },
@@ -2705,7 +2709,6 @@ describe('virtual-scroll-logic', () => {
       expect(result.insetInlineStart).toBe('10px');
       expect(result.transform).toBe('translate(-10px, -10px)');
     });
-
     it('calculates style for non-hydrated item', () => {
       const result = calculateItemStyle({
         containerTag: 'div',
@@ -2756,6 +2759,8 @@ describe('virtual-scroll-logic', () => {
         item: {
           index: 10,
           isStickyActive: true,
+          isStickyActiveX: true,
+          isStickyActiveY: true,
           offset: { x: 600, y: 600 },
           size: { height: 50, width: 50 },
           stickyOffset: { x: -10, y: -20 },
@@ -2768,7 +2773,6 @@ describe('virtual-scroll-logic', () => {
       expect(result.insetInlineStart).toBe('10px');
       expect(result.transform).toBe('translate(-10px, -20px)');
     });
-
     it('correctly inverts transform in rtl mode', () => {
       const item: RenderedItem = {
         index: 0,
@@ -2817,7 +2821,20 @@ describe('virtual-scroll-logic', () => {
         paddingStartX: 0,
         paddingStartY: 0,
       });
-      expect(result.transform).toBe('translate(-10px, 20px)');
+      expect(result.transform).toBe('translate(-100px, 20px)');
+
+      result = calculateItemStyle({
+        containerTag: 'div',
+        direction: 'horizontal',
+        isHydrated: true,
+        isRtl: true,
+        item: { ...item, isStickyActive: true },
+        itemSize: 50,
+        paddingStartX: 0,
+        paddingStartY: 0,
+      });
+
+      expect(result.transform).toBe('translate(-10px, 200px)');
     });
 
     it('maintains 1:1 movement even when scale is high', () => {

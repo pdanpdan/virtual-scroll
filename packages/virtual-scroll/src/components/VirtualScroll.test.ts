@@ -2328,5 +2328,41 @@ describe('virtualScroll', () => {
 
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(15);
     });
+
+    describe('table virtualization', () => {
+      it('correctly virtualizes when using table tags and constrained height', async () => {
+        const items = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
+        const wrapper = mount(VirtualScroll, {
+          props: {
+            items,
+            itemSize: 40,
+            containerTag: 'table',
+            wrapperTag: 'tbody',
+            itemTag: 'tr',
+            style: { height: '400px', display: 'block' },
+          },
+          slots: {
+            item: '<td class="item">{{ index }}</td>',
+          },
+        });
+
+        await nextTick();
+        // Since it's mounted in JSDOM, we need to mock clientHeight/clientWidth if they are 0
+        const el = wrapper.element as HTMLElement;
+        Object.defineProperty(el, 'clientHeight', { value: 400, configurable: true });
+        Object.defineProperty(el, 'clientWidth', { value: 800, configurable: true });
+
+        // Trigger resize observation
+        const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+        vs.refresh();
+        await nextTick();
+        await nextTick();
+
+        // 400px height / 40px itemSize = 10 items + buffer
+        const renderedCount = wrapper.findAll('tr.virtual-scroll-item').length;
+        expect(renderedCount).toBeLessThan(30);
+        expect(renderedCount).toBeGreaterThan(10);
+      });
+    });
   });
 });

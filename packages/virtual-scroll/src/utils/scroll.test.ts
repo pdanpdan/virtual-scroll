@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { getPaddingX, getPaddingY, isBody, isElement, isScrollableElement, isScrollToIndexOptions, isWindow, isWindowLike } from './scroll';
+import { getPaddingX, getPaddingY, isBody, isElement, isScrollableElement, isScrollToIndexOptions, isWindow, isWindowLike, scrollTo } from './scroll';
 
 describe('scroll utils', () => {
   describe('element type guards', () => {
-    describe('iswindow', () => {
+    describe('is window', () => {
       it('returns true for null', () => {
         expect(isWindow(null)).toBe(true);
       });
@@ -27,7 +27,7 @@ describe('scroll utils', () => {
       });
     });
 
-    describe('isbody', () => {
+    describe('is body', () => {
       it('returns true for document.body', () => {
         expect(isBody(document.body)).toBe(true);
       });
@@ -64,7 +64,7 @@ describe('scroll utils', () => {
       });
     });
 
-    describe('iswindowlike', () => {
+    describe('is window like', () => {
       it('returns true for window', () => {
         expect(isWindowLike(window)).toBe(true);
       });
@@ -87,7 +87,7 @@ describe('scroll utils', () => {
       });
     });
 
-    describe('iselement', () => {
+    describe('is element', () => {
       it('returns true for a div', () => {
         const el = document.createElement('div');
         expect(isElement(el)).toBe(true);
@@ -106,7 +106,7 @@ describe('scroll utils', () => {
       });
     });
 
-    describe('isscrollableelement', () => {
+    describe('is scrollable element', () => {
       it('returns true for a div', () => {
         const el = document.createElement('div');
         expect(isScrollableElement(el)).toBe(true);
@@ -119,7 +119,7 @@ describe('scroll utils', () => {
   });
 
   describe('options type guards', () => {
-    describe('isscrolltoindexoptions', () => {
+    describe('is scroll to index options', () => {
       it('returns true for valid options', () => {
         expect(isScrollToIndexOptions({ align: 'start' })).toBe(true);
         expect(isScrollToIndexOptions({ behavior: 'smooth' })).toBe(true);
@@ -135,7 +135,7 @@ describe('scroll utils', () => {
   });
 
   describe('padding utilities', () => {
-    describe('getpaddingx', () => {
+    describe('get padding x', () => {
       it('handles numeric padding', () => {
         expect(getPaddingX(10, 'horizontal')).toBe(10);
         expect(getPaddingX(10, 'both')).toBe(10);
@@ -153,7 +153,7 @@ describe('scroll utils', () => {
       });
     });
 
-    describe('getpaddingy', () => {
+    describe('get padding y', () => {
       it('handles numeric padding', () => {
         expect(getPaddingY(10, 'vertical')).toBe(10);
         expect(getPaddingY(10, 'both')).toBe(10);
@@ -169,6 +169,60 @@ describe('scroll utils', () => {
       it('returns 0 for undefined', () => {
         expect(getPaddingY(undefined)).toBe(0);
       });
+    });
+  });
+
+  describe('scrollTo utility', () => {
+    it('does nothing if container is undefined', () => {
+      const spy = vi.spyOn(window, 'scrollTo');
+      scrollTo(undefined, { top: 100 });
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('scrolls the window if container is null', () => {
+      const spy = vi.spyOn(window, 'scrollTo');
+      scrollTo(null, { top: 100 });
+      expect(spy).toHaveBeenCalledWith({ top: 100 });
+    });
+
+    it('scrolls the window if container is window', () => {
+      const spy = vi.spyOn(window, 'scrollTo');
+      scrollTo(window, { top: 100 });
+      expect(spy).toHaveBeenCalledWith({ top: 100 });
+    });
+
+    it('scrolls the window if container is document.documentElement', () => {
+      const spy = vi.spyOn(window, 'scrollTo');
+      scrollTo(document.documentElement, { top: 100 });
+      expect(spy).toHaveBeenCalledWith({ top: 100 });
+    });
+
+    it('scrolls an element using scrollTo if available', () => {
+      const el = document.createElement('div');
+      const spy = vi.fn();
+      el.scrollTo = spy;
+      scrollTo(el, { left: 50, top: 100 });
+      expect(spy).toHaveBeenCalledWith({ left: 50, top: 100 });
+    });
+
+    it('scrolls an element using scrollLeft/scrollTop if scrollTo is missing', () => {
+      const el = document.createElement('div');
+      // @ts-expect-error forcing missing scrollTo
+      el.scrollTo = undefined;
+      scrollTo(el, { left: 50, top: 100 });
+      expect(el.scrollLeft).toBe(50);
+      expect(el.scrollTop).toBe(100);
+    });
+
+    it('does not set undefined values on scrollLeft/scrollTop', () => {
+      const el = document.createElement('div');
+      el.scrollLeft = 10;
+      el.scrollTop = 20;
+      // @ts-expect-error forcing missing scrollTo
+      el.scrollTo = undefined;
+      scrollTo(el, { behavior: 'smooth' });
+      expect(el.scrollLeft).toBe(10);
+      expect(el.scrollTop).toBe(20);
     });
   });
 });

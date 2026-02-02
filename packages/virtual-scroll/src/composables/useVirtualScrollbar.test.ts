@@ -440,9 +440,7 @@ describe('useVirtualScrollbar', () => {
       await thumb.trigger('mousedown');
       expect(scrollToOffset).not.toHaveBeenCalled();
     });
-  });
 
-  describe('edge cases & cleanup', () => {
     it('handles scrollabletrackrange <= 0', async () => {
       const scrollToOffset = vi.fn();
       const { wrapper } = setup({
@@ -467,18 +465,6 @@ describe('useVirtualScrollbar', () => {
       thumb.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
       thumb.element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientY: 50 }));
       expect(scrollToOffset).not.toHaveBeenCalled();
-    });
-
-    it('handles missing track element during move', () => {
-      const { wrapper } = setup({
-        axis: 'vertical',
-        totalSize: 1000,
-        position: 0,
-        viewportSize: 200,
-        scrollToOffset: vi.fn(),
-      });
-
-      wrapper.unmount();
     });
 
     it('handles move with missing parent track', async () => {
@@ -521,6 +507,20 @@ describe('useVirtualScrollbar', () => {
 
       thumb.element.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
       expect(thumb.element.releasePointerCapture).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('lifecycle', () => {
+    it('handles missing track element during move', () => {
+      const { wrapper } = setup({
+        axis: 'vertical',
+        totalSize: 1000,
+        position: 0,
+        viewportSize: 200,
+        scrollToOffset: vi.fn(),
+      });
+
+      wrapper.unmount();
     });
   });
 });
