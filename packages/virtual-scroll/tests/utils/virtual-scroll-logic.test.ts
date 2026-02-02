@@ -1,4 +1,4 @@
-import type { RenderedItem } from '../types';
+import type { RenderedItem } from '../../src/types';
 
 import { describe, expect, it } from 'vitest';
 
@@ -10,7 +10,7 @@ import {
   calculateScrollTarget,
   calculateStickyItem,
   calculateTotalSize,
-} from './virtual-scroll-logic';
+} from '../../src/utils/virtual-scroll-logic';
 
 describe('virtual-scroll-logic', () => {
   describe('calculate total size', () => {

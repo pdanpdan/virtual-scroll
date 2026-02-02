@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FenwickTree } from './fenwick-tree';
+import { FenwickTree } from '../../src/utils/fenwick-tree';
 
 describe('fenwickTree', () => {
   describe('initialization', () => {

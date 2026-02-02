@@ -1,4 +1,4 @@
-import type { ItemSlotProps, ScrollbarSlotProps, ScrollDetails, VirtualScrollInstance } from '../types';
+import type { ItemSlotProps, ScrollbarSlotProps, ScrollDetails, VirtualScrollInstance } from '../../src/types';
 import type { VueWrapper } from '@vue/test-utils';
 import type { DefineComponent } from 'vue';
 
@@ -7,8 +7,8 @@ import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { h, nextTick, ref } from 'vue';
 
-import { displayToVirtual, virtualToDisplay } from '../utils/virtual-scroll-logic';
-import VirtualScroll from './VirtualScroll.vue';
+import VirtualScroll from '../../src/components/VirtualScroll.vue';
+import { displayToVirtual, virtualToDisplay } from '../../src/utils/virtual-scroll-logic';
 
 // --- Mocks ---
 

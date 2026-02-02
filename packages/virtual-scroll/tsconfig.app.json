@@ -4,14 +4,13 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "target": "esnext",
     "jsx": "react-jsx",
-
     "lib": [
       "ESNext",
       "DOM",
       "DOM.Iterable"
     ],
     "baseUrl": ".",
-    "rootDir": "./src",
+    "rootDir": "./",
     "module": "esnext",
     "moduleResolution": "bundler",
     "paths": {
@@ -34,7 +33,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "tests/**/*.test.ts"
   ],
   "exclude": [
     "node_modules",

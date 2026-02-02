@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 
-import VirtualScrollbar from './VirtualScrollbar.vue';
+import VirtualScrollbar from '../../src/components/VirtualScrollbar.vue';
 
 describe('virtualScrollbar', () => {
   describe('rendering', () => {

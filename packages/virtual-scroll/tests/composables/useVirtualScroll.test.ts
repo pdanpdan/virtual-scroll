@@ -1,12 +1,12 @@
 /* global ScrollToOptions, ResizeObserverCallback */
-import type { VirtualScrollProps } from '../types';
+import type { VirtualScrollProps } from '../../src/types';
 import type { Ref } from 'vue';
 
 import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, nextTick, ref } from 'vue';
 
-import { useVirtualScroll } from './useVirtualScroll';
+import { useVirtualScroll } from '../../src/composables/useVirtualScroll';
 
 // --- Mocks ---
 

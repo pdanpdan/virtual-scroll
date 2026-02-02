@@ -1,6 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { getPaddingX, getPaddingY, isBody, isElement, isScrollableElement, isScrollToIndexOptions, isWindow, isWindowLike, scrollTo } from './scroll';
+import {
+  getPaddingX,
+  getPaddingY,
+  isBody,
+  isElement,
+  isScrollableElement,
+  isScrollToIndexOptions,
+  isWindow,
+  isWindowLike,
+  scrollTo,
+} from '../../src/utils/scroll';
 
 describe('scroll utils', () => {
   describe('element type guards', () => {

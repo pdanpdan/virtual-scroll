@@ -1,10 +1,10 @@
-import type { UseVirtualScrollbarProps } from './useVirtualScrollbar';
+import type { UseVirtualScrollbarProps } from '../../src/composables/useVirtualScrollbar';
 
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, nextTick, ref } from 'vue';
 
-import { useVirtualScrollbar } from './useVirtualScrollbar';
+import { useVirtualScrollbar } from '../../src/composables/useVirtualScrollbar';
 
 // Helper to test composable
 function setup(propsValue: UseVirtualScrollbarProps) {
