@@ -5,7 +5,7 @@
   "description": "A high-performance virtual scroll component for Vue 3",
   "author": "",
   "license": "MIT",
-  "homepage": "https://github.com/pdanpdan/virtual-scroll#readme",
+  "homepage": "https://pdanpdan.github.io/virtual-scroll",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pdanpdan/virtual-scroll.git",

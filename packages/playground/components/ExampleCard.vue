@@ -12,21 +12,44 @@ const props = defineProps<{
   rel?: string;
 }>();
 
-const cardClass = computed(() => props.group ? `example-card--group-${ props.group }` : '');
+const cardClass = computed(() => {
+  switch (props.group) {
+    case '1': return 'example-card--group-1';
+    case '2': return 'example-card--group-2';
+    case '3': return 'example-card--group-3';
+    case '4': return 'example-card--group-4';
+    case '5': return 'example-card--group-5';
+    case '6': return 'example-card--group-6';
+    case '7': return 'example-card--group-7';
+    default: return '';
+  }
+});
 
-const titleTypeClass = computed(() => props.group ? `example-card-title-type--group-${ props.group }` : '');
+const titleTypeClass = computed(() => {
+  switch (props.group) {
+    case '1': return 'example-card-title-type--group-1';
+    case '2': return 'example-card-title-type--group-2';
+    case '3': return 'example-card-title-type--group-3';
+    case '4': return 'example-card-title-type--group-4';
+    case '5': return 'example-card-title-type--group-5';
+    case '6': return 'example-card-title-type--group-6';
+    case '7': return 'example-card-title-type--group-7';
+    default: return '';
+  }
+});
 
-const map: Record<string, string> = {
-  1: 'btn-primary',
-  2: 'btn-secondary',
-  3: 'btn-accent',
-  4: 'btn-info',
-  5: 'btn-warning',
-  6: 'btn-success',
-  7: 'btn-error',
-};
-
-const buttonClass = computed(() => map[ props.group || '' ] || '');
+const buttonClass = computed(() => {
+  switch (props.group) {
+    case '1': return 'btn-primary';
+    case '2': return 'btn-secondary';
+    case '3': return 'btn-accent';
+    case '4': return 'btn-info';
+    case '5': return 'btn-warning';
+    case '6': return 'btn-success';
+    case '7': return 'btn-error';
+    default: return '';
+  }
+});
 </script>
 
 <template>
