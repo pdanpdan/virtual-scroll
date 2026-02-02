@@ -12,8 +12,13 @@ import type { MaybeRefOrGetter } from 'vue';
 /* global ScrollToOptions */
 import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive, ref, toValue, watch } from 'vue';
 
+import {
+  DEFAULT_BUFFER,
+  DEFAULT_COLUMN_WIDTH,
+  DEFAULT_ITEM_SIZE,
+} from '../types';
 import { FenwickTree } from '../utils/fenwick-tree';
-import { BROWSER_MAX_SIZE, getPaddingX, getPaddingY, isElement, isScrollableElement, isScrollToIndexOptions, isWindowLike } from '../utils/scroll';
+import { BROWSER_MAX_SIZE, getPaddingX, getPaddingY, isElement, isScrollableElement, isScrollToIndexOptions, isWindowLike, scrollTo } from '../utils/scroll';
 import {
   calculateColumnRange,
   calculateItemPosition,
@@ -25,20 +30,6 @@ import {
   findPrevStickyIndex,
   virtualToDisplay,
 } from '../utils/virtual-scroll-logic';
-
-export {
-  type RenderedItem,
-  type ScrollAlignment,
-  type ScrollAlignmentOptions,
-  type ScrollDetails,
-  type ScrollDirection,
-  type ScrollToIndexOptions,
-  type VirtualScrollProps,
-};
-
-export const DEFAULT_ITEM_SIZE = 40;
-export const DEFAULT_COLUMN_WIDTH = 100;
-export const DEFAULT_BUFFER = 5;
 
 /**
  * Composable for virtual scrolling logic.
@@ -391,8 +382,6 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       stickyEndY: stickyEndY.value,
       flowPaddingStartX: flowStartX.value,
       flowPaddingStartY: flowStartY.value,
-      flowPaddingEndX: flowEndX.value,
-      flowPaddingEndY: flowEndY.value,
       paddingStartX: paddingStartX.value,
       paddingStartY: paddingStartY.value,
       paddingEndX: paddingEndX.value,
@@ -425,35 +414,17 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     const scrollBehavior = isCorrection ? 'auto' : (behavior || 'smooth');
     isProgrammaticScroll.value = true;
 
-    if (typeof window !== 'undefined' && container === window) {
-      window.scrollTo({
-        left: (colIndex === null || colIndex === undefined) ? undefined : (isRtl.value ? finalX : Math.max(0, finalX)),
-        top: (rowIndex === null || rowIndex === undefined) ? undefined : Math.max(0, finalY),
-        behavior: scrollBehavior,
-      } as ScrollToOptions);
-    } else if (isScrollableElement(container)) {
-      const scrollOptions: ScrollToOptions = {
-        behavior: scrollBehavior,
-      };
-
-      if (colIndex !== null && colIndex !== undefined) {
-        scrollOptions.left = (isRtl.value ? finalX : Math.max(0, finalX));
-      }
-      if (rowIndex !== null && rowIndex !== undefined) {
-        scrollOptions.top = Math.max(0, finalY);
-      }
-
-      if (typeof container.scrollTo === 'function') {
-        container.scrollTo(scrollOptions);
-      } else {
-        if (scrollOptions.left !== undefined) {
-          container.scrollLeft = scrollOptions.left;
-        }
-        if (scrollOptions.top !== undefined) {
-          container.scrollTop = scrollOptions.top;
-        }
-      }
+    const scrollOptions: ScrollToOptions = {
+      behavior: scrollBehavior,
+    };
+    if (colIndex !== null && colIndex !== undefined) {
+      scrollOptions.left = isRtl.value ? finalX : Math.max(0, finalX);
     }
+    if (rowIndex !== null && rowIndex !== undefined) {
+      scrollOptions.top = Math.max(0, finalY);
+    }
+
+    scrollTo(container, scrollOptions);
 
     if (scrollBehavior === 'auto' || scrollBehavior === undefined) {
       if (colIndex !== null && colIndex !== undefined) {
@@ -517,35 +488,17 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       : currentX;
     const targetY = (displayTargetY !== null) ? displayTargetY : currentY;
 
-    if (typeof window !== 'undefined' && container === window) {
-      window.scrollTo({
-        left: (x !== null && x !== undefined) ? targetX : undefined,
-        top: (y !== null && y !== undefined) ? targetY : undefined,
-        behavior: options?.behavior || 'auto',
-      } as ScrollToOptions);
-    } else if (isScrollableElement(container)) {
-      const scrollOptions: ScrollToOptions = {
-        behavior: options?.behavior || 'auto',
-      };
-
-      if (x !== null && x !== undefined) {
-        scrollOptions.left = targetX;
-      }
-      if (y !== null && y !== undefined) {
-        scrollOptions.top = targetY;
-      }
-
-      if (typeof container.scrollTo === 'function') {
-        container.scrollTo(scrollOptions);
-      } else {
-        if (scrollOptions.left !== undefined) {
-          container.scrollLeft = scrollOptions.left;
-        }
-        if (scrollOptions.top !== undefined) {
-          container.scrollTop = scrollOptions.top;
-        }
-      }
+    const scrollOptions: ScrollToOptions = {
+      behavior: options?.behavior || 'auto',
+    };
+    if (x !== null && x !== undefined) {
+      scrollOptions.left = targetX;
     }
+    if (y !== null && y !== undefined) {
+      scrollOptions.top = targetY;
+    }
+
+    scrollTo(container, scrollOptions);
 
     if (options?.behavior === 'auto' || options?.behavior === undefined) {
       if (x !== null && x !== undefined) {
@@ -1103,7 +1056,7 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       const originalX = x;
       const originalY = y;
 
-      const { isStickyActive, stickyOffset } = calculateStickyItem({
+      const { isStickyActive, isStickyActiveX, isStickyActiveY, stickyOffset } = calculateStickyItem({
         index: i,
         isSticky,
         direction: direction.value,
@@ -1118,18 +1071,18 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         fixedWidth: fixedColumnWidth.value,
         gap: props.value.gap || 0,
         columnGap: props.value.columnGap || 0,
-        getItemQueryY: (idx) => itemSizesY.query(idx),
-        getItemQueryX: (idx) => itemSizesX.query(idx),
+        getItemQueryY: queryYCached,
+        getItemQueryX: queryXCached,
       });
 
       const offsetX = isHydrated.value
-        ? (internalScrollX.value / scaleX.value + (originalX + itemsStartVU_X - internalScrollX.value)) - wrapperStartDU_X
-        : (originalX - ssrOffsetX);
+        ? (internalScrollX.value / scaleX.value + (x + itemsStartVU_X - internalScrollX.value)) - wrapperStartDU_X
+        : (x - ssrOffsetX);
       const offsetY = isHydrated.value
-        ? (internalScrollY.value / scaleY.value + (originalY + itemsStartVU_Y - internalScrollY.value)) - wrapperStartDU_Y
-        : (originalY - ssrOffsetY);
-      const last = lastItemsMap.get(i);
+        ? (internalScrollY.value / scaleY.value + (y + itemsStartVU_Y - internalScrollY.value)) - wrapperStartDU_Y
+        : (y - ssrOffsetY);
 
+      const last = lastItemsMap.get(i);
       if (
         last
         && last.item === item
@@ -1139,6 +1092,8 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         && last.size.height === height
         && last.isSticky === isSticky
         && last.isStickyActive === isStickyActive
+        && last.isStickyActiveX === isStickyActiveX
+        && last.isStickyActiveY === isStickyActiveY
         && last.stickyOffset.x === stickyOffset.x
         && last.stickyOffset.y === stickyOffset.y
       ) {
@@ -1153,10 +1108,9 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
           originalY,
           isSticky,
           isStickyActive,
-          stickyOffset: {
-            x: stickyOffset.x,
-            y: stickyOffset.y,
-          },
+          isStickyActiveX,
+          isStickyActiveY,
+          stickyOffset,
         });
       }
     }
@@ -1287,6 +1241,26 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     const processedRows = new Set<number>();
     const processedCols = new Set<number>();
 
+    const tryUpdateColumn = (colIdx: number, width: number) => {
+      if (colIdx >= 0 && colIdx < (props.value.columnCount || 0) && !processedCols.has(colIdx)) {
+        processedCols.add(colIdx);
+        const oldW = columnSizes.get(colIdx);
+        const targetW = width + columnGap;
+
+        if (!measuredColumns[ colIdx ] || Math.abs(oldW - targetW) > 0.1) {
+          const d = targetW - oldW;
+          if (Math.abs(d) > 0.1) {
+            columnSizes.update(colIdx, d);
+            needUpdate = true;
+            if (colIdx < firstColIndex) {
+              deltaX += d;
+            }
+          }
+          measuredColumns[ colIdx ] = 1;
+        }
+      }
+    };
+
     for (const { index, inlineSize, blockSize, element } of updates) {
       // Ignore 0-size measurements as they usually indicate hidden/detached elements
       if (inlineSize <= 0 && blockSize <= 0) {
@@ -1336,51 +1310,14 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       ) {
         const colIndexAttr = element.dataset.colIndex;
         if (colIndexAttr != null) {
-          const colIndex = Number.parseInt(colIndexAttr, 10);
-          if (colIndex >= 0 && colIndex < (props.value.columnCount || 0) && !processedCols.has(colIndex)) {
-            processedCols.add(colIndex);
-            const oldW = columnSizes.get(colIndex);
-            const targetW = inlineSize + columnGap;
-
-            if (!measuredColumns[ colIndex ] || Math.abs(oldW - targetW) > 0.1) {
-              const d = targetW - oldW;
-              if (Math.abs(d) > 0.1) {
-                columnSizes.update(colIndex, d);
-                needUpdate = true;
-                if (colIndex < firstColIndex) {
-                  deltaX += d;
-                }
-              }
-              measuredColumns[ colIndex ] = 1;
-            }
-          }
+          tryUpdateColumn(Number.parseInt(colIndexAttr, 10), inlineSize);
         } else {
           // If the element is a row, try to find cells with data-col-index
-          const cells = element.dataset.colIndex !== undefined
-            ? [ element ]
-            : Array.from(element.querySelectorAll('[data-col-index]')) as HTMLElement[];
+          const cells = Array.from(element.querySelectorAll('[data-col-index]')) as HTMLElement[];
 
           for (const child of cells) {
             const colIndex = Number.parseInt(child.dataset.colIndex!, 10);
-
-            if (colIndex >= 0 && colIndex < (props.value.columnCount || 0) && !processedCols.has(colIndex)) {
-              processedCols.add(colIndex);
-              const rect = child.getBoundingClientRect();
-              const w = rect.width;
-              const oldW = columnSizes.get(colIndex);
-              const targetW = w + columnGap;
-              if (!measuredColumns[ colIndex ] || Math.abs(oldW - targetW) > 0.1) {
-                const d = targetW - oldW;
-                if (Math.abs(d) > 0.1) {
-                  columnSizes.update(colIndex, d);
-                  needUpdate = true;
-                  if (colIndex < firstColIndex) {
-                    deltaX += d;
-                  }
-                }
-                measuredColumns[ colIndex ] = 1;
-              }
-            }
+            tryUpdateColumn(colIndex, child.getBoundingClientRect().width);
           }
         }
       }
@@ -1470,8 +1407,6 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         stickyEndY: stickyEndY.value,
         flowPaddingStartX: flowStartX.value,
         flowPaddingStartY: flowStartY.value,
-        flowPaddingEndX: flowEndX.value,
-        flowPaddingEndY: flowEndY.value,
         paddingStartX: paddingStartX.value,
         paddingStartY: paddingStartY.value,
         paddingEndX: paddingEndX.value,
@@ -1512,23 +1447,25 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
   let directionInterval: ReturnType<typeof setInterval> | undefined;
 
   const attachEvents = (container: HTMLElement | Window | null) => {
-    if (!container || typeof window === 'undefined') {
+    if (typeof window === 'undefined') {
       return;
     }
-    const scrollTarget = container === window ? document : container;
+    const effectiveContainer = container || window;
+    const scrollTarget = (effectiveContainer === window || (isElement(effectiveContainer) && effectiveContainer === document.documentElement)) ? document : effectiveContainer;
+
     scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
 
     computedStyle = null;
     updateDirection();
 
-    if (isElement(container)) {
+    if (isElement(effectiveContainer)) {
       directionObserver = new MutationObserver(() => updateDirection());
-      directionObserver.observe(container, { attributes: true, attributeFilter: [ 'dir', 'style' ] });
+      directionObserver.observe(effectiveContainer, { attributes: true, attributeFilter: [ 'dir', 'style' ] });
     }
 
     directionInterval = setInterval(updateDirection, 1000);
 
-    if (container === window) {
+    if (effectiveContainer === window) {
       viewportWidth.value = document.documentElement.clientWidth;
       viewportHeight.value = document.documentElement.clientHeight;
       scrollX.value = window.scrollX;
@@ -1541,29 +1478,28 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         updateHostOffset();
       };
       window.addEventListener('resize', onResize);
+
       return () => {
         scrollTarget.removeEventListener('scroll', handleScroll);
         window.removeEventListener('resize', onResize);
+        directionObserver?.disconnect();
         clearInterval(directionInterval);
         computedStyle = null;
       };
     } else {
-      viewportWidth.value = (container as HTMLElement).clientWidth;
-      viewportHeight.value = (container as HTMLElement).clientHeight;
-      scrollX.value = (container as HTMLElement).scrollLeft;
-      scrollY.value = (container as HTMLElement).scrollTop;
+      viewportWidth.value = (effectiveContainer as HTMLElement).clientWidth;
+      viewportHeight.value = (effectiveContainer as HTMLElement).clientHeight;
+      scrollX.value = (effectiveContainer as HTMLElement).scrollLeft;
+      scrollY.value = (effectiveContainer as HTMLElement).scrollTop;
 
-      resizeObserver = new ResizeObserver((entries) => {
+      resizeObserver = new ResizeObserver(() => {
         updateDirection();
-        for (const entry of entries) {
-          if (entry.target === container) {
-            viewportWidth.value = (container as HTMLElement).clientWidth;
-            viewportHeight.value = (container as HTMLElement).clientHeight;
-            updateHostOffset();
-          }
-        }
+        viewportWidth.value = (effectiveContainer as HTMLElement).clientWidth;
+        viewportHeight.value = (effectiveContainer as HTMLElement).clientHeight;
+        updateHostOffset();
       });
-      resizeObserver.observe(container as HTMLElement);
+      resizeObserver.observe(effectiveContainer as HTMLElement);
+
       return () => {
         scrollTarget.removeEventListener('scroll', handleScroll);
         resizeObserver?.disconnect();

@@ -5,6 +5,7 @@
  * Features include sticky headers/footers, RTL support, custom scrollbars, and scroll restoration.
  */
 import type {
+  ItemSlotProps,
   RenderedItem,
   ScrollAlignment,
   ScrollbarSlotProps,
@@ -66,39 +67,7 @@ const slots = defineSlots<{
   /**
    * Scoped slot for rendering each individual item.
    */
-  item?: (props: {
-    /** The original data item from the `items` array. */
-    item: T;
-    /** The original index of the item in the `items` array. */
-    index: number;
-    /**
-     * Information about the current visible range of columns (for grid mode).
-     * @see ColumnRange
-     */
-    columnRange: {
-      /** Index of the first rendered column. */
-      start: number;
-      /** Index of the last rendered column (exclusive). */
-      end: number;
-      /** Pixel offset from the start of the row to the first rendered cell. */
-      padStart: number;
-      /** Pixel offset from the last rendered cell to the end of the row. */
-      padEnd: number;
-    };
-    /**
-     * Helper function to get the width of a specific column.
-     * Useful for setting consistent widths in grid mode.
-     */
-    getColumnWidth: (index: number) => number;
-    /** Vertical gap between items. */
-    gap: number;
-    /** Horizontal gap between columns. */
-    columnGap: number;
-    /** Whether this item is configured to be sticky via `stickyIndices`. */
-    isSticky?: boolean | undefined;
-    /** Whether this item is currently in a sticky state (stuck at the top/start). */
-    isStickyActive?: boolean | undefined;
-  }) => VNodeChild;
+  item?: (props: ItemSlotProps<T>) => VNodeChild;
 
   /**
    * Content shown at the end of the list when the `loading` prop is true.
@@ -421,27 +390,21 @@ const extraResizeObserver = typeof window === 'undefined'
     updateHostOffset();
   });
 
-watch(headerRef, (newEl, oldEl) => {
-  if (oldEl) {
-    extraResizeObserver?.unobserve(oldEl);
-  }
-  if (newEl) {
-    extraResizeObserver?.observe(newEl);
-  } else {
-    measuredPaddingStart.value = 0;
-  }
-}, { immediate: true });
+function watchExtraRef(refEl: typeof headerRef, measuredValue: typeof measuredPaddingStart) {
+  watch(refEl, (newEl, oldEl) => {
+    if (oldEl) {
+      extraResizeObserver?.unobserve(oldEl);
+    }
+    if (newEl) {
+      extraResizeObserver?.observe(newEl);
+    } else {
+      measuredValue.value = 0;
+    }
+  }, { immediate: true });
+}
 
-watch(footerRef, (newEl, oldEl) => {
-  if (oldEl) {
-    extraResizeObserver?.unobserve(oldEl);
-  }
-  if (newEl) {
-    extraResizeObserver?.observe(newEl);
-  } else {
-    measuredPaddingEnd.value = 0;
-  }
-}, { immediate: true });
+watchExtraRef(headerRef, measuredPaddingStart);
+watchExtraRef(footerRef, measuredPaddingEnd);
 
 onMounted(() => {
   if (hostRef.value) {
@@ -868,7 +831,7 @@ const containerStyle = computed(() => {
     ...(props.direction !== 'vertical' ? { whiteSpace: 'nowrap' as const } : {}),
   };
 
-  if (showVirtualScrollbars.value) {
+  if (showVirtualScrollbars.value || !isWindowContainer.value) {
     base.overflow = 'auto';
   }
 
@@ -883,6 +846,7 @@ const containerStyle = computed(() => {
   if (props.containerTag === 'table') {
     return {
       ...base,
+      display: 'block',
       minInlineSize: props.direction === 'vertical' ? '100%' : 'auto',
     };
   }
@@ -910,6 +874,7 @@ const verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => {
   };
 
   return {
+    axis: 'vertical',
     positionPercent: verticalScrollbar.positionPercent.value,
     viewportPercent: verticalScrollbar.viewportPercent.value,
     thumbSizePercent: verticalScrollbar.thumbSizePercent.value,
@@ -941,6 +906,7 @@ const horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => {
   };
 
   return {
+    axis: 'horizontal',
     positionPercent: horizontalScrollbar.positionPercent.value,
     viewportPercent: horizontalScrollbar.viewportPercent.value,
     thumbSizePercent: horizontalScrollbar.thumbSizePercent.value,
@@ -998,7 +964,7 @@ const spacerStyle = computed(() => ({
  */
 function getItemStyle(item: RenderedItem<T>) {
   const style = calculateItemStyle({
-    containerTag: props.containerTag,
+    containerTag: props.containerTag || 'div',
     direction: props.direction,
     isHydrated: isHydrated.value,
     item,
@@ -1265,7 +1231,11 @@ defineExpose({
           :column-gap="props.columnGap"
           :is-sticky="renderedItem.isSticky"
           :is-sticky-active="renderedItem.isStickyActive"
+          :is-sticky-active-x="renderedItem.isStickyActiveX"
+          :is-sticky-active-y="renderedItem.isStickyActiveY"
+          :offset="renderedItem.offset"
         />
+
         <div v-if="isDebug" class="virtual-scroll-debug-info">
           #{{ renderedItem.index }} ({{ Math.round(renderedItem.offset.x) }}, {{ Math.round(renderedItem.offset.y) }})
         </div>
