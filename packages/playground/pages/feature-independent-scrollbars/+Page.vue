@@ -2,7 +2,7 @@
 import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
-import { VirtualScrollbar } from '@pdanpdan/virtual-scroll';
+import { EMPTY_SCROLL_DETAILS, VirtualScrollbar } from '@pdanpdan/virtual-scroll';
 import { inject, onMounted, onUnmounted, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
@@ -19,20 +19,8 @@ const viewportWidth = ref(0);
 const viewportHeight = ref(0);
 
 const mockScrollDetails = ref<ScrollDetails>({
-  items: [],
-  currentIndex: 0,
-  currentColIndex: 0,
-  currentEndIndex: 0,
-  currentEndColIndex: 0,
-  scrollOffset: { x: 0, y: 0 },
-  displayScrollOffset: { x: 0, y: 0 },
-  viewportSize: { width: 0, height: 0 },
-  displayViewportSize: { width: 0, height: 0 },
+  ...EMPTY_SCROLL_DETAILS,
   totalSize: { width: 2000, height: 2000 },
-  isScrolling: false,
-  isProgrammaticScroll: false,
-  range: { start: 0, end: 0 },
-  columnRange: { start: 0, end: 0, padStart: 0, padEnd: 0 },
 });
 
 const rtlMode = inject<Ref<boolean>>('rtlMode', ref(false));
