@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.6.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.5.0...v0.6.0) (2026-02-02)
+
+
+### Bug Fixes
+
+* **virtual-scroll:** improve sticky logic and axis-specific active states ([ec4cbfd](https://github.com/pdanpdan/virtual-scroll/commit/ec4cbfdf625ddb16e21463d6ba2da400eb9b5c5f))
+
+
+### Features
+
+* **virtual-scroll:** add universal scrollTo utility and improve element detection ([89c5124](https://github.com/pdanpdan/virtual-scroll/commit/89c51244fecedf81c5e7de332513c0a8c2ee7888))
+
 # [0.5.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.4.0...v0.5.0) (2026-02-01)
 
 
