@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
+import type { ColumnRange, ScrollDetails } from '@pdanpdan/virtual-scroll';
 
 import { computed, onMounted, onUnmounted } from 'vue';
 
@@ -8,12 +8,7 @@ import { currentFps, efficiency, refreshRate, startDetection, stopDetection } fr
 const props = defineProps<{
   scrollDetails: ScrollDetails | null;
   direction?: string;
-  columnRange?: {
-    start: number;
-    end: number;
-    padStart: number;
-    padEnd: number;
-  };
+  columnRange?: ColumnRange;
 }>();
 
 const itemsRange = computed(() => ({

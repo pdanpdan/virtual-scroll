@@ -1,3 +1,44 @@
+/** Default fallback size for items (VU). */
+export const DEFAULT_ITEM_SIZE = 40;
+/** Default fallback width for columns (VU). */
+export const DEFAULT_COLUMN_WIDTH = 100;
+/** Default number of items to render outside the viewport. */
+export const DEFAULT_BUFFER = 5;
+
+/** Represents a point in 2D space. */
+export interface Point {
+  /** X coordinate. */
+  x: number;
+  /** Y coordinate. */
+  y: number;
+}
+
+/** Represents dimensions in 2D space. */
+export interface Size {
+  /** Width dimension. */
+  width: number;
+  /** Height dimension. */
+  height: number;
+}
+
+/** Initial empty state for scroll details. */
+export const EMPTY_SCROLL_DETAILS: ScrollDetails<unknown> = {
+  items: [],
+  currentIndex: 0,
+  currentColIndex: 0,
+  currentEndIndex: 0,
+  currentEndColIndex: 0,
+  scrollOffset: { x: 0, y: 0 },
+  displayScrollOffset: { x: 0, y: 0 },
+  viewportSize: { width: 0, height: 0 },
+  displayViewportSize: { width: 0, height: 0 },
+  totalSize: { width: 0, height: 0 },
+  isScrolling: false,
+  isProgrammaticScroll: false,
+  range: { start: 0, end: 0 },
+  columnRange: { start: 0, end: 0, padStart: 0, padEnd: 0 },
+};
+
 /**
  * The direction of the virtual scroll.
  * - 'vertical': Single-column vertical scrolling.
@@ -55,19 +96,9 @@ export interface RenderedItem<T = unknown> {
   /** The 0-based index of the item in the original array. */
   index: number;
   /** The calculated pixel offset relative to the items wrapper in display pixels (DU). */
-  offset: {
-    /** Horizontal offset (left) in DU. */
-    x: number;
-    /** Vertical offset (top) in DU. */
-    y: number;
-  };
+  offset: Point;
   /** The current measured or estimated size of the item in virtual units (VU). */
-  size: {
-    /** Pixel width in VU. */
-    width: number;
-    /** Pixel height in VU. */
-    height: number;
-  };
+  size: Size;
   /** The original horizontal pixel offset before any sticky adjustments in VU. */
   originalX: number;
   /** The original vertical pixel offset before any sticky adjustments in VU. */
@@ -76,13 +107,12 @@ export interface RenderedItem<T = unknown> {
   isSticky?: boolean;
   /** Whether this item is currently in a stuck state at the viewport edge. */
   isStickyActive?: boolean;
+  /** Whether this item is currently in a stuck state at the horizontal viewport edge. */
+  isStickyActiveX?: boolean;
+  /** Whether this item is currently in a stuck state at the vertical viewport edge. */
+  isStickyActiveY?: boolean;
   /** The relative translation applied to the item for the sticky pushing effect in DU. */
-  stickyOffset: {
-    /** Horizontal translation in DU. */
-    x: number;
-    /** Vertical translation in DU. */
-    y: number;
-  };
+  stickyOffset: Point;
 }
 
 /** Information about the currently visible range of columns and their paddings. */
@@ -110,40 +140,15 @@ export interface ScrollDetails<T = unknown> {
   /** Index of the last column visible before any sticky end column in the viewport (grid mode). */
   currentEndColIndex: number;
   /** Current relative pixel scroll position from the content start in VU. */
-  scrollOffset: {
-    /** Horizontal position (X) in VU. */
-    x: number;
-    /** Vertical position (Y) in VU. */
-    y: number;
-  };
+  scrollOffset: Point;
   /** Current display pixel scroll position (before scaling) in DU. */
-  displayScrollOffset: {
-    /** Horizontal position (X) in DU. */
-    x: number;
-    /** Vertical position (Y) in DU. */
-    y: number;
-  };
+  displayScrollOffset: Point;
   /** Current dimensions of the visible viewport area in VU. */
-  viewportSize: {
-    /** Pixel width in VU. */
-    width: number;
-    /** Pixel height in VU. */
-    height: number;
-  };
+  viewportSize: Size;
   /** Current dimensions of the visible viewport area in display pixels (DU). */
-  displayViewportSize: {
-    /** Pixel width in DU. */
-    width: number;
-    /** Pixel height in DU. */
-    height: number;
-  };
+  displayViewportSize: Size;
   /** Total calculated or estimated size of all items and gaps in VU. */
-  totalSize: {
-    /** Total pixel width in VU. */
-    width: number;
-    /** Total pixel height in VU. */
-    height: number;
-  };
+  totalSize: Size;
   /** Whether the container is currently being scrolled by the user or an animation. */
   isScrolling: boolean;
   /** Whether the current scroll operation was initiated programmatically. */
@@ -159,18 +164,34 @@ export interface ScrollDetails<T = unknown> {
   columnRange: ColumnRange;
 }
 
-/** Configuration properties for the `useVirtualScroll` composable. */
-export interface VirtualScrollProps<T = unknown> {
-  /**
-   * Array of data items to virtualize.
-   */
+/**
+ * Configuration for Server-Side Rendering.
+ * Defines which items are rendered statically on the server.
+ */
+export interface SSRRange {
+  /** First row index (for list or grid). */
+  start: number;
+  /** Exclusive last row index (for list or grid). */
+  end: number;
+  /** First column index (for grid mode). */
+  colStart?: number;
+  /** Exclusive last column index (for grid mode). */
+  colEnd?: number;
+}
+
+/** Pixel padding configuration in display pixels (DU). */
+export type PaddingValue = number | { x?: number; y?: number; };
+
+/** Base configuration properties shared between the component and the composable. */
+export interface VirtualScrollBaseProps<T = unknown> {
+  /** Array of data items to virtualize. */
   items: T[];
 
   /**
    * Fixed size of each item in virtual units (VU) or a function that returns the size of an item.
    * Pass `0`, `null` or `undefined` for automatic dynamic size detection via `ResizeObserver`.
    */
-  itemSize?: number | ((item: T, index: number) => number) | undefined;
+  itemSize?: number | ((item: T, index: number) => number) | null | undefined;
 
   /**
    * Direction of the virtual scroll.
@@ -197,31 +218,10 @@ export interface VirtualScrollProps<T = unknown> {
   container?: HTMLElement | Window | null | undefined;
 
   /**
-   * The host element that directly wraps the absolute-positioned items.
-   * Used for calculating relative offsets in display pixels (DU).
-   */
-  hostElement?: HTMLElement | null | undefined;
-
-  /**
-   * The root element of the VirtualScroll component.
-   * Used for calculating relative offsets in display pixels (DU).
-   */
-  hostRef?: HTMLElement | null | undefined;
-
-  /**
    * Configuration for Server-Side Rendering.
    * Defines which items are rendered statically on the server.
    */
-  ssrRange?: {
-    /** First row index. */
-    start: number;
-    /** Exclusive last row index. */
-    end: number;
-    /** First column index (grid mode). */
-    colStart?: number;
-    /** Exclusive last column index (grid mode). */
-    colEnd?: number;
-  } | undefined;
+  ssrRange?: SSRRange | undefined;
 
   /**
    * Number of columns for bidirectional grid scrolling.
@@ -232,29 +232,17 @@ export interface VirtualScrollProps<T = unknown> {
    * Fixed width of columns in VU, an array of widths, or a function returning widths.
    * Pass `0`, `null` or `undefined` for dynamic column detection.
    */
-  columnWidth?: number | number[] | ((index: number) => number) | undefined;
+  columnWidth?: number | number[] | ((index: number) => number) | null | undefined;
 
   /**
    * Pixel padding at the start of the scroll container in display pixels (DU).
    */
-  scrollPaddingStart?: number | { x?: number; y?: number; } | undefined;
+  scrollPaddingStart?: PaddingValue | undefined;
 
   /**
    * Pixel padding at the end of the scroll container in DU.
    */
-  scrollPaddingEnd?: number | { x?: number; y?: number; } | undefined;
-
-  /**
-   * Size of sticky elements at the start of the viewport (top or left) in DU.
-   * Used to adjust the visible range and item positioning without increasing content size.
-   */
-  stickyStart?: number | { x?: number; y?: number; } | undefined;
-
-  /**
-   * Size of sticky elements at the end of the viewport (bottom or right) in DU.
-   * Used to adjust the visible range without increasing content size.
-   */
-  stickyEnd?: number | { x?: number; y?: number; } | undefined;
+  scrollPaddingEnd?: PaddingValue | undefined;
 
   /**
    * Gap between items in virtual units (VU).
@@ -272,16 +260,6 @@ export interface VirtualScrollProps<T = unknown> {
    * List of indices that should stick to the viewport edge.
    */
   stickyIndices?: number[] | undefined;
-
-  /**
-   * Extra padding (display pixels - DU) at the start of the flow (e.g. non-sticky header).
-   */
-  flowPaddingStart?: number | { x?: number; y?: number; } | undefined;
-
-  /**
-   * Extra padding (DU) at the end of the flow (e.g. non-sticky footer).
-   */
-  flowPaddingEnd?: number | { x?: number; y?: number; } | undefined;
 
   /**
    * Threshold distance from the end in display pixels (DU) to emit the 'load' event.
@@ -324,6 +302,43 @@ export interface VirtualScrollProps<T = unknown> {
    * Enable debug visualization of buffers and indices.
    */
   debug?: boolean | undefined;
+}
+
+/** Configuration properties for the `useVirtualScroll` composable. */
+export interface VirtualScrollProps<T = unknown> extends VirtualScrollBaseProps<T> {
+  /**
+   * The host element that directly wraps the absolute-positioned items.
+   * Used for calculating relative offsets in display pixels (DU).
+   */
+  hostElement?: HTMLElement | null | undefined;
+
+  /**
+   * The root element of the VirtualScroll component.
+   * Used for calculating relative offsets in display pixels (DU).
+   */
+  hostRef?: HTMLElement | null | undefined;
+
+  /**
+   * Size of sticky elements at the start of the viewport (top or left) in DU.
+   * Used to adjust the visible range and item positioning without increasing content size.
+   */
+  stickyStart?: PaddingValue | undefined;
+
+  /**
+   * Size of sticky elements at the end of the viewport (bottom or right) in DU.
+   * Used to adjust the visible range without increasing content size.
+   */
+  stickyEnd?: PaddingValue | undefined;
+
+  /**
+   * Extra padding (display pixels - DU) at the start of the flow (e.g. non-sticky header).
+   */
+  flowPaddingStart?: PaddingValue | undefined;
+
+  /**
+   * Extra padding (DU) at the end of the flow (e.g. non-sticky footer).
+   */
+  flowPaddingEnd?: PaddingValue | undefined;
 }
 
 /** Help provide axis specific information to the scrollbar. */
@@ -374,6 +389,8 @@ export interface VirtualScrollbarProps {
 
 /** Properties passed to the 'scrollbar' scoped slot. */
 export interface ScrollbarSlotProps {
+  /** The axis for this scrollbar. */
+  axis: ScrollAxis;
   /** Current scroll position as a percentage (0 to 1). */
   positionPercent: number;
   /** Viewport size as a percentage of total size (0 to 1). */
@@ -412,16 +429,7 @@ export interface ItemSlotProps<T = unknown> {
   /** The 0-based index of the item. */
   index: number;
   /** Information about the currently visible range of columns. */
-  columnRange: {
-    /** First rendered column. */
-    start: number;
-    /** Last rendered column (exclusive). */
-    end: number;
-    /** Pixel space before first column. */
-    padStart: number;
-    /** Pixel space after last column. */
-    padEnd: number;
-  };
+  columnRange: ColumnRange;
   /** Helper to get the current calculated width of any column index. */
   getColumnWidth: (index: number) => number;
   /** Vertical gap between items. */
@@ -432,73 +440,31 @@ export interface ItemSlotProps<T = unknown> {
   isSticky?: boolean | undefined;
   /** Whether this item is currently in a sticky state at the edge. */
   isStickyActive?: boolean | undefined;
+  /** Whether this item is currently in a sticky state at the horizontal edge. */
+  isStickyActiveX?: boolean | undefined;
+  /** Whether this item is currently in a sticky state at the vertical edge. */
+  isStickyActiveY?: boolean | undefined;
+  /** The calculated pixel offset relative to the items wrapper in display pixels (DU). */
+  offset: {
+    /** Horizontal offset (left) in DU. */
+    x: number;
+    /** Vertical offset (top) in DU. */
+    y: number;
+  };
 }
 
 /** Configuration properties for the `VirtualScroll` component. */
-export interface VirtualScrollComponentProps<T = unknown> {
-  /** Array of items to be virtualized. */
-  items: T[];
-  /** Fixed size of each item (in pixels) or a function that returns the size of an item. */
-  itemSize?: number | ((item: T, index: number) => number) | null;
-  /** Direction of the scroll. */
-  direction?: ScrollDirection;
-  /** Number of items to render before the visible viewport. */
-  bufferBefore?: number;
-  /** Number of items to render after the visible viewport. */
-  bufferAfter?: number;
-  /** The scrollable container element or window. */
-  container?: HTMLElement | Window | null;
-  /** Range of items to render during Server-Side Rendering. */
-  ssrRange?: {
-    /** First row index to render. */
-    start: number;
-    /** Last row index to render (exclusive). */
-    end: number;
-    /** First column index to render (for grid mode). */
-    colStart?: number;
-    /** Last column index to render (exclusive, for grid mode). */
-    colEnd?: number;
-  };
-  /** Number of columns for bidirectional (grid) scroll. */
-  columnCount?: number;
-  /** Fixed width of columns (in pixels), an array of widths, or a function for column widths. */
-  columnWidth?: number | number[] | ((index: number) => number) | null;
+export interface VirtualScrollComponentProps<T = unknown> extends VirtualScrollBaseProps<T> {
   /** The HTML tag to use for the root container. */
   containerTag?: string;
   /** The HTML tag to use for the items wrapper. */
   wrapperTag?: string;
   /** The HTML tag to use for each item. */
   itemTag?: string;
-  /** Additional padding at the start of the scroll container (top or left). */
-  scrollPaddingStart?: number | { x?: number; y?: number; };
-  /** Additional padding at the end of the scroll container (bottom or right). */
-  scrollPaddingEnd?: number | { x?: number; y?: number; };
   /** Whether the content in the 'header' slot is sticky. */
   stickyHeader?: boolean;
   /** Whether the content in the 'footer' slot is sticky. */
   stickyFooter?: boolean;
-  /** Gap between items in pixels. */
-  gap?: number;
-  /** Gap between columns in pixels. */
-  columnGap?: number;
-  /** Indices of items that should stick to the top/start of the viewport. */
-  stickyIndices?: number[];
-  /** Distance from the end of the scrollable area (in pixels) to trigger the 'load' event. */
-  loadDistance?: number;
-  /** Whether items are currently being loaded. */
-  loading?: boolean;
-  /** Whether to automatically restore and maintain scroll position when items are prepended to the list. */
-  restoreScrollOnPrepend?: boolean;
-  /** Initial scroll index to jump to immediately after mount. */
-  initialScrollIndex?: number;
-  /** Alignment for the initial scroll index. */
-  initialScrollAlign?: ScrollAlignment | ScrollAlignmentOptions;
-  /** Default size for items before they are measured by ResizeObserver. */
-  defaultItemSize?: number;
-  /** Default width for columns before they are measured by ResizeObserver. */
-  defaultColumnWidth?: number;
-  /** Whether to show debug information (visible offsets and indices) over items. */
-  debug?: boolean;
   /** Whether to use virtual scrollbars for styling purposes. */
   virtualScrollbar?: boolean;
 }
@@ -544,7 +510,7 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   /** Physical height of the content in the DOM (clamped to browser limits). */
   renderedHeight: number;
   /** Absolute offset of the component within its container. */
-  componentOffset: { x: number; y: number; };
+  componentOffset: Point;
   /** Properties for the vertical scrollbar. */
   scrollbarPropsVertical: ScrollbarSlotProps | null;
   /** Properties for the horizontal scrollbar. */
@@ -615,10 +581,6 @@ export interface ScrollTargetParams {
   flowPaddingStartX?: number | undefined;
   /** Flow padding start on Y axis. */
   flowPaddingStartY?: number | undefined;
-  /** Flow padding end on X axis. */
-  flowPaddingEndX?: number | undefined;
-  /** Flow padding end on Y axis. */
-  flowPaddingEndY?: number | undefined;
   /** Scroll padding start on X axis. */
   paddingStartX?: number | undefined;
   /** Scroll padding start on Y axis. */
