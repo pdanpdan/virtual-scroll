@@ -8,6 +8,7 @@ A high-performance, flexible virtual scrolling component for Vue 3 that supports
 ## Links
 
 - **Documentation & Live Examples:** [https://pdanpdan.github.io/virtual-scroll/](https://pdanpdan.github.io/virtual-scroll/)
+- **LLM Documentation:** [llms.txt](./packages/playground/public/llms.txt) ([web](https://pdanpdan.github.io/virtual-scroll/llms.txt))
 - **NPM Package:** [https://www.npmjs.com/package/@pdanpdan/virtual-scroll](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
 - **GitHub Repository:** [https://github.com/pdanpdan/virtual-scroll](https://github.com/pdanpdan/virtual-scroll)
 

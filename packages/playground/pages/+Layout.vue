@@ -94,6 +94,7 @@ const navLinks: Link[] = [
   { href: '/', label: 'Welcome' },
   { href: '/docs', label: 'Documentation' },
   { href: '/changelog', label: 'Changelog' },
+  { href: '/llms.txt', label: 'LLM Support', props: { rel: 'external', target: '__blank' } },
 ];
 
 const essentialLinks: Link[] = [

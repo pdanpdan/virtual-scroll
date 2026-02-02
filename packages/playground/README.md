@@ -7,6 +7,7 @@ It contains numerous examples showcasing various features and patterns of the li
 ## Explore
 
 - **Documentation & Examples:** [Live Demo & Docs](https://pdanpdan.github.io/virtual-scroll/)
+- **LLM Documentation:** [llms.txt](./public/llms.txt) ([web](https://pdanpdan.github.io/virtual-scroll/llms.txt))
 - **Main Package:** [`@pdanpdan/virtual-scroll`](../virtual-scroll)
 
 ## Getting Started

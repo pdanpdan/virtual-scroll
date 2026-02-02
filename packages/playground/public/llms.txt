@@ -1,0 +1,152 @@
+# @pdanpdan/virtual-scroll Documentation for LLMs
+
+A high-performance, flexible virtual scrolling component for Vue 3 that supports massive datasets (up to billions of pixels) through coordinate scaling.
+
+## Core Features
+- **Virtualization**: Only renders items in the viewport (plus buffer).
+- **Coordinate Scaling**: Bypasses browser scroll limits (typically 10-30M pixels) by scaling "Virtual Units" (VU) to "Display Units" (DU).
+- **1:1 Movement**: Ensures 1px of wheel/touch movement equals 1px of viewport movement, regardless of scale.
+- **Multi-Directional**: Supports `vertical`, `horizontal`, and `both` (grid) directions.
+- **Dynamic Sizing**: Supports fixed, variable (function/array), and fully dynamic sizes (via `ResizeObserver`).
+- **Performance**: Uses Fenwick Tree for $O(\log N)$ prefix sum/point updates for efficient offset calculations.
+
+## Installation
+```bash
+pnpm add @pdanpdan/virtual-scroll
+```
+
+## Common Patterns & Examples
+
+### 1. Basic Vertical List
+[Live Example](https://pdanpdan.github.io/virtual-scroll/essential-vertical-fixed)
+```vue
+<VirtualScroll :items="items" :item-size="50">
+  <template #item="{ item, index }">
+    <div class="item">{{ index }}: {{ item.label }}</div>
+  </template>
+</VirtualScroll>
+```
+
+### 2. Grid (Table/Spreadsheet)
+[Live Example](https://pdanpdan.github.io/virtual-scroll/essential-grid-fixed)
+```vue
+<VirtualScroll 
+  :items="items" 
+  direction="both" 
+  :column-count="10" 
+  :column-width="150" 
+  :item-size="40"
+>
+  <template #item="{ item, index }">
+    <div class="cell">{{ item.value }}</div>
+  </template>
+</VirtualScroll>
+```
+
+### 3. Chat Interface
+[Live Example](https://pdanpdan.github.io/virtual-scroll/pattern-chat)
+Features: dynamic heights, initial scroll to bottom, scroll restoration on history load.
+```vue
+<VirtualScroll
+  ref="virtualScrollRef"
+  :items="messages"
+  :restore-scroll-on-prepend="true"
+  :initial-scroll-index="messages.length - 1"
+  initial-scroll-align="end"
+  :sticky-footer="true"
+>
+  <template #item="{ item }">
+    <div class="chat-bubble">{{ item.text }}</div>
+  </template>
+  <template #footer>
+    <div class="input-area"><!-- Input field here --></div>
+  </template>
+</VirtualScroll>
+```
+
+### 4. Semantic HTML Table
+[Live Example](https://pdanpdan.github.io/virtual-scroll/pattern-table)
+Uses custom tags for correct `<table>` semantics.
+```vue
+<VirtualScroll
+  :items="items"
+  container-tag="table"
+  wrapper-tag="tbody"
+  item-tag="tr"
+  :sticky-header="true"
+>
+  <template #header>
+    <tr><th>ID</th><th>Name</th></tr>
+  </template>
+  <template #item="{ item }">
+    <td>{{ item.id }}</td><td>{{ item.name }}</td>
+  </template>
+</VirtualScroll>
+```
+
+### 5. Infinite Scroll
+[Live Example](https://pdanpdan.github.io/virtual-scroll/feature-infinite-scroll)
+```vue
+<VirtualScroll
+  :items="items"
+  :loading="isLoading"
+  @load="fetchMoreItems"
+>
+  <template #item="{ item }">...</template>
+  <template #loading>
+    <div class="spinner">Loading more...</div>
+  </template>
+</VirtualScroll>
+```
+
+### 6. Sticky Sections (iOS-style)
+[Live Example](https://pdanpdan.github.io/virtual-scroll/feature-sticky-sections)
+Headers that "push" each other as you scroll.
+```vue
+<VirtualScroll :items="items" :sticky-indices="[0, 20, 40]">
+  <template #item="{ item, isStickyActive }">
+    <div :class="{ 'sticky-header': item.type === 'header', 'active': isStickyActive }">
+      {{ item.label }}
+    </div>
+  </template>
+</VirtualScroll>
+```
+
+## Component API Highlights
+
+### Props
+- `items`: `T[]` (Required) - Data to virtualize.
+- `itemSize`: `number | ((item, index) => number) | null` (Default: `40`) - Pass `null`/`0` for dynamic sizing.
+- `direction`: `'vertical' | 'horizontal' | 'both'`.
+- `virtualScrollbar`: `boolean` - Force virtual scrollbars even when browser limits aren't hit.
+- `restoreScrollOnPrepend`: `boolean` - Prevents "jumping" when adding items to the top.
+- `ssrRange`: `{ start: number, end: number }` - Pre-render specific items for SEO/SSR.
+
+### Exposed Methods (via Ref)
+- `scrollToIndex(row, col?, options?)`: Options include `align: 'start' | 'center' | 'end' | 'auto'` and `behavior: 'auto' | 'smooth'`.
+- `scrollToOffset(x, y, options?)`: Programmatic pixel-based scroll.
+- `refresh()`: Resets all internal measurements (useful if items change size externally).
+
+## Technical Implementation Details
+
+### Coordinate Scaling (VU vs DU)
+When the total size exceeds the browser's limit (e.g., 15 million pixels), the library calculates a `scale` factor:
+`scale = Virtual_Total_Size / Browser_Max_Limit`
+The browser's native scrollbar moves through `DU` (Display Units), while items are positioned and rendered in `VU` (Virtual Units).
+Positioning formula: `translateY(VU_offset - (DU_scroll * scale))`
+
+### Performance Optimization
+- **Fenwick Tree**: Used to store and update item sizes. Prefix sums (finding the offset of the N-th item) and point updates (updating the size of an item) both take $O(\log N)$ time.
+- **ResizeObserver**: Automatically tracks size changes of rendered items and updates the Fenwick Tree, triggering a layout adjustment only when necessary.
+
+## CSS Variables for Styling
+Customize the default virtual scrollbar:
+- `--vs-scrollbar-size`: width/height of the scrollbar.
+- `--vs-scrollbar-bg`: track color.
+- `--vs-scrollbar-thumb-bg`: thumb color.
+- `--vs-scrollbar-radius`: border radius.
+
+## Links
+- [Documentation & Examples](https://pdanpdan.github.io/virtual-scroll/)
+- [GitHub Repository](https://github.com/pdanpdan/virtual-scroll)
+- [NPM Package](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
