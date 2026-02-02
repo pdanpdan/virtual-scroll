@@ -1,4 +1,12 @@
+/**
+ * Utilities for scroll management and element type detection.
+ * Provides helper functions for checking Window and Body elements,
+ * and a universal scrollTo function.
+ */
+
 import type { ScrollDirection, ScrollToIndexOptions } from '../types';
+
+/* global ScrollToOptions */
 
 /**
  * Maximum size (in pixels) for an element that most browsers can handle reliably.
@@ -55,6 +63,29 @@ export function isElement(container: HTMLElement | Window | null | undefined): c
  */
 export function isScrollableElement(target: EventTarget | null): target is HTMLElement {
   return target != null && 'scrollLeft' in target;
+}
+
+/**
+ * Universal scroll function that handles both Window and HTMLElements.
+ *
+ * @param container - The container to scroll.
+ * @param options - Scroll options.
+ */
+export function scrollTo(container: HTMLElement | Window | null | undefined, options: ScrollToOptions) {
+  if (isWindow(container)) {
+    window.scrollTo(options);
+  } else if (container != null && isScrollableElement(container)) {
+    if (typeof container.scrollTo === 'function') {
+      container.scrollTo(options);
+    } else {
+      if (options.left !== undefined) {
+        container.scrollLeft = options.left;
+      }
+      if (options.top !== undefined) {
+        container.scrollTop = options.top;
+      }
+    }
+  }
 }
 
 /**
