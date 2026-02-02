@@ -1,3 +1,8 @@
+/**
+ * Composable for virtual scrollbar logic.
+ * Handles calculation of thumb position and size, track interactions, and dragging.
+ */
+
 import type { ScrollAxis } from '../types';
 import type { MaybeRefOrGetter } from 'vue';
 
