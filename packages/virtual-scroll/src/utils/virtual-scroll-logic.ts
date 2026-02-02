@@ -293,6 +293,45 @@ function calculateAxisTarget({
   return { target, itemSize, effectiveAlign };
 }
 
+/**
+ * Helper to calculate sticky state for a single axis.
+ *
+ * @param scrollPos - Virtual scroll position.
+ * @param originalPos - Original virtual item position.
+ * @param size - Virtual item size.
+ * @param index - Item index.
+ * @param stickyIndices - All sticky indices.
+ * @param getNextStickyPos - Resolver for the next sticky item's position.
+ * @returns Sticky state for this axis.
+ */
+function calculateAxisSticky(
+  scrollPos: number,
+  originalPos: number,
+  size: number,
+  index: number,
+  stickyIndices: number[],
+  getNextStickyPos: (idx: number) => number,
+) {
+  if (scrollPos <= originalPos) {
+    return { isActive: false, offset: 0 };
+  }
+
+  const nextStickyIdx = findNextStickyIndex(stickyIndices, index);
+  if (nextStickyIdx === undefined) {
+    return { isActive: true, offset: 0 };
+  }
+
+  const nextStickyPos = getNextStickyPos(nextStickyIdx);
+  if (scrollPos >= nextStickyPos) {
+    return { isActive: false, offset: 0 };
+  }
+
+  return {
+    isActive: true,
+    offset: Math.max(0, Math.min(size, nextStickyPos - scrollPos)) - size,
+  };
+}
+
 // --- Exported Functions ---
 
 /**
@@ -639,7 +678,6 @@ export function calculateColumnRange({
  * @param params.height - Virtual item height (VU).
  * @param params.stickyIndices - All sticky indices.
  * @param params.fixedSize - Fixed item size (VU).
- * @param params.fixedWidth - Fixed column width (VU).
  * @param params.gap - Item gap (VU).
  * @param params.columnGap - Column gap (VU).
  * @param params.getItemQueryY - Resolver for vertical offset (VU).
@@ -659,61 +697,56 @@ export function calculateStickyItem({
   height,
   stickyIndices,
   fixedSize,
-  fixedWidth,
   gap,
   columnGap,
   getItemQueryY,
   getItemQueryX,
 }: StickyParams) {
-  let isStickyActive = false;
+  let isStickyActiveX = false;
+  let isStickyActiveY = false;
   const stickyOffset = { x: 0, y: 0 };
 
   if (!isSticky) {
-    return { isStickyActive, stickyOffset };
+    return { isStickyActiveX, isStickyActiveY, isStickyActive: false, stickyOffset };
   }
 
   // Y Axis (Sticky Rows)
   if (direction === 'vertical' || direction === 'both') {
-    if (relativeScrollY > originalY) {
-      const nextStickyIdx = findNextStickyIndex(stickyIndices, index);
-
-      if (nextStickyIdx !== undefined) {
-        const nextStickyY = fixedSize !== null ? nextStickyIdx * (fixedSize + gap) : getItemQueryY(nextStickyIdx);
-        if (relativeScrollY >= nextStickyY) {
-          isStickyActive = false;
-        } else {
-          isStickyActive = true;
-          stickyOffset.y = Math.max(0, Math.min(height, nextStickyY - relativeScrollY)) - height;
-        }
-      } else {
-        isStickyActive = true;
-      }
-    }
+    const res = calculateAxisSticky(
+      relativeScrollY,
+      originalY,
+      height,
+      index,
+      stickyIndices,
+      (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + gap) : getItemQueryY(nextIdx)),
+    );
+    isStickyActiveY = res.isActive;
+    stickyOffset.y = res.offset;
   }
 
   // X Axis (Sticky Columns / Items)
-  if (direction === 'horizontal' || (direction === 'both' && !isStickyActive)) {
-    if (relativeScrollX > originalX) {
-      const nextStickyIdx = findNextStickyIndex(stickyIndices, index);
+  if (direction === 'horizontal') {
+    const res = calculateAxisSticky(
+      relativeScrollX,
+      originalX,
+      width,
+      index,
+      stickyIndices,
+      (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + columnGap) : getItemQueryX(nextIdx)),
+    );
 
-      if (nextStickyIdx !== undefined) {
-        const nextStickyX = direction === 'horizontal'
-          ? (fixedSize !== null ? nextStickyIdx * (fixedSize + columnGap) : getItemQueryX(nextStickyIdx))
-          : (fixedWidth !== null ? nextStickyIdx * (fixedWidth + columnGap) : getItemQueryX(nextStickyIdx));
-
-        if (relativeScrollX >= nextStickyX) {
-          isStickyActive = false;
-        } else {
-          isStickyActive = true;
-          stickyOffset.x = Math.max(0, Math.min(width, nextStickyX - relativeScrollX)) - width;
-        }
-      } else {
-        isStickyActive = true;
-      }
+    if (res.isActive) {
+      isStickyActiveX = true;
+      stickyOffset.x = res.offset;
     }
   }
 
-  return { isStickyActive, stickyOffset };
+  return {
+    isStickyActiveX,
+    isStickyActiveY,
+    isStickyActive: isStickyActiveX || isStickyActiveY,
+    stickyOffset,
+  };
 }
 
 /**
@@ -824,18 +857,18 @@ export function calculateItemStyle<T = unknown>({
   }
 
   if (isHydrated) {
-    const tx = isRtl
-      ? -(item.isStickyActive ? item.stickyOffset.x : item.offset.x)
-      : (item.isStickyActive ? item.stickyOffset.x : item.offset.x);
+    const isStickingVertically = item.isStickyActiveY ?? (item.isStickyActive && (isVertical || isBoth));
+    const isStickingHorizontally = item.isStickyActiveX ?? (item.isStickyActive && isHorizontal);
 
-    if (item.isStickyActive) {
-      if (isVertical || isBoth) {
-        style.insetBlockStart = `${ paddingStartY }px`;
-      }
-      if (isHorizontal || isBoth) {
-        style.insetInlineStart = `${ paddingStartX }px`;
-      }
-      style.transform = `translate(${ tx }px, ${ item.stickyOffset.y }px)`;
+    const tx = isRtl
+      ? -(isStickingHorizontally ? item.stickyOffset.x : item.offset.x)
+      : (isStickingHorizontally ? item.stickyOffset.x : item.offset.x);
+    const ty = isStickingVertically ? item.stickyOffset.y : item.offset.y;
+
+    if (item.isStickyActive || item.isStickyActiveX || item.isStickyActiveY) {
+      style.insetBlockStart = isStickingVertically ? `${ paddingStartY }px` : 'auto';
+      style.insetInlineStart = isStickingHorizontally ? `${ paddingStartX }px` : 'auto';
+      style.transform = `translate(${ tx }px, ${ ty }px)`;
     } else {
       style.transform = `translate(${ tx }px, ${ item.offset.y }px)`;
     }
