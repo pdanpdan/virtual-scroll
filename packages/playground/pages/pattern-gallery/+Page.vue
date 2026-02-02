@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,6 +6,7 @@ import { computed, inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -36,7 +36,10 @@ const photos = computed(() => Array.from(
   }),
 ));
 
-const scrollDetails = ref<ScrollDetails | null>(null);
+const {
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
 </script>
 
 <template>
@@ -95,7 +98,7 @@ const scrollDetails = ref<ScrollDetails | null>(null);
       :items="photos"
       :gap="16"
       :debug="debugMode"
-      @scroll="(details) => scrollDetails = details"
+      @scroll="onScroll"
     >
       <template #item="{ index: rowIndex, item: rowItems }">
         <div

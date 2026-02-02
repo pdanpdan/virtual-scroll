@@ -126,6 +126,12 @@ const patternLinks: Link[] = [
   { href: '/pattern-masonry', label: 'Masonry Grid' },
   { href: '/pattern-search', label: 'Search & Highlight' },
 ];
+
+const linkGroups = [
+  { title: 'Essentials', links: essentialLinks },
+  { title: 'Features', links: featureLinks },
+  { title: 'Patterns', links: patternLinks },
+];
 </script>
 
 <template>
@@ -260,48 +266,10 @@ const patternLinks: Link[] = [
           </AppLink>
         </li>
 
-        <li class="px-2">
-          <div class="menu-title divider drawer-menu-title">Essentials</div>
+        <li v-for="group in linkGroups" :key="group.title" class="px-2">
+          <div class="menu-title divider drawer-menu-title">{{ group.title }}</div>
           <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
-            <li v-for="link in essentialLinks" :key="link.href">
-              <AppLink v-slot="{ href, active }" :href="link.href">
-                <a
-                  :href
-                  class="drawer-link"
-                  :class="{ 'drawer-link--active': active }"
-                  v-bind="link.props"
-                  :data-vike="link.props?.rel === 'external' ? 'false' : undefined"
-                >
-                  {{ link.label }}
-                </a>
-              </AppLink>
-            </li>
-          </ul>
-        </li>
-
-        <li class="px-2">
-          <div class="menu-title divider drawer-menu-title">Features</div>
-          <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
-            <li v-for="link in featureLinks" :key="link.href">
-              <AppLink v-slot="{ href, active }" :href="link.href">
-                <a
-                  :href
-                  class="drawer-link"
-                  :class="{ 'drawer-link--active': active }"
-                  v-bind="link.props"
-                  :data-vike="link.props?.rel === 'external' ? 'false' : undefined"
-                >
-                  {{ link.label }}
-                </a>
-              </AppLink>
-            </li>
-          </ul>
-        </li>
-
-        <li class="px-2">
-          <div class="menu-title divider drawer-menu-title">Patterns</div>
-          <ul class="ms-0 ps-0 flex flex-col gap-0.5 before:hidden">
-            <li v-for="link in patternLinks" :key="link.href">
+            <li v-for="link in group.links" :key="link.href">
               <AppLink v-slot="{ href, active }" :href="link.href">
                 <a
                   :href

@@ -166,7 +166,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
 
       <div
         v-show="activeTab === 'preview'"
-        class="flex-1 mx-2 mb-2 rounded-[inherit] overflow-auto flex flex-col"
+        class="flex-1 min-h-0 mx-2 mb-2 rounded-[inherit] overflow-auto flex flex-col"
         :dir="rtlMode ? 'rtl' : 'ltr'"
       >
         <div v-if="$slots['example-controls']" class="p-2 md:px-4 bg-base-200" dir="ltr">

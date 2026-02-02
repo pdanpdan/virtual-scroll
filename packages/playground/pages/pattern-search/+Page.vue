@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,6 +6,7 @@ import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from '
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -17,8 +17,13 @@ const itemCount = ref(10000);
 const searchQuery = ref('Ultimate');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const currentMatchIndex = ref(-1);
-const virtualScrollRef = ref();
-const scrollDetails = ref<ScrollDetails | null>(null);
+
+const {
+  virtualScrollRef,
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
+
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 const isMounted = ref(false);
 
@@ -41,8 +46,6 @@ const matches = computed(() => {
   return results;
 });
 
-currentMatchIndex.value = matches.value.length > 0 ? 0 : -1;
-
 const ssrRange = computed(() => {
   const matchIdx = matches.value[ 0 ];
   if (matchIdx == null) {
@@ -60,10 +63,6 @@ const currentMatchNumber = computed(() => {
   }
   return currentMatchIndex.value + 1;
 });
-
-function onScroll(details: ScrollDetails) {
-  scrollDetails.value = details;
-}
 
 function nextMatch() {
   if (matches.value.length === 0) {

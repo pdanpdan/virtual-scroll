@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,13 +6,19 @@ import { inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
 const items = ref(Array.from({ length: 50 }, (_, i) => ({ id: i, label: `Initial Item ${ i }` })));
 const loading = ref(false);
 const autoLoad = ref(true);
-const scrollDetails = ref<ScrollDetails | null>(null);
+
+const {
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
+
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 async function loadMore() {
@@ -39,10 +44,6 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
   if (autoLoad.value && direction === 'vertical') {
     await loadMore();
   }
-}
-
-function onScroll(details: ScrollDetails) {
-  scrollDetails.value = details;
 }
 </script>
 

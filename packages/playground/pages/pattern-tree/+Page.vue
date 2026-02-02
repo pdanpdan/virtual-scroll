@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,6 +6,7 @@ import { computed, inject, reactive, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -67,7 +67,10 @@ function flatten(nodes: TreeNode[], result: TreeNode[] = []): TreeNode[] {
 
 const visibleItems = computed(() => flatten(tree));
 
-const scrollDetails = ref<ScrollDetails | null>(null);
+const {
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
 
 /**
  * Toggles the expanded state of a node.
@@ -152,7 +155,7 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
       class="example-container"
       :items="visibleItems"
       :debug="debugMode"
-      @scroll="(details) => scrollDetails = details"
+      @scroll="onScroll"
     >
       <template #item="{ item, index }">
         <div

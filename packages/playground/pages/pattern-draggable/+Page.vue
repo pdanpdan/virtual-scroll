@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,6 +6,7 @@ import { inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -28,11 +28,12 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const draggedIndex = ref<number | null>(null);
 const dropTargetIndex = ref<number | null>(null);
-const virtualScrollRef = ref<{
-  scrollDetails: ScrollDetails;
-  scrollToOffset: (x: number | null, y: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
-} | null>(null);
-const scrollDetails = ref<ScrollDetails | null>(null);
+
+const {
+  virtualScrollRef,
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
 
 let scrollInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -169,7 +170,7 @@ function handleDragEnd() {
       class="example-container"
       :items="items"
       :debug="debugMode"
-      @scroll="(details) => scrollDetails = details"
+      @scroll="onScroll"
     >
       <template #item="{ item, index }">
         <div

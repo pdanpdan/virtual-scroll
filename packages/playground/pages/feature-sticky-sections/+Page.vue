@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,6 +6,7 @@ import { computed, inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -34,12 +34,12 @@ const stickyIndices = computed(() => {
   return indices;
 });
 
-const scrollDetails = ref<ScrollDetails | null>(null);
-const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
+const {
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
 
-function onScroll(details: ScrollDetails) {
-  scrollDetails.value = details;
-}
+const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 </script>
 
 <template>

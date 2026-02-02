@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollAlignment, ScrollAlignmentOptions, ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -8,6 +7,7 @@ import { computed, inject, reactive, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -41,22 +41,16 @@ const items = computed(() => Array.from({ length: rowCount.value }, (_, i) => ({
   label: `Row ${ i + 1 }`,
 })));
 
-const virtualScrollRef = ref();
-const scrollDetails = ref<ScrollDetails | null>(null);
+const {
+  virtualScrollRef,
+  scrollDetails,
+  onScroll,
+  handleScrollToIndex,
+  handleScrollToOffset,
+} = useExampleScroll();
+
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 const rtlMode = inject<Ref<boolean>>('rtlMode', ref(false));
-
-function onScroll(details: ScrollDetails) {
-  scrollDetails.value = details;
-}
-
-function handleScrollToIndex(row: number | null, col: number | null, align: ScrollAlignment | ScrollAlignmentOptions) {
-  virtualScrollRef.value?.scrollToIndex(row, col, align);
-}
-
-function handleScrollToOffset(x: number | null, y: number | null) {
-  virtualScrollRef.value?.scrollToOffset(x, y);
-}
 
 function getCellContent(row: number, col: number) {
   if (row === 0) {
@@ -191,7 +185,7 @@ function stopResizing() {
       :sticky-indices="stickyIndices"
       @scroll="onScroll"
     >
-      <template #item="{ index, columnRange, isStickyActive }">
+      <template #item="{ index, columnRange, isStickyActive, offset }">
         <div
           class="example-spreadsheet-row"
           :class="{ 'example-spreadsheet-row--header': index === 0, 'example-spreadsheet-row--sticky': isStickyActive }"
@@ -204,6 +198,7 @@ function stopResizing() {
             :style="{
               width: `${ getColWidth(0) }px`,
               height: `${ getRowHeight(null, index) }px`,
+              insetInlineStart: `${ -Math.max(0, offset.x) }px`,
             }"
           >
             {{ index === 0 ? '' : index }}

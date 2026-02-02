@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -7,13 +6,19 @@ import { inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
 const items = ref(Array.from({ length: 50 }, (_, i) => ({ id: `orig-${ i }`, label: `Original Item ${ i }` })));
 const prependCount = ref(0);
 const restoreScrollOnPrepend = ref(true);
-const scrollDetails = ref<ScrollDetails | null>(null);
+
+const {
+  scrollDetails,
+  onScroll,
+} = useExampleScroll();
+
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 function prependItems() {
@@ -37,10 +42,6 @@ function appendItems() {
 
   items.value = [ ...items.value, ...newItems ];
   appendCount.value += count;
-}
-
-function onScroll(details: ScrollDetails) {
-  scrollDetails.value = details;
 }
 </script>
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ScrollAlignment, ScrollAlignmentOptions, ScrollDetails } from '@pdanpdan/virtual-scroll';
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -8,6 +7,7 @@ import { computed, inject, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -26,21 +26,15 @@ const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => (
   id: i,
 })));
 
-const virtualScrollRef = ref();
-const scrollDetails = ref<ScrollDetails | null>(null);
+const {
+  virtualScrollRef,
+  scrollDetails,
+  onScroll,
+  handleScrollToIndex,
+  handleScrollToOffset,
+} = useExampleScroll();
+
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
-
-function onScroll(details: ScrollDetails) {
-  scrollDetails.value = details;
-}
-
-function handleScrollToIndex(row: number | null, col: number | null, align: ScrollAlignment | ScrollAlignmentOptions) {
-  virtualScrollRef.value?.scrollToIndex(row, col, align);
-}
-
-function handleScrollToOffset(x: number | null, y: number | null) {
-  virtualScrollRef.value?.scrollToOffset(x, y);
-}
 </script>
 
 <template>

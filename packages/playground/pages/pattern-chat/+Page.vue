@@ -8,6 +8,7 @@ import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { createSeededRandom } from '#/lib/random';
+import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
@@ -19,8 +20,12 @@ interface Message {
 }
 
 const items = ref<Message[]>([]);
-const virtualScrollRef = ref();
-const scrollDetails = ref<ScrollDetails | null>(null);
+
+const {
+  virtualScrollRef,
+  scrollDetails,
+} = useExampleScroll();
+
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 const isLoading = ref(false);
 const isAtBottom = ref(true);
