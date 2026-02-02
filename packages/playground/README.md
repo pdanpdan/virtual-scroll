@@ -1,15 +1,22 @@
-# Virtual Scroll Playground
+# @pdanpdan/virtual-scroll Playground
 
-This is the development and demonstration environment for `@pdanpdan/virtual-scroll`.
+This is the development, testing, and demonstration environment for the [`@pdanpdan/virtual-scroll`](../virtual-scroll) package.
+
+It contains numerous examples showcasing various features and patterns of the library.
+
+## Explore
+
+- **Documentation & Examples:** [Live Demo & Docs](https://pdanpdan.github.io/virtual-scroll/)
+- **Main Package:** [`@pdanpdan/virtual-scroll`](../virtual-scroll)
 
 ## Getting Started
 
-1. Install dependencies from the root:
+1. Install dependencies from the project root:
    ```bash
    pnpm install
    ```
 
-2. Run the playground:
+2. Run the playground in development mode:
    ```bash
    pnpm --filter playground dev
    ```
@@ -19,7 +26,7 @@ This is the development and demonstration environment for `@pdanpdan/virtual-scr
 ## Features
 
 - **Live HMR**: Changes made to `packages/virtual-scroll/src` are immediately reflected in the playground without a rebuild.
-- **SSR**: All pages are server side generated and hydrated in client. You can test them with JS enables/disabled to see the behavior and to check for htdration errors.
+- **SSR Support**: All pages are Server-Side Generated (SSG) and hydrated in the client, allowing you to test performance and SEO-friendliness.
 
 ## Tech Stack
 

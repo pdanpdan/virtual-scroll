@@ -1,11 +1,22 @@
-# Virtual Scroll
+# @pdanpdan/virtual-scroll
 
-Monorepo for a high-performance Vue 3 virtual scrolling library and its playground/demonstration environment.
+A high-performance, flexible virtual scrolling component for Vue 3 that supports massive datasets (up to billions of pixels) through coordinate scaling.
 
-## Packages
+[![NPM Version](https://img.shields.io/npm/v/@pdanpdan/virtual-scroll.svg)](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
+[![License](https://img.shields.io/npm/l/@pdanpdan/virtual-scroll.svg)](./LICENSE)
 
-- **[@pdanpdan/virtual-scroll](./packages/virtual-scroll)**: Core library providing high-performance virtualization for Vue 3.
-- **[playground](./packages/playground)**: Live playground/demonstration environment, showcase various usage scenarios.
+## Links
+
+- **Documentation & Live Examples:** [https://pdanpdan.github.io/virtual-scroll/](https://pdanpdan.github.io/virtual-scroll/)
+- **NPM Package:** [https://www.npmjs.com/package/@pdanpdan/virtual-scroll](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
+- **GitHub Repository:** [https://github.com/pdanpdan/virtual-scroll](https://github.com/pdanpdan/virtual-scroll)
+
+## Project Structure
+
+This is a monorepo managed by `pnpm`.
+
+- **[`@pdanpdan/virtual-scroll`](./packages/virtual-scroll)**: The core library.
+- **[`playground`](./packages/playground)**: Documentation and demonstration environment.
 
 ## Getting Started
 
@@ -17,7 +28,7 @@ pnpm install
 
 ### Development
 
-Start the playground in development mode with SSR and HMR enabled for the library:
+Start the playground in development mode (with SSR and HMR enabled for the library):
 
 ```bash
 pnpm dev
@@ -25,7 +36,7 @@ pnpm dev
 
 ### Build
 
-Build all packages in the workspace:
+Build all packages:
 
 ```bash
 pnpm build
@@ -33,36 +44,10 @@ pnpm build
 
 ### Testing
 
-Run all test and checks for the core library (linting, typescript type checking, test suite):
+Run all checks (linting, type checking, tests) for the core library:
 
 ```bash
 pnpm test:all
-```
-
-Run the test suite for the core library:
-
-```bash
-pnpm test
-```
-
-Run the test suite for the core library and show result in web interface:
-
-```bash
-pnpm test:ui
-```
-
-### Linting
-
-Run linting across the entire workspace:
-
-```bash
-pnpm lint
-```
-
-Fix linting across the entire workspace:
-
-```bash
-pnpm lint:fix
 ```
 
 ## License

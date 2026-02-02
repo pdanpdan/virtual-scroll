@@ -275,10 +275,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </p>
         </div>
 
-        <h3 id="props" class="docs-prop-header">Props</h3>
+        <h3 id="props" class="docs-prop-header text-primary">Props</h3>
 
         <h4 class="docs-prop-subheader">Core Configuration</h4>
-        <div class="docs-table-container mb-8">
+        <div class="docs-table-container mb-8 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -318,7 +318,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <h4 class="docs-prop-subheader">Grid Configuration <span class="text-xs normal-case opacity-60">(only for direction="both")</span></h4>
-        <div class="docs-table-container mb-8">
+        <div class="docs-table-container mb-8 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -352,7 +352,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <h4 class="docs-prop-subheader">Features & Behavior</h4>
-        <div class="docs-table-container mb-8">
+        <div class="docs-table-container mb-8 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -413,7 +413,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               </tr>
               <tr>
                 <td><code class="text-primary font-bold">initialScrollAlign</code></td>
-                <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link">Options</a></code></td>
+                <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td>
                 <td><code>'start'</code></td>
                 <td>Alignment for initial index.</td>
               </tr>
@@ -421,13 +421,13 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </table>
         </div>
 
-        <h4 id="scroll-alignment" class="docs-prop-subheader text-secondary">ScrollAlignment</h4>
+        <h4 id="scroll-alignment" class="docs-prop-subheader text-primary">ScrollAlignment</h4>
         <div class="prose prose-sm mb-4 text-base-content/70">
           <p>Controls the item's final position in the viewport: <code>'start' | 'center' | 'end' | 'auto'</code>.</p>
         </div>
 
         <h4 class="docs-prop-subheader">Advanced & Performance</h4>
-        <div class="docs-table-container mb-8">
+        <div class="docs-table-container mb-8 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -487,30 +487,36 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </div>
         </div>
 
-        <h3 id="slots" class="docs-prop-header">Slots</h3>
+        <h3 id="slots" class="docs-prop-header text-accent">Slots</h3>
         <div class="grid grid-cols-1 2xl:grid-cols-2 gap-4 mb-10">
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-primary">
-            <h4 class="font-bold text-primary mb-2">#item</h4>
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+            <h4 class="font-bold text-accent mb-2">#item</h4>
             <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
             <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
               <li><code>item: T</code>: The data item from the source array.</li>
               <li><code>index: number</code>: The original 0-based index of the item.</li>
               <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
               <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
-              <li><code>columnRange: <a href="#column-range" class="link">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
+              <li><code>isStickyActiveX / Y: boolean</code>: <code>true</code> if the item is stuck at the horizontal/vertical threshold.</li>
+              <li><code>offset: { x, y }</code>: Calculated physical position (DU).</li>
+              <li><code>columnRange: <a href="#column-range" class="link link-accent">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
               <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
               <li><code>gap: number</code>: Vertical gap between items.</li>
               <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
             </ul>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-info">
-            <h4 class="font-bold text-info mb-2">#scrollbar</h4>
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+            <h4 class="font-bold text-accent mb-2">#scrollbar</h4>
             <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
             <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
+              <li><code>axis: 'vertical' | 'horizontal'</code>: The scrollbar axis.</li>
               <li><code>positionPercent: number</code>: Current scroll position (0 to 1).</li>
               <li><code>viewportPercent: number</code>: Viewport as percentage of total size.</li>
-              <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element.</li>
-              <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element.</li>
+              <li><code>thumbSizePercent: number</code>: Calculated thumb size (0 to 100).</li>
+              <li><code>thumbPositionPercent: number</code>: Calculated thumb position (0 to 100).</li>
+              <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-accent">Attributes and listeners</a> for the track element.</li>
+              <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-accent">Attributes and listeners</a> for the thumb element.</li>
+              <li><code>isDragging: boolean</code>: Whether the thumb is currently being dragged.</li>
               <li>
                 <code>scrollbarProps: object</code>: Grouped properties for <code>VirtualScrollbar</code>.
                 <ul class="list-disc ps-5 mt-1">
@@ -525,8 +531,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               </li>
             </ul>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-secondary">
-            <h4 class="font-bold text-secondary mb-2">#header / #footer</h4>
+          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+            <h4 class="font-bold text-accent mb-2">#header / #footer</h4>
             <p class="text-xs md:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
           </div>
           <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
@@ -536,9 +542,9 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
 
         <section id="scrollbar-slot-props" class="mb-12">
-          <h4 class="docs-prop-subheader">ScrollbarSlotProps</h4>
+          <h4 class="docs-prop-subheader text-accent">ScrollbarSlotProps</h4>
           <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
-            <p>Properties passed to the 'scrollbar' scoped slot and useVirtualScrollbar return value.</p>
+            <p>Properties passed to the 'scrollbar' scoped slot and <code>useVirtualScrollbar</code> return value.</p>
           </div>
 
           <CodeBlock
@@ -586,7 +592,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </section>
 
         <h3 id="events" class="docs-prop-header">Events</h3>
-        <div class="docs-table-container mb-10">
+        <div class="docs-table-container mb-10 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -598,7 +604,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <tbody class="text-xs md:text-sm">
               <tr>
                 <td><code>scroll</code></td>
-                <td><code><a href="#scroll-details" class="link">ScrollDetails&lt;T&gt;</a></code></td>
+                <td><code><a href="#scroll-details" class="link link-primary">ScrollDetails&lt;T&gt;</a></code></td>
                 <td>Emitted on every scroll position change.</td>
               </tr>
               <tr>
@@ -745,106 +751,106 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </p>
         </div>
 
-        <h4 class="docs-prop-subheader text-secondary">Properties</h4>
+        <h4 class="docs-prop-subheader text-primary">Properties</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-8">
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">All Props</code>
+          <a href="#props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">All Props</code>
             <p class="text-[10px] opacity-60 mt-1">All component props are available on the instance.</p>
-          </div>
+          </a>
           <a href="#scroll-details" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">scrollDetails</code>
+            <code class="text-primary font-bold text-xs">scrollDetails</code>
             <p class="text-[10px] opacity-60 mt-1">Full reactive state of the virtualizer.</p>
           </a>
           <a href="#column-range" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">columnRange</code>
+            <code class="text-primary font-bold text-xs">columnRange</code>
             <p class="text-[10px] opacity-60 mt-1">Visible column indices and paddings.</p>
           </a>
           <a href="#is-hydrated" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">isHydrated</code>
+            <code class="text-primary font-bold text-xs">isHydrated</code>
             <p class="text-[10px] opacity-60 mt-1">Mounted and ready for virtualization.</p>
           </a>
           <a href="#is-rtl" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">isRtl</code>
+            <code class="text-primary font-bold text-xs">isRtl</code>
             <p class="text-[10px] opacity-60 mt-1">Right-to-Left mode active.</p>
           </a>
           <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">scrollbarPropsVertical</code>
+            <code class="text-primary font-bold text-xs">scrollbarPropsVertical</code>
             <p class="text-[10px] opacity-60 mt-1">Reactive vertical scrollbar properties.</p>
           </a>
           <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">scrollbarPropsHorizontal</code>
+            <code class="text-primary font-bold text-xs">scrollbarPropsHorizontal</code>
             <p class="text-[10px] opacity-60 mt-1">Reactive horizontal scrollbar properties.</p>
           </a>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">scaleX / scaleY</code>
+          <a href="#scale-factors" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">scaleX / scaleY</code>
             <p class="text-[10px] opacity-60 mt-1">Current coordinate scaling factors.</p>
-          </div>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">componentOffset</code>
+          </a>
+          <a href="#component-offset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-primary font-bold text-xs">componentOffset</code>
             <p class="text-[10px] opacity-60 mt-1">Absolute offset of the component within its container.</p>
-          </div>
+          </a>
           <a href="#rendered-dimensions" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">renderedWidth / renderedHeight</code>
+            <code class="text-primary font-bold text-xs">renderedWidth / renderedHeight</code>
             <p class="text-[10px] opacity-60 mt-1">Physical dimensions in DOM (clamped).</p>
           </a>
         </div>
 
-        <h4 class="docs-prop-subheader text-primary">Methods</h4>
+        <h4 class="docs-prop-subheader text-secondary">Methods</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-10">
           <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">scrollToIndex()</code>
+            <code class="text-secondary font-bold text-xs">scrollToIndex()</code>
             <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
           </a>
           <a href="#method-scrolltooffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">scrollToOffset()</code>
+            <code class="text-secondary font-bold text-xs">scrollToOffset()</code>
             <p class="text-[10px] opacity-60 mt-1">Scroll to precise pixel position.</p>
           </a>
           <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">stopProgrammaticScroll()</code>
+            <code class="text-secondary font-bold text-xs">stopProgrammaticScroll()</code>
             <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
           </a>
           <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getColumnWidth()</code>
+            <code class="text-secondary font-bold text-xs">getColumnWidth()</code>
             <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
           </a>
           <a href="#method-getrowheight" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getRowHeight()</code>
+            <code class="text-secondary font-bold text-xs">getRowHeight()</code>
             <p class="text-[10px] opacity-60 mt-1">Get calculated height of a row.</p>
           </a>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getRowOffset()</code>
+          <a href="#method-getrowoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">getRowOffset()</code>
             <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a row.</p>
-          </div>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getColumnOffset()</code>
+          </a>
+          <a href="#method-getcolumnoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">getColumnOffset()</code>
             <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a column.</p>
-          </div>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getItemOffset()</code>
+          </a>
+          <a href="#method-getitemoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">getItemOffset()</code>
             <p class="text-[10px] opacity-60 mt-1">Get virtual offset of an item.</p>
-          </div>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <code class="text-primary font-bold text-xs">getItemSize()</code>
+          </a>
+          <a href="#method-getitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">getItemSize()</code>
             <p class="text-[10px] opacity-60 mt-1">Get item size along scroll axis.</p>
-          </div>
+          </a>
           <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">refresh()</code>
+            <code class="text-secondary font-bold text-xs">refresh()</code>
             <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
           </a>
           <a href="#method-updatedirection" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">updateDirection()</code>
+            <code class="text-secondary font-bold text-xs">updateDirection()</code>
             <p class="text-[10px] opacity-60 mt-1">Trigger RTL/LTR detection.</p>
           </a>
           <a href="#method-updatehostoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">updateHostOffset()</code>
+            <code class="text-secondary font-bold text-xs">updateHostOffset()</code>
             <p class="text-[10px] opacity-60 mt-1">Recalculate container position.</p>
           </a>
           <a href="#method-updateitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">updateItemSize()</code>
+            <code class="text-secondary font-bold text-xs">updateItemSize()</code>
             <p class="text-[10px] opacity-60 mt-1">Manually register measurement.</p>
           </a>
           <a href="#method-updateitemsizes" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">updateItemSizes()</code>
+            <code class="text-secondary font-bold text-xs">updateItemSizes()</code>
             <p class="text-[10px] opacity-60 mt-1">Batch register measurements.</p>
           </a>
         </div>
@@ -897,8 +903,8 @@ const scrollY = ref(0);
 </template>"
         />
 
-        <h3 id="scrollbar-props" class="docs-prop-header">Props</h3>
-        <div class="docs-table-container mb-8">
+        <h3 id="scrollbar-props" class="docs-prop-header text-primary">Props</h3>
+        <div class="docs-table-container mb-8 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -943,8 +949,8 @@ const scrollY = ref(0);
           </table>
         </div>
 
-        <h3 id="scrollbar-events" class="docs-prop-header">Events</h3>
-        <div class="docs-table-container mb-10">
+        <h3 id="scrollbar-events" class="docs-prop-header text-secondary">Events</h3>
+        <div class="docs-table-container mb-10 text-base-content/80">
           <table class="table table-sm md:table-md table-zebra w-full">
             <thead class="bg-base-300">
               <tr>
@@ -972,7 +978,7 @@ const scrollY = ref(0);
 
         <!-- useVirtualScroll -->
         <section id="use-virtual-scroll" class="mb-16">
-          <h3 class="docs-prop-header">useVirtualScroll</h3>
+          <h3 class="docs-prop-header text-secondary">useVirtualScroll</h3>
           <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
             <p>
               Provides the core virtualization logic. Recommended for advanced use cases or when building custom wrappers.
@@ -1017,99 +1023,119 @@ const {
               </thead>
               <tbody>
                 <tr>
-                  <td><a href="#rendered-item" class="link font-bold text-secondary">renderedItems</a></td>
+                  <td><a href="#rendered-item" class="link font-bold text-primary">renderedItems</a></td>
                   <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
                   <td>List of items to render in the current buffer.</td>
                 </tr>
                 <tr>
-                  <td><a href="#scroll-details" class="link font-bold text-secondary">scrollDetails</a></td>
+                  <td><a href="#scroll-details" class="link font-bold text-primary">scrollDetails</a></td>
                   <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
                   <td>Full reactive state of the virtual scroll system.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">totalWidth</code> / <code class="text-secondary font-bold">totalHeight</code></td>
+                  <td><code class="text-primary font-bold">totalWidth</code> / <code class="text-primary font-bold">totalHeight</code></td>
                   <td><code>Ref&lt;number&gt;</code></td>
-                  <td>Calculated dimensions of the entire list/grid.</td>
+                  <td>Calculated dimensions of the entire list/grid (VU).</td>
                 </tr>
                 <tr id="rendered-dimensions">
-                  <td><code class="text-secondary font-bold">renderedWidth</code> / <code class="text-secondary font-bold">renderedHeight</code></td>
+                  <td><code class="text-primary font-bold">renderedWidth</code> / <code class="text-primary font-bold">renderedHeight</code></td>
                   <td><code>Ref&lt;number&gt;</code></td>
-                  <td>Total dimensions to be rendered in the DOM (clamped to 15Mpx).</td>
+                  <td>Total dimensions to be rendered in the DOM (clamped to browser limits, DU).</td>
                 </tr>
                 <tr>
-                  <td><a href="#column-range" class="link font-bold text-secondary">columnRange</a></td>
+                  <td><a href="#column-range" class="link font-bold text-primary">columnRange</a></td>
                   <td><code>Ref&lt;ColumnRange&gt;</code></td>
                   <td>Visible columns and their associated paddings.</td>
                 </tr>
                 <tr id="is-hydrated">
-                  <td><code class="text-secondary font-bold">isHydrated</code></td>
+                  <td><code class="text-primary font-bold">isHydrated</code></td>
                   <td><code>Ref&lt;boolean&gt;</code></td>
                   <td><code>true</code> when the component is mounted and hydrated.</td>
                 </tr>
                 <tr id="is-rtl">
-                  <td><code class="text-secondary font-bold">isRtl</code></td>
+                  <td><code class="text-primary font-bold">isRtl</code></td>
                   <td><code>Ref&lt;boolean&gt;</code></td>
                   <td><code>true</code> if the scroll container is in Right-to-Left mode.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-scrolltoindex" class="link font-bold text-primary">scrollToIndex</a></td>
+                  <td><a href="#method-scrolltoindex" class="link font-bold text-secondary">scrollToIndex</a></td>
                   <td><code>Function</code></td>
                   <td>Programmatic scroll to a specific index.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-scrolltooffset" class="link font-bold text-primary">scrollToOffset</a></td>
+                  <td><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a></td>
                   <td><code>Function</code></td>
                   <td>Programmatic scroll to a pixel offset.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-primary">stopProgrammaticScroll</a></td>
+                  <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-secondary">stopProgrammaticScroll</a></td>
                   <td><code>Function</code></td>
                   <td>Cancel any active smooth scroll animation.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-updateitemsize" class="link font-bold text-primary">updateItemSize</a></td>
+                  <td><a href="#method-updateitemsize" class="link font-bold text-secondary">updateItemSize</a></td>
                   <td><code>Function</code></td>
                   <td>Register a manual item measurement.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-updateitemsizes" class="link font-bold text-primary">updateItemSizes</a></td>
+                  <td><a href="#method-updateitemsizes" class="link font-bold text-secondary">updateItemSizes</a></td>
                   <td><code>Function</code></td>
                   <td>Register multiple manual item measurements.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-updatehostoffset" class="link font-bold text-primary">updateHostOffset</a></td>
+                  <td><a href="#method-updatehostoffset" class="link font-bold text-secondary">updateHostOffset</a></td>
                   <td><code>Function</code></td>
                   <td>Force update the container's relative position.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-updatedirection" class="link font-bold text-primary">updateDirection</a></td>
+                  <td><a href="#method-updatedirection" class="link font-bold text-secondary">updateDirection</a></td>
                   <td><code>Function</code></td>
                   <td>Manually trigger direction (LTR/RTL) detection.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-getcolumnwidth" class="link font-bold text-primary">getColumnWidth</a></td>
+                  <td><a href="#method-getcolumnwidth" class="link font-bold text-secondary">getColumnWidth</a></td>
                   <td><code>Function</code></td>
                   <td>Helper to get a column's width.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-getrowheight" class="link font-bold text-primary">getRowHeight</a></td>
+                  <td><a href="#method-getrowheight" class="link font-bold text-secondary">getRowHeight</a></td>
                   <td><code>Function</code></td>
                   <td>Helper to get a row's height.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-refresh" class="link font-bold text-primary">refresh</a></td>
+                  <td><a href="#method-getrowoffset" class="link font-bold text-secondary">getRowOffset</a></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get a row's virtual offset (VU).</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-getcolumnoffset" class="link font-bold text-secondary">getColumnOffset</a></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get a column's virtual offset (VU).</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-getitemoffset" class="link font-bold text-secondary">getItemOffset</a></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get an item's virtual offset (VU).</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-getitemsize" class="link font-bold text-secondary">getItemSize</a></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get an item's size along scroll axis (VU).</td>
+                </tr>
+                <tr>
+                  <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
                   <td><code>Function</code></td>
                   <td>Resets all measurements and state.</td>
                 </tr>
-                <tr>
-                  <td><code class="text-secondary font-bold">scaleX</code> / <code class="text-secondary font-bold">scaleY</code></td>
+                <tr id="scale-factors">
+                  <td><code class="text-primary font-bold">scaleX</code> / <code class="text-primary font-bold">scaleY</code></td>
                   <td><code>Ref&lt;number&gt;</code></td>
-                  <td>Current coordinate scaling factors.</td>
+                  <td>Current coordinate scaling factors (VU / DU).</td>
                 </tr>
-                <tr>
-                  <td><code class="text-secondary font-bold">componentOffset</code></td>
+                <tr id="component-offset">
+                  <td><code class="text-primary font-bold">componentOffset</code></td>
                   <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
-                  <td>Absolute offset of the component in its container.</td>
+                  <td>Absolute offset of the component in its container (DU).</td>
                 </tr>
               </tbody>
             </table>
@@ -1118,7 +1144,7 @@ const {
 
         <!-- useVirtualScrollbar -->
         <section id="use-virtual-scrollbar">
-          <h3 class="docs-prop-header">useVirtualScrollbar</h3>
+          <h3 class="docs-prop-header text-secondary">useVirtualScrollbar</h3>
           <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
             <p>
               Provides the logic for virtual scrollbar interactions. It handles track clicks, thumb dragging, and coordinate mapping (including RTL).
@@ -1161,37 +1187,37 @@ const {
               </thead>
               <tbody>
                 <tr>
-                  <td><code class="text-secondary font-bold">trackProps</code></td>
-                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link">object</a>&gt;</code></td>
+                  <td><code class="text-primary font-bold">trackProps</code></td>
+                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
                   <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element. Includes <code>class</code> and <code>style</code>.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">thumbProps</code></td>
-                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link">object</a>&gt;</code></td>
+                  <td><code class="text-primary font-bold">thumbProps</code></td>
+                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
                   <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element. Includes <code>class</code> and <code>style</code>.</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">viewportPercent</code></td>
+                  <td><code class="text-primary font-bold">viewportPercent</code></td>
                   <td><code>ComputedRef&lt;number&gt;</code></td>
                   <td>Viewport size as percentage of total size (0-1).</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">positionPercent</code></td>
+                  <td><code class="text-primary font-bold">positionPercent</code></td>
                   <td><code>ComputedRef&lt;number&gt;</code></td>
                   <td>Scroll position as percentage of scrollable range (0-1).</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">thumbSizePercent</code></td>
+                  <td><code class="text-primary font-bold">thumbSizePercent</code></td>
                   <td><code>ComputedRef&lt;number&gt;</code></td>
                   <td>Calculated thumb size (percentage of track, 0-100).</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">thumbPositionPercent</code></td>
+                  <td><code class="text-primary font-bold">thumbPositionPercent</code></td>
                   <td><code>ComputedRef&lt;number&gt;</code></td>
                   <td>Calculated thumb position (percentage of track, 0-100).</td>
                 </tr>
                 <tr>
-                  <td><code class="text-secondary font-bold">isDragging</code></td>
+                  <td><code class="text-primary font-bold">isDragging</code></td>
                   <td><code>Ref&lt;boolean&gt;</code></td>
                   <td>Whether the thumb is currently being dragged.</td>
                 </tr>
@@ -1209,7 +1235,7 @@ const {
 
         <h3 class="docs-section-header text-2xl mt-16">Types</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12 text-base-content/80">
           <div class="card bg-base-300 p-4 border border-base-content/5">
             <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
             <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
@@ -1231,7 +1257,7 @@ const {
                 <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
               </thead>
               <tbody class="text-xs md:text-sm">
-                <tr><td><code>items</code></td><td><code><a href="#rendered-item" class="link">RenderedItem&lt;T&gt;</a>[]</code></td><td>Rendered items in the buffer.</td></tr>
+                <tr><td><code>items</code></td><td><code><a href="#rendered-item" class="link link-primary">RenderedItem&lt;T&gt;</a>[]</code></td><td>Rendered items in the buffer.</td></tr>
                 <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index below any sticky header.</td></tr>
                 <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index after any sticky column.</td></tr>
                 <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Current relative scroll position in virtual units (VU).</td></tr>
@@ -1242,7 +1268,7 @@ const {
                 <tr><td><code>isScrolling</code></td><td><code>boolean</code></td><td>Active scrolling state.</td></tr>
                 <tr><td><code>isProgrammaticScroll</code></td><td><code>boolean</code></td><td>True if triggered by <code>scrollToIndex/Offset</code>.</td></tr>
                 <tr><td><code>range</code></td><td><code>{ start, end }</code></td><td>Visible row range (inclusive start, exclusive end).</td></tr>
-                <tr><td><code>columnRange</code></td><td><code><a href="#column-range" class="link">ColumnRange</a></code></td><td>Visible column range (grid).</td></tr>
+                <tr><td><code>columnRange</code></td><td><code><a href="#column-range" class="link link-primary">ColumnRange</a></code></td><td>Visible column range (grid).</td></tr>
               </tbody>
             </table>
           </div>
@@ -1306,14 +1332,14 @@ const {
                 <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
                 <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
                 <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation (DU).</td></tr>
-                <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
+                <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link link-primary">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
                 <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
                 <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Default: {{ DEFAULT_COLUMN_WIDTH }}px.</td></tr>
                 <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
                 <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
                 <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
                 <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
-                <tr><td><code>initialScrollAlign</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link">Options</a></code></td><td>Alignment for initial jump.</td></tr>
+                <tr><td><code>initialScrollAlign</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Alignment for initial jump.</td></tr>
                 <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
                 <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
                 <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
@@ -1355,7 +1381,7 @@ const {
                 <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
               </thead>
               <tbody class="text-xs md:text-sm">
-                <tr><td><code>align</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
+                <tr><td><code>align</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
                 <tr><td><code>behavior</code></td><td><code>'auto' | 'smooth'</code></td><td>Scroll behavior (default: <code>'smooth'</code>).</td></tr>
               </tbody>
             </table>
@@ -1374,8 +1400,8 @@ const {
                 <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
               </thead>
               <tbody class="text-xs md:text-sm">
-                <tr><td><code>x</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
-                <tr><td><code>y</code></td><td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
+                <tr><td><code>x</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
+                <tr><td><code>y</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1417,13 +1443,13 @@ const {
           </div>
         </section>
 
-        <h3 class="docs-section-header text-2xl mt-24">Methods</h3>
+        <h3 class="docs-section-header text-2xl mt-24 text-secondary">Methods</h3>
 
         <div class="space-y-8 mb-10">
           <!-- Method: scrollToIndex -->
-          <div id="method-scrolltoindex" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> scrollToIndex()
+          <div id="method-scrolltoindex" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> scrollToIndex()
             </h4>
             <CodeBlock
               class="docs-code-block mb-4 font-mono text-xs"
@@ -1442,7 +1468,7 @@ const {
                   <tbody>
                     <tr><td><code>rowIndex</code></td><td><code>number | null</code></td><td>Target row. <code>null</code> to keep current Y.</td></tr>
                     <tr><td><code>colIndex</code></td><td><code>number | null</code></td><td>Target column. <code>null</code> to keep current X.</td></tr>
-                    <tr><td><code>options</code></td><td><code><a href="#scroll-to-index-options" class="link">Options</a></code></td><td>Alignment and behavior settings.</td></tr>
+                    <tr><td><code>options</code></td><td><code><a href="#scroll-to-index-options" class="link link-secondary">Options</a></code></td><td>Alignment and behavior settings.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -1450,9 +1476,9 @@ const {
           </div>
 
           <!-- Method: scrollToOffset -->
-          <div id="method-scrolltooffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> scrollToOffset()
+          <div id="method-scrolltooffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> scrollToOffset()
             </h4>
             <CodeBlock
               class="docs-code-block mb-4 font-mono text-xs"
@@ -1469,9 +1495,9 @@ const {
           </div>
 
           <!-- Method: refresh -->
-          <div id="method-refresh" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> refresh()
+          <div id="method-refresh" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> refresh()
             </h4>
             <div class="prose prose-sm max-w-none opacity-90">
               <p>Invalidates all cached measurements and triggers a full re-initialization. Use this if your item source data changes in a way that affects sizes without changing the <code>items</code> array reference.</p>
@@ -1479,9 +1505,9 @@ const {
           </div>
 
           <!-- Method: updateItemSize -->
-          <div id="method-updateitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> updateItemSize()
+          <div id="method-updateitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> updateItemSize()
             </h4>
             <CodeBlock
               class="docs-code-block mb-4 font-mono text-xs"
@@ -1499,9 +1525,9 @@ const {
           </div>
 
           <!-- Method: updateItemSizes -->
-          <div id="method-updateitemsizes" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> updateItemSizes()
+          <div id="method-updateitemsizes" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> updateItemSizes()
             </h4>
             <CodeBlock
               class="docs-code-block mb-4 font-mono text-xs"
@@ -1514,9 +1540,9 @@ const {
           </div>
 
           <!-- Method: updateHostOffset -->
-          <div id="method-updatehostoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> updateHostOffset()
+          <div id="method-updatehostoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> updateHostOffset()
             </h4>
             <div class="prose prose-sm max-w-none opacity-90">
               <p>Forces a recalculation of the host element's position relative to the scroll container. Call this if the layout changes in a way that shifts the component without triggering a resize event.</p>
@@ -1524,9 +1550,9 @@ const {
           </div>
 
           <!-- Method: updateDirection -->
-          <div id="method-updatedirection" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> updateDirection()
+          <div id="method-updatedirection" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> updateDirection()
             </h4>
             <div class="prose prose-sm max-w-none opacity-90">
               <p>Manually triggers the detection of the scroll direction (LTR or RTL). The component also performs this automatically on mount and whenever the <code>container</code> prop changes.</p>
@@ -1534,9 +1560,9 @@ const {
           </div>
 
           <!-- Method: getColumnWidth -->
-          <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> getColumnWidth()
+          <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getColumnWidth()
             </h4>
             <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnWidth(index: number): number" />
             <div class="prose prose-sm max-w-none opacity-90">
@@ -1545,9 +1571,9 @@ const {
           </div>
 
           <!-- Method: getRowHeight -->
-          <div id="method-getrowheight" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> getRowHeight()
+          <div id="method-getrowheight" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getRowHeight()
             </h4>
             <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowHeight(index: number): number" />
             <div class="prose prose-sm max-w-none opacity-90">
@@ -1555,10 +1581,54 @@ const {
             </div>
           </div>
 
+          <!-- Method: getRowOffset -->
+          <div id="method-getrowoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getRowOffset()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowOffset(index: number): number" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the virtual vertical offset (top) of a row in virtual units (VU).</p>
+            </div>
+          </div>
+
+          <!-- Method: getColumnOffset -->
+          <div id="method-getcolumnoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getColumnOffset()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnOffset(index: number): number" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the virtual horizontal offset (left) of a column in virtual units (VU).</p>
+            </div>
+          </div>
+
+          <!-- Method: getItemOffset -->
+          <div id="method-getitemoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getItemOffset()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemOffset(index: number): number" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the virtual offset of an item along the scroll axis in virtual units (VU).</p>
+            </div>
+          </div>
+
+          <!-- Method: getItemSize -->
+          <div id="method-getitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getItemSize()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemSize(index: number): number" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the size of an item along the scroll axis in virtual units (VU).</p>
+            </div>
+          </div>
+
           <!-- Method: stopProgrammaticScroll -->
-          <div id="method-stopprogrammaticscroll" class="card shadow-soft bg-base-300 p-6 border-t-2 border-primary">
-            <h4 class="font-bold text-lg text-primary flex items-center gap-2 mb-4">
-              <span class="badge badge-primary">Method</span> stopProgrammaticScroll()
+          <div id="method-stopprogrammaticscroll" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> stopProgrammaticScroll()
             </h4>
             <div class="prose prose-sm max-w-none opacity-90">
               <p>Immediately halts any active smooth scroll animation and clears pending scroll requests.</p>
@@ -1573,7 +1643,7 @@ const {
       <section id="utility-functions">
         <h2 class="docs-section-header">Utility Functions</h2>
         <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6">
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
             <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
               Type Guards
             </h4>
@@ -1586,12 +1656,12 @@ const {
               <p><code>isScrollToIndexOptions(val)</code>: Type guard for <code>ScrollToIndexOptions</code> object.</p>
             </div>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
             <h4 class="font-bold text-accent mb-2">getPaddingX / getPaddingY</h4>
             <p class="text-[10px] opacity-60 mb-2"><code>(p: number | object, dir: string): number</code></p>
             <p class="text-xs md:text-sm opacity-80">Extracts effective pixel padding from <code>scrollPadding</code> props, taking the current <code>direction</code> into account.</p>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
             <h4 class="font-bold text-accent mb-2">Coordinate Mapping</h4>
             <div class="space-y-1 text-xs md:text-sm opacity-80 mb-2">
               <p><code>displayToVirtual(displayPos, hostOffset, scale)</code>: Maps display pixels (DU) to virtual content position (VU).</p>
@@ -1601,12 +1671,12 @@ const {
             <p class="text-[10px] opacity-60 mb-2"><code>(pos, size, scroll, view, sticky?): boolean</code></p>
             <p class="text-xs md:text-sm opacity-80">Highly accurate visibility check (VU) used for auto-alignment and rendering ranges.</p>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
             <h4 class="font-bold text-accent mb-2">FenwickTree</h4>
             <p class="text-[10px] opacity-60 mb-2"><code>class FenwickTree(size: number)</code></p>
             <p class="text-xs md:text-sm opacity-80">Highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates. Used internally for all position tracking.</p>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent">
+          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
             <h4 class="font-bold text-accent mb-2">Default Values & Constants</h4>
             <div class="space-y-2">
               <div class="flex items-center justify-between text-xs md:text-sm">
