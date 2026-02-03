@@ -6,8 +6,8 @@ import CodeBlock from '#/components/CodeBlock.vue';
 </script>
 
 <template>
-  <div class="card shadow-soft bg-base-300 mb-8">
-    <div class="card-body flex-row items-center p-4 @4xl:p-8 gap-4 @4xl:gap-8">
+  <div class="app-header-card">
+    <div class="app-header-body">
       <AppLogo class="shrink-0 size-24 hidden @4xl:block drop-shadow-lg" />
       <div>
         <h1 class="text-primary">API Reference</h1>
@@ -34,85 +34,85 @@ import CodeBlock from '#/components/CodeBlock.vue';
     <!-- 1.1 Key Features -->
     <section id="features">
       <h2 class="docs-section-header">Key Features</h2>
-      <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4">
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+      <div class="docs-feature-grid">
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Bidirectional Scrolling</h4>
-              <p class="text-xs opacity-70">Virtualize both rows and columns for massive data grids.</p>
+              <h4 class="docs-feature-card-title">Bidirectional Scrolling</h4>
+              <p class="docs-feature-card-description">Virtualize both rows and columns for massive data grids.</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Dynamic Item Sizes</h4>
-              <p class="text-xs opacity-70">Automatic measurement via ResizeObserver for precise scrolling.</p>
+              <h4 class="docs-feature-card-title">Dynamic Item Sizes</h4>
+              <p class="docs-feature-card-description">Automatic measurement via ResizeObserver for precise scrolling.</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">RTL Support</h4>
-              <p class="text-xs opacity-70">Automatic direction detection and correct coordinate mapping for RTL layouts.</p>
+              <h4 class="docs-feature-card-title">RTL Support</h4>
+              <p class="docs-feature-card-description">Automatic direction detection and correct coordinate mapping for RTL layouts.</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Native Window Scroll</h4>
-              <p class="text-xs opacity-70">Use the browser window/body as the scroll container.</p>
+              <h4 class="docs-feature-card-title">Native Window Scroll</h4>
+              <p class="docs-feature-card-description">Use the browser window/body as the scroll container.</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Sticky Headers/Footers</h4>
-              <p class="text-xs opacity-70">iOS-style pushing headers for segmented lists and groups.</p>
+              <h4 class="docs-feature-card-title">Sticky Headers/Footers</h4>
+              <p class="docs-feature-card-description">iOS-style pushing headers for segmented lists and groups.</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Scroll Restoration</h4>
-              <p class="text-xs opacity-70">Maintains position when prepending items (perfect for chat).</p>
+              <h4 class="docs-feature-card-title">Scroll Restoration</h4>
+              <p class="docs-feature-card-description">Maintains position when prepending items (perfect for chat).</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">SSR & Hydration</h4>
-              <p class="text-xs opacity-70">Full support for server-side rendering and client hydration.</p>
+              <h4 class="docs-feature-card-title">SSR & Hydration</h4>
+              <p class="docs-feature-card-description">Full support for server-side rendering and client hydration.</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Massive List Support</h4>
-              <p class="text-xs opacity-70">Handles 10M+ items via automatic coordinate scaling (except for window/body containers).</p>
+              <h4 class="docs-feature-card-title">Massive List Support</h4>
+              <p class="docs-feature-card-description">Handles 10M+ items via automatic coordinate scaling (except for window/body containers).</p>
             </div>
           </div>
         </div>
-        <div class="card bg-base-300 shadow-sm border border-base-content/5">
-          <div class="card-body p-4 flex-row gap-4">
-            <div class="text-primary text-2xl font-bold">✓</div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
             <div>
-              <h4 class="font-bold text-sm">Virtual Scrollbars</h4>
-              <p class="text-xs opacity-70">Fully customizable virtual scrollbars that replace native ones.</p>
+              <h4 class="docs-feature-card-title">Virtual Scrollbars</h4>
+              <p class="docs-feature-card-description">Fully customizable virtual scrollbars that replace native ones.</p>
             </div>
           </div>
         </div>
@@ -155,11 +155,11 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
     <!-- 3. Usage Modes -->
     <section id="usage-modes">
       <h2 class="docs-section-header">Usage Modes</h2>
-      <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 @4xl:gap-8">
-        <div class="card shadow-soft bg-base-300 border-primary/10 overflow-hidden">
-          <div class="card-body p-5">
-            <h3 class="card-title text-base @4xl:text-lg text-primary">Compiled Component</h3>
-            <p class="text-xs @4xl:text-sm opacity-90 grow-0">Recommended for most projects. Uses pre-compiled JS.</p>
+      <div class="docs-usage-grid">
+        <div class="docs-usage-card docs-usage-card--primary">
+          <div class="docs-usage-card-body">
+            <h3 class="docs-usage-card-title docs-usage-card-title--primary">Compiled Component</h3>
+            <p class="docs-usage-card-description">Recommended for most projects. Uses pre-compiled JS.</p>
             <CodeBlock
               class="docs-code-block"
               lang="ts"
@@ -174,10 +174,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </div>
         </div>
 
-        <div class="card shadow-soft bg-base-300 border-secondary/10 overflow-hidden">
-          <div class="card-body p-5">
-            <h3 class="card-title text-base @4xl:text-lg text-secondary">Original Vue SFC</h3>
-            <p class="text-xs @4xl:text-sm opacity-90 grow-0">Import raw source for custom compilation.</p>
+        <div class="docs-usage-card docs-usage-card--secondary">
+          <div class="docs-usage-card-body">
+            <h3 class="docs-usage-card-title docs-usage-card-title--secondary">Original Vue SFC</h3>
+            <p class="docs-usage-card-description">Import raw source for custom compilation.</p>
             <CodeBlock
               class="docs-code-block"
               lang="ts"
@@ -191,10 +191,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </div>
         </div>
 
-        <div class="col-span-full card shadow-soft bg-base-300 border-accent/10 overflow-hidden">
-          <div class="card-body p-5">
-            <h3 class="card-title text-base @4xl:text-lg text-accent">CDN Usage</h3>
-            <p class="text-xs @4xl:text-sm opacity-90 grow-0">Use directly in browser without build step.</p>
+        <div class="col-span-full docs-usage-card docs-usage-card--accent">
+          <div class="docs-usage-card-body">
+            <h3 class="docs-usage-card-title docs-usage-card-title--accent">CDN Usage</h3>
+            <p class="docs-usage-card-description">Use directly in browser without build step.</p>
             <CodeBlock
               class="docs-code-block"
               lang="html"
@@ -222,8 +222,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
         </p>
         <div class="docs-table-container mt-4">
-          <table class="table table-sm @4xl:table-md table-zebra w-full border border-base-content/5">
-            <thead class="bg-base-300 text-base-content">
+          <table class="docs-table">
+            <thead>
               <tr>
                 <th>Type</th>
                 <th><code>itemSize</code> / <code>columnWidth</code></th>
@@ -231,7 +231,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <th>Description</th>
               </tr>
             </thead>
-            <tbody class="text-xs @4xl:text-sm text-base-content/80">
+            <tbody>
               <tr>
                 <td><strong>Fixed</strong></td>
                 <td><code>number</code></td>
@@ -278,8 +278,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <h4 class="docs-prop-subheader">Core Configuration</h4>
       <div class="docs-table-container mb-8 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/4">Prop</th>
               <th class="w-1/4">Type</th>
@@ -287,27 +287,27 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
-              <td><code class="text-primary font-bold">items</code></td>
+              <td><code class="docs-prop-name">items</code></td>
               <td><code>T[]</code></td>
               <td>-</td>
               <td>The array of items to render. Required.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">itemSize</code></td>
+              <td><code class="docs-prop-name">itemSize</code></td>
               <td><code>number | fn | null</code></td>
               <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
               <td>Fixed size or function. See <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">direction</code></td>
+              <td><code class="docs-prop-name">direction</code></td>
               <td><code>'vertical' | 'horizontal' | 'both'</code></td>
               <td><code>'vertical'</code></td>
               <td>The scroll direction.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">gap</code></td>
+              <td><code class="docs-prop-name">gap</code></td>
               <td><code>number</code></td>
               <td><code>0</code></td>
               <td>Spacings between items (vertical or horizontal).</td>
@@ -318,8 +318,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <h4 class="docs-prop-subheader">Grid Configuration <span class="text-xs normal-case opacity-60">(only for direction="both")</span></h4>
       <div class="docs-table-container mb-8 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/4">Prop</th>
               <th class="w-1/4">Type</th>
@@ -327,21 +327,21 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
-              <td><code class="text-primary font-bold">columnCount</code></td>
+              <td><code class="docs-prop-name">columnCount</code></td>
               <td><code>number</code></td>
               <td><code>0</code></td>
               <td>Number of columns for grid mode.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">columnWidth</code></td>
+              <td><code class="docs-prop-name">columnWidth</code></td>
               <td><code>num | arr | fn | null</code></td>
               <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
               <td>Width for columns in grid mode.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">columnGap</code></td>
+              <td><code class="docs-prop-name">columnGap</code></td>
               <td><code>number</code></td>
               <td><code>0</code></td>
               <td>Spacings between columns.</td>
@@ -352,8 +352,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <h4 class="docs-prop-subheader">Features & Behavior</h4>
       <div class="docs-table-container mb-8 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/4">Prop</th>
               <th class="w-1/4">Type</th>
@@ -361,57 +361,57 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
-              <td><code class="text-primary font-bold">stickyIndices</code></td>
+              <td><code class="docs-prop-name">stickyIndices</code></td>
               <td><code>number[]</code></td>
               <td><code>[]</code></td>
               <td>Indices of items that should remain sticky.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">stickyHeader</code> / <code class="text-primary font-bold">stickyFooter</code></td>
+              <td><code class="docs-prop-name">stickyHeader</code> / <code class="docs-prop-name">stickyFooter</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
               <td>If true, header/footer size is measured and added to padding.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">ssrRange</code></td>
+              <td><code class="docs-prop-name">ssrRange</code></td>
               <td><code>{start, end, ...}</code></td>
               <td>-</td>
               <td>Range of items to pre-render. See <a href="#ssr-support" class="link">SSR Support</a>.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">loading</code></td>
+              <td><code class="docs-prop-name">loading</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
               <td>Shows <code>#loading</code> slot and prevents multiple <code>load</code> events.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">loadDistance</code></td>
+              <td><code class="docs-prop-name">loadDistance</code></td>
               <td><code>number</code></td>
               <td><code>200</code></td>
               <td>Distance from end to trigger <code>load</code> event.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">virtualScrollbar</code></td>
+              <td><code class="docs-prop-name">virtualScrollbar</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
               <td>Whether to force use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window/body</code> as container.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">restoreScrollOnPrepend</code></td>
+              <td><code class="docs-prop-name">restoreScrollOnPrepend</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
               <td>Maintain scroll position when items are added to the top.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">initialScrollIndex</code></td>
+              <td><code class="docs-prop-name">initialScrollIndex</code></td>
               <td><code>number</code></td>
               <td>-</td>
               <td>Index to jump to on mount.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">initialScrollAlign</code></td>
+              <td><code class="docs-prop-name">initialScrollAlign</code></td>
               <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td>
               <td><code>'start'</code></td>
               <td>Alignment for initial index.</td>
@@ -422,8 +422,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <h4 class="docs-prop-subheader">Accessibility</h4>
       <div class="docs-table-container mb-8 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/4">Prop</th>
               <th class="w-1/4">Type</th>
@@ -431,27 +431,27 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
-              <td><code class="text-primary font-bold">role</code></td>
+              <td><code class="docs-prop-name">role</code></td>
               <td><code>string</code></td>
               <td><code>'list' | 'grid'</code></td>
               <td>ARIA role for the container. Automatically detected based on direction.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">ariaLabel</code></td>
+              <td><code class="docs-prop-name">ariaLabel</code></td>
               <td><code>string</code></td>
               <td>-</td>
               <td>Accessible label for the scroll container.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">ariaLabelledby</code></td>
+              <td><code class="docs-prop-name">ariaLabelledby</code></td>
               <td><code>string</code></td>
               <td>-</td>
               <td>ID of the element that labels the scroll container.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">itemRole</code></td>
+              <td><code class="docs-prop-name">itemRole</code></td>
               <td><code>string</code></td>
               <td>-</td>
               <td>ARIA role for each item. Set to <code>'none'</code> to manually apply roles using <code>getItemAriaProps</code>.</td>
@@ -467,8 +467,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <h4 class="docs-prop-subheader">Advanced & Performance</h4>
       <div class="docs-table-container mb-8 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/4">Prop</th>
               <th class="w-1/4">Type</th>
@@ -476,45 +476,45 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
-              <td><code class="text-primary font-bold">container</code></td>
+              <td><code class="docs-prop-name">container</code></td>
               <td><code>El | Window | null</code></td>
               <td><code>undefined</code></td>
               <td>The scrollable container. Defaults to component root.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">scrollPaddingStart</code> / <code class="text-primary font-bold">End</code></td>
+              <td><code class="docs-prop-name">scrollPaddingStart</code> / <code class="docs-prop-name">End</code></td>
               <td><code>num | {x, y}</code></td>
               <td><code>0</code></td>
               <td>Additional padding for scroll offsets.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">containerTag</code> / <code class="text-primary font-bold">wrapperTag</code> / <code class="text-primary font-bold">itemTag</code></td>
+              <td><code class="docs-prop-name">containerTag</code> / <code class="docs-prop-name">wrapperTag</code> / <code class="docs-prop-name">itemTag</code></td>
               <td><code>string</code></td>
               <td><code>'div'</code></td>
               <td>HTML tags for different parts of the component.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">bufferBefore</code> / <code class="text-primary font-bold">bufferAfter</code></td>
+              <td><code class="docs-prop-name">bufferBefore</code> / <code class="docs-prop-name">bufferAfter</code></td>
               <td><code>number</code></td>
               <td><code>{{ DEFAULT_BUFFER }}</code></td>
               <td>Number of items to render outside the viewport.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">defaultItemSize</code></td>
+              <td><code class="docs-prop-name">defaultItemSize</code></td>
               <td><code>number</code></td>
               <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
               <td>Estimated size for items before measurement.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">defaultColumnWidth</code></td>
+              <td><code class="docs-prop-name">defaultColumnWidth</code></td>
               <td><code>number</code></td>
               <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
               <td>Estimated width for columns before measurement.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">debug</code></td>
+              <td><code class="docs-prop-name">debug</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
               <td>Enables debug mode (visible offsets and indices).</td>
@@ -526,9 +526,9 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </div>
       </div>
 
-      <h3 id="slots" class="docs-prop-header text-accent">Slots</h3>
+      <h3 id="slots" class="docs-prop-header docs-prop-header--accent">Slots</h3>
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-10">
-        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+        <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#item</h4>
           <p class="text-xs @4xl:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
           <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
@@ -546,7 +546,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
           </ul>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+        <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#scrollbar</h4>
           <p class="text-xs @4xl:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
           <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
@@ -572,11 +572,11 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </li>
           </ul>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+        <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#header / #footer</h4>
           <p class="text-xs @4xl:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+        <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#loading</h4>
           <p class="text-xs @4xl:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
         </div>
@@ -609,11 +609,11 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         />
 
         <div class="docs-table-container text-base-content/80">
-          <table class="table table-sm @4xl:table-md table-zebra w-full">
-            <thead class="bg-base-300 text-base-content">
+          <table class="docs-table">
+            <thead>
               <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
             </thead>
-            <tbody class="text-xs @4xl:text-sm">
+            <tbody>
               <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>The scrollbar axis.</td></tr>
               <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total scrollable content size.</td></tr>
               <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll offset.</td></tr>
@@ -634,15 +634,15 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
 
       <h3 id="events" class="docs-prop-header">Events</h3>
       <div class="docs-table-container mb-10 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th>Event</th>
               <th>Payload</th>
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
               <td><code>scroll</code></td>
               <td><code><a href="#scroll-details" class="link link-primary">ScrollDetails&lt;T&gt;</a></code></td>
@@ -666,45 +666,45 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
         <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
         <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 not-prose mt-4">
-          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-            <kbd class="kbd kbd-sm @4xl:kbd-md">Home</kbd>
-            <span class="text-xs @4xl:text-sm opacity-80">Scroll to the very beginning (Index 0,0).</span>
+          <div class="docs-kbd-item">
+            <kbd class="docs-kbd">Home</kbd>
+            <span class="docs-kbd-description">Scroll to the very beginning (Index 0,0).</span>
           </div>
-          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-            <kbd class="kbd kbd-sm @4xl:kbd-md">End</kbd>
-            <span class="text-xs @4xl:text-sm opacity-80">Scroll to the very last row and column.</span>
+          <div class="docs-kbd-item">
+            <kbd class="docs-kbd">End</kbd>
+            <span class="docs-kbd-description">Scroll to the very last row and column.</span>
           </div>
-          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-            <kbd class="kbd kbd-sm @4xl:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm @4xl:kbd-md">PgDn</kbd>
-            <span class="text-xs @4xl:text-sm opacity-80">Scroll by one full viewport height/width.</span>
+          <div class="docs-kbd-item">
+            <kbd class="docs-kbd">PgUp</kbd> / <kbd class="docs-kbd">PgDn</kbd>
+            <span class="docs-kbd-description">Scroll by one full viewport height/width.</span>
           </div>
-          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+          <div class="docs-kbd-item">
             <span class="flex gap-1">
-              <kbd class="kbd kbd-sm @4xl:kbd-md">↑</kbd>
-              <kbd class="kbd kbd-sm @4xl:kbd-md">↓</kbd>
+              <kbd class="docs-kbd">↑</kbd>
+              <kbd class="docs-kbd">↓</kbd>
             </span>
-            <span class="text-xs @4xl:text-sm opacity-80">Scroll vertically by item height.</span>
+            <span class="docs-kbd-description">Scroll vertically by item height.</span>
           </div>
-          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+          <div class="docs-kbd-item">
             <span class="flex gap-1">
-              <kbd class="kbd kbd-sm @4xl:kbd-md">←</kbd>
-              <kbd class="kbd kbd-sm @4xl:kbd-md">→</kbd>
+              <kbd class="docs-kbd">←</kbd>
+              <kbd class="docs-kbd">→</kbd>
             </span>
-            <span class="text-xs @4xl:text-sm opacity-80">Scroll horizontally by column width.</span>
+            <span class="docs-kbd-description">Scroll horizontally by column width.</span>
           </div>
         </div>
       </div>
 
       <h3 id="css-classes" class="docs-prop-header">CSS Classes</h3>
       <div class="docs-table-container mb-10 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300 text-base-content">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/3">Class</th>
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
               <td><code>.virtual-scroll-container</code></td>
               <td>The root scrollable container element.</td>
@@ -764,8 +764,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </p>
       </div>
       <div class="docs-table-container mb-10 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full text-xs @4xl:text-sm">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/3">Variable</th>
               <th>Default (Light/Dark)</th>
@@ -792,115 +792,115 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         </p>
       </div>
 
-      <h4 class="docs-prop-subheader text-primary">Properties</h4>
-      <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 mb-8">
-        <a href="#props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">All Props</code>
-          <p class="text-[10px] opacity-60 mt-1">All component props are available on the instance.</p>
+      <h4 class="docs-prop-subheader docs-prop-subheader--primary">Properties</h4>
+      <div class="docs-link-grid mb-8">
+        <a href="#props" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">All Props</code>
+          <p class="docs-link-description">All component props are available on the instance.</p>
         </a>
-        <a href="#scroll-details" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">scrollDetails</code>
-          <p class="text-[10px] opacity-60 mt-1">Full reactive state of the virtualizer.</p>
+        <a href="#scroll-details" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">scrollDetails</code>
+          <p class="docs-link-description">Full reactive state of the virtualizer.</p>
         </a>
-        <a href="#column-range" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">columnRange</code>
-          <p class="text-[10px] opacity-60 mt-1">Visible column indices and paddings.</p>
+        <a href="#column-range" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">columnRange</code>
+          <p class="docs-link-description">Visible column indices and paddings.</p>
         </a>
-        <a href="#is-hydrated" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">isHydrated</code>
-          <p class="text-[10px] opacity-60 mt-1">Mounted and ready for virtualization.</p>
+        <a href="#is-hydrated" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">isHydrated</code>
+          <p class="docs-link-description">Mounted and ready for virtualization.</p>
         </a>
-        <a href="#is-rtl" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">isRtl</code>
-          <p class="text-[10px] opacity-60 mt-1">Right-to-Left mode active.</p>
+        <a href="#is-rtl" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">isRtl</code>
+          <p class="docs-link-description">Right-to-Left mode active.</p>
         </a>
-        <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">scrollbarPropsVertical</code>
-          <p class="text-[10px] opacity-60 mt-1">Reactive vertical scrollbar properties.</p>
+        <a href="#scrollbar-slot-props" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">scrollbarPropsVertical</code>
+          <p class="docs-link-description">Reactive vertical scrollbar properties.</p>
         </a>
-        <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">scrollbarPropsHorizontal</code>
-          <p class="text-[10px] opacity-60 mt-1">Reactive horizontal scrollbar properties.</p>
+        <a href="#scrollbar-slot-props" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">scrollbarPropsHorizontal</code>
+          <p class="docs-link-description">Reactive horizontal scrollbar properties.</p>
         </a>
-        <a href="#scale-factors" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">scaleX / scaleY</code>
-          <p class="text-[10px] opacity-60 mt-1">Current coordinate scaling factors.</p>
+        <a href="#scale-factors" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">scaleX / scaleY</code>
+          <p class="docs-link-description">Current coordinate scaling factors.</p>
         </a>
-        <a href="#component-offset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">componentOffset</code>
-          <p class="text-[10px] opacity-60 mt-1">Absolute offset of the component within its container.</p>
+        <a href="#component-offset" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">componentOffset</code>
+          <p class="docs-link-description">Absolute offset of the component within its container.</p>
         </a>
-        <a href="#rendered-dimensions" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-primary font-bold text-xs">renderedWidth / renderedHeight</code>
-          <p class="text-[10px] opacity-60 mt-1">Physical dimensions in DOM (clamped).</p>
+        <a href="#rendered-dimensions" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">renderedWidth / renderedHeight</code>
+          <p class="docs-link-description">Physical dimensions in DOM (clamped).</p>
         </a>
       </div>
 
-      <h4 class="docs-prop-subheader text-secondary">Methods</h4>
-      <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 mb-10">
-        <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">scrollToIndex()</code>
-          <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
+      <h4 class="docs-prop-subheader docs-prop-subheader--secondary">Methods</h4>
+      <div class="docs-link-grid mb-10">
+        <a href="#method-scrolltoindex" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">scrollToIndex()</code>
+          <p class="docs-link-description">Scroll to a specific row/column.</p>
         </a>
-        <a href="#method-scrolltooffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">scrollToOffset()</code>
-          <p class="text-[10px] opacity-60 mt-1">Scroll to precise pixel position.</p>
+        <a href="#method-scrolltooffset" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">scrollToOffset()</code>
+          <p class="docs-link-description">Scroll to precise pixel position.</p>
         </a>
-        <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">stopProgrammaticScroll()</code>
-          <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
+        <a href="#method-stopprogrammaticscroll" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">stopProgrammaticScroll()</code>
+          <p class="docs-link-description">Halt smooth scroll animations.</p>
         </a>
-        <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getColumnWidth()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
+        <a href="#method-getcolumnwidth" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getColumnWidth()</code>
+          <p class="docs-link-description">Get calculated width of a column.</p>
         </a>
-        <a href="#method-getrowheight" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getRowHeight()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get calculated height of a row.</p>
+        <a href="#method-getrowheight" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getRowHeight()</code>
+          <p class="docs-link-description">Get calculated height of a row.</p>
         </a>
-        <a href="#method-getrowoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getRowOffset()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a row.</p>
+        <a href="#method-getrowoffset" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getRowOffset()</code>
+          <p class="docs-link-description">Get virtual offset of a row.</p>
         </a>
-        <a href="#method-getcolumnoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getColumnOffset()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a column.</p>
+        <a href="#method-getcolumnoffset" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getColumnOffset()</code>
+          <p class="docs-link-description">Get virtual offset of a column.</p>
         </a>
-        <a href="#method-getitemoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getItemOffset()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get virtual offset of an item.</p>
+        <a href="#method-getitemoffset" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getItemOffset()</code>
+          <p class="docs-link-description">Get virtual offset of an item.</p>
         </a>
-        <a href="#method-getitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getItemSize()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get item size along scroll axis.</p>
+        <a href="#method-getitemsize" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getItemSize()</code>
+          <p class="docs-link-description">Get item size along scroll axis.</p>
         </a>
-        <a href="#method-getitemariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getItemAriaProps()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for an item.</p>
+        <a href="#method-getitemariaprops" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getItemAriaProps()</code>
+          <p class="docs-link-description">Get ARIA attributes for an item.</p>
         </a>
-        <a href="#method-getcellariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">getCellAriaProps()</code>
-          <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for a cell.</p>
+        <a href="#method-getcellariaprops" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getCellAriaProps()</code>
+          <p class="docs-link-description">Get ARIA attributes for a cell.</p>
         </a>
-        <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">refresh()</code>
-          <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
+        <a href="#method-refresh" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">refresh()</code>
+          <p class="docs-link-description">Reset all dynamic measurements.</p>
         </a>
-        <a href="#method-updatedirection" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">updateDirection()</code>
-          <p class="text-[10px] opacity-60 mt-1">Trigger RTL/LTR detection.</p>
+        <a href="#method-updatedirection" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">updateDirection()</code>
+          <p class="docs-link-description">Trigger RTL/LTR detection.</p>
         </a>
-        <a href="#method-updatehostoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">updateHostOffset()</code>
-          <p class="text-[10px] opacity-60 mt-1">Recalculate container position.</p>
+        <a href="#method-updatehostoffset" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">updateHostOffset()</code>
+          <p class="docs-link-description">Recalculate container position.</p>
         </a>
-        <a href="#method-updateitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">updateItemSize()</code>
-          <p class="text-[10px] opacity-60 mt-1">Manually register measurement.</p>
+        <a href="#method-updateitemsize" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">updateItemSize()</code>
+          <p class="docs-link-description">Manually register measurement.</p>
         </a>
-        <a href="#method-updateitemsizes" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-          <code class="text-secondary font-bold text-xs">updateItemSizes()</code>
-          <p class="text-[10px] opacity-60 mt-1">Batch register measurements.</p>
+        <a href="#method-updateitemsizes" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">updateItemSizes()</code>
+          <p class="docs-link-description">Batch register measurements.</p>
         </a>
       </div>
     </section>
@@ -954,8 +954,8 @@ const scrollY = ref(0);
 
       <h3 id="scrollbar-props" class="docs-prop-header text-primary">Props</h3>
       <div class="docs-table-container mb-8 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th class="w-1/4">Prop</th>
               <th class="w-1/4">Type</th>
@@ -963,39 +963,39 @@ const scrollY = ref(0);
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
-              <td><code class="text-primary font-bold">axis</code></td>
+              <td><code class="docs-prop-name">axis</code></td>
               <td><code>'vertical' | 'horizontal'</code></td>
               <td>-</td>
               <td>The axis of the scrollbar. Required.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">totalSize</code></td>
+              <td><code class="docs-prop-name">totalSize</code></td>
               <td><code>number</code></td>
               <td>-</td>
               <td>Total size of the scrollable content in pixels. Required.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">viewportSize</code></td>
+              <td><code class="docs-prop-name">viewportSize</code></td>
               <td><code>number</code></td>
               <td>-</td>
               <td>Size of the visible viewport in pixels. Required.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">position</code></td>
+              <td><code class="docs-prop-name">position</code></td>
               <td><code>number</code></td>
               <td>-</td>
               <td>Current scroll position in pixels. Required.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">containerId</code></td>
+              <td><code class="docs-prop-name">containerId</code></td>
               <td><code>string</code></td>
               <td><code>undefined</code></td>
               <td>ID of the container element for accessibility.</td>
             </tr>
             <tr>
-              <td><code class="text-primary font-bold">ariaLabel</code></td>
+              <td><code class="docs-prop-name">ariaLabel</code></td>
               <td><code>string</code></td>
               <td>-</td>
               <td>Accessible label for the scrollbar.</td>
@@ -1006,15 +1006,15 @@ const scrollY = ref(0);
 
       <h3 id="scrollbar-events" class="docs-prop-header text-secondary">Events</h3>
       <div class="docs-table-container mb-10 text-base-content/80">
-        <table class="table table-sm @4xl:table-md table-zebra w-full">
-          <thead class="bg-base-300">
+        <table class="docs-table">
+          <thead>
             <tr>
               <th>Event</th>
               <th>Payload</th>
               <th>Description</th>
             </tr>
           </thead>
-          <tbody class="text-xs @4xl:text-sm">
+          <tbody>
             <tr>
               <td><code>scroll-to-offset</code></td>
               <td><code>number</code></td>
@@ -1068,8 +1068,8 @@ scrollToIndex
 
         <h4 class="docs-prop-subheader">Return Value</h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
-          <table class="table table-sm @4xl:table-md table-zebra w-full">
-            <thead class="bg-base-300 text-base-content">
+          <table class="docs-table">
+            <thead>
               <tr>
                 <th class="w-1/4">Member</th>
                 <th class="w-1/4">Type</th>
@@ -1088,12 +1088,12 @@ scrollToIndex
                 <td>Full reactive state of the virtual scroll system.</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">totalWidth</code> / <code class="text-primary font-bold">totalHeight</code></td>
+                <td><code class="docs-prop-name">totalWidth</code> / <code class="docs-prop-name">totalHeight</code></td>
                 <td><code>Ref&lt;number&gt;</code></td>
                 <td>Calculated dimensions of the entire list/grid (VU).</td>
               </tr>
               <tr id="rendered-dimensions">
-                <td><code class="text-primary font-bold">renderedWidth</code> / <code class="text-primary font-bold">renderedHeight</code></td>
+                <td><code class="docs-prop-name">renderedWidth</code> / <code class="docs-prop-name">renderedHeight</code></td>
                 <td><code>Ref&lt;number&gt;</code></td>
                 <td>Total dimensions to be rendered in the DOM (clamped to browser limits, DU).</td>
               </tr>
@@ -1103,12 +1103,12 @@ scrollToIndex
                 <td>Visible columns and their associated paddings.</td>
               </tr>
               <tr id="is-hydrated">
-                <td><code class="text-primary font-bold">isHydrated</code></td>
+                <td><code class="docs-prop-name">isHydrated</code></td>
                 <td><code>Ref&lt;boolean&gt;</code></td>
                 <td><code>true</code> when the component is mounted and hydrated.</td>
               </tr>
               <tr id="is-rtl">
-                <td><code class="text-primary font-bold">isRtl</code></td>
+                <td><code class="docs-prop-name">isRtl</code></td>
                 <td><code>Ref&lt;boolean&gt;</code></td>
                 <td><code>true</code> if the scroll container is in Right-to-Left mode.</td>
               </tr>
@@ -1193,12 +1193,12 @@ scrollToIndex
                 <td>Resets all measurements and state.</td>
               </tr>
               <tr id="scale-factors">
-                <td><code class="text-primary font-bold">scaleX</code> / <code class="text-primary font-bold">scaleY</code></td>
+                <td><code class="docs-prop-name">scaleX</code> / <code class="docs-prop-name">scaleY</code></td>
                 <td><code>Ref&lt;number&gt;</code></td>
                 <td>Current coordinate scaling factors (VU / DU).</td>
               </tr>
               <tr id="component-offset">
-                <td><code class="text-primary font-bold">componentOffset</code></td>
+                <td><code class="docs-prop-name">componentOffset</code></td>
                 <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
                 <td>Absolute offset of the component in its container (DU).</td>
               </tr>
@@ -1242,8 +1242,8 @@ scrollToOffset: (val) => { scrollPos = val; }
 
         <h4 class="docs-prop-subheader">Return Value</h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
-          <table class="table table-sm @4xl:table-md table-zebra w-full">
-            <thead class="bg-base-300 text-base-content">
+          <table class="docs-table">
+            <thead>
               <tr>
                 <th class="w-1/4">Member</th>
                 <th class="w-1/4">Type</th>
@@ -1252,37 +1252,37 @@ scrollToOffset: (val) => { scrollPos = val; }
             </thead>
             <tbody>
               <tr>
-                <td><code class="text-primary font-bold">trackProps</code></td>
+                <td><code class="docs-prop-name">trackProps</code></td>
                 <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
                 <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element. Includes <code>class</code> and <code>style</code>.</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">thumbProps</code></td>
+                <td><code class="docs-prop-name">thumbProps</code></td>
                 <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
                 <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element. Includes <code>class</code> and <code>style</code>.</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">viewportPercent</code></td>
+                <td><code class="docs-prop-name">viewportPercent</code></td>
                 <td><code>ComputedRef&lt;number&gt;</code></td>
                 <td>Viewport size as percentage of total size (0-1).</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">positionPercent</code></td>
+                <td><code class="docs-prop-name">positionPercent</code></td>
                 <td><code>ComputedRef&lt;number&gt;</code></td>
                 <td>Scroll position as percentage of scrollable range (0-1).</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">thumbSizePercent</code></td>
+                <td><code class="docs-prop-name">thumbSizePercent</code></td>
                 <td><code>ComputedRef&lt;number&gt;</code></td>
                 <td>Calculated thumb size (percentage of track, 0-100).</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">thumbPositionPercent</code></td>
+                <td><code class="docs-prop-name">thumbPositionPercent</code></td>
                 <td><code>ComputedRef&lt;number&gt;</code></td>
                 <td>Calculated thumb position (percentage of track, 0-100).</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">isDragging</code></td>
+                <td><code class="docs-prop-name">isDragging</code></td>
                 <td><code>Ref&lt;boolean&gt;</code></td>
                 <td>Whether the thumb is currently being dragged.</td>
               </tr>
@@ -1489,19 +1489,19 @@ scrollToOffset: (val) => { scrollPos = val; }
             </thead>
             <tbody class="text-xs @4xl:text-sm">
               <tr>
-                <td><code class="text-primary font-bold">'start'</code></td>
+                <td><code class="docs-prop-name">'start'</code></td>
                 <td>Aligns to top (vertical) or left (horizontal) edge.</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">'center'</code></td>
+                <td><code class="docs-prop-name">'center'</code></td>
                 <td>Aligns to viewport center.</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">'end'</code></td>
+                <td><code class="docs-prop-name">'end'</code></td>
                 <td>Aligns to bottom (vertical) or right (horizontal) edge.</td>
               </tr>
               <tr>
-                <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default</span></td>
+                <td><code class="docs-prop-name">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default</span></td>
                 <td><strong>Smart:</strong> If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
               </tr>
             </tbody>
@@ -1513,8 +1513,8 @@ scrollToOffset: (val) => { scrollPos = val; }
 
       <div class="space-y-8 mb-10">
         <!-- Method: scrollToIndex -->
-        <div id="method-scrolltoindex" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-scrolltoindex" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> scrollToIndex()
           </h4>
           <CodeBlock
@@ -1542,8 +1542,8 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
         </div>
 
         <!-- Method: scrollToOffset -->
-        <div id="method-scrolltooffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-scrolltooffset" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> scrollToOffset()
           </h4>
           <CodeBlock
@@ -1561,8 +1561,8 @@ options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
         </div>
 
         <!-- Method: refresh -->
-        <div id="method-refresh" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-refresh" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> refresh()
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
@@ -1571,8 +1571,8 @@ options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
         </div>
 
         <!-- Method: updateItemSize -->
-        <div id="method-updateitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-updateitemsize" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> updateItemSize()
           </h4>
           <CodeBlock
@@ -1591,8 +1591,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: updateItemSizes -->
-        <div id="method-updateitemsizes" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-updateitemsizes" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> updateItemSizes()
           </h4>
           <CodeBlock
@@ -1606,8 +1606,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: updateHostOffset -->
-        <div id="method-updatehostoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-updatehostoffset" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> updateHostOffset()
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
@@ -1616,8 +1616,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: updateDirection -->
-        <div id="method-updatedirection" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-updatedirection" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> updateDirection()
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
@@ -1626,8 +1626,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getColumnWidth -->
-        <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getcolumnwidth" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getColumnWidth()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnWidth(index: number): number" />
@@ -1637,8 +1637,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getRowHeight -->
-        <div id="method-getrowheight" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getrowheight" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getRowHeight()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowHeight(index: number): number" />
@@ -1648,8 +1648,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getRowOffset -->
-        <div id="method-getrowoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getrowoffset" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getRowOffset()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowOffset(index: number): number" />
@@ -1659,8 +1659,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getColumnOffset -->
-        <div id="method-getcolumnoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getcolumnoffset" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getColumnOffset()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnOffset(index: number): number" />
@@ -1670,8 +1670,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getItemOffset -->
-        <div id="method-getitemoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getitemoffset" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getItemOffset()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemOffset(index: number): number" />
@@ -1681,8 +1681,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getItemSize -->
-        <div id="method-getitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getitemsize" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getItemSize()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemSize(index: number): number" />
@@ -1692,8 +1692,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getItemAriaProps -->
-        <div id="method-getitemariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getitemariaprops" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getItemAriaProps()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemAriaProps(index: number): Record<string, string | number | undefined>" />
@@ -1703,8 +1703,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: getCellAriaProps -->
-        <div id="method-getcellariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-getcellariaprops" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> getCellAriaProps()
           </h4>
           <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getCellAriaProps(colIndex: number): Record<string, string | number | undefined>" />
@@ -1714,8 +1714,8 @@ element?: HTMLElement
         </div>
 
         <!-- Method: stopProgrammaticScroll -->
-        <div id="method-stopprogrammaticscroll" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+        <div id="method-stopprogrammaticscroll" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
             <span class="badge badge-secondary">Method</span> stopProgrammaticScroll()
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
@@ -1731,7 +1731,7 @@ element?: HTMLElement
     <section id="utility-functions">
       <h2 class="docs-section-header">Utility Functions</h2>
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-6">
-        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+        <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
             Type Guards
           </h4>
@@ -1744,12 +1744,12 @@ element?: HTMLElement
             <p><code>isScrollToIndexOptions(val)</code>: Type guard for <code>ScrollToIndexOptions</code> object.</p>
           </div>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+        <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2">getPaddingX / getPaddingY</h4>
           <p class="text-[10px] opacity-60 mb-2"><code>(p: number | object, dir: string): number</code></p>
           <p class="text-xs @4xl:text-sm opacity-80">Extracts effective pixel padding from <code>scrollPadding</code> props, taking the current <code>direction</code> into account.</p>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+        <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2">Coordinate Mapping</h4>
           <div class="space-y-1 text-xs @4xl:text-sm opacity-80 mb-2">
             <p><code>displayToVirtual(displayPos, hostOffset, scale)</code>: Maps display pixels (DU) to virtual content position (VU).</p>
@@ -1759,12 +1759,12 @@ element?: HTMLElement
           <p class="text-[10px] opacity-60 mb-2"><code>(pos, size, scroll, view, sticky?): boolean</code></p>
           <p class="text-xs @4xl:text-sm opacity-80">Highly accurate visibility check (VU) used for auto-alignment and rendering ranges.</p>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+        <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2">FenwickTree</h4>
           <p class="text-[10px] opacity-60 mb-2"><code>class FenwickTree(size: number)</code></p>
           <p class="text-xs @4xl:text-sm opacity-80">Highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates. Used internally for all position tracking.</p>
         </div>
-        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+        <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2">Default Values & Constants</h4>
           <div class="space-y-2">
             <div class="flex items-center justify-between text-xs @4xl:text-sm">
@@ -1796,7 +1796,7 @@ element?: HTMLElement
       <h2 class="docs-section-header">SSR & Hydration</h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
-        <div class="card bg-base-300 p-6 mt-6 border-s-4 border-warning">
+        <div class="docs-alert docs-alert--warning mt-6">
           <h4 class="font-bold mb-2">Hydration Logic</h4>
           <ol class="list-decimal ps-5 space-y-2 opacity-90">
             <li><strong>Server</strong>: Renders a static block of items at <code>ssrRange</code>.</li>

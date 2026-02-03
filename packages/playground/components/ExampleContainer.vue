@@ -47,7 +47,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
 
 <template>
   <div class="space-y-4 @4xl:space-y-8">
-    <div v-if="$slots.title || $slots.description" class="card bg-base-300 shadow-soft">
+    <div v-if="$slots.title || $slots.description" class="app-card">
       <div class="card-body relative p-4 @4xl:p-8" :class="isIndex ? undefined : 'pb-2 @4xl:pb-2'">
         <figure v-if="$slots.icon" class="hidden @4xl:block absolute top-6 end-6 pointer-events-none">
           <slot name="icon" />

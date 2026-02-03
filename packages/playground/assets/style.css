@@ -299,6 +299,18 @@ html, body {
 
 /* --- General Utilities --- */
 
+@utility app-card {
+  @apply card shadow-soft bg-base-300;
+}
+
+@utility app-header-card {
+  @apply app-card mb-8;
+}
+
+@utility app-header-body {
+  @apply card-body flex-row items-center p-4 @4xl:p-8 gap-4 @4xl:gap-8;
+}
+
 @utility shadow-soft {
   @apply shadow-lg border border-base-content/5;
 }
@@ -354,21 +366,187 @@ html, body {
 @utility docs-prop-header {
   @apply text-lg @4xl:text-xl font-semibold mb-4 pb-2 border-b border-base-300 text-secondary;
 }
+@utility docs-prop-header--primary {
+  @apply text-primary border-primary/30;
+}
+@utility docs-prop-header--accent {
+  @apply text-accent border-accent/30;
+}
 
 @utility docs-prop-subheader {
   @apply text-sm @4xl:text-base font-bold mb-4 opacity-70 tracking-widest small-caps;
 }
+@utility docs-prop-subheader--primary {
+  @apply text-primary opacity-100;
+}
+@utility docs-prop-subheader--secondary {
+  @apply text-secondary opacity-100;
+}
+@utility docs-prop-subheader--accent {
+  @apply text-accent opacity-100;
+}
+
+@utility docs-prop-name {
+  @apply text-primary font-bold;
+}
+@utility docs-prop-name--secondary {
+  @apply text-secondary font-bold;
+}
 
 @utility docs-table-container {
-  @apply overflow-x-auto mb-10 card shadow-soft bg-base-300;
+  @apply overflow-x-auto mb-10 app-card;
+}
+
+@utility docs-table {
+  @apply table table-sm @4xl:table-md table-zebra w-full border border-base-content/5;
+
+  thead {
+    @apply bg-base-300 text-base-content;
+  }
+
+  tbody {
+    @apply text-xs @4xl:text-sm text-base-content/80;
+  }
+}
+
+@utility docs-feature-grid {
+  @apply grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4;
 }
 
 @utility docs-feature-card {
-  @apply card shadow-soft bg-base-300;
+  @apply app-card border border-base-content/5 shadow-sm;
 }
 
 @utility docs-feature-card-body {
-  @apply card-body p-4 flex-row items-start gap-3;
+  @apply card-body p-4 flex-row gap-4;
+}
+
+@utility docs-feature-card-icon {
+  @apply text-primary text-2xl font-bold;
+}
+
+@utility docs-feature-card-title {
+  @apply font-bold text-sm;
+}
+
+@utility docs-feature-card-description {
+  @apply text-xs opacity-70;
+}
+
+@utility docs-usage-grid {
+  @apply grid grid-cols-1 @4xl:grid-cols-2 gap-4 @4xl:gap-8;
+}
+
+@utility docs-usage-card {
+  @apply app-card overflow-hidden;
+}
+
+@utility docs-usage-card--primary {
+   @apply border-primary/10;
+}
+@utility docs-usage-card--secondary {
+  @apply border-secondary/10;
+}
+@utility docs-usage-card--accent {
+  @apply border-accent/10;
+}
+
+@utility docs-usage-card-body {
+  @apply card-body p-5;
+}
+
+@utility docs-usage-card-title {
+  @apply card-title text-base @4xl:text-lg;
+}
+@utility docs-usage-card-title--primary {
+  @apply text-primary;
+}
+@utility docs-usage-card-title--secondary {
+  @apply text-secondary;
+}
+@utility docs-usage-card-title--accent {
+  @apply text-accent;
+}
+
+@utility docs-usage-card-description {
+  @apply text-xs @4xl:text-sm opacity-90 grow-0;
+}
+
+@utility docs-kbd {
+  @apply kbd kbd-sm @4xl:kbd-md;
+}
+
+@utility docs-kbd-item {
+  @apply flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5;
+}
+
+@utility docs-kbd-description {
+  @apply text-xs @4xl:text-sm opacity-80;
+}
+
+@utility docs-method-card {
+  @apply app-card p-6 border-t-2 text-base-content/80;
+}
+@utility docs-method-card--primary {
+  @apply border-primary;
+}
+@utility docs-method-card--secondary {
+  @apply border-secondary;
+}
+
+@utility docs-method-title {
+  @apply font-bold text-lg flex items-center gap-2 mb-4;
+}
+@utility docs-method-title--primary {
+  @apply text-primary;
+}
+@utility docs-method-title--secondary {
+  @apply text-secondary;
+}
+
+@utility docs-link-grid {
+  @apply grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4;
+}
+
+@utility docs-link-card {
+  @apply bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5 rounded-box;
+}
+
+@utility docs-link-title {
+  @apply font-bold text-xs;
+}
+@utility docs-link-title--primary {
+  @apply text-primary;
+}
+@utility docs-link-title--secondary {
+  @apply text-secondary;
+}
+@utility docs-link-title--accent {
+  @apply text-accent;
+}
+
+@utility docs-link-description {
+  @apply text-[10px] opacity-60 mt-1;
+}
+
+@utility docs-alert {
+  @apply card bg-base-300 p-6 border-s-4;
+}
+@utility docs-alert--warning {
+  @apply border-warning;
+}
+@utility docs-alert--info {
+  @apply border-info;
+}
+
+@utility docs-card {
+  @apply card shadow-soft bg-base-300 p-4 @4xl:p-6;
+}
+@utility docs-card--accent {
+  @apply border-s-4 border-accent;
+}
+@utility docs-card--accent-thin {
+  @apply border-s-2 border-accent;
 }
 
 /* --- Sheet --- */

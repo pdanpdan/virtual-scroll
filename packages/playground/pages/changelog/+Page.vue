@@ -4,8 +4,8 @@ import { changelog } from '#/pages/changelog/changelog-data';
 </script>
 
 <template>
-  <div class="card shadow-soft bg-base-300 mb-8">
-    <div class="card-body flex-row items-center p-4 @4xl:p-8 gap-4 @4xl:gap-8">
+  <div class="app-header-card">
+    <div class="app-header-body">
       <AppLogo class="shrink-0 size-24 hidden @4xl:block drop-shadow-lg" />
       <div>
         <h1 class="text-primary">Changelog</h1>
