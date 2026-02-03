@@ -1,5 +1,18 @@
 # Changelog
 
+# [0.7.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.6.1...v0.7.0) (2026-02-03)
+
+
+### Bug Fixes
+
+* **docs:** revert optimization for class names (tailwind :) ) ([c10683e](https://github.com/pdanpdan/virtual-scroll/commit/c10683e2aa3695f5d64e9360c7741cc084283347))
+
+
+### Features
+
+* **playground:** enhance accessibility across all examples ([850aec7](https://github.com/pdanpdan/virtual-scroll/commit/850aec7c746ea37df4c175d84415f296737cc09c))
+* **virtual-scroll:** implement comprehensive ARIA support ([fb8d464](https://github.com/pdanpdan/virtual-scroll/commit/fb8d464ed2871dd59fa4b920ee91bfa92d5632bd))
+
 ## [0.6.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.6.0...v0.6.1) (2026-02-02)
 
 # [0.6.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.5.0...v0.6.0) (2026-02-02)
