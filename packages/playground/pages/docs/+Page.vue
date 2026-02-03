@@ -6,135 +6,134 @@ import CodeBlock from '#/components/CodeBlock.vue';
 </script>
 
 <template>
-  <div class="pb-10">
-    <div class="card shadow-soft bg-base-300">
-      <div class="card-body flex-row items-center p-4 md:p-8 gap-4 md:gap-8">
-        <AppLogo class="shrink-0 size-24 hidden md:block drop-shadow-lg" />
-        <div>
-          <h1 class="text-primary">API Reference</h1>
-          <p class="text-base md:text-xl opacity-60 font-medium mt-1">
-            Complete documentation for <code>@pdanpdan/virtual-scroll</code>.
-          </p>
-        </div>
+  <div class="card shadow-soft bg-base-300 mb-8">
+    <div class="card-body flex-row items-center p-4 @4xl:p-8 gap-4 @4xl:gap-8">
+      <AppLogo class="shrink-0 size-24 hidden @4xl:block drop-shadow-lg" />
+      <div>
+        <h1 class="text-primary">API Reference</h1>
+        <p class="text-base @4xl:text-xl opacity-60 font-medium mt-1">
+          Complete documentation for <code>@pdanpdan/virtual-scroll</code>.
+        </p>
       </div>
     </div>
+  </div>
 
-    <div class="space-y-12 md:space-y-16 mt-8">
-      <!-- 1. Introduction -->
-      <section id="introduction">
-        <h2 class="docs-section-header">Introduction</h2>
-        <div class="prose prose-sm md:prose-lg max-w-none">
-          <p>
-            <code>@pdanpdan/virtual-scroll</code> is a high-performance Vue 3 virtual scroll library designed to handle massive lists with ease.
-            It supports vertical, horizontal, and bidirectional (grid) scrolling, dynamic item sizes using <code>ResizeObserver</code>,
-            and full support for Right-to-Left (RTL) layouts.
-          </p>
-        </div>
-      </section>
+  <div class="space-y-8">
+    <!-- 1. Introduction -->
+    <section id="introduction">
+      <h2 class="docs-section-header">Introduction</h2>
+      <div class="prose prose-sm @4xl:prose-lg max-w-none">
+        <p>
+          <code>@pdanpdan/virtual-scroll</code> is a high-performance Vue 3 virtual scroll library designed to handle massive lists with ease.
+          It supports vertical, horizontal, and bidirectional (grid) scrolling, dynamic item sizes using <code>ResizeObserver</code>,
+          and full support for Right-to-Left (RTL) layouts.
+        </p>
+      </div>
+    </section>
 
-      <!-- 1.1 Key Features -->
-      <section id="features">
-        <h2 class="docs-section-header">Key Features</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Bidirectional Scrolling</h4>
-                <p class="text-xs opacity-70">Virtualize both rows and columns for massive data grids.</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Dynamic Item Sizes</h4>
-                <p class="text-xs opacity-70">Automatic measurement via ResizeObserver for precise scrolling.</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">RTL Support</h4>
-                <p class="text-xs opacity-70">Automatic direction detection and correct coordinate mapping for RTL layouts.</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Native Window Scroll</h4>
-                <p class="text-xs opacity-70">Use the browser window/body as the scroll container.</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Sticky Headers/Footers</h4>
-                <p class="text-xs opacity-70">iOS-style pushing headers for segmented lists and groups.</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Scroll Restoration</h4>
-                <p class="text-xs opacity-70">Maintains position when prepending items (perfect for chat).</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">SSR & Hydration</h4>
-                <p class="text-xs opacity-70">Full support for server-side rendering and client hydration.</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Massive List Support</h4>
-                <p class="text-xs opacity-70">Handles 10M+ items via automatic coordinate scaling (except for window/body containers).</p>
-              </div>
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-sm border border-base-content/5">
-            <div class="card-body p-4 flex-row gap-4">
-              <div class="text-primary text-2xl font-bold">✓</div>
-              <div>
-                <h4 class="font-bold text-sm">Virtual Scrollbars</h4>
-                <p class="text-xs opacity-70">Fully customizable virtual scrollbars that replace native ones.</p>
-              </div>
+    <!-- 1.1 Key Features -->
+    <section id="features">
+      <h2 class="docs-section-header">Key Features</h2>
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4">
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Bidirectional Scrolling</h4>
+              <p class="text-xs opacity-70">Virtualize both rows and columns for massive data grids.</p>
             </div>
           </div>
         </div>
-      </section>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Dynamic Item Sizes</h4>
+              <p class="text-xs opacity-70">Automatic measurement via ResizeObserver for precise scrolling.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">RTL Support</h4>
+              <p class="text-xs opacity-70">Automatic direction detection and correct coordinate mapping for RTL layouts.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Native Window Scroll</h4>
+              <p class="text-xs opacity-70">Use the browser window/body as the scroll container.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Sticky Headers/Footers</h4>
+              <p class="text-xs opacity-70">iOS-style pushing headers for segmented lists and groups.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Scroll Restoration</h4>
+              <p class="text-xs opacity-70">Maintains position when prepending items (perfect for chat).</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">SSR & Hydration</h4>
+              <p class="text-xs opacity-70">Full support for server-side rendering and client hydration.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Massive List Support</h4>
+              <p class="text-xs opacity-70">Handles 10M+ items via automatic coordinate scaling (except for window/body containers).</p>
+            </div>
+          </div>
+        </div>
+        <div class="card bg-base-300 shadow-sm border border-base-content/5">
+          <div class="card-body p-4 flex-row gap-4">
+            <div class="text-primary text-2xl font-bold">✓</div>
+            <div>
+              <h4 class="font-bold text-sm">Virtual Scrollbars</h4>
+              <p class="text-xs opacity-70">Fully customizable virtual scrollbars that replace native ones.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <!-- 2. Quick Start -->
-      <section id="quick-start">
-        <h2 class="docs-section-header">Quick Start</h2>
-        <div class="prose prose-sm md:prose-md max-w-none mb-4 md:mb-6">
-          <p>Install the package using your favorite package manager:</p>
-        </div>
-        <CodeBlock class="docs-code-block" code="pnpm add @pdanpdan/virtual-scroll" lang="bash" />
-        <div class="prose prose-sm md:prose-md max-w-none mb-4 md:mb-6 mt-8">
-          <p>Basic usage in a Vue component:</p>
-        </div>
-        <CodeBlock
-          class="docs-code-block"
-          lang="vue"
-          line-numbers
-          code="<script setup>
+    <!-- 2. Quick Start -->
+    <section id="quick-start">
+      <h2 class="docs-section-header">Quick Start</h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none">
+        <p>Install the package using your favorite package manager:</p>
+      </div>
+      <CodeBlock class="docs-code-block" code="pnpm add @pdanpdan/virtual-scroll" lang="bash" />
+      <div class="prose prose-sm @4xl:prose-md max-w-none mt-4 @4xl:mt-6">
+        <p>Basic usage in a Vue component:</p>
+      </div>
+      <CodeBlock
+        class="docs-code-block"
+        lang="vue"
+        line-numbers
+        code="<script setup>
 import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
 import &quot;@pdanpdan/virtual-scroll/style.css&quot;;
 
@@ -142,787 +141,787 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
 </script>
 
 <template>
-  <VirtualScroll :items=&quot;items&quot; :item-size=&quot;50&quot; class=&quot;h-96&quot;>
-    <template #item=&quot;{ item }&quot;>
-      <div class=&quot;h-12 flex items-center px-4 border-b border-base-200&quot;>
-        {{ item.name }}
-      </div>
-    </template>
-  </VirtualScroll>
+<VirtualScroll :items=&quot;items&quot; :item-size=&quot;50&quot; class=&quot;h-96&quot;>
+  <template #item=&quot;{ item }&quot;>
+    <div class=&quot;h-12 flex items-center px-4 border-b border-base-200&quot;>
+      {{ item.name }}
+    </div>
+  </template>
+</VirtualScroll>
 </template>"
-        />
-      </section>
+      />
+    </section>
 
-      <!-- 3. Usage Modes -->
-      <section id="usage-modes">
-        <h2 class="docs-section-header">Usage Modes</h2>
-        <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6 md:gap-8">
-          <div class="card shadow-soft bg-base-300 border-primary/10 overflow-hidden">
-            <div class="card-body p-5">
-              <h3 class="card-title text-base md:text-lg text-primary">Compiled Component</h3>
-              <p class="text-xs md:text-sm opacity-90 mb-4 grow-0">Recommended for most projects. Uses pre-compiled JS.</p>
-              <CodeBlock
-                class="docs-code-block"
-                lang="ts"
-                code="import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
+    <!-- 3. Usage Modes -->
+    <section id="usage-modes">
+      <h2 class="docs-section-header">Usage Modes</h2>
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 @4xl:gap-8">
+        <div class="card shadow-soft bg-base-300 border-primary/10 overflow-hidden">
+          <div class="card-body p-5">
+            <h3 class="card-title text-base @4xl:text-lg text-primary">Compiled Component</h3>
+            <p class="text-xs @4xl:text-sm opacity-90 grow-0">Recommended for most projects. Uses pre-compiled JS.</p>
+            <CodeBlock
+              class="docs-code-block"
+              lang="ts"
+              code="import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll&quot;;
 import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
-              />
-              <p />
-              <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80">
-                <li>Compatible with all modern bundlers.</li>
-                <li><strong>Note:</strong> Manual CSS import is required.</li>
-              </ul>
-            </div>
+            />
+            <p />
+            <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80">
+              <li>Compatible with all modern bundlers.</li>
+              <li><strong>Note:</strong> Manual CSS import is required.</li>
+            </ul>
           </div>
+        </div>
 
-          <div class="card shadow-soft bg-base-300 border-secondary/10 overflow-hidden">
-            <div class="card-body p-5">
-              <h3 class="card-title text-base md:text-lg text-secondary">Original Vue SFC</h3>
-              <p class="text-xs md:text-sm opacity-90 mb-4 grow-0">Import raw source for custom compilation.</p>
-              <CodeBlock
-                class="docs-code-block"
-                lang="ts"
-                code="import VS from &quot;@pdanpdan/virtual-scroll/VirtualScroll.vue&quot;;"
-              />
-              <p />
-              <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80">
-                <li>Enables better tree-shaking in your build.</li>
-                <li>Styles handled by your Vue loader.</li>
-              </ul>
-            </div>
+        <div class="card shadow-soft bg-base-300 border-secondary/10 overflow-hidden">
+          <div class="card-body p-5">
+            <h3 class="card-title text-base @4xl:text-lg text-secondary">Original Vue SFC</h3>
+            <p class="text-xs @4xl:text-sm opacity-90 grow-0">Import raw source for custom compilation.</p>
+            <CodeBlock
+              class="docs-code-block"
+              lang="ts"
+              code="import VS from &quot;@pdanpdan/virtual-scroll/VirtualScroll.vue&quot;;"
+            />
+            <p />
+            <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80">
+              <li>Enables better tree-shaking in your build.</li>
+              <li>Styles handled by your Vue loader.</li>
+            </ul>
           </div>
+        </div>
 
-          <div class="2xl:col-span-full card shadow-soft bg-base-300 border-accent/10 overflow-hidden">
-            <div class="card-body p-5">
-              <h3 class="card-title text-base md:text-lg text-accent">CDN Usage</h3>
-              <p class="text-xs md:text-sm opacity-90 mb-4 grow-0">Use directly in browser without build step.</p>
-              <CodeBlock
-                class="docs-code-block"
-                lang="html"
-                code="&lt;script src=&quot;https://unpkg.com/vue@3&quot;&gt;&lt;/script&gt;
+        <div class="col-span-full card shadow-soft bg-base-300 border-accent/10 overflow-hidden">
+          <div class="card-body p-5">
+            <h3 class="card-title text-base @4xl:text-lg text-accent">CDN Usage</h3>
+            <p class="text-xs @4xl:text-sm opacity-90 grow-0">Use directly in browser without build step.</p>
+            <CodeBlock
+              class="docs-code-block"
+              lang="html"
+              code="&lt;script src=&quot;https://unpkg.com/vue@3&quot;&gt;&lt;/script&gt;
 &lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css&quot;&gt;
 &lt;script src=&quot;https://unpkg.com/@pdanpdan/virtual-scroll&quot;&gt;&lt;/script&gt;"
-              />
-              <p />
-              <ul class="list-disc ps-5 text-xs md:text-sm space-y-1 opacity-80 mt-2">
-                <li>No installation required.</li>
-                <li>Available via <code>window.VirtualScroll</code>.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div class="divider opacity-30" />
-
-      <!-- 4. Sizing Guide -->
-      <section id="sizing-guide">
-        <h2 class="docs-section-header">Sizing Guide</h2>
-        <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-12">
-          <p>
-            The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
-          </p>
-          <div class="docs-table-container mt-4">
-            <table class="table table-sm md:table-md table-zebra w-full border border-base-content/5">
-              <thead class="bg-base-300 text-base-content">
-                <tr>
-                  <th>Type</th>
-                  <th><code>itemSize</code> / <code>columnWidth</code></th>
-                  <th>Perf</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody class="text-xs md:text-sm text-base-content/80">
-                <tr>
-                  <td><strong>Fixed</strong></td>
-                  <td><code>number</code></td>
-                  <td><span class="badge badge-success badge-soft badge-xs">Best</span></td>
-                  <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
-                </tr>
-                <tr>
-                  <td><strong>Array</strong></td>
-                  <td><code>number[]</code> (cols only)</td>
-                  <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
-                  <td>Fixed sizes from array (cycles if shorter). <em>O(log n)</em>.</td>
-                </tr>
-                <tr>
-                  <td><strong>Function</strong></td>
-                  <td><code>(item, idx) => number</code></td>
-                  <td><span class="badge badge-warning badge-soft badge-xs">Good</span></td>
-                  <td>Known but variable sizes. No <code>ResizeObserver</code> overhead unless measured size differs.</td>
-                </tr>
-                <tr>
-                  <td><strong>Dynamic</strong></td>
-                  <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
-                  <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
-                  <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <div class="divider opacity-30" />
-
-      <!-- 5. VirtualScroll Component -->
-      <section id="virtual-scroll">
-        <h2 class="docs-section-header">VirtualScroll Component</h2>
-        <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
-          <p>
-            The <code>VirtualScroll</code> component is the primary way to use this library. It provides a declarative Vue interface
-            for virtualizing large lists and grids, handling all rendering, recycling, and scroll logic automatically.
-          </p>
-        </div>
-
-        <h3 id="props" class="docs-prop-header text-primary">Props</h3>
-
-        <h4 class="docs-prop-subheader">Core Configuration</h4>
-        <div class="docs-table-container mb-8 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/4">Prop</th>
-                <th class="w-1/4">Type</th>
-                <th class="w-1/6">Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code class="text-primary font-bold">items</code></td>
-                <td><code>T[]</code></td>
-                <td>-</td>
-                <td>The array of items to render. Required.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">itemSize</code></td>
-                <td><code>number | fn | null</code></td>
-                <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
-                <td>Fixed size or function. See <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">direction</code></td>
-                <td><code>'vertical' | 'horizontal' | 'both'</code></td>
-                <td><code>'vertical'</code></td>
-                <td>The scroll direction.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">gap</code></td>
-                <td><code>number</code></td>
-                <td><code>0</code></td>
-                <td>Spacings between items (vertical or horizontal).</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h4 class="docs-prop-subheader">Grid Configuration <span class="text-xs normal-case opacity-60">(only for direction="both")</span></h4>
-        <div class="docs-table-container mb-8 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/4">Prop</th>
-                <th class="w-1/4">Type</th>
-                <th class="w-1/6">Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code class="text-primary font-bold">columnCount</code></td>
-                <td><code>number</code></td>
-                <td><code>0</code></td>
-                <td>Number of columns for grid mode.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">columnWidth</code></td>
-                <td><code>num | arr | fn | null</code></td>
-                <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
-                <td>Width for columns in grid mode.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">columnGap</code></td>
-                <td><code>number</code></td>
-                <td><code>0</code></td>
-                <td>Spacings between columns.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h4 class="docs-prop-subheader">Features & Behavior</h4>
-        <div class="docs-table-container mb-8 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/4">Prop</th>
-                <th class="w-1/4">Type</th>
-                <th class="w-1/6">Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code class="text-primary font-bold">stickyIndices</code></td>
-                <td><code>number[]</code></td>
-                <td><code>[]</code></td>
-                <td>Indices of items that should remain sticky.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">stickyHeader</code> / <code class="text-primary font-bold">stickyFooter</code></td>
-                <td><code>boolean</code></td>
-                <td><code>false</code></td>
-                <td>If true, header/footer size is measured and added to padding.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">ssrRange</code></td>
-                <td><code>{start, end, ...}</code></td>
-                <td>-</td>
-                <td>Range of items to pre-render. See <a href="#ssr-support" class="link">SSR Support</a>.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">loading</code></td>
-                <td><code>boolean</code></td>
-                <td><code>false</code></td>
-                <td>Shows <code>#loading</code> slot and prevents multiple <code>load</code> events.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">loadDistance</code></td>
-                <td><code>number</code></td>
-                <td><code>200</code></td>
-                <td>Distance from end to trigger <code>load</code> event.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">virtualScrollbar</code></td>
-                <td><code>boolean</code></td>
-                <td><code>false</code></td>
-                <td>Whether to force use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window/body</code> as container.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">restoreScrollOnPrepend</code></td>
-                <td><code>boolean</code></td>
-                <td><code>false</code></td>
-                <td>Maintain scroll position when items are added to the top.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">initialScrollIndex</code></td>
-                <td><code>number</code></td>
-                <td>-</td>
-                <td>Index to jump to on mount.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">initialScrollAlign</code></td>
-                <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td>
-                <td><code>'start'</code></td>
-                <td>Alignment for initial index.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h4 class="docs-prop-subheader">Accessibility</h4>
-        <div class="docs-table-container mb-8 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/4">Prop</th>
-                <th class="w-1/4">Type</th>
-                <th class="w-1/6">Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code class="text-primary font-bold">role</code></td>
-                <td><code>string</code></td>
-                <td><code>'list' | 'grid'</code></td>
-                <td>ARIA role for the container. Automatically detected based on direction.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">ariaLabel</code></td>
-                <td><code>string</code></td>
-                <td>-</td>
-                <td>Accessible label for the scroll container.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">ariaLabelledby</code></td>
-                <td><code>string</code></td>
-                <td>-</td>
-                <td>ID of the element that labels the scroll container.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">itemRole</code></td>
-                <td><code>string</code></td>
-                <td>-</td>
-                <td>ARIA role for each item. Set to <code>'none'</code> to manually apply roles using <code>getItemAriaProps</code>.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h4 class="docs-prop-subheader text-primary">ScrollAlignment</h4>
-        <div class="prose prose-sm mb-4 text-base-content/70">
-          <p>Controls the item's final position in the viewport: <code>'start' | 'center' | 'end' | 'auto'</code>.</p>
-        </div>
-
-        <h4 class="docs-prop-subheader">Advanced & Performance</h4>
-        <div class="docs-table-container mb-8 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/4">Prop</th>
-                <th class="w-1/4">Type</th>
-                <th class="w-1/6">Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code class="text-primary font-bold">container</code></td>
-                <td><code>El | Window | null</code></td>
-                <td><code>undefined</code></td>
-                <td>The scrollable container. Defaults to component root.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">scrollPaddingStart</code> / <code class="text-primary font-bold">End</code></td>
-                <td><code>num | {x, y}</code></td>
-                <td><code>0</code></td>
-                <td>Additional padding for scroll offsets.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">containerTag</code> / <code class="text-primary font-bold">wrapperTag</code> / <code class="text-primary font-bold">itemTag</code></td>
-                <td><code>string</code></td>
-                <td><code>'div'</code></td>
-                <td>HTML tags for different parts of the component.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">bufferBefore</code> / <code class="text-primary font-bold">bufferAfter</code></td>
-                <td><code>number</code></td>
-                <td><code>{{ DEFAULT_BUFFER }}</code></td>
-                <td>Number of items to render outside the viewport.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">defaultItemSize</code></td>
-                <td><code>number</code></td>
-                <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
-                <td>Estimated size for items before measurement.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">defaultColumnWidth</code></td>
-                <td><code>number</code></td>
-                <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
-                <td>Estimated width for columns before measurement.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">debug</code></td>
-                <td><code>boolean</code></td>
-                <td><code>false</code></td>
-                <td>Enables debug mode (visible offsets and indices).</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="mt-4 text-xs opacity-60">
-            * For a full list of props including advanced configuration, see the <a href="#virtual-scroll-props" class="link link-primary">VirtualScrollProps interface</a>.
-          </div>
-        </div>
-
-        <h3 id="slots" class="docs-prop-header text-accent">Slots</h3>
-        <div class="grid grid-cols-1 2xl:grid-cols-2 gap-4 mb-10">
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
-            <h4 class="font-bold text-accent mb-2">#item</h4>
-            <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
-            <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
-              <li><code>item: T</code>: The data item from the source array.</li>
-              <li><code>index: number</code>: The original 0-based index of the item.</li>
-              <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
-              <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
-              <li><code>isStickyActiveX / Y: boolean</code>: <code>true</code> if the item is stuck at the horizontal/vertical threshold.</li>
-              <li><code>offset: { x, y }</code>: Calculated physical position (DU).</li>
-              <li><code>columnRange: <a href="#column-range" class="link link-accent">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
-              <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
-              <li><code>getItemAriaProps: (index: number) => object</code>: Helper to get ARIA attributes for an item (e.g. <code>role="listitem"</code>, <code>aria-posinset</code>).</li>
-              <li><code>getCellAriaProps: (index: number) => object</code>: Helper to get ARIA attributes for a cell (e.g. <code>role="gridcell"</code>, <code>aria-colindex</code>).</li>
-              <li><code>gap: number</code>: Vertical gap between items.</li>
-              <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
+            />
+            <p />
+            <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80 mt-2">
+              <li>No installation required.</li>
+              <li>Available via <code>window.VirtualScroll</code>.</li>
             </ul>
           </div>
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
-            <h4 class="font-bold text-accent mb-2">#scrollbar</h4>
-            <p class="text-xs md:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
-            <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
-              <li><code>axis: 'vertical' | 'horizontal'</code>: The scrollbar axis.</li>
-              <li><code>positionPercent: number</code>: Current scroll position (0 to 1).</li>
-              <li><code>viewportPercent: number</code>: Viewport as percentage of total size.</li>
-              <li><code>thumbSizePercent: number</code>: Calculated thumb size (0 to 100).</li>
-              <li><code>thumbPositionPercent: number</code>: Calculated thumb position (0 to 100).</li>
-              <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-accent">Attributes and listeners</a> for the track element.</li>
-              <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-accent">Attributes and listeners</a> for the thumb element.</li>
-              <li><code>isDragging: boolean</code>: Whether the thumb is currently being dragged.</li>
-              <li>
-                <code>scrollbarProps: object</code>: Grouped properties for <code>VirtualScrollbar</code>.
-                <ul class="list-disc ps-5 mt-1">
-                  <li><code>axis: 'vertical' | 'horizontal'</code></li>
-                  <li><code>totalSize: number</code></li>
-                  <li><code>position: number</code></li>
-                  <li><code>viewportSize: number</code></li>
-                  <li><code>scrollToOffset: (offset: number) => void</code></li>
-                  <li><code>containerId: string</code></li>
-                  <li><code>isRtl: boolean</code></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
-            <h4 class="font-bold text-accent mb-2">#header / #footer</h4>
-            <p class="text-xs md:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
-            <h4 class="font-bold text-accent mb-2">#loading</h4>
-            <p class="text-xs md:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
-          </div>
         </div>
-
-        <section id="scrollbar-slot-props" class="mb-12">
-          <h4 class="docs-prop-subheader text-accent">ScrollbarSlotProps</h4>
-          <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
-            <p>Properties passed to the 'scrollbar' scoped slot and <code>useVirtualScrollbar</code> return value.</p>
-          </div>
-
-          <CodeBlock
-            class="docs-code-block mb-8"
-            lang="vue"
-            code="<template>
-  <VirtualScroll :items=&quot;items&quot; direction=&quot;both&quot; virtual-scrollbar>
-    <template #scrollbar=&quot;{ trackProps, thumbProps, axis }&quot;>
-      &amp;lt;!-- Vertical Track -->
-      <div v-if=&quot;axis === 'vertical'&quot; v-bind=&quot;trackProps&quot; class=&quot;w-2 bg-base-300&quot;>
-        <div v-bind=&quot;thumbProps&quot; class=&quot;bg-primary rounded&quot; />
       </div>
+    </section>
 
-      &amp;lt;!-- Horizontal Track -->
-      <div v-else v-bind=&quot;trackProps&quot; class=&quot;h-2 bg-base-300&quot;>
-        <div v-bind=&quot;thumbProps&quot; class=&quot;bg-secondary rounded&quot; />
-      </div>
-    </template>
-  </VirtualScroll>
-</template>"
-          />
+    <div class="divider opacity-30" />
 
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>The scrollbar axis.</td></tr>
-                <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total scrollable content size.</td></tr>
-                <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll offset.</td></tr>
-                <tr><td><code>positionPercent</code></td><td><code>number</code></td><td>Scroll position percentage (0-1).</td></tr>
-                <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible viewport size.</td></tr>
-                <tr><td><code>viewportPercent</code></td><td><code>number</code></td><td>Viewport percentage of total (0-1).</td></tr>
-                <tr><td><code>thumbSizePercent</code></td><td><code>number</code></td><td>Calculated thumb size percentage (0-100).</td></tr>
-                <tr><td><code>thumbPositionPercent</code></td><td><code>number</code></td><td>Calculated thumb position percentage (0-100).</td></tr>
-                <tr><td><code>scrollToOffset</code></td><td><code>Function</code></td><td>Scroll to pixel offset on this axis.</td></tr>
-                <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Current RTL state.</td></tr>
-                <tr><td><code>trackProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the track. Bind with <code>v-bind="trackProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
-                <tr><td><code>thumbProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the thumb. Bind with <code>v-bind="thumbProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
-                <tr><td><code>isDragging</code></td><td><code>boolean</code></td><td>Whether the thumb is currently being dragged.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <h3 id="events" class="docs-prop-header">Events</h3>
-        <div class="docs-table-container mb-10 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th>Event</th>
-                <th>Payload</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code>scroll</code></td>
-                <td><code><a href="#scroll-details" class="link link-primary">ScrollDetails&lt;T&gt;</a></code></td>
-                <td>Emitted on every scroll position change.</td>
-              </tr>
-              <tr>
-                <td><code>load</code></td>
-                <td><code>'vertical' | 'horizontal'</code></td>
-                <td>Triggered when the user scrolls within <code>loadDistance</code> of the end.</td>
-              </tr>
-              <tr>
-                <td><code>visibleRangeChange</code></td>
-                <td><code>{ start, end, colStart, colEnd }</code></td>
-                <td>Emitted when the set of rendered indices changes.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 id="keyboard-navigation" class="docs-prop-header">Keyboard Navigation</h3>
-        <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-10">
-          <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose mt-4">
-            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-              <kbd class="kbd kbd-sm md:kbd-md">Home</kbd>
-              <span class="text-xs md:text-sm opacity-80">Scroll to the very beginning (Index 0,0).</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-              <kbd class="kbd kbd-sm md:kbd-md">End</kbd>
-              <span class="text-xs md:text-sm opacity-80">Scroll to the very last row and column.</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-              <kbd class="kbd kbd-sm md:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm md:kbd-md">PgDn</kbd>
-              <span class="text-xs md:text-sm opacity-80">Scroll by one full viewport height/width.</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-              <span class="flex gap-1">
-                <kbd class="kbd kbd-sm md:kbd-md">↑</kbd>
-                <kbd class="kbd kbd-sm md:kbd-md">↓</kbd>
-              </span>
-              <span class="text-xs md:text-sm opacity-80">Scroll vertically by item height.</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
-              <span class="flex gap-1">
-                <kbd class="kbd kbd-sm md:kbd-md">←</kbd>
-                <kbd class="kbd kbd-sm md:kbd-md">→</kbd>
-              </span>
-              <span class="text-xs md:text-sm opacity-80">Scroll horizontally by column width.</span>
-            </div>
-          </div>
-        </div>
-
-        <h3 id="css-classes" class="docs-prop-header">CSS Classes</h3>
-        <div class="docs-table-container mb-10 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
+    <!-- 4. Sizing Guide -->
+    <section id="sizing-guide">
+      <h2 class="docs-section-header">Sizing Guide</h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
+        <p>
+          The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
+        </p>
+        <div class="docs-table-container mt-4">
+          <table class="table table-sm @4xl:table-md table-zebra w-full border border-base-content/5">
             <thead class="bg-base-300 text-base-content">
               <tr>
-                <th class="w-1/3">Class</th>
+                <th>Type</th>
+                <th><code>itemSize</code> / <code>columnWidth</code></th>
+                <th>Perf</th>
                 <th>Description</th>
               </tr>
             </thead>
-            <tbody class="text-xs md:text-sm">
+            <tbody class="text-xs @4xl:text-sm text-base-content/80">
               <tr>
-                <td><code>.virtual-scroll-container</code></td>
-                <td>The root scrollable container element.</td>
+                <td><strong>Fixed</strong></td>
+                <td><code>number</code></td>
+                <td><span class="badge badge-success badge-soft badge-xs">Best</span></td>
+                <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
               </tr>
               <tr>
-                <td><code>.virtual-scroll-wrapper</code></td>
-                <td>Wraps rendered items and provides total scrollable dimensions.</td>
+                <td><strong>Array</strong></td>
+                <td><code>number[]</code> (cols only)</td>
+                <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
+                <td>Fixed sizes from array (cycles if shorter). <em>O(log n)</em>.</td>
               </tr>
               <tr>
-                <td><code>.virtual-scroll-item</code></td>
-                <td>Applied to each individual rendered item. Use for general item styling.</td>
+                <td><strong>Function</strong></td>
+                <td><code>(item, idx) => number</code></td>
+                <td><span class="badge badge-warning badge-soft badge-xs">Good</span></td>
+                <td>Known but variable sizes. No <code>ResizeObserver</code> overhead unless measured size differs.</td>
               </tr>
               <tr>
-                <td><code>.virtual-scroll-header</code> / <code>.virtual-scroll-footer</code></td>
-                <td>Containers for header and footer slots.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll-loading</code></td>
-                <td>Container for the loading slot.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--vertical</code> / <code>--horizontal</code> / <code>--both</code></td>
-                <td>Direction modifiers applied to the root container.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--hydrated</code></td>
-                <td>Applied after client-side mount and hydration is complete.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--window</code></td>
-                <td>Applied when scrolling via the global window object.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--table</code></td>
-                <td>Applied when <code>containerTag="table"</code> is used.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--sticky</code></td>
-                <td>Applied to items that are currently stuck to the viewport edge.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--debug</code></td>
-                <td>Visible when <code>debug</code> prop is active.</td>
-              </tr>
-              <tr>
-                <td><code>.virtual-scroll--hide-scrollbar</code></td>
-                <td>Applied when virtual scrollbars are enabled or content is massive.</td>
+                <td><strong>Dynamic</strong></td>
+                <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
+                <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
+                <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
+    </section>
 
-        <h3 id="css-variables" class="docs-prop-header">CSS Variables</h3>
-        <div class="prose prose-sm max-w-none mb-6 opacity-80">
-          <p>
-            The default <code>VirtualScrollbar</code> can be styled using the following CSS variables:
-          </p>
+    <div class="divider opacity-30" />
+
+    <!-- 5. VirtualScroll Component -->
+    <section id="virtual-scroll">
+      <h2 class="docs-section-header">VirtualScroll Component</h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          The <code>VirtualScroll</code> component is the primary way to use this library. It provides a declarative Vue interface
+          for virtualizing large lists and grids, handling all rendering, recycling, and scroll logic automatically.
+        </p>
+      </div>
+
+      <h3 id="props" class="docs-prop-header text-primary">Props</h3>
+
+      <h4 class="docs-prop-subheader">Core Configuration</h4>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code class="text-primary font-bold">items</code></td>
+              <td><code>T[]</code></td>
+              <td>-</td>
+              <td>The array of items to render. Required.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">itemSize</code></td>
+              <td><code>number | fn | null</code></td>
+              <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
+              <td>Fixed size or function. See <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">direction</code></td>
+              <td><code>'vertical' | 'horizontal' | 'both'</code></td>
+              <td><code>'vertical'</code></td>
+              <td>The scroll direction.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">gap</code></td>
+              <td><code>number</code></td>
+              <td><code>0</code></td>
+              <td>Spacings between items (vertical or horizontal).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="docs-prop-subheader">Grid Configuration <span class="text-xs normal-case opacity-60">(only for direction="both")</span></h4>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code class="text-primary font-bold">columnCount</code></td>
+              <td><code>number</code></td>
+              <td><code>0</code></td>
+              <td>Number of columns for grid mode.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">columnWidth</code></td>
+              <td><code>num | arr | fn | null</code></td>
+              <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
+              <td>Width for columns in grid mode.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">columnGap</code></td>
+              <td><code>number</code></td>
+              <td><code>0</code></td>
+              <td>Spacings between columns.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="docs-prop-subheader">Features & Behavior</h4>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code class="text-primary font-bold">stickyIndices</code></td>
+              <td><code>number[]</code></td>
+              <td><code>[]</code></td>
+              <td>Indices of items that should remain sticky.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">stickyHeader</code> / <code class="text-primary font-bold">stickyFooter</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>If true, header/footer size is measured and added to padding.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">ssrRange</code></td>
+              <td><code>{start, end, ...}</code></td>
+              <td>-</td>
+              <td>Range of items to pre-render. See <a href="#ssr-support" class="link">SSR Support</a>.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">loading</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Shows <code>#loading</code> slot and prevents multiple <code>load</code> events.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">loadDistance</code></td>
+              <td><code>number</code></td>
+              <td><code>200</code></td>
+              <td>Distance from end to trigger <code>load</code> event.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">virtualScrollbar</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Whether to force use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window/body</code> as container.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">restoreScrollOnPrepend</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Maintain scroll position when items are added to the top.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">initialScrollIndex</code></td>
+              <td><code>number</code></td>
+              <td>-</td>
+              <td>Index to jump to on mount.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">initialScrollAlign</code></td>
+              <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td>
+              <td><code>'start'</code></td>
+              <td>Alignment for initial index.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="docs-prop-subheader">Accessibility</h4>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code class="text-primary font-bold">role</code></td>
+              <td><code>string</code></td>
+              <td><code>'list' | 'grid'</code></td>
+              <td>ARIA role for the container. Automatically detected based on direction.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">ariaLabel</code></td>
+              <td><code>string</code></td>
+              <td>-</td>
+              <td>Accessible label for the scroll container.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">ariaLabelledby</code></td>
+              <td><code>string</code></td>
+              <td>-</td>
+              <td>ID of the element that labels the scroll container.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">itemRole</code></td>
+              <td><code>string</code></td>
+              <td>-</td>
+              <td>ARIA role for each item. Set to <code>'none'</code> to manually apply roles using <code>getItemAriaProps</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="docs-prop-subheader text-primary">ScrollAlignment</h4>
+      <div class="prose prose-sm mb-4 text-base-content/70">
+        <p>Controls the item's final position in the viewport: <code>'start' | 'center' | 'end' | 'auto'</code>.</p>
+      </div>
+
+      <h4 class="docs-prop-subheader">Advanced & Performance</h4>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code class="text-primary font-bold">container</code></td>
+              <td><code>El | Window | null</code></td>
+              <td><code>undefined</code></td>
+              <td>The scrollable container. Defaults to component root.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">scrollPaddingStart</code> / <code class="text-primary font-bold">End</code></td>
+              <td><code>num | {x, y}</code></td>
+              <td><code>0</code></td>
+              <td>Additional padding for scroll offsets.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">containerTag</code> / <code class="text-primary font-bold">wrapperTag</code> / <code class="text-primary font-bold">itemTag</code></td>
+              <td><code>string</code></td>
+              <td><code>'div'</code></td>
+              <td>HTML tags for different parts of the component.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">bufferBefore</code> / <code class="text-primary font-bold">bufferAfter</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_BUFFER }}</code></td>
+              <td>Number of items to render outside the viewport.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">defaultItemSize</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
+              <td>Estimated size for items before measurement.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">defaultColumnWidth</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
+              <td>Estimated width for columns before measurement.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">debug</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Enables debug mode (visible offsets and indices).</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="mt-4 text-xs opacity-60">
+          * For a full list of props including advanced configuration, see the <a href="#virtual-scroll-props" class="link link-primary">VirtualScrollProps interface</a>.
         </div>
-        <div class="docs-table-container mb-10 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full text-xs md:text-sm">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/3">Variable</th>
-                <th>Default (Light/Dark)</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td><code>--vs-scrollbar-bg</code></td><td><code>rgba(230,230,230,0.9) / rgba(30,30,30,0.9)</code></td><td>Track background color.</td></tr>
-              <tr><td><code>--vs-scrollbar-thumb-bg</code></td><td><code>rgba(0,0,0,0.3) / rgba(255,255,255,0.3)</code></td><td>Thumb background color.</td></tr>
-              <tr><td><code>--vs-scrollbar-thumb-hover-bg</code></td><td><code>rgba(0,0,0,0.6) / rgba(255,255,255,0.6)</code></td><td>Thumb background on hover/active.</td></tr>
-              <tr><td><code>--vs-scrollbar-size</code></td><td><code>8px</code></td><td>Width (vertical) or height (horizontal) of the scrollbar.</td></tr>
-              <tr><td><code>--vs-scrollbar-radius</code></td><td><code>4px</code></td><td>Border radius for track and thumb.</td></tr>
-              <tr><td><code>--vs-scrollbar-cross-gap</code></td><td><code>var(--vs-scrollbar-size)</code></td><td>Size of gap to use where scrollbars meet.</td></tr>
-              <tr><td><code>--vs-scrollbar-has-cross-gap</code></td><td><code>0</code></td><td>If gap should be shown where scrollbars meet.</td></tr>
-            </tbody>
-          </table>
+      </div>
+
+      <h3 id="slots" class="docs-prop-header text-accent">Slots</h3>
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-10">
+        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+          <h4 class="font-bold text-accent mb-2">#item</h4>
+          <p class="text-xs @4xl:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
+          <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
+            <li><code>item: T</code>: The data item from the source array.</li>
+            <li><code>index: number</code>: The original 0-based index of the item.</li>
+            <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
+            <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
+            <li><code>isStickyActiveX / Y: boolean</code>: <code>true</code> if the item is stuck at the horizontal/vertical threshold.</li>
+            <li><code>offset: { x, y }</code>: Calculated physical position (DU).</li>
+            <li><code>columnRange: <a href="#column-range" class="link link-accent">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
+            <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
+            <li><code>getItemAriaProps: (index: number) => object</code>: Helper to get ARIA attributes for an item (e.g. <code>role="listitem"</code>, <code>aria-posinset</code>).</li>
+            <li><code>getCellAriaProps: (index: number) => object</code>: Helper to get ARIA attributes for a cell (e.g. <code>role="gridcell"</code>, <code>aria-colindex</code>).</li>
+            <li><code>gap: number</code>: Vertical gap between items.</li>
+            <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
+          </ul>
         </div>
-
-        <h3 id="methods" class="docs-prop-header">Exposed Members</h3>
-        <div class="prose prose-sm max-w-none mb-6 opacity-80">
-          <p>
-            The <code>VirtualScroll</code> component exposes several reactive properties and methods from the underlying logic.
-            You can access these via a template <code>ref</code>.
-          </p>
+        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+          <h4 class="font-bold text-accent mb-2">#scrollbar</h4>
+          <p class="text-xs @4xl:text-sm opacity-90 mb-2">Scoped slot for custom scrollbar implementation.</p>
+          <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
+            <li><code>axis: 'vertical' | 'horizontal'</code>: The scrollbar axis.</li>
+            <li><code>positionPercent: number</code>: Current scroll position (0 to 1).</li>
+            <li><code>viewportPercent: number</code>: Viewport as percentage of total size.</li>
+            <li><code>thumbSizePercent: number</code>: Calculated thumb size (0 to 100).</li>
+            <li><code>thumbPositionPercent: number</code>: Calculated thumb position (0 to 100).</li>
+            <li><code>trackProps: object</code>: <a href="#scrollbar-slot-props" class="link link-accent">Attributes and listeners</a> for the track element.</li>
+            <li><code>thumbProps: object</code>: <a href="#scrollbar-slot-props" class="link link-accent">Attributes and listeners</a> for the thumb element.</li>
+            <li><code>isDragging: boolean</code>: Whether the thumb is currently being dragged.</li>
+            <li>
+              <code>scrollbarProps: object</code>: Grouped properties for <code>VirtualScrollbar</code>.
+              <ul class="list-disc ps-5 mt-1">
+                <li><code>axis: 'vertical' | 'horizontal'</code></li>
+                <li><code>totalSize: number</code></li>
+                <li><code>position: number</code></li>
+                <li><code>viewportSize: number</code></li>
+                <li><code>scrollToOffset: (offset: number) => void</code></li>
+                <li><code>containerId: string</code></li>
+                <li><code>isRtl: boolean</code></li>
+              </ul>
+            </li>
+          </ul>
         </div>
-
-        <h4 class="docs-prop-subheader text-primary">Properties</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-8">
-          <a href="#props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">All Props</code>
-            <p class="text-[10px] opacity-60 mt-1">All component props are available on the instance.</p>
-          </a>
-          <a href="#scroll-details" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">scrollDetails</code>
-            <p class="text-[10px] opacity-60 mt-1">Full reactive state of the virtualizer.</p>
-          </a>
-          <a href="#column-range" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">columnRange</code>
-            <p class="text-[10px] opacity-60 mt-1">Visible column indices and paddings.</p>
-          </a>
-          <a href="#is-hydrated" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">isHydrated</code>
-            <p class="text-[10px] opacity-60 mt-1">Mounted and ready for virtualization.</p>
-          </a>
-          <a href="#is-rtl" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">isRtl</code>
-            <p class="text-[10px] opacity-60 mt-1">Right-to-Left mode active.</p>
-          </a>
-          <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">scrollbarPropsVertical</code>
-            <p class="text-[10px] opacity-60 mt-1">Reactive vertical scrollbar properties.</p>
-          </a>
-          <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">scrollbarPropsHorizontal</code>
-            <p class="text-[10px] opacity-60 mt-1">Reactive horizontal scrollbar properties.</p>
-          </a>
-          <a href="#scale-factors" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">scaleX / scaleY</code>
-            <p class="text-[10px] opacity-60 mt-1">Current coordinate scaling factors.</p>
-          </a>
-          <a href="#component-offset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">componentOffset</code>
-            <p class="text-[10px] opacity-60 mt-1">Absolute offset of the component within its container.</p>
-          </a>
-          <a href="#rendered-dimensions" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-primary font-bold text-xs">renderedWidth / renderedHeight</code>
-            <p class="text-[10px] opacity-60 mt-1">Physical dimensions in DOM (clamped).</p>
-          </a>
+        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+          <h4 class="font-bold text-accent mb-2">#header / #footer</h4>
+          <p class="text-xs @4xl:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
         </div>
-
-        <h4 class="docs-prop-subheader text-secondary">Methods</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 mb-10">
-          <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">scrollToIndex()</code>
-            <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
-          </a>
-          <a href="#method-scrolltooffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">scrollToOffset()</code>
-            <p class="text-[10px] opacity-60 mt-1">Scroll to precise pixel position.</p>
-          </a>
-          <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">stopProgrammaticScroll()</code>
-            <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
-          </a>
-          <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getColumnWidth()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
-          </a>
-          <a href="#method-getrowheight" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getRowHeight()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get calculated height of a row.</p>
-          </a>
-          <a href="#method-getrowoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getRowOffset()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a row.</p>
-          </a>
-          <a href="#method-getcolumnoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getColumnOffset()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a column.</p>
-          </a>
-          <a href="#method-getitemoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getItemOffset()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get virtual offset of an item.</p>
-          </a>
-          <a href="#method-getitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getItemSize()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get item size along scroll axis.</p>
-          </a>
-          <a href="#method-getitemariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getItemAriaProps()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for an item.</p>
-          </a>
-          <a href="#method-getcellariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">getCellAriaProps()</code>
-            <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for a cell.</p>
-          </a>
-          <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">refresh()</code>
-            <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
-          </a>
-          <a href="#method-updatedirection" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">updateDirection()</code>
-            <p class="text-[10px] opacity-60 mt-1">Trigger RTL/LTR detection.</p>
-          </a>
-          <a href="#method-updatehostoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">updateHostOffset()</code>
-            <p class="text-[10px] opacity-60 mt-1">Recalculate container position.</p>
-          </a>
-          <a href="#method-updateitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">updateItemSize()</code>
-            <p class="text-[10px] opacity-60 mt-1">Manually register measurement.</p>
-          </a>
-          <a href="#method-updateitemsizes" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
-            <code class="text-secondary font-bold text-xs">updateItemSizes()</code>
-            <p class="text-[10px] opacity-60 mt-1">Batch register measurements.</p>
-          </a>
+        <div class="card shadow-soft bg-base-300 p-4 border-s-4 border-accent">
+          <h4 class="font-bold text-accent mb-2">#loading</h4>
+          <p class="text-xs @4xl:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
         </div>
-      </section>
+      </div>
 
-      <div class="divider opacity-30" />
-
-      <!-- 5.1 VirtualScrollbar Component -->
-      <section id="virtual-scrollbar">
-        <h2 class="docs-section-header">VirtualScrollbar Component</h2>
-        <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
-          <p>
-            The <code>VirtualScrollbar</code> component provides a cross-browser consistent scrollbar that can be used independently or within the <code>VirtualScroll</code> component.
-            Check out the <a href="/feature-independent-scrollbars" class="link link-primary font-bold">Independent Scrollbars example</a> to see it in action without virtualization.
-          </p>
+      <section id="scrollbar-slot-props" class="mb-12">
+        <h4 class="docs-prop-subheader text-accent">ScrollbarSlotProps</h4>
+        <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+          <p>Properties passed to the 'scrollbar' scoped slot and <code>useVirtualScrollbar</code> return value.</p>
         </div>
 
         <CodeBlock
           class="docs-code-block mb-8"
           lang="vue"
-          line-numbers
-          code="<script setup>
+          code="<template>
+<VirtualScroll :items=&quot;items&quot; direction=&quot;both&quot; virtual-scrollbar>
+  <template #scrollbar=&quot;{ trackProps, thumbProps, axis }&quot;>
+    &amp;lt;!-- Vertical Track -->
+    <div v-if=&quot;axis === 'vertical'&quot; v-bind=&quot;trackProps&quot; class=&quot;w-2 bg-base-300&quot;>
+      <div v-bind=&quot;thumbProps&quot; class=&quot;bg-primary rounded&quot; />
+    </div>
+
+    &amp;lt;!-- Horizontal Track -->
+    <div v-else v-bind=&quot;trackProps&quot; class=&quot;h-2 bg-base-300&quot;>
+      <div v-bind=&quot;thumbProps&quot; class=&quot;bg-secondary rounded&quot; />
+    </div>
+  </template>
+</VirtualScroll>
+</template>"
+        />
+
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>The scrollbar axis.</td></tr>
+              <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total scrollable content size.</td></tr>
+              <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll offset.</td></tr>
+              <tr><td><code>positionPercent</code></td><td><code>number</code></td><td>Scroll position percentage (0-1).</td></tr>
+              <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible viewport size.</td></tr>
+              <tr><td><code>viewportPercent</code></td><td><code>number</code></td><td>Viewport percentage of total (0-1).</td></tr>
+              <tr><td><code>thumbSizePercent</code></td><td><code>number</code></td><td>Calculated thumb size percentage (0-100).</td></tr>
+              <tr><td><code>thumbPositionPercent</code></td><td><code>number</code></td><td>Calculated thumb position percentage (0-100).</td></tr>
+              <tr><td><code>scrollToOffset</code></td><td><code>Function</code></td><td>Scroll to pixel offset on this axis.</td></tr>
+              <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Current RTL state.</td></tr>
+              <tr><td><code>trackProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the track. Bind with <code>v-bind="trackProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
+              <tr><td><code>thumbProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the thumb. Bind with <code>v-bind="thumbProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
+              <tr><td><code>isDragging</code></td><td><code>boolean</code></td><td>Whether the thumb is currently being dragged.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <h3 id="events" class="docs-prop-header">Events</h3>
+      <div class="docs-table-container mb-10 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th>Event</th>
+              <th>Payload</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code>scroll</code></td>
+              <td><code><a href="#scroll-details" class="link link-primary">ScrollDetails&lt;T&gt;</a></code></td>
+              <td>Emitted on every scroll position change.</td>
+            </tr>
+            <tr>
+              <td><code>load</code></td>
+              <td><code>'vertical' | 'horizontal'</code></td>
+              <td>Triggered when the user scrolls within <code>loadDistance</code> of the end.</td>
+            </tr>
+            <tr>
+              <td><code>visibleRangeChange</code></td>
+              <td><code>{ start, end, colStart, colEnd }</code></td>
+              <td>Emitted when the set of rendered indices changes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="keyboard-navigation" class="docs-prop-header">Keyboard Navigation</h3>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
+        <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
+        <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 not-prose mt-4">
+          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+            <kbd class="kbd kbd-sm @4xl:kbd-md">Home</kbd>
+            <span class="text-xs @4xl:text-sm opacity-80">Scroll to the very beginning (Index 0,0).</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+            <kbd class="kbd kbd-sm @4xl:kbd-md">End</kbd>
+            <span class="text-xs @4xl:text-sm opacity-80">Scroll to the very last row and column.</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+            <kbd class="kbd kbd-sm @4xl:kbd-md">PgUp</kbd> / <kbd class="kbd kbd-sm @4xl:kbd-md">PgDn</kbd>
+            <span class="text-xs @4xl:text-sm opacity-80">Scroll by one full viewport height/width.</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+            <span class="flex gap-1">
+              <kbd class="kbd kbd-sm @4xl:kbd-md">↑</kbd>
+              <kbd class="kbd kbd-sm @4xl:kbd-md">↓</kbd>
+            </span>
+            <span class="text-xs @4xl:text-sm opacity-80">Scroll vertically by item height.</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5">
+            <span class="flex gap-1">
+              <kbd class="kbd kbd-sm @4xl:kbd-md">←</kbd>
+              <kbd class="kbd kbd-sm @4xl:kbd-md">→</kbd>
+            </span>
+            <span class="text-xs @4xl:text-sm opacity-80">Scroll horizontally by column width.</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="css-classes" class="docs-prop-header">CSS Classes</h3>
+      <div class="docs-table-container mb-10 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300 text-base-content">
+            <tr>
+              <th class="w-1/3">Class</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code>.virtual-scroll-container</code></td>
+              <td>The root scrollable container element.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll-wrapper</code></td>
+              <td>Wraps rendered items and provides total scrollable dimensions.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll-item</code></td>
+              <td>Applied to each individual rendered item. Use for general item styling.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll-header</code> / <code>.virtual-scroll-footer</code></td>
+              <td>Containers for header and footer slots.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll-loading</code></td>
+              <td>Container for the loading slot.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--vertical</code> / <code>--horizontal</code> / <code>--both</code></td>
+              <td>Direction modifiers applied to the root container.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--hydrated</code></td>
+              <td>Applied after client-side mount and hydration is complete.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--window</code></td>
+              <td>Applied when scrolling via the global window object.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--table</code></td>
+              <td>Applied when <code>containerTag="table"</code> is used.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--sticky</code></td>
+              <td>Applied to items that are currently stuck to the viewport edge.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--debug</code></td>
+              <td>Visible when <code>debug</code> prop is active.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll--hide-scrollbar</code></td>
+              <td>Applied when virtual scrollbars are enabled or content is massive.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="css-variables" class="docs-prop-header">CSS Variables</h3>
+      <div class="prose prose-sm max-w-none mb-6 opacity-80">
+        <p>
+          The default <code>VirtualScrollbar</code> can be styled using the following CSS variables:
+        </p>
+      </div>
+      <div class="docs-table-container mb-10 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full text-xs @4xl:text-sm">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/3">Variable</th>
+              <th>Default (Light/Dark)</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--vs-scrollbar-bg</code></td><td><code>rgba(230,230,230,0.9) / rgba(30,30,30,0.9)</code></td><td>Track background color.</td></tr>
+            <tr><td><code>--vs-scrollbar-thumb-bg</code></td><td><code>rgba(0,0,0,0.3) / rgba(255,255,255,0.3)</code></td><td>Thumb background color.</td></tr>
+            <tr><td><code>--vs-scrollbar-thumb-hover-bg</code></td><td><code>rgba(0,0,0,0.6) / rgba(255,255,255,0.6)</code></td><td>Thumb background on hover/active.</td></tr>
+            <tr><td><code>--vs-scrollbar-size</code></td><td><code>8px</code></td><td>Width (vertical) or height (horizontal) of the scrollbar.</td></tr>
+            <tr><td><code>--vs-scrollbar-radius</code></td><td><code>4px</code></td><td>Border radius for track and thumb.</td></tr>
+            <tr><td><code>--vs-scrollbar-cross-gap</code></td><td><code>var(--vs-scrollbar-size)</code></td><td>Size of gap to use where scrollbars meet.</td></tr>
+            <tr><td><code>--vs-scrollbar-has-cross-gap</code></td><td><code>0</code></td><td>If gap should be shown where scrollbars meet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="methods" class="docs-prop-header">Exposed Members</h3>
+      <div class="prose prose-sm max-w-none mb-6 opacity-80">
+        <p>
+          The <code>VirtualScroll</code> component exposes several reactive properties and methods from the underlying logic.
+          You can access these via a template <code>ref</code>.
+        </p>
+      </div>
+
+      <h4 class="docs-prop-subheader text-primary">Properties</h4>
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 mb-8">
+        <a href="#props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">All Props</code>
+          <p class="text-[10px] opacity-60 mt-1">All component props are available on the instance.</p>
+        </a>
+        <a href="#scroll-details" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">scrollDetails</code>
+          <p class="text-[10px] opacity-60 mt-1">Full reactive state of the virtualizer.</p>
+        </a>
+        <a href="#column-range" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">columnRange</code>
+          <p class="text-[10px] opacity-60 mt-1">Visible column indices and paddings.</p>
+        </a>
+        <a href="#is-hydrated" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">isHydrated</code>
+          <p class="text-[10px] opacity-60 mt-1">Mounted and ready for virtualization.</p>
+        </a>
+        <a href="#is-rtl" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">isRtl</code>
+          <p class="text-[10px] opacity-60 mt-1">Right-to-Left mode active.</p>
+        </a>
+        <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">scrollbarPropsVertical</code>
+          <p class="text-[10px] opacity-60 mt-1">Reactive vertical scrollbar properties.</p>
+        </a>
+        <a href="#scrollbar-slot-props" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">scrollbarPropsHorizontal</code>
+          <p class="text-[10px] opacity-60 mt-1">Reactive horizontal scrollbar properties.</p>
+        </a>
+        <a href="#scale-factors" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">scaleX / scaleY</code>
+          <p class="text-[10px] opacity-60 mt-1">Current coordinate scaling factors.</p>
+        </a>
+        <a href="#component-offset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">componentOffset</code>
+          <p class="text-[10px] opacity-60 mt-1">Absolute offset of the component within its container.</p>
+        </a>
+        <a href="#rendered-dimensions" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-primary font-bold text-xs">renderedWidth / renderedHeight</code>
+          <p class="text-[10px] opacity-60 mt-1">Physical dimensions in DOM (clamped).</p>
+        </a>
+      </div>
+
+      <h4 class="docs-prop-subheader text-secondary">Methods</h4>
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 mb-10">
+        <a href="#method-scrolltoindex" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">scrollToIndex()</code>
+          <p class="text-[10px] opacity-60 mt-1">Scroll to a specific row/column.</p>
+        </a>
+        <a href="#method-scrolltooffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">scrollToOffset()</code>
+          <p class="text-[10px] opacity-60 mt-1">Scroll to precise pixel position.</p>
+        </a>
+        <a href="#method-stopprogrammaticscroll" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">stopProgrammaticScroll()</code>
+          <p class="text-[10px] opacity-60 mt-1">Halt smooth scroll animations.</p>
+        </a>
+        <a href="#method-getcolumnwidth" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getColumnWidth()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get calculated width of a column.</p>
+        </a>
+        <a href="#method-getrowheight" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getRowHeight()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get calculated height of a row.</p>
+        </a>
+        <a href="#method-getrowoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getRowOffset()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a row.</p>
+        </a>
+        <a href="#method-getcolumnoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getColumnOffset()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get virtual offset of a column.</p>
+        </a>
+        <a href="#method-getitemoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getItemOffset()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get virtual offset of an item.</p>
+        </a>
+        <a href="#method-getitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getItemSize()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get item size along scroll axis.</p>
+        </a>
+        <a href="#method-getitemariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getItemAriaProps()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for an item.</p>
+        </a>
+        <a href="#method-getcellariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">getCellAriaProps()</code>
+          <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for a cell.</p>
+        </a>
+        <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">refresh()</code>
+          <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
+        </a>
+        <a href="#method-updatedirection" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">updateDirection()</code>
+          <p class="text-[10px] opacity-60 mt-1">Trigger RTL/LTR detection.</p>
+        </a>
+        <a href="#method-updatehostoffset" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">updateHostOffset()</code>
+          <p class="text-[10px] opacity-60 mt-1">Recalculate container position.</p>
+        </a>
+        <a href="#method-updateitemsize" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">updateItemSize()</code>
+          <p class="text-[10px] opacity-60 mt-1">Manually register measurement.</p>
+        </a>
+        <a href="#method-updateitemsizes" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+          <code class="text-secondary font-bold text-xs">updateItemSizes()</code>
+          <p class="text-[10px] opacity-60 mt-1">Batch register measurements.</p>
+        </a>
+      </div>
+    </section>
+
+    <div class="divider opacity-30" />
+
+    <!-- 5.1 VirtualScrollbar Component -->
+    <section id="virtual-scrollbar">
+      <h2 class="docs-section-header">VirtualScrollbar Component</h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
+        <p>
+          The <code>VirtualScrollbar</code> component provides a cross-browser consistent scrollbar that can be used independently or within the <code>VirtualScroll</code> component.
+          Check out the <a href="/feature-independent-scrollbars" class="link link-primary font-bold">Independent Scrollbars example</a> to see it in action without virtualization.
+        </p>
+      </div>
+
+      <CodeBlock
+        class="docs-code-block mb-8"
+        lang="vue"
+        line-numbers
+        code="<script setup>
 import { VirtualScrollbar } from &quot;@pdanpdan/virtual-scroll&quot;;
 import { ref } from &quot;vue&quot;;
 
@@ -931,882 +930,881 @@ const scrollY = ref(0);
 </script>
 
 <template>
-  <div class=&quot;relative overflow-hidden h-96&quot;>
-    &amp;lt;!-- Vertical Scrollbar -->
-    <VirtualScrollbar
-      axis=&quot;vertical&quot;
-      :total-size=&quot;10000&quot;
-      :viewport-size=&quot;400&quot;
-      :position=&quot;scrollY&quot;
-      @scroll-to-offset=&quot;val => scrollY = val&quot;
-    />
+<div class=&quot;relative overflow-hidden h-96&quot;>
+  &amp;lt;!-- Vertical Scrollbar -->
+  <VirtualScrollbar
+    axis=&quot;vertical&quot;
+    :total-size=&quot;10000&quot;
+    :viewport-size=&quot;400&quot;
+    :position=&quot;scrollY&quot;
+    @scroll-to-offset=&quot;val => scrollY = val&quot;
+  />
 
-    &amp;lt;!-- Horizontal Scrollbar -->
-    <VirtualScrollbar
-      axis=&quot;horizontal&quot;
-      :total-size=&quot;10000&quot;
-      :viewport-size=&quot;800&quot;
-      :position=&quot;scrollX&quot;
-      @scroll-to-offset=&quot;val => scrollX = val&quot;
-    />
-  </div>
+  &amp;lt;!-- Horizontal Scrollbar -->
+  <VirtualScrollbar
+    axis=&quot;horizontal&quot;
+    :total-size=&quot;10000&quot;
+    :viewport-size=&quot;800&quot;
+    :position=&quot;scrollX&quot;
+    @scroll-to-offset=&quot;val => scrollX = val&quot;
+  />
+</div>
 </template>"
-        />
+      />
 
-        <h3 id="scrollbar-props" class="docs-prop-header text-primary">Props</h3>
-        <div class="docs-table-container mb-8 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th class="w-1/4">Prop</th>
-                <th class="w-1/4">Type</th>
-                <th class="w-1/6">Default</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code class="text-primary font-bold">axis</code></td>
-                <td><code>'vertical' | 'horizontal'</code></td>
-                <td>-</td>
-                <td>The axis of the scrollbar. Required.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">totalSize</code></td>
-                <td><code>number</code></td>
-                <td>-</td>
-                <td>Total size of the scrollable content in pixels. Required.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">viewportSize</code></td>
-                <td><code>number</code></td>
-                <td>-</td>
-                <td>Size of the visible viewport in pixels. Required.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">position</code></td>
-                <td><code>number</code></td>
-                <td>-</td>
-                <td>Current scroll position in pixels. Required.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">containerId</code></td>
-                <td><code>string</code></td>
-                <td><code>undefined</code></td>
-                <td>ID of the container element for accessibility.</td>
-              </tr>
-              <tr>
-                <td><code class="text-primary font-bold">ariaLabel</code></td>
-                <td><code>string</code></td>
-                <td>-</td>
-                <td>Accessible label for the scrollbar.</td>
-              </tr>
-            </tbody>
-          </table>
+      <h3 id="scrollbar-props" class="docs-prop-header text-primary">Props</h3>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code class="text-primary font-bold">axis</code></td>
+              <td><code>'vertical' | 'horizontal'</code></td>
+              <td>-</td>
+              <td>The axis of the scrollbar. Required.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">totalSize</code></td>
+              <td><code>number</code></td>
+              <td>-</td>
+              <td>Total size of the scrollable content in pixels. Required.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">viewportSize</code></td>
+              <td><code>number</code></td>
+              <td>-</td>
+              <td>Size of the visible viewport in pixels. Required.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">position</code></td>
+              <td><code>number</code></td>
+              <td>-</td>
+              <td>Current scroll position in pixels. Required.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">containerId</code></td>
+              <td><code>string</code></td>
+              <td><code>undefined</code></td>
+              <td>ID of the container element for accessibility.</td>
+            </tr>
+            <tr>
+              <td><code class="text-primary font-bold">ariaLabel</code></td>
+              <td><code>string</code></td>
+              <td>-</td>
+              <td>Accessible label for the scrollbar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="scrollbar-events" class="docs-prop-header text-secondary">Events</h3>
+      <div class="docs-table-container mb-10 text-base-content/80">
+        <table class="table table-sm @4xl:table-md table-zebra w-full">
+          <thead class="bg-base-300">
+            <tr>
+              <th>Event</th>
+              <th>Payload</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs @4xl:text-sm">
+            <tr>
+              <td><code>scroll-to-offset</code></td>
+              <td><code>number</code></td>
+              <td>Emitted when the user interacts with the scrollbar to change position.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="divider opacity-30" />
+
+    <!-- 6. Composables -->
+    <section id="composables">
+      <h2 class="docs-section-header">Composables</h2>
+
+      <!-- useVirtualScroll -->
+      <section id="use-virtual-scroll" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useVirtualScroll</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Provides the core virtualization logic. Recommended for advanced use cases or when building custom wrappers.
+          </p>
         </div>
 
-        <h3 id="scrollbar-events" class="docs-prop-header text-secondary">Events</h3>
-        <div class="docs-table-container mb-10 text-base-content/80">
-          <table class="table table-sm md:table-md table-zebra w-full">
-            <thead class="bg-base-300">
-              <tr>
-                <th>Event</th>
-                <th>Payload</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody class="text-xs md:text-sm">
-              <tr>
-                <td><code>scroll-to-offset</code></td>
-                <td><code>number</code></td>
-                <td>Emitted when the user interacts with the scrollbar to change position.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <div class="divider opacity-30" />
-
-      <!-- 6. Composables -->
-      <section id="composables">
-        <h2 class="docs-section-header">Composables</h2>
-
-        <!-- useVirtualScroll -->
-        <section id="use-virtual-scroll" class="mb-16">
-          <h3 class="docs-prop-header text-secondary">useVirtualScroll</h3>
-          <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
-            <p>
-              Provides the core virtualization logic. Recommended for advanced use cases or when building custom wrappers.
-            </p>
-          </div>
-
-          <CodeBlock
-            class="docs-code-block mb-8 font-mono"
-            lang="ts"
-            code="import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, ref } from 'vue';
 
 const items = ref([...]);
 const props = computed(() => ({
-  items: items.value,
-  itemSize: 50,
-  direction: 'vertical'
+items: items.value,
+itemSize: 50,
+direction: 'vertical'
 }));
 
 const {
-  renderedItems,
-  scrollDetails,
-  totalHeight,
-  scrollToIndex
+renderedItems,
+scrollDetails,
+totalHeight,
+scrollToIndex
 } = useVirtualScroll(props);"
-          />
+        />
 
-          <h4 class="docs-prop-subheader">Parameters</h4>
-          <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
-            <p>Accepts a single <code>MaybeRefOrGetter</code> to a <a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a> object.</p>
-          </div>
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts a single <code>MaybeRefOrGetter</code> to a <a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a> object.</p>
+        </div>
 
-          <h4 class="docs-prop-subheader">Return Value</h4>
-          <div class="docs-table-container mb-12 text-base-content/80 text-xs md:text-sm">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr>
-                  <th class="w-1/4">Member</th>
-                  <th class="w-1/4">Type</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><a href="#rendered-item" class="link font-bold text-primary">renderedItems</a></td>
-                  <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
-                  <td>List of items to render in the current buffer.</td>
-                </tr>
-                <tr>
-                  <td><a href="#scroll-details" class="link font-bold text-primary">scrollDetails</a></td>
-                  <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
-                  <td>Full reactive state of the virtual scroll system.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">totalWidth</code> / <code class="text-primary font-bold">totalHeight</code></td>
-                  <td><code>Ref&lt;number&gt;</code></td>
-                  <td>Calculated dimensions of the entire list/grid (VU).</td>
-                </tr>
-                <tr id="rendered-dimensions">
-                  <td><code class="text-primary font-bold">renderedWidth</code> / <code class="text-primary font-bold">renderedHeight</code></td>
-                  <td><code>Ref&lt;number&gt;</code></td>
-                  <td>Total dimensions to be rendered in the DOM (clamped to browser limits, DU).</td>
-                </tr>
-                <tr>
-                  <td><a href="#column-range" class="link font-bold text-primary">columnRange</a></td>
-                  <td><code>Ref&lt;ColumnRange&gt;</code></td>
-                  <td>Visible columns and their associated paddings.</td>
-                </tr>
-                <tr id="is-hydrated">
-                  <td><code class="text-primary font-bold">isHydrated</code></td>
-                  <td><code>Ref&lt;boolean&gt;</code></td>
-                  <td><code>true</code> when the component is mounted and hydrated.</td>
-                </tr>
-                <tr id="is-rtl">
-                  <td><code class="text-primary font-bold">isRtl</code></td>
-                  <td><code>Ref&lt;boolean&gt;</code></td>
-                  <td><code>true</code> if the scroll container is in Right-to-Left mode.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-scrolltoindex" class="link font-bold text-secondary">scrollToIndex</a></td>
-                  <td><code>Function</code></td>
-                  <td>Programmatic scroll to a specific index.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a></td>
-                  <td><code>Function</code></td>
-                  <td>Programmatic scroll to a pixel offset.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-secondary">stopProgrammaticScroll</a></td>
-                  <td><code>Function</code></td>
-                  <td>Cancel any active smooth scroll animation.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-updateitemsize" class="link font-bold text-secondary">updateItemSize</a></td>
-                  <td><code>Function</code></td>
-                  <td>Register a manual item measurement.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-updateitemsizes" class="link font-bold text-secondary">updateItemSizes</a></td>
-                  <td><code>Function</code></td>
-                  <td>Register multiple manual item measurements.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-updatehostoffset" class="link font-bold text-secondary">updateHostOffset</a></td>
-                  <td><code>Function</code></td>
-                  <td>Force update the container's relative position.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-secondary font-bold">updateDirection</code></td>
-                  <td><code>Function</code></td>
-                  <td>Manually trigger direction (LTR/RTL) detection.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-secondary font-bold">getItemAriaProps</code></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get ARIA attributes for an item.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-secondary font-bold">getCellAriaProps</code></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get ARIA attributes for a cell.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-secondary font-bold">getColumnWidth</code></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get a column's width.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-getrowheight" class="link font-bold text-secondary">getRowHeight</a></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get a row's height.</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-getrowoffset" class="link font-bold text-secondary">getRowOffset</a></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get a row's virtual offset (VU).</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-getcolumnoffset" class="link font-bold text-secondary">getColumnOffset</a></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get a column's virtual offset (VU).</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-getitemoffset" class="link font-bold text-secondary">getItemOffset</a></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get an item's virtual offset (VU).</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-getitemsize" class="link font-bold text-secondary">getItemSize</a></td>
-                  <td><code>Function</code></td>
-                  <td>Helper to get an item's size along scroll axis (VU).</td>
-                </tr>
-                <tr>
-                  <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
-                  <td><code>Function</code></td>
-                  <td>Resets all measurements and state.</td>
-                </tr>
-                <tr id="scale-factors">
-                  <td><code class="text-primary font-bold">scaleX</code> / <code class="text-primary font-bold">scaleY</code></td>
-                  <td><code>Ref&lt;number&gt;</code></td>
-                  <td>Current coordinate scaling factors (VU / DU).</td>
-                </tr>
-                <tr id="component-offset">
-                  <td><code class="text-primary font-bold">componentOffset</code></td>
-                  <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
-                  <td>Absolute offset of the component in its container (DU).</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <h4 class="docs-prop-subheader">Return Value</h4>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr>
+                <th class="w-1/4">Member</th>
+                <th class="w-1/4">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="#rendered-item" class="link font-bold text-primary">renderedItems</a></td>
+                <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
+                <td>List of items to render in the current buffer.</td>
+              </tr>
+              <tr>
+                <td><a href="#scroll-details" class="link font-bold text-primary">scrollDetails</a></td>
+                <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
+                <td>Full reactive state of the virtual scroll system.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">totalWidth</code> / <code class="text-primary font-bold">totalHeight</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td>Calculated dimensions of the entire list/grid (VU).</td>
+              </tr>
+              <tr id="rendered-dimensions">
+                <td><code class="text-primary font-bold">renderedWidth</code> / <code class="text-primary font-bold">renderedHeight</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td>Total dimensions to be rendered in the DOM (clamped to browser limits, DU).</td>
+              </tr>
+              <tr>
+                <td><a href="#column-range" class="link font-bold text-primary">columnRange</a></td>
+                <td><code>Ref&lt;ColumnRange&gt;</code></td>
+                <td>Visible columns and their associated paddings.</td>
+              </tr>
+              <tr id="is-hydrated">
+                <td><code class="text-primary font-bold">isHydrated</code></td>
+                <td><code>Ref&lt;boolean&gt;</code></td>
+                <td><code>true</code> when the component is mounted and hydrated.</td>
+              </tr>
+              <tr id="is-rtl">
+                <td><code class="text-primary font-bold">isRtl</code></td>
+                <td><code>Ref&lt;boolean&gt;</code></td>
+                <td><code>true</code> if the scroll container is in Right-to-Left mode.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-scrolltoindex" class="link font-bold text-secondary">scrollToIndex</a></td>
+                <td><code>Function</code></td>
+                <td>Programmatic scroll to a specific index.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Programmatic scroll to a pixel offset.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-secondary">stopProgrammaticScroll</a></td>
+                <td><code>Function</code></td>
+                <td>Cancel any active smooth scroll animation.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updateitemsize" class="link font-bold text-secondary">updateItemSize</a></td>
+                <td><code>Function</code></td>
+                <td>Register a manual item measurement.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updateitemsizes" class="link font-bold text-secondary">updateItemSizes</a></td>
+                <td><code>Function</code></td>
+                <td>Register multiple manual item measurements.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updatehostoffset" class="link font-bold text-secondary">updateHostOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Force update the container's relative position.</td>
+              </tr>
+              <tr>
+                <td><code class="text-secondary font-bold">updateDirection</code></td>
+                <td><code>Function</code></td>
+                <td>Manually trigger direction (LTR/RTL) detection.</td>
+              </tr>
+              <tr>
+                <td><code class="text-secondary font-bold">getItemAriaProps</code></td>
+                <td><code>Function</code></td>
+                <td>Helper to get ARIA attributes for an item.</td>
+              </tr>
+              <tr>
+                <td><code class="text-secondary font-bold">getCellAriaProps</code></td>
+                <td><code>Function</code></td>
+                <td>Helper to get ARIA attributes for a cell.</td>
+              </tr>
+              <tr>
+                <td><code class="text-secondary font-bold">getColumnWidth</code></td>
+                <td><code>Function</code></td>
+                <td>Helper to get a column's width.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-getrowheight" class="link font-bold text-secondary">getRowHeight</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get a row's height.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-getrowoffset" class="link font-bold text-secondary">getRowOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get a row's virtual offset (VU).</td>
+              </tr>
+              <tr>
+                <td><a href="#method-getcolumnoffset" class="link font-bold text-secondary">getColumnOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get a column's virtual offset (VU).</td>
+              </tr>
+              <tr>
+                <td><a href="#method-getitemoffset" class="link font-bold text-secondary">getItemOffset</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get an item's virtual offset (VU).</td>
+              </tr>
+              <tr>
+                <td><a href="#method-getitemsize" class="link font-bold text-secondary">getItemSize</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get an item's size along scroll axis (VU).</td>
+              </tr>
+              <tr>
+                <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
+                <td><code>Function</code></td>
+                <td>Resets all measurements and state.</td>
+              </tr>
+              <tr id="scale-factors">
+                <td><code class="text-primary font-bold">scaleX</code> / <code class="text-primary font-bold">scaleY</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td>Current coordinate scaling factors (VU / DU).</td>
+              </tr>
+              <tr id="component-offset">
+                <td><code class="text-primary font-bold">componentOffset</code></td>
+                <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
+                <td>Absolute offset of the component in its container (DU).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-        <!-- useVirtualScrollbar -->
-        <section id="use-virtual-scrollbar">
-          <h3 class="docs-prop-header text-secondary">useVirtualScrollbar</h3>
-          <div class="prose prose-sm md:prose-md max-w-none text-base-content/90 mb-8">
-            <p>
-              Provides the logic for virtual scrollbar interactions. It handles track clicks, thumb dragging, and coordinate mapping (including RTL).
-            </p>
-          </div>
+      <!-- useVirtualScrollbar -->
+      <section id="use-virtual-scrollbar">
+        <h3 class="docs-prop-header text-secondary">useVirtualScrollbar</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Provides the logic for virtual scrollbar interactions. It handles track clicks, thumb dragging, and coordinate mapping (including RTL).
+          </p>
+        </div>
 
-          <CodeBlock
-            class="docs-code-block mb-8 font-mono"
-            lang="ts"
-            code="import { useVirtualScrollbar } from '@pdanpdan/virtual-scroll';
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScrollbar } from '@pdanpdan/virtual-scroll';
 
 const {
-  trackProps,
-  thumbProps,
-  thumbSizePercent,
-  thumbPositionPercent
+trackProps,
+thumbProps,
+thumbSizePercent,
+thumbPositionPercent
 } = useVirtualScrollbar({
-  axis: 'vertical',
-  totalSize: 10000,
-  viewportSize: 500,
-  position: scrollPos,
-  scrollToOffset: (val) => { scrollPos = val; }
+axis: 'vertical',
+totalSize: 10000,
+viewportSize: 500,
+position: scrollPos,
+scrollToOffset: (val) => { scrollPos = val; }
 });"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts a <code>UseVirtualScrollbarProps</code> object where each property can be a <code>MaybeRefOrGetter</code>.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Return Value</h4>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr>
+                <th class="w-1/4">Member</th>
+                <th class="w-1/4">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="text-primary font-bold">trackProps</code></td>
+                <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
+                <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element. Includes <code>class</code> and <code>style</code>.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">thumbProps</code></td>
+                <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
+                <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element. Includes <code>class</code> and <code>style</code>.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">viewportPercent</code></td>
+                <td><code>ComputedRef&lt;number&gt;</code></td>
+                <td>Viewport size as percentage of total size (0-1).</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">positionPercent</code></td>
+                <td><code>ComputedRef&lt;number&gt;</code></td>
+                <td>Scroll position as percentage of scrollable range (0-1).</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">thumbSizePercent</code></td>
+                <td><code>ComputedRef&lt;number&gt;</code></td>
+                <td>Calculated thumb size (percentage of track, 0-100).</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">thumbPositionPercent</code></td>
+                <td><code>ComputedRef&lt;number&gt;</code></td>
+                <td>Calculated thumb position (percentage of track, 0-100).</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">isDragging</code></td>
+                <td><code>Ref&lt;boolean&gt;</code></td>
+                <td>Whether the thumb is currently being dragged.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <div class="divider opacity-30" />
+
+    <!-- 7. API Reference -->
+    <section id="api-reference">
+      <h2 class="docs-section-header">API Reference</h2>
+
+      <h3 class="docs-section-header text-2xl mt-16">Types</h3>
+
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-12 text-base-content/80">
+        <div class="card bg-base-300 p-4 border border-base-content/5">
+          <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
+          <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
+          <p class="text-[10px] opacity-60 mt-2 italic">Defines the virtualization axes for the VirtualScroll component.</p>
+        </div>
+        <div class="card bg-base-300 p-4 border border-base-content/5">
+          <h4 class="docs-prop-subheader text-primary mb-2">ScrollAxis</h4>
+          <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal'" />
+          <p class="text-[10px] opacity-60 mt-2 italic">Used specifically for individual scrollbar instances.</p>
+        </div>
+      </div>
+
+      <!-- ScrollDetails -->
+      <section id="scroll-details" class="mb-12">
+        <h4 class="docs-prop-subheader">ScrollDetails&lt;T&gt;</h4>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>items</code></td><td><code><a href="#rendered-item" class="link link-primary">RenderedItem&lt;T&gt;</a>[]</code></td><td>Rendered items in the buffer.</td></tr>
+              <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index below any sticky header.</td></tr>
+              <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index after any sticky column.</td></tr>
+              <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Current relative scroll position in virtual units (VU).</td></tr>
+              <tr><td><code>displayScrollOffset</code></td><td><code>{ x, y }</code></td><td>Current physical scroll position in display pixels (DU).</td></tr>
+              <tr><td><code>viewportSize</code></td><td><code>{ width, height }</code></td><td>Dimensions of the visible viewport in virtual units (VU).</td></tr>
+              <tr><td><code>displayViewportSize</code></td><td><code>{ width, height }</code></td><td>Physical dimensions of the visible viewport in display pixels (DU).</td></tr>
+              <tr><td><code>totalSize</code></td><td><code>{ width, height }</code></td><td>Estimated total content dimensions (VU).</td></tr>
+              <tr><td><code>isScrolling</code></td><td><code>boolean</code></td><td>Active scrolling state.</td></tr>
+              <tr><td><code>isProgrammaticScroll</code></td><td><code>boolean</code></td><td>True if triggered by <code>scrollToIndex/Offset</code>.</td></tr>
+              <tr><td><code>range</code></td><td><code>{ start, end }</code></td><td>Visible row range (inclusive start, exclusive end).</td></tr>
+              <tr><td><code>columnRange</code></td><td><code><a href="#column-range" class="link link-primary">ColumnRange</a></code></td><td>Visible column range (grid).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- RenderedItem -->
+      <section id="rendered-item" class="mb-12">
+        <h4 class="docs-prop-subheader">RenderedItem&lt;T&gt;</h4>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>item</code></td><td><code>T</code></td><td>The source data item.</td></tr>
+              <tr><td><code>index</code></td><td><code>number</code></td><td>Item's position in the array.</td></tr>
+              <tr><td><code>offset</code></td><td><code>{ x, y }</code></td><td>Absolute pixel position within the wrapper (DU).</td></tr>
+              <tr><td><code>size</code></td><td><code>{ width, height }</code></td><td>Current dimensions (VU).</td></tr>
+              <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>Offsets before any sticky adjustments (VU).</td></tr>
+              <tr><td><code>isSticky</code></td><td><code>boolean</code></td><td>Is configured as sticky.</td></tr>
+              <tr><td><code>isStickyActive</code></td><td><code>boolean</code></td><td>Currently stuck to the edge.</td></tr>
+              <tr><td><code>stickyOffset</code></td><td><code>{ x, y }</code></td><td>Translation applied for sticky pushing effect (DU).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ColumnRange -->
+      <section id="column-range" class="mb-12">
+        <h4 class="docs-prop-subheader">ColumnRange</h4>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>start</code></td><td><code>number</code></td><td>Index of first rendered column.</td></tr>
+              <tr><td><code>end</code></td><td><code>number</code></td><td>Index of last rendered column (exclusive).</td></tr>
+              <tr><td><code>padStart</code></td><td><code>number</code></td><td>Pixel space to maintain before columns (VU).</td></tr>
+              <tr><td><code>padEnd</code></td><td><code>number</code></td><td>Pixel space to maintain after columns (VU).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VirtualScrollProps -->
+      <section id="virtual-scroll-props" class="mb-12">
+        <h4 class="docs-prop-subheader">VirtualScrollProps&lt;T&gt;</h4>
+        <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+          <p>Full property configuration shared between the component and composable.</p>
+        </div>
+        <div class="docs-table-container overflow-x-auto text-base-content/80">
+          <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs opacity-90">
+              <tr><td><code>items</code></td><td><code>T[]</code></td><td>Data source. Required.</td></tr>
+              <tr><td><code>itemSize</code></td><td><code>num | fn | null</code></td><td>Sizing logic. Default: {{ DEFAULT_ITEM_SIZE }}px.</td></tr>
+              <tr><td><code>direction</code></td><td><code>ScrollDirection</code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
+              <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
+              <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
+              <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation (DU).</td></tr>
+              <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link link-primary">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
+              <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
+              <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Default: {{ DEFAULT_COLUMN_WIDTH }}px.</td></tr>
+              <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
+              <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
+              <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
+              <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
+              <tr><td><code>initialScrollAlign</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Alignment for initial jump.</td></tr>
+              <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
+              <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
+              <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- UseVirtualScrollbarProps -->
+      <section id="use-virtual-scrollbar-props" class="mb-12">
+        <h4 class="docs-prop-subheader">UseVirtualScrollbarProps</h4>
+        <div class="docs-table-container overflow-x-auto text-base-content/80">
+          <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs opacity-90">
+              <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>Axis of the scrollbar.</td></tr>
+              <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total size of content in pixels.</td></tr>
+              <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll position in pixels.</td></tr>
+              <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible area size in pixels.</td></tr>
+              <tr><td><code>scrollToOffset</code></td><td><code>(offset: number) => void</code></td><td>Callback to update position.</td></tr>
+              <tr><td><code>containerId</code></td><td><code>string</code></td><td>ID for accessibility.</td></tr>
+              <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Enable RTL mapping.</td></tr>
+              <tr><td><code>ariaLabel</code></td><td><code>string</code></td><td>Accessible label for the scrollbar.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ScrollToIndexOptions -->
+      <section id="scroll-to-index-options" class="mb-12">
+        <h4 class="docs-prop-subheader">ScrollToIndexOptions</h4>
+        <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+          <p>Full configuration for index-based scrolling.</p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>align</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
+              <tr><td><code>behavior</code></td><td><code>'auto' | 'smooth'</code></td><td>Scroll behavior (default: <code>'smooth'</code>).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ScrollAlignmentOptions -->
+      <section id="scroll-alignment-options" class="mb-12">
+        <h4 class="docs-prop-subheader">ScrollAlignmentOptions</h4>
+        <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+          <p>Allows axis-specific alignment in <code>scrollToIndex</code>.</p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>x</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
+              <tr><td><code>y</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ScrollAlignment -->
+      <section id="alignments" class="mb-12">
+        <h4 class="docs-prop-subheader">ScrollAlignment</h4>
+        <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+          <p>Controls the item's final position in the viewport during <code>scrollToIndex</code>.</p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr>
+                <th class="w-1/4">Value</th>
+                <th>Behavior</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr>
+                <td><code class="text-primary font-bold">'start'</code></td>
+                <td>Aligns to top (vertical) or left (horizontal) edge.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">'center'</code></td>
+                <td>Aligns to viewport center.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">'end'</code></td>
+                <td>Aligns to bottom (vertical) or right (horizontal) edge.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default</span></td>
+                <td><strong>Smart:</strong> If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <h3 class="docs-section-header text-2xl mt-24 text-secondary">Methods</h3>
+
+      <div class="space-y-8 mb-10">
+        <!-- Method: scrollToIndex -->
+        <div id="method-scrolltoindex" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> scrollToIndex()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="scrollToIndex(
+rowIndex: number | null,
+colIndex: number | null,
+options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
+): void"
           />
-
-          <h4 class="docs-prop-subheader">Parameters</h4>
-          <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
-            <p>Accepts a <code>UseVirtualScrollbarProps</code> object where each property can be a <code>MaybeRefOrGetter</code>.</p>
-          </div>
-
-          <h4 class="docs-prop-subheader">Return Value</h4>
-          <div class="docs-table-container mb-12 text-base-content/80 text-xs md:text-sm">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr>
-                  <th class="w-1/4">Member</th>
-                  <th class="w-1/4">Type</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code class="text-primary font-bold">trackProps</code></td>
-                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
-                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the track element. Includes <code>class</code> and <code>style</code>.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">thumbProps</code></td>
-                  <td><code>ComputedRef&lt;<a href="#scrollbar-slot-props" class="link link-primary">object</a>&gt;</code></td>
-                  <td><a href="#scrollbar-slot-props" class="link link-primary">Attributes and listeners</a> for the thumb element. Includes <code>class</code> and <code>style</code>.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">viewportPercent</code></td>
-                  <td><code>ComputedRef&lt;number&gt;</code></td>
-                  <td>Viewport size as percentage of total size (0-1).</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">positionPercent</code></td>
-                  <td><code>ComputedRef&lt;number&gt;</code></td>
-                  <td>Scroll position as percentage of scrollable range (0-1).</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">thumbSizePercent</code></td>
-                  <td><code>ComputedRef&lt;number&gt;</code></td>
-                  <td>Calculated thumb size (percentage of track, 0-100).</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">thumbPositionPercent</code></td>
-                  <td><code>ComputedRef&lt;number&gt;</code></td>
-                  <td>Calculated thumb position (percentage of track, 0-100).</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">isDragging</code></td>
-                  <td><code>Ref&lt;boolean&gt;</code></td>
-                  <td>Whether the thumb is currently being dragged.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </section>
-
-      <div class="divider opacity-30" />
-
-      <!-- 7. API Reference -->
-      <section id="api-reference">
-        <h2 class="docs-section-header">API Reference</h2>
-
-        <h3 class="docs-section-header text-2xl mt-16">Types</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12 text-base-content/80">
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
-            <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
-            <p class="text-[10px] opacity-60 mt-2 italic">Defines the virtualization axes for the VirtualScroll component.</p>
-          </div>
-          <div class="card bg-base-300 p-4 border border-base-content/5">
-            <h4 class="docs-prop-subheader text-primary mb-2">ScrollAxis</h4>
-            <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal'" />
-            <p class="text-[10px] opacity-60 mt-2 italic">Used specifically for individual scrollbar instances.</p>
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Ensures a specific item is visible within the viewport. If the item's size is dynamic and not yet measured, the scroll position will be automatically corrected after rendering.</p>
+            <div class="overflow-x-auto">
+              <table class="table table-xs w-full bg-base-200">
+                <thead class="text-base-content"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>rowIndex</code></td><td><code>number | null</code></td><td>Target row. <code>null</code> to keep current Y.</td></tr>
+                  <tr><td><code>colIndex</code></td><td><code>number | null</code></td><td>Target column. <code>null</code> to keep current X.</td></tr>
+                  <tr><td><code>options</code></td><td><code><a href="#scroll-to-index-options" class="link link-secondary">Options</a></code></td><td>Alignment and behavior settings.</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- ScrollDetails -->
-        <section id="scroll-details" class="mb-12">
-          <h4 class="docs-prop-subheader">ScrollDetails&lt;T&gt;</h4>
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>items</code></td><td><code><a href="#rendered-item" class="link link-primary">RenderedItem&lt;T&gt;</a>[]</code></td><td>Rendered items in the buffer.</td></tr>
-                <tr><td><code>currentIndex</code></td><td><code>number</code></td><td>First visible row index below any sticky header.</td></tr>
-                <tr><td><code>currentColIndex</code></td><td><code>number</code></td><td>First visible column index after any sticky column.</td></tr>
-                <tr><td><code>scrollOffset</code></td><td><code>{ x, y }</code></td><td>Current relative scroll position in virtual units (VU).</td></tr>
-                <tr><td><code>displayScrollOffset</code></td><td><code>{ x, y }</code></td><td>Current physical scroll position in display pixels (DU).</td></tr>
-                <tr><td><code>viewportSize</code></td><td><code>{ width, height }</code></td><td>Dimensions of the visible viewport in virtual units (VU).</td></tr>
-                <tr><td><code>displayViewportSize</code></td><td><code>{ width, height }</code></td><td>Physical dimensions of the visible viewport in display pixels (DU).</td></tr>
-                <tr><td><code>totalSize</code></td><td><code>{ width, height }</code></td><td>Estimated total content dimensions (VU).</td></tr>
-                <tr><td><code>isScrolling</code></td><td><code>boolean</code></td><td>Active scrolling state.</td></tr>
-                <tr><td><code>isProgrammaticScroll</code></td><td><code>boolean</code></td><td>True if triggered by <code>scrollToIndex/Offset</code>.</td></tr>
-                <tr><td><code>range</code></td><td><code>{ start, end }</code></td><td>Visible row range (inclusive start, exclusive end).</td></tr>
-                <tr><td><code>columnRange</code></td><td><code><a href="#column-range" class="link link-primary">ColumnRange</a></code></td><td>Visible column range (grid).</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- RenderedItem -->
-        <section id="rendered-item" class="mb-12">
-          <h4 class="docs-prop-subheader">RenderedItem&lt;T&gt;</h4>
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>item</code></td><td><code>T</code></td><td>The source data item.</td></tr>
-                <tr><td><code>index</code></td><td><code>number</code></td><td>Item's position in the array.</td></tr>
-                <tr><td><code>offset</code></td><td><code>{ x, y }</code></td><td>Absolute pixel position within the wrapper (DU).</td></tr>
-                <tr><td><code>size</code></td><td><code>{ width, height }</code></td><td>Current dimensions (VU).</td></tr>
-                <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>Offsets before any sticky adjustments (VU).</td></tr>
-                <tr><td><code>isSticky</code></td><td><code>boolean</code></td><td>Is configured as sticky.</td></tr>
-                <tr><td><code>isStickyActive</code></td><td><code>boolean</code></td><td>Currently stuck to the edge.</td></tr>
-                <tr><td><code>stickyOffset</code></td><td><code>{ x, y }</code></td><td>Translation applied for sticky pushing effect (DU).</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ColumnRange -->
-        <section id="column-range" class="mb-12">
-          <h4 class="docs-prop-subheader">ColumnRange</h4>
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>start</code></td><td><code>number</code></td><td>Index of first rendered column.</td></tr>
-                <tr><td><code>end</code></td><td><code>number</code></td><td>Index of last rendered column (exclusive).</td></tr>
-                <tr><td><code>padStart</code></td><td><code>number</code></td><td>Pixel space to maintain before columns (VU).</td></tr>
-                <tr><td><code>padEnd</code></td><td><code>number</code></td><td>Pixel space to maintain after columns (VU).</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- VirtualScrollProps -->
-        <section id="virtual-scroll-props" class="mb-12">
-          <h4 class="docs-prop-subheader">VirtualScrollProps&lt;T&gt;</h4>
-          <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
-            <p>Full property configuration shared between the component and composable.</p>
-          </div>
-          <div class="docs-table-container overflow-x-auto text-base-content/80">
-            <table class="table table-xs md:table-sm table-zebra w-full min-w-150">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs opacity-90">
-                <tr><td><code>items</code></td><td><code>T[]</code></td><td>Data source. Required.</td></tr>
-                <tr><td><code>itemSize</code></td><td><code>num | fn | null</code></td><td>Sizing logic. Default: {{ DEFAULT_ITEM_SIZE }}px.</td></tr>
-                <tr><td><code>direction</code></td><td><code>ScrollDirection</code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
-                <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
-                <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
-                <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation (DU).</td></tr>
-                <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link link-primary">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
-                <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
-                <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Default: {{ DEFAULT_COLUMN_WIDTH }}px.</td></tr>
-                <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
-                <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
-                <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
-                <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
-                <tr><td><code>initialScrollAlign</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Alignment for initial jump.</td></tr>
-                <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
-                <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
-                <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- UseVirtualScrollbarProps -->
-        <section id="use-virtual-scrollbar-props" class="mb-12">
-          <h4 class="docs-prop-subheader">UseVirtualScrollbarProps</h4>
-          <div class="docs-table-container overflow-x-auto text-base-content/80">
-            <table class="table table-xs md:table-sm table-zebra w-full min-w-150">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs opacity-90">
-                <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>Axis of the scrollbar.</td></tr>
-                <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total size of content in pixels.</td></tr>
-                <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll position in pixels.</td></tr>
-                <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible area size in pixels.</td></tr>
-                <tr><td><code>scrollToOffset</code></td><td><code>(offset: number) => void</code></td><td>Callback to update position.</td></tr>
-                <tr><td><code>containerId</code></td><td><code>string</code></td><td>ID for accessibility.</td></tr>
-                <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Enable RTL mapping.</td></tr>
-                <tr><td><code>ariaLabel</code></td><td><code>string</code></td><td>Accessible label for the scrollbar.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ScrollToIndexOptions -->
-        <section id="scroll-to-index-options" class="mb-12">
-          <h4 class="docs-prop-subheader">ScrollToIndexOptions</h4>
-          <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
-            <p>Full configuration for index-based scrolling.</p>
-          </div>
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>align</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
-                <tr><td><code>behavior</code></td><td><code>'auto' | 'smooth'</code></td><td>Scroll behavior (default: <code>'smooth'</code>).</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ScrollAlignmentOptions -->
-        <section id="scroll-alignment-options" class="mb-12">
-          <h4 class="docs-prop-subheader">ScrollAlignmentOptions</h4>
-          <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
-            <p>Allows axis-specific alignment in <code>scrollToIndex</code>.</p>
-          </div>
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr><td><code>x</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
-                <tr><td><code>y</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ScrollAlignment -->
-        <section id="alignments" class="mb-12">
-          <h4 class="docs-prop-subheader">ScrollAlignment</h4>
-          <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
-            <p>Controls the item's final position in the viewport during <code>scrollToIndex</code>.</p>
-          </div>
-          <div class="docs-table-container text-base-content/80">
-            <table class="table table-sm md:table-md table-zebra w-full">
-              <thead class="bg-base-300 text-base-content">
-                <tr>
-                  <th class="w-1/4">Value</th>
-                  <th>Behavior</th>
-                </tr>
-              </thead>
-              <tbody class="text-xs md:text-sm">
-                <tr>
-                  <td><code class="text-primary font-bold">'start'</code></td>
-                  <td>Aligns to top (vertical) or left (horizontal) edge.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">'center'</code></td>
-                  <td>Aligns to viewport center.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">'end'</code></td>
-                  <td>Aligns to bottom (vertical) or right (horizontal) edge.</td>
-                </tr>
-                <tr>
-                  <td><code class="text-primary font-bold">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default</span></td>
-                  <td><strong>Smart:</strong> If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <h3 class="docs-section-header text-2xl mt-24 text-secondary">Methods</h3>
-
-        <div class="space-y-8 mb-10">
-          <!-- Method: scrollToIndex -->
-          <div id="method-scrolltoindex" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> scrollToIndex()
-            </h4>
-            <CodeBlock
-              class="docs-code-block mb-4 font-mono text-xs"
-              lang="ts"
-              code="scrollToIndex(
-  rowIndex: number | null,
-  colIndex: number | null,
-  options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
+        <!-- Method: scrollToOffset -->
+        <div id="method-scrolltooffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> scrollToOffset()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="scrollToOffset(
+x: number | null,
+y: number | null,
+options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
 ): void"
-            />
-            <div class="prose prose-sm max-w-none opacity-90 space-y-4">
-              <p>Ensures a specific item is visible within the viewport. If the item's size is dynamic and not yet measured, the scroll position will be automatically corrected after rendering.</p>
-              <div class="overflow-x-auto">
-                <table class="table table-xs w-full bg-base-200">
-                  <thead class="text-base-content"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
-                  <tbody>
-                    <tr><td><code>rowIndex</code></td><td><code>number | null</code></td><td>Target row. <code>null</code> to keep current Y.</td></tr>
-                    <tr><td><code>colIndex</code></td><td><code>number | null</code></td><td>Target column. <code>null</code> to keep current X.</td></tr>
-                    <tr><td><code>options</code></td><td><code><a href="#scroll-to-index-options" class="link link-secondary">Options</a></code></td><td>Alignment and behavior settings.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Scrolls the container to an absolute pixel position. Clamped between <code>0</code> and the calculated total size.</p>
           </div>
+        </div>
 
-          <!-- Method: scrollToOffset -->
-          <div id="method-scrolltooffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> scrollToOffset()
-            </h4>
-            <CodeBlock
-              class="docs-code-block mb-4 font-mono text-xs"
-              lang="ts"
-              code="scrollToOffset(
-  x: number | null,
-  y: number | null,
-  options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
+        <!-- Method: refresh -->
+        <div id="method-refresh" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> refresh()
+          </h4>
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Invalidates all cached measurements and triggers a full re-initialization. Use this if your item source data changes in a way that affects sizes without changing the <code>items</code> array reference.</p>
+          </div>
+        </div>
+
+        <!-- Method: updateItemSize -->
+        <div id="method-updateitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> updateItemSize()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="updateItemSize(
+index: number,
+width: number,
+height: number,
+element?: HTMLElement
 ): void"
-            />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Scrolls the container to an absolute pixel position. Clamped between <code>0</code> and the calculated total size.</p>
-            </div>
-          </div>
-
-          <!-- Method: refresh -->
-          <div id="method-refresh" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> refresh()
-            </h4>
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Invalidates all cached measurements and triggers a full re-initialization. Use this if your item source data changes in a way that affects sizes without changing the <code>items</code> array reference.</p>
-            </div>
-          </div>
-
-          <!-- Method: updateItemSize -->
-          <div id="method-updateitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> updateItemSize()
-            </h4>
-            <CodeBlock
-              class="docs-code-block mb-4 font-mono text-xs"
-              lang="ts"
-              code="updateItemSize(
-  index: number,
-  width: number,
-  height: number,
-  element?: HTMLElement
-): void"
-            />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Manually registers a new measurement for a single item. The <code>element</code> parameter allows the virtualizer to detect columns from any internal structure using <code>data-col-index</code> attributes.</p>
-            </div>
-          </div>
-
-          <!-- Method: updateItemSizes -->
-          <div id="method-updateitemsizes" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> updateItemSizes()
-            </h4>
-            <CodeBlock
-              class="docs-code-block mb-4 font-mono text-xs"
-              lang="ts"
-              code="updateItemSizes(updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement }>): void"
-            />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Batched version of <code>updateItemSize</code>. More efficient when many items are measured simultaneously.</p>
-            </div>
-          </div>
-
-          <!-- Method: updateHostOffset -->
-          <div id="method-updatehostoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> updateHostOffset()
-            </h4>
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Forces a recalculation of the host element's position relative to the scroll container. Call this if the layout changes in a way that shifts the component without triggering a resize event.</p>
-            </div>
-          </div>
-
-          <!-- Method: updateDirection -->
-          <div id="method-updatedirection" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> updateDirection()
-            </h4>
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Manually triggers the detection of the scroll direction (LTR or RTL). The component also performs this automatically on mount and whenever the <code>container</code> prop changes.</p>
-            </div>
-          </div>
-
-          <!-- Method: getColumnWidth -->
-          <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getColumnWidth()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnWidth(index: number): number" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the currently calculated width for a specific column index, taking measurements and gaps into account.</p>
-            </div>
-          </div>
-
-          <!-- Method: getRowHeight -->
-          <div id="method-getrowheight" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getRowHeight()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowHeight(index: number): number" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the currently calculated height for a specific row index, taking measurements and gaps into account.</p>
-            </div>
-          </div>
-
-          <!-- Method: getRowOffset -->
-          <div id="method-getrowoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getRowOffset()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowOffset(index: number): number" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the virtual vertical offset (top) of a row in virtual units (VU).</p>
-            </div>
-          </div>
-
-          <!-- Method: getColumnOffset -->
-          <div id="method-getcolumnoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getColumnOffset()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnOffset(index: number): number" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the virtual horizontal offset (left) of a column in virtual units (VU).</p>
-            </div>
-          </div>
-
-          <!-- Method: getItemOffset -->
-          <div id="method-getitemoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getItemOffset()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemOffset(index: number): number" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the virtual offset of an item along the scroll axis in virtual units (VU).</p>
-            </div>
-          </div>
-
-          <!-- Method: getItemSize -->
-          <div id="method-getitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getItemSize()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemSize(index: number): number" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the size of an item along the scroll axis in virtual units (VU).</p>
-            </div>
-          </div>
-
-          <!-- Method: getItemAriaProps -->
-          <div id="method-getitemariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getItemAriaProps()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemAriaProps(index: number): Record<string, string | number | undefined>" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the ARIA attributes for an item at the given index. Includes <code>role</code>, <code>aria-setsize</code>, and <code>aria-posinset</code> (or <code>aria-rowindex</code> for grids).</p>
-            </div>
-          </div>
-
-          <!-- Method: getCellAriaProps -->
-          <div id="method-getcellariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> getCellAriaProps()
-            </h4>
-            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getCellAriaProps(colIndex: number): Record<string, string | number | undefined>" />
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Returns the ARIA attributes for a cell at the given column index. Only relevant for <code>direction="both"</code> or <code>role="grid"</code>. Includes <code>role="gridcell"</code> and <code>aria-colindex</code>.</p>
-            </div>
-          </div>
-
-          <!-- Method: stopProgrammaticScroll -->
-          <div id="method-stopprogrammaticscroll" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
-            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
-              <span class="badge badge-secondary">Method</span> stopProgrammaticScroll()
-            </h4>
-            <div class="prose prose-sm max-w-none opacity-90">
-              <p>Immediately halts any active smooth scroll animation and clears pending scroll requests.</p>
-            </div>
+          />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Manually registers a new measurement for a single item. The <code>element</code> parameter allows the virtualizer to detect columns from any internal structure using <code>data-col-index</code> attributes.</p>
           </div>
         </div>
-      </section>
 
-      <div class="divider opacity-30" />
-
-      <!-- 8. Utility Functions -->
-      <section id="utility-functions">
-        <h2 class="docs-section-header">Utility Functions</h2>
-        <div class="grid grid-cols-1 2xl:grid-cols-2 gap-6">
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
-            <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
-              Type Guards
-            </h4>
-            <div class="space-y-1 text-xs md:text-sm opacity-80">
-              <p><code>isElement(val)</code>: Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding <code>window</code>).</p>
-              <p><code>isWindow(val)</code>: Checks for global <code>window</code> object.</p>
-              <p><code>isBody(val)</code>: Checks for <code>document.body</code>.</p>
-              <p><code>isWindowLike(val)</code>: Matches <code>window</code> or <code>body</code>.</p>
-              <p><code>isScrollableElement(val)</code>: Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>.</p>
-              <p><code>isScrollToIndexOptions(val)</code>: Type guard for <code>ScrollToIndexOptions</code> object.</p>
-            </div>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
-            <h4 class="font-bold text-accent mb-2">getPaddingX / getPaddingY</h4>
-            <p class="text-[10px] opacity-60 mb-2"><code>(p: number | object, dir: string): number</code></p>
-            <p class="text-xs md:text-sm opacity-80">Extracts effective pixel padding from <code>scrollPadding</code> props, taking the current <code>direction</code> into account.</p>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
-            <h4 class="font-bold text-accent mb-2">Coordinate Mapping</h4>
-            <div class="space-y-1 text-xs md:text-sm opacity-80 mb-2">
-              <p><code>displayToVirtual(displayPos, hostOffset, scale)</code>: Maps display pixels (DU) to virtual content position (VU).</p>
-              <p><code>virtualToDisplay(virtualPos, hostOffset, scale)</code>: Maps virtual content position (VU) to display pixels (DU).</p>
-            </div>
-            <h4 class="font-bold text-accent mb-2">isItemVisible</h4>
-            <p class="text-[10px] opacity-60 mb-2"><code>(pos, size, scroll, view, sticky?): boolean</code></p>
-            <p class="text-xs md:text-sm opacity-80">Highly accurate visibility check (VU) used for auto-alignment and rendering ranges.</p>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
-            <h4 class="font-bold text-accent mb-2">FenwickTree</h4>
-            <p class="text-[10px] opacity-60 mb-2"><code>class FenwickTree(size: number)</code></p>
-            <p class="text-xs md:text-sm opacity-80">Highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates. Used internally for all position tracking.</p>
-          </div>
-          <div class="card shadow-soft bg-base-300 p-4 md:p-6 border-s-2 border-accent text-base-content/80">
-            <h4 class="font-bold text-accent mb-2">Default Values & Constants</h4>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-xs md:text-sm">
-                <code class="text-primary">DEFAULT_ITEM_SIZE</code>
-                <code class="opacity-60">{{ DEFAULT_ITEM_SIZE }}px</code>
-              </div>
-              <div class="flex items-center justify-between text-xs md:text-sm">
-                <code class="text-primary">DEFAULT_COLUMN_WIDTH</code>
-                <code class="opacity-60">{{ DEFAULT_COLUMN_WIDTH }}px</code>
-              </div>
-              <div class="flex items-center justify-between text-xs md:text-sm">
-                <code class="text-primary">DEFAULT_BUFFER</code>
-                <code class="opacity-60">{{ DEFAULT_BUFFER }} items</code>
-              </div>
-              <div class="flex items-center justify-between text-xs md:text-sm">
-                <code class="text-primary">BROWSER_MAX_SIZE</code>
-                <code class="opacity-60">10,000,000px</code>
-              </div>
-            </div>
-            <p class="text-[10px] opacity-60 mt-4 italic">
-              Values applied when props are omitted or dynamic estimates are needed. <code>BROWSER_MAX_SIZE</code> defines the scaling threshold.
-            </p>
+        <!-- Method: updateItemSizes -->
+        <div id="method-updateitemsizes" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> updateItemSizes()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="updateItemSizes(updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement }>): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Batched version of <code>updateItemSize</code>. More efficient when many items are measured simultaneously.</p>
           </div>
         </div>
-      </section>
 
-      <!-- 9. SSR Support -->
-      <section id="ssr-support">
-        <h2 class="docs-section-header">SSR & Hydration</h2>
-        <div class="prose prose-sm md:prose-md max-w-none text-base-content/90">
-          <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
-          <div class="card bg-base-300 p-6 mt-6 border-s-4 border-warning">
-            <h4 class="font-bold mb-2">Hydration Logic</h4>
-            <ol class="list-decimal ps-5 space-y-2 opacity-90">
-              <li><strong>Server</strong>: Renders a static block of items at <code>ssrRange</code>.</li>
-              <li><strong>Client (Pre-mount)</strong>: Renders the same items to match server HTML.</li>
-              <li><strong>Client (Mounted)</strong>: Calculates total dimensions, scrolls to exactly match the pre-rendered range, and then transitions to absolute positioning for virtualization.</li>
-            </ol>
+        <!-- Method: updateHostOffset -->
+        <div id="method-updatehostoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> updateHostOffset()
+          </h4>
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Forces a recalculation of the host element's position relative to the scroll container. Call this if the layout changes in a way that shifts the component without triggering a resize event.</p>
           </div>
         </div>
-      </section>
-    </div>
+
+        <!-- Method: updateDirection -->
+        <div id="method-updatedirection" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> updateDirection()
+          </h4>
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Manually triggers the detection of the scroll direction (LTR or RTL). The component also performs this automatically on mount and whenever the <code>container</code> prop changes.</p>
+          </div>
+        </div>
+
+        <!-- Method: getColumnWidth -->
+        <div id="method-getcolumnwidth" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getColumnWidth()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnWidth(index: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the currently calculated width for a specific column index, taking measurements and gaps into account.</p>
+          </div>
+        </div>
+
+        <!-- Method: getRowHeight -->
+        <div id="method-getrowheight" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getRowHeight()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowHeight(index: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the currently calculated height for a specific row index, taking measurements and gaps into account.</p>
+          </div>
+        </div>
+
+        <!-- Method: getRowOffset -->
+        <div id="method-getrowoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getRowOffset()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowOffset(index: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the virtual vertical offset (top) of a row in virtual units (VU).</p>
+          </div>
+        </div>
+
+        <!-- Method: getColumnOffset -->
+        <div id="method-getcolumnoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getColumnOffset()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnOffset(index: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the virtual horizontal offset (left) of a column in virtual units (VU).</p>
+          </div>
+        </div>
+
+        <!-- Method: getItemOffset -->
+        <div id="method-getitemoffset" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getItemOffset()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemOffset(index: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the virtual offset of an item along the scroll axis in virtual units (VU).</p>
+          </div>
+        </div>
+
+        <!-- Method: getItemSize -->
+        <div id="method-getitemsize" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getItemSize()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemSize(index: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the size of an item along the scroll axis in virtual units (VU).</p>
+          </div>
+        </div>
+
+        <!-- Method: getItemAriaProps -->
+        <div id="method-getitemariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getItemAriaProps()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemAriaProps(index: number): Record<string, string | number | undefined>" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the ARIA attributes for an item at the given index. Includes <code>role</code>, <code>aria-setsize</code>, and <code>aria-posinset</code> (or <code>aria-rowindex</code> for grids).</p>
+          </div>
+        </div>
+
+        <!-- Method: getCellAriaProps -->
+        <div id="method-getcellariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> getCellAriaProps()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getCellAriaProps(colIndex: number): Record<string, string | number | undefined>" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the ARIA attributes for a cell at the given column index. Only relevant for <code>direction="both"</code> or <code>role="grid"</code>. Includes <code>role="gridcell"</code> and <code>aria-colindex</code>.</p>
+          </div>
+        </div>
+
+        <!-- Method: stopProgrammaticScroll -->
+        <div id="method-stopprogrammaticscroll" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+          <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+            <span class="badge badge-secondary">Method</span> stopProgrammaticScroll()
+          </h4>
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Immediately halts any active smooth scroll animation and clears pending scroll requests.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider opacity-30" />
+
+    <!-- 8. Utility Functions -->
+    <section id="utility-functions">
+      <h2 class="docs-section-header">Utility Functions</h2>
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-6">
+        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+          <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
+            Type Guards
+          </h4>
+          <div class="space-y-1 text-xs @4xl:text-sm opacity-80">
+            <p><code>isElement(val)</code>: Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding <code>window</code>).</p>
+            <p><code>isWindow(val)</code>: Checks for global <code>window</code> object.</p>
+            <p><code>isBody(val)</code>: Checks for <code>document.body</code>.</p>
+            <p><code>isWindowLike(val)</code>: Matches <code>window</code> or <code>body</code>.</p>
+            <p><code>isScrollableElement(val)</code>: Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>.</p>
+            <p><code>isScrollToIndexOptions(val)</code>: Type guard for <code>ScrollToIndexOptions</code> object.</p>
+          </div>
+        </div>
+        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+          <h4 class="font-bold text-accent mb-2">getPaddingX / getPaddingY</h4>
+          <p class="text-[10px] opacity-60 mb-2"><code>(p: number | object, dir: string): number</code></p>
+          <p class="text-xs @4xl:text-sm opacity-80">Extracts effective pixel padding from <code>scrollPadding</code> props, taking the current <code>direction</code> into account.</p>
+        </div>
+        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+          <h4 class="font-bold text-accent mb-2">Coordinate Mapping</h4>
+          <div class="space-y-1 text-xs @4xl:text-sm opacity-80 mb-2">
+            <p><code>displayToVirtual(displayPos, hostOffset, scale)</code>: Maps display pixels (DU) to virtual content position (VU).</p>
+            <p><code>virtualToDisplay(virtualPos, hostOffset, scale)</code>: Maps virtual content position (VU) to display pixels (DU).</p>
+          </div>
+          <h4 class="font-bold text-accent mb-2">isItemVisible</h4>
+          <p class="text-[10px] opacity-60 mb-2"><code>(pos, size, scroll, view, sticky?): boolean</code></p>
+          <p class="text-xs @4xl:text-sm opacity-80">Highly accurate visibility check (VU) used for auto-alignment and rendering ranges.</p>
+        </div>
+        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+          <h4 class="font-bold text-accent mb-2">FenwickTree</h4>
+          <p class="text-[10px] opacity-60 mb-2"><code>class FenwickTree(size: number)</code></p>
+          <p class="text-xs @4xl:text-sm opacity-80">Highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates. Used internally for all position tracking.</p>
+        </div>
+        <div class="card shadow-soft bg-base-300 p-4 @4xl:p-6 border-s-2 border-accent text-base-content/80">
+          <h4 class="font-bold text-accent mb-2">Default Values & Constants</h4>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_ITEM_SIZE</code>
+              <code class="opacity-60">{{ DEFAULT_ITEM_SIZE }}px</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_COLUMN_WIDTH</code>
+              <code class="opacity-60">{{ DEFAULT_COLUMN_WIDTH }}px</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_BUFFER</code>
+              <code class="opacity-60">{{ DEFAULT_BUFFER }} items</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">BROWSER_MAX_SIZE</code>
+              <code class="opacity-60">10,000,000px</code>
+            </div>
+          </div>
+          <p class="text-[10px] opacity-60 mt-4 italic">
+            Values applied when props are omitted or dynamic estimates are needed. <code>BROWSER_MAX_SIZE</code> defines the scaling threshold.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. SSR Support -->
+    <section id="ssr-support">
+      <h2 class="docs-section-header">SSR & Hydration</h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
+        <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
+        <div class="card bg-base-300 p-6 mt-6 border-s-4 border-warning">
+          <h4 class="font-bold mb-2">Hydration Logic</h4>
+          <ol class="list-decimal ps-5 space-y-2 opacity-90">
+            <li><strong>Server</strong>: Renders a static block of items at <code>ssrRange</code>.</li>
+            <li><strong>Client (Pre-mount)</strong>: Renders the same items to match server HTML.</li>
+            <li><strong>Client (Mounted)</strong>: Calculates total dimensions, scrolls to exactly match the pre-rendered range, and then transitions to absolute positioning for virtualization.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
   </div>
 </template>

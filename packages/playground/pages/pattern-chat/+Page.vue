@@ -212,7 +212,7 @@ function scrollToBottom() {
         class="absolute bottom-20 inset-x-0 flex justify-center z-10 px-4"
       >
         <button
-          class="btn btn-primary btn-sm md:btn-md shadow-strong shadow-primary/40 gap-2 rounded-full border-2 border-white/10"
+          class="btn btn-primary btn-sm @4xl:btn-md shadow-strong shadow-primary/40 gap-2 rounded-full border-2 border-white/10"
           @click="scrollToBottom"
         >
           <svg
@@ -255,16 +255,16 @@ function scrollToBottom() {
         </template>
 
         <template #footer>
-          <div class="p-3 md:p-4 bg-base-200 border-t border-base-300 flex gap-2">
+          <div class="p-3 @4xl:p-4 bg-base-200 border-t border-base-300 flex gap-2">
             <input
               v-model="newMessage"
               type="text"
               placeholder="Type a message..."
-              class="input input-bordered input-sm md:input-md w-full"
+              class="input input-bordered input-sm @4xl:input-md w-full"
               aria-label="Message"
               @keydown.enter="sendMessage"
             />
-            <button class="btn btn-primary btn-sm md:btn-md px-6" @click="sendMessage">Send</button>
+            <button class="btn btn-primary btn-sm @4xl:btn-md px-6" @click="sendMessage">Send</button>
           </div>
         </template>
       </VirtualScroll>

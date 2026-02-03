@@ -299,7 +299,7 @@ onUnmounted(() => {
           <span class="example-badge me-4" :class="{ 'badge-primary': index === matches[currentMatchIndex] }">
             #{{ index }}
           </span>
-          <div class="text-sm md:text-base" v-html="getHighlightedContent(item.text, searchQuery)" />
+          <div class="text-sm @4xl:text-base" v-html="getHighlightedContent(item.text, searchQuery)" />
         </div>
       </template>
     </VirtualScroll>

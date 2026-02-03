@@ -95,7 +95,7 @@ function handleScrollToOffset() {
 </script>
 
 <template>
-  <ul class="max-sm:w-full min-w-80 list bg-base-300 rounded-box shadow-soft text-sm pointer-events-auto">
+  <ul class="min-w-80 list bg-base-300 rounded-box shadow-soft text-sm pointer-events-auto">
     <li class="list-row py-0 items-center border-b border-base-content/5">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <div class="py-4 font-bold text-xs small-caps tracking-widest opacity-50">Controls</div>
@@ -119,7 +119,7 @@ function handleScrollToOffset() {
         </label>
 
         <template v-if="direction === 'both'">
-          <div class="w-full sm:hidden" />
+          <div class="w-full xl:hidden" />
 
           <label class="floating-label p-0">
             <span class="text-xs font-bold small-caps text-base-content/50">Cols #</span>
@@ -147,8 +147,6 @@ function handleScrollToOffset() {
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Post</span>
           <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
-
-        <div v-if="(bufferBefore !== undefined || bufferAfter !== undefined) && (stickyHeader !== undefined || stickyFooter !== undefined)" class="w-full sm:hidden" />
 
         <div class="flex gap-4 items-center ps-1">
           <label v-if="stickyHeader !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
@@ -180,7 +178,7 @@ function handleScrollToOffset() {
           </select>
         </label>
 
-        <div v-if="direction === 'both'" class="w-full sm:hidden" />
+        <div v-if="direction === 'both'" class="w-full xl:hidden" />
 
         <label v-if="direction !== 'vertical'" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">{{ direction === 'both' ? 'Col' : 'Item' }} #</span>

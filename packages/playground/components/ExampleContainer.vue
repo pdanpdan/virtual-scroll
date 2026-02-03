@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
   minWidth?: string;
   code?: string;
 }>(), {
-  height: 'min(50dvh, 600px)',
+  height: 'min(65dvh, 800px)',
   minHeight: 'min(10dvh, 50px)',
   minWidth: 'min(10vw, 50px)',
 });
@@ -46,74 +46,44 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
 </script>
 
 <template>
-  <div class="space-y-2 md:space-y-4">
-    <div v-if="$slots.title || $slots.description" class="prose max-w-none mb-6">
-      <div class="card bg-base-300 shadow-soft">
-        <div class="card-body relative p-5 md:p-6" :class="isIndex ? undefined : 'pb-2 md:pb-2'">
-          <figure v-if="$slots.icon" class="hidden md:block absolute top-6 end-6 pointer-events-none">
-            <slot name="icon" />
-          </figure>
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <h1 v-if="$slots.title" class="text-xl md:text-2xl m-0 font-extrabold tracking-tight">
-                <slot name="title" />
-              </h1>
-              <div v-if="$slots.subtitle" class="text-xs md:text-sm font-bold small-caps tracking-widest opacity-40 mt-1">
-                <slot name="subtitle" />
-              </div>
+  <div class="space-y-4 @4xl:space-y-8">
+    <div v-if="$slots.title || $slots.description" class="card bg-base-300 shadow-soft">
+      <div class="card-body relative p-4 @4xl:p-8" :class="isIndex ? undefined : 'pb-2 @4xl:pb-2'">
+        <figure v-if="$slots.icon" class="hidden @4xl:block absolute top-6 end-6 pointer-events-none">
+          <slot name="icon" />
+        </figure>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <h1 v-if="$slots.title" class="text-xl @4xl:text-2xl m-0 font-extrabold tracking-tight">
+              <slot name="title" />
+            </h1>
+            <div v-if="$slots.subtitle" class="text-xs @4xl:text-sm font-bold small-caps tracking-widest opacity-40 mt-1">
+              <slot name="subtitle" />
             </div>
           </div>
-          <div v-if="$slots.description" class="opacity-70 m-0 mt-4 text-sm md:text-base leading-relaxed max-w-3xl">
-            <slot name="description" />
-          </div>
-
-          <div v-if="!isIndex" class="card-actions justify-between items-center my-2">
-            <AppLink v-slot="{ href }" href="/">
-              <a :href class="btn btn-sm btn-soft gap-1.5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  class="size-3"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                </svg>
-                <span class="small-caps font-bold tracking-widest hidden md:inline">Back to Home</span>
-              </a>
-            </AppLink>
-
-            <ViewSource class="btn btn-sm btn-soft gap-1.5" />
-          </div>
         </div>
-      </div>
-    </div>
+        <div v-if="$slots.description" class="opacity-70 m-0 mt-4 text-sm @4xl:text-base leading-relaxed max-w-3xl">
+          <slot name="description" />
+        </div>
 
-    <div v-if="$slots.controls" id="virtual-scroll-controls" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
-      <div class="sheet-content sheet-content-end h-fit top-1 translate-y-0 overflow-visible">
-        <button
-          class="sheet-handle appearance-none after:hidden h-36 w-8 top-19 translate-y-0"
-          popovertarget="virtual-scroll-controls"
-          popovertargetaction="toggle"
-        >
-          <div class="bg-accent text-accent-content small-caps text-lg tracking-wider rounded-l-box flex flex-col flex-nowrap items-center justify-center">
-            <svg
-              class="sheet-handle-icon sheet-handle-icon--right"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="2.5"
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
-            </svg>
-            <div class="me-2 [writing-mode:vertical-lr] rotate-180">Controls</div>
-          </div>
-        </button>
+        <div v-if="!isIndex" class="card-actions justify-between items-center my-2">
+          <AppLink v-slot="{ href }" href="/">
+            <a :href class="btn btn-sm btn-soft gap-1.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                class="size-3"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+              </svg>
+              <span class="small-caps font-bold tracking-widest hidden @4xl:inline">Back to Home</span>
+            </a>
+          </AppLink>
 
-        <div class="flex flex-wrap gap-1 items-stretch pe-1">
-          <slot name="controls" />
+          <ViewSource class="btn btn-sm btn-soft gap-1.5" />
         </div>
       </div>
     </div>
@@ -175,7 +145,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
         class="flex-1 min-h-0 mx-2 mb-2 rounded-[inherit] overflow-auto flex flex-col"
         :dir="rtlMode ? 'rtl' : 'ltr'"
       >
-        <div v-if="$slots['example-controls']" class="p-2 md:px-4 bg-base-200" dir="ltr">
+        <div v-if="$slots['example-controls']" class="p-2 @4xl:px-4 bg-base-200" dir="ltr">
           <slot name="example-controls" />
         </div>
         <slot />
@@ -189,6 +159,34 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
         :code="code"
         line-numbers
       />
+    </div>
+  </div>
+
+  <div v-if="$slots.controls" id="virtual-scroll-controls" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
+    <div class="sheet-content sheet-content-end h-fit top-1 translate-y-0 overflow-visible">
+      <button
+        class="sheet-handle appearance-none after:hidden h-36 w-8 top-19 translate-y-0"
+        popovertarget="virtual-scroll-controls"
+        popovertargetaction="toggle"
+      >
+        <div class="bg-accent text-accent-content small-caps text-lg tracking-wider rounded-l-box flex flex-col flex-nowrap items-center justify-center">
+          <svg
+            class="sheet-handle-icon sheet-handle-icon--right"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2.5"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+          </svg>
+          <div class="me-2 [writing-mode:vertical-lr] rotate-180">Controls</div>
+        </div>
+      </button>
+
+      <div class="flex max-lg:flex-col flex-wrap gap-1 items-stretch pe-1">
+        <slot name="controls" />
+      </div>
     </div>
   </div>
 </template>

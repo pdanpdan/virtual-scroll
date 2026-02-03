@@ -119,7 +119,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <td class="w-56 text-sm">{{ item.city }}</td>
         <td class="w-24 text-center">
           <span
-            class="badge badge-xs md:badge-sm font-semibold"
+            class="badge badge-xs @4xl:badge-sm font-semibold"
             :class="{
               'badge-primary': item.role === 'Admin',
               'badge-secondary': item.role === 'Editor',
@@ -131,7 +131,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </td>
         <td class="w-24 text-center">
           <span
-            class="badge badge-xs md:badge-sm font-semibold"
+            class="badge badge-xs @4xl:badge-sm font-semibold"
             :class="item.status === 'Active' ? 'badge-success' : 'badge-error'"
           >
             {{ item.status }}

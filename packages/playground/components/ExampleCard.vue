@@ -56,7 +56,7 @@ const buttonClass = computed(() => {
   <div class="card example-card" :class="cardClass">
     <div class="card-body p-5">
       <div class="example-card-title-type" :class="titleTypeClass">{{ type }}</div>
-      <h3 class="card-title mt-0 text-base md:text-lg">{{ title }}</h3>
+      <h3 class="card-title">{{ title }}</h3>
       <p class="text-sm opacity-90">{{ description }}</p>
       <div class="card-actions justify-end mt-2">
         <AppLink v-slot="{ href: appHref }" :href="href">

@@ -29,7 +29,7 @@ onUnmounted(stopDetection);
 </script>
 
 <template>
-  <ul class="max-sm:w-full min-w-84 list bg-base-300 rounded-box shadow-soft text-sm pointer-events-auto">
+  <ul class="min-w-84 list bg-base-300 rounded-box shadow-soft text-sm pointer-events-auto">
     <li class="list-row py-4 items-center border-b border-base-content/5">
       <div class="font-bold text-xs small-caps tracking-widest opacity-50">Scroll Status</div>
       <div class="grid *:[grid-area:1/1]">

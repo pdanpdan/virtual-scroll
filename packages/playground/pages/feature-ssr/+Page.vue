@@ -56,8 +56,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Demonstrates the <strong>ssrRange</strong> prop. The grid is configured to start pre-rendered at <strong>Row {{ ssrRange.start }}, Column {{ ssrRange.colStart }}</strong>. On the client, it automatically scrolls to match this range on mount.<br /><br />
-      <div class="alert alert-info alert-soft">
+      Demonstrates the <strong>ssrRange</strong> prop. The grid is configured to start pre-rendered at <strong>Row {{ ssrRange.start }}, Column {{ ssrRange.colStart }}</strong>. On the client, it automatically scrolls to match this range on mount.
+      <div class="alert alert-info -mb-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -66,7 +66,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span class="text-xs md:text-sm font-medium">In a real SSR environment, the content for this range would be present in the initial HTML.</span>
+        <span class="text-xs @4xl:text-sm font-medium">In a real SSR environment, the content for this range would be present in the initial HTML.</span>
       </div>
     </template>
 

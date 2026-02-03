@@ -118,8 +118,8 @@ const {
               class="size-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
             />
-            <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 md:p-4">
-              <span class="text-white text-xs md:text-sm font-medium truncate">{{ photo.author }}</span>
+            <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 @4xl:p-4">
+              <span class="text-white text-xs @4xl:text-sm font-medium truncate">{{ photo.author }}</span>
             </div>
           </div>
         </div>

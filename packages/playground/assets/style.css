@@ -107,15 +107,15 @@ html, body {
 @layer base {
 
   h1 {
-    @apply text-2xl md:text-4xl font-black tracking-tight;
+    @apply text-2xl @4xl:text-4xl font-black tracking-tight;
   }
 
   h2 {
-    @apply text-xl md:text-2xl font-extrabold tracking-tight;
+    @apply text-xl @4xl:text-2xl font-extrabold tracking-tight;
   }
 
   h3 {
-    @apply text-lg md:text-xl font-bold;
+    @apply text-lg @4xl:text-xl font-bold;
   }
 }
 
@@ -212,14 +212,14 @@ html, body {
   @apply text-start px-6;
 }
 @utility example-body-header {
-  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-t-[inherit] border-b border-base-300;
+  @apply bg-base-200 text-base-content p-8 @4xl:p-12 text-center rounded-t-[inherit] border-b border-base-300;
 
   h2 {
-    @apply text-xl md:text-3xl font-extrabold mb-2 tracking-widest text-primary small-caps;
+    @apply text-xl @4xl:text-3xl font-extrabold mb-2 tracking-widest text-primary small-caps;
   }
 
   p {
-    @apply opacity-60 text-sm md:text-base;
+    @apply opacity-60 text-sm @4xl:text-base;
   }
 }
 
@@ -228,14 +228,14 @@ html, body {
 }
 
 @utility example-body-footer {
-  @apply bg-base-200 text-base-content p-8 md:p-12 text-center rounded-b-[inherit] border-t border-base-300;
+  @apply bg-base-200 text-base-content p-8 @4xl:p-12 text-center rounded-b-[inherit] border-t border-base-300;
 
   h2 {
-    @apply text-lg md:text-2xl font-bold tracking-widest opacity-60 small-caps;
+    @apply text-lg @4xl:text-2xl font-bold tracking-widest opacity-60 small-caps;
   }
 
   p {
-    @apply opacity-40 text-xs md:text-sm mt-2 font-medium;
+    @apply opacity-40 text-xs @4xl:text-sm mt-2 font-medium;
   }
 }
 
@@ -247,7 +247,7 @@ html, body {
 }
 
 @utility example-grid-cell {
-  @apply flex flex-col items-center justify-center border-e border-b border-base-content/5 shrink-0 hover:bg-base-300 transition-colors text-xs md:text-xs box-border;
+  @apply flex flex-col items-center justify-center border-e border-b border-base-content/5 shrink-0 hover:bg-base-300 transition-colors text-xs @4xl:text-xs box-border;
 }
 
 @utility example-spreadsheet {
@@ -270,7 +270,7 @@ html, body {
 }
 
 @utility example-spreadsheet-cell {
-  @apply shrink-0 relative inline-flex items-center justify-center border-e border-b border-base-content/5 text-xs md:text-sm px-2 box-border bg-inherit;
+  @apply shrink-0 relative inline-flex items-center justify-center border-e border-b border-base-content/5 text-xs @4xl:text-sm px-2 box-border bg-inherit;
 
   &.example-spreadsheet-cell--row-header {
     @apply sticky start-0 z-10 font-bold bg-base-200 border-e-2 border-base-300 text-base-content/50;
@@ -344,7 +344,7 @@ html, body {
 /* --- Documentation Utilities --- */
 
 @utility docs-section-header {
-  @apply text-xl md:text-2xl font-bold mb-4 md:mb-6 tracking-widest text-primary small-caps;
+  @apply text-xl @4xl:text-2xl font-bold mb-4 @4xl:mb-6 tracking-widest text-primary small-caps;
 }
 
 @utility docs-code-block {
@@ -352,11 +352,11 @@ html, body {
 }
 
 @utility docs-prop-header {
-  @apply text-lg md:text-xl font-semibold mb-4 pb-2 border-b border-base-300 text-secondary;
+  @apply text-lg @4xl:text-xl font-semibold mb-4 pb-2 border-b border-base-300 text-secondary;
 }
 
 @utility docs-prop-subheader {
-  @apply text-sm md:text-base font-bold mb-4 opacity-70 tracking-widest small-caps;
+  @apply text-sm @4xl:text-base font-bold mb-4 opacity-70 tracking-widest small-caps;
 }
 
 @utility docs-table-container {
