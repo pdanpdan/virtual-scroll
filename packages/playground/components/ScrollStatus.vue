@@ -12,8 +12,8 @@ const props = defineProps<{
 }>();
 
 const itemsRange = computed(() => ({
-  start: props.scrollDetails?.items?.[ 0 ]?.index ?? 0,
-  end: props.scrollDetails?.items?.[ (props.scrollDetails?.items?.length || 0) - 1 ]?.index ?? 0,
+  start: props.scrollDetails?.range?.start ?? 0,
+  end: props.scrollDetails?.range?.end ?? 0,
 }));
 
 const fpsClass = computed(() => {

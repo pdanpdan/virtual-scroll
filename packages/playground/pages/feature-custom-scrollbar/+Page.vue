@@ -26,6 +26,7 @@ const items = computed(() => Array.from({ length: rowCount.value }, (_, i) => ({
 })));
 
 const {
+  virtualScrollRef,
   scrollDetails,
   onScroll,
 } = useExampleScroll();
@@ -58,7 +59,11 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #controls>
-      <ScrollStatus :scroll-details="scrollDetails" direction="both" />
+      <ScrollStatus
+        :scroll-details="scrollDetails"
+        direction="both"
+        :column-range="virtualScrollRef?.columnRange"
+      />
     </template>
 
     <template #example-controls>
@@ -155,6 +160,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <VirtualScroll
+      ref="virtualScrollRef"
       :debug="debugMode"
       class="example-container"
       :items="items"

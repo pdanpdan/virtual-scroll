@@ -153,7 +153,11 @@ function stopResizing() {
     </template>
 
     <template #controls>
-      <ScrollStatus :scroll-details="scrollDetails" direction="both" />
+      <ScrollStatus
+        :scroll-details="scrollDetails"
+        direction="both"
+        :column-range="virtualScrollRef?.columnRange"
+      />
 
       <ScrollControls
         v-model:item-count="rowCount"
