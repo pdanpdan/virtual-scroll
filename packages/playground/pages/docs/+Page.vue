@@ -421,7 +421,47 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </table>
         </div>
 
-        <h4 id="scroll-alignment" class="docs-prop-subheader text-primary">ScrollAlignment</h4>
+        <h4 class="docs-prop-subheader">Accessibility</h4>
+        <div class="docs-table-container mb-8 text-base-content/80">
+          <table class="table table-sm md:table-md table-zebra w-full">
+            <thead class="bg-base-300">
+              <tr>
+                <th class="w-1/4">Prop</th>
+                <th class="w-1/4">Type</th>
+                <th class="w-1/6">Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs md:text-sm">
+              <tr>
+                <td><code class="text-primary font-bold">role</code></td>
+                <td><code>string</code></td>
+                <td><code>'list' | 'grid'</code></td>
+                <td>ARIA role for the container. Automatically detected based on direction.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">ariaLabel</code></td>
+                <td><code>string</code></td>
+                <td>-</td>
+                <td>Accessible label for the scroll container.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">ariaLabelledby</code></td>
+                <td><code>string</code></td>
+                <td>-</td>
+                <td>ID of the element that labels the scroll container.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">itemRole</code></td>
+                <td><code>string</code></td>
+                <td>-</td>
+                <td>ARIA role for each item. Set to <code>'none'</code> to manually apply roles using <code>getItemAriaProps</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 class="docs-prop-subheader text-primary">ScrollAlignment</h4>
         <div class="prose prose-sm mb-4 text-base-content/70">
           <p>Controls the item's final position in the viewport: <code>'start' | 'center' | 'end' | 'auto'</code>.</p>
         </div>
@@ -501,6 +541,8 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <li><code>offset: { x, y }</code>: Calculated physical position (DU).</li>
               <li><code>columnRange: <a href="#column-range" class="link link-accent">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
               <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
+              <li><code>getItemAriaProps: (index: number) => object</code>: Helper to get ARIA attributes for an item (e.g. <code>role="listitem"</code>, <code>aria-posinset</code>).</li>
+              <li><code>getCellAriaProps: (index: number) => object</code>: Helper to get ARIA attributes for a cell (e.g. <code>role="gridcell"</code>, <code>aria-colindex</code>).</li>
               <li><code>gap: number</code>: Vertical gap between items.</li>
               <li><code>columnGap: number</code>: Horizontal gap between columns.</li>
             </ul>
@@ -833,6 +875,14 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <code class="text-secondary font-bold text-xs">getItemSize()</code>
             <p class="text-[10px] opacity-60 mt-1">Get item size along scroll axis.</p>
           </a>
+          <a href="#method-getitemariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">getItemAriaProps()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for an item.</p>
+          </a>
+          <a href="#method-getcellariaprops" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
+            <code class="text-secondary font-bold text-xs">getCellAriaProps()</code>
+            <p class="text-[10px] opacity-60 mt-1">Get ARIA attributes for a cell.</p>
+          </a>
           <a href="#method-refresh" class="card bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5">
             <code class="text-secondary font-bold text-xs">refresh()</code>
             <p class="text-[10px] opacity-60 mt-1">Reset all dynamic measurements.</p>
@@ -944,6 +994,12 @@ const scrollY = ref(0);
                 <td><code>string</code></td>
                 <td><code>undefined</code></td>
                 <td>ID of the container element for accessibility.</td>
+              </tr>
+              <tr>
+                <td><code class="text-primary font-bold">ariaLabel</code></td>
+                <td><code>string</code></td>
+                <td>-</td>
+                <td>Accessible label for the scrollbar.</td>
               </tr>
             </tbody>
           </table>
@@ -1088,12 +1144,22 @@ const {
                   <td>Force update the container's relative position.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-updatedirection" class="link font-bold text-secondary">updateDirection</a></td>
+                  <td><code class="text-secondary font-bold">updateDirection</code></td>
                   <td><code>Function</code></td>
                   <td>Manually trigger direction (LTR/RTL) detection.</td>
                 </tr>
                 <tr>
-                  <td><a href="#method-getcolumnwidth" class="link font-bold text-secondary">getColumnWidth</a></td>
+                  <td><code class="text-secondary font-bold">getItemAriaProps</code></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get ARIA attributes for an item.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">getCellAriaProps</code></td>
+                  <td><code>Function</code></td>
+                  <td>Helper to get ARIA attributes for a cell.</td>
+                </tr>
+                <tr>
+                  <td><code class="text-secondary font-bold">getColumnWidth</code></td>
                   <td><code>Function</code></td>
                   <td>Helper to get a column's width.</td>
                 </tr>
@@ -1364,6 +1430,7 @@ const {
                 <tr><td><code>scrollToOffset</code></td><td><code>(offset: number) => void</code></td><td>Callback to update position.</td></tr>
                 <tr><td><code>containerId</code></td><td><code>string</code></td><td>ID for accessibility.</td></tr>
                 <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Enable RTL mapping.</td></tr>
+                <tr><td><code>ariaLabel</code></td><td><code>string</code></td><td>Accessible label for the scrollbar.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1622,6 +1689,28 @@ const {
             <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemSize(index: number): number" />
             <div class="prose prose-sm max-w-none opacity-90">
               <p>Returns the size of an item along the scroll axis in virtual units (VU).</p>
+            </div>
+          </div>
+
+          <!-- Method: getItemAriaProps -->
+          <div id="method-getitemariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getItemAriaProps()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getItemAriaProps(index: number): Record<string, string | number | undefined>" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the ARIA attributes for an item at the given index. Includes <code>role</code>, <code>aria-setsize</code>, and <code>aria-posinset</code> (or <code>aria-rowindex</code> for grids).</p>
+            </div>
+          </div>
+
+          <!-- Method: getCellAriaProps -->
+          <div id="method-getcellariaprops" class="card shadow-soft bg-base-300 p-6 border-t-2 border-secondary text-base-content/80">
+            <h4 class="font-bold text-lg text-secondary flex items-center gap-2 mb-4">
+              <span class="badge badge-secondary">Method</span> getCellAriaProps()
+            </h4>
+            <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getCellAriaProps(colIndex: number): Record<string, string | number | undefined>" />
+            <div class="prose prose-sm max-w-none opacity-90">
+              <p>Returns the ARIA attributes for a cell at the given column index. Only relevant for <code>direction="both"</code> or <code>role="grid"</code>. Includes <code>role="gridcell"</code> and <code>aria-colindex</code>.</p>
             </div>
           </div>
 
