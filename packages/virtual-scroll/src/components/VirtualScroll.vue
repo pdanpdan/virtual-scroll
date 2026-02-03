@@ -49,6 +49,7 @@ const props = withDefaults(defineProps<Props<T>>(), {
   restoreScrollOnPrepend: false,
   debug: false,
   virtualScrollbar: false,
+  itemRole: undefined,
 });
 
 const emit = defineEmits<{
@@ -871,6 +872,7 @@ const verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => {
     scrollToOffset: handleVerticalScrollbarScrollToOffset,
     containerId: containerId.value,
     isRtl: isRtl.value,
+    ariaLabel: 'Vertical scroll',
   };
 
   return {
@@ -903,6 +905,7 @@ const horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => {
     scrollToOffset: handleHorizontalScrollbarScrollToOffset,
     containerId: containerId.value,
     isRtl: isRtl.value,
+    ariaLabel: 'Horizontal scroll',
   };
 
   return {
@@ -989,6 +992,112 @@ const isTable = computed(() => props.containerTag === 'table');
 const headerTag = computed(() => isTable.value ? 'thead' : 'div');
 const footerTag = computed(() => isTable.value ? 'tfoot' : 'div');
 
+const effectiveRole = computed(() => {
+  if (props.role) {
+    return props.role;
+  }
+  return isTable.value ? null : (props.direction === 'both' ? 'grid' : 'list');
+});
+
+const isGrid = computed(() => effectiveRole.value === 'grid' || isTable.value);
+
+const containerRole = computed(() => isTable.value
+  ? null
+  : ((props.ariaLabel || props.ariaLabelledby) ? 'region' : 'none'));
+const wrapperRole = computed(() => isTable.value ? null : effectiveRole.value);
+const internalItemRole = computed(() => {
+  if (isGrid.value) {
+    return 'row';
+  }
+
+  const role = effectiveRole.value;
+  if (role === 'tree') {
+    return 'treeitem';
+  }
+  if (role === 'listbox') {
+    return 'option';
+  }
+  if (role === 'menu') {
+    return 'menuitem';
+  }
+  return 'listitem';
+});
+const itemRole = computed(() => props.itemRole != null ? props.itemRole : internalItemRole.value);
+const cellRole = computed(() => {
+  if (props.role === 'grid' || (!props.role && props.direction === 'both')) {
+    return 'gridcell';
+  }
+  return isTable.value ? 'cell' : null;
+});
+
+const shouldBindItemAria = computed(() => {
+  const role = itemRole.value;
+  return role == null || (role !== 'none' && role !== 'presentation');
+});
+
+const rootAriaProps = computed(() => ({
+  'aria-label': props.ariaLabel,
+  'aria-labelledby': props.ariaLabelledby,
+  'aria-busy': props.loading ? 'true' : undefined,
+}));
+
+const wrapperAriaProps = computed(() => {
+  const aria: Record<string, string | number | undefined> = {};
+
+  const role = effectiveRole.value;
+  const supportsOrientation = role && [ 'grid', 'tree', 'listbox', 'menu', 'tablist' ].includes(role);
+
+  if (supportsOrientation) {
+    aria[ 'aria-orientation' ] = props.direction === 'both' ? undefined : props.direction;
+  }
+
+  if (isGrid.value) {
+    aria[ 'aria-rowcount' ] = props.items.length;
+    if (props.columnCount > 0) {
+      aria[ 'aria-colcount' ] = props.columnCount;
+    }
+  }
+
+  return aria;
+});
+
+function getItemAriaProps(index: number) {
+  const aria: Record<string, string | number | undefined> = {};
+
+  if (isGrid.value) {
+    aria[ 'aria-rowindex' ] = index + 1;
+  } else {
+    aria[ 'aria-setsize' ] = props.items.length;
+    aria[ 'aria-posinset' ] = index + 1;
+  }
+
+  const role = itemRole.value;
+  if (role !== null) {
+    aria.role = (role === 'none' || role === 'presentation')
+      ? internalItemRole.value
+      : role;
+  }
+
+  return aria;
+}
+
+function getCellAriaProps(colIndex: number) {
+  const role = cellRole.value;
+  if (!role) {
+    return {};
+  }
+
+  const aria: Record<string, string | number | undefined> = {
+    role,
+  };
+
+  if (isGrid.value) {
+    aria[ 'aria-colindex' ] = colIndex + 1;
+  }
+
+  return aria;
+}
+
 defineExpose({
   ...toRefs(props),
 
@@ -1019,6 +1128,18 @@ defineExpose({
    * @see useVirtualScroll
    */
   getRowHeight,
+
+  /**
+   * Helper to get ARIA attributes for a cell.
+   * @param colIndex - The column index.
+   */
+  getCellAriaProps,
+
+  /**
+   * Helper to get ARIA attributes for an item.
+   * @param index - The item index.
+   */
+  getItemAriaProps,
 
   /**
    * Helper to get the virtual offset of a specific row.
@@ -1156,6 +1277,8 @@ defineExpose({
     ]"
     :style="containerStyle"
     tabindex="0"
+    :role="isTable ? undefined : containerRole"
+    v-bind="isTable ? { ...rootAriaProps, ...wrapperAriaProps } : rootAriaProps"
     @keydown="handleKeyDown"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"
@@ -1165,6 +1288,7 @@ defineExpose({
     <div
       v-if="showVirtualScrollbars"
       class="virtual-scroll-scrollbar-container"
+      aria-hidden="true"
     >
       <div
         class="virtual-scroll-scrollbar-viewport"
@@ -1188,6 +1312,7 @@ defineExpose({
       ref="headerRef"
       class="virtual-scroll-header"
       :class="{ 'virtual-scroll--sticky': stickyHeader }"
+      :role="isTable ? undefined : 'none'"
     >
       <slot name="header" />
     </component>
@@ -1197,6 +1322,8 @@ defineExpose({
       ref="wrapperRef"
       class="virtual-scroll-wrapper"
       :style="wrapperStyle"
+      :role="isTable ? undefined : wrapperRole"
+      v-bind="isTable ? {} : wrapperAriaProps"
     >
       <!-- Phantom element to push scroll height -->
       <component
@@ -1220,13 +1347,16 @@ defineExpose({
           'virtual-scroll--debug': isDebug,
         }"
         :style="getItemStyle(renderedItem)"
+        v-bind="shouldBindItemAria ? getItemAriaProps(renderedItem.index) : { role: 'none' }"
       >
         <slot
           name="item"
           :item="renderedItem.item"
           :index="renderedItem.index"
+          :get-item-aria-props="getItemAriaProps"
           :column-range="slotColumnRange"
           :get-column-width="getColumnWidth"
+          :get-cell-aria-props="getCellAriaProps"
           :gap="props.gap"
           :column-gap="props.columnGap"
           :is-sticky="renderedItem.isSticky"
@@ -1246,6 +1376,8 @@ defineExpose({
       v-if="loading && slots.loading"
       class="virtual-scroll-loading"
       :style="loadingStyle"
+      aria-live="polite"
+      aria-atomic="true"
     >
       <slot name="loading" />
     </div>
@@ -1256,6 +1388,7 @@ defineExpose({
       ref="footerRef"
       class="virtual-scroll-footer"
       :class="{ 'virtual-scroll--sticky': stickyFooter }"
+      :role="isTable ? undefined : 'none'"
     >
       <slot name="footer" />
     </component>

@@ -164,6 +164,9 @@ export interface ScrollDetails<T = unknown> {
   columnRange: ColumnRange;
 }
 
+/** Helper to get ARIA attributes for an item. */
+export type GetItemAriaProps = (index: number) => Record<string, string | number | undefined>;
+
 /**
  * Configuration for Server-Side Rendering.
  * Defines which items are rendered statically on the server.
@@ -302,6 +305,29 @@ export interface VirtualScrollBaseProps<T = unknown> {
    * Enable debug visualization of buffers and indices.
    */
   debug?: boolean | undefined;
+
+  /**
+   * ARIA role for the scroll container.
+   * Defaults to 'list' for vertical/horizontal and 'grid' for both.
+   */
+  role?: string | undefined;
+
+  /**
+   * ARIA label for the scroll container.
+   */
+  ariaLabel?: string | undefined;
+
+  /**
+   * ID of the element that labels the scroll container.
+   */
+  ariaLabelledby?: string | undefined;
+
+  /**
+   * ARIA role for each rendered item.
+   * Defaults to 'listitem' for list roles and 'row' for grid roles.
+   * Set to 'none' or 'presentation' to disable automatic role assignment on the wrapper.
+   */
+  itemRole?: string | undefined;
 }
 
 /** Configuration properties for the `useVirtualScroll` composable. */
@@ -385,6 +411,11 @@ export interface VirtualScrollbarProps {
    * @default false
    */
   isRtl?: boolean;
+
+  /**
+   * Accessible label for the scrollbar.
+   */
+  ariaLabel?: string;
 }
 
 /** Properties passed to the 'scrollbar' scoped slot. */
@@ -428,10 +459,14 @@ export interface ItemSlotProps<T = unknown> {
   item: T;
   /** The 0-based index of the item. */
   index: number;
+  /** Helper to get ARIA attributes for the item. */
+  getItemAriaProps: GetItemAriaProps;
   /** Information about the currently visible range of columns. */
   columnRange: ColumnRange;
   /** Helper to get the current calculated width of any column index. */
   getColumnWidth: (index: number) => number;
+  /** Helper to get ARIA attributes for a cell. */
+  getCellAriaProps: (colIndex: number) => Record<string, string | number | undefined>;
   /** Vertical gap between items. */
   gap: number;
   /** Horizontal gap between columns. */
@@ -479,6 +514,8 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   getColumnWidth: (index: number) => number;
   /** Helper to get the height of a specific row. */
   getRowHeight: (index: number) => number;
+  /** Helper to get ARIA attributes for a cell. */
+  getCellAriaProps: (colIndex: number) => Record<string, string | number | undefined>;
   /** Helper to get the virtual offset of a specific row. */
   getRowOffset: (index: number) => number;
   /** Helper to get the virtual offset of a specific column. */

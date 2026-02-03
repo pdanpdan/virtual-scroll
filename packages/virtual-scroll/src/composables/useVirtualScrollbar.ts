@@ -27,6 +27,8 @@ export interface UseVirtualScrollbarProps {
   containerId?: MaybeRefOrGetter<string | undefined>;
   /** Whether the scrollbar is in Right-to-Left (RTL) mode. */
   isRtl?: MaybeRefOrGetter<boolean>;
+  /** Accessible label for the scrollbar. */
+  ariaLabel?: MaybeRefOrGetter<string | undefined>;
 }
 
 /**
@@ -197,6 +199,7 @@ export function useVirtualScrollbar(props: UseVirtualScrollbarProps) {
     ],
     style: trackStyle.value,
     role: 'scrollbar',
+    'aria-label': toValue(props.ariaLabel),
     'aria-orientation': axis.value,
     'aria-valuenow': Math.round(position.value),
     'aria-valuemin': 0,
