@@ -21,9 +21,9 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 mt-8">
       <div class="card bg-base-300 shadow-strong border-2 border-accent/30 md:col-span-2 2xl:col-span-2 overflow-hidden group">
         <div class="card-body p-8 md:p-10 relative">
-          <div class="absolute top-0 end-0 p-8 opacity-5 transition-transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+          <figure class="absolute top-0 end-0 p-8 opacity-5 transition-transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
             <AppLogo class="size-32" />
-          </div>
+          </figure>
           <h2 class="card-title text-accent text-2xl md:text-3xl mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"

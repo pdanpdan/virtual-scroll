@@ -6,6 +6,7 @@ import { matchHref } from '#/lib/url';
 
 import AppLink from './AppLink.vue';
 import CodeBlock from './CodeBlock.vue';
+import ViewSource from './ViewSource.vue';
 
 const props = withDefaults(defineProps<{
   height?: string;
@@ -47,11 +48,11 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
 <template>
   <div class="space-y-2 md:space-y-4">
     <div v-if="$slots.title || $slots.description" class="prose max-w-none mb-6">
-      <div class="card card-side bg-base-300 shadow-soft">
-        <figure v-if="$slots.icon" class="shrink-0 items-start justify-center pt-7 ps-5 hidden sm:flex">
-          <slot name="icon" />
-        </figure>
-        <div class="card-body p-5 md:p-6">
+      <div class="card bg-base-300 shadow-soft">
+        <div class="card-body relative p-5 md:p-6" :class="isIndex ? undefined : 'pb-2 md:pb-2'">
+          <figure v-if="$slots.icon" class="hidden md:block absolute top-6 end-6 pointer-events-none">
+            <slot name="icon" />
+          </figure>
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1">
               <h1 v-if="$slots.title" class="text-xl md:text-2xl m-0 font-extrabold tracking-tight">
@@ -61,7 +62,13 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
                 <slot name="subtitle" />
               </div>
             </div>
-            <AppLink v-if="!isIndex" v-slot="{ href }" href="/">
+          </div>
+          <div v-if="$slots.description" class="opacity-70 m-0 mt-4 text-sm md:text-base leading-relaxed max-w-3xl">
+            <slot name="description" />
+          </div>
+
+          <div v-if="!isIndex" class="card-actions justify-between items-center my-2">
+            <AppLink v-slot="{ href }" href="/">
               <a :href class="btn btn-sm btn-soft gap-1.5">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -73,12 +80,11 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                 </svg>
-                <span class="hidden md:inline">Back to Welcome</span>
+                <span class="small-caps font-bold tracking-widest hidden md:inline">Back to Home</span>
               </a>
             </AppLink>
-          </div>
-          <div v-if="$slots.description" class="opacity-70 m-0 mt-4 text-sm md:text-base leading-relaxed max-w-3xl">
-            <slot name="description" />
+
+            <ViewSource class="btn btn-sm btn-soft gap-1.5" />
           </div>
         </div>
       </div>

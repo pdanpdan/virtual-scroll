@@ -171,7 +171,7 @@ html, body {
 @utility example-title--group-7 { @apply text-error; }
 
 @utility example-icon {
-  @apply size-12 p-2 rounded-box bg-primary text-primary-content shadow-lg;
+  @apply size-14 p-2 rounded-box bg-primary text-primary-content shadow-lg;
 }
 @utility example-icon--group-1 { @apply bg-primary text-primary-content; }
 @utility example-icon--group-2 { @apply bg-secondary text-secondary-content; }
