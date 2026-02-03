@@ -98,6 +98,7 @@ const {
       :items="photos"
       :gap="16"
       :debug="debugMode"
+      aria-label="Photo gallery"
       @scroll="onScroll"
     >
       <template #item="{ index: rowIndex, item: rowItems }">

@@ -96,6 +96,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       container-tag="table"
       wrapper-tag="tbody"
       item-tag="tr"
+      aria-label="User data table"
       @scroll="onScroll"
     >
       <template #header>

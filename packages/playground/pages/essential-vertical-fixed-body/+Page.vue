@@ -89,6 +89,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :container="scrollContainer"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
+      aria-label="Fixed height body scroll list"
       @scroll="onScroll"
     >
       <template #header>

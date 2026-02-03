@@ -95,6 +95,7 @@ function appendItems() {
       :items="items"
       :item-size="60"
       :restore-scroll-on-prepend="restoreScrollOnPrepend"
+      aria-label="Scroll restoration list"
       @scroll="onScroll"
     >
       <template #item="{ item, index }">

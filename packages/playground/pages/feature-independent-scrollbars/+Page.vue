@@ -178,6 +178,7 @@ onUnmounted(() => {
         :viewport-size="viewportHeight"
         :position="scrollY"
         :is-rtl="rtlMode"
+        aria-label="Independent vertical scroll"
         @scroll-to-offset="scrollToY"
       />
 
@@ -188,6 +189,7 @@ onUnmounted(() => {
         :viewport-size="viewportWidth"
         :position="scrollX"
         :is-rtl="rtlMode"
+        aria-label="Independent horizontal scroll"
         @scroll-to-offset="scrollToX"
       />
     </div>

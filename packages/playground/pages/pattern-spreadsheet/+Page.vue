@@ -187,9 +187,10 @@ function stopResizing() {
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
       :sticky-indices="stickyIndices"
+      aria-label="Interactive spreadsheet"
       @scroll="onScroll"
     >
-      <template #item="{ index, columnRange, isStickyActive, offset }">
+      <template #item="{ index, columnRange, isStickyActive, offset, getCellAriaProps }">
         <div
           class="example-spreadsheet-row"
           :class="{ 'example-spreadsheet-row--header': index === 0, 'example-spreadsheet-row--sticky': isStickyActive }"
@@ -204,6 +205,8 @@ function stopResizing() {
               height: `${ getRowHeight(null, index) }px`,
               insetInlineStart: `${ -Math.max(0, offset.x) }px`,
             }"
+            v-bind="getCellAriaProps(0)"
+            :role="index === 0 ? 'gridcell' : 'rowheader'"
           >
             {{ index === 0 ? '' : index }}
             <div
@@ -224,6 +227,8 @@ function stopResizing() {
                 width: `${ getColWidth(colIdx - 1 + columnRange.start) }px`,
                 height: `${ getRowHeight(null, index) }px`,
               }"
+              v-bind="getCellAriaProps(colIdx - 1 + columnRange.start)"
+              :role="index === 0 ? 'columnheader' : 'gridcell'"
             >
               {{ getCellContent(index, colIdx - 1 + columnRange.start) }}
               <div

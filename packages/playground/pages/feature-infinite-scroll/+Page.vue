@@ -97,6 +97,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
       :item-size="60"
       :loading="loading"
       :load-distance="300"
+      aria-label="Infinite scrolling list"
       @load="onLoad"
       @scroll="onScroll"
     >

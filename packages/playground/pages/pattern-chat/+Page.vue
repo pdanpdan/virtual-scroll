@@ -242,6 +242,7 @@ function scrollToBottom() {
         :scroll-padding-end="10"
         :gap="12"
         :sticky-footer="true"
+        aria-label="Chat messages"
         @scroll="onScroll"
       >
         <template #item="{ item }">

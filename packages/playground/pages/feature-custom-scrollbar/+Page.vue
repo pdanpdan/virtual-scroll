@@ -171,13 +171,14 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :gap="gap"
       :column-gap="columnGap"
       :virtual-scrollbar="virtualScrollbars"
+      aria-label="Grid with custom scrollbars"
       :style="{
         '--vs-scrollbar-has-cross-gap': 1,
         '--vs-scrollbar-cross-gap': `${ scrollbarCrossGap }px`,
       }"
       @scroll="onScroll"
     >
-      <template #item="{ index, columnRange, getColumnWidth, columnGap: slotColumnGap }">
+      <template #item="{ index, columnRange, getColumnWidth, columnGap: slotColumnGap, getCellAriaProps }">
         <div class="example-grid-row">
           <div
             v-for="colIndex in Array.from({ length: columnRange.end - columnRange.start }, (_, i) => columnRange.start + i)"
@@ -187,6 +188,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
               width: `${ getColumnWidth(colIndex) }px`,
               marginInlineStart: colIndex > 0 ? `${ slotColumnGap }px` : 0,
             }"
+            v-bind="getCellAriaProps(colIndex)"
           >
             <span class="example-badge">#{{ index }},{{ colIndex }}</span>
           </div>

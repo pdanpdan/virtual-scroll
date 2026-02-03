@@ -88,9 +88,9 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       class="example-container"
       direction="horizontal"
       :items="items"
-      :default-item-size="150"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
+      aria-label="Dynamic width horizontal list"
       @scroll="onScroll"
     >
       <template #item="{ item, index }">

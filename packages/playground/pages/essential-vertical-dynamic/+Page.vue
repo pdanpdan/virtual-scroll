@@ -94,6 +94,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :buffer-after="bufferAfter"
       :sticky-header="stickyHeader"
       :sticky-footer="stickyFooter"
+      aria-label="Dynamic height list"
       @scroll="onScroll"
     >
       <template v-if="stickyHeader" #header>

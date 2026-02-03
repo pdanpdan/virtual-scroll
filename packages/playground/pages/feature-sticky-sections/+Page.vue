@@ -79,6 +79,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :items="items"
       :item-size="50"
       :sticky-indices="stickyIndices"
+      aria-label="Sticky sections list"
       @scroll="onScroll"
     >
       <template #item="{ item, isStickyActive }">

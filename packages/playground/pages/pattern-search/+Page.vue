@@ -288,6 +288,7 @@ onUnmounted(() => {
       :items="items"
       :item-size="60"
       :ssr-range="ssrRange"
+      aria-label="Search results"
       @scroll="onScroll"
     >
       <template #item="{ item, index }">

@@ -191,6 +191,7 @@ function setItemRef(el: Element | null | ComponentPublicInstance, id: number) {
             :container="containerRef || undefined"
             :items="colItems"
             :debug="debugMode"
+            :aria-label="`Masonry column ${ colIndex + 1 }`"
             @scroll="(details) => colIndex === 0 ? scrollDetails = details : undefined"
           >
             <template #item="{ item, index }">

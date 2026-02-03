@@ -155,12 +155,19 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
       class="example-container"
       :items="visibleItems"
       :debug="debugMode"
+      role="tree"
+      item-role="none"
+      aria-label="Collapsible directory tree"
       @scroll="onScroll"
     >
-      <template #item="{ item, index }">
+      <template #item="{ item, index, getItemAriaProps }">
         <div
-          role="button"
+          role="treeitem"
+          v-bind="getItemAriaProps(index)"
           tabindex="0"
+          aria-selected="false"
+          :aria-level="item.level + 1"
+          :aria-expanded="item.children.length > 0 ? item.expanded : undefined"
           class="example-vertical-item py-2 outline-none focus-visible:bg-base-300 cursor-pointer"
           :style="{ paddingInlineStart: `${ item.level * 24 + 16 }px` }"
           @click="toggle(item)"

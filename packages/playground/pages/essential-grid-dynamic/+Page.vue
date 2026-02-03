@@ -124,6 +124,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :sticky-header="stickyHeader"
       :sticky-footer="stickyFooter"
       :sticky-indices="stickyIndices"
+      aria-label="Dynamic dimensions grid"
       @scroll="onScroll"
     >
       <template v-if="stickyHeader" #header>
@@ -132,7 +133,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
 
-      <template #item="{ index, columnRange, getColumnWidth, isStickyActive }">
+      <template #item="{ index, columnRange, getColumnWidth, isStickyActive, getCellAriaProps }">
         <div
           :key="`r_${ index }`"
           class="example-grid-row"
@@ -147,6 +148,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
               inlineSize: `${ columnWidthFn(columnRange.start + c - 1) }px`,
               blockSize: `${ itemSizeFn(null, index) }px`,
             } "
+            v-bind="getCellAriaProps(columnRange.start + c - 1)"
           >
             <div class="example-badge mb-2">R{{ index }} &times; C{{ columnRange.start + c - 1 }}</div>
             <div class="opacity-40 tabular-nums">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>

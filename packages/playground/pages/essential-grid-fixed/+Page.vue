@@ -99,6 +99,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :buffer-after="bufferAfter"
       :sticky-header="stickyHeader"
       :sticky-footer="stickyFooter"
+      aria-label="Fixed dimensions grid"
       @scroll="onScroll"
     >
       <template v-if="stickyHeader" #header>
@@ -107,7 +108,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
 
-      <template #item="{ index, columnRange, getColumnWidth }">
+      <template #item="{ index, columnRange, getColumnWidth, getCellAriaProps }">
         <div :key="`r_${ index }`" class="example-grid-row">
           <div
             v-for="c in (columnRange.end - columnRange.start)"
@@ -115,6 +116,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
             :data-col-index="columnRange.start + c - 1"
             class="example-grid-cell"
             :style="{ inlineSize: `${ getColumnWidth(columnRange.start + c - 1) }px` }"
+            v-bind="getCellAriaProps(columnRange.start + c - 1)"
           >
             <div class="example-badge mb-2">R{{ index }} &times; C{{ columnRange.start + c - 1 }}</div>
             <div class="opacity-40 tabular-nums">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>

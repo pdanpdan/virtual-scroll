@@ -170,6 +170,7 @@ function handleDragEnd() {
       class="example-container"
       :items="items"
       :debug="debugMode"
+      aria-label="Reorderable list"
       @scroll="onScroll"
     >
       <template #item="{ item, index }">
@@ -201,6 +202,7 @@ function handleDragEnd() {
           <div
             class="ms-auto p-2 cursor-grab active:cursor-grabbing opacity-30 hover:opacity-100 touch-pan-y select-none"
             draggable="true"
+            :aria-label="`Drag handle for ${ item.label }`"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

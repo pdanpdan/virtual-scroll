@@ -83,6 +83,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :item-size="itemSize"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
+      aria-label="Fixed width horizontal list"
       @scroll="onScroll"
     >
       <template #item="{ item, index }">
