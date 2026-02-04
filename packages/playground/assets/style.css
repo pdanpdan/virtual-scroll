@@ -553,7 +553,7 @@ html, body {
 
 @utility sheet {
   @layer daisyui.l1.l2.l3 {
-    @apply fixed inset-0 pointer-events-none overflow-clip contain-strict;
+    @apply pointer-events-none fixed start-0 top-0 h-dvh w-full overflow-clip contain-strict;
 
     --sheet-tr: 0.3s cubic-bezier(0.5, 1.2, 0.3, 1);
 
