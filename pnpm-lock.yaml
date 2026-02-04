@@ -64,8 +64,8 @@ catalogs:
       specifier: ^0.4.253
       version: 0.4.253
     vike-vue:
-      specifier: ^0.9.10
-      version: 0.9.10
+      specifier: ^0.9.11
+      version: 0.9.11
     vite:
       specifier: npm:rolldown-vite@^7.3.1
       version: 7.3.1
@@ -136,7 +136,7 @@ importers:
         version: 0.4.253(rolldown-vite@7.3.1(@types/node@25.2.0)(esbuild@0.27.2)(jiti@2.6.1)(yaml@2.8.2))
       vike-vue:
         specifier: 'catalog:'
-        version: 0.9.10(vike@0.4.253(rolldown-vite@7.3.1(@types/node@25.2.0)(esbuild@0.27.2)(jiti@2.6.1)(yaml@2.8.2)))(vue@3.5.27(typescript@5.9.3))
+        version: 0.9.11(vike@0.4.253(rolldown-vite@7.3.1(@types/node@25.2.0)(esbuild@0.27.2)(jiti@2.6.1)(yaml@2.8.2)))(vue@3.5.27(typescript@5.9.3))
       vue:
         specifier: 'catalog:'
         version: 3.5.27(typescript@5.9.3)
@@ -3889,8 +3889,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  vike-vue@0.9.10:
-    resolution: {integrity: sha512-kg5m+wbr2pSz0iBATaeGtrscszrepkYUlxdF1RXGcO+gMtOkk189b9bRve/6x7VQ4g/+L3NE79uR4Z+3KGff3w==}
+  vike-vue@0.9.11:
+    resolution: {integrity: sha512-Ujcu7NG/ZFsiAgEomA0PtuHFg0J/BMcol/QHiDzaIlov2JSiDfapyBLidrPVTrHwLHvmeCnxa4ruVqG+/Vj1XA==}
     peerDependencies:
       vike: '>=0.4.191'
       vue: '>=3.0.0'
@@ -7960,7 +7960,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vike-vue@0.9.10(vike@0.4.253(rolldown-vite@7.3.1(@types/node@25.2.0)(esbuild@0.27.2)(jiti@2.6.1)(yaml@2.8.2)))(vue@3.5.27(typescript@5.9.3)):
+  vike-vue@0.9.11(vike@0.4.253(rolldown-vite@7.3.1(@types/node@25.2.0)(esbuild@0.27.2)(jiti@2.6.1)(yaml@2.8.2)))(vue@3.5.27(typescript@5.9.3)):
     dependencies:
       magic-string: 0.30.21
       oxc-parser: 0.104.0
