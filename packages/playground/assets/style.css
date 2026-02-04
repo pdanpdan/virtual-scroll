@@ -610,7 +610,7 @@ body {
 
 @utility sheet {
   @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none fixed start-0 top-0 h-dvh w-full overflow-clip contain-strict;
+    @apply pointer-events-none fixed start-0 top-0 h-dvh w-full overflow-clip;
 
     --sheet-tr: 0.3s cubic-bezier(0.5, 1.2, 0.3, 1);
 
@@ -663,7 +663,7 @@ body {
 
 @utility sheet-content {
   @layer daisyui.l1.l2.l3 {
-    @apply absolute flex translate-0 flex-col overflow-clip contain-layout;
+    @apply absolute flex translate-0 flex-col overflow-clip;
 
     transition:
       translate var(--sheet-tr),
