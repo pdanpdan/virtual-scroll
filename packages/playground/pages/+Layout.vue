@@ -241,7 +241,7 @@ const linkGroups = [
   </div>
 
   <div id="app-settings" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
-    <div class="sheet-content sheet-content-bottom w-fit left-1/2 -translate-x-1/2 overflow-visible pb-1">
+    <div class="sheet-content sheet-content-bottom w-fit left-1/2 -translate-x-1/2 overflow-visible">
       <button
         class="sheet-handle appearance-none after:hidden h-8 w-36"
         popovertarget="app-settings"
@@ -262,7 +262,7 @@ const linkGroups = [
         </div>
       </button>
 
-      <div class="flex max-md:flex-col max-md:items-stretch max-md:gap-1 items-center gap-2 p-2 min-w-64 bg-base-300 rounded-box shadow-soft text-sm">
+      <div class="flex max-md:flex-col max-md:items-stretch max-md:gap-1 items-center gap-2 p-2 mb-1 min-w-64 bg-base-300 rounded-box shadow-soft text-sm">
         <label class="settings-item group p-2 min-w-32">
           <span class="settings-label me-2">Theme</span>
           <div class="swap swap-rotate me-2">

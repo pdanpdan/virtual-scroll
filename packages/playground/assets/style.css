@@ -610,7 +610,7 @@ body {
 
 @utility sheet {
   @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none fixed inset-0 overflow-clip contain-strict;
+    @apply pointer-events-none fixed start-0 top-0 h-lvh w-full overflow-clip;
 
     --sheet-tr: 0.3s cubic-bezier(0.5, 1.2, 0.3, 1);
 
@@ -619,7 +619,7 @@ body {
     }
 
     &[popover] {
-      @apply inline-flex size-full bg-transparent;
+      @apply inline-flex bg-transparent;
     }
 
     > [type="checkbox"] {
@@ -641,7 +641,7 @@ body {
 
 @utility sheet-backdrop {
   @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none invisible fixed inset-0 opacity-0;
+    @apply pointer-events-none invisible absolute inset-0 opacity-0;
 
     transition: opacity var(--sheet-tr);
 
@@ -663,7 +663,7 @@ body {
 
 @utility sheet-content {
   @layer daisyui.l1.l2.l3 {
-    @apply absolute flex translate-0 flex-col overflow-clip contain-layout;
+    @apply fixed flex translate-0 flex-col overflow-clip;
 
     transition:
       translate var(--sheet-tr),
@@ -672,7 +672,6 @@ body {
 
     > * {
       @apply pointer-events-auto invisible;
-
       transition: visibility var(--sheet-tr) allow-discrete;
     }
 
@@ -707,6 +706,7 @@ body {
     input:checked ~ &,
     :popover-open > & {
       @apply translate-y-0;
+      padding-block-start: env(safe-area-inset-top, 0px);
     }
 
     &:has(.sheet-handle) {
@@ -728,6 +728,7 @@ body {
     input:checked ~ &,
     :popover-open > & {
       @apply translate-y-0;
+      padding-block-end: env(safe-area-inset-bottom, 0px);
     }
 
     &:has(.sheet-handle) {
@@ -753,6 +754,11 @@ body {
     input:checked ~ &,
     :popover-open > & {
       @apply translate-x-0;
+      padding-inline-start: env(safe-area-inset-left, 0px);
+
+      &:dir(rtl) {
+        padding-inline-start: env(safe-area-inset-right, 0px);
+      }
     }
 
     &:has(.sheet-handle) {
@@ -778,6 +784,11 @@ body {
     input:checked ~ &,
     :popover-open > & {
       @apply translate-x-0;
+      padding-inline-end: env(safe-area-inset-right, 0px);
+
+      &:dir(rtl) {
+        padding-inline-end: env(safe-area-inset-left, 0px);
+      }
     }
 
     &:has(.sheet-handle) {
@@ -789,6 +800,7 @@ body {
     }
   }
 }
+
 
 .sheet-handle-icon {
   @apply size-4 transition-transform delay-300 duration-300;
