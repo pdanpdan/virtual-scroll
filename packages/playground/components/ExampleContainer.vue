@@ -14,8 +14,8 @@ const props = withDefaults(defineProps<{
   minWidth?: string;
   code?: string;
 }>(), {
-  height: 'min(65dvh, 800px)',
-  minHeight: 'min(10dvh, 50px)',
+  height: 'min(65svh, 800px)',
+  minHeight: 'min(10svh, 50px)',
   minWidth: 'min(10vw, 50px)',
 });
 

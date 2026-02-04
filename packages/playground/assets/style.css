@@ -610,7 +610,7 @@ body {
 
 @utility sheet {
   @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none fixed start-0 top-0 h-dvh w-full overflow-clip;
+    @apply pointer-events-none fixed inset-0 overflow-clip contain-strict;
 
     --sheet-tr: 0.3s cubic-bezier(0.5, 1.2, 0.3, 1);
 
@@ -641,7 +641,7 @@ body {
 
 @utility sheet-backdrop {
   @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none invisible fixed start-0 top-0 h-dvh w-full opacity-0;
+    @apply pointer-events-none invisible fixed inset-0 opacity-0;
 
     transition: opacity var(--sheet-tr);
 
@@ -663,7 +663,7 @@ body {
 
 @utility sheet-content {
   @layer daisyui.l1.l2.l3 {
-    @apply absolute flex translate-0 flex-col overflow-clip;
+    @apply absolute flex translate-0 flex-col overflow-clip contain-layout;
 
     transition:
       translate var(--sheet-tr),
@@ -700,9 +700,9 @@ body {
 
 @utility sheet-content-top {
   @layer daisyui.l1.l2 {
-    @apply top-0 max-h-[98vh] w-full rounded-b-box;
+    @apply top-0 max-h-[98svh] w-full rounded-b-box;
 
-    --tw-translate-y: calc(var(--sheet-peek, 0px) - 100%);
+    --tw-translate-y: calc(var(--sheet-peek, 0px) + env(safe-area-inset-top, 0px) - 100%);
 
     input:checked ~ &,
     :popover-open > & {
@@ -714,20 +714,20 @@ body {
     }
 
     .sheet-handle {
-      @apply left-[50%] bottom-0 h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
+      @apply bottom-0 left-[50%] h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
     }
   }
 }
 
 @utility sheet-content-bottom {
   @layer daisyui.l1.l2 {
-    @apply top-[100dvh] max-h-[98vh] w-full rounded-t-box;
+    @apply bottom-0 max-h-[98svh] w-full rounded-t-box;
 
-    --tw-translate-y: calc(-1 * var(--sheet-peek, 0px));
+    --tw-translate-y: calc(100% - var(--sheet-peek, 0px) - env(safe-area-inset-bottom, 0px));
 
     input:checked ~ &,
     :popover-open > & {
-      @apply -translate-y-full;
+      @apply translate-y-0;
     }
 
     &:has(.sheet-handle) {
@@ -735,7 +735,7 @@ body {
     }
 
     .sheet-handle {
-      @apply left-[50%] top-0 h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
+      @apply top-0 left-[50%] h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
     }
   }
 }
@@ -744,10 +744,10 @@ body {
   @layer daisyui.l1.l2 {
     @apply start-0 h-full max-w-[98vw] rounded-e-box;
 
-    --tw-translate-x: calc(var(--sheet-peek, 0px) - 100%);
+    --tw-translate-x: calc(var(--sheet-peek, 0px) + env(safe-area-inset-left, 0px) - 100%);
 
     &:dir(rtl) {
-      --tw-translate-x: calc(100% - var(--sheet-peek, 0px));
+      --tw-translate-x: calc(100% - var(--sheet-peek, 0px) - env(safe-area-inset-right, 0px));
     }
 
     input:checked ~ &,
@@ -769,10 +769,10 @@ body {
   @layer daisyui.l1.l2 {
     @apply end-0 h-full max-w-[98vw] rounded-s-box;
 
-    --tw-translate-x: calc(100% - var(--sheet-peek, 0px));
+    --tw-translate-x: calc(100% - var(--sheet-peek, 0px) - env(safe-area-inset-right, 0px));
 
     &:dir(rtl) {
-      --tw-translate-x: calc(var(--sheet-peek, 0px) - 100%);
+      --tw-translate-x: calc(var(--sheet-peek, 0px) + env(safe-area-inset-left, 0px) - 100%);
     }
 
     input:checked ~ &,
