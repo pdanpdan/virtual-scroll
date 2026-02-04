@@ -241,7 +241,7 @@ const linkGroups = [
   </div>
 
   <div id="app-settings" class="sheet z-50 [--sheet-handle-size:32px]" popover="manual">
-    <div class="sheet-content sheet-content-bottom w-fit start-1/2 -translate-x-1/2 overflow-visible pb-1">
+    <div class="sheet-content sheet-content-bottom w-fit left-1/2 -translate-x-1/2 overflow-visible pb-1">
       <button
         class="sheet-handle appearance-none after:hidden h-8 w-36"
         popovertarget="app-settings"

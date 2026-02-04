@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
+  themes: light --default,
+    dark --prefersdark;
   exclude: properties;
   logs: false;
 }
@@ -91,7 +92,8 @@
   --shiki-token-link: oklch(78% 0.15 250);
 }
 
-html, body {
+html,
+body {
   block-size: 100%;
   margin: 0;
   -webkit-font-smoothing: antialiased;
@@ -105,17 +107,16 @@ html, body {
 }
 
 @layer base {
-
   h1 {
-    @apply text-2xl @4xl:text-4xl font-black tracking-tight;
+    @apply text-2xl font-black tracking-tight @4xl:text-4xl;
   }
 
   h2 {
-    @apply text-xl @4xl:text-2xl font-extrabold tracking-tight;
+    @apply text-xl font-extrabold tracking-tight @4xl:text-2xl;
   }
 
   h3 {
-    @apply text-lg @4xl:text-xl font-bold;
+    @apply text-lg font-bold @4xl:text-xl;
   }
 }
 
@@ -123,7 +124,7 @@ html, body {
   [type="number"]::-webkit-inner-spin-button {
     @apply ms-1;
 
-    @media screen and (max-width: theme('screens.sm')) {
+    @media screen and (max-width: theme("screens.sm")) {
       @apply ms-3;
     }
   }
@@ -136,118 +137,174 @@ html, body {
 /* --- Example Card Utilities --- */
 
 @utility example-card {
-  @apply bg-base-300 shadow-md border-t-4;
+  @apply border-t-4 bg-base-300 shadow-md;
 }
-@utility example-card--group-1 { @apply border-primary; }
-@utility example-card--group-2 { @apply border-secondary; }
-@utility example-card--group-3 { @apply border-accent; }
-@utility example-card--group-4 { @apply border-info; }
-@utility example-card--group-5 { @apply border-warning; }
-@utility example-card--group-6 { @apply border-success; }
-@utility example-card--group-7 { @apply border-error; }
+@utility example-card--group-1 {
+  @apply border-primary;
+}
+@utility example-card--group-2 {
+  @apply border-secondary;
+}
+@utility example-card--group-3 {
+  @apply border-accent;
+}
+@utility example-card--group-4 {
+  @apply border-info;
+}
+@utility example-card--group-5 {
+  @apply border-warning;
+}
+@utility example-card--group-6 {
+  @apply border-success;
+}
+@utility example-card--group-7 {
+  @apply border-error;
+}
 
 @utility example-card-title-type {
-  @apply font-bold text-sm tracking-widest opacity-70 mb-1 small-caps;
+  @apply mb-1 text-sm font-bold tracking-widest opacity-70 small-caps;
 }
-@utility example-card-title-type--group-1 { @apply text-primary; }
-@utility example-card-title-type--group-2 { @apply text-secondary; }
-@utility example-card-title-type--group-3 { @apply text-accent; }
-@utility example-card-title-type--group-4 { @apply text-info; }
-@utility example-card-title-type--group-5 { @apply text-warning; }
-@utility example-card-title-type--group-6 { @apply text-success; }
-@utility example-card-title-type--group-7 { @apply text-error; }
+@utility example-card-title-type--group-1 {
+  @apply text-primary;
+}
+@utility example-card-title-type--group-2 {
+  @apply text-secondary;
+}
+@utility example-card-title-type--group-3 {
+  @apply text-accent;
+}
+@utility example-card-title-type--group-4 {
+  @apply text-info;
+}
+@utility example-card-title-type--group-5 {
+  @apply text-warning;
+}
+@utility example-card-title-type--group-6 {
+  @apply text-success;
+}
+@utility example-card-title-type--group-7 {
+  @apply text-error;
+}
 
 /* --- Example Page Utilities --- */
 
 @utility example-title {
-  @apply text-primary font-bold opacity-90 pe-2 align-baseline small-caps;
+  @apply pe-2 align-baseline font-bold text-primary opacity-90 small-caps;
 }
-@utility example-title--group-1 { @apply text-primary; }
-@utility example-title--group-2 { @apply text-secondary; }
-@utility example-title--group-3 { @apply text-accent; }
-@utility example-title--group-4 { @apply text-info; }
-@utility example-title--group-5 { @apply text-warning; }
-@utility example-title--group-6 { @apply text-success; }
-@utility example-title--group-7 { @apply text-error; }
+@utility example-title--group-1 {
+  @apply text-primary;
+}
+@utility example-title--group-2 {
+  @apply text-secondary;
+}
+@utility example-title--group-3 {
+  @apply text-accent;
+}
+@utility example-title--group-4 {
+  @apply text-info;
+}
+@utility example-title--group-5 {
+  @apply text-warning;
+}
+@utility example-title--group-6 {
+  @apply text-success;
+}
+@utility example-title--group-7 {
+  @apply text-error;
+}
 
 @utility example-icon {
-  @apply size-14 p-2 rounded-box bg-primary text-primary-content shadow-lg;
+  @apply size-14 rounded-box bg-primary p-2 text-primary-content shadow-lg;
 }
-@utility example-icon--group-1 { @apply bg-primary text-primary-content; }
-@utility example-icon--group-2 { @apply bg-secondary text-secondary-content; }
-@utility example-icon--group-3 { @apply bg-accent text-accent-content; }
-@utility example-icon--group-4 { @apply bg-info text-info-content; }
-@utility example-icon--group-5 { @apply bg-warning text-warning-content; }
-@utility example-icon--group-6 { @apply bg-success text-success-content; }
-@utility example-icon--group-7 { @apply bg-error text-error-content; }
+@utility example-icon--group-1 {
+  @apply bg-primary text-primary-content;
+}
+@utility example-icon--group-2 {
+  @apply bg-secondary text-secondary-content;
+}
+@utility example-icon--group-3 {
+  @apply bg-accent text-accent-content;
+}
+@utility example-icon--group-4 {
+  @apply bg-info text-info-content;
+}
+@utility example-icon--group-5 {
+  @apply bg-warning text-warning-content;
+}
+@utility example-icon--group-6 {
+  @apply bg-success text-success-content;
+}
+@utility example-icon--group-7 {
+  @apply bg-error text-error-content;
+}
 
 @utility example-container {
-  @apply flex-1 relative bg-base-100 bg-clip-border border border-base-300 rounded-[inherit];
+  @apply relative flex-1 rounded-[inherit] border border-base-300 bg-base-100 bg-clip-border;
 }
 
 /* --- Example Content Utilities --- */
 
 @utility example-badge {
-  @apply badge badge-neutral badge-sm tabular-nums;
+  @apply badge badge-sm tabular-nums badge-neutral;
 }
 
 @utility example-vertical-item {
-  @apply flex items-center px-6 border-b border-base-content/5 hover:bg-base-200 text-sm;
+  @apply flex items-center border-b border-base-content/5 px-6 text-sm hover:bg-base-200;
 }
 @utility example-vertical-item--fixed {
   @apply h-full;
 }
 
 @utility example-horizontal-item {
-  @apply h-full flex flex-col items-center justify-center px-4 py-6 border-e border-base-content/5 hover:bg-base-200 transition-colors whitespace-normal text-center select-none;
+  @apply flex h-full flex-col items-center justify-center border-e border-base-content/5 px-4 py-6 text-center whitespace-normal transition-colors select-none hover:bg-base-200;
 }
 @utility example-horizontal-item--fixed {
   @apply w-full;
 }
 
 @utility example-sticky-header {
-  @apply bg-base-200 text-base-content/60 p-4 border-b border-base-300 font-bold text-xs tracking-widest text-center shadow-sm z-1 small-caps;
+  @apply z-1 border-b border-base-300 bg-base-200 p-4 text-center text-xs font-bold tracking-widest text-base-content/60 shadow-sm small-caps;
 }
 @utility example-sticky-header--start {
-  @apply text-start px-6;
+  @apply px-6 text-start;
 }
 @utility example-body-header {
-  @apply bg-base-200 text-base-content p-8 @4xl:p-12 text-center rounded-t-[inherit] border-b border-base-300;
+  @apply rounded-t-[inherit] border-b border-base-300 bg-base-200 p-8 text-center text-base-content @4xl:p-12;
 
   h2 {
-    @apply text-xl @4xl:text-3xl font-extrabold mb-2 tracking-widest text-primary small-caps;
+    @apply mb-2 text-xl font-extrabold tracking-widest text-primary small-caps @4xl:text-3xl;
   }
 
   p {
-    @apply opacity-60 text-sm @4xl:text-base;
+    @apply text-sm opacity-60 @4xl:text-base;
   }
 }
 
 @utility example-sticky-footer {
-  @apply bg-base-200 text-base-content/60 p-4 border-t border-base-300 font-bold text-xs tracking-widest text-center shadow-sm z-1 small-caps;
+  @apply z-1 border-t border-base-300 bg-base-200 p-4 text-center text-xs font-bold tracking-widest text-base-content/60 shadow-sm small-caps;
 }
 
 @utility example-body-footer {
-  @apply bg-base-200 text-base-content p-8 @4xl:p-12 text-center rounded-b-[inherit] border-t border-base-300;
+  @apply rounded-b-[inherit] border-t border-base-300 bg-base-200 p-8 text-center text-base-content @4xl:p-12;
 
   h2 {
-    @apply text-lg @4xl:text-2xl font-bold tracking-widest opacity-60 small-caps;
+    @apply text-lg font-bold tracking-widest opacity-60 small-caps @4xl:text-2xl;
   }
 
   p {
-    @apply opacity-40 text-xs @4xl:text-sm mt-2 font-medium;
+    @apply mt-2 text-xs font-medium opacity-40 @4xl:text-sm;
   }
 }
 
 @utility example-grid-row {
-  @apply min-h-full flex items-stretch;
+  @apply flex min-h-full items-stretch;
 }
 @utility example-grid-row--sticky {
-  @apply bg-base-200 shadow-sm z-1;
+  @apply z-1 bg-base-200 shadow-sm;
 }
 
 @utility example-grid-cell {
-  @apply flex flex-col items-center justify-center border-e border-b border-base-content/5 shrink-0 hover:bg-base-300 transition-colors text-xs @4xl:text-xs box-border;
+  @apply box-border flex shrink-0 flex-col items-center justify-center border-e border-b border-base-content/5 text-xs transition-colors hover:bg-base-300 @4xl:text-xs;
 }
 
 @utility example-spreadsheet {
@@ -255,7 +312,7 @@ html, body {
 }
 
 @utility example-spreadsheet-row {
-  @apply flex flex-nowrap whitespace-nowrap bg-base-100;
+  @apply flex flex-nowrap bg-base-100 whitespace-nowrap;
 
   &:hover {
     @apply bg-base-200/30;
@@ -270,10 +327,10 @@ html, body {
 }
 
 @utility example-spreadsheet-cell {
-  @apply shrink-0 relative inline-flex items-center justify-center border-e border-b border-base-content/5 text-xs @4xl:text-sm px-2 box-border bg-inherit;
+  @apply relative box-border inline-flex shrink-0 items-center justify-center border-e border-b border-base-content/5 bg-inherit px-2 text-xs @4xl:text-sm;
 
   &.example-spreadsheet-cell--row-header {
-    @apply sticky start-0 z-10 font-bold bg-base-200 border-e-2 border-base-300 text-base-content/50;
+    @apply sticky start-0 z-10 border-e-2 border-base-300 bg-base-200 font-bold text-base-content/50;
 
     .example-spreadsheet-row--header & {
       @apply z-40 bg-base-300 text-primary;
@@ -281,7 +338,7 @@ html, body {
   }
 
   &.example-spreadsheet-cell--col-header {
-    @apply font-bold bg-base-200 border-b-2 border-base-300 text-base-content/50;
+    @apply border-b-2 border-base-300 bg-base-200 font-bold text-base-content/50;
 
     &:hover {
       @apply text-base-content/80;
@@ -290,11 +347,11 @@ html, body {
 }
 
 @utility example-spreadsheet-col-resizer {
-  @apply absolute end-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/40 transition-colors z-50;
+  @apply absolute end-0 top-0 bottom-0 z-50 w-1 cursor-col-resize transition-colors hover:bg-primary/40;
 }
 
 @utility example-spreadsheet-row-resizer {
-  @apply absolute bottom-0 start-0 end-0 h-1 cursor-row-resize hover:bg-primary/40 transition-colors z-50;
+  @apply absolute start-0 end-0 bottom-0 z-50 h-1 cursor-row-resize transition-colors hover:bg-primary/40;
 }
 
 /* --- General Utilities --- */
@@ -308,15 +365,15 @@ html, body {
 }
 
 @utility app-header-body {
-  @apply card-body flex-row items-center p-4 @4xl:p-8 gap-4 @4xl:gap-8;
+  @apply card-body flex-row items-center gap-4 p-4 @4xl:gap-8 @4xl:p-8;
 }
 
 @utility shadow-soft {
-  @apply shadow-lg border border-base-content/5;
+  @apply border border-base-content/5 shadow-lg;
 }
 
 @utility shadow-strong {
-  @apply shadow-xl border border-base-content/10;
+  @apply border border-base-content/10 shadow-xl;
 }
 
 @utility small-caps {
@@ -324,11 +381,11 @@ html, body {
 }
 
 @utility settings-item {
-  @apply flex items-center justify-between rounded-box active:text-base-content cursor-pointer;
+  @apply flex cursor-pointer items-center justify-between rounded-box active:text-base-content;
 }
 
 @utility settings-label {
-  @apply text-xs font-bold tracking-widest opacity-50 group-hover:opacity-100 transition-opacity small-caps;
+  @apply text-xs font-bold tracking-widest opacity-50 transition-opacity small-caps group-hover:opacity-100;
 }
 
 /* --- Drawer Utilities --- */
@@ -339,42 +396,42 @@ html, body {
 }
 
 @utility drawer-link {
-  @apply rounded-selector font-bold text-sm tracking-wide py-2.5 hover:bg-base-content/5 active:bg-primary/95;
+  @apply rounded-selector py-2.5 text-sm font-bold tracking-wide hover:bg-base-content/5 active:bg-primary/95;
 }
 @utility drawer-link--active {
-  @apply bg-primary hover:bg-primary/90 text-primary-content shadow-md;
+  @apply bg-primary text-primary-content shadow-md hover:bg-primary/90;
 }
 
 @utility drawer-header {
-  @apply py-6 px-2 mb-4 flex flex-row items-center justify-between text-base-content border-b border-base-content/5;
+  @apply mb-4 flex flex-row items-center justify-between border-b border-base-content/5 px-2 py-6 text-base-content;
 }
 
 @utility drawer-menu-title {
-  @apply text-sm font-black tracking-[0.2em] opacity-80 my-6 small-caps;
+  @apply my-6 text-sm font-black tracking-[0.2em] opacity-80 small-caps;
 }
 
 /* --- Documentation Utilities --- */
 
 @utility docs-section-header {
-  @apply text-xl @4xl:text-2xl font-bold mb-4 @4xl:mb-6 tracking-widest text-primary small-caps;
+  @apply mb-4 text-xl font-bold tracking-widest text-primary small-caps @4xl:mb-6 @4xl:text-2xl;
 }
 
 @utility docs-code-block {
-  @apply rounded-[inherit] border border-base-content/10 mb-4;
+  @apply mb-4 rounded-[inherit] border border-base-content/10;
 }
 
 @utility docs-prop-header {
-  @apply text-lg @4xl:text-xl font-semibold mb-4 pb-2 border-b border-base-300 text-secondary;
+  @apply mb-4 border-b border-base-300 pb-2 text-lg font-semibold text-secondary @4xl:text-xl;
 }
 @utility docs-prop-header--primary {
-  @apply text-primary border-primary/30;
+  @apply border-primary/30 text-primary;
 }
 @utility docs-prop-header--accent {
-  @apply text-accent border-accent/30;
+  @apply border-accent/30 text-accent;
 }
 
 @utility docs-prop-subheader {
-  @apply text-sm @4xl:text-base font-bold mb-4 opacity-70 tracking-widest small-caps;
+  @apply mb-4 text-sm font-bold tracking-widest opacity-70 small-caps @4xl:text-base;
 }
 @utility docs-prop-subheader--primary {
   @apply text-primary opacity-100;
@@ -387,30 +444,30 @@ html, body {
 }
 
 @utility docs-prop-name {
-  @apply text-primary font-bold;
+  @apply font-bold text-primary;
 }
 @utility docs-prop-name--secondary {
-  @apply text-secondary font-bold;
+  @apply font-bold text-secondary;
 }
 
 @utility docs-table-container {
-  @apply overflow-x-auto mb-10 app-card;
+  @apply app-card mb-10 overflow-x-auto;
 }
 
 @utility docs-table {
-  @apply table table-sm @4xl:table-md table-zebra w-full border border-base-content/5;
+  @apply table w-full border border-base-content/5 table-zebra table-sm @4xl:table-md;
 
   thead {
     @apply bg-base-300 text-base-content;
   }
 
   tbody {
-    @apply text-xs @4xl:text-sm text-base-content/80;
+    @apply text-xs text-base-content/80 @4xl:text-sm;
   }
 }
 
 @utility docs-feature-grid {
-  @apply grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4;
+  @apply grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-3;
 }
 
 @utility docs-feature-card {
@@ -418,15 +475,15 @@ html, body {
 }
 
 @utility docs-feature-card-body {
-  @apply card-body p-4 flex-row gap-4;
+  @apply card-body flex-row gap-4 p-4;
 }
 
 @utility docs-feature-card-icon {
-  @apply text-primary text-2xl font-bold;
+  @apply text-2xl font-bold text-primary;
 }
 
 @utility docs-feature-card-title {
-  @apply font-bold text-sm;
+  @apply text-sm font-bold;
 }
 
 @utility docs-feature-card-description {
@@ -434,7 +491,7 @@ html, body {
 }
 
 @utility docs-usage-grid {
-  @apply grid grid-cols-1 @4xl:grid-cols-2 gap-4 @4xl:gap-8;
+  @apply grid grid-cols-1 gap-4 @4xl:grid-cols-2 @4xl:gap-8;
 }
 
 @utility docs-usage-card {
@@ -442,7 +499,7 @@ html, body {
 }
 
 @utility docs-usage-card--primary {
-   @apply border-primary/10;
+  @apply border-primary/10;
 }
 @utility docs-usage-card--secondary {
   @apply border-secondary/10;
@@ -469,7 +526,7 @@ html, body {
 }
 
 @utility docs-usage-card-description {
-  @apply text-xs @4xl:text-sm opacity-90 grow-0;
+  @apply grow-0 text-xs opacity-90 @4xl:text-sm;
 }
 
 @utility docs-kbd {
@@ -477,15 +534,15 @@ html, body {
 }
 
 @utility docs-kbd-item {
-  @apply flex items-center gap-3 p-3 bg-base-300 rounded-lg border border-base-content/5;
+  @apply flex items-center gap-3 rounded-lg border border-base-content/5 bg-base-300 p-3;
 }
 
 @utility docs-kbd-description {
-  @apply text-xs @4xl:text-sm opacity-80;
+  @apply text-xs opacity-80 @4xl:text-sm;
 }
 
 @utility docs-method-card {
-  @apply app-card p-6 border-t-2 text-base-content/80;
+  @apply app-card border-t-2 p-6 text-base-content/80;
 }
 @utility docs-method-card--primary {
   @apply border-primary;
@@ -495,7 +552,7 @@ html, body {
 }
 
 @utility docs-method-title {
-  @apply font-bold text-lg flex items-center gap-2 mb-4;
+  @apply mb-4 flex items-center gap-2 text-lg font-bold;
 }
 @utility docs-method-title--primary {
   @apply text-primary;
@@ -505,15 +562,15 @@ html, body {
 }
 
 @utility docs-link-grid {
-  @apply grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4;
+  @apply grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-3;
 }
 
 @utility docs-link-card {
-  @apply bg-base-300 p-4 hover:bg-base-200 transition-colors border border-base-content/5 rounded-box;
+  @apply rounded-box border border-base-content/5 bg-base-300 p-4 transition-colors hover:bg-base-200;
 }
 
 @utility docs-link-title {
-  @apply font-bold text-xs;
+  @apply text-xs font-bold;
 }
 @utility docs-link-title--primary {
   @apply text-primary;
@@ -526,11 +583,11 @@ html, body {
 }
 
 @utility docs-link-description {
-  @apply text-[10px] opacity-60 mt-1;
+  @apply mt-1 text-[10px] opacity-60;
 }
 
 @utility docs-alert {
-  @apply card bg-base-300 p-6 border-s-4;
+  @apply card border-s-4 bg-base-300 p-6;
 }
 @utility docs-alert--warning {
   @apply border-warning;
@@ -584,7 +641,7 @@ html, body {
 
 @utility sheet-backdrop {
   @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none invisible fixed inset-0 opacity-0;
+    @apply pointer-events-none invisible fixed start-0 top-0 h-dvh w-full opacity-0;
 
     transition: opacity var(--sheet-tr);
 
@@ -657,7 +714,7 @@ html, body {
     }
 
     .sheet-handle {
-      @apply start-[50%] bottom-0 h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
+      @apply left-[50%] bottom-0 h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
     }
   }
 }
@@ -666,7 +723,7 @@ html, body {
   @layer daisyui.l1.l2 {
     @apply top-[100dvh] max-h-[98vh] w-full rounded-t-box;
 
-    --tw-translate-y: calc(100% - 100dvh);
+    --tw-translate-y: calc(-1 * var(--sheet-peek, 0px));
 
     input:checked ~ &,
     :popover-open > & {
@@ -678,7 +735,7 @@ html, body {
     }
 
     .sheet-handle {
-      @apply start-[50%] top-0 h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
+      @apply left-[50%] top-0 h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
     }
   }
 }
@@ -690,8 +747,6 @@ html, body {
     --tw-translate-x: calc(var(--sheet-peek, 0px) - 100%);
 
     &:dir(rtl) {
-      @apply translate-x-full;
-
       --tw-translate-x: calc(100% - var(--sheet-peek, 0px));
     }
 
@@ -717,8 +772,6 @@ html, body {
     --tw-translate-x: calc(100% - var(--sheet-peek, 0px));
 
     &:dir(rtl) {
-      @apply -translate-x-full;
-
       --tw-translate-x: calc(var(--sheet-peek, 0px) - 100%);
     }
 
@@ -738,10 +791,10 @@ html, body {
 }
 
 .sheet-handle-icon {
-  @apply size-4 transition-transform duration-300 delay-300;
+  @apply size-4 transition-transform delay-300 duration-300;
 
   &.sheet-handle-icon--right {
-    @apply ms-px my-2 rotate-0;
+    @apply my-2 ms-px rotate-0;
 
     :popover-open & {
       @apply rotate-180;
@@ -756,7 +809,6 @@ html, body {
     }
   }
 }
-
 
 /* --- Page Transitions --- */
 
@@ -773,27 +825,39 @@ main {
 }
 
 @keyframes VS-fade-in {
-  from { opacity: 0; }
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes VS-fade-out {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes VS-slide-to-left {
-  to { transform: translateX(-100px); }
+  to {
+    transform: translateX(-100px);
+  }
 }
 
 @keyframes VS-slide-from-right {
-  from { transform: translateX(100px); }
+  from {
+    transform: translateX(100px);
+  }
 }
 
 @keyframes VS-slide-to-right {
-  to { transform: translateX(100px); }
+  to {
+    transform: translateX(100px);
+  }
 }
 
 @keyframes VS-slide-from-left {
-  from { transform: translateX(-100px); }
+  from {
+    transform: translateX(-100px);
+  }
 }
 
 ::view-transition-old(VS-main) {
@@ -806,25 +870,29 @@ main {
 
 html.page-forward-transition::view-transition-old(VS-main),
 html:active-view-transition-type(forward)::view-transition-old(VS-main) {
-  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
-             250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-left;
+  animation:
+    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-left;
 }
 
 html.page-forward-transition::view-transition-new(VS-main),
 html:active-view-transition-type(forward)::view-transition-new(VS-main) {
-  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
-             250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-right;
+  animation:
+    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-right;
 }
 
 /* Backward transition */
 html.page-back-transition::view-transition-old(VS-main),
 html:active-view-transition-type(back)::view-transition-old(VS-main) {
-  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
-             250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-right;
+  animation:
+    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-right;
 }
 
 html.page-back-transition::view-transition-new(VS-main),
 html:active-view-transition-type(back)::view-transition-new(VS-main) {
-  animation: 200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
-             250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-left;
+  animation:
+    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-left;
 }
