@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://pdanpdan.github.io/virtual-scroll/sitemap.xml
