@@ -11,16 +11,16 @@ packages:
 catalogs:
   default:
     '@antfu/eslint-config': ^7.2.0
-    '@release-it/conventional-changelog': ^10.0.4
+    '@release-it/conventional-changelog': ^10.0.5
     '@tailwindcss/vite': ^4.1.18
-    '@types/node': ^25.2.0
+    '@types/node': ^25.2.1
     '@vitejs/plugin-vue': ^6.0.4
     '@vitest/coverage-v8': ^4.0.18
     '@vitest/ui': ^4.0.18
     '@vue/compiler-dom': ^3.5.27
     '@vue/test-utils': ^2.4.6
     '@vue/tsconfig': ^0.8.1
-    daisyui: ^5.5.17
+    daisyui: ^5.5.18
     eslint: ^9.39.2
     eslint-plugin-vuejs-accessibility: ^2.4.1
     jsdom: ^28.0.0
