@@ -15,10 +15,6 @@
   <!-- Minimal Essential Styles -->
   <style>
     [v-cloak] { display: none; }
-    html { --lightningcss-light: initial; --lightningcss-dark: ; color-scheme: light dark; }
-    @media (prefers-color-scheme: dark) { html { --lightningcss-light: ; --lightningcss-dark: initial; } }
-    html[data-theme="light"] { --lightningcss-light: initial; --lightningcss-dark: ; color-scheme: light; }
-    html[data-theme="dark"] { --lightningcss-light: ; --lightningcss-dark: initial; color-scheme: dark; }
     html, body, #app { height: 100%; margin: 0; overflow: hidden; font-family: sans-serif; }
 
     .example-item { display: flex; align-items: center; border-bottom: 1px solid color-mix(in oklch, var(--color-base-content), transparent 90%); padding: 0 1rem; font-size: 0.875rem; }
