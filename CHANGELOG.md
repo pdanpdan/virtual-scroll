@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.8.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.7.0...v0.8.0) (2026-02-07)
+
+
+### Features
+
+* use lightningcss with profile widely-available to compile css ([ed05e47](https://github.com/pdanpdan/virtual-scroll/commit/ed05e4777af04ecb6b98ffdd31c681a1a2b16a86))
+
 # [0.7.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.6.1...v0.7.0) (2026-02-03)
 
 
