@@ -191,22 +191,45 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </div>
         </div>
 
-        <div class="col-span-full docs-usage-card docs-usage-card--accent">
+        <div class="docs-usage-card docs-usage-card--accent">
           <div class="docs-usage-card-body">
             <h3 class="docs-usage-card-title docs-usage-card-title--accent">CDN Usage</h3>
             <p class="docs-usage-card-description">Use directly in browser without build step.</p>
             <CodeBlock
               class="docs-code-block"
               lang="html"
-              code="&lt;script src=&quot;https://unpkg.com/vue@3&quot;&gt;&lt;/script&gt;
-&lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css&quot;&gt;
-&lt;script src=&quot;https://unpkg.com/@pdanpdan/virtual-scroll&quot;&gt;&lt;/script&gt;"
+              code="&lt;script src=&quot;https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/virtual-scroll.css&quot;&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/index.js&quot;&gt;&lt;/script&gt;"
             />
             <p />
             <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80 mt-2">
               <li>No installation required.</li>
               <li>Available via <code>window.VirtualScroll</code>.</li>
             </ul>
+          </div>
+        </div>
+
+        <div class="docs-usage-card docs-usage-card--accent">
+          <div class="docs-usage-card-body">
+            <h3 class="docs-usage-card-title docs-usage-card-title--accent">CDN Stand-alone Examples</h3>
+            <p class="docs-usage-card-description text-xs">Full-page HTML examples loading all dependencies from CDN.</p>
+            <div class="flex-1 overflow-auto mt-2">
+              <ul class="grid grid-cols-1 @3xl:grid-cols-2 gap-x-4 gap-y-1 text-sm @4xl:text-base">
+                <li><a href="/virtual-scroll/umd/index.html" target="_blank" data-vike="false" class="link link-primary font-bold">Main Index</a></li>
+                <li><a href="/virtual-scroll/umd/essential-vertical-fixed.html" target="_blank" data-vike="false" class="link">Vertical Fixed</a></li>
+                <li><a href="/virtual-scroll/umd/essential-vertical-dynamic.html" target="_blank" data-vike="false" class="link">Vertical Dynamic</a></li>
+                <li><a href="/virtual-scroll/umd/essential-horizontal-fixed.html" target="_blank" data-vike="false" class="link">Horizontal Fixed</a></li>
+                <li><a href="/virtual-scroll/umd/essential-horizontal-dynamic.html" target="_blank" data-vike="false" class="link">Horizontal Dynamic</a></li>
+                <li><a href="/virtual-scroll/umd/essential-grid-fixed.html" target="_blank" data-vike="false" class="link">Grid Fixed</a></li>
+                <li><a href="/virtual-scroll/umd/essential-grid-dynamic.html" target="_blank" data-vike="false" class="link">Grid Dynamic</a></li>
+                <li><a href="/virtual-scroll/umd/feature-custom-scrollbar.html" target="_blank" data-vike="false" class="link">Custom Scrollbar</a></li>
+                <li><a href="/virtual-scroll/umd/feature-infinite-scroll.html" target="_blank" data-vike="false" class="link">Infinite Scroll</a></li>
+                <li><a href="/virtual-scroll/umd/feature-sticky-sections.html" target="_blank" data-vike="false" class="link">Sticky Sections</a></li>
+                <li><a href="/virtual-scroll/umd/pattern-chat.html" target="_blank" data-vike="false" class="link">Chat Interface</a></li>
+                <li><a href="/virtual-scroll/umd/pattern-table.html" target="_blank" data-vike="false" class="link">Semantic Table</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
