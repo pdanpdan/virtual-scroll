@@ -64,12 +64,17 @@
     "@vitejs/plugin-vue": "catalog:",
     "@vue/test-utils": "catalog:",
     "@vue/tsconfig": "catalog:",
+    "browserslist": "catalog:",
     "jsdom": "catalog:",
+    "lightningcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
     "vue-tsc": "catalog:"
-  }
+  },
+  "browserslist": [
+    ">0.5%, baseline widely available"
+  ]
 }
