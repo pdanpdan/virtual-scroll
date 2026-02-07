@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinite Scroll - Virtual Scroll Stand-alone</title>
+
+  <!-- External Styles and Scripts -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/index.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/virtual-scroll.css">
+
+  <!-- Minimal Essential Styles -->
+  <style>
+    [v-cloak] { display: none; }
+    html { --lightningcss-light: initial; --lightningcss-dark: ; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { html { --lightningcss-light: ; --lightningcss-dark: initial; } }
+    html[data-theme="light"] { --lightningcss-light: initial; --lightningcss-dark: ; color-scheme: light; }
+    html[data-theme="dark"] { --lightningcss-light: ; --lightningcss-dark: initial; color-scheme: dark; }
+    html, body, #app { height: 100%; margin: 0; overflow: hidden; font-family: sans-serif; }
+
+    .example-item { display: flex; align-items: center; border-bottom: 1px solid color-mix(in oklch, var(--color-base-content), transparent 90%); padding: 0 1rem; font-size: 0.875rem; }
+    .example-item--horizontal { flex-direction: column; justify-content: center; border-bottom: 0; border-right: 1px solid color-mix(in oklch, var(--color-base-content), transparent 90%); text-align: center; }
+    .example-item:hover { background-color: color-mix(in oklch, var(--color-base-content), transparent 95%); }
+
+    .example-badge { background: var(--color-neutral); color: var(--color-neutral-content); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: 12px; }
+    .example-badge--horizontal { margin-right: 0; margin-bottom: 8px; }
+
+    .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid color-mix(in oklch, var(--color-base-content), transparent 90%); border-bottom: 1px solid color-mix(in oklch, var(--color-base-content), transparent 90%); font-size: 11px; }
+
+  </style>
+
+  <!-- Theme Support -->
+  <script>
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const updateTheme = (evt) => { document.documentElement.dataset.theme = evt.matches ? "dark" : "light"; }
+    updateTheme(mediaQuery);
+    mediaQuery.addListener(updateTheme);
+  </script>
+</head>
+
+<body>
+  <div id="app" v-cloak class="max-h-dvh flex flex-col bg-base-200 text-base-content">
+    <!-- Header: Title and Description -->
+    <div class="px-4 py-2 bg-base-100 border-b border-base-content/10 shrink-0 flex items-center justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="text-lg font-black text-primary uppercase tracking-tight truncate">Infinite Scroll</h1>
+        <p class="text-xs opacity-60 leading-tight truncate">Demonstrates the load event and loading prop/slot for automatic pagination.</p>
+      </div>
+
+      <a href="index.html" data-vike="false" class="btn btn-xs btn-ghost gap-1 px-2 shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+        <span class="uppercase text-[10px] font-bold">Back</span>
+      </a>
+    </div>
+
+    <!-- Interactive Status Bar -->
+    <div class="flex items-center gap-4 p-2 bg-base-300 text-[11px] font-mono border-b border-base-content/10 shrink-0">
+      <div class="flex items-center gap-1">
+        <span class="opacity-50">Items:</span>
+        <input v-model.number="itemCount" class="input input-xs input-bordered w-20 h-6">
+      </div>
+
+      <div v-if="direction !== 'horizontal'" class="flex items-center gap-1">
+        <span class="opacity-50">Size:</span>
+        <input v-model.number="itemSize" class="input input-xs input-bordered w-16 h-6">
+      </div>
+
+      <button @click="scrollToRandom" class="btn btn-xs btn-primary h-6 min-h-0 px-2 uppercase text-[10px]">Random Scroll</button>
+
+      <div class="grow"></div>
+
+      <div class="hidden sm:block opacity-60 uppercase tracking-tighter">
+        Range: {{ scrollDetails?.range?.start }}-{{ scrollDetails?.range?.end }} |
+        Offset: {{ Math.round(scrollDetails?.scrollOffset?.x || 0) }}, {{ Math.round(scrollDetails?.scrollOffset?.y || 0) }}
+      </div>
+    </div>
+
+    <!-- Main Viewport Content -->
+
+    <virtual-scroll
+      ref="vs"
+      class="flex-1"
+      :items="infiniteItems"
+      :item-size="itemSize"
+      :loading="loading"
+      @load="onLoad"
+      @scroll="onScroll"
+    >
+      <template #item="{ index }">
+        <div class="example-item h-full">
+          <span class="example-badge">#{{ index }}</span>
+          <span>Infinite Item {{ index }}</span>
+        </div>
+      </template>
+
+      <template #loading>
+        <div class="p-4 text-center text-primary font-bold animate-pulse uppercase text-xs tracking-widest">
+          Loading more items...
+        </div>
+      </template>
+    </virtual-scroll>
+
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    const { createApp, ref, computed } = Vue;
+    const { VirtualScroll } = window.VirtualScroll;
+
+    createApp({
+      setup() {
+        const direction = 'vertical';
+        const itemCount = ref(100);
+        const itemSize = ref(direction === 'vertical' ? 50 : 160);
+        const vs = ref(null);
+        const scrollDetails = ref(null);
+
+        const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
+          id: i,
+          text: 'Item ' + i,
+          color: 'hsl(' + ((i * 137.5) % 360) + ', 70%, 50%)'
+        })));
+
+        const onScroll = (details) => {
+          scrollDetails.value = details;
+        };
+
+        const scrollToRandom = () => {
+          const idx = Math.floor(Math.random() * itemCount.value);
+          vs.value?.scrollToIndex(idx, direction === 'both' ? Math.floor(Math.random() * 10) : null, { behavior: 'smooth' });
+        };
+
+        const infiniteItems = ref([]);
+        const loading = ref(false);
+        itemCount.value = 100;
+        const onLoad = () => {
+          if (loading.value || infiniteItems.value.length > itemCount.value + 500) return;
+          loading.value = true;
+          setTimeout(() => {
+            const start = infiniteItems.value.length;
+            infiniteItems.value.push(...Array.from({ length: 20 }, (_, i) => start + i));
+            loading.value = false;
+          }, 800);
+        };
+        Vue.watch(itemCount, (val) => {
+          infiniteItems.value = Array.from({ length: val }, (_, i) => i);
+        }, { immediate: true });
+
+        return {
+          itemCount,
+          itemSize,
+          items,
+          vs,
+          scrollDetails,
+          onScroll,
+          scrollToRandom,
+          direction,
+          infiniteItems, loading, onLoad,
+        };
+      }
+    })
+    .component('virtual-scroll', VirtualScroll)
+    .mount('#app');
+  </script>
+</body>
+</html>

@@ -30,11 +30,11 @@ pnpm add @pdanpdan/virtual-scroll
 ### 2. Grid (Table/Spreadsheet)
 [Live Example](https://pdanpdan.github.io/virtual-scroll/essential-grid-fixed)
 ```vue
-<VirtualScroll 
-  :items="items" 
-  direction="both" 
-  :column-count="10" 
-  :column-width="150" 
+<VirtualScroll
+  :items="items"
+  direction="both"
+  :column-count="10"
+  :column-width="150"
   :item-size="40"
 >
   <template #item="{ item, index }">
@@ -150,3 +150,24 @@ Customize the default virtual scrollbar:
 - [Documentation & Examples](https://pdanpdan.github.io/virtual-scroll/)
 - [GitHub Repository](https://github.com/pdanpdan/virtual-scroll)
 - [NPM Package](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
+
+## UMD Stand-alone Examples
+- [Grid Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-grid-dynamic.html): Simultaneously virtualizes rows and columns with dynamic detection of widths from any slot structure.
+- [Grid Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-grid-fixed.html): Simultaneously virtualizes rows and columns using fixed itemSize and alternating columnWidth values.
+- [Horizontal Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-horizontal-dynamic.html): Horizontal scrolling with items with different widths measured via ResizeObserver.
+- [Horizontal Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-horizontal-fixed.html): Optimized for items where every item has the same width and row height is filled automatically.
+- [Vertical Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-dynamic.html): Vertical scrolling with variable item heights automatically measured using ResizeObserver.
+- [Vertical Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-fixed.html): Optimized for lists where every item has the same height and items are only rendered when they enter the visible viewport.
+- [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/umd/feature-custom-scrollbar.html): Demonstrates the virtual scrollbar implementation that allows the scrollbar to be designed and styled by the user.
+- [Independent Scrollbars](https://pdanpdan.github.io/virtual-scroll/umd/feature-independent-scrollbars.html): Demonstrates using VirtualScrollbar components independently to control a standard scrollable div.
+- [Infinite Scroll](https://pdanpdan.github.io/virtual-scroll/umd/feature-infinite-scroll.html): Demonstrates the load event and loading prop/slot for automatic pagination.
+- [Scroll Restoration](https://pdanpdan.github.io/virtual-scroll/umd/feature-scroll-restoration.html): Demonstrates maintaining scroll position when items are prepended to the list.
+- [Sticky Sections](https://pdanpdan.github.io/virtual-scroll/umd/feature-sticky-sections.html): Demonstrates iOS-style sticky headers where new headers push previous ones out of view.
+- [Chat Interface](https://pdanpdan.github.io/virtual-scroll/umd/pattern-chat.html): Chat demonstration with dynamic heights, initial scroll to bottom, and history scroll restoration.
+- [Draggable List](https://pdanpdan.github.io/virtual-scroll/umd/pattern-draggable.html): Reorder virtualized items using native drag and drop while maintaining high performance.
+- [Photo Gallery](https://pdanpdan.github.io/virtual-scroll/umd/pattern-gallery.html): High-performance grid gallery featuring lazy-loading placeholders and a lightbox.
+- [Masonry Grid](https://pdanpdan.github.io/virtual-scroll/umd/pattern-masonry.html): Achieve masonry layout by combining multiple VirtualScroll columns sharing a single scroll container.
+- [Search & Highlight](https://pdanpdan.github.io/virtual-scroll/umd/pattern-search.html): Generic way to provide native search in virtualized content using data-layer searching and CSS Custom Highlight API. Triggered with Ctrl+K.
+- [Spreadsheet Grid](https://pdanpdan.github.io/virtual-scroll/umd/pattern-spreadsheet.html): Excel-like bidirectional grid with sticky row and column headers and resizable cells.
+- [Table](https://pdanpdan.github.io/virtual-scroll/umd/pattern-table.html): Semantic HTML table virtualization for semantically correct and accessible tabular data grids.
+- [Collapsible Tree](https://pdanpdan.github.io/virtual-scroll/umd/pattern-tree.html): Hierarchical list where items can be expanded or collapsed while maintaining smooth performance.
