@@ -2,7 +2,7 @@ const BASE_URL = import.meta.env.BASE_URL;
 
 export function normalizeHref(href: string, addBase: boolean = true) {
   const url = addBase === true && href.startsWith(BASE_URL) === false ? `${ BASE_URL }/${ href }` : href;
-  return `/${ url.split('/').filter((t) => t.length > 0).join('/') }`;
+  return `/${ url.split('/').filter((t) => t.length > 0).join('/') }/`;
 }
 
 export function matchHref(href: string, urlPathname: string) {
