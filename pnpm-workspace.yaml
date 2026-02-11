@@ -10,10 +10,10 @@ packages:
   - packages/*
 catalogs:
   default:
-    '@antfu/eslint-config': ^7.3.0
+    '@antfu/eslint-config': ^7.4.3
     '@release-it/conventional-changelog': ^10.0.5
     '@tailwindcss/vite': ^4.1.18
-    '@types/node': ^25.2.2
+    '@types/node': ^25.2.3
     '@vitejs/plugin-vue': ^6.0.4
     '@vitest/coverage-v8': ^4.0.18
     '@vitest/ui': ^4.0.18
