@@ -1,13 +1,14 @@
 import type { UseVirtualScrollbarProps } from '../../src/composables/useVirtualScrollbar';
+import type { MaybeRefOrGetter } from 'vue';
 
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
-import { defineComponent, h, nextTick, ref } from 'vue';
+import { computed, defineComponent, h, nextTick, ref } from 'vue';
 
 import { useVirtualScrollbar } from '../../src/composables/useVirtualScrollbar';
 
 // Helper to test composable
-function setup(propsValue: UseVirtualScrollbarProps) {
+function setup(propsValue: MaybeRefOrGetter<UseVirtualScrollbarProps>) {
   let result: ReturnType<typeof useVirtualScrollbar>;
 
   const TestComponent = defineComponent({
@@ -109,13 +110,13 @@ describe('useVirtualScrollbar', () => {
   describe('reactivity', () => {
     it('updates when props change reactively', async () => {
       const position = ref(0);
-      const { result } = setup({
+      const { result } = setup(computed(() => ({
         axis: 'vertical',
         totalSize: 1000,
-        position,
+        position: position.value,
         viewportSize: 200,
         scrollToOffset: vi.fn(),
-      });
+      })));
 
       expect(result.positionPercent.value).toBe(0);
 
@@ -512,15 +513,23 @@ describe('useVirtualScrollbar', () => {
 
   describe('lifecycle', () => {
     it('handles missing track element during move', () => {
-      const { wrapper } = setup({
+      const scrollSpy = vi.fn();
+      const { result } = setup({
         axis: 'vertical',
         totalSize: 1000,
         position: 0,
         viewportSize: 200,
-        scrollToOffset: vi.fn(),
+        scrollToOffset: scrollSpy,
       });
 
-      wrapper.unmount();
+      result.isDragging.value = true;
+      const event = {
+        clientY: 100,
+        currentTarget: document.createElement('div'), // no parent
+      } as unknown as PointerEvent;
+
+      result.thumbProps.value.onPointermove!(event);
+      expect(scrollSpy).not.toHaveBeenCalled();
     });
   });
 });

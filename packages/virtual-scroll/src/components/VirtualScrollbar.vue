@@ -19,18 +19,18 @@ const emit = defineEmits<{
   (e: 'scrollToOffset', offset: number): void;
 }>();
 
-const { trackProps, thumbProps } = useVirtualScrollbar({
-  axis: () => props.axis,
-  totalSize: () => props.totalSize,
-  position: () => props.position,
-  viewportSize: () => props.viewportSize,
-  containerId: () => props.containerId,
-  isRtl: () => props.isRtl,
+const { trackProps, thumbProps } = useVirtualScrollbar(() => ({
+  axis: props.axis,
+  totalSize: props.totalSize,
+  position: props.position,
+  viewportSize: props.viewportSize,
+  containerId: props.containerId,
+  isRtl: props.isRtl,
   scrollToOffset: (offset: number) => {
     props.scrollToOffset?.(offset);
     emit('scrollToOffset', offset);
   },
-});
+}));
 </script>
 
 <template>
