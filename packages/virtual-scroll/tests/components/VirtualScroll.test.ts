@@ -20,14 +20,14 @@ Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: tru
 HTMLElement.prototype.scrollTo = function (this: HTMLElement, options?: number | ScrollToOptions, y?: number) {
   if (typeof options === 'object') {
     if (options.top !== undefined) {
-      this.scrollTop = options.top;
+      Object.defineProperty(this, 'scrollTop', { configurable: true, value: options.top, writable: true });
     }
     if (options.left !== undefined) {
-      this.scrollLeft = options.left;
+      Object.defineProperty(this, 'scrollLeft', { configurable: true, value: options.left, writable: true });
     }
   } else if (typeof options === 'number' && typeof y === 'number') {
-    this.scrollLeft = options;
-    this.scrollTop = y;
+    Object.defineProperty(this, 'scrollLeft', { configurable: true, value: options, writable: true });
+    Object.defineProperty(this, 'scrollTop', { configurable: true, value: y, writable: true });
   }
   this.dispatchEvent(new (this.ownerDocument?.defaultView?.Event || Event)('scroll'));
 };
@@ -213,11 +213,13 @@ describe('virtualScroll', () => {
         },
       });
       await nextTick();
-      wrapper.unmount();
-      // no errors should be thrown
+      expect(() => wrapper.unmount()).not.toThrow();
     });
 
     it('handles hostRef change', async () => {
+      const observeSpy = vi.spyOn(ResizeObserver.prototype, 'observe');
+      const unobserveSpy = vi.spyOn(ResizeObserver.prototype, 'unobserve');
+
       const wrapper = mount(VirtualScroll, {
         props: {
           items: mockItems,
@@ -225,9 +227,16 @@ describe('virtualScroll', () => {
         },
       });
       await nextTick();
+      const firstHost = wrapper.find('.virtual-scroll-container').element;
+
       await wrapper.setProps({ containerTag: 'section' });
       await nextTick();
-      // should have unobserved old and observed new
+
+      expect(unobserveSpy).toHaveBeenCalledWith(firstHost);
+      expect(observeSpy).toHaveBeenCalled();
+
+      observeSpy.mockRestore();
+      unobserveSpy.mockRestore();
     });
 
     it('stops active smooth scroll via stopProgrammaticScroll', async () => {
@@ -246,6 +255,111 @@ describe('virtualScroll', () => {
 
       // Should not have moved significantly or at all from where it was stopped
       expect(vs.scrollDetails.scrollOffset.y).toBe(posBefore);
+    });
+
+    it('handles table container tag correctly', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          containerTag: 'table',
+          direction: 'vertical',
+        },
+      });
+      await nextTick();
+      const container = wrapper.find('.virtual-scroll-container');
+      expect(container.element.tagName).toBe('TABLE');
+      expect(container.attributes('role')).toBeUndefined();
+      expect(container.classes()).toContain('virtual-scroll--table');
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.wrapperRole).toBeNull();
+      expect(vs.cellRole).toBe('cell');
+    });
+
+    it('handles custom roles and orientation', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          role: 'tree',
+          direction: 'vertical',
+        },
+      });
+      await nextTick();
+      const wrapperEl = wrapper.find('.virtual-scroll-wrapper');
+      expect(wrapperEl.attributes('aria-orientation')).toBe('vertical');
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.getItemAriaProps(0).role).toBe('treeitem');
+
+      await wrapper.setProps({ role: 'listbox' });
+      expect(vs.getItemAriaProps(0).role).toBe('option');
+
+      await wrapper.setProps({ role: 'menu' });
+      expect(vs.getItemAriaProps(0).role).toBe('menuitem');
+    });
+
+    it('handles presentation role for items by falling back to internal role', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { items: mockItems, itemRole: 'presentation' },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.getItemAriaProps(0).role).toBe('listitem');
+    });
+
+    it('provides correct ARIA attributes for hierarchical structures like tree', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          role: 'tree',
+        },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.getItemAriaProps(0).role).toBe('treeitem');
+    });
+
+    it('provides correct ARIA attributes for lists and menus', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemRole: 'menuitem',
+        },
+      });
+
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      const aria = vs.getItemAriaProps(0);
+
+      expect(aria.role).toBe('menuitem');
+      expect(aria[ 'aria-posinset' ]).toBe(1);
+      expect(aria[ 'aria-setsize' ]).toBe(100);
+    });
+
+    it('falls back to gridcell role for cells by default in grid mode', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          direction: 'both',
+          columnCount: 5,
+        },
+      });
+
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.getCellAriaProps(0).role).toBe('gridcell');
+    });
+
+    it('returns empty ARIA props for cells when no cell role is defined', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          direction: 'vertical', // no grid, no table -> no cell role
+        },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.getCellAriaProps(0)).toEqual({});
     });
   });
 
@@ -306,15 +420,29 @@ describe('virtualScroll', () => {
     });
 
     it('handles wheel when virtual scrollbars are inactive', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { value: 500 });
+      Object.defineProperty(container, 'scrollTop', { value: 0, writable: true, configurable: true });
+
       const wrapper = mount(VirtualScroll, {
         props: {
           items: mockItems,
           virtualScrollbar: false,
+          container,
         },
       });
       await nextTick();
-      await wrapper.find('.virtual-scroll-container').trigger('wheel', { deltaY: 100 });
-      // should just stop programmatic scroll
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      // Start a programmatic scroll
+      vs.scrollToIndex(5);
+      expect(vs.scrollDetails.isProgrammaticScroll).toBe(true);
+
+      // Trigger wheel event on the component root
+      await wrapper.trigger('wheel', { deltaY: 100 });
+
+      // Should stop programmatic scroll
+      expect(vs.scrollDetails.isProgrammaticScroll).toBe(false);
     });
 
     it('should not enter a loop when scrolling to end with dynamic items', async () => {
@@ -705,7 +833,7 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'PageDown' });
       await nextTick();
-      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(500);
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(450);
 
       await container.trigger('keydown', { key: 'PageUp' });
       await nextTick();
@@ -753,7 +881,7 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'PageDown' });
       await nextTick();
-      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(500);
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(400);
 
       await container.trigger('keydown', { key: 'PageUp' });
       await nextTick();
@@ -1023,6 +1151,216 @@ describe('virtualScroll', () => {
       await wrapper.find('.virtual-scroll-container').trigger('keydown', { key: 'ArrowRight' });
 
       expect(scrollToIndexSpy).not.toHaveBeenCalled();
+    });
+
+    it('respects snapMode="center" with ArrowDown', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          snap: 'center',
+        },
+      });
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      const container = wrapper.find('.virtual-scroll-container');
+      triggerResize(container.element, 500, 500);
+      await nextTick();
+      await nextTick();
+
+      // Start at item 10 centered.
+      // Offset for item 10 is 10 * 50 = 500.
+      // To center it in 500px viewport, scroll offset should be 500 - (500/2 - 50/2) = 500 - 225 = 275.
+      vs.scrollToIndex(10, null, { align: 'center', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.scrollOffset.y).toBe(275);
+
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+      await nextTick();
+
+      // Should move to item 11 centered.
+      // Offset for item 11 is 11 * 50 = 550.
+      // Centered: 550 - 225 = 325.
+      expect(vs.scrollDetails.scrollOffset.y).toBe(325);
+    });
+
+    it('respects snapMode="center" with ArrowUp', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          snap: 'center',
+        },
+      });
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      const container = wrapper.find('.virtual-scroll-container');
+      triggerResize(container.element, 500, 500);
+      await nextTick();
+      await nextTick();
+
+      vs.scrollToIndex(10, null, { align: 'center', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.scrollOffset.y).toBe(275);
+
+      await container.trigger('keydown', { key: 'ArrowUp' });
+      await nextTick();
+      await nextTick();
+
+      // Should move to item 9 centered.
+      // Offset for item 9 is 9 * 50 = 450.
+      // Centered: 450 - 225 = 225.
+      expect(vs.scrollDetails.scrollOffset.y).toBe(225);
+    });
+
+    it('respects snapMode="start" with ArrowDown', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          snap: 'start',
+        },
+      });
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      const container = wrapper.find('.virtual-scroll-container');
+      triggerResize(container.element, 500, 500);
+      await nextTick();
+      await nextTick();
+
+      // Start at index 0.
+      // ArrowDown should scroll to index 1 and align to START because snap="start".
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+      await nextTick();
+
+      // index 1 offset is 50.
+      expect(vs.scrollDetails.scrollOffset.y).toBe(50);
+    });
+
+    it('respects snapMode="end" with ArrowUp', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          snap: 'end',
+        },
+      });
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      const container = wrapper.find('.virtual-scroll-container');
+      triggerResize(container.element, 500, 500);
+      await nextTick();
+      await nextTick();
+
+      // Scroll to index 20 aligned to end.
+      // Index 20 bottom is (20+1)*50 = 1050.
+      // End aligned: 1050 - 500 = 550.
+      vs.scrollToIndex(20, null, { align: 'end', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+      expect(vs.scrollDetails.scrollOffset.y).toBe(550);
+
+      // ArrowUp should scroll to index 19 and align to END.
+      // Index 19 bottom is 20*50 = 1000.
+      // End aligned: 1000 - 500 = 500.
+      await container.trigger('keydown', { key: 'ArrowUp' });
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.scrollOffset.y).toBe(500);
+    });
+
+    it('scrolls to next item with arrowdown when snap="start"', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 50,
+          snap: 'start',
+        },
+      });
+      await nextTick();
+      const container = wrapper.find('.virtual-scroll-container');
+
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.scrollDetails.scrollOffset.y).toBe(50);
+    });
+
+    it('scrolls to previous item with arrowup when snap="start"', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 50,
+          snap: 'start',
+        },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      vs.scrollToIndex(1, null, { align: 'start', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      await container.trigger('keydown', { key: 'ArrowUp' });
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.scrollOffset.y).toBe(0);
+    });
+
+    it('scrolls to next item with arrowright when snap="start" (horizontal)', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 100,
+          direction: 'horizontal',
+          snap: 'start',
+        },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      const container = wrapper.find('.virtual-scroll-container');
+
+      await container.trigger('keydown', { key: 'ArrowRight' });
+      await nextTick();
+      await nextTick();
+
+      expect(vs.scrollDetails.scrollOffset.x).toBe(100);
+    });
+
+    it('scrolls to previous item with arrowleft when snap="end" (horizontal)', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 100,
+          direction: 'horizontal',
+          snap: 'end',
+        },
+      });
+      await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      vs.scrollToIndex(null, 5, { align: 'end', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      await container.trigger('keydown', { key: 'ArrowLeft' });
+      await nextTick();
+      await nextTick();
+
+      // index 5 end: 600. viewport 500. offset 100.
+      // index 4 end: 500. viewport 500. offset 0.
+      expect(vs.scrollDetails.scrollOffset.x).toBe(0);
     });
   });
 
@@ -1451,14 +1789,18 @@ describe('virtualScroll', () => {
         props: { itemSize: 50, items: mockItems },
       });
       await nextTick();
-      const container = wrapper.find('.virtual-scroll-container');
-      const containerEl = container.element as HTMLElement;
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      const scrollSpy = vi.spyOn(vs, 'scrollToOffset');
+
+      const containerEl = wrapper.find('.virtual-scroll-container').element as HTMLElement;
 
       const pointerMoveEvent = new PointerEvent('pointermove', { bubbles: true, clientY: 400 });
       containerEl.dispatchEvent(pointerMoveEvent);
 
       const pointerUpEvent = new PointerEvent('pointerup', { bubbles: true });
       containerEl.dispatchEvent(pointerUpEvent);
+
+      expect(scrollSpy).not.toHaveBeenCalled();
     });
 
     it('handles pointer-based scrolling when scaling is active', async () => {
@@ -2121,18 +2463,35 @@ describe('virtualScroll', () => {
     });
 
     it('handles sticky header and footer measurements', async () => {
-      mount(VirtualScroll, {
+      const wrapper = mount(VirtualScroll, {
         props: {
           items: mockItems.slice(0, 10),
+          itemSize: 50,
           stickyFooter: true,
           stickyHeader: true,
         },
         slots: {
-          footer: () => h('div', { class: 'footer', style: 'height: 30px' }, 'FOOTER'),
-          header: () => h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
+          footer: h('div', { class: 'footer', style: 'height: 30px' }, 'FOOTER'),
+          header: h('div', { class: 'header', style: 'height: 40px' }, 'HEADER'),
         },
       });
       await nextTick();
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      const headerEl = wrapper.find('.virtual-scroll-header').element as HTMLElement;
+      const footerEl = wrapper.find('.virtual-scroll-footer').element as HTMLElement;
+
+      Object.defineProperty(headerEl, 'offsetHeight', { configurable: true, value: 40 });
+      Object.defineProperty(footerEl, 'offsetHeight', { configurable: true, value: 30 });
+
+      triggerResize(headerEl, 500, 40);
+      triggerResize(footerEl, 500, 30);
+
+      await nextTick();
+      await nextTick();
+
+      // items 10 * 50 = 500. header 40. footer 30. total = 570.
+      expect(vs.scrollDetails.totalSize.height).toBe(570);
     });
 
     it('accounts for sticky header and footer in scroll padding', async () => {
@@ -2363,6 +2722,109 @@ describe('virtualScroll', () => {
         expect(renderedCount).toBeLessThan(30);
         expect(renderedCount).toBeGreaterThan(10);
       });
+    });
+  });
+
+  describe('snap', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    it('snaps to item when scrolling stops if snap prop is true', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          snap: true,
+        },
+      });
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      const el = container.element as HTMLElement;
+
+      // Mock scrollTo on the element instance to capture calls and update state
+      el.scrollTo = vi.fn().mockImplementation((opts: ScrollToOptions) => {
+        if (opts.top !== undefined) {
+          el.scrollTop = opts.top;
+        }
+      });
+
+      // Simulate user scrolling to 75
+      Object.defineProperty(el, 'scrollTop', { value: 75, writable: true });
+      await container.trigger('scroll');
+
+      await nextTick();
+
+      // Advance timer to trigger snap timeout (250ms)
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      // scrollTo should have been called to snap to 50
+      expect(el.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 50, behavior: 'smooth', left: 0 }));
+    });
+
+    it('does not snap if snap prop is false', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          snap: false,
+        },
+      });
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      const el = container.element as HTMLElement;
+
+      el.scrollTo = vi.fn();
+
+      // Scroll to 75
+      Object.defineProperty(el, 'scrollTop', { value: 75, writable: true });
+      await container.trigger('scroll');
+
+      await nextTick();
+
+      // Clear previous calls (if any, though trigger scroll shouldn't call scrollTo)
+      vi.mocked(el.scrollTo).mockClear();
+
+      // Advance timer
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(el.scrollTo).not.toHaveBeenCalled();
+    });
+
+    it('snaps to center if snap prop is "center"', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 100,
+          items: mockItems,
+          snap: 'center',
+        },
+      });
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      const el = container.element as HTMLElement;
+
+      el.scrollTo = vi.fn().mockImplementation((opts: ScrollToOptions) => {
+        if (opts.top !== undefined) {
+          el.scrollTop = opts.top;
+        }
+      });
+
+      // Viewport 500. Center is 250. Scroll to 20 -> center is 270.
+      // Item at 270 is index 2 (200-300).
+      // Snaps index 2 to center. Item center is 250. Viewport center is 250. Top = 0.
+      Object.defineProperty(el, 'scrollTop', { value: 20, writable: true });
+      await container.trigger('scroll');
+
+      await nextTick();
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(el.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0, behavior: 'smooth', left: 0 }));
     });
   });
 });
