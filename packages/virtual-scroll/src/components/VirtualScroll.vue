@@ -683,6 +683,41 @@ function handleKeyDown(event: KeyboardEvent) {
   const { currentIndex, currentEndIndex, currentColIndex, currentEndColIndex } = scrollDetails.value;
 
   /**
+   * Helper to calculate the target index for PageUp/PageDown.
+   *
+   * @param isVerticalAxis - True for vertical, false for horizontal.
+   * @param isForward - True for forward (PageDown), false for backward (PageUp).
+   */
+  const getPageTarget = (isVerticalAxis: boolean, isForward: boolean) => {
+    const isHorizontalAxis = !isVerticalAxis;
+    const startIdx = isVerticalAxis ? currentIndex : currentColIndex;
+    const endIdx = isVerticalAxis ? currentEndIndex : currentEndColIndex;
+    const pageSize = Math.max(1, endIdx - startIdx);
+    const maxIdx = isVerticalAxis
+      ? props.items.length - 1
+      : (props.columnCount ? props.columnCount - 1 : props.items.length - 1);
+
+    if (isForward) {
+      if (snapMode === 'center') {
+        return Math.min(maxIdx, getCenterIndex(isHorizontalAxis) + pageSize);
+      }
+      if (snapMode === 'end') {
+        return Math.min(maxIdx, endIdx + pageSize);
+      }
+      return endIdx; // default or snapMode === 'start'
+    } else {
+      // backward
+      if (snapMode === 'center') {
+        return Math.max(0, getCenterIndex(isHorizontalAxis) - pageSize);
+      }
+      if (snapMode === 'start') {
+        return Math.max(0, startIdx - pageSize);
+      }
+      return startIdx; // default or snapMode === 'end'
+    }
+  };
+
+  /**
    * Performs keyboard navigation for arrow keys.
    *
    * @param isVerticalAxis - True for vertical, false for horizontal.
@@ -838,18 +873,18 @@ function handleKeyDown(event: KeyboardEvent) {
       event.preventDefault();
       stopProgrammaticScroll();
       if (props.direction === 'horizontal') {
-        scrollToIndex(null, currentColIndex, { align: 'end' });
+        scrollToIndex(null, getPageTarget(false, false), { align: snapMode || 'end' });
       } else {
-        scrollToIndex(currentIndex, null, { align: 'end' });
+        scrollToIndex(getPageTarget(true, false), null, { align: snapMode || 'end' });
       }
       break;
     case 'PageDown':
       event.preventDefault();
       stopProgrammaticScroll();
       if (props.direction === 'horizontal') {
-        scrollToIndex(null, currentEndColIndex, { align: 'start' });
+        scrollToIndex(null, getPageTarget(false, true), { align: snapMode || 'start' });
       } else {
-        scrollToIndex(currentEndIndex, null, { align: 'start' });
+        scrollToIndex(getPageTarget(true, true), null, { align: snapMode || 'start' });
       }
       break;
   }

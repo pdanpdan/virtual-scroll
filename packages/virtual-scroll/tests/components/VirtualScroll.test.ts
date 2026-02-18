@@ -2817,7 +2817,7 @@ describe('virtualScroll', () => {
       // Viewport 500. Center is 250. Scroll to 20 -> center is 270.
       // Item at 270 is index 2 (200-300).
       // Snaps index 2 to center. Item center is 250. Viewport center is 250. Top = 0.
-      Object.defineProperty(el, 'scrollTop', { value: 20, writable: true });
+      Object.defineProperty(el, 'scrollTop', { value: 20, writable: true, configurable: true });
       await container.trigger('scroll');
 
       await nextTick();
@@ -2825,6 +2825,35 @@ describe('virtualScroll', () => {
       await nextTick();
 
       expect(el.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0, behavior: 'smooth', left: 0 }));
+    });
+
+    it('respects snap mode with PageUp and PageDown', async () => {
+      vi.useRealTimers();
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 100,
+          items: mockItems,
+          snap: 'center',
+        },
+      });
+      await nextTick();
+      const container = wrapper.find('.virtual-scroll-container');
+
+      // 500px viewport, 100px items.
+      // Initially at 0. centerIdx is index 2 (center 250).
+      // currentEndIndex is 4 (400..500). pageSize is 4 - 0 = 4.
+      // PageDown -> target = centerIdx + 4 = 6. align 'center'.
+      // index 6 center is 650. To center it in 500px viewport: scrollTop = 650 - 250 = 400.
+
+      await container.trigger('keydown', { key: 'PageDown' });
+      await nextTick();
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(400);
+
+      // PageUp -> target = centerIdx - 4 = 6 - 4 = 2. align 'center'.
+      // index 2 center is 250. scrollTop = 250 - 250 = 0.
+      await container.trigger('keydown', { key: 'PageUp' });
+      await nextTick();
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
   });
 });
