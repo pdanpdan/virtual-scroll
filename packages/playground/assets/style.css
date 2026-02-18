@@ -407,7 +407,7 @@ body {
 }
 
 @utility drawer-menu-title {
-  @apply my-6 text-sm font-black tracking-[0.2em] opacity-80 small-caps;
+  @apply my-6 text-sm font-black tracking-widest opacity-80 small-caps;
 }
 
 /* --- Documentation Utilities --- */

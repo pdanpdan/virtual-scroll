@@ -51,7 +51,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
       </div>
     </div>
 
-    <div class="divider col-span-full font-bold small-caps text-xs tracking-widest opacity-50">
+    <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Essentials
     </div>
 
@@ -119,7 +119,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
       group="4"
     />
 
-    <div class="divider col-span-full font-bold small-caps text-xs tracking-widest opacity-50">
+    <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Features
     </div>
 
@@ -172,7 +172,15 @@ import ExampleCard from '#/components/ExampleCard.vue';
       group="6"
     />
 
-    <div class="divider col-span-full font-bold small-caps text-xs tracking-widest opacity-50">
+    <ExampleCard
+      type="Feature"
+      title="Scroll Snapping"
+      description="Automatically align to the nearest item after scrolling stops."
+      href="/feature-scroll-snap"
+      group="7"
+    />
+
+    <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Patterns & Recipes
     </div>
 
