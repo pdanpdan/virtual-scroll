@@ -185,6 +185,17 @@ export interface SSRRange {
 /** Pixel padding configuration in display pixels (DU). */
 export type PaddingValue = number | { x?: number; y?: number; };
 
+/**
+ * Snap mode for automatic alignment after scrolling stops.
+ * - `false`: No snapping.
+ * - `true`: Same as 'auto'.
+ * - 'start': Aligns the first visible item to the viewport start if at least 50% visible, otherwise aligns the next item.
+ * - 'center': Aligns the item that intersects the viewport center to the center.
+ * - 'end': Aligns the last visible item to the viewport end if at least 50% visible, otherwise aligns the previous item.
+ * - 'auto': Intelligent snapping based on scroll direction. Acts as 'end' when scrolling towards start, and 'start' when scrolling towards end.
+ */
+export type SnapMode = boolean | 'start' | 'center' | 'end' | 'auto';
+
 /** Base configuration properties shared between the component and the composable. */
 export interface VirtualScrollBaseProps<T = unknown> {
   /** Array of data items to virtualize. */
@@ -254,7 +265,7 @@ export interface VirtualScrollBaseProps<T = unknown> {
   gap?: number | undefined;
 
   /**
-   * Gap between columns in VU.
+   * Gap between columns in virtual units (VU).
    * Applied in horizontal and bidirectional grid modes.
    */
   columnGap?: number | undefined;
@@ -328,6 +339,12 @@ export interface VirtualScrollBaseProps<T = unknown> {
    * Set to 'none' or 'presentation' to disable automatic role assignment on the wrapper.
    */
   itemRole?: string | undefined;
+
+  /**
+   * Whether to snap to items after scrolling stops.
+   * @default false
+   */
+  snap?: SnapMode | undefined;
 }
 
 /** Configuration properties for the `useVirtualScroll` composable. */
@@ -516,6 +533,12 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   getRowHeight: (index: number) => number;
   /** Helper to get ARIA attributes for a cell. */
   getCellAriaProps: (colIndex: number) => Record<string, string | number | undefined>;
+  /** Helper to get ARIA attributes for an item. */
+  getItemAriaProps: (index: number) => Record<string, string | number | undefined>;
+  /** The ARIA role of the items wrapper. */
+  wrapperRole: string | null;
+  /** The ARIA role of each cell. */
+  cellRole: string | null;
   /** Helper to get the virtual offset of a specific row. */
   getRowOffset: (index: number) => number;
   /** Helper to get the virtual offset of a specific column. */
@@ -525,7 +548,7 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   /** Helper to get the size of a specific item along the scroll axis. */
   getItemSize: (index: number) => number;
   /** Programmatically scroll to a specific row and/or column. */
-  scrollToIndex: (rowIndex: number | null | undefined, colIndex: number | null | undefined, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => void;
+  scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => void;
   /** Programmatically scroll to a specific pixel offset. */
   scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
   /** Resets all dynamic measurements and re-initializes from props. */
