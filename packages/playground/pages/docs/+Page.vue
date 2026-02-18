@@ -116,6 +116,15 @@ import CodeBlock from '#/components/CodeBlock.vue';
             </div>
           </div>
         </div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
+            <div>
+              <h4 class="docs-feature-card-title">Scroll Snapping</h4>
+              <p class="docs-feature-card-description">Auto-align items to viewport edges or center (start, center, end, auto).</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -416,6 +425,12 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <td>Distance from end to trigger <code>load</code> event.</td>
             </tr>
             <tr>
+              <td><code class="docs-prop-name">snap</code></td>
+              <td><code>bool | <a href="#snap-modes" class="link link-primary">SnapMode</a></code></td>
+              <td><code>false</code></td>
+              <td>Automatically align to nearest item after scroll stops. See <a href="#snap-modes" class="link link-primary font-bold">SnapMode</a>.</td>
+            </tr>
+            <tr>
               <td><code class="docs-prop-name">virtualScrollbar</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
@@ -435,7 +450,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </tr>
             <tr>
               <td><code class="docs-prop-name">initialScrollAlign</code></td>
-              <td><code><a href="#scroll-alignment" class="link">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td>
+              <td><code><a href="#alignments" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td>
               <td><code>'start'</code></td>
               <td>Alignment for initial index.</td>
             </tr>
@@ -481,6 +496,23 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <h3 id="accessibility" class="docs-prop-header">Accessibility (ARIA)</h3>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>The component automatically manages ARIA roles and attributes to ensure screen readers can navigate virtualized content. Common roles like <code>tree</code>, <code>listbox</code>, and <code>menu</code> are also supported.</p>
+        <div class="docs-table-container">
+          <table class="docs-table">
+            <thead><tr><th>Role Prop</th><th>Default Item Role</th><th>Behavior</th></tr></thead>
+            <tbody>
+              <tr><td><code>list</code> (default)</td><td><code>listitem</code></td><td>Standard 1D list.</td></tr>
+              <tr><td><code>grid</code></td><td><code>row</code></td><td>2D data grid or table.</td></tr>
+              <tr><td><code>tree</code></td><td><code>treeitem</code></td><td>Hierarchical structure.</td></tr>
+              <tr><td><code>listbox</code></td><td><code>option</code></td><td>Selectable list.</td></tr>
+              <tr><td><code>menu</code></td><td><code>menuitem</code></td><td>Navigation menu.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <h4 class="docs-prop-subheader text-primary">ScrollAlignment</h4>
@@ -706,14 +738,14 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <kbd class="docs-kbd">↑</kbd>
               <kbd class="docs-kbd">↓</kbd>
             </span>
-            <span class="docs-kbd-description">Scroll vertically by item height.</span>
+            <span class="docs-kbd-description">Scroll vertically by item height (respects <code>snap</code> mode).</span>
           </div>
           <div class="docs-kbd-item">
             <span class="flex gap-1">
               <kbd class="docs-kbd">←</kbd>
               <kbd class="docs-kbd">→</kbd>
             </span>
-            <span class="docs-kbd-description">Scroll horizontally by column width.</span>
+            <span class="docs-kbd-description">Scroll horizontally by column width (respects <code>snap</code> mode).</span>
           </div>
         </div>
       </div>
@@ -857,6 +889,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           <code class="docs-link-title docs-link-title--primary">renderedWidth / renderedHeight</code>
           <p class="docs-link-description">Physical dimensions in DOM (clamped).</p>
         </a>
+        <div class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">wrapperRole / cellRole</code>
+          <p class="docs-link-description">The ARIA roles currently applied to the wrapper and its cells.</p>
+        </div>
       </div>
 
       <h4 class="docs-prop-subheader docs-prop-subheader--secondary">Methods</h4>
@@ -896,6 +932,14 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <a href="#method-getitemsize" class="docs-link-card">
           <code class="docs-prop-name--secondary text-xs">getItemSize()</code>
           <p class="docs-link-description">Get item size along scroll axis.</p>
+        </a>
+        <a href="#method-getrowindexat" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getRowIndexAt()</code>
+          <p class="docs-link-description">Get row index at virtual offset.</p>
+        </a>
+        <a href="#method-getcolindexat" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">getColIndexAt()</code>
+          <p class="docs-link-description">Get column index at virtual offset.</p>
         </a>
         <a href="#method-getitemariaprops" class="docs-link-card">
           <code class="docs-prop-name--secondary text-xs">getItemAriaProps()</code>
@@ -1086,7 +1130,7 @@ scrollToIndex
 
         <h4 class="docs-prop-subheader">Parameters</h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
-          <p>Accepts a single <code>MaybeRefOrGetter</code> to a <a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a> object.</p>
+          <p>Accepts a <code>MaybeRefOrGetter</code> to a <code><a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a></code> object.</p>
         </div>
 
         <h4 class="docs-prop-subheader">Return Value</h4>
@@ -1230,6 +1274,111 @@ scrollToIndex
         </div>
       </section>
 
+      <!-- useVirtualScrollSizes -->
+      <section id="use-virtual-scroll-sizes" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useVirtualScrollSizes</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Manages the underlying sizing logic using Fenwick Trees. This composable handles prefix sum calculations, size updates, and scroll correction adjustments.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScrollSizes } from '@pdanpdan/virtual-scroll';
+import { computed } from 'vue';
+
+const {
+  itemSizesY,
+  updateItemSizes,
+  getSizeAt
+} = useVirtualScrollSizes({
+  props: computed(() => ({ items: [], itemSize: 50 })),
+  isDynamicItemSize: computed(() => false),
+  isDynamicColumnWidth: computed(() => false),
+  defaultSize: computed(() => 50),
+  fixedItemSize: computed(() => 50),
+  direction: computed(() => 'vertical')
+});"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts a <code>MaybeRefOrGetter</code> to a <code><a href="#use-virtual-scroll-sizes-props" class="link link-primary font-semibold">UseVirtualScrollSizesProps</a></code> object.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Return Value</h4>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th class="w-1/4">Member</th>
+                <th class="w-1/4">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="docs-prop-name">itemSizesX / Y</code></td>
+                <td><code><a href="#fenwick-tree" class="link link-primary">FenwickTree</a></code></td>
+                <td>Prefix sum trees for item sizes.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">columnSizes</code></td>
+                <td><code><a href="#fenwick-tree" class="link link-primary">FenwickTree</a></code></td>
+                <td>Prefix sum tree for column widths.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">measuredItemsX / Y</code></td>
+                <td><code>Ref&lt;Uint8Array&gt;</code></td>
+                <td>Bitmask of measured items.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">measuredColumns</code></td>
+                <td><code>Ref&lt;Uint8Array&gt;</code></td>
+                <td>Bitmask of measured columns.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">treeUpdateFlag</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td>Reactive flag that increments when trees update.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">sizesInitialized</code></td>
+                <td><code>Ref&lt;boolean&gt;</code></td>
+                <td>True after initial sizes are calculated.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">getItemBaseSize</code></td>
+                <td><code>Function</code></td>
+                <td>Helper to get item size from props.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">getSizeAt</code></td>
+                <td><code>Function</code></td>
+                <td>Helper to get current size at index.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">initializeSizes</code></td>
+                <td><code>Function</code></td>
+                <td>Setup trees from component props.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">updateItemSizes</code></td>
+                <td><code>Function</code></td>
+                <td>Batch register measurements and trigger corrections.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">refresh</code></td>
+                <td><code>Function</code></td>
+                <td>Reset all measurements and state.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- useVirtualScrollbar -->
       <section id="use-virtual-scrollbar">
         <h3 class="docs-prop-header text-secondary">useVirtualScrollbar</h3>
@@ -1260,7 +1409,7 @@ scrollToOffset: (val) => { scrollPos = val; }
 
         <h4 class="docs-prop-subheader">Parameters</h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
-          <p>Accepts a <code>UseVirtualScrollbarProps</code> object where each property can be a <code>MaybeRefOrGetter</code>.</p>
+          <p>Accepts a <code>MaybeRefOrGetter</code> to a <code><a href="#use-virtual-scrollbar-props" class="link link-primary font-semibold">UseVirtualScrollbarProps</a></code> object.</p>
         </div>
 
         <h4 class="docs-prop-subheader">Return Value</h4>
@@ -1324,15 +1473,20 @@ scrollToOffset: (val) => { scrollPos = val; }
       <h3 class="docs-section-header text-2xl mt-16">Types</h3>
 
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-12 text-base-content/80">
-        <div class="card bg-base-300 p-4 border border-base-content/5">
+        <div id="scroll-direction" class="card bg-base-300 p-4 border border-base-content/5">
           <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
           <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
           <p class="text-[10px] opacity-60 mt-2 italic">Defines the virtualization axes for the VirtualScroll component.</p>
         </div>
-        <div class="card bg-base-300 p-4 border border-base-content/5">
+        <div id="scroll-axis" class="card bg-base-300 p-4 border border-base-content/5">
           <h4 class="docs-prop-subheader text-primary mb-2">ScrollAxis</h4>
           <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal'" />
           <p class="text-[10px] opacity-60 mt-2 italic">Used specifically for individual scrollbar instances.</p>
+        </div>
+        <div id="snap-mode" class="card bg-base-300 p-4 border border-base-content/5">
+          <h4 class="docs-prop-subheader text-primary mb-2">SnapMode</h4>
+          <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="boolean | 'start' | 'center' | 'end' | 'auto'" />
+          <p class="text-[10px] opacity-60 mt-2 italic">Controls automatic alignment after scrolling stops.</p>
         </div>
       </div>
 
@@ -1416,7 +1570,7 @@ scrollToOffset: (val) => { scrollPos = val; }
             <tbody class="text-xs opacity-90">
               <tr><td><code>items</code></td><td><code>T[]</code></td><td>Data source. Required.</td></tr>
               <tr><td><code>itemSize</code></td><td><code>num | fn | null</code></td><td>Sizing logic. Default: {{ DEFAULT_ITEM_SIZE }}px.</td></tr>
-              <tr><td><code>direction</code></td><td><code>ScrollDirection</code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
+              <tr><td><code>direction</code></td><td><code><a href="#scroll-direction" class="link link-primary">ScrollDirection</a></code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
               <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
               <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
               <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation (DU).</td></tr>
@@ -1426,8 +1580,9 @@ scrollToOffset: (val) => { scrollPos = val; }
               <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
               <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
               <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
+              <tr><td><code>snap</code></td><td><code><a href="#snap-mode" class="link link-primary">SnapMode</a></code></td><td>Auto-alignment after scroll stop.</td></tr>
               <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
-              <tr><td><code>initialScrollAlign</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Alignment for initial jump.</td></tr>
+              <tr><td><code>initialScrollAlign</code></td><td><code><a href="#alignments" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Alignment for initial jump.</td></tr>
               <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
               <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
               <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
@@ -1445,7 +1600,7 @@ scrollToOffset: (val) => { scrollPos = val; }
               <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
             </thead>
             <tbody class="text-xs opacity-90">
-              <tr><td><code>axis</code></td><td><code>'vertical' | 'horizontal'</code></td><td>Axis of the scrollbar.</td></tr>
+              <tr><td><code>axis</code></td><td><code><a href="#scroll-axis" class="link link-primary">ScrollAxis</a></code></td><td>Axis of the scrollbar.</td></tr>
               <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total size of content in pixels.</td></tr>
               <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll position in pixels.</td></tr>
               <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible area size in pixels.</td></tr>
@@ -1470,7 +1625,7 @@ scrollToOffset: (val) => { scrollPos = val; }
               <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
             </thead>
             <tbody class="text-xs @4xl:text-sm">
-              <tr><td><code>align</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
+              <tr><td><code>align</code></td><td><code><a href="#alignments" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Where to align the item (default: <code>'auto'</code>).</td></tr>
               <tr><td><code>behavior</code></td><td><code>'auto' | 'smooth'</code></td><td>Scroll behavior (default: <code>'smooth'</code>).</td></tr>
             </tbody>
           </table>
@@ -1489,8 +1644,8 @@ scrollToOffset: (val) => { scrollPos = val; }
               <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
             </thead>
             <tbody class="text-xs @4xl:text-sm">
-              <tr><td><code>x</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
-              <tr><td><code>y</code></td><td><code><a href="#scroll-alignment" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
+              <tr><td><code>x</code></td><td><code><a href="#alignments" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the horizontal axis.</td></tr>
+              <tr><td><code>y</code></td><td><code><a href="#alignments" class="link link-primary">ScrollAlignment</a></code></td><td>Alignment on the vertical axis.</td></tr>
             </tbody>
           </table>
         </div>
@@ -1532,6 +1687,90 @@ scrollToOffset: (val) => { scrollPos = val; }
         </div>
       </section>
 
+      <!-- SnapMode -->
+      <section id="snap-modes" class="mb-12">
+        <h4 class="docs-prop-subheader">SnapMode</h4>
+        <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+          <p>Defines how items align when user scrolling stops. <strong>Note:</strong> Snapping is disabled for items larger than the viewport.</p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr>
+                <th class="w-1/4">Value</th>
+                <th>Behavior</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr>
+                <td><code class="docs-prop-name">false</code></td>
+                <td>No snapping (default).</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">true</code> / <code class="docs-prop-name">'auto'</code></td>
+                <td><strong>Smart Directional:</strong> If scrolling towards start, acts as <code>'end'</code>. If scrolling towards end, acts as <code>'start'</code>.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">'start'</code></td>
+                <td>Snaps the first visible item to the top/left edge if >= 50% is visible, otherwise snaps the next item.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">'center'</code></td>
+                <td>Snaps the item intersecting the viewport center to be exactly centered.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">'end'</code></td>
+                <td>Snaps the last visible item to the bottom/right edge if >= 50% is visible, otherwise snaps the previous item.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- UseVirtualScrollSizesProps -->
+      <section id="use-virtual-scroll-sizes-props" class="mb-12">
+        <h4 class="docs-prop-subheader">UseVirtualScrollSizesProps</h4>
+        <div class="docs-table-container overflow-x-auto text-base-content/80">
+          <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs opacity-90">
+              <tr><td><code>props</code></td><td><code><a href="#virtual-scroll-props" class="link link-primary">VirtualScrollProps</a></code></td><td>Virtual scroll configuration.</td></tr>
+              <tr><td><code>isDynamicItemSize</code></td><td><code>boolean</code></td><td>Whether items have dynamic heights/widths.</td></tr>
+              <tr><td><code>isDynamicColumnWidth</code></td><td><code>boolean</code></td><td>Whether columns have dynamic widths.</td></tr>
+              <tr><td><code>defaultSize</code></td><td><code>number</code></td><td>Fallback size for items before they are measured.</td></tr>
+              <tr><td><code>fixedItemSize</code></td><td><code>number | null</code></td><td>Fixed item size if applicable.</td></tr>
+              <tr><td><code>direction</code></td><td><code><a href="#scroll-direction" class="link link-primary">ScrollDirection</a></code></td><td>The scroll direction.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FenwickTree -->
+      <section id="fenwick-tree" class="mb-12">
+        <h4 class="docs-prop-subheader">FenwickTree</h4>
+        <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+          <p>A highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates.</p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Method</th><th class="w-1/4">Signature</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>update</code></td><td><code>(index, delta) => void</code></td><td>Update value at index and propagate changes.</td></tr>
+              <tr><td><code>query</code></td><td><code>(index) => number</code></td><td>Get prefix sum up to index (exclusive).</td></tr>
+              <tr><td><code>get</code></td><td><code>(index) => number</code></td><td>Get individual value at index.</td></tr>
+              <tr><td><code>findLowerBound</code></td><td><code>(value) => number</code></td><td>Find largest index where prefix sum &lt;= value.</td></tr>
+              <tr><td><code>rebuild</code></td><td><code>() => void</code></td><td>Rebuild tree from current values in <em>O(n)</em>.</td></tr>
+              <tr><td><code>resize</code></td><td><code>(size) => void</code></td><td>Resize tree while preserving values.</td></tr>
+              <tr><td><code>shift</code></td><td><code>(offset) => void</code></td><td>Shift values by offset (useful for prepending).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <h3 class="docs-section-header text-2xl mt-24 text-secondary">Methods</h3>
 
       <div class="space-y-8 mb-10">
@@ -1544,8 +1783,8 @@ scrollToOffset: (val) => { scrollPos = val; }
             class="docs-code-block mb-4 font-mono text-xs"
             lang="ts"
             code="scrollToIndex(
-rowIndex: number | null,
-colIndex: number | null,
+rowIndex?: number | null,
+colIndex?: number | null,
 options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
 ): void"
           />
@@ -1555,8 +1794,8 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
               <table class="table table-xs w-full bg-base-200">
                 <thead class="text-base-content"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
                 <tbody>
-                  <tr><td><code>rowIndex</code></td><td><code>number | null</code></td><td>Target row. <code>null</code> to keep current Y.</td></tr>
-                  <tr><td><code>colIndex</code></td><td><code>number | null</code></td><td>Target column. <code>null</code> to keep current X.</td></tr>
+                  <tr><td><code>rowIndex</code></td><td><code>number | null</code></td><td>Target row. <code>null</code> to keep current Y. Optional.</td></tr>
+                  <tr><td><code>colIndex</code></td><td><code>number | null</code></td><td>Target column. <code>null</code> to keep current X. Optional.</td></tr>
                   <tr><td><code>options</code></td><td><code><a href="#scroll-to-index-options" class="link link-secondary">Options</a></code></td><td>Alignment and behavior settings.</td></tr>
                 </tbody>
               </table>
@@ -1573,8 +1812,8 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
             class="docs-code-block mb-4 font-mono text-xs"
             lang="ts"
             code="scrollToOffset(
-x: number | null,
-y: number | null,
+x?: number | null,
+y?: number | null,
 options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
 ): void"
           />
@@ -1714,6 +1953,28 @@ element?: HTMLElement
           </div>
         </div>
 
+        <!-- Method: getRowIndexAt -->
+        <div id="method-getrowindexat" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> getRowIndexAt()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getRowIndexAt(offset: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the row (or item) index at a specific vertical (or horizontal in horizontal mode) virtual offset (VU).</p>
+          </div>
+        </div>
+
+        <!-- Method: getColIndexAt -->
+        <div id="method-getcolindexat" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> getColIndexAt()
+          </h4>
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColIndexAt(offset: number): number" />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Returns the column index at a specific horizontal virtual offset (VU).</p>
+          </div>
+        </div>
+
         <!-- Method: getItemAriaProps -->
         <div id="method-getitemariaprops" class="docs-method-card docs-method-card--secondary">
           <h4 class="docs-method-title docs-method-title--secondary">
@@ -1759,11 +2020,11 @@ element?: HTMLElement
             Type Guards
           </h4>
           <div class="space-y-1 text-xs @4xl:text-sm opacity-80">
-            <p><code>isElement(val)</code>: Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding <code>window</code>).</p>
-            <p><code>isWindow(val)</code>: Checks for global <code>window</code> object.</p>
-            <p><code>isBody(val)</code>: Checks for <code>document.body</code>.</p>
-            <p><code>isWindowLike(val)</code>: Matches <code>window</code> or <code>body</code>.</p>
-            <p><code>isScrollableElement(val)</code>: Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>.</p>
+            <p><code>isElement(val?)</code>: Checks if a value is a standard <code>HTMLElement</code> (explicitly excluding <code>window</code>). Optional.</p>
+            <p><code>isWindow(val?)</code>: Checks for global <code>window</code> object. Optional.</p>
+            <p><code>isBody(val?)</code>: Checks for <code>document.body</code>. Optional.</p>
+            <p><code>isWindowLike(val?)</code>: Matches <code>window</code> or <code>body</code>. Optional.</p>
+            <p><code>isScrollableElement(val?)</code>: Checks if a value is an <code>HTMLElement</code> or <code>Window</code> that exposes native scroll properties like <code>scrollLeft</code>. Optional.</p>
             <p><code>isScrollToIndexOptions(val)</code>: Type guard for <code>ScrollToIndexOptions</code> object.</p>
           </div>
         </div>
