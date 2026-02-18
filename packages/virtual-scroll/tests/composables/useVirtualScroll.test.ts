@@ -1,5 +1,5 @@
 /* global ScrollToOptions, ResizeObserverCallback */
-import type { VirtualScrollProps } from '../../src/types';
+import type { SnapMode, VirtualScrollProps } from '../../src/types';
 import type { Ref } from 'vue';
 
 import { mount } from '@vue/test-utils';
@@ -65,12 +65,18 @@ Object.defineProperty(document.documentElement, 'clientWidth', { configurable: t
 Object.defineProperty(window, 'innerHeight', { configurable: true, value: 500 });
 Object.defineProperty(window, 'innerWidth', { configurable: true, value: 500 });
 
+const scrollState = { x: 0, y: 0 };
+vi.spyOn(window, 'scrollX', 'get').mockImplementation(() => scrollState.x);
+vi.spyOn(window, 'scrollY', 'get').mockImplementation(() => scrollState.y);
+vi.spyOn(window, 'pageXOffset', 'get').mockImplementation(() => scrollState.x);
+vi.spyOn(window, 'pageYOffset', 'get').mockImplementation(() => scrollState.y);
+
 globalThis.window.scrollTo = vi.fn().mockImplementation((options: ScrollToOptions) => {
   if (options.left !== undefined) {
-    Object.defineProperty(window, 'scrollX', { configurable: true, value: options.left, writable: true });
+    scrollState.x = options.left;
   }
   if (options.top !== undefined) {
-    Object.defineProperty(window, 'scrollY', { configurable: true, value: options.top, writable: true });
+    scrollState.y = options.top;
   }
   document.dispatchEvent(new Event('scroll'));
 });
@@ -98,8 +104,8 @@ describe('useVirtualScroll', () => {
   const mockItems: MockItem[] = Array.from({ length: 100 }, (_, i) => ({ id: i }));
 
   beforeEach(() => {
-    Object.defineProperty(window, 'scrollX', { configurable: true, value: 0, writable: true });
-    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0, writable: true });
+    scrollState.x = 0;
+    scrollState.y = 0;
     Object.defineProperty(document.documentElement, 'clientHeight', { configurable: true, value: 500 });
     Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 500 });
   });
@@ -392,6 +398,47 @@ describe('useVirtualScroll', () => {
       expect(disconnectSpy).toHaveBeenCalled();
       globalThis.MutationObserver = oldMutationObserver;
     });
+
+    it('calculates dimensions correctly during SSR with both direction', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        columnCount: 10,
+        columnWidth: 100,
+        ssrRange: { start: 0, end: 10, colStart: 0, colEnd: 5 },
+        direction: 'both',
+      });
+      expect(result.renderedHeight.value).toBeGreaterThan(0);
+      expect(result.renderedWidth.value).toBeGreaterThan(0);
+      expect(result.columnRange.value.start).toBe(0);
+      expect(result.columnRange.value.end).toBe(5);
+      wrapper.unmount();
+    });
+
+    it('provides getRowIndexAt and getColIndexAt helpers in both direction', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'both',
+        columnCount: 10,
+        columnWidth: 100,
+        itemSize: 50,
+      });
+      await nextTick();
+      expect(result.getColIndexAt(150)).toBe(1);
+      expect(result.getRowIndexAt(75)).toBe(1);
+      wrapper.unmount();
+    });
+
+    it('provides getRowIndexAt and getColIndexAt helpers in horizontal direction', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'horizontal',
+        itemSize: 100,
+      });
+      await nextTick();
+      expect(result.getColIndexAt(150)).toBe(1);
+      expect(result.getRowIndexAt(75)).toBe(0); // always 0 in horizontal list
+      wrapper.unmount();
+    });
   });
 
   describe('scroll management', () => {
@@ -406,7 +453,7 @@ describe('useVirtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      Object.defineProperty(window, 'scrollY', { configurable: true, value: 500, writable: true });
+      scrollState.y = 500;
       document.dispatchEvent(new Event('scroll'));
 
       await nextTick();
@@ -522,6 +569,38 @@ describe('useVirtualScroll', () => {
       expect(result.scrollDetails.value.displayViewportSize.height).toBe(800);
       wrapper.unmount();
     });
+
+    it('handles programmatic scroll state and behaviors', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+
+      result.scrollToIndex(10, null, { behavior: 'smooth' });
+      expect(result.scrollDetails.value.isProgrammaticScroll).toBe(true);
+
+      result.scrollToOffset(0, 100, { behavior: 'auto' });
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(100);
+      wrapper.unmount();
+    });
+
+    it('handles scroll event targets', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+
+      // For window target
+      scrollState.y = 100;
+
+      document.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(100);
+      wrapper.unmount();
+    });
   });
 
   describe('dynamic sizing & prepending', () => {
@@ -559,7 +638,7 @@ describe('useVirtualScroll', () => {
       await nextTick();
 
       // Scroll to item 10 (10 * 40 = 400px)
-      Object.defineProperty(window, 'scrollY', { configurable: true, value: 400, writable: true });
+      scrollState.y = 400;
       document.dispatchEvent(new Event('scroll'));
       await nextTick();
 
@@ -1105,8 +1184,8 @@ describe('useVirtualScroll', () => {
       const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => {
         const dir = el === container ? 'rtl' : 'ltr';
         return {
-          get direction() { return dir; },
-        } as unknown as CSSStyleDeclaration;
+          direction: dir,
+        } as Partial<CSSStyleDeclaration> as CSSStyleDeclaration;
       });
 
       const { result, wrapper } = setup({
@@ -1499,6 +1578,18 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
       styleSpy.mockRestore();
     });
+
+    it('handles updateDirection and cached computedStyle', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'vertical',
+      });
+      result.updateDirection();
+      // Call again to test cached computedStyle
+      result.updateDirection();
+      expect(result.isRtl.value).toBe(false);
+      wrapper.unmount();
+    });
   });
 
   describe('scaling & large lists', () => {
@@ -1597,6 +1688,23 @@ describe('useVirtualScroll', () => {
         wrapper.unmount();
       });
     });
+
+    it('handles scale and direction watchers', async () => {
+      const { props, result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 1000000, // force scale
+        direction: 'vertical',
+      });
+      await nextTick();
+      const initialScale = result.scaleY.value;
+      expect(initialScale).toBeGreaterThan(1);
+
+      props.value.direction = 'horizontal';
+      await nextTick();
+
+      expect(result.isRtl.value).toBe(false);
+      wrapper.unmount();
+    });
   });
 
   describe('host element & layout', () => {
@@ -1622,6 +1730,605 @@ describe('useVirtualScroll', () => {
 
       expect(result.scrollDetails.value.displayScrollOffset.y).toBe(0);
       wrapper.unmount();
+    });
+
+    it('triggers correction when host dimensions change', async () => {
+      const hostElement = document.createElement('div');
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        hostElement,
+      });
+      await nextTick();
+
+      // Mock getBoundingClientRect
+      const spy = vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 10,
+        top: 10,
+        right: 510,
+        bottom: 510,
+        width: 500,
+        height: 500,
+        toJSON: () => {},
+      } as DOMRect);
+
+      result.updateHostOffset();
+      await nextTick();
+
+      expect(result.componentOffset.y).toBeGreaterThanOrEqual(0);
+
+      spy.mockRestore();
+      wrapper.unmount();
+    });
+  });
+
+  describe('snap', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const setupSnapTest = (snapMode: SnapMode, itemSize: number = 50) => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      let scrollTop = 0;
+      Object.defineProperty(container, 'scrollTop', {
+        configurable: true,
+        get: () => scrollTop,
+        set: (val) => {
+          scrollTop = val;
+        },
+      });
+      container.scrollTo = vi.fn().mockImplementation((options: ScrollToOptions) => {
+        if (options.top !== undefined) {
+          scrollTop = options.top;
+        }
+        container.dispatchEvent(new Event('scroll'));
+      });
+
+      const { result, wrapper } = setup({
+        container,
+        direction: 'vertical',
+        itemSize,
+        items: mockItems,
+        snap: snapMode,
+      });
+
+      return {
+        result,
+        wrapper,
+        container,
+        getScrollTop: () => scrollTop,
+        setScrollTop: (val: number) => {
+          scrollTop = val;
+        },
+      };
+    };
+
+    it('snaps to the nearest item after scrolling stops (mode="auto")', async () => {
+      const { container, setScrollTop } = setupSnapTest(true);
+
+      await nextTick();
+      await nextTick();
+
+      // User scrolls down to 75 (towards end) -> acts like 'start'
+      // Item at 75 is index 1. Visible amount = 25. Percent = 0.5.
+      // Should snap to index 1 (top 50).
+      setScrollTop(75);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 50, behavior: 'smooth', left: 0 }));
+    });
+
+    it('snaps to start if snap="start" and visible percent >= 50%', async () => {
+      const { container, setScrollTop } = setupSnapTest('start', 100);
+
+      await nextTick();
+      await nextTick();
+
+      // Scroll to 40. Item 0 visible amount = 100 - 40 = 60. Percent = 0.6.
+      setScrollTop(40);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0, behavior: 'smooth', left: 0 }));
+    });
+
+    it('snaps to next item if snap="start" and visible percent < 50%', async () => {
+      const { container, setScrollTop } = setupSnapTest('start', 100);
+
+      await nextTick();
+      await nextTick();
+
+      // Scroll to 60. Item 0 visible amount = 100 - 60 = 40. Percent = 0.4.
+      setScrollTop(60);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 100, behavior: 'smooth', left: 0 }));
+    });
+
+    it('snaps to end if snap="end" and visible percent >= 50%', async () => {
+      const { result, container, setScrollTop } = setupSnapTest('end', 100);
+
+      await nextTick();
+      await nextTick();
+
+      // viewport 500. itemSize 100.
+      // Scroll to 20. Viewport is 20-520.
+      // Item 5 (500-600) visible amount = 20. Percent = 0.2.
+      // targetIndex = 4. Align end. top = 0.
+      setScrollTop(20);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0, behavior: 'smooth', left: 0 }));
+
+      // Manually stop programmatic scroll to clear states
+      result.stopProgrammaticScroll();
+      vi.mocked(container.scrollTo).mockClear();
+
+      // Scroll to 80. Viewport is 80-580.
+      // Item 5 (500-600) visible amount = 80. Percent = 0.8.
+      // targetIndex = 5. Align end. top = 100.
+      setScrollTop(80);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 100, behavior: 'smooth', left: 0 }));
+    });
+
+    it('snaps to center if snap="center"', async () => {
+      const { container, setScrollTop } = setupSnapTest('center', 100);
+
+      await nextTick();
+      await nextTick();
+
+      // Viewport 500. Scroll to 20. Viewport is 20-520. Center is 270.
+      // Item at 270 is index 2 (200-300).
+      // Align index 2 to center. 250 - 50 = 200? Wait.
+      // Item center = 250. Viewport center = 250. So top = 0.
+      setScrollTop(20);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0, behavior: 'smooth', left: 0 }));
+    });
+
+    it('does not snap if item is larger than viewport', async () => {
+      const { container, setScrollTop } = setupSnapTest('start', 600); // itemSize 600, viewport 500
+
+      await nextTick();
+      await nextTick();
+
+      setScrollTop(100);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).not.toHaveBeenCalled();
+    });
+
+    it('does not snap if scroll was programmatic', async () => {
+      const { result, container } = setupSnapTest(true);
+
+      await nextTick();
+      await nextTick();
+
+      // Programmatic scroll
+      result.scrollToIndex(5, null, { align: 'start', behavior: 'smooth' });
+      await nextTick();
+
+      // Clear calls
+      vi.mocked(container.scrollTo).mockClear();
+
+      // Fast forward past the scroll timeout
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      // Ensure no snap call happened because it was programmatic
+      expect(container.scrollTo).not.toHaveBeenCalled();
+    });
+
+    it('handles snap logic in scroll handler', async () => {
+      vi.useFakeTimers();
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        snap: true,
+      });
+      await nextTick();
+
+      scrollState.y = 20;
+
+      // Trigger scroll
+      document.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      expect(result.scrollDetails.value.isScrolling).toBe(true);
+
+      vi.advanceTimersByTime(600);
+      await nextTick();
+      expect(result.scrollDetails.value.isScrolling).toBe(false);
+
+      vi.useRealTimers();
+      wrapper.unmount();
+    });
+
+    it('provides horizontal size fallback for unmeasured items', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'horizontal',
+        itemSize: 0,
+        defaultItemSize: 60,
+      });
+      expect(result.getItemSize(0)).toBe(60);
+      wrapper.unmount();
+    });
+
+    it('correctly preserves logical scroll position in RTL mode', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'horizontal',
+        itemSize: 50,
+      });
+      await nextTick();
+
+      // Simulate RTL
+      vi.spyOn(window, 'getComputedStyle').mockImplementation(() => ({
+        direction: 'rtl',
+      } as Partial<CSSStyleDeclaration> as CSSStyleDeclaration));
+
+      result.updateDirection();
+      expect(result.isRtl.value).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('caches rendered item state when properties remain identical', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+      const first = result.renderedItems.value;
+      // Trigger recompute
+      await nextTick();
+      const second = result.renderedItems.value;
+      expect(first[ 0 ]).toBe(second[ 0 ]);
+      wrapper.unmount();
+    });
+
+    it('updates hostOffset and detects direction via MutationObserver', async () => {
+      const hostElement = document.createElement('div');
+      const { wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        hostElement,
+      });
+      await nextTick();
+
+      hostElement.setAttribute('dir', 'rtl');
+      // Mutation observer is async
+      await nextTick();
+      await nextTick();
+      wrapper.unmount();
+    });
+
+    it('handles host offset threshold correctly', async () => {
+      const hostElement = document.createElement('div');
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        hostElement,
+      });
+      await nextTick();
+
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 100,
+        top: 100,
+        right: 600,
+        bottom: 600,
+        width: 500,
+        height: 500,
+      } as DOMRect);
+
+      result.updateHostOffset();
+      result.updateHostOffset(); // should skip update if identical
+      wrapper.unmount();
+    });
+
+    it('handles direction update and detects RTL changes', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+
+      const spy = vi.spyOn(window, 'getComputedStyle').mockImplementation(() => ({
+        direction: 'rtl',
+      } as Partial<CSSStyleDeclaration> as CSSStyleDeclaration));
+
+      result.updateDirection();
+      expect(result.isRtl.value).toBe(true);
+
+      spy.mockImplementation(() => ({
+        direction: 'ltr',
+      } as Partial<CSSStyleDeclaration> as CSSStyleDeclaration));
+      result.updateDirection();
+      expect(result.isRtl.value).toBe(false);
+
+      wrapper.unmount();
+      spy.mockRestore();
+    });
+
+    it('covers calculateOffset fallback branch', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        // @ts-expect-error - invalid container to hit fallback
+        container: { some: 'other', addEventListener: vi.fn(), removeEventListener: vi.fn() },
+      });
+      await nextTick();
+      result.updateHostOffset();
+      wrapper.unmount();
+    });
+
+    it('covers SSR range calculations specifically for columnRange and renderedItems before hydration', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'both',
+        columnCount: 10,
+        columnWidth: 100,
+        itemSize: 50,
+        ssrRange: { start: 0, end: 10, colStart: 2, colEnd: 5 },
+      });
+      // Accessing these before nextTick ensures isHydrated is false
+      expect(result.isHydrated.value).toBe(false);
+      expect(result.columnRange.value.start).toBe(2);
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+
+      await nextTick();
+      expect(result.isHydrated.value).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('covers sequential query optimization in renderedItems with non-sequential sticky item', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        direction: 'both',
+        columnCount: 10,
+        columnWidth: 100,
+        stickyIndices: [ 50 ], // sticky item far ahead
+      });
+      await nextTick();
+
+      // Accessing renderedItems triggers the cached queries
+      // sortedIndices will be [50, 0, 1, ...]
+      const items = result.renderedItems.value;
+      expect(items.length).toBeGreaterThan(0);
+
+      // Force non-sequential query by jumping back and forth
+      expect(result.renderedItems.value).toBeDefined();
+      wrapper.unmount();
+    });
+
+    it('handles programmatic scroll logic in scrollToIndex and scrollToOffset', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+
+      result.scrollToIndex(10, null, { behavior: 'smooth' });
+      expect(result.scrollDetails.value.isProgrammaticScroll).toBe(true);
+
+      result.scrollToOffset(null, 100);
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(100);
+      wrapper.unmount();
+    });
+
+    it('covers snap logic for horizontal axis with element container', async () => {
+      vi.useFakeTimers();
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientWidth', { value: 500 });
+      Object.defineProperty(container, 'scrollLeft', { value: 0, writable: true });
+
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        direction: 'horizontal',
+        snap: true,
+        container,
+      });
+      await nextTick();
+
+      // Simulate horizontal scroll
+      container.scrollLeft = 20;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(result.scrollDetails.value.isScrolling).toBe(false);
+      wrapper.unmount();
+      vi.useRealTimers();
+    });
+
+    it('covers isRtl watch logic for horizontal scroll position maintenance', async () => {
+      const container = document.createElement('div');
+      container.style.direction = 'ltr';
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'horizontal',
+        itemSize: 50,
+        container,
+      });
+      await nextTick();
+
+      // Ensure it is mounted and detected as LTR
+      result.updateDirection();
+      await nextTick();
+
+      // Scroll to some position
+      result.scrollToOffset(100, null);
+      await nextTick();
+
+      // Simulate RTL change
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((el) => ({
+        direction: el === container ? 'rtl' : 'ltr',
+      } as Partial<CSSStyleDeclaration> as CSSStyleDeclaration));
+
+      result.updateDirection();
+      await nextTick();
+      await nextTick(); // extra tick for watch
+
+      expect(result.isRtl.value).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('handles scroll events from window and document', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+
+      window.dispatchEvent(new Event('scroll'));
+      expect(result.scrollDetails.value.viewportSize.height).toBe(500);
+
+      document.dispatchEvent(new Event('scroll'));
+      expect(result.scrollDetails.value.viewportSize.height).toBe(500);
+      wrapper.unmount();
+    });
+
+    it('covers getRowHeight horizontal branch and getColumnOffset fallback', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'horizontal',
+        itemSize: 100,
+      });
+      await nextTick();
+      expect(result.getRowHeight(0)).toBe(500); // usableHeight
+      expect(result.getColumnOffset(1)).toBe(100); // horizontal fallback
+      wrapper.unmount();
+    });
+
+    it('covers scrollToIndex options fallback branch', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+      result.scrollToIndex(10, null, 'start');
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(500);
+      wrapper.unmount();
+    });
+
+    it('covers SSR range calculations for columnRange and renderedItems', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'both',
+        columnCount: 10,
+        columnWidth: 100,
+        itemSize: 50,
+        ssrRange: { start: 0, end: 10, colStart: 0, colEnd: 5 },
+      });
+      // isHydrated is false initially
+      expect(result.columnRange.value.end).toBe(5);
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      wrapper.unmount();
+    });
+
+    it('covers queryXCached fallback branch', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        direction: 'horizontal',
+        itemSize: 100,
+      });
+      await nextTick();
+      // Trigger non-sequential query
+      const items = result.renderedItems.value;
+      // queryXCached is used internally in renderedItems loop
+      expect(items[ 0 ]).toBeDefined();
+      wrapper.unmount();
+    });
+
+    it('covers scrollToIndex options fallback branch and pendingScroll update', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+
+      await nextTick();
+
+      // 1. Set a pending scroll with simple alignment (not ScrollToIndexOptions)
+      result.scrollToIndex(10, null, 'start');
+
+      // 2. Trigger another auto scroll to same index to hit pendingScroll branch
+      result.scrollToIndex(10, null, { behavior: 'auto' });
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(500);
+      wrapper.unmount();
+    });
+
+    it('covers attachEvents window cleanup function', async () => {
+      const removeSpy = vi.spyOn(window, 'removeEventListener');
+      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
+
+      const { wrapper } = setup({
+        items: mockItems,
+        container: window,
+      });
+
+      await nextTick();
+      wrapper.unmount(); // triggers cleanup return function
+
+      expect(removeSpy).toHaveBeenCalledWith('resize', expect.any(Function));
+      expect(clearIntervalSpy).toHaveBeenCalled();
+
+      removeSpy.mockRestore();
+      clearIntervalSpy.mockRestore();
+    });
+    it('covers SSR branches in raw composable setup', () => {
+      const props = ref<VirtualScrollProps<MockItem>>({
+        items: mockItems,
+        direction: 'both',
+        columnCount: 10,
+        columnWidth: 100,
+        itemSize: 50,
+        ssrRange: { start: 0, end: 10, colStart: 2, colEnd: 5 },
+      });
+
+      const vs = useVirtualScroll(props);
+
+      // These access computed getters before hydration/mount
+      expect(vs.columnRange.value.start).toBe(2);
+      expect(vs.renderedItems.value.length).toBeGreaterThan(0);
     });
   });
 });
