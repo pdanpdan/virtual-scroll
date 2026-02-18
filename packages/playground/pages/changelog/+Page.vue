@@ -75,7 +75,7 @@ import { changelog } from '#/pages/changelog/changelog-data';
                 :class="[index % 2 === 0 ? '@4xl:flex-row-reverse' : 'flex-row']"
               >
                 <span class="text-primary font-bold shrink-0 mt-0.5 select-none leading-tight">✓</span>
-                <span class="leading-relaxed">{{ feature }}</span>
+                <span class="leading-relaxed" v-html="feature" />
               </li>
             </ul>
           </div>
@@ -91,7 +91,7 @@ import { changelog } from '#/pages/changelog/changelog-data';
                 :class="[index % 2 === 0 ? '@4xl:flex-row-reverse' : 'flex-row']"
               >
                 <span class="text-error font-bold shrink-0 mt-0.5 select-none leading-tight">⨯</span>
-                <span class="leading-relaxed">{{ fix }}</span>
+                <span class="leading-relaxed" v-html="fix" />
               </li>
             </ul>
           </div>

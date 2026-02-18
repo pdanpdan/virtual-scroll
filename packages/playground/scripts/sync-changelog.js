@@ -49,7 +49,11 @@ for (let section of sections) {
       } else if (line.startsWith('### Bug Fixes')) {
         currentType = 'fixes';
       } else if (line.startsWith('*') || line.startsWith('-')) {
-        const item = line.replace(/^[*-]\s+/, '').replace(/\s+\(\[.*\]\(.*?\)\)$/, '');
+        const item = line.replace(/^[*-]\s+/, '')
+          .replace(/\s+\(\[.*\]\(.*?\)\)$/, '')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/`(.*?)`/g, '<code>$1</code>');
         if (currentType) {
           currentVersion[ currentType ].push(item);
         } else if (version === '0.0.1' || !currentType) {
