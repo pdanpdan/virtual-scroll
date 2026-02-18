@@ -116,7 +116,9 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
 - **Sticky Sections**: Support for sticky headers, footers, and indices.
 - **Scroll Restoration**: Automatically maintains scroll position when items are prepended to the list.
+- **Scroll Snapping**: Automatically align to the nearest item after scrolling stops (start, center, end, or auto).
 - **RTL Support**: Full support for Right-to-Left layouts with automatic detection.
+- **Accessibility**: Automatic ARIA role mapping for lists, grids, trees, listboxes, and menus.
 
 ## Component Reference: VirtualScroll
 
@@ -130,18 +132,53 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 | `columnCount` | `number` | `0` | Number of columns for grid mode. |
 | `columnWidth` | `num | num[] | fn | null` | `100` | Width for columns in grid mode. |
 | `gap` / `columnGap` | `number` | `0` | Spacing between items/columns. |
+| `snap` | `SnapMode` | `false` | Enable scroll snapping. See [SnapMode](#snapmode). |
 | `stickyIndices` | `number[]` | `[]` | Indices of items that should remain sticky. |
 | `stickyHeader` / `stickyFooter` | `boolean` | `false` | If true, measures and adds slot size to padding. |
 | `ssrRange` | `object` | - | Range of items to pre-render for SSR. |
 | `virtualScrollbar` | `boolean` | `false` | Whether to force virtual scrollbars. |
 | `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
 | `container` | `HTMLElement | Window` | `hostRef` | The scrollable container element. |
+| `containerTag` | `string` | `'div'` | HTML tag for the root container. |
+| `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper. |
+| `itemTag` | `string` | `'div'` | HTML tag for each rendered item. |
 | `scrollPaddingStart` / `End` | `num | {x, y}` | `0` | Padding for scroll calculations. |
 | `bufferBefore` / `bufferAfter` | `number` | `5` | Items to render outside the viewport. |
 | `initialScrollIndex` | `number` | `undefined` | Index to jump to on mount. |
-| `initialScrollAlign` | `'start' | 'center' | 'end' | 'auto'` | `'start'` | Alignment for initial jump. |
+| `initialScrollAlign` | `ScrollAlignment | ScrollAlignmentOptions` | `'start'` | Alignment for initial jump. See [ScrollAlignment](#scrollalignment) or [Options](#scrollalignmentoptions). |
 | `defaultItemSize` / `defaultColumnWidth` | `number` | `40 / 100` | Estimate for dynamic items/columns. |
 | `debug` | `boolean` | `false` | Enable debug visualization. |
+| `role` | `string` | - | ARIA role for the container. Defaults based on direction. |
+| `ariaLabel` / `Labelledby` | `string` | - | Accessibility labels for the container. |
+| `itemRole` | `string` | - | ARIA role for items. Defaults based on `role`. |
+
+### SnapMode
+
+Controls the automatic alignment after scrolling stops.
+
+- `false` (default): No snapping.
+- `true` / `'auto'`: Intelligent snapping based on scroll direction. Acts as `'end'` when scrolling towards start, and `'start'` when scrolling towards end.
+- `'start'`: Aligns the first visible item to the viewport start if at least 50% visible, otherwise aligns the next item.
+- `'center'`: Aligns the item that intersects the viewport center to the center.
+- `'end'`: Aligns the last visible item to the viewport end if at least 50% visible, otherwise aligns the previous item.
+
+**Note:** Snapping is automatically disabled if the target item's size is larger than the viewport dimension.
+
+### ScrollAlignment
+
+Controls the item's final position in the viewport during `scrollToIndex`.
+
+- `'start'`: Aligns to top (vertical) or left (horizontal) edge.
+- `'center'`: Aligns to viewport center.
+- `'end'`: Aligns to bottom (vertical) or right (horizontal) edge.
+- `'auto'` (default): **Smart:** If the item is already fully visible, no scroll occurs. Otherwise, aligns to `'start'` or `'end'` to bring it into view.
+
+### ScrollAlignmentOptions
+
+Allows axis-specific alignment in `scrollToIndex`.
+
+- `x`: `ScrollAlignment` for the horizontal axis.
+- `y`: `ScrollAlignment` for the vertical axis.
 
 ### Slots
 
@@ -165,8 +202,8 @@ The following properties and methods are available on the `VirtualScroll` compon
 
 #### Properties
 - **All Props**: All properties defined in [Props](#props) are available on the instance.
-- `scrollDetails`: Full reactive state of the virtual scroll system.
-- `columnRange`: Information about the current visible range of columns.
+- `scrollDetails`: Full reactive state of the virtual scroll system. See [ScrollDetails](#scrolldetails).
+- `columnRange`: Information about the current visible range of columns. See [ColumnRange](#columnrange).
 - `isHydrated`: `true` when the component is mounted and hydrated.
 - `isRtl`: `true` if the container is in Right-to-Left mode.
 - `scrollbarPropsVertical` / `scrollbarPropsHorizontal`: Reactive `ScrollbarSlotProps`.
@@ -175,10 +212,10 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `componentOffset`: Absolute offset of the component within its container (DU).
 
 #### Methods
-- `scrollToIndex(row, col, options)`: Programmatic scroll to index.
+- `scrollToIndex(row, col, options)`: Programmatic scroll to index. See [ScrollToIndexOptions](#scrolltoindexoptions).
 - `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position.
 - `refresh()`: Resets all measurements and state.
-- `stopProgrammaticScroll()`: Halt smooth scroll animations.
+- `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
 - `updateDirection()`: Manually trigger direction detection.
 - `updateHostOffset()`: Recalculate component position.
 - `updateItemSize(index, w, h, el?)`: Register single measurement.
@@ -189,6 +226,59 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `getColumnOffset(index)`: Returns the virtual offset of a column.
 - `getItemOffset(index)`: Returns the virtual offset of an item.
 - `getItemSize(index)`: Returns the size of an item along the scroll axis.
+- `getRowIndexAt(offset)`: Returns the row index at a virtual offset.
+- `getColIndexAt(offset)`: Returns the column index at a virtual offset.
+- `getCellAriaProps(colIndex)`: Returns ARIA attributes for a grid cell.
+- `getItemAriaProps(index)`: Returns ARIA attributes for a row/item.
+
+## Accessibility (ARIA)
+
+The component automatically manages ARIA roles and attributes to ensure screen readers can navigate the virtualized content.
+
+| Role Prop | Default Item Role | Usage Case |
+|-----------|-------------------|------------|
+| `list` | `listitem` | Standard vertical or horizontal list. |
+| `grid` | `row` | Bidirectional grid or table. |
+| `tree` | `treeitem` | Hierarchical list. |
+| `listbox` | `option` | Selection lists. |
+| `menu` | `menuitem` | Navigational menus. |
+
+`aria-rowcount`, `aria-colcount`, `aria-rowindex`, and `aria-colindex` are automatically calculated and applied based on the current scroll state.
+
+## Type Definitions
+
+### ScrollDetails
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `RenderedItem[]` | List of items currently in DOM. |
+| `currentIndex` | `number` | Index of first visible row. |
+| `currentColIndex` | `number` | Index of first visible column. |
+| `scrollOffset` | `Point` | Current virtual scroll position (VU). |
+| `displayScrollOffset` | `Point` | Current physical scroll position (DU). |
+| `viewportSize` | `Size` | Dimensions of visible area (VU). |
+| `displayViewportSize` | `Size` | Physical dimensions of visible area (DU). |
+| `totalSize` | `Size` | Total size of all items (VU). |
+| `isScrolling` | `boolean` | Whether scrolling is active. |
+| `isProgrammaticScroll`| `boolean` | Whether scroll was triggered via API. |
+| `range` | `{start, end}` | Range of rendered item indices. |
+| `columnRange` | `ColumnRange` | Range of rendered columns. |
+
+### ColumnRange
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `start` | `number` | First rendered column index. |
+| `end` | `number` | Last rendered column index (exclusive). |
+| `padStart` | `number` | Virtual padding at the start of the row (VU). |
+| `padEnd` | `number` | Virtual padding at the end of the row (VU). |
+
+### ScrollToIndexOptions
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `align` | `ScrollAlignment | ScrollAlignmentOptions` | `'auto'` | Alignment logic. |
+| `behavior` | `'auto' | 'smooth'` | `'smooth'` | Scroll animation. |
 
 ## Sizing Guide
 
@@ -265,12 +355,15 @@ The `scrollbar` slot provides everything needed to build a fully custom interfac
 | `--vs-scrollbar-bg` | `rgba(230,230,230,0.9) / rgba(30,30,30,0.9)` | Track background color. |
 | `--vs-scrollbar-thumb-bg` | `rgba(0,0,0,0.3) / rgba(255,255,255,0.3)` | Thumb background color. |
 | `--vs-scrollbar-thumb-hover-bg` | `rgba(0,0,0,0.6) / rgba(255,255,255,0.6)` | Thumb background on hover/active. |
-| `--vs-scrollbar-size` | `8px` | Width/height of the scrollbar. |
+| `--vs-scrollbar-size` | `8px` | Width (vertical) or height (horizontal) of the scrollbar. |
 | `--vs-scrollbar-radius` | `4px` | Border radius for track and thumb. |
+| `--vs-scrollbar-cross-gap` | `var(--vs-scrollbar-size)` | Size of gap where scrollbars meet. |
+| `--vs-scrollbar-has-cross-gap` | `0` | If gap should be shown where scrollbars meet. |
 
 ## Composables
 
 - `useVirtualScroll(props)`: Core logic for virtualization.
+- `useVirtualScrollSizes(config)`: Size and measurement management.
 - `useVirtualScrollbar(props)`: Logic for scrollbar interactions.
 
 ## License

@@ -2,14 +2,26 @@ import type { RenderedItem } from '../../src/types';
 
 import { describe, expect, it } from 'vitest';
 
+import { BROWSER_MAX_SIZE } from '../../src/utils/scroll';
 import {
+  calculateAxisSize,
   calculateColumnRange,
+  calculateInstantaneousVelocity,
   calculateItemPosition,
   calculateItemStyle,
+  calculateOffsetAt,
+  calculatePrependCount,
   calculateRange,
+  calculateRangeSize,
+  calculateScale,
   calculateScrollTarget,
+  calculateSSROffsets,
   calculateStickyItem,
   calculateTotalSize,
+  displayToVirtual,
+  isItemVisible,
+  resolveSnap,
+  virtualToDisplay,
 } from '../../src/utils/virtual-scroll-logic';
 
 describe('virtual-scroll-logic', () => {
@@ -404,6 +416,95 @@ describe('virtual-scroll-logic', () => {
         usableWidth: 500,
       });
       expect(result.height).toBe(0);
+    });
+  });
+
+  describe('calculateAxisSize and calculateRangeSize', () => {
+    it('handles empty or negative count in calculateAxisSize', () => {
+      expect(calculateAxisSize(0, 50, 10, () => 50)).toBe(0);
+      expect(calculateAxisSize(-1, 50, 10, () => 50)).toBe(0);
+    });
+
+    it('handles empty or inverse range in calculateRangeSize', () => {
+      expect(calculateRangeSize(10, 10, 50, 10, () => 500)).toBe(0);
+      expect(calculateRangeSize(10, 5, 50, 10, () => 500)).toBe(0);
+    });
+  });
+
+  describe('calculateOffsetAt', () => {
+    it('handles fixed and dynamic size cases', () => {
+      expect(calculateOffsetAt(5, 50, 10, () => 0)).toBe(5 * (50 + 10));
+      expect(calculateOffsetAt(5, null, 10, (i) => i * 60)).toBe(5 * 60);
+    });
+  });
+
+  describe('isItemVisible', () => {
+    it('handles sticky offsets and large items', () => {
+      // itemPos, itemSize, scrollPos, viewSize, stickyOffsetStart, stickyOffsetEnd
+      expect(isItemVisible(100, 50, 0, 500, 50, 50)).toBe(true);
+      expect(isItemVisible(20, 50, 0, 500, 50, 50)).toBe(false); // partially hidden by sticky header
+
+      // item larger than usable viewport
+      expect(isItemVisible(0, 1000, 0, 500, 50, 50)).toBe(true); // covering the whole viewport
+    });
+  });
+
+  describe('resolveSnap', () => {
+    const getSize = (i: number) => (i === 100 ? 1000 : 50);
+    const getQuery = (i: number) => i * 50;
+    const getIndexAt = (o: number) => Math.floor(o / 50);
+
+    it('handles directional auto snapping', () => {
+      // Toward end (start direction) -> should snap to end
+      expect(resolveSnap('auto', 'start', 0, 9, 0, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 9,
+        align: 'end',
+      });
+      // Toward start (end direction) -> should snap to start
+      expect(resolveSnap('auto', 'end', 0, 9, 0, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 0,
+        align: 'start',
+      });
+      expect(resolveSnap('auto', null, 0, 10, 0, 500, 100, getSize, getQuery, getIndexAt)).toBeNull();
+    });
+
+    it('handles center mode snapping', () => {
+      expect(resolveSnap('center', null, 0, 20, 25, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 5,
+        align: 'center',
+      });
+    });
+
+    it('handles start mode snapping with visibility thresholds', () => {
+      // Mostly visible -> stay at current
+      expect(resolveSnap('start', null, 2, 12, 110, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 2,
+        align: 'start',
+      });
+      // Less than 50% visible -> next
+      expect(resolveSnap('start', null, 2, 12, 130, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 3,
+        align: 'start',
+      });
+    });
+
+    it('handles end mode snapping with visibility thresholds', () => {
+      // relScroll 20 + viewSize 500 = 520. getQuery(10) = 500. visible = 20. size = 50. 20/50 = 0.4 < 0.5 -> prev index 9.
+      expect(resolveSnap('end', null, 0, 10, 20, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 9,
+        align: 'end',
+      });
+      // relScroll 40 + viewSize 500 = 540. visible = 40. 40/50 = 0.8 >= 0.5 -> stay at 10.
+      expect(resolveSnap('end', null, 0, 10, 40, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 10,
+        align: 'end',
+      });
+    });
+
+    it('returns null if target item is larger than viewport', () => {
+      expect(resolveSnap('start', null, 100, 110, 5000, 500, 200, getSize, getQuery, getIndexAt)).toBeNull();
+      expect(resolveSnap('end', null, 90, 100, 4500, 500, 200, getSize, getQuery, getIndexAt)).toBeNull();
+      expect(resolveSnap('center', null, 90, 110, 4750, 500, 200, getSize, getQuery, getIndexAt)).toBeNull();
     });
   });
 
@@ -2862,6 +2963,151 @@ describe('virtual-scroll-logic', () => {
       });
 
       expect(style.transform).toBe('translate(0px, 600px)');
+    });
+  });
+
+  describe('coordinate mapping', () => {
+    it('maps display pixels to virtual coordinates correctly', () => {
+      // displayPos, hostOffset, scale
+      expect(displayToVirtual(100, 10, 2)).toBe(180); // (100 - 10) * 2
+    });
+
+    it('maps virtual coordinates to display pixels correctly', () => {
+      // virtualPos, hostOffset, scale
+      expect(virtualToDisplay(180, 10, 2)).toBe(100); // 180 / 2 + 10
+    });
+  });
+
+  describe('additional utility coverage', () => {
+    it('handles gap subtraction in calculateRangeSize', () => {
+      // start, end, fixedSize, gap, query
+      expect(calculateRangeSize(0, 10, null, 10, (i) => i * 60)).toBe(590);
+    });
+
+    it('handles horizontal SSR offsets', () => {
+      const offsets = calculateSSROffsets(
+        'horizontal',
+        { start: 0, end: 10, colStart: 5, colEnd: 10 },
+        null,
+        null,
+        10,
+        10,
+        () => 0,
+        (i) => i * 60,
+        () => 0,
+      );
+      expect(offsets.x).toBe(300);
+    });
+
+    it('detects prepend count correctly', () => {
+      expect(calculatePrependCount([], [ 1, 2 ])).toBe(0);
+      const items = [ { id: 1 } ];
+      expect(calculatePrependCount(items, [ { id: 2 }, items[ 0 ] ])).toBe(1);
+
+      // Items identity check
+      const obj = { id: 1 };
+      expect(calculatePrependCount([ obj ], [ { id: 2 }, obj ])).toBe(1);
+      expect(calculatePrependCount([ obj ], [ { id: 2 }, { id: 1 } ])).toBe(0); // different object reference
+    });
+
+    it('calculates scroll target with start alignment', () => {
+      const result = calculateScrollTarget({
+        rowIndex: 10,
+        colIndex: 10,
+        options: 'start',
+        direction: 'both',
+        viewportWidth: 500,
+        viewportHeight: 500,
+        totalWidth: 10000,
+        totalHeight: 10000,
+        gap: 10,
+        columnGap: 10,
+        fixedSize: 50,
+        fixedWidth: 50,
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        getItemSizeY: () => 50,
+        getItemSizeX: () => 50,
+        getItemQueryY: (i) => i * 60,
+        getItemQueryX: (i) => i * 60,
+        getColumnSize: () => 50,
+        getColumnQuery: (i) => i * 60,
+        scaleX: 1,
+        scaleY: 1,
+        hostOffsetX: 0,
+        hostOffsetY: 0,
+      });
+      expect(result.targetX).toBe(600);
+    });
+
+    it('handles horizontal direction in calculateRange', () => {
+      const res = calculateRange({
+        direction: 'horizontal',
+        relativeScrollX: 100,
+        relativeScrollY: 0,
+        usableWidth: 500,
+        usableHeight: 500,
+        itemsLength: 100,
+        bufferBefore: 0,
+        bufferAfter: 0,
+        gap: 10,
+        columnGap: 10,
+        fixedSize: 50,
+        findLowerBoundY: () => 0,
+        findLowerBoundX: (o) => Math.floor(o / 60),
+        queryY: () => 0,
+        queryX: (i) => i * 60,
+      });
+      expect(res.start).toBe(1);
+    });
+
+    it('handles empty oldItems in calculatePrependCount', () => {
+      expect(calculatePrependCount([], [ 1, 2 ])).toBe(0);
+    });
+
+    it('returns 0 in calculatePrependCount when first old item is undefined (sparse array)', () => {
+      const oldItems: (number | undefined)[] = [];
+      oldItems.length = 5; // [empty x 5]
+      const newItems = [ 1, ...oldItems ];
+      expect(calculatePrependCount(oldItems, newItems)).toBe(0);
+    });
+
+    it('returns zero velocity when dt is zero or negative', () => {
+      expect(calculateInstantaneousVelocity({ x: 0, y: 0 }, { x: 10, y: 10 }, 0)).toEqual({ x: 0, y: 0 });
+      expect(calculateInstantaneousVelocity({ x: 0, y: 0 }, { x: 10, y: 10 }, -1)).toEqual({ x: 0, y: 0 });
+    });
+
+    it('returns null in resolveSnap for unsupported modes', () => {
+      // @ts-expect-error - testing invalid mode
+      expect(resolveSnap('invalid', null, 0, 10, 0, 500, 100, () => 50, (i) => i * 50, (_o) => 0)).toBeNull();
+    });
+  });
+
+  describe('calculateScale', () => {
+    it('returns 1 for window container', () => {
+      expect(calculateScale(true, 50000000, 500)).toBe(1);
+    });
+
+    it('returns 1 for small total size', () => {
+      expect(calculateScale(false, 1000, 500)).toBe(1);
+    });
+
+    it('returns 1 when viewport is larger or equal to BROWSER_MAX_SIZE (fallback branch)', () => {
+      // line 440: displayRange = displaySize - viewportSize
+      // if viewportSize >= BROWSER_MAX_SIZE, then displayRange <= 0
+      expect(calculateScale(false, BROWSER_MAX_SIZE + 1000, BROWSER_MAX_SIZE + 500)).toBe(1);
+      expect(calculateScale(false, BROWSER_MAX_SIZE + 1000, BROWSER_MAX_SIZE)).toBe(1);
+    });
+
+    it('calculates correct scaling factor for large lists', () => {
+      const totalSize = 20000000;
+      const viewportSize = 500;
+      const scale = calculateScale(false, totalSize, viewportSize);
+      expect(scale).toBeGreaterThan(1);
+      // realRange = 20,000,000 - 500 = 19,999,500
+      // displaySize = BROWSER_MAX_SIZE = 10,000,000
+      // displayRange = 10,000,000 - 500 = 9,999,500
+      expect(scale).toBe(19999500 / 9999500);
     });
   });
 });

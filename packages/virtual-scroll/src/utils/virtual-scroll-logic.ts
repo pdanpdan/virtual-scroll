@@ -5,9 +5,12 @@ import type {
   RangeParams,
   ScrollAlignment,
   ScrollAlignmentOptions,
+  ScrollDirection,
   ScrollTargetParams,
   ScrollTargetResult,
   ScrollToIndexOptions,
+  SnapMode,
+  SSRRange,
   StickyParams,
   TotalSizeParams,
 } from '../types';
@@ -36,6 +39,14 @@ interface AxisAlignmentParams {
   viewSize: number;
   stickyOffsetStart: number;
   stickyOffsetEnd: number;
+}
+
+/** Snap result. */
+export interface SnapResult {
+  /** Target index. */
+  index: number;
+  /** Alignment. */
+  align: 'start' | 'center' | 'end';
 }
 
 // --- Internal Helpers ---
@@ -212,7 +223,7 @@ function calculateAxisAlignment({
  * @param query - Prefix sum resolver.
  * @returns Total size.
  */
-function calculateAxisSize(
+export function calculateAxisSize(
   count: number,
   fixedSize: number | null,
   gap: number,
@@ -225,6 +236,54 @@ function calculateAxisSize(
     return Math.max(0, count * (fixedSize + gap) - gap);
   }
   return Math.max(0, query(count) - gap);
+}
+
+/**
+ * Helper to calculate size for a range on a single axis.
+ *
+ * @param start - Start index.
+ * @param end - End index.
+ * @param fixedSize - Fixed size if any.
+ * @param gap - Gap size.
+ * @param query - Prefix sum resolver.
+ * @returns Range size.
+ */
+export function calculateRangeSize(
+  start: number,
+  end: number,
+  fixedSize: number | null,
+  gap: number,
+  query: (index: number) => number,
+): number {
+  const count = end - start;
+  if (count <= 0) {
+    return 0;
+  }
+  if (fixedSize !== null) {
+    return Math.max(0, count * (fixedSize + gap) - gap);
+  }
+  return Math.max(0, query(end) - query(start) - gap);
+}
+
+/**
+ * Helper to calculate offset at a specific index.
+ *
+ * @param index - Item index.
+ * @param fixedSize - Fixed size if any.
+ * @param gap - Gap size.
+ * @param query - Prefix sum resolver.
+ * @returns Offset at index.
+ */
+export function calculateOffsetAt(
+  index: number,
+  fixedSize: number | null,
+  gap: number,
+  query: (index: number) => number,
+): number {
+  if (fixedSize !== null) {
+    return index * (fixedSize + gap);
+  }
+  return query(index);
 }
 
 /**
@@ -361,6 +420,35 @@ export function isItemVisible(
     return itemPos >= usableStart - 0.5 && (itemPos + itemSize) <= usableEnd + 0.5;
   }
   return itemPos <= usableStart + 0.5 && (itemPos + itemSize) >= usableEnd - 0.5;
+}
+
+/**
+ * Calculates the coordinate scaling factor between virtual and display units.
+ *
+ * @param isWindow - If the container is the window.
+ * @param totalSize - Total virtual size (VU).
+ * @param viewportSize - Viewport size (DU).
+ * @returns Scaling factor (VU/DU).
+ */
+export function calculateScale(isWindow: boolean, totalSize: number, viewportSize: number): number {
+  if (isWindow || totalSize <= BROWSER_MAX_SIZE) {
+    return 1;
+  }
+  const displaySize = Math.min(totalSize, BROWSER_MAX_SIZE);
+  const realRange = totalSize - viewportSize;
+  const displayRange = displaySize - viewportSize;
+  return displayRange > 0 ? realRange / displayRange : 1;
+}
+
+/**
+ * Calculates the physical size to be rendered in the DOM.
+ *
+ * @param isWindow - If the container is the window.
+ * @param totalSize - Total virtual size (VU).
+ * @returns Physical size (DU).
+ */
+export function calculateRenderedSize(isWindow: boolean, totalSize: number): number {
+  return isWindow ? totalSize : Math.min(totalSize, BROWSER_MAX_SIZE);
 }
 
 /**
@@ -878,6 +966,72 @@ export function calculateItemStyle<T = unknown>({
 }
 
 /**
+ * Calculates the SSR offsets for items based on the configured SSR range and direction.
+ *
+ * @param direction - Scroll direction.
+ * @param ssrRange - SSR configuration.
+ * @param fixedItemSize - Fixed item size (VU).
+ * @param fixedColumnWidth - Fixed column width (VU).
+ * @param gap - Item gap (VU).
+ * @param columnGap - Column gap (VU).
+ * @param queryY - Resolver for vertical offset (VU).
+ * @param queryX - Resolver for horizontal offset (VU).
+ * @param queryColumn - Resolver for column offset (VU).
+ * @returns Offset X and Y (VU).
+ */
+export function calculateSSROffsets(
+  direction: ScrollDirection,
+  ssrRange: SSRRange,
+  fixedItemSize: number | null,
+  fixedColumnWidth: number | null,
+  gap: number,
+  columnGap: number,
+  queryY: (index: number) => number,
+  queryX: (index: number) => number,
+  queryColumn: (index: number) => number,
+): { x: number; y: number; } {
+  const ssrStartRow = ssrRange.start || 0;
+  const ssrStartCol = ssrRange.colStart || 0;
+
+  let x = 0;
+  const y = (direction !== 'horizontal')
+    ? calculateOffsetAt(ssrStartRow, fixedItemSize, gap, queryY)
+    : 0;
+
+  if (direction === 'horizontal') {
+    x = calculateOffsetAt(ssrStartCol, fixedItemSize, columnGap, queryX);
+  } else if (direction === 'both') {
+    x = calculateOffsetAt(ssrStartCol, fixedColumnWidth, columnGap, queryColumn);
+  }
+
+  return { x, y };
+}
+
+/**
+ * Detects how many items were prepended to the list based on item identity.
+ *
+ * @param oldItems - Previous items list.
+ * @param newItems - Current items list.
+ * @returns Number of prepended items.
+ */
+export function calculatePrependCount<T>(oldItems: T[], newItems: T[]): number {
+  if (oldItems.length === 0 || newItems.length <= oldItems.length) {
+    return 0;
+  }
+  const oldFirstItem = oldItems[ 0 ];
+  if (oldFirstItem === undefined) {
+    return 0;
+  }
+  const limit = newItems.length - oldItems.length;
+  for (let i = 1; i <= limit; i++) {
+    if (newItems[ i ] === oldFirstItem) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+/**
  * Calculates the total width and height of the virtualized content.
  *
  * @param params - Total size parameters.
@@ -931,4 +1085,154 @@ export function calculateTotalSize({
     width: isBoth ? Math.max(width, usableWidth) : width,
     height: isBoth ? Math.max(height, usableHeight) : height,
   };
+}
+
+/**
+ * Calculates the next step in an inertia animation.
+ *
+ * @param velocity - Current velocity.
+ * @param velocity.x - Horizontal velocity.
+ * @param velocity.y - Vertical velocity.
+ * @param friction - Friction coefficient (0-1).
+ * @param frameTime - Time elapsed since last frame in ms (default 16ms).
+ * @returns Next velocity and distance to move.
+ */
+export function calculateInertiaStep(
+  velocity: { x: number; y: number; },
+  friction: number,
+  frameTime: number = 16,
+) {
+  const nextVelocity = {
+    x: velocity.x * friction,
+    y: velocity.y * friction,
+  };
+
+  return {
+    nextVelocity,
+    delta: {
+      x: nextVelocity.x * frameTime,
+      y: nextVelocity.y * frameTime,
+    },
+  };
+}
+
+/**
+ * Calculates instantaneous velocity from position change.
+ *
+ * @param lastPos - Previous position.
+ * @param lastPos.x - Horizontal position.
+ * @param lastPos.y - Vertical position.
+ * @param currentPos - Current position.
+ * @param currentPos.x - Horizontal position.
+ * @param currentPos.y - Vertical position.
+ * @param dt - Time delta in ms.
+ * @returns Calculated velocity {x, y}.
+ */
+export function calculateInstantaneousVelocity(
+  lastPos: { x: number; y: number; },
+  currentPos: { x: number; y: number; },
+  dt: number,
+) {
+  if (dt <= 0) {
+    return { x: 0, y: 0 };
+  }
+  return {
+    x: (lastPos.x - currentPos.x) / dt,
+    y: (lastPos.y - currentPos.y) / dt,
+  };
+}
+
+/**
+ * Resolves the target index and alignment for snapping on a single axis.
+ *
+ * @param mode - The snap mode ('start', 'center', 'end', 'auto').
+ * @param dir - The scroll direction on this axis.
+ * @param currentIdx - The current first visible index.
+ * @param currentEndIdx - The current last visible index.
+ * @param relScroll - The current virtual scroll offset.
+ * @param viewSize - The viewport dimension.
+ * @param count - Total number of items/columns.
+ * @param getSize - Resolver for item size.
+ * @param getQuery - Resolver for item prefix sum.
+ * @param getIndexAt - Resolver for index at a virtual offset.
+ * @returns Snap result or null.
+ */
+export function resolveSnap(
+  mode: SnapMode,
+  dir: 'start' | 'end' | null,
+  currentIdx: number,
+  currentEndIdx: number,
+  relScroll: number,
+  viewSize: number,
+  count: number,
+  getSize: (i: number) => number,
+  getQuery: (i: number) => number,
+  getIndexAt: (o: number) => number,
+): SnapResult | null {
+  let effectiveMode = mode;
+  if (mode === 'auto') {
+    if (dir === 'start') {
+      effectiveMode = 'end';
+    } else if (dir === 'end') {
+      effectiveMode = 'start';
+    } else {
+      return null;
+    }
+  }
+
+  if (effectiveMode === 'start') {
+    const size = getSize(currentIdx);
+    // Ignore items larger than viewport to prevent jarring jumps
+    if (size > viewSize) {
+      return null;
+    }
+    const visibleAmount = getQuery(currentIdx) + size - relScroll;
+    return {
+      index: Math.min(count - 1, visibleAmount / size >= 0.5 ? currentIdx : currentIdx + 1),
+      align: 'start' as const,
+    };
+  }
+  if (effectiveMode === 'end') {
+    const size = getSize(currentEndIdx);
+    if (size > viewSize) {
+      return null;
+    }
+    const visibleAmount = relScroll + viewSize - getQuery(currentEndIdx);
+    return {
+      index: Math.max(0, visibleAmount / size >= 0.5 ? currentEndIdx : currentEndIdx - 1),
+      align: 'end' as const,
+    };
+  }
+  if (effectiveMode === 'center') {
+    const center = relScroll + viewSize / 2;
+    const idx = Math.max(0, Math.min(count - 1, getIndexAt(center)));
+    const size = getSize(idx);
+    if (size > viewSize) {
+      return null;
+    }
+    return { index: idx, align: 'center' as const };
+  }
+  return null;
+}
+
+/**
+ * Helper to get the index at a virtual offset.
+ *
+ * @param offset - Virtual offset.
+ * @param fixedSize - Fixed size if any.
+ * @param gap - Gap size.
+ * @param findLowerBound - Binary search resolver.
+ * @returns Index at offset.
+ */
+export function calculateIndexAt(
+  offset: number,
+  fixedSize: number | null,
+  gap: number,
+  findLowerBound: (offset: number) => number,
+): number {
+  const step = (fixedSize || 0) + gap;
+  if (fixedSize !== null && step > 0) {
+    return Math.floor(offset / step);
+  }
+  return findLowerBound(offset);
 }
