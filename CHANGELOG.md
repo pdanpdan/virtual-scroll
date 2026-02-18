@@ -1,5 +1,21 @@
 # Changelog
 
+# [0.9.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.8.0...v0.9.0) (2026-02-18)
+
+
+### Bug Fixes
+
+* **tests:** resolve event target mismatches and stabilize scroll snap timing ([522d003](https://github.com/pdanpdan/virtual-scroll/commit/522d003950b953c84067789fc9a4b77b67fbc7e3))
+
+
+### Features
+
+* **changelog:** support basic markdown formatting in changelog items ([a144263](https://github.com/pdanpdan/virtual-scroll/commit/a144263172a9902eb0d8c1ec7517475b94387cec))
+* **core:** allow optional indices in scrollToIndex and simplify scroll utilities ([08a5ec5](https://github.com/pdanpdan/virtual-scroll/commit/08a5ec5ed101d13d486867849dd5d6ad3ded65ae))
+* **navigation:** ensure PageUp/PageDown respect snap mode ([ee5b7fb](https://github.com/pdanpdan/virtual-scroll/commit/ee5b7fb8e2103c470f1497a54e31b66f35103d4d))
+* **navigation:** improve PageUp/PageDown behavior by using scrollToIndex with snapping ([34ce83f](https://github.com/pdanpdan/virtual-scroll/commit/34ce83fa3e14cb68eec14c4d8463b01c0a1262b6))
+* **playground:** hide dev-only settings when not viewing an example page ([898a610](https://github.com/pdanpdan/virtual-scroll/commit/898a6109d3b5e4038e31f6226188ef2f8d8cce64))
+
 # [0.8.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.7.0...v0.8.0) (2026-02-07)
 
 
