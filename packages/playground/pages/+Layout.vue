@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { usePageContext } from 'vike-vue/usePageContext';
-import { onMounted, provide, ref, watch } from 'vue';
+import { computed, onMounted, provide, ref, watch } from 'vue';
 
 import AppLink from '#/components/AppLink.vue';
 import AppLogo from '#/components/AppLogo.vue';
@@ -115,6 +115,7 @@ const featureLinks: Link[] = [
   { href: '/feature-ssr', label: 'SSR Support', props: { rel: 'external' } },
   { href: '/feature-custom-scrollbar', label: 'Custom Scrollbar' },
   { href: '/feature-independent-scrollbars', label: 'Independent Scrollbars' },
+  { href: '/feature-scroll-snap', label: 'Scroll Snap' },
 ];
 
 const patternLinks: Link[] = [
@@ -127,6 +128,11 @@ const patternLinks: Link[] = [
   { href: '/pattern-masonry', label: 'Masonry Grid' },
   { href: '/pattern-search', label: 'Search & Highlight' },
 ];
+
+const isExamplePage = computed(() => {
+  const pathname = pageContext.urlPathname;
+  return [ ...essentialLinks, ...featureLinks, ...patternLinks ].some((link) => pathname.includes(link.href));
+});
 
 const linkGroups = [
   { title: 'Essentials', links: essentialLinks },
@@ -262,7 +268,10 @@ const linkGroups = [
         </div>
       </button>
 
-      <div class="flex max-md:flex-col max-md:items-stretch max-md:gap-1 items-center gap-2 p-2 mb-1 min-w-64 bg-base-300 rounded-box shadow-soft text-sm">
+      <div
+        class="flex items-center gap-2 p-2 mb-1 min-w-64 bg-base-300 rounded-box shadow-soft text-sm"
+        :class="isExamplePage ? 'max-md:flex-col max-md:items-stretch max-md:gap-1' : 'flex-col items-stretch gap-1'"
+      >
         <label class="settings-item group p-2 min-w-32">
           <span class="settings-label me-2">Theme</span>
           <div class="swap swap-rotate me-2">
@@ -276,12 +285,12 @@ const linkGroups = [
           </div>
         </label>
 
-        <label class="settings-item group p-2 min-w-32">
+        <label v-if="isExamplePage" class="settings-item group p-2 min-w-32">
           <span class="settings-label me-2">RTL Mode</span>
           <input v-model="rtlMode" type="checkbox" class="toggle toggle-primary" />
         </label>
 
-        <label class="settings-item group p-2 min-w-32">
+        <label v-if="isExamplePage" class="settings-item group p-2 min-w-32">
           <span class="settings-label me-2">Debug Mode</span>
           <input v-model="debugMode" type="checkbox" class="toggle toggle-primary" />
         </label>
