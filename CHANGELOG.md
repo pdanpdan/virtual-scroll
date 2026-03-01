@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.9.0...v0.9.1) (2026-03-01)
+
+
+### Performance Improvements
+
+* internal optimization for sticky items ([b90b40b](https://github.com/pdanpdan/virtual-scroll/commit/b90b40bbf87e429c4b7f7794aa68e15d403b9da0))
+
 # [0.9.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.8.0...v0.9.0) (2026-02-18)
 
 
