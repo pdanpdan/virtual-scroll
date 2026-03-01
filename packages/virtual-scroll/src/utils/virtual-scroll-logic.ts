@@ -361,6 +361,7 @@ function calculateAxisTarget({
  * @param index - Item index.
  * @param stickyIndices - All sticky indices.
  * @param getNextStickyPos - Resolver for the next sticky item's position.
+ * @param nextStickyIndex - Pre-calculated next sticky index (optional).
  * @returns Sticky state for this axis.
  */
 function calculateAxisSticky(
@@ -370,12 +371,16 @@ function calculateAxisSticky(
   index: number,
   stickyIndices: number[],
   getNextStickyPos: (idx: number) => number,
+  nextStickyIndex?: number,
 ) {
   if (scrollPos <= originalPos) {
     return { isActive: false, offset: 0 };
   }
 
-  const nextStickyIdx = findNextStickyIndex(stickyIndices, index);
+  const nextStickyIdx = nextStickyIndex !== undefined
+    ? nextStickyIndex
+    : findNextStickyIndex(stickyIndices, index);
+
   if (nextStickyIdx === undefined) {
     return { isActive: true, offset: 0 };
   }
@@ -770,6 +775,7 @@ export function calculateColumnRange({
  * @param params.columnGap - Column gap (VU).
  * @param params.getItemQueryY - Resolver for vertical offset (VU).
  * @param params.getItemQueryX - Resolver for horizontal offset (VU).
+ * @param params.nextStickyIndex - Optional pre-calculated next sticky index.
  * @returns Sticky state and offset (VU).
  * @see StickyParams
  */
@@ -789,7 +795,8 @@ export function calculateStickyItem({
   columnGap,
   getItemQueryY,
   getItemQueryX,
-}: StickyParams) {
+  nextStickyIndex,
+}: StickyParams & { nextStickyIndex?: number | undefined; }) {
   let isStickyActiveX = false;
   let isStickyActiveY = false;
   const stickyOffset = { x: 0, y: 0 };
@@ -807,6 +814,7 @@ export function calculateStickyItem({
       index,
       stickyIndices,
       (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + gap) : getItemQueryY(nextIdx)),
+      nextStickyIndex,
     );
     isStickyActiveY = res.isActive;
     stickyOffset.y = res.offset;
@@ -821,6 +829,7 @@ export function calculateStickyItem({
       index,
       stickyIndices,
       (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + columnGap) : getItemQueryX(nextIdx)),
+      nextStickyIndex,
     );
 
     if (res.isActive) {

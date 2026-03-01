@@ -758,7 +758,10 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       )
       : { x: 0, y: 0 };
 
-    const lastItemsMap = new Map(lastRenderedItems.map((it) => [ it.index, it ]));
+    const lastItemsMap = new Map<number, RenderedItem<T>>();
+    for (const item of lastRenderedItems) {
+      lastItemsMap.set(item.index, item);
+    }
 
     // Optimization: Cache sequential queries to avoid O(log N) tree traversal for every item
     let lastIndexX = -1;
@@ -795,6 +798,9 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
 
     const colRange = columnRange.value;
 
+    // Optimization: track sticky index pointer
+    let currentStickyIndexPtr = 0;
+
     for (const i of sortedIndices) {
       const item = props.value.items[ i ];
       if (item === undefined) {
@@ -821,6 +827,12 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       const originalX = x;
       const originalY = y;
 
+      // Find next sticky index for optimization
+      while (currentStickyIndexPtr < stickyIndices.length && stickyIndices[ currentStickyIndexPtr ]! <= i) {
+        currentStickyIndexPtr++;
+      }
+      const nextStickyIndex = currentStickyIndexPtr < stickyIndices.length ? stickyIndices[ currentStickyIndexPtr ] : undefined;
+
       const { isStickyActive, isStickyActiveX, isStickyActiveY, stickyOffset } = calculateStickyItem({
         index: i,
         isSticky,
@@ -836,8 +848,9 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         fixedWidth: fixedColumnWidth.value,
         gap: props.value.gap || 0,
         columnGap: props.value.columnGap || 0,
-        getItemQueryY: queryYCached,
-        getItemQueryX: queryXCached,
+        getItemQueryY: (idx) => itemSizesY.query(idx),
+        getItemQueryX: (idx) => itemSizesX.query(idx),
+        nextStickyIndex,
       });
 
       const offsetX = isHydrated.value

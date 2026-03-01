@@ -126,102 +126,141 @@ export function useVirtualScrollSizes<T>(
   };
 
   /**
+   * Helper to initialize measurements for a single axis.
+   */
+  const initializeAxis = (
+    count: number,
+    tree: FenwickTree,
+    measured: Uint8Array,
+    sizeProp: number | number[] | ((...args: any[]) => number) | null | undefined,
+    defaultSize: number,
+    gap: number,
+    isDynamic: boolean,
+    isX: boolean,
+    shouldReset: boolean,
+  ) => {
+    let needsRebuild = false;
+
+    if (shouldReset) {
+      for (let i = 0; i < count; i++) {
+        if (tree.get(i) !== 0) {
+          tree.set(i, 0);
+          measured[ i ] = 0;
+          needsRebuild = true;
+        }
+      }
+      return needsRebuild;
+    }
+
+    for (let i = 0; i < count; i++) {
+      const current = tree.get(i);
+      const isMeasured = measured[ i ] === 1;
+
+      if (!isDynamic || (!isMeasured && current === 0)) {
+        const baseSize = getSizeAt(i, sizeProp, defaultSize, gap, tree, isX) + gap;
+
+        if (Math.abs(current - baseSize) > 0.5) {
+          tree.set(i, baseSize);
+          measured[ i ] = isDynamic ? 0 : 1;
+          needsRebuild = true;
+        } else if (!isDynamic) {
+          measured[ i ] = 1;
+        }
+      }
+    }
+    return needsRebuild;
+  };
+
+  /**
    * Initializes prefix sum trees from props (fixed sizes, width arrays, or functions).
    */
   const initializeMeasurements = () => {
     const propsVal = props.value.props;
-    const newItems = propsVal.items;
-    const len = newItems.length;
+    const len = propsVal.items.length;
     const colCount = propsVal.columnCount || 0;
     const gap = propsVal.gap || 0;
     const columnGap = propsVal.columnGap || 0;
     const cw = propsVal.columnWidth;
-
-    let colNeedsRebuild = false;
-    let itemsNeedRebuild = false;
+    const itemSize = propsVal.itemSize;
+    const defaultColWidth = propsVal.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
+    const defaultItemSize = propsVal.defaultItemSize || props.value.defaultSize;
 
     // Initialize columns
-    if (colCount > 0) {
-      for (let i = 0; i < colCount; i++) {
-        const currentW = columnSizes.get(i);
-        const isMeasured = measuredColumns.value[ i ] === 1;
+    const colNeedsRebuild = initializeAxis(
+      colCount,
+      columnSizes,
+      measuredColumns.value,
+      cw,
+      defaultColWidth,
+      columnGap,
+      props.value.isDynamicColumnWidth,
+      true,
+      false,
+    );
 
-        if (!props.value.isDynamicColumnWidth || (!isMeasured && currentW === 0)) {
-          let baseWidth = 0;
-          if (typeof cw === 'number' && cw > 0) {
-            baseWidth = cw;
-          } else if (Array.isArray(cw) && cw.length > 0) {
-            baseWidth = cw[ i % cw.length ] || propsVal.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
-          } else if (typeof cw === 'function') {
-            baseWidth = cw(i);
-          } else {
-            baseWidth = propsVal.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
-          }
+    // Initialize items X
+    const itemsXNeedsRebuild = initializeAxis(
+      len,
+      itemSizesX,
+      measuredItemsX.value,
+      itemSize,
+      defaultItemSize,
+      columnGap,
+      props.value.isDynamicItemSize,
+      true,
+      props.value.direction !== 'horizontal',
+    );
 
-          const targetW = baseWidth + columnGap;
-          if (Math.abs(currentW - targetW) > 0.5) {
-            columnSizes.set(i, targetW);
-            measuredColumns.value[ i ] = props.value.isDynamicColumnWidth ? 0 : 1;
-            colNeedsRebuild = true;
-          } else if (!props.value.isDynamicColumnWidth) {
-            measuredColumns.value[ i ] = 1;
-          }
-        }
-      }
-    }
-
-    // Initialize items
-    for (let i = 0; i < len; i++) {
-      const item = propsVal.items[ i ];
-      const currentX = itemSizesX.get(i);
-      const currentY = itemSizesY.get(i);
-      const isMeasuredX = measuredItemsX.value[ i ] === 1;
-      const isMeasuredY = measuredItemsY.value[ i ] === 1;
-
-      if (props.value.direction === 'horizontal') {
-        if (!props.value.isDynamicItemSize || (!isMeasuredX && currentX === 0)) {
-          const baseSize = getItemBaseSize(item as T, i);
-          const targetX = baseSize + columnGap;
-          if (Math.abs(currentX - targetX) > 0.5) {
-            itemSizesX.set(i, targetX);
-            measuredItemsX.value[ i ] = props.value.isDynamicItemSize ? 0 : 1;
-            itemsNeedRebuild = true;
-          } else if (!props.value.isDynamicItemSize) {
-            measuredItemsX.value[ i ] = 1;
-          }
-        }
-      } else if (currentX !== 0) {
-        itemSizesX.set(i, 0);
-        measuredItemsX.value[ i ] = 0;
-        itemsNeedRebuild = true;
-      }
-
-      if (props.value.direction !== 'horizontal') {
-        if (!props.value.isDynamicItemSize || (!isMeasuredY && currentY === 0)) {
-          const baseSize = getItemBaseSize(item as T, i);
-          const targetY = baseSize + gap;
-          if (Math.abs(currentY - targetY) > 0.5) {
-            itemSizesY.set(i, targetY);
-            measuredItemsY.value[ i ] = props.value.isDynamicItemSize ? 0 : 1;
-            itemsNeedRebuild = true;
-          } else if (!props.value.isDynamicItemSize) {
-            measuredItemsY.value[ i ] = 1;
-          }
-        }
-      } else if (currentY !== 0) {
-        itemSizesY.set(i, 0);
-        measuredItemsY.value[ i ] = 0;
-        itemsNeedRebuild = true;
-      }
-    }
+    // Initialize items Y
+    const itemsYNeedsRebuild = initializeAxis(
+      len,
+      itemSizesY,
+      measuredItemsY.value,
+      itemSize,
+      defaultItemSize,
+      gap,
+      props.value.isDynamicItemSize,
+      false,
+      props.value.direction === 'horizontal',
+    );
 
     if (colNeedsRebuild) {
       columnSizes.rebuild();
     }
-    if (itemsNeedRebuild) {
+    if (itemsXNeedsRebuild) {
       itemSizesX.rebuild();
+    }
+    if (itemsYNeedsRebuild) {
       itemSizesY.rebuild();
     }
+  };
+
+  /**
+   * Helper to update a single size in the tree.
+   */
+  const updateAxis = (
+    index: number,
+    newSize: number,
+    tree: FenwickTree,
+    measured: Uint8Array,
+    gap: number,
+    firstIndex: number,
+    accumulatedDelta: { val: number; },
+  ) => {
+    const oldSize = tree.get(index);
+    const targetSize = newSize + gap;
+    let updated = false;
+
+    if (!measured[ index ] || Math.abs(targetSize - oldSize) > 0.1) {
+      const d = targetSize - oldSize;
+      tree.update(index, d);
+      measured[ index ] = 1;
+      updated = true;
+      if (index < firstIndex && oldSize > 0) {
+        accumulatedDelta.val += d;
+      }
+    }
+    return updated;
   };
 
   /**
@@ -297,8 +336,8 @@ export function useVirtualScrollSizes<T>(
     onScrollCorrection: (deltaX: number, deltaY: number) => void,
   ) => {
     let needUpdate = false;
-    let deltaX = 0;
-    let deltaY = 0;
+    const deltaX = { val: 0 };
+    const deltaY = { val: 0 };
     const propsVal = props.value.props;
     const gap = propsVal.gap || 0;
     const columnGap = propsVal.columnGap || 0;
@@ -315,19 +354,8 @@ export function useVirtualScrollSizes<T>(
     const tryUpdateColumn = (colIdx: number, width: number) => {
       if (colIdx >= 0 && colIdx < (propsVal.columnCount || 0) && !processedCols.has(colIdx)) {
         processedCols.add(colIdx);
-        const oldW = columnSizes.get(colIdx);
-        const targetW = width + columnGap;
-
-        if (!measuredColumns.value[ colIdx ] || Math.abs(oldW - targetW) > 0.1) {
-          const d = targetW - oldW;
-          if (Math.abs(d) > 0.1) {
-            columnSizes.update(colIdx, d);
-            needUpdate = true;
-            if (colIdx < firstColIndex && oldW > 0) {
-              deltaX += d;
-            }
-          }
-          measuredColumns.value[ colIdx ] = 1;
+        if (updateAxis(colIdx, width, columnSizes, measuredColumns.value, columnGap, firstColIndex, deltaX)) {
+          needUpdate = true;
         }
       }
     };
@@ -342,30 +370,13 @@ export function useVirtualScrollSizes<T>(
       if (index >= 0 && !processedRows.has(index) && isMeasurable && blockSize > 0) {
         processedRows.add(index);
         if (isHorizontalMode && inlineSize > 0) {
-          const oldWidth = itemSizesX.get(index);
-          const targetWidth = inlineSize + columnGap;
-          if (!measuredItemsX.value[ index ] || Math.abs(targetWidth - oldWidth) > 0.1) {
-            const d = targetWidth - oldWidth;
-            itemSizesX.update(index, d);
-            measuredItemsX.value[ index ] = 1;
+          if (updateAxis(index, inlineSize, itemSizesX, measuredItemsX.value, columnGap, firstRowIndex, deltaX)) {
             needUpdate = true;
-            if (index < firstRowIndex && oldWidth > 0) {
-              deltaX += d;
-            }
           }
         }
         if (!isHorizontalMode) {
-          const oldHeight = itemSizesY.get(index);
-          const targetHeight = blockSize + gap;
-
-          if (!measuredItemsY.value[ index ] || Math.abs(targetHeight - oldHeight) > 0.1) {
-            const d = targetHeight - oldHeight;
-            itemSizesY.update(index, d);
-            measuredItemsY.value[ index ] = 1;
+          if (updateAxis(index, blockSize, itemSizesY, measuredItemsY.value, gap, firstRowIndex, deltaY)) {
             needUpdate = true;
-            if (index < firstRowIndex && oldHeight > 0) {
-              deltaY += d;
-            }
           }
         }
       }
@@ -396,8 +407,8 @@ export function useVirtualScrollSizes<T>(
 
     if (needUpdate) {
       treeUpdateFlag.value++;
-      if (deltaX !== 0 || deltaY !== 0) {
-        onScrollCorrection(deltaX, deltaY);
+      if (deltaX.val !== 0 || deltaY.val !== 0) {
+        onScrollCorrection(deltaX.val, deltaY.val);
       }
     }
   };
