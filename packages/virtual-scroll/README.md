@@ -127,10 +127,10 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `items` | `T[]` | Required | Array of items to be virtualized. |
-| `itemSize` | `number | fn | null` | `40` | Fixed size or function. Pass `0`/`null` for dynamic. |
-| `direction` | `'vertical' | 'horizontal' | 'both'` | `'vertical'` | Scroll direction. |
+| `itemSize` | `number \| fn \| null` | `40` | Fixed size or function. Pass `0`/`null` for dynamic. |
+| `direction` | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Scroll direction. |
 | `columnCount` | `number` | `0` | Number of columns for grid mode. |
-| `columnWidth` | `num | num[] | fn | null` | `100` | Width for columns in grid mode. |
+| `columnWidth` | `num \| num[] \| fn \| null` | `100` | Width for columns in grid mode. |
 | `gap` / `columnGap` | `number` | `0` | Spacing between items/columns. |
 | `snap` | `SnapMode` | `false` | Enable scroll snapping. See [SnapMode](#snapmode). |
 | `stickyIndices` | `number[]` | `[]` | Indices of items that should remain sticky. |
@@ -138,14 +138,14 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 | `ssrRange` | `object` | - | Range of items to pre-render for SSR. |
 | `virtualScrollbar` | `boolean` | `false` | Whether to force virtual scrollbars. |
 | `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
-| `container` | `HTMLElement | Window` | `hostRef` | The scrollable container element. |
+| `container` | `HTMLElement \| Window` | `hostRef` | The scrollable container element. |
 | `containerTag` | `string` | `'div'` | HTML tag for the root container. |
 | `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper. |
 | `itemTag` | `string` | `'div'` | HTML tag for each rendered item. |
-| `scrollPaddingStart` / `End` | `num | {x, y}` | `0` | Padding for scroll calculations. |
+| `scrollPaddingStart` / `End` | `num \| {x, y}` | `0` | Padding for scroll calculations. |
 | `bufferBefore` / `bufferAfter` | `number` | `5` | Items to render outside the viewport. |
 | `initialScrollIndex` | `number` | `undefined` | Index to jump to on mount. |
-| `initialScrollAlign` | `ScrollAlignment | ScrollAlignmentOptions` | `'start'` | Alignment for initial jump. See [ScrollAlignment](#scrollalignment) or [Options](#scrollalignmentoptions). |
+| `initialScrollAlign` | `ScrollAlignment \| ScrollAlignmentOptions` | `'start'` | Alignment for initial jump. See [ScrollAlignment](#scrollalignment) or [Options](#scrollalignmentoptions). |
 | `defaultItemSize` / `defaultColumnWidth` | `number` | `40 / 100` | Estimate for dynamic items/columns. |
 | `debug` | `boolean` | `false` | Enable debug visualization. |
 | `role` | `string` | - | ARIA role for the container. Defaults based on direction. |
@@ -277,8 +277,8 @@ The component automatically manages ARIA roles and attributes to ensure screen r
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `align` | `ScrollAlignment | ScrollAlignmentOptions` | `'auto'` | Alignment logic. |
-| `behavior` | `'auto' | 'smooth'` | `'smooth'` | Scroll animation. |
+| `align` | `ScrollAlignment \| ScrollAlignmentOptions` | `'auto'` | Alignment logic. |
+| `behavior` | `'auto' \| 'smooth'` | `'smooth'` | Scroll animation. |
 
 ## Sizing Guide
 
