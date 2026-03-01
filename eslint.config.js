@@ -128,6 +128,12 @@ export default antfu(
     },
   },
   {
+    files: [ '**/*.md' ],
+    rules: {
+      'perfectionist/sort-imports': 'off',
+    },
+  },
+  {
     files: [ '**/*.vue' ],
     languageOptions: {
       globals: {
