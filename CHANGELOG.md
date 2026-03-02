@@ -1,5 +1,21 @@
 # Changelog
 
+# [0.10.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.9.1...v0.10.0) (2026-03-02)
+
+
+### Bug Fixes
+
+* resolve typechecking and build issues ([911e573](https://github.com/pdanpdan/virtual-scroll/commit/911e57306a9d9b1baef996b8dd7cb55170d4c811))
+
+
+### Features
+
+* add a new scroll snap mode 'next' ([aff1b4b](https://github.com/pdanpdan/virtual-scroll/commit/aff1b4bc7bd3cc49918a4789be70ad10b8972d73))
+* expose handleScrollCorrection and component properties ([47b2b32](https://github.com/pdanpdan/virtual-scroll/commit/47b2b32c2a08e37d5a547a42c3b7ab6ff56fac5a))
+* implement modular extension system ([9f48baa](https://github.com/pdanpdan/virtual-scroll/commit/9f48baa7bb374a18d15f488b6ba20b406cb16a83))
+* support array-based circular sizing patterns ([57be4e6](https://github.com/pdanpdan/virtual-scroll/commit/57be4e676666dd06e63e71ee6d5ed9c0da9e6b0f))
+* use smooth scrolling for final snap scroll ([f54eb57](https://github.com/pdanpdan/virtual-scroll/commit/f54eb57fd106aac365059fbcca8c101d672d7557))
+
 ## [0.9.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.9.0...v0.9.1) (2026-03-01)
 
 
