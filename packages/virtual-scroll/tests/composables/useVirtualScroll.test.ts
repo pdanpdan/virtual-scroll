@@ -858,8 +858,8 @@ describe('useVirtualScroll', () => {
 
       expect(container.scrollTo).toHaveBeenCalledTimes(1);
 
-      // End scroll by waiting for timeout (default 250ms)
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // End scroll by waiting for timeout (150ms + 500ms safety + buffer)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await nextTick();
 
       // Now correction should trigger
@@ -988,6 +988,58 @@ describe('useVirtualScroll', () => {
       await nextTick();
 
       expect(scrollTop).toBe(4400);
+      wrapper.unmount();
+    });
+
+    it('does not trigger unnecessary correction at high scale when rounding occurs', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      let scrollTop = 0;
+      Object.defineProperty(container, 'scrollTop', {
+        configurable: true,
+        get: () => scrollTop,
+        set: (val) => { scrollTop = val; },
+      });
+      container.scrollTo = vi.fn().mockImplementation((options: ScrollToOptions) => {
+        if (options.top !== undefined) {
+          // Simulate browser rounding: land at nearest integer
+          scrollTop = Math.round(options.top);
+        }
+        container.dispatchEvent(new Event('scroll'));
+      });
+
+      const { result, wrapper } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 1000,
+        items: Array.from({ length: 100000 }, (_, i) => ({ id: i })), // 100M VU
+      });
+
+      await nextTick();
+      await nextTick();
+
+      const scaleY = result.scaleY.value;
+      expect(scaleY).toBeGreaterThan(1.1); // Ensure we are scaled
+
+      // Clear initial calls from mount/watchers
+      vi.mocked(container.scrollTo).mockClear();
+
+      // Scroll to index 50. Target VU = 50000.
+      // Display target = 50000 / scaleY.
+      // Since scaleY is ~10.00045, display target is ~4999.77.
+      // Math.round(4999.77) = 5000.
+      // errorVU = Math.abs(5000 * scaleY - 50000) = Math.abs(5000 * 10.00045 - 50000) = 2.25.
+      // 2.25 > 2 (old tolerance), so it would have triggered.
+      // Now tolerance is 2 * 10 = 20. 2.25 < 20.
+      result.scrollToIndex(50, null, { behavior: 'smooth' });
+      await nextTick();
+
+      // End scroll by waiting for timeout (150ms + 500ms safety)
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      await nextTick();
+
+      // If it called correction, it would be another scrollTo call.
+      expect(container.scrollTo).toHaveBeenCalledTimes(1);
       wrapper.unmount();
     });
   });

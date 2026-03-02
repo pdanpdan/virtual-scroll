@@ -62,7 +62,25 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
   const hostRefOffset = reactive({ x: 0, y: 0 });
   let scrollTimeout: ReturnType<typeof setTimeout> | undefined;
 
+  // --- Scroll Queue / Correction ---
+  const pendingScroll = ref<{
+    rowIndex: number | null | undefined;
+    colIndex: number | null | undefined;
+    options: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
+  } | null>(null);
+
   const isProgrammaticScroll = ref(false);
+  let programmaticScrollTimer: ReturnType<typeof setTimeout> | undefined;
+
+  /**
+   * Stops any currently active programmatic scroll and clears pending corrections.
+   */
+  const stopProgrammaticScroll = () => {
+    isProgrammaticScroll.value = false;
+    clearTimeout(programmaticScrollTimer);
+    pendingScroll.value = null;
+  };
+
   const internalScrollX = ref(0);
   const internalScrollY = ref(0);
   /** The last recorded virtual X position, used to detect scroll direction for snapping. */
@@ -135,13 +153,6 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     fixedItemSize: fixedItemSize.value,
     direction: direction.value,
   })));
-
-  // --- Scroll Queue / Correction ---
-  const pendingScroll = ref<{
-    rowIndex: number | null | undefined;
-    colIndex: number | null | undefined;
-    options: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
-  } | null>(null);
 
   const sortedStickyIndices = computed(() =>
     [ ...(props.value.stickyIndices || []) ].sort((a, b) => a - b),
@@ -361,7 +372,16 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     }
 
     const scrollBehavior = isCorrection ? 'auto' : (behavior || 'smooth');
+
     isProgrammaticScroll.value = true;
+    clearTimeout(programmaticScrollTimer);
+    if (scrollBehavior === 'smooth') {
+      programmaticScrollTimer = setTimeout(() => {
+        isProgrammaticScroll.value = false;
+        programmaticScrollTimer = undefined;
+        checkPendingScroll();
+      }, 500);
+    }
 
     const scrollOptions: ScrollToOptions = {
       behavior: scrollBehavior,
@@ -405,6 +425,14 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
   const scrollToOffset = (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => {
     const container = props.value.container || window;
     isProgrammaticScroll.value = true;
+    clearTimeout(programmaticScrollTimer);
+    if (options?.behavior === 'smooth') {
+      programmaticScrollTimer = setTimeout(() => {
+        isProgrammaticScroll.value = false;
+        programmaticScrollTimer = undefined;
+        checkPendingScroll();
+      }, 500);
+    }
     pendingScroll.value = null;
 
     const clampedX = (x !== null && x !== undefined)
@@ -948,14 +976,6 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
 
   // --- Event Handlers & Lifecycle ---
   /**
-   * Stops any currently active programmatic scroll and clears pending corrections.
-   */
-  const stopProgrammaticScroll = () => {
-    isProgrammaticScroll.value = false;
-    pendingScroll.value = null;
-  };
-
-  /**
    * Event handler for scroll events.
    */
   const handleScroll = (e: Event) => {
@@ -1005,7 +1025,6 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
     scrollTimeout = setTimeout(() => {
       const wasProgrammatic = isProgrammaticScroll.value;
       isScrolling.value = false;
-      isProgrammaticScroll.value = false;
 
       // Only perform snapping if enabled and the last scroll was user-initiated
       if (props.value.snap && !wasProgrammatic) {
@@ -1070,8 +1089,13 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
             behavior: 'smooth',
           });
         }
+      } else {
+        // If not snapping, clear the programmatic flag if it wasn't already cleared by the safety timer
+        if (programmaticScrollTimer === undefined) {
+          isProgrammaticScroll.value = false;
+        }
       }
-    }, 250);
+    }, 150);
   };
 
   /**
@@ -1115,7 +1139,7 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
       const isSmooth = isScrollToIndexOptions(options) && options.behavior === 'smooth';
 
       // If it's a smooth scroll, we wait until it's finished before correcting.
-      if (isSmooth && isScrolling.value) {
+      if (isSmooth && (isScrolling.value || isProgrammaticScroll.value)) {
         return;
       }
 
@@ -1167,8 +1191,8 @@ export function useVirtualScroll<T = unknown>(propsInput: MaybeRefOrGetter<Virtu
         paddingEndY: paddingEndY.value,
       });
 
-      const toleranceX = 2;
-      const toleranceY = 2;
+      const toleranceX = 2 * scaleX.value;
+      const toleranceY = 2 * scaleY.value;
       const reachedX = (colIndex === null || colIndex === undefined) || Math.abs(currentRelX - targetX) < toleranceX;
       const reachedY = (rowIndex === null || rowIndex === undefined) || Math.abs(currentRelY - targetY) < toleranceY;
 
