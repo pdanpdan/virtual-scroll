@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.0...v0.10.1) (2026-03-02)
+
+
+### Bug Fixes
+
+* prevent auto scroll on android when snap is enabled ([63b3b2d](https://github.com/pdanpdan/virtual-scroll/commit/63b3b2d123a740fa4659749247821cf56f33dc8a))
+
 # [0.10.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.9.1...v0.10.0) (2026-03-02)
 
 
