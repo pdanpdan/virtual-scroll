@@ -6,6 +6,7 @@ import type {
   ScrollDetails,
   ScrollDirection,
   ScrollToIndexOptions,
+  ScrollToIndexResult,
   VirtualScrollProps,
 } from '../types';
 /* global ScrollToOptions */
@@ -112,10 +113,10 @@ export function useVirtualScroll<T = unknown>(
     pendingScroll.value = null;
   };
 
-  /** Previous internal horizontal virtual position. */
-  let lastInternalX = 0;
-  /** Previous internal vertical virtual position. */
-  let lastInternalY = 0;
+  /** Horizontal virtual scroll position at the start of the current scroll interaction (VU). */
+  let scrollStartX = 0;
+  /** Vertical virtual scroll position at the start of the current scroll interaction (VU). */
+  let scrollStartY = 0;
 
   // --- Computed Config ---
   /** Validated scroll direction. */
@@ -348,10 +349,9 @@ export function useVirtualScroll<T = unknown>(
     rowIndex?: number | null,
     colIndex?: number | null,
     options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions,
-  ) {
-    const isCorrection = (typeof options === 'object' && options !== null && 'isCorrection' in options)
-      ? options.isCorrection
-      : false;
+  ): ScrollToIndexResult {
+    const isCorrection = isScrollToIndexOptions(options) ? options.isCorrection : false;
+    const dryRun = isScrollToIndexOptions(options) ? options.dryRun : false;
 
     const container = props.value.container || window;
 
@@ -393,7 +393,7 @@ export function useVirtualScroll<T = unknown>(
       paddingEndY: paddingEndY.value,
     });
 
-    if (!isCorrection) {
+    if (!isCorrection && !dryRun) {
       const behavior = isScrollToIndexOptions(options) ? options.behavior : undefined;
       pendingScroll.value = {
         rowIndex,
@@ -416,14 +416,18 @@ export function useVirtualScroll<T = unknown>(
     }
     const scrollBehavior = isCorrection ? 'auto' : (behavior || 'smooth');
 
-    isProgrammaticScroll.value = true;
-    clearTimeout(programmaticScrollTimer);
-    if (scrollBehavior === 'smooth') {
-      programmaticScrollTimer = setTimeout(() => {
-        isProgrammaticScroll.value = false;
-        programmaticScrollTimer = undefined;
-        checkPendingScroll();
-      }, 500);
+    if (!dryRun) {
+      if (scrollBehavior === 'smooth' || !isCorrection) {
+        isProgrammaticScroll.value = true;
+        clearTimeout(programmaticScrollTimer);
+        if (scrollBehavior === 'smooth') {
+          programmaticScrollTimer = setTimeout(() => {
+            isProgrammaticScroll.value = false;
+            programmaticScrollTimer = undefined;
+            checkPendingScroll();
+          }, 1000);
+        }
+      }
     }
 
     const scrollOptions: ScrollToOptions = { behavior: scrollBehavior };
@@ -433,9 +437,12 @@ export function useVirtualScroll<T = unknown>(
     if (rowIndex !== null && rowIndex !== undefined) {
       scrollOptions.top = Math.max(0, finalY);
     }
-    scrollTo(container, scrollOptions);
 
-    if (scrollBehavior === 'auto' || scrollBehavior === undefined) {
+    if (!isCorrection && !dryRun) {
+      scrollTo(container, scrollOptions);
+    }
+
+    if (!dryRun && (scrollBehavior === 'auto' || scrollBehavior === undefined)) {
       if (colIndex !== null && colIndex !== undefined) {
         scrollX.value = (isRtl.value ? finalX : Math.max(0, finalX));
         internalScrollX.value = targetX;
@@ -445,6 +452,8 @@ export function useVirtualScroll<T = unknown>(
         internalScrollY.value = targetY;
       }
     }
+
+    return { targetX, targetY, displayTargetX, displayTargetY };
   }
 
   function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) {
@@ -456,7 +465,7 @@ export function useVirtualScroll<T = unknown>(
         isProgrammaticScroll.value = false;
         programmaticScrollTimer = undefined;
         checkPendingScroll();
-      }, 500);
+      }, 1000);
     }
     pendingScroll.value = null;
 
@@ -759,14 +768,23 @@ export function useVirtualScroll<T = unknown>(
     const scrollValueX = isRtl.value ? Math.abs(scrollX.value) : scrollX.value;
     const virtualX = displayToVirtual(scrollValueX, componentOffset.x, scaleX.value);
     const virtualY = displayToVirtual(scrollY.value, componentOffset.y, scaleY.value);
-    if (Math.abs(virtualX - lastInternalX) > 0.5) {
-      scrollDirectionX.value = virtualX > lastInternalX ? 'end' : 'start';
-      lastInternalX = virtualX;
+
+    if (!isProgrammaticScroll.value) {
+      if (!isScrolling.value) {
+        scrollStartX = internalScrollX.value;
+        scrollStartY = internalScrollY.value;
+      }
+      const deltaX = virtualX - scrollStartX;
+      const deltaY = virtualY - scrollStartY;
+
+      if (Math.abs(deltaX) > 0.5) {
+        scrollDirectionX.value = deltaX > 0 ? 'end' : 'start';
+      }
+      if (Math.abs(deltaY) > 0.5) {
+        scrollDirectionY.value = deltaY > 0 ? 'end' : 'start';
+      }
     }
-    if (Math.abs(virtualY - lastInternalY) > 0.5) {
-      scrollDirectionY.value = virtualY > lastInternalY ? 'end' : 'start';
-      lastInternalY = virtualY;
-    }
+
     internalScrollX.value = virtualX;
     internalScrollY.value = virtualY;
     if (!isProgrammaticScroll.value) {
@@ -1085,5 +1103,7 @@ export function useVirtualScroll<T = unknown>(
     getRowIndexAt,
     /** Helper to get the column index at a specific virtual offset (VU). */
     getColIndexAt,
+    /** @internal */
+    __internalState: ctx.internalState,
   };
 }

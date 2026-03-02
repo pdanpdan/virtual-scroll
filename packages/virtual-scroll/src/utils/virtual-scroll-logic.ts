@@ -1190,35 +1190,44 @@ export function resolveSnap(
   }
 
   if (mode === 'next') {
-    if (dir === 'start') {
-      effectiveMode = 'end';
-    } else if (dir === 'end') {
-      effectiveMode = 'start';
-    } else {
-      return null;
-    }
-
-    if (effectiveMode === 'start') {
-      // Scrolling towards end (dir === 'end') -> snap to NEXT item start
+    if (dir === 'end') {
+      // Scrolling items UP (towards end of list) -> snap to NEXT item start
       const size = getSize(currentIdx);
       if (size > viewSize) {
         return null;
+      }
+      const scrolledOut = relScroll - getQuery(currentIdx);
+      const threshold = Math.min(5, size * 0.1);
+      if (scrolledOut <= threshold) {
+        return {
+          index: currentIdx,
+          align: 'start' as const,
+        };
       }
       return {
         index: Math.min(count - 1, currentIdx + 1),
         align: 'start' as const,
       };
-    }
-    if (effectiveMode === 'end') {
-      // Scrolling towards start (dir === 'start') -> snap to PREVIOUS item end
+    } else if (dir === 'start') {
+      // Scrolling items DOWN (towards start of list) -> snap to PREVIOUS item end
       const size = getSize(currentEndIdx);
       if (size > viewSize) {
         return null;
+      }
+      const scrolledOutBottom = (getQuery(currentEndIdx) + size) - (relScroll + viewSize);
+      const threshold = Math.min(5, size * 0.1);
+      if (scrolledOutBottom <= threshold) {
+        return {
+          index: currentEndIdx,
+          align: 'end' as const,
+        };
       }
       return {
         index: Math.max(0, currentEndIdx - 1),
         align: 'end' as const,
       };
+    } else {
+      return null;
     }
   }
 

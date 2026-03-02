@@ -1,4 +1,4 @@
-import type { RenderedItem, ScrollAlignment, ScrollAlignmentOptions, ScrollDetails, ScrollToIndexOptions, Size, VirtualScrollProps } from '../types';
+import type { RenderedItem, ScrollAlignment, ScrollAlignmentOptions, ScrollDetails, ScrollToIndexOptions, ScrollToIndexResult, Size, VirtualScrollProps } from '../types';
 import type { Ref } from 'vue';
 
 /**
@@ -51,7 +51,7 @@ export interface ExtensionContext<T = unknown> {
   /** Direct access to core component methods. */
   methods: {
     /** Scroll to a specific row and/or column. */
-    scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => void;
+    scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
     /** Scroll to a specific virtual pixel offset. */
     scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
     /** Detect and update text direction. */

@@ -95,7 +95,7 @@ export function scrollTo(container: HTMLElement | Window | null | undefined, opt
  * @returns `true` if the options object contains scroll-to-index specific properties.
  */
 export function isScrollToIndexOptions(options: unknown): options is ScrollToIndexOptions {
-  return typeof options === 'object' && options != null && ('align' in options || 'behavior' in options || 'isCorrection' in options);
+  return typeof options === 'object' && options != null && ('align' in options || 'behavior' in options || 'isCorrection' in options || 'dryRun' in options);
 }
 
 /**

@@ -1,11 +1,14 @@
 import type { VirtualScrollExtension } from '../src/extensions';
-import type { VirtualScrollProps } from '../src/types';
-/* global ScrollToOptions, ResizeObserverCallback */
+import type { ScrollDirection, VirtualScrollProps } from '../src/types';
 import type { Ref } from 'vue';
+/* global ScrollToOptions, ResizeObserverCallback */
 
 import { mount } from '@vue/test-utils';
 import { vi } from 'vitest';
-import { defineComponent, ref } from 'vue';
+import {
+  defineComponent,
+  ref,
+} from 'vue';
 
 import { useVirtualScroll } from '../src/composables/useVirtualScroll';
 import {
@@ -105,10 +108,27 @@ export interface MockItem {
 
 export const mockItems = Array.from({ length: 100 }, (_, i) => ({ id: i }));
 
+/** @internal */
+export interface InternalState {
+  scrollDirectionX: { value: 'start' | 'end' | null; };
+  scrollDirectionY: { value: 'start' | 'end' | null; };
+  internalScrollX: { value: number; };
+  internalScrollY: { value: number; };
+  isScrolling: { value: boolean; };
+  isProgrammaticScroll: { value: boolean; };
+  viewportWidth: { value: number; };
+  viewportHeight: { value: number; };
+  scaleX: { value: number; };
+  scaleY: { value: number; };
+  relativeScrollX: { value: number; };
+  relativeScrollY: { value: number; };
+  direction: { value: ScrollDirection; };
+}
+
 // Helper to test composable
 export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: VirtualScrollExtension<T>[]) {
-  const props = ref(propsValue) as Ref<VirtualScrollProps<T>>;
   let result: ReturnType<typeof useVirtualScroll<T>>;
+  let internalState: InternalState;
 
   const extensions = customExtensions || [
     useRtlExtension<T>(),
@@ -121,12 +141,18 @@ export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: V
     useCoordinateScalingExtension<T>(),
   ] as VirtualScrollExtension<T>[];
 
+  const propsRef = ref(propsValue) as Ref<VirtualScrollProps<T>>;
+
   const TestComponent = defineComponent({
-    setup() {
-      result = useVirtualScroll(props, extensions);
+    setup(_, { expose }) {
+      const vs = useVirtualScroll(propsRef, extensions);
+      result = vs;
+      // @ts-expect-error - accessing internal state for testing
+      internalState = vs.__internalState;
+      expose({ vs });
       return () => null;
     },
   });
   const wrapper = mount(TestComponent);
-  return { props, result: result!, wrapper };
+  return { props: propsRef, result: result!, wrapper, internalState: internalState! };
 }

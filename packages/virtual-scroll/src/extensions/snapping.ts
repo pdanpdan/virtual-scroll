@@ -72,10 +72,23 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
       }
 
       if (shouldSnap) {
-        ctx.methods.scrollToIndex(targetRow, targetCol, {
+        const { targetX, targetY } = ctx.methods.scrollToIndex(targetRow, targetCol, {
           align: { x: alignX, y: alignY },
-          behavior: 'smooth',
+          dryRun: true,
         });
+
+        const currentX = ctx.internalState.internalScrollX.value;
+        const currentY = ctx.internalState.internalScrollY.value;
+
+        const diffX = (targetCol !== null) ? Math.abs(targetX - currentX) : 0;
+        const diffY = (targetRow !== null) ? Math.abs(targetY - currentY) : 0;
+
+        if (diffX > 0.5 || diffY > 0.5) {
+          ctx.methods.scrollToIndex(targetRow, targetCol, {
+            align: { x: alignX, y: alignY },
+            behavior: 'smooth',
+          });
+        }
       }
     },
   };

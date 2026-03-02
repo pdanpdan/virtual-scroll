@@ -152,7 +152,7 @@ describe('useVirtualScroll', () => {
       result.scrollToOffset(0, 100, { behavior: 'smooth' });
       expect(result.scrollDetails.value.isProgrammaticScroll).toBe(true);
 
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(1000);
       await nextTick();
 
       expect(result.scrollDetails.value.isProgrammaticScroll).toBe(false);

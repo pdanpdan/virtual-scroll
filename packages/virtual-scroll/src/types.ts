@@ -87,6 +87,25 @@ export interface ScrollToIndexOptions {
    * @internal
    */
   isCorrection?: boolean;
+
+  /**
+   * If true, only calculates the target position without performing the actual scroll.
+   * Useful for extensions that need to validate if a snap is necessary.
+   * @default false
+   */
+  dryRun?: boolean;
+}
+
+/** Result of the `scrollToIndex` method. */
+export interface ScrollToIndexResult {
+  /** Target relative horizontal position in virtual units (VU). */
+  targetX: number;
+  /** Target relative vertical position in virtual units (VU). */
+  targetY: number;
+  /** Target display horizontal position (DU). */
+  displayTargetX: number;
+  /** Target display vertical position (DU). */
+  displayTargetY: number;
 }
 
 /** Represents an item currently rendered in the virtual scroll area. */
@@ -566,7 +585,7 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   /** The tag used for rendering items. */
   itemTag: string;
   /** Programmatically scroll to a specific row and/or column. */
-  scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => void;
+  scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
   /** Programmatically scroll to a specific pixel offset. */
   scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
   /** Resets all dynamic measurements and re-initializes from props. */
