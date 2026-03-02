@@ -22,6 +22,14 @@ import {
   useVirtualScroll,
 } from '../composables/useVirtualScroll';
 import { useVirtualScrollbar } from '../composables/useVirtualScrollbar';
+import {
+  useCoordinateScalingExtension,
+  useInfiniteLoadingExtension,
+  usePrependRestorationExtension,
+  useRtlExtension,
+  useSnappingExtension,
+  useStickyExtension,
+} from '../extensions/all';
 import { getPaddingX, getPaddingY, isWindowLike } from '../utils/scroll';
 import {
   calculateInertiaStep,
@@ -106,6 +114,17 @@ const instanceId = useId();
  * Used for accessibility (aria-controls) and to target the element in DOM.
  */
 const containerId = computed(() => `vs-container-${ instanceId }`);
+
+const extensions = [
+  useRtlExtension<T>(),
+  useSnappingExtension<T>(),
+  useStickyExtension<T>(),
+  useInfiniteLoadingExtension<T>({
+    onLoad: (dir) => emit('load', dir),
+  }),
+  usePrependRestorationExtension<T>(),
+  useCoordinateScalingExtension<T>(),
+];
 
 const measuredPaddingStart = ref(0);
 const measuredPaddingEnd = ref(0);
@@ -202,7 +221,7 @@ const {
   renderedVirtualHeight,
   getRowIndexAt,
   getColIndexAt,
-} = useVirtualScroll(virtualScrollProps);
+} = useVirtualScroll(virtualScrollProps, extensions);
 
 const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
 
@@ -315,25 +334,6 @@ watch(scrollDetails, (details, oldDetails) => {
       colStart: details.columnRange.start,
       colEnd: details.columnRange.end,
     });
-  }
-
-  if (props.loading) {
-    return;
-  }
-
-  // vertical or both
-  if (props.direction !== 'horizontal' && details.totalSize) {
-    const remaining = details.totalSize.height - (details.scrollOffset.y + details.viewportSize.height);
-    if (remaining <= props.loadDistance) {
-      emit('load', 'vertical');
-    }
-  }
-  // horizontal or both
-  if (props.direction !== 'vertical' && details.totalSize) {
-    const remaining = details.totalSize.width - (details.scrollOffset.x + details.viewportSize.width);
-    if (remaining <= props.loadDistance) {
-      emit('load', 'horizontal');
-    }
   }
 });
 
@@ -1246,6 +1246,16 @@ defineExpose({
    * @see useVirtualScroll
    */
   getItemSize,
+
+  /**
+   * Whether the component is in table mode.
+   */
+  isTable,
+
+  /**
+   * The tag used for rendering items.
+   */
+  itemTag: computed(() => props.itemTag || 'div'),
 
   /**
    * Helper to get the row (or item) index at a specific vertical (or horizontal in horizontal mode) virtual offset (VU).
