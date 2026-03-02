@@ -56,8 +56,12 @@ export function useVirtualScrollSizes<T>(
   /** Cached list of previous items to detect prepending and shift measurements. */
   let lastItems: T[] = [];
 
+  /**
+   * Helper to get the base size of an item from props or default fallback.
+   * @param item - The data item.
+   * @param index - The item index.
+   */
   const getItemBaseSize = (item: T, index: number) => (typeof props.value.props.itemSize === 'function' ? (props.value.props.itemSize as (item: T, index: number) => number)(item, index) : props.value.defaultSize);
-
   /**
    * Internal helper to get the size of an item or column at a specific index.
    *
@@ -71,7 +75,7 @@ export function useVirtualScrollSizes<T>(
    */
   const getSizeAt = (
     index: number,
-    sizeProp: number | number[] | ((...args: any[]) => number) | null | undefined,
+    sizeProp: number | (number | null | undefined)[] | ((...args: any[]) => number) | null | undefined,
     defaultSize: number,
     gap: number,
     tree: FenwickTree,
@@ -83,7 +87,7 @@ export function useVirtualScrollSizes<T>(
     if (typeof sizeProp === 'number' && sizeProp > 0) {
       return sizeProp;
     }
-    if (isX && Array.isArray(sizeProp) && sizeProp.length > 0) {
+    if (Array.isArray(sizeProp) && sizeProp.length > 0) {
       const val = sizeProp[ index % sizeProp.length ];
       return (val != null && val > 0) ? val : defaultSize;
     }
@@ -132,7 +136,7 @@ export function useVirtualScrollSizes<T>(
     count: number,
     tree: FenwickTree,
     measured: Uint8Array,
-    sizeProp: number | number[] | ((...args: any[]) => number) | null | undefined,
+    sizeProp: number | (number | null | undefined)[] | ((...args: any[]) => number) | null | undefined,
     defaultSize: number,
     gap: number,
     isDynamic: boolean,
@@ -238,15 +242,18 @@ export function useVirtualScrollSizes<T>(
   /**
    * Helper to update a single size in the tree.
    */
-  const updateAxis = (
-    index: number,
-    newSize: number,
-    tree: FenwickTree,
-    measured: Uint8Array,
-    gap: number,
-    firstIndex: number,
-    accumulatedDelta: { val: number; },
-  ) => {
+  /**
+   * Helper to update a single size in the tree.
+   * @param index - Index to update.
+   * @param newSize - Measured size (without gap).
+   * @param tree - Target Fenwick tree.
+   * @param measured - Tracking array for measurements.
+   * @param gap - Gap size.
+   * @param firstIndex - Current first visible index (for delta calculation).
+   * @param accumulatedDelta - Object to collect scroll correction delta.
+   * @param accumulatedDelta.val - The current accumulated delta value.
+   */
+  const updateAxis = (index: number, newSize: number, tree: FenwickTree, measured: Uint8Array, gap: number, firstIndex: number, accumulatedDelta: { val: number; }) => {
     const oldSize = tree.get(index);
     const targetSize = newSize + gap;
     let updated = false;
@@ -266,10 +273,8 @@ export function useVirtualScrollSizes<T>(
   /**
    * Initializes or updates sizes based on current props and items.
    * Handles prepending of items by shifting existing measurements.
-   *
-   * @param onScrollCorrection - Callback to adjust scroll position when items are prepended.
    */
-  const initializeSizes = (onScrollCorrection?: (addedX: number, addedY: number) => void) => {
+  const initializeSizes = () => {
     const propsVal = props.value.props;
     const newItems = propsVal.items;
     const len = newItems.length;
@@ -291,23 +296,6 @@ export function useVirtualScrollSizes<T>(
       newMeasuredY.set(measuredItemsY.value.subarray(0, Math.min(len - prependCount, measuredItemsY.value.length)), prependCount);
       measuredItemsX.value = newMeasuredX;
       measuredItemsY.value = newMeasuredY;
-
-      // Calculate added size
-      const gap = propsVal.gap || 0;
-      const columnGap = propsVal.columnGap || 0;
-      let addedX = 0;
-      let addedY = 0;
-
-      for (let i = 0; i < prependCount; i++) {
-        const size = getItemBaseSize(newItems[ i ] as T, i);
-        if (props.value.direction === 'horizontal') {
-          addedX += size + columnGap;
-        } else { addedY += size + gap; }
-      }
-
-      if ((addedX > 0 || addedY > 0) && onScrollCorrection) {
-        onScrollCorrection(addedX, addedY);
-      }
     }
 
     initializeMeasurements();
@@ -351,6 +339,11 @@ export function useVirtualScrollSizes<T>(
     const processedRows = new Set<number>();
     const processedCols = new Set<number>();
 
+    /**
+     * Helper to try and update a column width from an element measurement.
+     * @param colIdx - Column index.
+     * @param width - Measured width.
+     */
     const tryUpdateColumn = (colIdx: number, width: number) => {
       if (colIdx >= 0 && colIdx < (propsVal.columnCount || 0) && !processedCols.has(colIdx)) {
         processedCols.add(colIdx);
@@ -415,17 +408,15 @@ export function useVirtualScrollSizes<T>(
 
   /**
    * Resets all dynamic measurements and re-initializes from current props.
-   *
-   * @param onScrollCorrection - Callback to adjust scroll position.
    */
-  const refresh = (onScrollCorrection?: (addedX: number, addedY: number) => void) => {
+  const refresh = () => {
     itemSizesX.resize(0);
     itemSizesY.resize(0);
     columnSizes.resize(0);
     measuredColumns.value.fill(0);
     measuredItemsX.value.fill(0);
     measuredItemsY.value.fill(0);
-    initializeSizes(onScrollCorrection);
+    initializeSizes();
   };
 
   return {

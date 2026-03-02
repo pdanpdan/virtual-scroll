@@ -206,7 +206,7 @@ export interface VirtualScrollBaseProps<T = unknown> {
    * Fixed size of each item in virtual units (VU) or a function that returns the size of an item.
    * Pass `0`, `null` or `undefined` for automatic dynamic size detection via `ResizeObserver`.
    */
-  itemSize?: number | ((item: T, index: number) => number) | null | undefined;
+  itemSize?: number | (number | null | undefined)[] | ((item: T, index: number) => number) | null | undefined;
 
   /**
    * Direction of the virtual scroll.
@@ -247,7 +247,7 @@ export interface VirtualScrollBaseProps<T = unknown> {
    * Fixed width of columns in VU, an array of widths, or a function returning widths.
    * Pass `0`, `null` or `undefined` for dynamic column detection.
    */
-  columnWidth?: number | number[] | ((index: number) => number) | null | undefined;
+  columnWidth?: number | (number | null | undefined)[] | ((index: number) => number) | null | undefined;
 
   /**
    * Pixel padding at the start of the scroll container in display pixels (DU).
@@ -284,11 +284,13 @@ export interface VirtualScrollBaseProps<T = unknown> {
 
   /**
    * Whether data is currently loading.
+   * While true, the loading slot is shown and `load` events are suppressed.
    */
   loading?: boolean | undefined;
 
   /**
-   * Whether to automatically restore and maintain scroll position when items are prepended to the array.
+   * Whether to automatically maintain scroll position when items are prepended to the array.
+   * Useful for "load more" chat interfaces.
    */
   restoreScrollOnPrepend?: boolean | undefined;
 
@@ -516,10 +518,20 @@ export interface VirtualScrollComponentProps<T = unknown> extends VirtualScrollB
   /** The HTML tag to use for each item. */
   itemTag?: string;
   /** Whether the content in the 'header' slot is sticky. */
+  /**
+   * If true, measures the header slot size and adds it to the scroll padding.
+   * Can be combined with CSS for sticky headers.
+   */
   stickyHeader?: boolean;
-  /** Whether the content in the 'footer' slot is sticky. */
+  /**
+   * If true, measures the footer slot size and adds it to the scroll padding.
+   * Can be combined with CSS for sticky footers.
+   */
   stickyFooter?: boolean;
-  /** Whether to use virtual scrollbars for styling purposes. */
+  /**
+   * Whether to use virtual scrollbars.
+   * Automatically enabled when content size exceeds browser limits.
+   */
   virtualScrollbar?: boolean;
 }
 
@@ -549,6 +561,10 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   getItemOffset: (index: number) => number;
   /** Helper to get the size of a specific item along the scroll axis. */
   getItemSize: (index: number) => number;
+  /** Whether the component is in table mode. */
+  isTable: boolean;
+  /** The tag used for rendering items. */
+  itemTag: string;
   /** Programmatically scroll to a specific row and/or column. */
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => void;
   /** Programmatically scroll to a specific pixel offset. */
@@ -683,6 +699,8 @@ export interface RangeParams {
   usableHeight: number;
   /** Total item count. */
   itemsLength: number;
+  /** Column count (for grid mode). */
+  columnCount?: number;
   /** Buffer items before. */
   bufferBefore: number;
   /** Buffer items after. */
@@ -798,7 +816,7 @@ export interface ItemStyleParams<T = unknown> {
   /** Scroll direction. */
   direction: ScrollDirection;
   /** Configured item size logic. */
-  itemSize: number | ((item: T, index: number) => number) | null | undefined;
+  itemSize: number | (number | null | undefined)[] | ((item: T, index: number) => number) | null | undefined;
   /** Parent container tag. */
   containerTag: string;
   /** Padding start on X axis. */
