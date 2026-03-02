@@ -6,6 +6,7 @@ import { BROWSER_MAX_SIZE } from '../../src/utils/scroll';
 import {
   calculateAxisSize,
   calculateColumnRange,
+  calculateInertiaStep,
   calculateInstantaneousVelocity,
   calculateItemPosition,
   calculateItemStyle,
@@ -2693,7 +2694,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 0, y: 600 },
           size: { height: 50, width: 500 },
           stickyOffset: { x: 0, y: 0 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 0,
         paddingStartY: 0,
@@ -2713,7 +2714,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 0, y: 600 },
           size: { height: 50, width: 500 },
           stickyOffset: { x: 0, y: 0 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 0,
         paddingStartX: 0,
         paddingStartY: 0,
@@ -2734,7 +2735,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 600, y: 0 },
           size: { height: 500, width: 50 },
           stickyOffset: { x: 0, y: 0 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 0,
         paddingStartX: 0,
         paddingStartY: 0,
@@ -2755,7 +2756,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 0, y: 600 },
           size: { height: 50, width: 500 },
           stickyOffset: { x: 0, y: -10 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 10,
         paddingStartY: 10,
@@ -2778,7 +2779,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 600, y: 600 },
           size: { height: 50, width: 50 },
           stickyOffset: { x: -10, y: -10 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 10,
         paddingStartY: 10,
@@ -2801,7 +2802,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 600, y: 600 },
           size: { height: 50, width: 50 },
           stickyOffset: { x: -10, y: -10 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 10,
         paddingStartY: 10,
@@ -2822,7 +2823,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 0, y: 600 },
           size: { height: 50, width: 500 },
           stickyOffset: { x: 0, y: 0 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 0,
         paddingStartY: 0,
@@ -2842,7 +2843,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 600, y: 0 },
           size: { height: 500, width: 50 },
           stickyOffset: { x: -10, y: 0 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 10,
         paddingStartY: 10,
@@ -2865,7 +2866,7 @@ describe('virtual-scroll-logic', () => {
           offset: { x: 600, y: 600 },
           size: { height: 50, width: 50 },
           stickyOffset: { x: -10, y: -20 },
-        } as unknown as RenderedItem<unknown>,
+        } as RenderedItem<unknown>,
         itemSize: 50,
         paddingStartX: 10,
         paddingStartY: 20,
@@ -2999,6 +3000,22 @@ describe('virtual-scroll-logic', () => {
       expect(offsets.x).toBe(300);
     });
 
+    it('handles both direction SSR offsets', () => {
+      const offsets = calculateSSROffsets(
+        'both',
+        { start: 10, end: 20, colStart: 5, colEnd: 10 },
+        null,
+        null,
+        10,
+        10,
+        (i) => i * 60,
+        () => 0,
+        (i) => i * 120,
+      );
+      expect(offsets.y).toBe(600);
+      expect(offsets.x).toBe(600);
+    });
+
     it('detects prepend count correctly', () => {
       expect(calculatePrependCount([], [ 1, 2 ])).toBe(0);
       const items = [ { id: 1 } ];
@@ -3061,6 +3078,14 @@ describe('virtual-scroll-logic', () => {
       expect(res.start).toBe(1);
     });
 
+    it('calculates range size with dynamic sizes (fixedSize is null)', () => {
+      expect(calculateRangeSize(0, 5, null, 10, (i) => i * 100)).toBe(5 * 100 - 10);
+    });
+
+    it('calculates range size with fixed sizes', () => {
+      expect(calculateRangeSize(0, 5, 100, 10, () => 0)).toBe(5 * 110 - 10);
+    });
+
     it('handles empty oldItems in calculatePrependCount', () => {
       expect(calculatePrependCount([], [ 1, 2 ])).toBe(0);
     });
@@ -3071,15 +3096,111 @@ describe('virtual-scroll-logic', () => {
       const newItems = [ 1, ...oldItems ];
       expect(calculatePrependCount(oldItems, newItems)).toBe(0);
     });
+  });
 
+  describe('calculateInstantaneousVelocity', () => {
     it('returns zero velocity when dt is zero or negative', () => {
       expect(calculateInstantaneousVelocity({ x: 0, y: 0 }, { x: 10, y: 10 }, 0)).toEqual({ x: 0, y: 0 });
       expect(calculateInstantaneousVelocity({ x: 0, y: 0 }, { x: 10, y: 10 }, -1)).toEqual({ x: 0, y: 0 });
     });
 
+    it('calculates velocity correctly with positive dt', () => {
+      const v = calculateInstantaneousVelocity({ x: 0, y: 0 }, { x: 10, y: 20 }, 10);
+      expect(v.x).toBe(-1);
+      expect(v.y).toBe(-2);
+    });
+  });
+
+  describe('calculateInertiaStep', () => {
+    it('calculates the next inertia step correctly', () => {
+      const { nextVelocity, delta } = calculateInertiaStep({ x: 10, y: 20 }, 0.95, 16);
+      expect(nextVelocity.x).toBe(10 * 0.95);
+      expect(nextVelocity.y).toBe(20 * 0.95);
+      expect(delta.x).toBe(nextVelocity.x * 16);
+      expect(delta.y).toBe(nextVelocity.y * 16);
+    });
+
+    it('uses default frameTime', () => {
+      const { delta } = calculateInertiaStep({ x: 10, y: 20 }, 0.95);
+      expect(delta.x).toBe(10 * 0.95 * 16);
+    });
+  });
+
+  describe('snap', () => {
+    it('returns null in resolveSnap for auto mode when direction is null', () => {
+      expect(resolveSnap('auto', null, 0, 10, 0, 500, 100, () => 50, (i) => i * 50, (_o) => 0)).toBeNull();
+    });
+
     it('returns null in resolveSnap for unsupported modes', () => {
       // @ts-expect-error - testing invalid mode
       expect(resolveSnap('invalid', null, 0, 10, 0, 500, 100, () => 50, (i) => i * 50, (_o) => 0)).toBeNull();
+    });
+
+    it('handles "next" mode in resolveSnap', () => {
+      const getSize = () => 100;
+      const getQuery = (i: number) => i * 100;
+      const getIndexAt = (o: number) => Math.floor(o / 100);
+
+      // dir 'end' -> effectiveMode 'start' -> snap to NEXT item
+      expect(resolveSnap('next', 'end', 5, 10, 520, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 6,
+        align: 'start',
+      });
+
+      // dir 'start' -> effectiveMode 'end' -> snap to PREVIOUS item
+      expect(resolveSnap('next', 'start', 5, 10, 520, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 9,
+        align: 'end',
+      });
+
+      // null dir -> returns null
+      expect(resolveSnap('next', null, 5, 10, 520, 500, 100, getSize, getQuery, getIndexAt)).toBeNull();
+
+      // item larger than viewport -> returns null
+      expect(resolveSnap('next', 'end', 5, 10, 520, 50, 100, getSize, getQuery, getIndexAt)).toBeNull();
+      expect(resolveSnap('next', 'start', 5, 10, 520, 50, 100, getSize, getQuery, getIndexAt)).toBeNull();
+    });
+
+    it('handles "end" mode in resolveSnap', () => {
+      const getSize = () => 100;
+      const getQuery = (i: number) => i * 100;
+      const getIndexAt = (o: number) => Math.floor(o / 100);
+
+      // dir 'start' -> effectiveMode 'end'
+      expect(resolveSnap('end', 'start', 5, 10, 520, 500, 100, getSize, getQuery, getIndexAt)).toEqual({
+        index: 9,
+        align: 'end',
+      });
+    });
+
+    it('returns current scrollPos in calculateAxisAlignment if item is already visible', () => {
+      const result = calculateScrollTarget({
+        rowIndex: 2,
+        colIndex: null,
+        options: 'auto',
+        direction: 'vertical',
+        viewportWidth: 500,
+        viewportHeight: 500,
+        totalWidth: 1000,
+        totalHeight: 1000,
+        gap: 0,
+        columnGap: 0,
+        fixedSize: 100,
+        fixedWidth: 100,
+        relativeScrollX: 0,
+        relativeScrollY: 150, // item 2 is at 200-300. In viewport 150-650.
+        getItemSizeY: () => 100,
+        getItemSizeX: () => 100,
+        getItemQueryY: (i) => i * 100,
+        getItemQueryX: (i) => i * 100,
+        getColumnSize: () => 100,
+        getColumnQuery: (i) => i * 100,
+        scaleX: 1,
+        scaleY: 1,
+        hostOffsetX: 0,
+        hostOffsetY: 0,
+      });
+      expect(result.targetY).toBe(150);
     });
   });
 

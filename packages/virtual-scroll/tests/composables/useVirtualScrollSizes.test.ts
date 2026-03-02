@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { computed, defineComponent, nextTick, ref } from 'vue';
 
 import { useVirtualScrollSizes } from '../../src/composables/useVirtualScrollSizes';
-import { DEFAULT_ITEM_SIZE } from '../../src/types';
+import { DEFAULT_COLUMN_WIDTH, DEFAULT_ITEM_SIZE } from '../../src/types';
 
 interface MockItem {
   id: number;
@@ -172,11 +172,14 @@ describe('useVirtualScrollSizes', () => {
     // Prepend 2 items
     props.value.items = [ { id: -1 }, { id: -2 }, ...items ];
 
-    result.initializeSizes(correctionSpy);
+    result.initializeSizes();
     await nextTick();
 
-    // Should detect 2 new items. 2 * 50 = 100px.
-    expect(correctionSpy).toHaveBeenCalledWith(0, 100);
+    // Should detect 2 new items. Data structures shift, but correction is now handled by extension
+    expect(correctionSpy).not.toHaveBeenCalled();
+    // Check that items shifted: old item 0 (id:0) was at index 0, now at index 2
+    // itemSizesY stores size + gap. size=50, gap=0 (default) -> 50.
+    expect(result.itemSizesY.get(2)).toBe(50);
     wrapper.unmount();
   });
 
@@ -375,6 +378,201 @@ describe('useVirtualScrollSizes', () => {
       onScrollCorrection,
     );
     expect(onScrollCorrection).toHaveBeenCalledWith(60, 0);
+    wrapper.unmount();
+  });
+
+  it('covers getItemBaseSize when itemSize is a function', async () => {
+    const { result, wrapper } = setup({
+      itemSize: (_item: MockItem) => _item.id * 10,
+      items: mockItems,
+    });
+    await nextTick();
+    expect(result.getItemBaseSize({ id: 5 }, 5)).toBe(50);
+    wrapper.unmount();
+  });
+
+  it('covers getSizeAt when sizeProp is an array', async () => {
+    const { result, wrapper } = setup({
+      columnWidth: [ 100, 200, 300 ],
+      direction: 'both',
+      columnCount: 5,
+      items: mockItems,
+    });
+    result.initializeSizes();
+    await nextTick();
+    // getSizeAt(index, sizeProp, defaultSize, gap, tree, isX)
+    expect(result.getSizeAt(0, [ 100, 200 ], 50, 0, result.columnSizes, true)).toBe(100);
+    expect(result.getSizeAt(1, [ 100, 200 ], 50, 0, result.columnSizes, true)).toBe(200);
+    expect(result.getSizeAt(2, [ 100, 200 ], 50, 0, result.columnSizes, true)).toBe(100);
+    // test fallback if val is null
+    expect(result.getSizeAt(0, [ null ], 50, 0, result.columnSizes, true)).toBe(50);
+    wrapper.unmount();
+  });
+
+  it('covers getSizeAt when sizeProp is a function in horizontal mode', async () => {
+    const { result, wrapper } = setup({
+      itemSize: (_item: MockItem) => 123,
+      direction: 'horizontal',
+      items: mockItems,
+    });
+    result.initializeSizes();
+    await nextTick();
+    expect(result.getSizeAt(0, (_item: MockItem) => 123, 50, 0, result.itemSizesX, true)).toBe(123);
+    // item is undefined
+    expect(result.getSizeAt(1000, (_item: MockItem) => 123, 50, 0, result.itemSizesX, true)).toBe(50);
+    wrapper.unmount();
+  });
+
+  it('covers query column index from children in updateItemSizes', async () => {
+    const { result, wrapper } = setup({
+      direction: 'both',
+      columnCount: 5,
+      columnWidth: 0,
+      items: mockItems,
+    });
+    result.initializeSizes();
+    await nextTick();
+
+    const onScrollCorrection = vi.fn();
+    const rowEl = document.createElement('div');
+    const cell0 = document.createElement('div');
+    cell0.dataset.colIndex = '0';
+    Object.defineProperty(cell0, 'getBoundingClientRect', { value: () => ({ width: 110 }) });
+    rowEl.appendChild(cell0);
+
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      () => 0,
+      () => 1, // firstColIndex = 1
+      100,
+      0,
+      onScrollCorrection,
+    );
+    await nextTick();
+    expect(result.columnSizes.get(0)).toBe(110);
+    wrapper.unmount();
+  });
+
+  it('ignores updates with non-positive sizes', async () => {
+    const { result, wrapper } = setup({
+      itemSize: 0,
+      items: mockItems,
+    });
+    result.initializeSizes();
+    await nextTick();
+    const initialSize = result.itemSizesY.get(0);
+    result.updateItemSizes([ { index: 0, inlineSize: 0, blockSize: 0 } ], () => 0, () => 0, 0, 0, () => {});
+    await nextTick();
+    expect(result.itemSizesY.get(0)).toBe(initialSize);
+    wrapper.unmount();
+  });
+
+  it('covers getSizeAt out of bounds', async () => {
+    const { result, wrapper } = setup({
+      items: mockItems,
+      itemSize: [ 50, 60 ] as number[], // use array to trigger index check
+    });
+    await nextTick();
+    expect(result.getSizeAt(-1, [ 50, 60 ], 40, 0, result.itemSizesY, false)).toBe(40);
+    expect(result.getSizeAt(1000, [ 50, 60 ], 40, 0, result.itemSizesY, false)).toBe(50); // 1000 % 2 = 0 -> 50
+    wrapper.unmount();
+  });
+
+  it('covers updateItemSizes with child having no colIndex', async () => {
+    const { result, wrapper } = setup({
+      direction: 'both',
+      columnCount: 5,
+      columnWidth: 0,
+      items: mockItems,
+    });
+    await nextTick();
+    await nextTick();
+
+    const rowEl = document.createElement('div');
+    const cell = document.createElement('div');
+    // no data-col-index
+    rowEl.appendChild(cell);
+
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      () => 0,
+      () => 0,
+      100,
+      0,
+      () => {},
+    );
+    await nextTick();
+    // Should not crash and should not update columnSizes
+    expect(result.getSizeAt(0, 0, DEFAULT_COLUMN_WIDTH, 0, result.columnSizes, true)).toBe(DEFAULT_COLUMN_WIDTH);
+    wrapper.unmount();
+  });
+
+  it('covers tryUpdateColumn with out of bounds colIdx', async () => {
+    const { result, wrapper } = setup({
+      direction: 'both',
+      columnCount: 5,
+      columnWidth: 0,
+      items: mockItems,
+    });
+    await nextTick();
+
+    const rowEl = document.createElement('div');
+    const cell = document.createElement('div');
+    cell.dataset.colIndex = '10'; // out of bounds
+    rowEl.appendChild(cell);
+
+    const onScrollCorrection = vi.fn();
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      () => 0,
+      () => 0,
+      100,
+      0,
+      onScrollCorrection,
+    );
+    await nextTick();
+    // Should not update anything
+    expect(onScrollCorrection).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('covers updateItemSizes in horizontal mode', async () => {
+    const { result, wrapper } = setup({
+      direction: 'horizontal',
+      itemSize: 0,
+      items: mockItems,
+    });
+    await nextTick();
+
+    const onScrollCorrection = vi.fn();
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 120, blockSize: 50 } ],
+      () => 0,
+      () => 0,
+      100,
+      0,
+      onScrollCorrection,
+    );
+    await nextTick();
+    expect(result.getSizeAt(0, 0, 40, 0, result.itemSizesX, true)).toBe(120);
+    wrapper.unmount();
+  });
+
+  it('covers initializeAxis needsRebuild branch when size is close but not equal', async () => {
+    const { result, wrapper } = setup({
+      itemSize: 50,
+      items: mockItems,
+    });
+    await nextTick();
+
+    // Manually set a value in tree that is close but not equal (e.g. 50.1)
+    result.itemSizesY.update(0, 0.1);
+
+    // Trigger initializeSizes. It should rebuild because 50.1 != 50
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.getSizeAt(0, 50, 40, 0, result.itemSizesY, false)).toBe(50);
     wrapper.unmount();
   });
 });
