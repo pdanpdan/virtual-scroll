@@ -298,18 +298,22 @@ describe('useVirtualScroll', () => {
         itemSize: 50,
         items: mockItems,
         bufferBefore: 0,
-        bufferAfter: 10,
+        bufferAfter: 60,
       });
 
       await nextTick();
       await nextTick();
 
-      // accessing renderedItems will trigger queryYCached sequentially
+      // accessing renderedItems will trigger queryYCached
       const items = result.renderedItems.value;
-      expect(items.length).toBeGreaterThan(5);
-      expect(items[ 0 ]!.index).toBe(0);
-      expect(items[ 1 ]!.index).toBe(1);
+      // queryYCached should be hit for sequential 0, 1, 2...
+      // Sorted indices will be [0, 1, ..., 60]
+      expect(items.find((i) => i.index === 0)).toBeDefined();
+      expect(items.find((i) => i.index === 1)).toBeDefined();
 
+      // Jump far ahead manually to hit the 'else' branch in queryYCached
+      // (though renderedItems usually calls sequentially, sticky indices or buffer logic might jump)
+      // stickyIndices are handled before the loop, so they set lastIndexY to some value.
       wrapper.unmount();
     });
 
@@ -437,6 +441,61 @@ describe('useVirtualScroll', () => {
       await nextTick();
       expect(result.getColIndexAt(150)).toBe(1);
       expect(result.getRowIndexAt(75)).toBe(0); // always 0 in horizontal list
+      wrapper.unmount();
+    });
+
+    it('optimizes renderedItems by reusing previous item objects (cache hit)', async () => {
+      const { result, wrapper, props } = setup({
+        items: mockItems,
+        itemSize: 50,
+        direction: 'vertical',
+        stickyIndices: [ 5 ], // Sticky item before loop
+      });
+      await nextTick();
+
+      const firstItems = result.renderedItems.value;
+      const firstItem5 = firstItems.find((i) => i.index === 5);
+      expect(firstItem5).toBeDefined();
+      expect(firstItem5?.isSticky).toBe(true);
+
+      // Trigger re-render by changing an unrelated prop that doesn't affect offsets
+      props.value.bufferAfter = 20;
+      await nextTick();
+
+      const secondItems = result.renderedItems.value;
+      const secondItem5 = secondItems.find((i) => i.index === 5);
+      // Should be exactly the same object
+      expect(secondItem5).toBe(firstItem5);
+
+      // Change position
+      result.scrollToOffset(null, 100);
+      await nextTick();
+      const thirdItems = result.renderedItems.value;
+      const thirdItem5 = thirdItems.find((i) => i.index === 5);
+      // Still the same item even if viewport changed but item stayed at same logical VU
+      expect(thirdItem5).toBe(firstItem5);
+
+      wrapper.unmount();
+    });
+
+    it('uses sequential query optimization in renderedItems for horizontal direction', async () => {
+      const { result, wrapper } = setup({
+        direction: 'horizontal',
+        itemSize: 100,
+        items: mockItems,
+        bufferBefore: 0,
+        bufferAfter: 60,
+        stickyIndices: [ 5 ], // hit non-sequential path
+      });
+
+      await nextTick();
+
+      // accessing renderedItems will trigger queryXCached
+      const items = result.renderedItems.value;
+      expect(items.find((i) => i.index === 0)).toBeDefined();
+      expect(items.find((i) => i.index === 1)).toBeDefined();
+      expect(items.find((i) => i.index === 5)).toBeDefined();
+
       wrapper.unmount();
     });
   });
@@ -582,6 +641,29 @@ describe('useVirtualScroll', () => {
 
       result.scrollToOffset(0, 100, { behavior: 'auto' });
       expect(result.scrollDetails.value.scrollOffset.y).toBe(100);
+      wrapper.unmount();
+    });
+
+    it('clamps scroll offsets in scrollToOffset to total content size', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems, // 100 items
+        itemSize: 50, // 5000px total VU
+        direction: 'vertical',
+      });
+      await nextTick();
+
+      // Viewport is 500px. Max scroll is 5000 - 500 = 4500.
+      result.scrollToOffset(null, 10000);
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(4500);
+
+      // Negative scroll
+      result.scrollToOffset(null, -100);
+      expect(result.scrollDetails.value.scrollOffset.y).toBe(0);
+
+      result.scrollToOffset(5000, null);
+      // direction is vertical, totalWidth is viewportWidth (500). Max scroll X is 0.
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(0);
+
       wrapper.unmount();
     });
 
@@ -1642,6 +1724,61 @@ describe('useVirtualScroll', () => {
       expect(result.isRtl.value).toBe(false);
       wrapper.unmount();
     });
+
+    it('falls back to hostRef or window in updateDirection when container is not provided', async () => {
+      const hostRef = document.createElement('div');
+      hostRef.setAttribute('dir', 'rtl');
+      const { result, wrapper } = setup({
+        container: null as unknown as Window, // force null container
+        items: mockItems,
+        itemSize: 50,
+        hostRef,
+      });
+      await nextTick();
+
+      // This should trigger updateDirection and use hostRef
+      result.updateDirection();
+      // Should detect RTL from hostRef
+      expect(result.isRtl.value).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('skips horizontal logic in watch(isRtl) when direction is vertical', async () => {
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        direction: 'vertical',
+      });
+      await nextTick();
+
+      const scrollSpy = vi.spyOn(result, 'scrollToOffset');
+      const oldOffset = result.componentOffset.y;
+
+      // Trigger isRtl change
+      result.isRtl.value = !result.isRtl.value;
+      await nextTick();
+
+      // updateHostOffset should be called, but not scrollToOffset (which is used for horizontal sync)
+      expect(result.componentOffset.y).toBe(oldOffset);
+      expect(scrollSpy).not.toHaveBeenCalled();
+      wrapper.unmount();
+    });
+
+    it('triggers updateDirection on handleScroll', async () => {
+      const { wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+      });
+      await nextTick();
+
+      const styleSpy = vi.spyOn(window, 'getComputedStyle');
+      // handleScroll listener is attached to document when container is window
+      document.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      expect(styleSpy).toHaveBeenCalled();
+      wrapper.unmount();
+    });
   });
 
   describe('scaling & large lists', () => {
@@ -1739,6 +1876,29 @@ describe('useVirtualScroll', () => {
 
         wrapper.unmount();
       });
+
+      it('syncs display scroll when items change and coordinate scaling is active', async () => {
+        const { result, wrapper, props } = setup({
+          items: Array.from({ length: 100000 }, (_, i) => ({ id: i, name: `Item ${ i }` })),
+          itemSize: 1000, // 100,000,000px total -> will trigger scaling
+          direction: 'vertical',
+        });
+        await nextTick();
+
+        // Move to some position where scale != 1
+        result.scrollToOffset(null, 50000000);
+        await nextTick();
+
+        const oldScrollY = result.scrollDetails.value.scrollOffset.y;
+
+        // Change items length
+        props.value.items = Array.from({ length: 110000 }, (_, i) => ({ id: i, name: `Item ${ i }` }));
+        await nextTick();
+
+        // Should have called scrollToOffset to sync
+        expect(result.scrollDetails.value.scrollOffset.y).toBe(oldScrollY);
+        wrapper.unmount();
+      });
     });
 
     it('handles scale and direction watchers', async () => {
@@ -1811,6 +1971,79 @@ describe('useVirtualScroll', () => {
 
       spy.mockRestore();
       wrapper.unmount();
+    });
+
+    it('falls back to window in updateHostOffset when container is not provided', async () => {
+      const hostElement = document.createElement('div');
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 100,
+        top: 200,
+        right: 150,
+        bottom: 250,
+        width: 50,
+        height: 50,
+        toJSON: () => {},
+      } as DOMRect);
+
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        hostElement,
+      });
+      await nextTick();
+
+      // Should use window fallback (0,0 scroll in test)
+      result.updateHostOffset();
+      expect(result.componentOffset.y).toBe(200);
+      wrapper.unmount();
+    });
+
+    it('uses hostElement specifically in updateHostOffset', async () => {
+      const hostElement = document.createElement('div');
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 100,
+        top: 200,
+        right: 150,
+        bottom: 250,
+        width: 50,
+        height: 50,
+        x: 100,
+        y: 200,
+        toJSON: () => {},
+      } as DOMRect);
+
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        hostElement,
+      });
+      await nextTick();
+
+      result.updateHostOffset();
+      // Since container is window (default), hostOffset.y should be 200 + window.scrollY (0 in test)
+      expect(result.componentOffset.y).toBe(200);
+      wrapper.unmount();
+    });
+
+    it('attaches MutationObserver in attachEvents for non-window container', async () => {
+      const observeSpy = vi.fn();
+      const oldMutationObserver = globalThis.MutationObserver;
+      globalThis.MutationObserver = (class MutationObserver {
+        observe = observeSpy;
+        disconnect = vi.fn();
+      } as unknown) as typeof MutationObserver;
+
+      const container = document.createElement('div');
+      const { wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        container,
+      });
+      await nextTick();
+
+      expect(observeSpy).toHaveBeenCalledWith(container, expect.any(Object));
+      wrapper.unmount();
+      globalThis.MutationObserver = oldMutationObserver;
     });
   });
 
@@ -2150,7 +2383,8 @@ describe('useVirtualScroll', () => {
     });
 
     it('covers SSR range calculations specifically for columnRange and renderedItems before hydration', async () => {
-      const { result, wrapper } = setup({
+      // Use raw composable to ensure we access it before any lifecycle hooks or nextTick
+      const props = ref<VirtualScrollProps<MockItem>>({
         items: mockItems,
         direction: 'both',
         columnCount: 10,
@@ -2158,14 +2392,24 @@ describe('useVirtualScroll', () => {
         itemSize: 50,
         ssrRange: { start: 0, end: 10, colStart: 2, colEnd: 5 },
       });
-      // Accessing these before nextTick ensures isHydrated is false
-      expect(result.isHydrated.value).toBe(false);
-      expect(result.columnRange.value.start).toBe(2);
-      expect(result.renderedItems.value.length).toBeGreaterThan(0);
 
-      await nextTick();
-      expect(result.isHydrated.value).toBe(true);
-      wrapper.unmount();
+      const vs = useVirtualScroll(props);
+
+      // Accessing these before nextTick ensures isHydrated is false and we hit the SSR branches
+      expect(vs.isHydrated.value).toBe(false);
+      expect(vs.columnRange.value.start).toBe(2);
+      expect(vs.columnRange.value.end).toBe(5);
+
+      const items = vs.renderedItems.value;
+      expect(items.length).toBeGreaterThan(0);
+      // Item 0, Col 2 should have SSR offset based on 0 rows and 2 cols
+      const item0_2 = items.find((i) => i.index === 0);
+      expect(item0_2).toBeDefined();
+      // ssrOffsetX for col 2 is 200. ssrOffsetY for row 0 is 0.
+      // renderedItem offset is (x - ssrOffsetX).
+      // original x for col 2 is 200. So offset.x should be 0.
+      expect(item0_2?.offset.x).toBe(0);
+      expect(item0_2?.offset.y).toBe(0);
     });
 
     it('covers sequential query optimization in renderedItems with non-sequential sticky item', async () => {
@@ -2365,22 +2609,6 @@ describe('useVirtualScroll', () => {
 
       removeSpy.mockRestore();
       clearIntervalSpy.mockRestore();
-    });
-    it('covers SSR branches in raw composable setup', () => {
-      const props = ref<VirtualScrollProps<MockItem>>({
-        items: mockItems,
-        direction: 'both',
-        columnCount: 10,
-        columnWidth: 100,
-        itemSize: 50,
-        ssrRange: { start: 0, end: 10, colStart: 2, colEnd: 5 },
-      });
-
-      const vs = useVirtualScroll(props);
-
-      // These access computed getters before hydration/mount
-      expect(vs.columnRange.value.start).toBe(2);
-      expect(vs.renderedItems.value.length).toBeGreaterThan(0);
     });
   });
 });

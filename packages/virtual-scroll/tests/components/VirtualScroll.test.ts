@@ -2855,5 +2855,51 @@ describe('virtualScroll', () => {
       await nextTick();
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
+
+    it('respects snapMode="start" with PageUp', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 100,
+          items: mockItems,
+          snap: 'start',
+        },
+      });
+      await nextTick();
+      const container = wrapper.find('.virtual-scroll-container');
+
+      // 500px viewport, 100px items.
+      // Scroll to 1000px (item 10 is at the top).
+      (wrapper.vm as { scrollToIndex: (row: number, col: number | null, align: unknown) => void; }).scrollToIndex(10, null, 'start');
+      await nextTick();
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(1000);
+
+      // PageUp with snapMode="start" -> getPageTarget(true, false) -> return startIdx - pageSize = 10 - 4 = 6.
+      // align will be snapMode || 'end' = 'start'.
+      await container.trigger('keydown', { key: 'PageUp' });
+      await nextTick();
+      // align 'start' for index 6 is 600.
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(600);
+    });
+
+    it('respects snapMode="end" with PageDown', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 100,
+          items: mockItems,
+          snap: 'end',
+        },
+      });
+      await nextTick();
+      const container = wrapper.find('.virtual-scroll-container');
+
+      // 500px viewport, 100px items.
+      // Initially at 0..500. endIdx is 4.
+      // PageDown with snapMode="end" -> getPageTarget(true, true) -> return endIdx + pageSize = 4 + 4 = 8.
+      // align will be snapMode || 'start' = 'end'.
+      await container.trigger('keydown', { key: 'PageDown' });
+      await nextTick();
+      // align 'end' for index 8 is 900 - 500 = 400.
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(400);
+    });
   });
 });
