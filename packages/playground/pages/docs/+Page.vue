@@ -125,6 +125,15 @@ import CodeBlock from '#/components/CodeBlock.vue';
             </div>
           </div>
         </div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
+            <div>
+              <h4 class="docs-feature-card-title">Circular Sizing Patterns</h4>
+              <p class="docs-feature-card-description">Pass arrays to define repeating size patterns for items or columns.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -244,6 +253,50 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
       </div>
     </section>
 
+    <!-- 3.1 Extensions -->
+    <section id="extensions">
+      <h2 class="docs-section-header">Extensions</h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          The library uses a highly modular architecture powered by extensions. Extensions can tap into the core lifecycle
+          to add features like RTL support, snapping, or custom loading logic without bloating the core engine.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-8">
+        <div class="card bg-base-200 p-4 border border-base-content/5">
+          <h4 class="font-bold text-primary mb-2">Built-in Extensions</h4>
+          <ul class="list-disc ps-5 text-sm space-y-1 opacity-80 text-base-content">
+            <li><a href="#use-rtl-extension" class="link"><code>useRtlExtension()</code></a>: Automatic RTL support.</li>
+            <li><a href="#use-snapping-extension" class="link"><code>useSnappingExtension()</code></a>: Scroll snapping.</li>
+            <li><a href="#use-sticky-extension" class="link"><code>useStickyExtension()</code></a>: Sticky elements.</li>
+            <li><a href="#use-infinite-loading-extension" class="link"><code>useInfiniteLoadingExtension()</code></a>: Data loading.</li>
+            <li><a href="#use-prepend-restoration-extension" class="link"><code>usePrependRestorationExtension()</code></a>: Position maintenance.</li>
+            <li><a href="#use-coordinate-scaling-extension" class="link"><code>useCoordinateScalingExtension()</code></a>: Massive lists.</li>
+          </ul>
+        </div>
+
+        <div class="card bg-base-200 p-4 border border-base-content/5">
+          <h4 class="font-bold text-secondary mb-2">Usage with Composable</h4>
+          <p class="text-xs opacity-70 mb-4 text-base-content">When using the low-level <code>useVirtualScroll</code> composable:</p>
+          <CodeBlock
+            class="docs-code-block font-mono text-[10px]"
+            lang="ts"
+            code="import {
+  useVirtualScroll,
+  useRtlExtension,
+  useSnappingExtension
+} from '@pdanpdan/virtual-scroll';
+
+const vs = useVirtualScroll(props, [
+  useRtlExtension(),
+  useSnappingExtension()
+]);"
+          />
+        </div>
+      </div>
+    </section>
+
     <div class="divider opacity-30" />
 
     <!-- 4. Sizing Guide -->
@@ -271,10 +324,10 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
                 <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
               </tr>
               <tr>
-                <td><strong>Array</strong></td>
-                <td><code>number[]</code> (cols only)</td>
+                <td><strong>Array (Circular Pattern)</strong></td>
+                <td><code>number[]</code></td>
                 <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
-                <td>Fixed sizes from array (cycles if shorter). <em>O(log n)</em>.</td>
+                <td>Repeating size patterns from array (e.g. <code>[50, 100]</code>). <em>O(log n)</em>.</td>
               </tr>
               <tr>
                 <td><strong>Function</strong></td>
@@ -328,9 +381,9 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             </tr>
             <tr>
               <td><code class="docs-prop-name">itemSize</code></td>
-              <td><code>number | fn | null</code></td>
+              <td><code>num | arr | fn | null</code></td>
               <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
-              <td>Fixed size or function. See <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
+              <td>Fixed size, circular array pattern, or function. See <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">direction</code></td>
@@ -370,7 +423,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
               <td><code class="docs-prop-name">columnWidth</code></td>
               <td><code>num | arr | fn | null</code></td>
               <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
-              <td>Width for columns in grid mode.</td>
+              <td>Width for columns in grid mode (supports fixed, array pattern, or function).</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">columnGap</code></td>
@@ -1190,12 +1243,17 @@ scrollToIndex
                 <td>Programmatic scroll to a pixel offset.</td>
               </tr>
               <tr>
-                <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-secondary">stopProgrammaticScroll</a></td>
+                <td><code class="text-secondary font-bold">stopProgrammaticScroll</code></td>
                 <td><code>Function</code></td>
                 <td>Cancel any active smooth scroll animation.</td>
               </tr>
               <tr>
-                <td><a href="#method-updateitemsize" class="link font-bold text-secondary">updateItemSize</a></td>
+                <td><code class="text-secondary font-bold">handleScrollCorrection</code></td>
+                <td><code>Function</code></td>
+                <td>Adjust scroll position to compensate for measurement changes.</td>
+              </tr>
+              <tr>
+                <td><code class="text-secondary font-bold">updateItemSize</code></td>
                 <td><code>Function</code></td>
                 <td>Register a manual item measurement.</td>
               </tr>
@@ -1460,6 +1518,211 @@ scrollToOffset: (val) => { scrollPos = val; }
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+    </section>
+
+    <div class="divider opacity-30" />
+
+    <!-- 6.1 Extension Reference -->
+    <section id="extension-reference">
+      <h2 class="docs-section-header">Extension Reference</h2>
+
+      <!-- useRtlExtension -->
+      <section id="use-rtl-extension" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useRtlExtension</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Automatically detects the text direction (LTR or RTL) of the scroll container and adjusts the coordinate system accordingly. It ensures that horizontal scroll offsets and item positioning are correct in RTL mode.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useRtlExtension } from '@pdanpdan/virtual-scroll';"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>This extension does not accept any parameters.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Behavior</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Injects detection logic into the <code>updateDirection</code> core method.</li>
+            <li>Detects direction from the container element, or falls back to the document root.</li>
+            <li>Automatically flips horizontal item offsets in RTL mode.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- useSnappingExtension -->
+      <section id="use-snapping-extension" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useSnappingExtension</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Adds scroll snapping behavior to the virtualizer. When user scrolling stops, the extension automatically aligns the viewport to the nearest item based on the <code>snap</code> prop configuration.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useSnappingExtension } from '@pdanpdan/virtual-scroll';"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>This extension does not accept any parameters.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Behavior</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Hooks into <code>onScrollEnd</code> lifecycle event.</li>
+            <li>Calculates the best snap target using <code>resolveSnap</code> utility.</li>
+            <li>Uses <code>scrollToIndex</code> with <code>behavior: 'smooth'</code> to perform the snap.</li>
+            <li>Automatically ignores items larger than the viewport to prevent infinite jumping.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- useStickyExtension -->
+      <section id="use-sticky-extension" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useStickyExtension</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Implements sticky item logic for rows and columns. It ensures that items specified in <code>stickyIndices</code> are always visible when their group is within the viewport range.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useStickyExtension } from '@pdanpdan/virtual-scroll';"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>This extension does not accept any parameters.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Behavior</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Hooks into <code>transformRenderedItems</code> to inject sticky items into the render list even if they are outside the normal virtual range.</li>
+            <li>Calculates <code>stickyOffset</code> for each item to create the "pushing" effect when the next sticky header arrives.</li>
+            <li>Supports both horizontal and vertical stickiness.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- useInfiniteLoadingExtension -->
+      <section id="use-infinite-loading-extension" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useInfiniteLoadingExtension</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Simple extension to facilitate infinite scrolling. It monitors the scroll position and triggers a callback when the user reaches a specific distance from the end of the content.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useInfiniteLoadingExtension } from '@pdanpdan/virtual-scroll';
+
+const ext = useInfiniteLoadingExtension({
+  onLoad: (axis) => {
+    console.log(`Load more items on ${axis} axis`);
+  }
+});"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="docs-table-container mb-8 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>onLoad</code></td>
+                <td><code>(axis) => void</code></td>
+                <td>Callback triggered when thresholds are met. Receives <code>'vertical' | 'horizontal'</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 class="docs-prop-subheader">Behavior</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Watches <code>scrollDetails</code> reactively.</li>
+            <li>Respects the <code>loadDistance</code> and <code>loading</code> props from the component.</li>
+            <li>Prevents duplicate triggers while <code>loading</code> is true.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- usePrependRestorationExtension -->
+      <section id="use-prepend-restoration-extension" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">usePrependRestorationExtension</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Essential for chat-like interfaces. When items are prepended to the beginning of the <code>items</code> array, this extension calculates the added size and applies a scroll correction to maintain the user's perceived position.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { usePrependRestorationExtension } from '@pdanpdan/virtual-scroll';"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>This extension does not accept any parameters.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Behavior</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Compares new items with previous items to detect prepended count.</li>
+            <li>Calculates the height (or width) of prepended items.</li>
+            <li>Uses <code>handleScrollCorrection</code> to silently adjust the scroll position before the next frame.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- useCoordinateScalingExtension -->
+      <section id="use-coordinate-scaling-extension">
+        <h3 class="docs-prop-header text-secondary">useCoordinateScalingExtension</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Enables support for virtually unlimited content sizes. Since browsers have a hard limit on the physical height/width of elements (usually around 10M to 30M pixels), this extension scales the display coordinates so the virtual list can represent billions of pixels.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useCoordinateScalingExtension } from '@pdanpdan/virtual-scroll';"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>This extension does not accept any parameters.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Behavior</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Calculates <code>scaleX</code> and <code>scaleY</code> factors when total size exceeds browser limits.</li>
+            <li>Transparently maps physical scroll events to virtual positions.</li>
+            <li>Automatically disabled when using <code>window</code> as the container (as the browser handles body scrolling differently).</li>
+          </ul>
         </div>
       </section>
     </section>

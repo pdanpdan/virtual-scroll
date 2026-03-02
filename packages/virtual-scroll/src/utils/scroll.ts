@@ -22,7 +22,7 @@ export const BROWSER_MAX_SIZE = 10000000;
  * @returns `true` if the container is the global window object.
  */
 export function isWindow(container?: HTMLElement | Window | null): container is Window {
-  return container === null || container === document.documentElement || (typeof window !== 'undefined' && container === window);
+  return container === null || (typeof document !== 'undefined' && container === document.documentElement) || (typeof window !== 'undefined' && container === window);
 }
 
 /**

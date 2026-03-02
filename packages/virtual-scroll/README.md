@@ -110,15 +110,92 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 ## Key Features
 
 - **Dynamic & Fixed Sizes**: Supports uniform item sizes, variable sizes via function/array, or fully dynamic sizes via `ResizeObserver`.
+- **Circular Patterns**: Pass an array to `itemSize` or `columnWidth` to define a repeating size pattern (e.g., `[50, 100]` will repeat for all items).
 - **Multi-Directional**: Works in `vertical`, `horizontal`, or `both` (grid) directions.
 - **Virtual Scrollbars**: Optimized virtual scrollbars that handle massive scales and provide consistent cross-browser styling.
+- **Extensions Architecture**: Highly modular system via extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration).
 - **Container Flexibility**: Can use a custom element or the browser `window`/`body` as the scroll container.
 - **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
-- **Sticky Sections**: Support for sticky headers, footers, and indices.
-- **Scroll Restoration**: Automatically maintains scroll position when items are prepended to the list.
-- **Scroll Snapping**: Automatically align to the nearest item after scrolling stops (start, center, end, or auto).
-- **RTL Support**: Full support for Right-to-Left layouts with automatic detection.
 - **Accessibility**: Automatic ARIA role mapping for lists, grids, trees, listboxes, and menus.
+
+## Extensions
+
+The library uses a modular extension system. You can use the built-in extensions or create your own.
+
+### Built-in Extensions
+
+- `useRtlExtension()`: Automatic Right-to-Left layout support.
+- `useSnappingExtension()`: Item snapping after scroll stops.
+- `useStickyExtension()`: Sticky header/footer and index support.
+- `useInfiniteLoadingExtension({ onLoad })`: Trigger loading when reaching thresholds.
+- `usePrependRestorationExtension()`: Maintain scroll position when items are prepended.
+- `useCoordinateScalingExtension()`: Support for massive lists (billions of pixels).
+
+### Extension Usage Example
+
+When using the `VirtualScroll` component, extensions are already integrated. If you use the `useVirtualScroll` composable directly, you can pass them as the second argument:
+
+```ts
+import {
+  useRtlExtension,
+  useSnappingExtension,
+  useVirtualScroll,
+} from '@pdanpdan/virtual-scroll';
+
+// eslint-disable-next-line unused-imports/no-unused-vars, no-undef
+const { renderedItems, scrollDetails } = useVirtualScroll(props, [
+  useRtlExtension(),
+  useSnappingExtension(),
+]);
+```
+
+## Composables
+
+The library exposes its internal logic via reactive composables for advanced use cases.
+
+### `useVirtualScroll(props, extensions?)`
+
+The core logic for virtualization.
+
+**Parameters:**
+- `props`: Reactive reference or getter for [VirtualScrollProps](#props).
+- `extensions`: Optional array of [VirtualScrollExtension](#extensions) objects.
+
+**Returns:**
+See the [Exposed Members](#exposed-members) section for the full list of returned properties and methods.
+
+### `useVirtualScrollSizes(config)`
+
+Manages item and column measurements using optimized Fenwick Trees for *O(log N)* performance.
+
+**Config:**
+- `props`: Full component props.
+- `isDynamicItemSize`: Boolean.
+- `isDynamicColumnWidth`: Boolean.
+- `defaultSize`: Fallback measurement.
+- `direction`: Scroll axis.
+
+**Returns:**
+- `itemSizesX` / `itemSizesY`: Internal Fenwick Trees.
+- `updateItemSizes(updates, ...)`: Method to register new measurements.
+- `refresh()`: Reset all measurements.
+
+### `useVirtualScrollbar(props)`
+
+Logic for custom virtual scrollbar interactions (dragging, clicking).
+
+**Props:**
+- `axis`: `'vertical' | 'horizontal'`
+- `totalSize`: Content size (DU).
+- `viewportSize`: Viewport size (DU).
+- `position`: Current scroll (DU).
+- `scrollToOffset`: Callback to update scroll.
+
+**Returns:**
+- `trackProps`: Attributes/listeners for the track.
+- `thumbProps`: Attributes/listeners for the thumb.
+- `thumbStyle`: Calculated reactive styles.
+- `isDragging`: Drag state.
 
 ## Component Reference: VirtualScroll
 
