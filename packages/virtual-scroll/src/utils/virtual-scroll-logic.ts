@@ -1189,6 +1189,39 @@ export function resolveSnap(
     }
   }
 
+  if (mode === 'next') {
+    if (dir === 'start') {
+      effectiveMode = 'end';
+    } else if (dir === 'end') {
+      effectiveMode = 'start';
+    } else {
+      return null;
+    }
+
+    if (effectiveMode === 'start') {
+      // Scrolling towards end (dir === 'end') -> snap to NEXT item start
+      const size = getSize(currentIdx);
+      if (size > viewSize) {
+        return null;
+      }
+      return {
+        index: Math.min(count - 1, currentIdx + 1),
+        align: 'start' as const,
+      };
+    }
+    if (effectiveMode === 'end') {
+      // Scrolling towards start (dir === 'start') -> snap to PREVIOUS item end
+      const size = getSize(currentEndIdx);
+      if (size > viewSize) {
+        return null;
+      }
+      return {
+        index: Math.max(0, currentEndIdx - 1),
+        align: 'end' as const,
+      };
+    }
+  }
+
   if (effectiveMode === 'start') {
     const size = getSize(currentIdx);
     // Ignore items larger than viewport to prevent jarring jumps

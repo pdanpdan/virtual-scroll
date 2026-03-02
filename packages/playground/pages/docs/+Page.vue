@@ -1485,7 +1485,7 @@ scrollToOffset: (val) => { scrollPos = val; }
         </div>
         <div id="snap-mode" class="card bg-base-300 p-4 border border-base-content/5">
           <h4 class="docs-prop-subheader text-primary mb-2">SnapMode</h4>
-          <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="boolean | 'start' | 'center' | 'end' | 'auto'" />
+          <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="boolean | 'start' | 'center' | 'end' | 'next' | 'auto'" />
           <p class="text-[10px] opacity-60 mt-2 italic">Controls automatic alignment after scrolling stops.</p>
         </div>
       </div>
@@ -1709,6 +1709,10 @@ scrollToOffset: (val) => { scrollPos = val; }
               <tr>
                 <td><code class="docs-prop-name">true</code> / <code class="docs-prop-name">'auto'</code></td>
                 <td><strong>Smart Directional:</strong> If scrolling towards start, acts as <code>'end'</code>. If scrolling towards end, acts as <code>'start'</code>.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">'next'</code></td>
+                <td>Snaps to the next (closest) snap position in the direction of the scroll.</td>
               </tr>
               <tr>
                 <td><code class="docs-prop-name">'start'</code></td>

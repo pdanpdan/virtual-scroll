@@ -14,7 +14,7 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 
 const itemCount = ref(100);
 const itemSize = ref(300); // Large items to make snapping obvious
-const snap = ref<SnapMode>('auto');
+const snap = ref<SnapMode>('next');
 
 const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
   id: i,
@@ -87,6 +87,7 @@ const isItemTooLarge = computed(() => {
           <select v-model="snap" class="select select-bordered select-sm w-32" aria-label="Snap mode">
             <option :value="false">None</option>
             <option value="auto">Auto (true)</option>
+            <option value="next">Next</option>
             <option value="start">Start</option>
             <option value="center">Center</option>
             <option value="end">End</option>

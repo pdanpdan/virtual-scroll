@@ -192,9 +192,10 @@ export type PaddingValue = number | { x?: number; y?: number; };
  * - 'start': Aligns the first visible item to the viewport start if at least 50% visible, otherwise aligns the next item.
  * - 'center': Aligns the item that intersects the viewport center to the center.
  * - 'end': Aligns the last visible item to the viewport end if at least 50% visible, otherwise aligns the previous item.
+ * - 'next': Snaps to the next (closest) snap position in the direction of the scroll.
  * - 'auto': Intelligent snapping based on scroll direction. Acts as 'end' when scrolling towards start, and 'start' when scrolling towards end.
  */
-export type SnapMode = boolean | 'start' | 'center' | 'end' | 'auto';
+export type SnapMode = boolean | 'start' | 'center' | 'end' | 'next' | 'auto';
 
 /** Base configuration properties shared between the component and the composable. */
 export interface VirtualScrollBaseProps<T = unknown> {
@@ -342,6 +343,7 @@ export interface VirtualScrollBaseProps<T = unknown> {
 
   /**
    * Whether to snap to items after scrolling stops.
+   * Options: false, true, 'auto', 'next', 'start', 'center', 'end'.
    * @default false
    */
   snap?: SnapMode | undefined;

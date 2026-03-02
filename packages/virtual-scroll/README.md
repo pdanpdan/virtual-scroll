@@ -158,6 +158,7 @@ Controls the automatic alignment after scrolling stops.
 
 - `false` (default): No snapping.
 - `true` / `'auto'`: Intelligent snapping based on scroll direction. Acts as `'end'` when scrolling towards start, and `'start'` when scrolling towards end.
+- `'next'`: Snaps to the next (closest) snap position in the direction of the scroll.
 - `'start'`: Aligns the first visible item to the viewport start if at least 50% visible, otherwise aligns the next item.
 - `'center'`: Aligns the item that intersects the viewport center to the center.
 - `'end'`: Aligns the last visible item to the viewport end if at least 50% visible, otherwise aligns the previous item.

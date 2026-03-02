@@ -2182,6 +2182,61 @@ describe('useVirtualScroll', () => {
       expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 100, behavior: 'smooth', left: 0 }));
     });
 
+    it('snaps to next item if snap="next" and scrolling towards end', async () => {
+      const { container, setScrollTop } = setupSnapTest('next', 100);
+
+      await nextTick();
+      await nextTick();
+
+      // Viewport 500. Item size 100.
+      // Initially at 0.
+      // User scrolls down to 20 (towards end).
+      // currentIdx = 0. Next item is 1.
+      setScrollTop(20);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 100, behavior: 'smooth' }));
+    });
+
+    it('snaps to previous item if snap="next" and scrolling towards start', async () => {
+      const { container, setScrollTop } = setupSnapTest('next', 100);
+
+      await nextTick();
+      await nextTick();
+
+      // Scroll to some position first
+      setScrollTop(500);
+      // We need to simulate that we reached 500 and stopped, then we scroll back
+      // But actually resolveSnap uses dir which is detected in handleScroll.
+
+      // Let's set it to 500
+      setScrollTop(500);
+      container.dispatchEvent(new Event('scroll'));
+      vi.advanceTimersByTime(600); // finish snap if any
+      await nextTick();
+      vi.mocked(container.scrollTo).mockClear();
+
+      // Now scroll UP to 480 (towards start)
+      setScrollTop(480);
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      vi.advanceTimersByTime(300);
+      await nextTick();
+
+      // viewport 500. item size 100.
+      // currentEndIdx at 480 is floor((480+500-1)/100) = 9. (approx)
+      // Actually currentEndIdx depends on getIndexAt(relScroll + viewSize - 1)
+      // relScroll 480 + 500 - 1 = 979. index 9 (900-1000).
+      // snap to previous end -> index 8. align end.
+      // index 8 ends at 900. top = 900 - 500 = 400.
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 400, behavior: 'smooth' }));
+    });
+
     it('snaps to center if snap="center"', async () => {
       const { container, setScrollTop } = setupSnapTest('center', 100);
 
