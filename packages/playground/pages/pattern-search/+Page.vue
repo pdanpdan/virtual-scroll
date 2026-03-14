@@ -18,6 +18,8 @@ const searchQuery = ref('Ultimate');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const currentMatchIndex = ref(-1);
 
+const reEscape = /[.*+?^${}()|[\\]/g;
+
 const {
   virtualScrollRef,
   scrollDetails,
@@ -170,7 +172,7 @@ function getHighlightedContent(text: string, query: string) {
   if ((isMounted.value && hasHighlightSupport) || !query || query.length < 2) {
     return text;
   }
-  const escapedQuery = query.replace(/[.*+?^${}()|[\\]/g, '\\$&');
+  const escapedQuery = query.replace(reEscape, '\\$&');
   const regex = new RegExp(`(${ escapedQuery })`, 'gi');
   return text.replace(regex, '<mark class="search-highlight-fallback">$1</mark>');
 }

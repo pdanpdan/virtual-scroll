@@ -630,7 +630,7 @@ export function useVirtualScroll<T = unknown>(
     treeUpdateFlag.value;
     const { start, end } = range.value;
     const items: RenderedItem<T>[] = [];
-    const stickyIndices = [ ...(props.value.stickyIndices || []) ].sort((a, b) => a - b);
+    const stickyIndices = (props.value.stickyIndices || []).toSorted((a, b) => a - b);
     const stickySet = new Set(stickyIndices);
     const sortedIndices: number[] = [];
     if (isHydrated.value || !props.value.ssrRange) {
@@ -840,7 +840,43 @@ export function useVirtualScroll<T = unknown>(
       const scrollValueY = actualScrollY;
       const currentRelX = displayToVirtual(scrollValueX, 0, scaleX.value);
       const currentRelY = displayToVirtual(scrollValueY, 0, scaleY.value);
-      const { targetX, targetY } = calculateScrollTarget({ rowIndex, colIndex, options, direction: direction.value, viewportWidth: viewportWidth.value, viewportHeight: viewportHeight.value, totalWidth: virtualWidth.value, totalHeight: virtualHeight.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, fixedSize: fixedItemSize.value, fixedWidth: fixedColumnWidth.value, relativeScrollX: currentRelX, relativeScrollY: currentRelY, getItemSizeY: (idx) => itemSizesY.get(idx), getItemSizeX: (idx) => itemSizesX.get(idx), getItemQueryY: (idx) => itemSizesY.query(idx), getItemQueryX: (idx) => itemSizesX.query(idx), getColumnSize: (idx) => columnSizes.get(idx), getColumnQuery: (idx) => columnSizes.query(idx), scaleX: scaleX.value, scaleY: scaleY.value, hostOffsetX: componentOffset.x, hostOffsetY: componentOffset.y, stickyIndices: (props.value.stickyIndices || []), stickyStartX: stickyStartX.value, stickyStartY: stickyStartY.value, stickyEndX: stickyEndX.value, stickyEndY: stickyEndY.value, flowPaddingStartX: flowStartX.value, flowPaddingStartY: flowStartY.value, paddingStartX: paddingStartX.value, paddingStartY: paddingStartY.value, paddingEndX: paddingEndX.value, paddingEndY: paddingEndY.value });
+      const { targetX, targetY } = calculateScrollTarget({
+        rowIndex,
+        colIndex,
+        options,
+        direction: direction.value,
+        viewportWidth: viewportWidth.value,
+        viewportHeight: viewportHeight.value,
+        totalWidth: totalWidth.value,
+        totalHeight: totalHeight.value,
+        gap: props.value.gap || 0,
+        columnGap: props.value.columnGap || 0,
+        fixedSize: fixedItemSize.value,
+        fixedWidth: fixedColumnWidth.value,
+        relativeScrollX: currentRelX,
+        relativeScrollY: currentRelY,
+        getItemSizeY: (idx) => itemSizesY.get(idx),
+        getItemSizeX: (idx) => itemSizesX.get(idx),
+        getItemQueryY: (idx) => itemSizesY.query(idx),
+        getItemQueryX: (idx) => itemSizesX.query(idx),
+        getColumnSize: (idx) => columnSizes.get(idx),
+        getColumnQuery: (idx) => columnSizes.query(idx),
+        scaleX: scaleX.value,
+        scaleY: scaleY.value,
+        hostOffsetX: componentOffset.x,
+        hostOffsetY: componentOffset.y,
+        stickyIndices: props.value.stickyIndices || [],
+        stickyStartX: stickyStartX.value,
+        stickyStartY: stickyStartY.value,
+        stickyEndX: stickyEndX.value,
+        stickyEndY: stickyEndY.value,
+        flowPaddingStartX: flowStartX.value,
+        flowPaddingStartY: flowStartY.value,
+        paddingStartX: paddingStartX.value,
+        paddingStartY: paddingStartY.value,
+        paddingEndX: paddingEndX.value,
+        paddingEndY: paddingEndY.value,
+      });
       const toleranceX = 2 * scaleX.value;
       const toleranceY = 2 * scaleY.value;
       const reachedX = (colIndex === null || colIndex === undefined) || (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX);

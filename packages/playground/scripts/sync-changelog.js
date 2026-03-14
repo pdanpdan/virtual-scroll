@@ -8,6 +8,8 @@ const __dirname = path.dirname(__filename);
 const changelogPath = path.resolve(__dirname, '../../../CHANGELOG.md');
 const outputPath = path.resolve(__dirname, '../pages/changelog/changelog-data.ts');
 
+const reReplaceQuote = /'/g;
+
 const content = fs.readFileSync(changelogPath, 'utf8');
 
 const versions = [];
@@ -73,7 +75,7 @@ function formatObject(obj, indent = '  ') {
     if (obj.length === 0) {
       return '[]';
     }
-    const items = obj.map((item) => `${ indent }  '${ item.replace(/'/g, "\\'") }',`).join('\n');
+    const items = obj.map((item) => `${ indent }  '${ item.replace(reReplaceQuote, "\\'") }',`).join('\n');
     return `[\n${ items }\n${ indent }]`;
   }
 
@@ -81,7 +83,7 @@ function formatObject(obj, indent = '  ') {
     .filter(([ _, value ]) => !Array.isArray(value) || value.length > 0)
     .map(([ key, value ]) => {
       const formattedValue = typeof value === 'string'
-        ? `'${ value.replace(/'/g, "\\'") }'`
+        ? `'${ value.replace(reReplaceQuote, "\\'") }'`
         : formatObject(value, `${ indent }  `);
       return `${ indent }  ${ key }: ${ formattedValue },`;
     })

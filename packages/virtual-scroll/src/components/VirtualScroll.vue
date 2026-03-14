@@ -1100,7 +1100,7 @@ const internalItemRole = computed(() => {
   }
   return 'listitem';
 });
-const itemRole = computed(() => props.itemRole != null ? props.itemRole : internalItemRole.value);
+const itemRole = computed(() => props.itemRole ?? internalItemRole.value);
 const cellRole = computed(() => {
   if (props.role === 'grid' || (!props.role && props.direction === 'both')) {
     return 'gridcell';

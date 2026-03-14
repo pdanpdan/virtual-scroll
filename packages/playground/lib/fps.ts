@@ -24,7 +24,7 @@ function updateFps(timestamp: number) {
     if (isCalibrating) {
       calibrationSamples.push(dt);
       if (calibrationSamples.length >= CALIBRATION_LIMIT) {
-        const sorted = [ ...calibrationSamples ].sort((a, b) => a - b);
+        const sorted = calibrationSamples.toSorted((a, b) => a - b);
         const medianDt = sorted[ Math.floor(sorted.length / 4) ];
         const estimatedHz = Math.round(1000 / medianDt);
 

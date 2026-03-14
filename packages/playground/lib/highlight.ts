@@ -4,6 +4,8 @@ import path from 'node:path';
 import { parse, transform } from '@vue/compiler-dom';
 import { createCssVariablesTheme, createHighlighter } from 'shiki';
 
+const reReplaceQuote = /"/g;
+
 let highlighterPromise: ReturnType<typeof createHighlighter> | null = null;
 
 export async function highlight(code: string, lang: string) {
@@ -100,7 +102,7 @@ export function highlightPlugin() {
         let newCode = code;
         for (const r of replacements.reverse()) {
           const highlightedHtml = await highlight(r.raw, r.lang);
-          const safeValue = JSON.stringify(highlightedHtml.replaceAll('&#x3C;/</', '&amp;lt;/</')).replace(/"/g, '&quot;');
+          const safeValue = JSON.stringify(highlightedHtml.replaceAll('&#x3C;/</', '&amp;lt;/</')).replace(reReplaceQuote, '&quot;');
           const newAttr = `:code="${ safeValue }"`;
           newCode = newCode.slice(0, r.start) + newAttr + newCode.slice(r.end);
         }

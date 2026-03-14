@@ -61,7 +61,7 @@ function generateMessage(id: number, sentByMe?: boolean): Message {
 
 function loadMessages(count: number, prepend = false) {
   const newItems = [];
-  const startId = prepend ? (items.value[ 0 ]?.id || 0) - count : (items.value[ items.value.length - 1 ]?.id || 0) + 1;
+  const startId = prepend ? (items.value[ 0 ]?.id || 0) - count : (items.value.at(-1)?.id || 0) + 1;
 
   for (let i = 0; i < count; i++) {
     const id = startId + i;
@@ -126,7 +126,7 @@ function onScroll(details: ScrollDetails) {
 const newMessage = ref('');
 
 function addMessage(text: string, isMe: boolean) {
-  const id = (items.value[ items.value.length - 1 ]?.id || 0) + 1;
+  const id = (items.value.at(-1)?.id || 0) + 1;
   const wasAtBottom = isAtBottom.value;
 
   items.value = [

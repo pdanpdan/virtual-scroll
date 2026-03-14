@@ -11,7 +11,7 @@ import { findPrevStickyIndex } from '../utils/virtual-scroll-logic';
  */
 export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
   const sortedStickyIndices = (ctx: ExtensionContext<T>) =>
-    computed(() => [ ...(ctx.props.value.stickyIndices || []) ].sort((a, b) => a - b));
+    computed(() => (ctx.props.value.stickyIndices || []).toSorted((a, b) => a - b));
 
   return {
     name: 'sticky',

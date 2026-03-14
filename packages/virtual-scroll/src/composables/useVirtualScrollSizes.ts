@@ -388,7 +388,7 @@ export function useVirtualScrollSizes<T>(
           tryUpdateColumn(Number.parseInt(colIndexAttr, 10), inlineSize);
         } else {
           // If the element is a row, try to find cells with data-col-index
-          const cells = Array.from(element.querySelectorAll('[data-col-index]')) as HTMLElement[];
+          const cells = [ ...element.querySelectorAll('[data-col-index]') ] as HTMLElement[];
 
           for (const child of cells) {
             const colIndex = Number.parseInt(child.dataset.colIndex!, 10);

@@ -15,6 +15,12 @@ import { join } from 'node:path';
 const PAGES_DIR = 'packages/playground/pages';
 const OUTPUT_DIR = 'packages/playground/public/umd';
 
+const reReplaceEmptyLines = /\n{3,}/g;
+const reReplaceTitle = /\{\{TITLE\}\}/g;
+const reReplaceDescription = /\{\{DESCRIPTION\}\}/g;
+const reMatchTile = /title: ['"](.*?)['"]/;
+const reMatchDescription = /description: ['"](.*?)['"]/;
+
 /**
  * Relevant pages to generate - each shows a unique feature or pattern
  */
@@ -56,7 +62,7 @@ function cleanHtml(html) {
     .split('\n')
     .map((line) => line.trimEnd())
     .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
+    .replace(reReplaceEmptyLines, '\n\n')
     .trim() }\n`;
 }
 
@@ -518,8 +524,8 @@ pages.forEach((page) => {
   // Extract metadata from existing playground configs
   if (existsSync(configPath)) {
     const configContent = readFileSync(configPath, 'utf-8');
-    const titleMatch = configContent.match(/title: ['"](.*?)['"]/);
-    const descMatch = configContent.match(/description: ['"](.*?)['"]/);
+    const titleMatch = configContent.match(reMatchTile);
+    const descMatch = configContent.match(reMatchDescription);
     if (titleMatch) {
       title = titleMatch[ 1 ].replace(' | Virtual Scroll', '');
     }
@@ -548,8 +554,8 @@ pages.forEach((page) => {
   const direction = page.includes('grid') ? 'both' : page.includes('horizontal') ? 'horizontal' : 'vertical';
 
   const html = baseHtml
-    .replace(/\{\{TITLE\}\}/g, title)
-    .replace(/\{\{DESCRIPTION\}\}/g, description)
+    .replace(reReplaceTitle, title)
+    .replace(reReplaceDescription, description)
     .replace('{{CONTENT}}', pageConfig.content)
     .replace('{{LOGIC}}', pageConfig.logic || '')
     .replace('{{EXPOSE}}', pageConfig.expose ? `${ pageConfig.expose },` : '')
