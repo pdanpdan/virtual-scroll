@@ -100,6 +100,16 @@ export function setupMocks() {
     }
     document.dispatchEvent(new Event('scroll'));
   });
+
+  HTMLElement.prototype.scrollTo = vi.fn().mockImplementation(function (this: HTMLElement, options: ScrollToOptions) {
+    if (options.left !== undefined) {
+      this.scrollLeft = options.left;
+    }
+    if (options.top !== undefined) {
+      this.scrollTop = options.top;
+    }
+    this.dispatchEvent(new Event('scroll'));
+  });
 }
 
 export interface MockItem {

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   getPaddingX,
@@ -13,6 +13,9 @@ import {
 } from '../../src/utils/scroll';
 
 describe('scroll utils', () => {
+  beforeEach(() => {
+    globalThis.window.scrollTo = vi.fn();
+  });
   describe('element type guards', () => {
     describe('is window', () => {
       it('returns true for null', () => {

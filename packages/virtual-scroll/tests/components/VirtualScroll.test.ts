@@ -93,6 +93,16 @@ globalThis.window.scrollTo = vi.fn().mockImplementation((options) => {
   document.dispatchEvent(new Event('scroll'));
 });
 
+HTMLElement.prototype.scrollTo = vi.fn().mockImplementation(function (this: HTMLElement, options: ScrollToOptions) {
+  if (options.left !== undefined) {
+    this.scrollLeft = options.left;
+  }
+  if (options.top !== undefined) {
+    this.scrollTop = options.top;
+  }
+  this.dispatchEvent(new Event('scroll'));
+});
+
 // --- Tests ---
 
 interface MockItem {
@@ -1505,7 +1515,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
 
       const row0 = wrapper.find('.virtual-scroll-item[data-index="0"]').element;
-      const cells0 = Array.from(row0.querySelectorAll('.cell'));
+      const cells0 = [ ...row0.querySelectorAll('.cell') ];
 
       triggerResize(row0, 1000, 50);
       for (const cell of cells0) {
@@ -1524,7 +1534,7 @@ describe('virtualScroll', () => {
       await nextTick();
 
       const row20 = wrapper.find('.virtual-scroll-item[data-index="20"]').element;
-      const cells20 = Array.from(row20.querySelectorAll('.cell'));
+      const cells20 = [ ...row20.querySelectorAll('.cell') ];
 
       for (const cell of cells20) {
         triggerResize(cell, 110.1, 50);
@@ -1568,7 +1578,7 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(5620);
 
       const row45El = wrapper.find('.virtual-scroll-item[data-index="45"]').element;
-      const cells45 = Array.from(row45El.querySelectorAll('.cell'));
+      const cells45 = [ ...row45El.querySelectorAll('.cell') ];
 
       for (const cell of cells45) {
         triggerResize(cell, 150, 120);

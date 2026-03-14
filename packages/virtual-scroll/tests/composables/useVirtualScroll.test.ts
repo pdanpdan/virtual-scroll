@@ -211,6 +211,46 @@ describe('useVirtualScroll', () => {
 
       wrapper.unmount();
     });
+
+    it('should correct scroll position after items are measured when using initialScrollIndex', async () => {
+      const items = Array.from({ length: 50 }, (_, i) => ({ id: i }));
+      const { result, internalState, wrapper } = setup({
+        direction: 'vertical',
+        items,
+        defaultItemSize: 50, // estimated
+        initialScrollIndex: 49,
+        initialScrollAlign: 'end',
+      });
+
+      // 1. Initial mount and first nextTick where scrollToIndex is called
+      await nextTick();
+
+      // Total height based on defaults: 50 * 50 = 2500
+      // Viewport is 500
+      // Target scroll: 2500 - 500 = 2000
+      expect(internalState.internalScrollY.value).toBe(2000);
+
+      // 2. Measure items - they are actually 80px each
+      const updates = items.map((_, i) => ({
+        index: i,
+        inlineSize: 500,
+        blockSize: 80,
+      }));
+
+      result.updateItemSizes(updates);
+
+      // Wait for nextTicks for hydration to finish and watchers to trigger
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      // Total height now: 50 * 80 = 4000
+      // Target scroll should be: 4000 - 500 = 3500
+      expect(result.totalHeight.value).toBe(4000);
+      expect(internalState.internalScrollY.value).toBe(3500);
+
+      wrapper.unmount();
+    });
   });
 
   describe('additional coverage', () => {

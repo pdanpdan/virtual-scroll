@@ -417,21 +417,19 @@ export function useVirtualScroll<T = unknown>(
     const scrollBehavior = isCorrection ? 'auto' : (behavior || 'smooth');
 
     if (!dryRun) {
-      if (scrollBehavior === 'smooth' || !isCorrection) {
-        isProgrammaticScroll.value = true;
-        clearTimeout(programmaticScrollTimer);
-        if (scrollBehavior === 'smooth') {
-          programmaticScrollTimer = setTimeout(() => {
-            isProgrammaticScroll.value = false;
-            programmaticScrollTimer = undefined;
-            checkPendingScroll();
-          }, 1000);
-        } else {
-          programmaticScrollTimer = setTimeout(() => {
-            isProgrammaticScroll.value = false;
-            programmaticScrollTimer = undefined;
-          }, 150);
-        }
+      isProgrammaticScroll.value = true;
+      clearTimeout(programmaticScrollTimer);
+      if (scrollBehavior === 'smooth') {
+        programmaticScrollTimer = setTimeout(() => {
+          isProgrammaticScroll.value = false;
+          programmaticScrollTimer = undefined;
+          checkPendingScroll();
+        }, 1000);
+      } else {
+        programmaticScrollTimer = setTimeout(() => {
+          isProgrammaticScroll.value = false;
+          programmaticScrollTimer = undefined;
+        }, 150);
       }
     }
 
@@ -443,7 +441,7 @@ export function useVirtualScroll<T = unknown>(
       scrollOptions.top = Math.max(0, finalY);
     }
 
-    if (!isCorrection && !dryRun) {
+    if (!dryRun) {
       scrollTo(container, scrollOptions);
     }
 
@@ -894,7 +892,7 @@ export function useVirtualScroll<T = unknown>(
     }
   }
 
-  watch([ treeUpdateFlag, viewportWidth, viewportHeight ], checkPendingScroll);
+  watch([ treeUpdateFlag, viewportWidth, viewportHeight, isHydrating ], checkPendingScroll);
   watch(isScrolling, (scrolling) => {
     if (!scrolling) {
       checkPendingScroll();
