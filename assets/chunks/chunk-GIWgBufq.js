@@ -1,1 +1,0 @@
-import{G as e}from"./chunk-qUAvYQQD.js";function t(){let t=e(),n=e(null);function r(e){n.value=e}function i(e,n,r){t.value?.scrollToIndex(e,n,r)}function a(e,n){t.value?.scrollToOffset(e,n)}return{virtualScrollRef:t,scrollDetails:n,onScroll:r,handleScrollToIndex:i,handleScrollToOffset:a}}export{t};
