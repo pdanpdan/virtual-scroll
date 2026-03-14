@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.3](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.2...v0.10.3) (2026-03-14)
+
+
+### Bug Fixes
+
+* initial scroll to bottom ([6f0106f](https://github.com/pdanpdan/virtual-scroll/commit/6f0106f39b00930d0c072ed96f2406ada797bfbf))
+
 ## [0.10.2](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.1...v0.10.2) (2026-03-14)
 
 

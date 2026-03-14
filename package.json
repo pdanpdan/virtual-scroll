@@ -1,7 +1,7 @@
 {
   "name": "virtual-scroll-workspace",
   "type": "module",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "private": true,
   "packageManager": "pnpm@10.32.1",
   "description": "Workspace for virtual scroll components",
