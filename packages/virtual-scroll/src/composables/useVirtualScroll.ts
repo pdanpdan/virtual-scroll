@@ -426,6 +426,11 @@ export function useVirtualScroll<T = unknown>(
             programmaticScrollTimer = undefined;
             checkPendingScroll();
           }, 1000);
+        } else {
+          programmaticScrollTimer = setTimeout(() => {
+            isProgrammaticScroll.value = false;
+            programmaticScrollTimer = undefined;
+          }, 150);
         }
       }
     }
@@ -466,6 +471,11 @@ export function useVirtualScroll<T = unknown>(
         programmaticScrollTimer = undefined;
         checkPendingScroll();
       }, 1000);
+    } else {
+      programmaticScrollTimer = setTimeout(() => {
+        isProgrammaticScroll.value = false;
+        programmaticScrollTimer = undefined;
+      }, 150);
     }
     pendingScroll.value = null;
 
@@ -833,8 +843,8 @@ export function useVirtualScroll<T = unknown>(
       const { targetX, targetY } = calculateScrollTarget({ rowIndex, colIndex, options, direction: direction.value, viewportWidth: viewportWidth.value, viewportHeight: viewportHeight.value, totalWidth: virtualWidth.value, totalHeight: virtualHeight.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, fixedSize: fixedItemSize.value, fixedWidth: fixedColumnWidth.value, relativeScrollX: currentRelX, relativeScrollY: currentRelY, getItemSizeY: (idx) => itemSizesY.get(idx), getItemSizeX: (idx) => itemSizesX.get(idx), getItemQueryY: (idx) => itemSizesY.query(idx), getItemQueryX: (idx) => itemSizesX.query(idx), getColumnSize: (idx) => columnSizes.get(idx), getColumnQuery: (idx) => columnSizes.query(idx), scaleX: scaleX.value, scaleY: scaleY.value, hostOffsetX: componentOffset.x, hostOffsetY: componentOffset.y, stickyIndices: (props.value.stickyIndices || []), stickyStartX: stickyStartX.value, stickyStartY: stickyStartY.value, stickyEndX: stickyEndX.value, stickyEndY: stickyEndY.value, flowPaddingStartX: flowStartX.value, flowPaddingStartY: flowStartY.value, paddingStartX: paddingStartX.value, paddingStartY: paddingStartY.value, paddingEndX: paddingEndX.value, paddingEndY: paddingEndY.value });
       const toleranceX = 2 * scaleX.value;
       const toleranceY = 2 * scaleY.value;
-      const reachedX = (colIndex === null || colIndex === undefined) || Math.abs(currentRelX - targetX) < toleranceX;
-      const reachedY = (rowIndex === null || rowIndex === undefined) || Math.abs(currentRelY - targetY) < toleranceY;
+      const reachedX = (colIndex === null || colIndex === undefined) || (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX);
+      const reachedY = (rowIndex === null || rowIndex === undefined) || (viewportHeight.value > 0 && Math.abs(currentRelY - targetY) < toleranceY);
       if (reachedX && reachedY) {
         const isMeasuredX = colIndex == null || colIndex === undefined || measuredColumns.value[ colIndex ] === 1;
         const isMeasuredY = rowIndex == null || rowIndex === undefined || measuredItemsY.value[ rowIndex ] === 1;

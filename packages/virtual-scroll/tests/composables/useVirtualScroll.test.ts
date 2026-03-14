@@ -159,6 +159,58 @@ describe('useVirtualScroll', () => {
       vi.useRealTimers();
       wrapper.unmount();
     });
+
+    it('correctly clamps scroll position when viewport height increases', async () => {
+      const container = document.createElement('div');
+      // Initially zero height
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 0 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+
+      // Mock footer height (measuredPaddingEnd)
+      const footerHeight = 60;
+
+      const { result, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items: mockItems, // 100 items * 50 = 5000px total height
+        initialScrollIndex: 99,
+        initialScrollAlign: 'end',
+        // We need to mock stickyEnd for the sticky footer
+        stickyEnd: { x: 0, y: footerHeight },
+      });
+
+      await nextTick();
+      await nextTick();
+
+      // Manually mark items as measured
+      const updates = [];
+      for (let i = 0; i < 100; i++) {
+        updates.push({ index: i, inlineSize: 500, blockSize: 50 });
+      }
+      result.updateItemSizes(updates);
+
+      await nextTick();
+
+      // Verify initially it's at the bottom (clamped to totalHeight because viewportHeight is 0)
+      expect(internalState.viewportHeight.value).toBe(0);
+      expect(internalState.internalScrollY.value).toBeGreaterThan(4500);
+
+      // Now resize to normal height
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      triggerResize(container, 500, 500);
+
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.viewportHeight.value).toBe(500);
+
+      // The internalScrollY MUST be clamped now
+      const maxPossibleScroll = result.scrollDetails.value.totalSize.height - 500;
+      expect(internalState.internalScrollY.value).toBeLessThanOrEqual(maxPossibleScroll);
+
+      wrapper.unmount();
+    });
   });
 
   describe('additional coverage', () => {
