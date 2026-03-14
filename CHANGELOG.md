@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.1...v0.10.2) (2026-03-14)
+
+
+### Bug Fixes
+
+* corner case where initial content was not initially rendered if screen was resized ([0364b2c](https://github.com/pdanpdan/virtual-scroll/commit/0364b2c712d0a3ccc9367ee80401140f74e895cb))
+
 ## [0.10.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.0...v0.10.1) (2026-03-02)
 
 
