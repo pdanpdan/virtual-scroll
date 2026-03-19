@@ -10,9 +10,9 @@ packages:
   - packages/*
 catalogs:
   default:
-    '@antfu/eslint-config': ^7.7.2
+    '@antfu/eslint-config': ^7.7.3
     '@release-it/conventional-changelog': ^10.0.6
-    '@tailwindcss/vite': ^4.2.1
+    '@tailwindcss/vite': ^4.2.2
     '@types/node': ^25.5.0
     '@vitejs/plugin-vue': ^6.0.5
     '@vitest/coverage-v8': ^4.1.0
@@ -24,19 +24,19 @@ catalogs:
     daisyui: ^5.5.19
     eslint: ^10.0.3
     eslint-plugin-vuejs-accessibility: ^2.5.0
-    jsdom: ^28.1.0
+    jsdom: ^29.0.0
     lightningcss: ^1.32.0
     release-it: ^19.2.4
     shiki: ^4.0.2
-    tailwindcss: ^4.2.1
+    tailwindcss: ^4.2.2
     typescript: ^5.9.3
     vike: ^0.4.255
     vike-vue: ^0.9.11
     # vite: ^7.3.1
-    vite: ^8.0.0
+    vite: ^8.0.1
     vite-plugin-dts: ^4.5.4
     vitest: ^4.1.0
     vue: ^3.5.30
-    vue-tsc: ^3.2.5
+    vue-tsc: ^3.2.6
 onlyBuiltDependencies:
   - esbuild

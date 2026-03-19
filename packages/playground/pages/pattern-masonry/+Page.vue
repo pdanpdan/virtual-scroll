@@ -103,16 +103,16 @@ function handleKeyDown(event: KeyboardEvent, colIndex: number, itemIndex: number
 
         // Find item in next column that best matches vertical position
         let bestIdx = 0;
-        let minDiff = Number.MAX_VALUE;
+        let minDiffMid = Number.MAX_VALUE;
 
         for (let i = 0; i < nextColItems.length; i++) {
           const itemOffset = nextColVs.getRowOffset(i);
           const itemHeight = nextColItems[ i ].height;
           const itemMidY = itemOffset + itemHeight / 2;
-          const diff = Math.abs(itemMidY - midY);
+          const diffMid = Math.abs(itemMidY - midY);
 
-          if (diff < minDiff) {
-            minDiff = diff;
+          if (diffMid < minDiffMid) {
+            minDiffMid = diffMid;
             bestIdx = i;
           } else if (itemMidY > midY + 500) {
             // Optimization: stop searching if we are way past
