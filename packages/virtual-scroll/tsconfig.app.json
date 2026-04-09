@@ -10,6 +10,7 @@
       "DOM.Iterable"
     ],
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "rootDir": "./",
     "module": "esnext",
     "moduleResolution": "bundler",

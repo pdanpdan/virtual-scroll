@@ -29,7 +29,6 @@ const items = Array.from({ length: 300 }, (_, i) => ({
 }));
 
 // Distribute items into columns
-// eslint-disable-next-line e18e/prefer-array-fill
 const columns = Array.from({ length: COLUMN_COUNT }, () => [] as MasonryItem[]) as MasonryItem[][];
 const columnHeights = Array.from({ length: COLUMN_COUNT }).fill(0) as number[];
 
