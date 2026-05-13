@@ -247,5 +247,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-search"
       group="1"
     />
+
+    <ExampleCard
+      type="Pattern"
+      title="Side-by-Side Code Diff"
+      description="Compare side-by-side large code diffs."
+      href="/pattern-diff"
+      group="2"
+    />
   </div>
 </template>
