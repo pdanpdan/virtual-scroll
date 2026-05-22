@@ -16,12 +16,15 @@ import type {
 } from '../types';
 import type { VNodeChild } from 'vue';
 
-import { computed, nextTick, onMounted, onUnmounted, ref, toRefs, useId, watch } from 'vue';
+import { computed, nextTick, ref, toRefs, useId, watch } from 'vue';
 
 import {
   useVirtualScroll,
 } from '../composables/useVirtualScroll';
 import { useVirtualScrollbar } from '../composables/useVirtualScrollbar';
+import { useVirtualScrollInertia } from '../composables/useVirtualScrollInertia';
+import { useVirtualScrollKeyboard } from '../composables/useVirtualScrollKeyboard';
+import { useVirtualScrollObservers } from '../composables/useVirtualScrollObservers';
 import {
   useCoordinateScalingExtension,
   useInfiniteLoadingExtension,
@@ -32,8 +35,6 @@ import {
 } from '../extensions/all';
 import { getPaddingX, getPaddingY, isWindowLike } from '../utils/scroll';
 import {
-  calculateInertiaStep,
-  calculateInstantaneousVelocity,
   calculateItemStyle,
   displayToVirtual,
 } from '../utils/virtual-scroll-logic';
@@ -348,88 +349,30 @@ watch(isHydrated, (hydrated) => {
   }
 }, { once: true });
 
-const hostResizeObserver = typeof window === 'undefined'
-  ? null
-  : new ResizeObserver(updateHostOffset);
-
-const itemResizeObserver = typeof window === 'undefined'
-  ? null
-  : new ResizeObserver((entries) => {
-    const updates: { index: number; inlineSize: number; blockSize: number; element?: HTMLElement; }[] = [];
-
-    for (const entry of entries) {
-      const target = entry.target as HTMLElement;
-      const index = Number(target.dataset.index);
-      const colIndex = target.dataset.colIndex;
-
-      let inlineSize = entry.contentRect.width;
-      let blockSize = entry.contentRect.height;
-
-      if (entry.borderBoxSize && entry.borderBoxSize.length > 0) {
-        inlineSize = entry.borderBoxSize[ 0 ]!.inlineSize;
-        blockSize = entry.borderBoxSize[ 0 ]!.blockSize;
-      } else {
-        // Fallback for older browsers or if borderBoxSize is missing
-        inlineSize = target.offsetWidth;
-        blockSize = target.offsetHeight;
-      }
-
-      if (colIndex !== undefined) {
-        // It's a cell measurement. row index is not strictly needed for column width.
-        // We use -1 as a placeholder for row index if it's a cell measurement.
-        updates.push({ index: -1, inlineSize, blockSize, element: target });
-      } else if (!Number.isNaN(index)) {
-        updates.push({ index, inlineSize, blockSize, element: target });
-      }
-    }
-
-    if (updates.length > 0) {
-      updateItemSizes(updates);
-    }
-  });
-
-const extraResizeObserver = typeof window === 'undefined'
-  ? null
-  : new ResizeObserver(() => {
-    measuredPaddingStart.value = headerRef.value?.offsetHeight || 0;
-    measuredPaddingEnd.value = footerRef.value?.offsetHeight || 0;
-    updateHostOffset();
-  });
-
-function watchExtraRef(refEl: typeof headerRef, measuredValue: typeof measuredPaddingStart) {
-  watch(refEl, (newEl, oldEl) => {
-    if (oldEl) {
-      extraResizeObserver?.unobserve(oldEl);
-    }
-    if (newEl) {
-      extraResizeObserver?.observe(newEl);
-    } else {
-      measuredValue.value = 0;
-    }
-  }, { immediate: true });
-}
-
-watchExtraRef(headerRef, measuredPaddingStart);
-watchExtraRef(footerRef, measuredPaddingEnd);
-
-onMounted(() => {
-  if (hostRef.value) {
-    hostResizeObserver?.observe(hostRef.value);
-  }
-
-  // Re-observe items that were set before observer was ready
-  for (const el of itemRefs.values()) {
-    observeItem(el, true);
-  }
+const { setItemRef } = useVirtualScrollObservers({
+  hostRef,
+  wrapperRef,
+  headerRef,
+  footerRef,
+  measuredPaddingStart,
+  measuredPaddingEnd,
+  itemRefs,
+  direction: props.direction,
+  updateHostOffset,
+  updateItemSizes,
 });
 
-watch([ hostRef, wrapperRef ], ([ newHost ], [ oldHost ]) => {
-  if (oldHost) {
-    hostResizeObserver?.unobserve(oldHost);
-  }
-  if (newHost) {
-    hostResizeObserver?.observe(newHost);
-  }
+const {
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp,
+  handleWheel,
+  stopInertia,
+} = useVirtualScrollInertia({
+  useVirtualScrolling,
+  scrollDetails,
+  scrollToOffset,
+  stopProgrammaticScroll,
 });
 
 watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtual ]) => {
@@ -442,458 +385,21 @@ watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtua
   }
 }, { immediate: true });
 
-/**
- * Helper to manage ResizeObserver for an item and its optional cells.
- *
- * @param el - The item element.
- * @param isObserve - True to observe, false to unobserve.
- */
-function observeItem(el: HTMLElement, isObserve: boolean) {
-  const method = isObserve ? 'observe' : 'unobserve';
-  itemResizeObserver?.[ method ](el);
-  if (props.direction === 'both' && el.children.length > 0) {
-    el.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.[ method ](c));
-  }
-}
-
-/**
- * Callback ref to track and measure item elements.
- *
- * @param el - The element or null if unmounting.
- * @param index - The original index of the item.
- */
-function setItemRef(el: unknown, index: number) {
-  if (el) {
-    const htmlEl = el as HTMLElement;
-    itemRefs.set(index, htmlEl);
-    observeItem(htmlEl, true);
-  } else {
-    const oldEl = itemRefs.get(index);
-    if (oldEl) {
-      observeItem(oldEl, false);
-      itemRefs.delete(index);
-    }
-  }
-}
-
-/**
- * State for inertia scrolling
- */
-const isPointerScrolling = ref(false);
-let startPointerPos = { x: 0, y: 0 };
-let startScrollOffset = { x: 0, y: 0 };
-let lastPointerPos = { x: 0, y: 0 };
-let lastPointerTime = 0;
-let velocity = { x: 0, y: 0 };
-let inertiaAnimationFrame: number | null = null;
-
-// Friction constant (0.9 to 0.98 is usually best)
-const FRICTION = 0.95;
-// Minimum velocity to continue the animation
-const MIN_VELOCITY = 0.1;
-
-/**
- * Recursively animates the scroll offset based on velocity and friction.
- */
-function startInertiaAnimation() {
-  const step = () => {
-    const { nextVelocity, delta } = calculateInertiaStep(velocity, FRICTION);
-    velocity.x = nextVelocity.x;
-    velocity.y = nextVelocity.y;
-
-    // Calculate the new scroll offset
-    const { x: currentX, y: currentY } = scrollDetails.value.scrollOffset;
-
-    // Move the scroll position by the current velocity
-    scrollToOffset(
-      currentX + delta.x,
-      currentY + delta.y,
-      { behavior: 'auto' },
-    );
-
-    // Continue animation if we haven't slowed down to a halt
-    if (Math.abs(velocity.x) > MIN_VELOCITY || Math.abs(velocity.y) > MIN_VELOCITY) {
-      inertiaAnimationFrame = requestAnimationFrame(step);
-    } else {
-      stopInertia();
-    }
-  };
-
-  inertiaAnimationFrame = requestAnimationFrame(step);
-}
-
-/**
- * Stops any ongoing inertia animation
- */
-function stopInertia() {
-  if (inertiaAnimationFrame !== null) {
-    cancelAnimationFrame(inertiaAnimationFrame);
-    inertiaAnimationFrame = null;
-  }
-  velocity = { x: 0, y: 0 };
-}
-
-/**
- * Handles pointer down events on the container to start emulated scrolling when scaling is active.
- *
- * @param event - The pointer down event.
- */
-function handlePointerDown(event: PointerEvent) {
-  stopProgrammaticScroll();
-  stopInertia(); // Stop any existing momentum
-
-  if (!useVirtualScrolling.value) {
-    return;
-  }
-
-  // Only handle primary button or touch
-  if (event.pointerType === 'mouse' && event.button !== 0) {
-    return;
-  }
-
-  isPointerScrolling.value = true;
-  startPointerPos = { x: event.clientX, y: event.clientY };
-  lastPointerPos = { x: event.clientX, y: event.clientY };
-  lastPointerTime = performance.now();
-  startScrollOffset = {
-    x: scrollDetails.value.scrollOffset.x,
-    y: scrollDetails.value.scrollOffset.y,
-  };
-
-  (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-}
-
-/**
- * Handles pointer move events on the container to perform emulated scrolling.
- *
- * @param event - The pointer move event.
- */
-function handlePointerMove(event: PointerEvent) {
-  if (!isPointerScrolling.value) {
-    return;
-  }
-
-  const now = performance.now();
-  const dt = now - lastPointerTime;
-
-  if (dt > 0) {
-    // Calculate instantaneous velocity (pixels per millisecond)
-    const instantVelocity = calculateInstantaneousVelocity(lastPointerPos, { x: event.clientX, y: event.clientY }, dt);
-
-    // Use a moving average for smoother velocity tracking
-    velocity.x = velocity.x * 0.2 + instantVelocity.x * 0.8;
-    velocity.y = velocity.y * 0.2 + instantVelocity.y * 0.8;
-  }
-
-  lastPointerPos = { x: event.clientX, y: event.clientY };
-  lastPointerTime = now;
-
-  const deltaX = startPointerPos.x - event.clientX;
-  const deltaY = startPointerPos.y - event.clientY;
-
-  requestAnimationFrame(() => {
-    scrollToOffset(
-      startScrollOffset.x + deltaX,
-      startScrollOffset.y + deltaY,
-      { behavior: 'auto' },
-    );
-  });
-}
-
-/**
- * Handles pointer up and cancel events to end emulated scrolling.
- *
- * @param event - The pointer event.
- */
-function handlePointerUp(event: PointerEvent) {
-  if (!isPointerScrolling.value) {
-    return;
-  }
-
-  isPointerScrolling.value = false;
-  (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
-
-  // If the user was moving fast enough, start the inertia loop
-  if (Math.abs(velocity.x) > MIN_VELOCITY || Math.abs(velocity.y) > MIN_VELOCITY) {
-    // avoid unwanted cross-axis drift
-    if (Math.abs(velocity.x) > 4 * Math.abs(velocity.y)) {
-      velocity.y = 0;
-    } else if (Math.abs(velocity.y) > 4 * Math.abs(velocity.x)) {
-      velocity.x = 0;
-    }
-
-    startInertiaAnimation();
-  }
-}
-
-/**
- * Handles mouse wheel events to support high-precision scrolling for large content or virtual scrollbars.
- *
- * @param event - The wheel event.
- */
-function handleWheel(event: WheelEvent) {
-  const { scrollOffset } = scrollDetails.value;
-  stopProgrammaticScroll();
-
-  if (useVirtualScrolling.value) {
-    // Prevent default browser scroll as we are handling it manually
-    event.preventDefault();
-
-    // For large content we manually scroll to keep precision/control
-    let { deltaX, deltaY } = event;
-
-    if (event.shiftKey && deltaX === 0) {
-      deltaX = deltaY;
-      deltaY = 0;
-    }
-
-    scrollToOffset(scrollOffset.x + deltaX, scrollOffset.y + deltaY, { behavior: 'auto' });
-  }
-}
-
-/**
- * Handles keyboard events for navigation (Home, End, Arrows, PageUp/Down).
- *
- * @param event - The keyboard event.
- */
-function handleKeyDown(event: KeyboardEvent) {
-  const { viewportSize, scrollOffset } = scrollDetails.value;
-  const isHorizontal = props.direction !== 'vertical';
-  const isVertical = props.direction !== 'horizontal';
-
-  const vProps = virtualScrollProps.value;
-  const sStart = vProps.stickyStart as { x: number; y: number; };
-  const sEnd = vProps.stickyEnd as { x: number; y: number; };
-  const pStart = vProps.scrollPaddingStart as { x: number; y: number; };
-  const pEnd = vProps.scrollPaddingEnd as { x: number; y: number; };
-
-  const snapModeProp = props.snap === true ? 'auto' : props.snap;
-  const snapMode = (snapModeProp && snapModeProp !== 'auto')
-    ? snapModeProp as 'start' | 'center' | 'end'
-    : null;
-
-  /**
-   * Helper to find center index.
-   */
-  const getCenterIndex = (isX: boolean) => {
-    const centerPos = (isX ? scrollOffset.x : scrollOffset.y) + (isX ? viewportSize.width : viewportSize.height) / 2;
-    return isX ? getColIndexAt(centerPos) : getRowIndexAt(centerPos);
-  };
-
-  const { currentIndex, currentEndIndex, currentColIndex, currentEndColIndex } = scrollDetails.value;
-
-  /**
-   * Helper to calculate the target index for PageUp/PageDown.
-   *
-   * @param isVerticalAxis - True for vertical, false for horizontal.
-   * @param isForward - True for forward (PageDown), false for backward (PageUp).
-   */
-  const getPageTarget = (isVerticalAxis: boolean, isForward: boolean) => {
-    const isHorizontalAxis = !isVerticalAxis;
-    const startIdx = isVerticalAxis ? currentIndex : currentColIndex;
-    const endIdx = isVerticalAxis ? currentEndIndex : currentEndColIndex;
-    const pageSize = Math.max(1, endIdx - startIdx);
-    const maxIdx = isVerticalAxis
-      ? props.items.length - 1
-      : (props.columnCount ? props.columnCount - 1 : props.items.length - 1);
-
-    if (isForward) {
-      if (snapMode === 'center') {
-        return Math.min(maxIdx, getCenterIndex(isHorizontalAxis) + pageSize);
-      }
-      if (snapMode === 'end') {
-        return Math.min(maxIdx, endIdx + pageSize);
-      }
-      return endIdx; // default or snapMode === 'start'
-    } else {
-      // backward
-      if (snapMode === 'center') {
-        return Math.max(0, getCenterIndex(isHorizontalAxis) - pageSize);
-      }
-      if (snapMode === 'start') {
-        return Math.max(0, startIdx - pageSize);
-      }
-      return startIdx; // default or snapMode === 'end'
-    }
-  };
-
-  /**
-   * Performs keyboard navigation for arrow keys.
-   *
-   * @param isVerticalAxis - True for vertical, false for horizontal.
-   * @param isForward - True for forward direction (Down/Right), false for backward.
-   */
-  const navigate = (isVerticalAxis: boolean, isForward: boolean) => {
-    const isHorizontalAxis = !isVerticalAxis;
-
-    if (snapMode === 'center') {
-      const centerIdx = getCenterIndex(isHorizontalAxis);
-      const maxIdx = isHorizontalAxis
-        ? (props.columnCount ? props.columnCount - 1 : props.items.length - 1)
-        : props.items.length - 1;
-      const targetIdx = isForward ? Math.min(maxIdx, centerIdx + 1) : Math.max(0, centerIdx - 1);
-      scrollToIndex(isVerticalAxis ? targetIdx : null, isHorizontalAxis ? targetIdx : null, { align: 'center' });
-      return;
-    }
-
-    if (isVerticalAxis) {
-      if (isForward) {
-        if (snapMode === 'start') {
-          scrollToIndex(Math.min(props.items.length - 1, currentIndex + 1), null, { align: 'start' });
-        } else {
-          const align = snapMode || 'end';
-          const viewportBottom = scrollOffset.y + viewportSize.height - (sEnd.y + pEnd.y);
-          const itemBottom = getRowOffset(currentEndIndex) + getRowHeight(currentEndIndex);
-
-          if (itemBottom > viewportBottom + 1) {
-            scrollToIndex(currentEndIndex, null, { align });
-          } else if (currentEndIndex < props.items.length - 1) {
-            scrollToIndex(currentEndIndex + 1, null, { align });
-          }
-        }
-      } else {
-        // backward
-        if (snapMode === 'end') {
-          scrollToIndex(Math.max(0, currentEndIndex - 1), null, { align: 'end' });
-        } else {
-          const align = snapMode || 'start';
-          const viewportTop = scrollOffset.y + sStart.y + pStart.y;
-          const itemPos = getRowOffset(currentIndex);
-
-          if (itemPos < viewportTop - 1) {
-            scrollToIndex(currentIndex, null, { align });
-          } else if (currentIndex > 0) {
-            scrollToIndex(currentIndex - 1, null, { align });
-          }
-        }
-      }
-    } else {
-      // Horizontal axis
-      const maxColIdx = props.columnCount ? props.columnCount - 1 : props.items.length - 1;
-      const isLogicalForward = isRtl.value ? !isForward : isForward;
-
-      if (isLogicalForward) {
-        if (snapMode === 'start') {
-          scrollToIndex(null, Math.min(maxColIdx, currentColIndex + 1), { align: 'start' });
-        } else {
-          const align = snapMode || 'end';
-          const viewportRight = scrollOffset.x + viewportSize.width - (sEnd.x + pEnd.x);
-          const colEndPos = (props.columnCount ? getColumnOffset(currentEndColIndex) + getColumnWidth(currentEndColIndex) : getItemOffset(currentEndColIndex) + getItemSize(currentEndColIndex));
-
-          if (colEndPos > viewportRight + 1) {
-            scrollToIndex(null, currentEndColIndex, { align });
-          } else if (currentEndColIndex < maxColIdx) {
-            scrollToIndex(null, currentEndColIndex + 1, { align });
-          }
-        }
-      } else {
-        // backward
-        if (snapMode === 'end') {
-          scrollToIndex(null, Math.max(0, currentEndColIndex - 1), { align: 'end' });
-        } else {
-          const align = snapMode || 'start';
-          const viewportLeft = scrollOffset.x + sStart.x + pStart.x;
-          const colStartPos = (props.columnCount ? getColumnOffset(currentColIndex) : getItemOffset(currentColIndex));
-
-          if (colStartPos < viewportLeft - 1) {
-            scrollToIndex(null, currentColIndex, { align });
-          } else if (currentColIndex > 0) {
-            scrollToIndex(null, currentColIndex - 1, { align });
-          }
-        }
-      }
-    }
-  };
-
-  switch (event.key) {
-    case 'Home': {
-      event.preventDefault();
-      stopProgrammaticScroll();
-      const distance = Math.max(scrollOffset.x, scrollOffset.y);
-      const viewport = props.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
-      const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
-
-      scrollToIndex(0, 0, { behavior, align: 'start' });
-      break;
-    }
-    case 'End': {
-      event.preventDefault();
-      stopProgrammaticScroll();
-      const lastItemIndex = props.items.length - 1;
-      const lastColIndex = (props.columnCount || 0) > 0 ? props.columnCount - 1 : 0;
-
-      const { totalSize } = scrollDetails.value;
-      const distance = Math.max(
-        totalSize.width - scrollOffset.x - viewportSize.width,
-        totalSize.height - scrollOffset.y - viewportSize.height,
-      );
-      const viewport = props.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
-      const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
-
-      if (props.direction === 'both') {
-        scrollToIndex(lastItemIndex, lastColIndex, { behavior, align: 'end' });
-      } else {
-        scrollToIndex(
-          props.direction === 'vertical' ? lastItemIndex : 0,
-          props.direction === 'horizontal' ? lastItemIndex : 0,
-          { behavior, align: 'end' },
-        );
-      }
-      break;
-    }
-    case 'ArrowUp':
-      event.preventDefault();
-      stopProgrammaticScroll();
-      if (isVertical) {
-        navigate(true, false);
-      }
-      break;
-    case 'ArrowDown':
-      event.preventDefault();
-      stopProgrammaticScroll();
-      if (isVertical) {
-        navigate(true, true);
-      }
-      break;
-    case 'ArrowLeft':
-      event.preventDefault();
-      stopProgrammaticScroll();
-      if (isHorizontal) {
-        navigate(false, false);
-      }
-      break;
-    case 'ArrowRight':
-      event.preventDefault();
-      stopProgrammaticScroll();
-      if (isHorizontal) {
-        navigate(false, true);
-      }
-      break;
-    case 'PageUp':
-      event.preventDefault();
-      stopProgrammaticScroll();
-      if (props.direction === 'horizontal') {
-        scrollToIndex(null, getPageTarget(false, false), { align: snapMode || 'end' });
-      } else {
-        scrollToIndex(getPageTarget(true, false), null, { align: snapMode || 'end' });
-      }
-      break;
-    case 'PageDown':
-      event.preventDefault();
-      stopProgrammaticScroll();
-      if (props.direction === 'horizontal') {
-        scrollToIndex(null, getPageTarget(false, true), { align: snapMode || 'start' });
-      } else {
-        scrollToIndex(getPageTarget(true, true), null, { align: snapMode || 'start' });
-      }
-      break;
-  }
-}
-
-onUnmounted(() => {
-  hostResizeObserver?.disconnect();
-  itemResizeObserver?.disconnect();
-  extraResizeObserver?.disconnect();
+const { handleKeyDown } = useVirtualScrollKeyboard({
+  props,
+  virtualScrollProps,
+  scrollDetails,
+  isRtl,
+  scrollToIndex,
+  stopProgrammaticScroll,
+  getRowHeight,
+  getColumnWidth,
+  getRowOffset,
+  getColumnOffset,
+  getItemOffset,
+  getItemSize,
+  getRowIndexAt,
+  getColIndexAt,
 });
 
 const containerStyle = computed(() => {

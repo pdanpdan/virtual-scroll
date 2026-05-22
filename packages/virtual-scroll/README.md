@@ -197,6 +197,50 @@ Logic for custom virtual scrollbar interactions (dragging, clicking).
 - `thumbStyle`: Calculated reactive styles.
 - `isDragging`: Drag state.
 
+### `useVirtualScrollInertia(config)`
+
+Handles pointer-based scrolling, inertia animation, and mouse wheel events for cases where native scrolling is not available (e.g., massive lists or custom scrollbars).
+
+**Config:**
+- `useVirtualScrolling`: Boolean ref.
+- `scrollDetails`: Reactive [ScrollDetails](#scrolldetails).
+- `scrollToOffset`: Method to update scroll position.
+- `stopProgrammaticScroll`: Method to halt animations.
+
+**Returns:**
+- `isPointerScrolling`: Boolean ref.
+- `handlePointerDown` / `Move` / `Up`: Event handlers for pointer interaction.
+- `handleWheel`: Event handler for mouse wheel.
+- `stopInertia()`: Method to cancel ongoing momentum.
+
+### `useVirtualScrollKeyboard(config)`
+
+Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtual scroll container.
+
+**Config:**
+- `props`: Full component props.
+- `scrollDetails`: Reactive [ScrollDetails](#scrolldetails).
+- `scrollToIndex`: Method to scroll to a specific index.
+- `stopProgrammaticScroll`: Method to halt animations.
+- `...resolvers`: Various helper functions for index/offset mapping.
+
+**Returns:**
+- `handleKeyDown`: Keyboard event handler.
+
+### `useVirtualScrollObservers(config)`
+
+Manages `ResizeObserver` instances for the container, items, and slots (header/footer) to support fully dynamic sizing.
+
+**Config:**
+- `hostRef` / `wrapperRef`: Element references.
+- `headerRef` / `footerRef`: Slot references.
+- `itemRefs`: Map for tracking rendered item elements.
+- `updateHostOffset`: Method to recalculate container position.
+- `updateItemSizes`: Method to register batch measurements.
+
+**Returns:**
+- `setItemRef(el, index)`: Callback ref for individual items.
+
 ## Component Reference: VirtualScroll
 
 ### Props
@@ -443,6 +487,9 @@ The `scrollbar` slot provides everything needed to build a fully custom interfac
 - `useVirtualScroll(props)`: Core logic for virtualization.
 - `useVirtualScrollSizes(config)`: Size and measurement management.
 - `useVirtualScrollbar(props)`: Logic for scrollbar interactions.
+- `useVirtualScrollInertia(config)`: Pointer scrolling and inertia.
+- `useVirtualScrollKeyboard(config)`: Keyboard navigation support.
+- `useVirtualScrollObservers(config)`: Dynamic size observation.
 
 ## License
 

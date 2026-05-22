@@ -1520,6 +1520,176 @@ scrollToOffset: (val) => { scrollPos = val; }
           </table>
         </div>
       </section>
+
+      <!-- useVirtualScrollInertia -->
+      <section id="use-virtual-scroll-inertia" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useVirtualScrollInertia</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Handles pointer-based scrolling, inertia animation, and mouse wheel events for cases where native scrolling is not available (e.g., massive lists or custom scrollbars).
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScrollInertia } from '@pdanpdan/virtual-scroll';
+
+const {
+  isPointerScrolling,
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp,
+  handleWheel
+} = useVirtualScrollInertia({
+  useVirtualScrolling: ref(true),
+  scrollDetails,
+  scrollToOffset: (x, y) => { /* ... */ },
+  stopProgrammaticScroll: () => { /* ... */ }
+});"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts an <code>UseVirtualScrollInertiaOptions</code> object.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Return Value</h4>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th class="w-1/4">Member</th>
+                <th class="w-1/4">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="docs-prop-name">isPointerScrolling</code></td>
+                <td><code>Ref&lt;boolean&gt;</code></td>
+                <td>True when user is actively dragging the content.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">handlePointerDown/Move/Up</code></td>
+                <td><code>Function</code></td>
+                <td>Pointer event handlers to be bound to the scroll container.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">handleWheel</code></td>
+                <td><code>Function</code></td>
+                <td>Wheel event handler to be bound to the scroll container.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">stopInertia</code></td>
+                <td><code>Function</code></td>
+                <td>Immediately stops any active momentum animation.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- useVirtualScrollKeyboard -->
+      <section id="use-virtual-scroll-keyboard" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">useVirtualScrollKeyboard</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Provides keyboard navigation support for the virtual scroll container, allowing users to navigate using Arrows, Home, End, PageUp, and PageDown keys.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScrollKeyboard } from '@pdanpdan/virtual-scroll';
+
+const { handleKeyDown } = useVirtualScrollKeyboard({
+  props,
+  scrollDetails,
+  scrollToIndex: (row, col, opt) => { /* ... */ },
+  stopProgrammaticScroll: () => { /* ... */ },
+  // ... resolvers
+});"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts an <code>UseVirtualScrollKeyboardOptions</code> object.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Return Value</h4>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th class="w-1/4">Member</th>
+                <th class="w-1/4">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="docs-prop-name">handleKeyDown</code></td>
+                <td><code>Function</code></td>
+                <td>Keyboard event handler to be bound to the focusable scroll container.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- useVirtualScrollObservers -->
+      <section id="use-virtual-scroll-observers">
+        <h3 class="docs-prop-header text-secondary">useVirtualScrollObservers</h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Manages <code>ResizeObserver</code> instances to support fully dynamic item and container sizes.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScrollObservers } from '@pdanpdan/virtual-scroll';
+
+const { setItemRef } = useVirtualScrollObservers({
+  hostRef,
+  wrapperRef,
+  headerRef,
+  footerRef,
+  itemRefs,
+  updateHostOffset: () => { /* ... */ },
+  updateItemSizes: (updates) => { /* ... */ },
+  // ...
+});"
+        />
+
+        <h4 class="docs-prop-subheader">Parameters</h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>Accepts an <code>UseVirtualScrollObserversOptions</code> object.</p>
+        </div>
+
+        <h4 class="docs-prop-subheader">Return Value</h4>
+        <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th class="w-1/4">Member</th>
+                <th class="w-1/4">Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="docs-prop-name">setItemRef</code></td>
+                <td><code>Function</code></td>
+                <td>Callback ref to be used on rendered items to track and measure them.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </section>
 
     <div class="divider opacity-30" />
