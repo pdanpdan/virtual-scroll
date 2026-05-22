@@ -1,5 +1,13 @@
 # Changelog
 
+# [0.11.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.3...v0.11.0) (2026-05-22)
+
+
+### Features
+
+* extract scroll inertia, kbd interactions, and observers in composables ([6b68f89](https://github.com/pdanpdan/virtual-scroll/commit/6b68f8923ea4d1bdffc065eecf1b37347f967649))
+* **playground:** add side-by-side diff example ([a0d18b0](https://github.com/pdanpdan/virtual-scroll/commit/a0d18b079c84d81f941c1bdd16b549e72a6855fa))
+
 ## [0.10.3](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.2...v0.10.3) (2026-03-14)
 
 
