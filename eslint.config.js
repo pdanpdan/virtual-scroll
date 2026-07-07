@@ -81,8 +81,6 @@ export default antfu(
       ],
       'ts/no-namespace': [ 'error', { allowDeclarations: true } ],
 
-      'unicorn/consistent-function-scoping': [ 'error', { checkArrowFunctions: false } ],
-
       'perfectionist/sort-imports': [ 'error', {
         type: 'natural',
         order: 'asc',
@@ -133,6 +131,14 @@ export default antfu(
       'perfectionist/sort-imports': 'off',
     },
   },
+
+  {
+    files: [ '**/*.js', '**/*.ts', '**/*.mjs', '**/*.cjs', '**/*.vue' ],
+    rules: {
+      'unicorn/consistent-function-scoping': [ 'error', { checkArrowFunctions: false } ],
+    },
+  },
+
   {
     files: [ '**/*.vue' ],
     languageOptions: {
