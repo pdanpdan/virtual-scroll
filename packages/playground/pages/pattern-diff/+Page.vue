@@ -67,8 +67,8 @@ function expandRegion(index: number) {
   diffData.value.splice(index, 1, ...expandedRows);
 }
 
-function getDiffParts(oldStr: string | null, newStr: string | null) {
-  if (oldStr === null || newStr === null || oldStr === newStr) {
+function getDiffParts(oldStr: string | null | undefined, newStr: string | null | undefined) {
+  if (oldStr == null || newStr == null || oldStr === newStr) {
     return {
       oldParts: [ { text: oldStr || '', changed: false } ],
       newParts: [ { text: newStr || '', changed: false } ],
