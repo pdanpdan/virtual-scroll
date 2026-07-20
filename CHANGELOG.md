@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.0...v0.11.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* dead CSS, doc corrections, expose missing methods ([c921ce8](https://github.com/pdanpdan/virtual-scroll/commit/c921ce83a67aeb27452c77e12db4aad73e302768))
+
 # [0.11.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.10.3...v0.11.0) (2026-05-22)
 
 
