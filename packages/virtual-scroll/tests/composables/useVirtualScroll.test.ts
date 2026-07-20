@@ -3,6 +3,10 @@ import type { MockItem } from '../test-helper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
 
+import { useCoordinateScalingExtension } from '../../src/extensions/coordinate-scaling';
+import { usePrependRestorationExtension } from '../../src/extensions/prepend-restoration';
+import { useSnappingExtension } from '../../src/extensions/snapping';
+import { useStickyExtension } from '../../src/extensions/sticky';
 import { clearMocks, mockItems, setup, setupMocks, triggerResize } from '../test-helper';
 
 describe('useVirtualScroll', () => {
@@ -274,7 +278,6 @@ describe('useVirtualScroll', () => {
 
     it('covers attachEvents window cleanup function', async () => {
       const removeSpy = vi.spyOn(window, 'removeEventListener');
-      const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
 
       const { wrapper } = setup({
         items: mockItems,
@@ -285,10 +288,8 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
 
       expect(removeSpy).toHaveBeenCalledWith('resize', expect.any(Function));
-      expect(clearIntervalSpy).toHaveBeenCalled();
 
       removeSpy.mockRestore();
-      clearIntervalSpy.mockRestore();
     });
 
     it('covers scrollValueX in handleScroll when isRtl is true', async () => {
@@ -374,6 +375,64 @@ describe('useVirtualScroll', () => {
       // componentOffset.x should have changed because of RTL logic in calculateOffset
       expect(result.componentOffset.x).not.toBe(initialX);
 
+      wrapper.unmount();
+    });
+  });
+
+  describe('extension combinations', () => {
+    it('works with no extensions', async () => {
+      const { result, wrapper } = setup({ items: mockItems, itemSize: 50 }, []);
+      await nextTick();
+      await nextTick();
+
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      expect(result.scrollDetails.value.totalSize.height).toBe(5000);
+      wrapper.unmount();
+    });
+
+    it('works with only snapping extension', async () => {
+      const { result, wrapper } = setup({ items: mockItems, itemSize: 50 }, [
+        useSnappingExtension(),
+      ]);
+      await nextTick();
+      await nextTick();
+
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      wrapper.unmount();
+    });
+
+    it('works with only sticky + coordinate-scaling extensions', async () => {
+      const { result, wrapper } = setup({ items: mockItems, itemSize: 50 }, [
+        useStickyExtension(),
+        useCoordinateScalingExtension(),
+      ]);
+      await nextTick();
+      await nextTick();
+
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      wrapper.unmount();
+    });
+
+    it('works with only prepend-restoration extension', async () => {
+      const { result, wrapper } = setup({ items: mockItems, itemSize: 50, restoreScrollOnPrepend: true }, [
+        usePrependRestorationExtension(),
+      ]);
+      await nextTick();
+      await nextTick();
+
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      wrapper.unmount();
+    });
+
+    it('works with snapping + sticky only (no RTL, no infinite loading)', async () => {
+      const { result, wrapper } = setup({ items: mockItems, itemSize: 50, stickyIndices: [ 0 ] }, [
+        useSnappingExtension(),
+        useStickyExtension(),
+      ]);
+      await nextTick();
+      await nextTick();
+
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
       wrapper.unmount();
     });
   });

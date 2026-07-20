@@ -140,16 +140,18 @@ export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: V
   let result: ReturnType<typeof useVirtualScroll<T>>;
   let internalState: InternalState;
 
-  const extensions = customExtensions || [
-    useRtlExtension<T>(),
-    useSnappingExtension<T>(),
-    useStickyExtension<T>(),
-    useInfiniteLoadingExtension<T>({
-      onLoad: () => {}, // Mock load emit
-    }),
-    usePrependRestorationExtension<T>(),
-    useCoordinateScalingExtension<T>(),
-  ] as VirtualScrollExtension<T>[];
+  const extensions = customExtensions !== undefined
+    ? customExtensions
+    : [
+      useRtlExtension<T>(),
+      useSnappingExtension<T>(),
+      useStickyExtension<T>(),
+      useInfiniteLoadingExtension<T>({
+        onLoad: () => {}, // Mock load emit
+      }),
+      usePrependRestorationExtension<T>(),
+      useCoordinateScalingExtension<T>(),
+    ] as VirtualScrollExtension<T>[];
 
   const propsRef = ref(propsValue) as Ref<VirtualScrollProps<T>>;
 
