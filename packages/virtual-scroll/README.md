@@ -378,7 +378,7 @@ The component automatically manages ARIA roles and attributes to ensure screen r
 | `currentColIndex` | `number` | Index of first visible column. |
 | `scrollOffset` | `Point` | Current virtual scroll position (VU). |
 | `displayScrollOffset` | `Point` | Current physical scroll position (DU). |
-| `viewportSize` | `Size` | Dimensions of visible area (VU). |
+| `viewportSize` | `Size` | Dimensions of visible area (DU). |
 | `displayViewportSize` | `Size` | Physical dimensions of visible area (DU). |
 | `totalSize` | `Size` | Total size of all items (VU). |
 | `isScrolling` | `boolean` | Whether scrolling is active. |
@@ -481,15 +481,6 @@ The `scrollbar` slot provides everything needed to build a fully custom interfac
 | `--vs-scrollbar-radius` | `4px` | Border radius for track and thumb. |
 | `--vs-scrollbar-cross-gap` | `var(--vs-scrollbar-size)` | Size of gap where scrollbars meet. |
 | `--vs-scrollbar-has-cross-gap` | `0` | If gap should be shown where scrollbars meet. |
-
-## Composables
-
-- `useVirtualScroll(props)`: Core logic for virtualization.
-- `useVirtualScrollSizes(config)`: Size and measurement management.
-- `useVirtualScrollbar(props)`: Logic for scrollbar interactions.
-- `useVirtualScrollInertia(config)`: Pointer scrolling and inertia.
-- `useVirtualScrollKeyboard(config)`: Keyboard navigation support.
-- `useVirtualScrollObservers(config)`: Dynamic size observation.
 
 ## License
 

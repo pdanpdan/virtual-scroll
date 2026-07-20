@@ -42,10 +42,6 @@ const { trackProps, thumbProps } = useVirtualScrollbar(() => ({
 <style>
 @layer components {
   .virtual-scrollbar-track {
-    --vsi-scrollbar-bg: var(--vs-scrollbar-bg, rgba(230, 230, 230, 0.9));
-    --vsi-scrollbar-thumb-bg: var(--vs-scrollbar-thumb-bg, rgba(0, 0, 0, 0.3));
-    --vsi-scrollbar-thumb-hover-bg: var(--vs-scrollbar-thumb-hover-bg, rgba(0, 0, 0, 0.6));
-
     --vsi-scrollbar-bg: var(--vs-scrollbar-bg, light-dark(rgba(230, 230, 230, 0.9), rgba(30, 30, 30, 0.9)));
     --vsi-scrollbar-thumb-bg: var(--vs-scrollbar-thumb-bg, light-dark(rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3)));
     --vsi-scrollbar-thumb-hover-bg: var(--vs-scrollbar-thumb-hover-bg, light-dark(rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.6)));

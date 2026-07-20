@@ -206,6 +206,7 @@ const {
   scrollToIndex,
   scrollToOffset,
   updateHostOffset,
+  updateItemSize,
   updateItemSizes,
   updateDirection,
   getItemOffset,
@@ -233,25 +234,19 @@ const showVirtualScrollbars = computed(() => {
   return props.virtualScrollbar === true || scaleX.value !== 1 || scaleY.value !== 1;
 });
 
-function handleVerticalScrollbarScrollToOffset(offset: number) {
+function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: number) {
   const { displayViewportSize } = scrollDetails.value;
-  const scrollableRange = renderedHeight.value - displayViewportSize.height;
+  const isVertical = axis === 'vertical';
+  const renderedSize = isVertical ? renderedHeight.value : renderedWidth.value;
+  const viewportDim = isVertical ? displayViewportSize.height : displayViewportSize.width;
+  const componentOff = isVertical ? componentOffset.y : componentOffset.x;
+  const scale = isVertical ? scaleY.value : scaleX.value;
+  const scrollableRange = renderedSize - viewportDim;
   if (offset >= scrollableRange - 0.5) {
-    scrollToOffset(null, Number.POSITIVE_INFINITY);
+    scrollToOffset(isVertical ? null : Number.POSITIVE_INFINITY, isVertical ? Number.POSITIVE_INFINITY : null);
   } else {
-    const virtualOffset = displayToVirtual(offset, componentOffset.y, scaleY.value);
-    scrollToOffset(null, virtualOffset);
-  }
-}
-
-function handleHorizontalScrollbarScrollToOffset(offset: number) {
-  const { displayViewportSize } = scrollDetails.value;
-  const scrollableRange = renderedWidth.value - displayViewportSize.width;
-  if (offset >= scrollableRange - 0.5) {
-    scrollToOffset(Number.POSITIVE_INFINITY, null);
-  } else {
-    const virtualOffset = displayToVirtual(offset, componentOffset.x, scaleX.value);
-    scrollToOffset(virtualOffset, null);
+    const virtualOffset = displayToVirtual(offset, componentOff, scale);
+    scrollToOffset(isVertical ? null : virtualOffset, isVertical ? virtualOffset : null);
   }
 }
 
@@ -260,7 +255,7 @@ const verticalScrollbar = useVirtualScrollbar(computed(() => ({
   totalSize: renderedHeight.value,
   position: scrollDetails.value.displayScrollOffset.y,
   viewportSize: scrollDetails.value.displayViewportSize.height,
-  scrollToOffset: handleVerticalScrollbarScrollToOffset,
+  scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
   containerId: containerId.value,
   isRtl: isRtl.value,
 })));
@@ -270,7 +265,7 @@ const horizontalScrollbar = useVirtualScrollbar(computed(() => ({
   totalSize: renderedWidth.value,
   position: scrollDetails.value.displayScrollOffset.x,
   viewportSize: scrollDetails.value.displayViewportSize.width,
-  scrollToOffset: handleHorizontalScrollbarScrollToOffset,
+  scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
   containerId: containerId.value,
   isRtl: isRtl.value,
 })));
@@ -485,7 +480,7 @@ const verticalScrollbarProps = computed(() => {
     renderedHeight.value,
     displayScrollOffset.y,
     displayViewportSize.height,
-    handleVerticalScrollbarScrollToOffset,
+    (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
     verticalScrollbar,
   );
 });
@@ -500,7 +495,7 @@ const horizontalScrollbarProps = computed(() => {
     renderedWidth.value,
     displayScrollOffset.x,
     displayViewportSize.width,
-    handleHorizontalScrollbarScrollToOffset,
+    (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
     horizontalScrollbar,
   );
 });
@@ -759,6 +754,16 @@ defineExpose({
   isTable,
 
   /**
+   * The ARIA role of the items wrapper.
+   */
+  wrapperRole,
+
+  /**
+   * The ARIA role of each cell in grid mode.
+   */
+  cellRole,
+
+  /**
    * The tag used for rendering items.
    */
   itemTag: computed(() => props.itemTag || 'div'),
@@ -818,6 +823,30 @@ defineExpose({
    * Detects the current direction (LTR/RTL) of the scroll container.
    */
   updateDirection,
+
+  /**
+   * Updates the physical offset of the component relative to its scroll container.
+   * Useful after layout changes (e.g., parent resize, DOM mutations).
+   * @see useVirtualScroll
+   */
+  updateHostOffset,
+
+  /**
+   * Updates the size of a single item in the measurement tree.
+   * @param index - The item index.
+   * @param inlineSize - Measured inline size of the element (width for horizontal, width in both modes).
+   * @param blockSize - Measured block size of the element (height for vertical, height in both modes).
+   * @param element - Optional DOM element used for column measurement in grid mode.
+   * @see useVirtualScroll
+   */
+  updateItemSize,
+
+  /**
+   * Batch-updates sizes for multiple items.
+   * @param updates - Array of size measurements.
+   * @see useVirtualScroll
+   */
+  updateItemSizes,
 
   /**
    * Whether the scroll container is in Right-to-Left (RTL) mode.
