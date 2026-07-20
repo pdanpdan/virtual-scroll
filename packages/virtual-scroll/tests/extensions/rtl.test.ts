@@ -89,8 +89,8 @@ describe('rtl support', () => {
     expect(result.isRtl.value).toBe(false);
 
     parent.setAttribute('dir', 'rtl');
-
-    vi.advanceTimersByTime(1000);
+    container.dispatchEvent(new Event('scroll'));
+    await nextTick();
     await nextTick();
 
     expect(result.isRtl.value).toBe(true);
