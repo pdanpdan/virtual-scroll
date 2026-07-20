@@ -113,6 +113,27 @@ export function useVirtualScroll<T = unknown>(
     pendingScroll.value = null;
   };
 
+  /**
+   * Marks the scroll as programmatic and sets a timeout to clear the flag.
+   * Smooth scrolls also trigger checkPendingScroll on completion.
+   */
+  function startProgrammaticScroll(behavior: 'auto' | 'smooth' | undefined) {
+    isProgrammaticScroll.value = true;
+    clearTimeout(programmaticScrollTimer);
+    if (behavior === 'smooth') {
+      programmaticScrollTimer = setTimeout(() => {
+        isProgrammaticScroll.value = false;
+        programmaticScrollTimer = undefined;
+        checkPendingScroll();
+      }, 1000);
+    } else {
+      programmaticScrollTimer = setTimeout(() => {
+        isProgrammaticScroll.value = false;
+        programmaticScrollTimer = undefined;
+      }, 150);
+    }
+  }
+
   /** Horizontal virtual scroll position at the start of the current scroll interaction (VU). */
   let scrollStartX = 0;
   /** Vertical virtual scroll position at the start of the current scroll interaction (VU). */
@@ -417,20 +438,7 @@ export function useVirtualScroll<T = unknown>(
     const scrollBehavior = isCorrection ? 'auto' : (behavior || 'smooth');
 
     if (!dryRun) {
-      isProgrammaticScroll.value = true;
-      clearTimeout(programmaticScrollTimer);
-      if (scrollBehavior === 'smooth') {
-        programmaticScrollTimer = setTimeout(() => {
-          isProgrammaticScroll.value = false;
-          programmaticScrollTimer = undefined;
-          checkPendingScroll();
-        }, 1000);
-      } else {
-        programmaticScrollTimer = setTimeout(() => {
-          isProgrammaticScroll.value = false;
-          programmaticScrollTimer = undefined;
-        }, 150);
-      }
+      startProgrammaticScroll(scrollBehavior);
     }
 
     const scrollOptions: ScrollToOptions = { behavior: scrollBehavior };
@@ -461,20 +469,7 @@ export function useVirtualScroll<T = unknown>(
 
   function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) {
     const container = props.value.container || window;
-    isProgrammaticScroll.value = true;
-    clearTimeout(programmaticScrollTimer);
-    if (options?.behavior === 'smooth') {
-      programmaticScrollTimer = setTimeout(() => {
-        isProgrammaticScroll.value = false;
-        programmaticScrollTimer = undefined;
-        checkPendingScroll();
-      }, 1000);
-    } else {
-      programmaticScrollTimer = setTimeout(() => {
-        isProgrammaticScroll.value = false;
-        programmaticScrollTimer = undefined;
-      }, 150);
-    }
+    startProgrammaticScroll(options?.behavior);
     pendingScroll.value = null;
 
     const clampedX = (x !== null && x !== undefined) ? Math.max(0, Math.min(x, totalWidth.value - viewportWidth.value)) : null;
@@ -949,11 +944,9 @@ export function useVirtualScroll<T = unknown>(
     scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
     updateDirection();
     let directionObserver: MutationObserver | null = null;
-    if (isElement(effectiveContainer)) {
-      directionObserver = new MutationObserver(() => updateDirection());
-      directionObserver.observe(effectiveContainer, { attributes: true, attributeFilter: [ 'dir', 'style' ] });
-    }
-    const directionInterval = setInterval(updateDirection, 1000);
+    const observeElement = isElement(effectiveContainer) ? effectiveContainer : document.documentElement;
+    directionObserver = new MutationObserver(() => updateDirection());
+    directionObserver.observe(observeElement, { attributes: true, attributeFilter: [ 'dir', 'style' ] });
     if (effectiveContainer === window) {
       viewportWidth.value = document.documentElement.clientWidth;
       viewportHeight.value = document.documentElement.clientHeight;
@@ -970,7 +963,6 @@ export function useVirtualScroll<T = unknown>(
         scrollTarget.removeEventListener('scroll', handleScroll);
         window.removeEventListener('resize', onResize);
         directionObserver?.disconnect();
-        clearInterval(directionInterval);
       };
     } else {
       viewportWidth.value = (effectiveContainer as HTMLElement).clientWidth;
@@ -988,7 +980,6 @@ export function useVirtualScroll<T = unknown>(
         scrollTarget.removeEventListener('scroll', handleScroll);
         resizeObserver.disconnect();
         directionObserver?.disconnect();
-        clearInterval(directionInterval);
       };
     }
   };
