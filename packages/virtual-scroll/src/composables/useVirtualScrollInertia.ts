@@ -80,7 +80,7 @@ export function useVirtualScrollInertia<T>({
    *
    * @param event - The pointer down event.
    */
-  function handlePointerDown(event: PointerEvent) {
+  const handlePointerDown = (event: PointerEvent) => {
     stopProgrammaticScroll();
     stopInertia(); // Stop any existing momentum
 
@@ -103,14 +103,14 @@ export function useVirtualScrollInertia<T>({
     };
 
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-  }
+  };
 
   /**
    * Handles pointer move events on the container to perform emulated scrolling.
    *
    * @param event - The pointer move event.
    */
-  function handlePointerMove(event: PointerEvent) {
+  const handlePointerMove = (event: PointerEvent) => {
     if (!isPointerScrolling.value) {
       return;
     }
@@ -140,14 +140,14 @@ export function useVirtualScrollInertia<T>({
         { behavior: 'auto' },
       );
     });
-  }
+  };
 
   /**
    * Handles pointer up and cancel events to end emulated scrolling.
    *
    * @param event - The pointer event.
    */
-  function handlePointerUp(event: PointerEvent) {
+  const handlePointerUp = (event: PointerEvent) => {
     if (!isPointerScrolling.value) {
       return;
     }
@@ -166,14 +166,14 @@ export function useVirtualScrollInertia<T>({
 
       startInertiaAnimation();
     }
-  }
+  };
 
   /**
    * Handles mouse wheel events to support high-precision scrolling for large content or virtual scrollbars.
    *
    * @param event - The wheel event.
    */
-  function handleWheel(event: WheelEvent) {
+  const handleWheel = (event: WheelEvent) => {
     stopProgrammaticScroll();
 
     if (useVirtualScrolling.value) {
@@ -190,7 +190,7 @@ export function useVirtualScrollInertia<T>({
 
       scrollToOffset(scrollDetails.value.scrollOffset.x + deltaX, scrollDetails.value.scrollOffset.y + deltaY, { behavior: 'auto' });
     }
-  }
+  };
 
   return {
     isPointerScrolling,

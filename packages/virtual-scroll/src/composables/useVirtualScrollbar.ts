@@ -102,7 +102,7 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
    * Handles click events on the scrollbar track to jump to a scroll position.
    * @param event - The mouse event.
    */
-  function handleTrackClick(event: MouseEvent) {
+  const handleTrackClick = (event: MouseEvent) => {
     const track = event.currentTarget as HTMLElement;
     if (event.target !== track) {
       return;
@@ -128,13 +128,13 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
     }
 
     props.value.scrollToOffset(Math.max(0, Math.min(scrollableRange, targetOffset)));
-  }
+  };
 
   /**
    * Handles pointer down events on the scrollbar thumb to start dragging.
    * @param event - The pointer event.
    */
-  function handleThumbPointerDown(event: PointerEvent) {
+  const handleThumbPointerDown = (event: PointerEvent) => {
     isDragging.value = true;
     startPos = isHorizontal.value
       ? (props.value.isRtl ? -event.clientX : event.clientX)
@@ -145,13 +145,13 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
     thumb.setPointerCapture(event.pointerId);
     event.preventDefault();
     event.stopPropagation();
-  }
+  };
 
   /**
    * Handles pointer move events to update the scroll position while dragging the thumb.
    * @param event - The pointer event.
    */
-  function handleThumbPointerMove(event: PointerEvent) {
+  const handleThumbPointerMove = (event: PointerEvent) => {
     if (!isDragging.value) {
       return;
     }
@@ -183,19 +183,19 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
     }
 
     props.value.scrollToOffset(Math.max(0, Math.min(scrollableContentRange, targetOffset)));
-  }
+  };
 
   /**
    * Handles pointer up events to stop dragging the thumb.
    * @param event - The pointer event.
    */
-  function handleThumbPointerUp(event: PointerEvent) {
+  const handleThumbPointerUp = (event: PointerEvent) => {
     if (!isDragging.value) {
       return;
     }
     isDragging.value = false;
     (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
-  }
+  };
 
   if (getCurrentInstance()) {
     onUnmounted(() => {

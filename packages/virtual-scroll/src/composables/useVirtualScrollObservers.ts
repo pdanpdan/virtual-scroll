@@ -75,7 +75,7 @@ export function useVirtualScrollObservers({
       updateHostOffset();
     });
 
-  function watchExtraRef(refEl: Ref<HTMLElement | null>, measuredValue: Ref<number>) {
+  const watchExtraRef = (refEl: Ref<HTMLElement | null>, measuredValue: Ref<number>) => {
     watch(refEl, (newEl, oldEl) => {
       if (oldEl) {
         extraResizeObserver?.unobserve(oldEl);
@@ -86,7 +86,7 @@ export function useVirtualScrollObservers({
         measuredValue.value = 0;
       }
     }, { immediate: true });
-  }
+  };
 
   watchExtraRef(headerRef, measuredPaddingStart);
   watchExtraRef(footerRef, measuredPaddingEnd);
@@ -94,18 +94,18 @@ export function useVirtualScrollObservers({
   /**
    * Helper to manage ResizeObserver for an item and its optional cells.
    */
-  function observeItem(el: HTMLElement, isObserve: boolean) {
+  const observeItem = (el: HTMLElement, isObserve: boolean) => {
     const method = isObserve ? 'observe' : 'unobserve';
     itemResizeObserver?.[ method ](el);
     if (direction === 'both' && el.children.length > 0) {
       el.querySelectorAll('[data-col-index]').forEach((c) => itemResizeObserver?.[ method ](c));
     }
-  }
+  };
 
   /**
    * Callback ref to track and measure item elements.
    */
-  function setItemRef(el: unknown, index: number) {
+  const setItemRef = (el: unknown, index: number) => {
     if (el) {
       const htmlEl = el as HTMLElement;
       itemRefs.set(index, htmlEl);
@@ -117,7 +117,7 @@ export function useVirtualScrollObservers({
         itemRefs.delete(index);
       }
     }
-  }
+  };
 
   onMounted(() => {
     if (hostRef.value) {
