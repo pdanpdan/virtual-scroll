@@ -11,7 +11,7 @@ export default defineConfig({
     vue(),
     dts({
       tsconfigPath: resolve(__dirname, 'tsconfig.app.json'),
-      rollupTypes: true,
+      entryRoot: resolve(__dirname, 'src'),
     }),
   ],
   css: {
