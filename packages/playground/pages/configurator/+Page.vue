@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
 import type { ConfiguratorState } from '#/lib/configurator/state';
 
@@ -23,6 +23,13 @@ import {
 const state = reactive<ConfiguratorState>(structuredClone(defaultState));
 
 const derived = computed(() => getDerived(state));
+
+// Options above modify options below: window scrolling only supports native scrollbars.
+watch(() => state.containerMode, (mode) => {
+  if (mode === 'window') {
+    state.scrollbarStyle = 'auto';
+  }
+});
 
 function reset() {
   Object.assign(state, structuredClone(defaultState));
@@ -145,7 +152,6 @@ function openInCodePen() {
             <select
               v-model="state.direction"
               class="select select-bordered select-sm w-full"
-              :disabled="derived.isIndependent"
             >
               <option value="vertical">Vertical</option>
               <option value="horizontal">Horizontal</option>
@@ -198,7 +204,6 @@ function openInCodePen() {
               name="container-mode"
               value="element"
               class="radio radio-sm radio-primary"
-              :disabled="derived.isIndependent"
             />
             <span class="text-xs font-semibold opacity-70">Own container</span>
           </label>
@@ -210,13 +215,12 @@ function openInCodePen() {
               name="container-mode"
               value="window"
               class="radio radio-sm radio-primary"
-              :disabled="derived.isIndependent"
             />
             <span class="text-xs font-semibold opacity-70">Window / body</span>
           </label>
         </div>
         <p v-if="state.containerMode === 'window'" class="text-[11px] opacity-60">
-          The page itself scrolls. Virtual scrollbars and coordinate scaling are disabled for window containers.
+          The page itself scrolls. Virtual scrollbars and coordinate scaling are disabled for window containers (so the content is limited to the supported browser content max size).
         </p>
       </FieldSet>
 
@@ -233,7 +237,6 @@ function openInCodePen() {
               name="data-source"
               value="lorem"
               class="radio radio-sm radio-primary"
-              :disabled="derived.isIndependent"
             />
             <span class="text-xs font-semibold opacity-70">Lorem API (fetched)</span>
           </label>
@@ -245,7 +248,6 @@ function openInCodePen() {
               name="data-source"
               value="local"
               class="radio radio-sm radio-primary"
-              :disabled="derived.isIndependent"
             />
             <span class="text-xs font-semibold opacity-70">Generated locally</span>
           </label>
@@ -276,7 +278,6 @@ function openInCodePen() {
             <select
               v-model="state.itemSizeMode"
               class="select select-bordered select-sm w-full"
-              :disabled="derived.isIndependent"
             >
               <option value="fixed">Fixed</option>
               <option value="pattern">Pattern (array)</option>
@@ -517,7 +518,7 @@ function openInCodePen() {
         :badge="`${ enabledFeatures } used`"
       >
         <div class="space-y-3">
-          <div class="space-y-1">
+          <div v-if="state.containerMode !== 'window'" class="space-y-1">
             <span class="text-xs font-bold small-caps tracking-widest text-base-content/50">Scrollbars</span>
             <div class="flex flex-wrap gap-3 items-center">
               <label class="flex gap-2 items-center cursor-pointer select-none">
@@ -578,181 +579,174 @@ function openInCodePen() {
             </span>
           </div>
 
-          <div class="divider my-1 opacity-60" />
+          <div v-if="state.containerMode !== 'window' && !derived.isIndependent" class="divider my-1 opacity-60" />
 
-          <FeatureToggle
-            v-model="state.snap"
-            label="Scroll snapping"
-            description="Automatically align to items after scrolling stops."
-            :disabled="derived.isIndependent"
-          />
-          <div v-if="state.snap" class="ps-7">
-            <label class="floating-label p-0">
-              <span class="text-xs font-bold small-caps text-base-content/50">Snap mode</span>
-              <select v-model="state.snapMode" class="select select-bordered select-sm w-full">
-                <option v-for="option in snapOptions" :key="option.value" :value="option.value">
-                  {{ option.label }} — {{ option.description }}
-                </option>
-              </select>
-            </label>
-          </div>
+          <template v-if="!derived.isIndependent">
+            <FeatureToggle
+              v-model="state.snap"
+              label="Scroll snapping"
+              description="Automatically align to items after scrolling stops."
+            />
+            <div v-if="state.snap" class="ps-7">
+              <label class="floating-label p-0">
+                <span class="text-xs font-bold small-caps text-base-content/50">Snap mode</span>
+                <select v-model="state.snapMode" class="select select-bordered select-sm w-full">
+                  <option v-for="option in snapOptions" :key="option.value" :value="option.value">
+                    {{ option.label }} — {{ option.description }}
+                  </option>
+                </select>
+              </label>
+            </div>
 
-          <FeatureToggle
-            v-model="state.stickyHeader"
-            label="Sticky header"
-            description="A header slot pinned to the top of the viewport."
-            :disabled="derived.isIndependent"
-          />
+            <FeatureToggle
+              v-model="state.stickyHeader"
+              label="Sticky header"
+              description="A header slot pinned to the top of the viewport."
+            />
 
-          <FeatureToggle
-            v-model="state.stickyFooter"
-            label="Sticky footer"
-            description="A footer slot pinned to the bottom of the viewport."
-            :disabled="derived.isIndependent"
-          />
+            <FeatureToggle
+              v-model="state.stickyFooter"
+              label="Sticky footer"
+              description="A footer slot pinned to the bottom of the viewport."
+            />
 
-          <FeatureToggle
-            v-model="state.stickySections"
-            label="Sticky sections"
-            description="iOS-style section headers using stickyIndices."
-            :disabled="derived.isIndependent"
-          />
-          <div v-if="state.stickySections" class="ps-7">
-            <label class="floating-label p-0">
-              <span class="text-xs font-bold small-caps text-base-content/50">Items per section</span>
-              <input
-                v-model.number="state.itemsPerSection"
-                type="number"
-                min="1"
-                max="1000"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-          </div>
+            <FeatureToggle
+              v-model="state.stickySections"
+              label="Sticky sections"
+              description="iOS-style section headers using stickyIndices."
+            />
+            <div v-if="state.stickySections" class="ps-7">
+              <label class="floating-label p-0">
+                <span class="text-xs font-bold small-caps text-base-content/50">Items per section</span>
+                <input
+                  v-model.number="state.itemsPerSection"
+                  type="number"
+                  min="1"
+                  max="1000"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+            </div>
 
-          <FeatureToggle
-            v-model="state.infiniteScroll"
-            label="Infinite loading"
-            description="Fetch more items when the end is near (load event + loading slot)."
-            :disabled="derived.isIndependent"
-          />
-          <div v-if="state.infiniteScroll" class="ps-7 flex flex-wrap gap-3">
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">Load distance (px)</span>
-              <input
-                v-model.number="state.loadDistance"
-                type="number"
-                min="0"
-                max="10000"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">Chunk size</span>
-              <input
-                v-model.number="state.loadChunk"
-                type="number"
-                min="1"
-                max="1000"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-          </div>
+            <FeatureToggle
+              v-model="state.infiniteScroll"
+              label="Infinite loading"
+              description="Fetch more items when the end is near (load event + loading slot)."
+            />
+            <div v-if="state.infiniteScroll" class="ps-7 flex flex-wrap gap-3">
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Load distance (px)</span>
+                <input
+                  v-model.number="state.loadDistance"
+                  type="number"
+                  min="0"
+                  max="10000"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Chunk size</span>
+                <input
+                  v-model.number="state.loadChunk"
+                  type="number"
+                  min="1"
+                  max="1000"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+            </div>
 
-          <FeatureToggle
-            v-model="state.restoreOnPrepend"
-            label="Prepend restoration"
-            description="Keep scroll position when items are inserted at the top."
-            :disabled="derived.isIndependent"
-          />
+            <FeatureToggle
+              v-model="state.restoreOnPrepend"
+              label="Prepend restoration"
+              description="Keep scroll position when items are inserted at the top."
+            />
 
-          <FeatureToggle
-            v-model="state.initialScroll"
-            label="Initial scroll position"
-            description="Jump to an item on mount."
-            :disabled="derived.isIndependent"
-          />
-          <div v-if="state.initialScroll" class="ps-7 flex flex-wrap gap-3">
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">Index</span>
-              <input
-                v-model.number="state.initialScrollIndex"
-                type="number"
-                min="0"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">Alignment</span>
-              <select v-model="state.initialScrollAlign" class="select select-bordered select-sm w-full">
-                <option v-for="option in alignOptions" :key="option.value" :value="option.value">
-                  {{ option.label }} — {{ option.description }}
-                </option>
-              </select>
-            </label>
-          </div>
+            <FeatureToggle
+              v-model="state.initialScroll"
+              label="Initial scroll position"
+              description="Jump to an item on mount."
+            />
+            <div v-if="state.initialScroll" class="ps-7 flex flex-wrap gap-3">
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Index</span>
+                <input
+                  v-model.number="state.initialScrollIndex"
+                  type="number"
+                  min="0"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Alignment</span>
+                <select v-model="state.initialScrollAlign" class="select select-bordered select-sm w-full">
+                  <option v-for="option in alignOptions" :key="option.value" :value="option.value">
+                    {{ option.label }} — {{ option.description }}
+                  </option>
+                </select>
+              </label>
+            </div>
 
-          <FeatureToggle
-            v-model="state.scrollPadding"
-            label="Scroll padding"
-            description="Reserve space at the start/end of the scrollable area."
-            :disabled="derived.isIndependent"
-          />
-          <div v-if="state.scrollPadding" class="ps-7 flex flex-wrap gap-3">
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">Start (px)</span>
-              <input
-                v-model.number="state.scrollPaddingStart"
-                type="number"
-                min="0"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">End (px)</span>
-              <input
-                v-model.number="state.scrollPaddingEnd"
-                type="number"
-                min="0"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-          </div>
+            <FeatureToggle
+              v-model="state.scrollPadding"
+              label="Scroll padding"
+              description="Reserve space at the start/end of the scrollable area."
+            />
+            <div v-if="state.scrollPadding" class="ps-7 flex flex-wrap gap-3">
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Start (px)</span>
+                <input
+                  v-model.number="state.scrollPaddingStart"
+                  type="number"
+                  min="0"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">End (px)</span>
+                <input
+                  v-model.number="state.scrollPaddingEnd"
+                  type="number"
+                  min="0"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+            </div>
 
-          <FeatureToggle
-            v-model="state.ssrRange"
-            label="SSR pre-render range"
-            description="Emit an ssrRange so the server renders the first rows."
-            :disabled="derived.isIndependent"
-          />
-          <div v-if="state.ssrRange" class="ps-7 flex flex-wrap gap-3">
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">Start row</span>
-              <input
-                v-model.number="state.ssrStart"
-                type="number"
-                min="0"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-            <label class="floating-label p-0 grow basis-28">
-              <span class="text-xs font-bold small-caps text-base-content/50">End row</span>
-              <input
-                v-model.number="state.ssrEnd"
-                type="number"
-                min="0"
-                placeholder=" "
-                class="input input-bordered input-sm w-full font-mono"
-              />
-            </label>
-          </div>
+            <FeatureToggle
+              v-model="state.ssrRange"
+              label="SSR pre-render range"
+              description="Emit an ssrRange so the server renders the first rows."
+            />
+            <div v-if="state.ssrRange" class="ps-7 flex flex-wrap gap-3">
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Start row</span>
+                <input
+                  v-model.number="state.ssrStart"
+                  type="number"
+                  min="0"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">End row</span>
+                <input
+                  v-model.number="state.ssrEnd"
+                  type="number"
+                  min="0"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+            </div>
+          </template>
         </div>
       </FieldSet>
 

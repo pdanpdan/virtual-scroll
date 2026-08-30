@@ -343,12 +343,19 @@ function configPropsScript(state: ConfiguratorState, derived: ReturnType<typeof 
 }
 
 function configScriptComponent(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
-  return join([
+  const lines: string[] = [
     '// --- Configuration (typed against VirtualScrollProps) ---',
     'const config = computed<VirtualScrollProps<Item>>(() => ({',
     configPropsScript(state, derived, true, '  ', false),
-    '}));',
-  ]);
+  ];
+
+  if (state.containerMode === 'window') {
+    lines.push('  // window container: the page scrolls natively');
+    lines.push('  container: scrollContainer.value,');
+  }
+
+  lines.push('}));');
+  return join(lines);
 }
 
 function configScriptComposable(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
@@ -1055,6 +1062,16 @@ function componentScript(state: ConfiguratorState, derived: ReturnType<typeof ge
   lines.push('}');
   lines.push('');
 
+  if (state.containerMode === 'window') {
+    lines.push('// --- Window container ---');
+    lines.push('const scrollContainer = ref<Window | null>(null);');
+    lines.push('');
+    lines.push('onMounted(() => {');
+    lines.push('  scrollContainer.value = window;');
+    lines.push('});');
+    lines.push('');
+  }
+
   const infinite = infiniteScript(state, derived, true);
   if (infinite) {
     lines.push(infinite);
@@ -1441,7 +1458,10 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
+body {
+  margin: 0;
+}
 .vs-app {
   display: flex;
   flex-direction: column;
@@ -1483,6 +1503,12 @@ onUnmounted(() => {
   min-block-size: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .vs-grid {
@@ -1582,9 +1608,22 @@ function penStateScript(state: ConfiguratorState, derived: ReturnType<typeof get
   lines.push('}');
   lines.push('');
 
+  if (state.containerMode === 'window') {
+    lines.push('// --- Window container: the page scrolls natively ---');
+    lines.push('const scrollContainer = ref(null);');
+    lines.push('');
+    lines.push('onMounted(() => {');
+    lines.push('  scrollContainer.value = window;');
+    lines.push('});');
+    lines.push('');
+  }
+
   lines.push('// --- Configuration ---');
   lines.push('const config = computed(() => ({');
   lines.push(configPropsScript(state, derived, isTs, '  ', false));
+  if (state.containerMode === 'window') {
+    lines.push('  container: scrollContainer.value,');
+  }
   lines.push('}));');
   lines.push('');
 
@@ -1688,10 +1727,10 @@ function penTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDer
     lines.push(
       `${ t }  <template #scrollbar="{ axis, trackProps, thumbProps }">`,
       `${ t }    <div v-if="axis === 'vertical'" v-bind="trackProps" class="vs-custom-track vs-custom-track--vertical">`,
-      `${ t }      <div v-bind="thumbProps" class="vs-custom-thumb" />`,
+      `${ t }      <div v-bind="thumbProps" class="vs-custom-thumb"></div>`,
       `${ t }    </div>`,
       `${ t }    <div v-else v-bind="trackProps" class="vs-custom-track vs-custom-track--horizontal">`,
-      `${ t }      <div v-bind="thumbProps" class="vs-custom-thumb" />`,
+      `${ t }      <div v-bind="thumbProps" class="vs-custom-thumb"></div>`,
       `${ t }    </div>`,
       `${ t }  </template>`,
     );
@@ -1909,6 +1948,9 @@ function generatePenIndependent(state: ConfiguratorState): CodePenPayload {
   ].join('\n');
 
   const css = [
+    'body {',
+    '  margin: 0;',
+    '}',
     '.vs-app {',
     '  display: flex;',
     '  flex-direction: column;',
@@ -1947,6 +1989,12 @@ function generatePenIndependent(state: ConfiguratorState): CodePenPayload {
     '  min-block-size: 0;',
     '  overflow: auto;',
     '  overscroll-behavior: contain;',
+    '  scrollbar-width: none;',
+    '  -ms-overflow-style: none;',
+    '',
+    '  &::-webkit-scrollbar {',
+    '    display: none;',
+    '  }',
     '}',
     '',
     '.vs-grid {',
