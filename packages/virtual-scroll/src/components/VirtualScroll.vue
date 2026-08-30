@@ -547,6 +547,11 @@ const spacerStyle = computed(() => ({
  * @returns CSS style object.
  */
 function getItemStyle(item: RenderedItem<T>) {
+  // Sticky items stick below the sticky header/footer: the inset is the user
+  // scroll padding plus the measured sticky start/end (e.g. the header slot).
+  const scrollPadding = virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; };
+  const sticky = virtualScrollProps.value.stickyStart as { x: number; y: number; };
+
   const style = calculateItemStyle({
     // v8 ignore next -- containerTag has a default, so the falsy fallback is unreachable
     containerTag: props.containerTag || 'div',
@@ -554,8 +559,8 @@ function getItemStyle(item: RenderedItem<T>) {
     isHydrated: isHydrated.value,
     item,
     itemSize: props.itemSize,
-    paddingStartX: (virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; }).x,
-    paddingStartY: (virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; }).y,
+    paddingStartX: scrollPadding.x + sticky.x,
+    paddingStartY: scrollPadding.y + sticky.y,
     isRtl: isRtl.value,
   });
 

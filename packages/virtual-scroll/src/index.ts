@@ -14,3 +14,4 @@ export * from './types';
 export * from './utils/fenwick-tree';
 export * from './utils/scroll';
 export * from './utils/virtual-scroll-logic';
+export * from './extensions/all';

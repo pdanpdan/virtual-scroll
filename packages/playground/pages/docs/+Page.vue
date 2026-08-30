@@ -451,13 +451,13 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">stickyIndices</code></td>
               <td><code>number[]</code></td>
               <td><code>[]</code></td>
-              <td>Indices of items that should remain sticky.</td>
+              <td>Indices of items that should remain sticky. When <code>stickyHeader</code>/<code>stickyFooter</code> are enabled, they stick below/above them.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">stickyHeader</code> / <code class="docs-prop-name">stickyFooter</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
-              <td>If true, header/footer size is measured and added to padding.</td>
+              <td>If true, header/footer size is measured and added to padding. Sticky <code>stickyIndices</code> items align below/above them.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">ssrRange</code></td>
@@ -1784,6 +1784,7 @@ const { setItemRef } = useVirtualScrollObservers({
           <ul class="list-disc ps-5 space-y-1">
             <li>Hooks into <code>transformRenderedItems</code> to inject sticky items into the render list even if they are outside the normal virtual range.</li>
             <li>Calculates <code>stickyOffset</code> for each item to create the "pushing" effect when the next sticky header arrives.</li>
+            <li>Sticky items stick below any sticky header (and above any sticky footer): activation and the pushing effect are measured from the sticky start/end offsets (<code>stickyStartX</code>/<code>stickyStartY</code> on <a href="#sticky-params" class="link link-primary">StickyParams</a>).</li>
             <li>Supports both horizontal and vertical stickiness.</li>
           </ul>
         </div>
@@ -2019,6 +2020,34 @@ const ext = useInfiniteLoadingExtension({
               <tr><td><code>defaultItemSize</code></td><td><code>number</code></td><td>Estimate for dynamic items.</td></tr>
               <tr><td><code>defaultColumnWidth</code></td><td><code>number</code></td><td>Estimate for dynamic columns.</td></tr>
               <tr><td><code>debug</code></td><td><code>boolean</code></td><td>Enable visualization.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- StickyParams -->
+      <section id="sticky-params" class="mb-12">
+        <h4 class="docs-prop-subheader">StickyParams</h4>
+        <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+          <p>Parameters for calculating sticky item offsets. Used by <code>calculateStickyItem</code> and the <code>useStickyExtension</code> core.</p>
+        </div>
+        <div class="docs-table-container overflow-x-auto text-base-content/80">
+          <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs opacity-90">
+              <tr><td><code>index</code></td><td><code>number</code></td><td>Item index.</td></tr>
+              <tr><td><code>isSticky</code></td><td><code>boolean</code></td><td>Whether the item is configured as sticky.</td></tr>
+              <tr><td><code>direction</code></td><td><code><a href="#scroll-direction" class="link link-primary">ScrollDirection</a></code></td><td>Scroll direction.</td></tr>
+              <tr><td><code>relativeScrollX</code> / <code>relativeScrollY</code></td><td><code>number</code></td><td>Virtual scroll position (VU).</td></tr>
+              <tr><td><code>originalX</code> / <code>originalY</code></td><td><code>number</code></td><td>Virtual original position of the item (VU).</td></tr>
+              <tr><td><code>width</code> / <code>height</code></td><td><code>number</code></td><td>Virtual item size (VU).</td></tr>
+              <tr><td><code>stickyIndices</code></td><td><code>number[]</code></td><td>All configured sticky indices.</td></tr>
+              <tr><td><code>fixedSize</code> / <code>fixedWidth</code></td><td><code>number | null</code></td><td>Fixed item size / column width (VU), <code>null</code> for dynamic.</td></tr>
+              <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Item / column gap (VU).</td></tr>
+              <tr><td><code>getItemQueryY</code> / <code>getItemQueryX</code></td><td><code>(index: number) => number</code></td><td>Prefix sum resolvers for offsets (VU).</td></tr>
+              <tr><td><code>stickyStartX</code> / <code>stickyStartY</code></td><td><code>number</code></td><td>Size of sticky start elements (left/top) in DU. Sticky items stick below them; activation and the pushing effect are measured from this offset. Optional, defaults to <code>0</code>.</td></tr>
             </tbody>
           </table>
         </div>

@@ -371,9 +371,12 @@ function calculateAxisSticky(
   index: number,
   stickyIndices: number[],
   getNextStickyPos: (idx: number) => number,
-  nextStickyIndex?: number,
+  nextStickyIndex: number | undefined,
+  stickyStart: number,
 ) {
-  if (scrollPos <= originalPos) {
+  // The item sticks once it reaches the sticky line, which sits below any
+  // sticky start elements (e.g. a sticky header slot).
+  if (scrollPos + stickyStart <= originalPos) {
     return { isActive: false, offset: 0 };
   }
 
@@ -386,13 +389,15 @@ function calculateAxisSticky(
   }
 
   const nextStickyPos = getNextStickyPos(nextStickyIdx);
-  if (scrollPos >= nextStickyPos) {
+  if (scrollPos + stickyStart >= nextStickyPos) {
     return { isActive: false, offset: 0 };
   }
 
+  // The previous header slides out while the next one travels from
+  // (stickyStart + size) down to the sticky line (stickyStart).
   return {
     isActive: true,
-    offset: Math.max(0, Math.min(size, nextStickyPos - scrollPos)) - size,
+    offset: Math.max(0, Math.min(size, nextStickyPos - scrollPos - stickyStart)) - size,
   };
 }
 
@@ -776,6 +781,8 @@ export function calculateColumnRange({
  * @param params.getItemQueryY - Resolver for vertical offset (VU).
  * @param params.getItemQueryX - Resolver for horizontal offset (VU).
  * @param params.nextStickyIndex - Optional pre-calculated next sticky index.
+ * @param params.stickyStartX - Sticky elements size at the start (left) in DU.
+ * @param params.stickyStartY - Sticky elements size at the start (top) in DU.
  * @returns Sticky state and offset (VU).
  * @see StickyParams
  */
@@ -796,6 +803,8 @@ export function calculateStickyItem({
   getItemQueryY,
   getItemQueryX,
   nextStickyIndex,
+  stickyStartX = 0,
+  stickyStartY = 0,
 }: StickyParams & { nextStickyIndex?: number | undefined; }) {
   let isStickyActiveX = false;
   let isStickyActiveY = false;
@@ -815,6 +824,7 @@ export function calculateStickyItem({
       stickyIndices,
       (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + gap) : getItemQueryY(nextIdx)),
       nextStickyIndex,
+      stickyStartY,
     );
     isStickyActiveY = res.isActive;
     stickyOffset.y = res.offset;
@@ -830,6 +840,7 @@ export function calculateStickyItem({
       stickyIndices,
       (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + columnGap) : getItemQueryX(nextIdx)),
       nextStickyIndex,
+      stickyStartX,
     );
 
     if (res.isActive) {

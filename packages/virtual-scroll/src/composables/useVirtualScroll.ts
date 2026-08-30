@@ -686,7 +686,7 @@ export function useVirtualScroll<T = unknown>(
         currentStickyIndexPtr++;
       }
       const nextStickyIndex = currentStickyIndexPtr < stickyIndices.length ? stickyIndices[ currentStickyIndexPtr ] : undefined;
-      const { isStickyActive, isStickyActiveX, isStickyActiveY, stickyOffset } = calculateStickyItem({ index: i, isSticky, direction: direction.value, relativeScrollX: relativeScrollX.value, relativeScrollY: relativeScrollY.value, originalX, originalY, width, height, stickyIndices, fixedSize: fixedItemSize.value, fixedWidth: fixedColumnWidth.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, getItemQueryY: (idx) => itemSizesY.query(idx), getItemQueryX: (idx) => itemSizesX.query(idx), nextStickyIndex });
+      const { isStickyActive, isStickyActiveX, isStickyActiveY, stickyOffset } = calculateStickyItem({ index: i, isSticky, direction: direction.value, relativeScrollX: relativeScrollX.value, relativeScrollY: relativeScrollY.value, originalX, originalY, width, height, stickyIndices, fixedSize: fixedItemSize.value, fixedWidth: fixedColumnWidth.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, getItemQueryY: (idx) => itemSizesY.query(idx), getItemQueryX: (idx) => itemSizesX.query(idx), nextStickyIndex, stickyStartX: stickyStartX.value, stickyStartY: stickyStartY.value });
       const offsetX = isHydrated.value ? (internalScrollX.value / scaleX.value + (x + itemsStartVU_X - internalScrollX.value)) - wrapperStartDU_X : (x - ssrOffsetX);
       const offsetY = isHydrated.value ? (internalScrollY.value / scaleY.value + (y + itemsStartVU_Y - internalScrollY.value)) - wrapperStartDU_Y : (y - ssrOffsetY);
       const last = lastItemsMap.get(i);

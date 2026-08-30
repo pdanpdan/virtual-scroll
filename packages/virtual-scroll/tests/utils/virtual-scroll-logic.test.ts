@@ -2403,6 +2403,80 @@ describe('virtual-scroll-logic', () => {
       expect(result.stickyOffset.y).toBe(-30);
     });
 
+    it('sticks at the sticky start line before reaching the top (vertical)', () => {
+      const result = calculateStickyItem({
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        height: 50,
+        index: 0,
+        isSticky: true,
+        originalX: 0,
+        originalY: 0,
+        relativeScrollX: 0,
+        relativeScrollY: -20,
+        stickyIndices: [ 0, 10 ],
+        stickyStartY: 48,
+        width: 500,
+      });
+      // The item is caught at the sticky line (48px) although its original
+      // position is still below the viewport top.
+      expect(result.isStickyActive).toBe(true);
+      expect(result.stickyOffset.y).toBe(0);
+    });
+
+    it('pushes the previous header out while the next one approaches the sticky line (vertical, with sticky start)', () => {
+      // Half-way: the next header (at 500) is 25px above the sticky line (48).
+      const half = calculateStickyItem({
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        height: 50,
+        index: 0,
+        isSticky: true,
+        originalX: 0,
+        originalY: 0,
+        relativeScrollX: 0,
+        relativeScrollY: 427,
+        stickyIndices: [ 0, 10 ],
+        stickyStartY: 48,
+        width: 500,
+      });
+      expect(half.isStickyActive).toBe(true);
+      expect(half.stickyOffset.y).toBe(-25);
+
+      // At the sticky line the previous header is fully displaced and the
+      // next one takes over.
+      const locked = calculateStickyItem({
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: null,
+        fixedWidth: null,
+        gap: 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        height: 50,
+        index: 0,
+        isSticky: true,
+        originalX: 0,
+        originalY: 0,
+        relativeScrollX: 0,
+        relativeScrollY: 452, // next sticky (500) minus the 48px sticky line
+        stickyIndices: [ 0, 10 ],
+        stickyStartY: 48,
+        width: 500,
+      });
+      expect(locked.isStickyActive).toBe(false);
+    });
+
     it('calculates sticky offset when pushing (horizontal, fixed size)', () => {
       const result = calculateStickyItem({
         columnGap: 0,

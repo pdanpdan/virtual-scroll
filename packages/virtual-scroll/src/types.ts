@@ -796,6 +796,10 @@ export interface StickyParams {
   getItemQueryY: (index: number) => number;
   /** Prefix sum resolver for rows (horizontal). */
   getItemQueryX: (index: number) => number;
+  /** Sticky elements size at the start (top/left) in DU: sticky items stick below them. */
+  stickyStartX?: number;
+  /** Sticky elements size at the start (top/left) in DU: sticky items stick below them. */
+  stickyStartY?: number;
 }
 
 /** Parameters for calculating an item's position and size. */

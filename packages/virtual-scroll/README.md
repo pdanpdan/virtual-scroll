@@ -254,8 +254,8 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 | `columnWidth` | `num \| num[] \| fn \| null` | `100` | Width for columns in grid mode. |
 | `gap` / `columnGap` | `number` | `0` | Spacing between items/columns. |
 | `snap` | `SnapMode` | `false` | Enable scroll snapping. See [SnapMode](#snapmode). |
-| `stickyIndices` | `number[]` | `[]` | Indices of items that should remain sticky. |
-| `stickyHeader` / `stickyFooter` | `boolean` | `false` | If true, measures and adds slot size to padding. |
+| `stickyIndices` | `number[]` | `[]` | Indices of items that should remain sticky. When `stickyHeader`/`stickyFooter` are enabled, they stick below/above them. |
+| `stickyHeader` / `stickyFooter` | `boolean` | `false` | If true, measures and adds slot size to padding. Sticky `stickyIndices` items align below/above them. |
 | `ssrRange` | `object` | - | Range of items to pre-render for SSR. |
 | `virtualScrollbar` | `boolean` | `false` | Whether to force virtual scrollbars. |
 | `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
