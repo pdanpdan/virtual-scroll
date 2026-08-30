@@ -6,7 +6,7 @@ import vue from '@vitejs/plugin-vue';
 import vike from 'vike/plugin';
 import { defineConfig } from 'vite';
 
-import { highlightPlugin } from './lib/highlight';
+import { highlightPlugin } from './lib/highlight.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
