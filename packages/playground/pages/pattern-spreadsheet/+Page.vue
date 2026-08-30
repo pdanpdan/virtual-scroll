@@ -36,7 +36,9 @@ function getColumnLabel(index: number): string {
   return label;
 }
 
-const items = computed(() => Array.from({ length: rowCount.value }, (_, i) => ({
+// The first row/column are headers, so the virtual grid is one row and one
+// column larger than the selected data size.
+const items = computed(() => Array.from({ length: rowCount.value + 1 }, (_, i) => ({
   id: i,
   label: `Row ${ i + 1 }`,
 })));
@@ -180,7 +182,7 @@ function stopResizing() {
       direction="both"
       :items="items"
       :item-size="getRowHeight"
-      :column-count="colCount"
+      :column-count="colCount + 1"
       :column-width="getColWidth"
       :default-item-size="defaultRowHeight"
       :default-column-width="defaultColWidth"
@@ -226,6 +228,10 @@ function stopResizing() {
               :style="{
                 width: `${ getColWidth(colIdx - 1 + columnRange.start) }px`,
                 height: `${ getRowHeight(null, index) }px`,
+                // The sticky row-header cell above stays in flow and consumes
+                // column 0's slot; once the range starts past column 0, pull the
+                // first data cell back so columns stay aligned with their slots.
+                marginInlineStart: colIdx === 1 && columnRange.start > 0 ? `-${ getColWidth(0) }px` : undefined,
               }"
               v-bind="getCellAriaProps(colIdx - 1 + columnRange.start)"
               :role="index === 0 ? 'columnheader' : 'gridcell'"
