@@ -281,9 +281,9 @@ import ExampleCard from '#/components/ExampleCard.vue';
 
     <ExampleCard
       type="Pattern"
-      title="Side-by-Side Code Diff"
-      description="Compare side-by-side large code diffs."
-      href="/pattern-diff"
+      title="Blog Posts"
+      description="Blog feed with dynamic heights and on-demand post loading."
+      href="/pattern-blog"
       group="2"
     />
   </div>

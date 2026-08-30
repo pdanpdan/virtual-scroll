@@ -129,6 +129,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-masonry', label: 'Masonry Grid' },
   { href: '/pattern-search', label: 'Search & Highlight' },
   { href: '/pattern-diff', label: 'Side-by-Side Code Diff' },
+  { href: '/pattern-blog', label: 'Blog Posts' },
 ];
 
 const isExamplePage = computed(() => {
