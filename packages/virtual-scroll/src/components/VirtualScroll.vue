@@ -292,6 +292,7 @@ function refresh() {
     const updates: { index: number; inlineSize: number; blockSize: number; element?: HTMLElement; }[] = [];
 
     for (const [ index, el ] of itemRefs.entries()) {
+      // v8 ignore next -- setItemRef deletes falsy refs, so entries never hold null
       if (el) {
         updates.push({
           index,
@@ -334,6 +335,7 @@ watch(scrollDetails, (details, oldDetails) => {
 });
 
 watch(isHydrated, (hydrated) => {
+  // v8 ignore next -- fires once with hydrated=true; scrollDetails is always defined by then
   if (hydrated && scrollDetails.value?.range && scrollDetails.value?.columnRange) {
     emit('visibleRangeChange', {
       start: scrollDetails.value.range.start,
@@ -546,6 +548,7 @@ const spacerStyle = computed(() => ({
  */
 function getItemStyle(item: RenderedItem<T>) {
   const style = calculateItemStyle({
+    // v8 ignore next -- containerTag has a default, so the falsy fallback is unreachable
     containerTag: props.containerTag || 'div',
     direction: props.direction,
     isHydrated: isHydrated.value,
@@ -580,9 +583,11 @@ const effectiveRole = computed(() => {
 
 const isGrid = computed(() => effectiveRole.value === 'grid' || isTable.value);
 
+// v8 ignore start -- template short-circuits on isTable, so the isTable branch never evaluates
 const containerRole = computed(() => isTable.value
   ? null
   : ((props.ariaLabel || props.ariaLabelledby) ? 'region' : 'none'));
+// v8 ignore stop
 const wrapperRole = computed(() => isTable.value ? null : effectiveRole.value);
 const internalItemRole = computed(() => {
   if (isGrid.value) {
@@ -651,6 +656,7 @@ function getItemAriaProps(index: number) {
   }
 
   const role = itemRole.value;
+  // v8 ignore next -- itemRole falls back to internalItemRole, which is never null
   if (role !== null) {
     aria.role = (role === 'none' || role === 'presentation')
       ? internalItemRole.value
@@ -670,6 +676,7 @@ function getCellAriaProps(colIndex: number) {
     role,
   };
 
+  // v8 ignore next -- a truthy cellRole implies grid or table mode, so isGrid is always true here
   if (isGrid.value) {
     aria[ 'aria-colindex' ] = colIndex + 1;
   }
@@ -766,6 +773,7 @@ defineExpose({
   /**
    * The tag used for rendering items.
    */
+  // v8 ignore next -- itemTag has a default, so the falsy fallback is unreachable
   itemTag: computed(() => props.itemTag || 'div'),
 
   /**

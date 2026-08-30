@@ -1,7 +1,11 @@
 /* global ScrollToOptions */
-import { describe, expect, it, vi } from 'vitest';
-import { nextTick } from 'vue';
+import type { ExtensionContext } from '../../src/extensions';
+import type { RenderedItem } from '../../src/types';
 
+import { describe, expect, it, vi } from 'vitest';
+import { nextTick, ref } from 'vue';
+
+import { useStickyExtension } from '../../src/extensions/sticky';
 import { mockItems, setup, setupMocks } from '../test-helper';
 
 describe('sticky elements', () => {
@@ -101,56 +105,95 @@ describe('sticky elements', () => {
     wrapper.unmount();
   });
 
-  it('covers transformRenderedItems when prevStickyIdx < start and not in list', async () => {
-    const { result, wrapper } = setup({
-      direction: 'vertical',
-      itemSize: 100,
-      items: Array.from({ length: 50 }, (_, i) => ({ id: i })),
-      stickyIndices: [ 5 ],
-      bufferBefore: 0,
-      bufferAfter: 0,
-    });
-
-    await nextTick();
-    await nextTick();
-
-    // Scroll to item 10. start=10. prevStickyIdx=5.
-    result.scrollToOffset(null, 1000, { behavior: 'auto' });
-    await nextTick();
-    await nextTick();
-
-    const renderedIndices = result.renderedItems.value.map((i) => i.index);
-    expect(renderedIndices).toContain(5);
-    expect(result.renderedItems.value.find((i) => i.index === 5)?.isStickyActive).toBe(true);
-
-    wrapper.unmount();
-  });
-
-  it('covers the case where a previous sticky item is NOT already in the list', async () => {
-    // This is to cover line 31 in sticky.ts
-    // We need to trigger transformRenderedItems when prevStickyIdx < start AND alreadyInList is false.
+  it('keeps the previous sticky item rendered above the visible range', async () => {
     const { result, wrapper } = setup({
       direction: 'vertical',
       itemSize: 100,
       items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
-      stickyIndices: [ 0, 50 ],
+      stickyIndices: [ 5, 50 ],
       bufferBefore: 0,
       bufferAfter: 0,
     });
 
     await nextTick();
+    await nextTick();
 
-    // Scroll to item 60. start will be around 60.
-    // prevStickyIdx for activeIdx 60 will be 50.
-    // 50 is not < start (60). Wait, 50 IS < 60.
-    // So if start is 60, and we have sticky index 50, and it's not in the list (because bufferBefore=0).
+    // Scrolling far enough so the previous sticky item is above the rendered range
     result.scrollToOffset(null, 6000, { behavior: 'auto' });
     await nextTick();
     await nextTick();
 
-    expect(result.renderedItems.value.map((i) => i.index)).toContain(50);
+    const renderedIndices = result.renderedItems.value.map((i) => i.index);
+    // The nearest sticky item above the range (50) stays rendered and active
+    expect(renderedIndices).toContain(50);
     expect(result.renderedItems.value.find((i) => i.index === 50)?.isStickyActive).toBe(true);
 
+    wrapper.unmount();
+  });
+
+  it('passes items through unchanged when the previous sticky item is missing from the list', () => {
+    const extension = useStickyExtension<{ id: number; }>();
+    const range = ref({ start: 10, end: 20, padStart: 0, padEnd: 0 });
+    const currentIndex = ref(25);
+    const ctx = {
+      props: ref({ stickyIndices: [ 5 ] }),
+      range,
+      currentIndex,
+    } as unknown as ExtensionContext<{ id: number; }>;
+
+    const items: RenderedItem<{ id: number; }>[] = [
+      { item: { id: 10 }, index: 10, offset: { x: 0, y: 0 }, size: { width: 100, height: 100 }, originalX: 0, originalY: 0, isSticky: false, isStickyActive: false, isStickyActiveX: false, isStickyActiveY: false, stickyOffset: { x: 0, y: 0 } },
+    ];
+
+    // prevStickyIdx (5) < start (10) and the sticky item is NOT in the list:
+    // the transform must not crash and must not alter the items.
+    const result = extension.transformRenderedItems!(items, ctx);
+    expect(result).toEqual(items);
+  });
+
+  it('queries dynamic sizes for sticky items', async () => {
+    const { result, wrapper } = setup({
+      direction: 'vertical',
+      itemSize: 0, // dynamic
+      defaultItemSize: 100,
+      items: Array.from({ length: 50 }, (_, i) => ({ id: i })),
+      stickyIndices: [ 0, 10 ],
+      bufferBefore: 0,
+      bufferAfter: 0,
+    });
+
+    await nextTick();
+    await nextTick();
+
+    result.scrollToOffset(null, 500, { behavior: 'auto' });
+    await nextTick();
+    await nextTick();
+
+    const item0 = result.renderedItems.value.find((i) => i.index === 0);
+    expect(item0?.isStickyActive).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('queries dynamic sizes for horizontal sticky items', async () => {
+    const { result, wrapper } = setup({
+      direction: 'horizontal',
+      itemSize: 0, // dynamic
+      defaultItemSize: 100,
+      items: Array.from({ length: 50 }, (_, i) => ({ id: i })),
+      stickyIndices: [ 0, 10 ],
+      bufferBefore: 0,
+      bufferAfter: 0,
+    });
+
+    await nextTick();
+    await nextTick();
+
+    result.scrollToOffset(500, null);
+    await nextTick();
+    await nextTick();
+
+    const item0 = result.renderedItems.value.find((i) => i.index === 0);
+    expect(item0?.isStickyActive).toBe(true);
     wrapper.unmount();
   });
 

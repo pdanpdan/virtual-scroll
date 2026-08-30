@@ -189,14 +189,14 @@ describe('useVirtualScrollInertia', () => {
       pointerId: 1,
     } as unknown as PointerEvent;
 
-    handlePointerDown(eventDown);
-
-    // Mock performance.now to simulate time passing (dt > 0)
+    // Mock performance.now before the interaction so dt > 0 during moves
     let time = 0;
     vi.spyOn(performance, 'now').mockImplementation(() => {
       time += 16;
       return time;
     });
+
+    handlePointerDown(eventDown);
 
     // Move horizontally fast → X velocity dominates
     handlePointerMove({ clientX: 50, clientY: 100 } as unknown as PointerEvent);
@@ -206,8 +206,8 @@ describe('useVirtualScrollInertia', () => {
     handlePointerUp({ currentTarget: target, pointerId: 1 } as unknown as PointerEvent);
 
     // Re-start to test Y-dominant drift
-    handlePointerDown(eventDown);
     time = 0;
+    handlePointerDown(eventDown);
     scrollToOffset.mockClear();
 
     // Move vertically fast
@@ -217,6 +217,54 @@ describe('useVirtualScrollInertia', () => {
     handlePointerUp({ currentTarget: target, pointerId: 1 } as unknown as PointerEvent);
 
     stopInertia();
+    vi.restoreAllMocks();
+  });
+
+  it('skips velocity updates for zero-dt moves and slow releases', () => {
+    const useVirtualScrolling = ref(true);
+    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollToOffset = vi.fn();
+
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0);
+      return 1;
+    });
+
+    const { handlePointerDown, handlePointerMove, handlePointerUp } = useVirtualScrollInertia({
+      useVirtualScrolling,
+      scrollDetails,
+      scrollToOffset,
+      stopProgrammaticScroll: vi.fn(),
+    });
+
+    const target = { setPointerCapture: vi.fn(), releasePointerCapture: vi.fn() };
+    let now = 1000;
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
+
+    const pointerDown = (clientX: number, clientY: number) => handlePointerDown({
+      pointerType: 'mouse',
+      button: 0,
+      clientX,
+      clientY,
+      currentTarget: target,
+      pointerId: 1,
+    } as unknown as PointerEvent);
+
+    // A second move within the same timestamp has dt = 0 and must not update velocity
+    pointerDown(100, 100);
+    now = 1016;
+    handlePointerMove({ clientX: 50, clientY: 100 } as unknown as PointerEvent);
+    handlePointerMove({ clientX: 40, clientY: 100 } as unknown as PointerEvent);
+
+    // A slow release keeps velocity below the inertia threshold: no animation starts
+    now = 1020;
+    pointerDown(100, 100);
+    now = 1036;
+    handlePointerMove({ clientX: 99, clientY: 100 } as unknown as PointerEvent);
+    scrollToOffset.mockClear();
+    handlePointerUp({ currentTarget: target, pointerId: 1 } as unknown as PointerEvent);
+
+    expect(scrollToOffset).not.toHaveBeenCalled();
     vi.restoreAllMocks();
   });
 
@@ -254,23 +302,49 @@ describe('useVirtualScrollInertia', () => {
     expect(target.releasePointerCapture).not.toHaveBeenCalled();
   });
 
-  it('stopInertia cancels animation frame and resets velocity', () => {
+  it('keeps both velocity components for diagonal movement', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
+    const stopProgrammaticScroll = vi.fn();
 
-    vi.spyOn(window, 'cancelAnimationFrame');
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0);
+      return 1;
+    });
 
-    const { stopInertia } = useVirtualScrollInertia({
+    const { handlePointerDown, handlePointerMove, handlePointerUp } = useVirtualScrollInertia({
       useVirtualScrolling,
       scrollDetails,
       scrollToOffset,
-      stopProgrammaticScroll: vi.fn(),
+      stopProgrammaticScroll,
     });
 
-    // Calling stopInertia when no animation frame is running should not throw
-    stopInertia();
-    expect(window.cancelAnimationFrame).not.toHaveBeenCalled();
+    const target = { setPointerCapture: vi.fn(), releasePointerCapture: vi.fn() };
+
+    let time = 0;
+    vi.spyOn(performance, 'now').mockImplementation(() => {
+      time += 16;
+      return time;
+    });
+
+    handlePointerDown({
+      pointerType: 'mouse',
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      currentTarget: target,
+      pointerId: 1,
+    } as unknown as PointerEvent);
+
+    // Diagonal movement with equal x/y deltas: neither axis dominates, so
+    // both velocity components must survive the drift-kill logic.
+    handlePointerMove({ clientX: 50, clientY: 50 } as unknown as PointerEvent);
+    handlePointerUp({ currentTarget: target, pointerId: 1 } as unknown as PointerEvent);
+
+    const lastCall = scrollToOffset.mock.calls.at(-1) as [ number, number ];
+    expect(lastCall[ 0 ]).not.toBe(0);
+    expect(lastCall[ 1 ]).not.toBe(0);
 
     vi.restoreAllMocks();
   });

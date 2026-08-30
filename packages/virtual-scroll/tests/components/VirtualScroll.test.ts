@@ -423,6 +423,22 @@ describe('virtualScroll', () => {
 
       wrapper.unmount();
     });
+
+    it('refreshes safely with no items', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: [],
+          itemSize: 50,
+        },
+      });
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(() => vs.refresh()).not.toThrow();
+      await nextTick();
+      expect(wrapper.findAll('.virtual-scroll-item').length).toBe(0);
+      wrapper.unmount();
+    });
   });
 
   describe('scrolling interaction', () => {
@@ -1714,6 +1730,28 @@ describe('virtualScroll', () => {
 
       expect(vs.scrollDetails.scrollOffset.y).toBe(250);
     });
+
+    it('positions the sticky header relative to the window container', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          stickyHeader: true,
+          showHeader: true,
+          container: window,
+        },
+        slots: {
+          header: () => h('div', { class: 'custom-header' }, 'Header'),
+        },
+      });
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(wrapper.find('.custom-header').exists()).toBe(true);
+      expect(vs.scrollDetails.items[ 0 ]!.offset.y).toBe(0);
+      wrapper.unmount();
+    });
   });
 
   describe('scaling & massive lists', () => {
@@ -2401,6 +2439,158 @@ describe('virtualScroll', () => {
       await nextTick();
       expect(wrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(true);
     });
+
+    it('scrolls via the virtual scrollbar track (vertical)', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 50,
+          virtualScrollbar: true,
+        },
+      });
+      await nextTick();
+      await nextTick();
+
+      const track = wrapper.find('.virtual-scrollbar-track');
+      expect(track.exists()).toBe(true);
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        top: 0,
+        left: 0,
+        width: 10,
+        height: 100,
+        bottom: 100,
+        right: 10,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      // Click in the middle of the track: scrollable range is 5000 - 500 = 4500,
+      // so the target offset is 2250
+      await track.trigger('mousedown', { clientY: 50 });
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.scrollDetails.scrollOffset.y).toBeCloseTo(2250, 0);
+      wrapper.unmount();
+    });
+
+    it('scrolls via the virtual scrollbar track (horizontal)', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 100,
+          direction: 'horizontal',
+          virtualScrollbar: true,
+        },
+      });
+      await nextTick();
+      await nextTick();
+
+      const track = wrapper.find('.virtual-scrollbar-track');
+      expect(track.exists()).toBe(true);
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        top: 0,
+        left: 0,
+        width: 100,
+        height: 10,
+        bottom: 10,
+        right: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      // Middle of the track: scrollable range is 10000 - 500 = 9500 -> 4750
+      await track.trigger('mousedown', { clientX: 50 });
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(4750, 0);
+      wrapper.unmount();
+    });
+
+    it('scrolls via a custom scrollbar slot using the component track props', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 50,
+          virtualScrollbar: true,
+        },
+        slots: {
+          scrollbar: (slotProps: ScrollbarSlotProps) => h('div', {
+            ...(slotProps.trackProps as Record<string, unknown>),
+            class: [ ...(slotProps.trackProps.class as string[]), 'custom-track' ],
+          }),
+        },
+      });
+      await nextTick();
+      await nextTick();
+
+      const track = wrapper.find('.custom-track');
+      expect(track.exists()).toBe(true);
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        top: 0,
+        left: 0,
+        width: 10,
+        height: 100,
+        bottom: 100,
+        right: 10,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      await track.trigger('mousedown', { clientY: 50 });
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.scrollDetails.scrollOffset.y).toBeCloseTo(2250, 0);
+      wrapper.unmount();
+    });
+
+    it('scrolls via a custom horizontal scrollbar slot', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems,
+          itemSize: 100,
+          direction: 'horizontal',
+          virtualScrollbar: true,
+        },
+        slots: {
+          scrollbar: (slotProps: ScrollbarSlotProps) => h('div', {
+            ...(slotProps.trackProps as Record<string, unknown>),
+            class: [ ...(slotProps.trackProps.class as string[]), 'custom-track' ],
+          }),
+        },
+      });
+      await nextTick();
+      await nextTick();
+
+      const track = wrapper.find('.custom-track');
+      vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+        top: 0,
+        left: 0,
+        width: 100,
+        height: 10,
+        bottom: 10,
+        right: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      } as DOMRect);
+
+      await track.trigger('mousedown', { clientX: 50 });
+      await nextTick();
+      await nextTick();
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      expect(vs.scrollDetails.scrollOffset.x).toBeCloseTo(4750, 0);
+      wrapper.unmount();
+    });
   });
 
   describe('ssr & hydration', () => {
@@ -2469,6 +2659,76 @@ describe('virtualScroll', () => {
       const vsItem = wrapper.find('.virtual-scroll-item');
       const vsItemStyle = (vsItem.element as HTMLElement).style;
       expect(vsItemStyle.columnGap).toBe('20px');
+    });
+
+    it('applies the ssr column range with dynamic column widths', async () => {
+      vi.useFakeTimers();
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          direction: 'both',
+          columnCount: 5,
+          columnWidth: 0, // dynamic
+          defaultColumnWidth: 100,
+          itemSize: 0, // dynamic
+          defaultItemSize: 50,
+          items: mockItems.slice(0, 20),
+          ssrRange: { start: 1, end: 3 },
+        },
+        slots: {
+          item: (props: ItemSlotProps) => {
+            const { item } = props as ItemSlotProps<MockItem>;
+            return h('div', item.label);
+          },
+        },
+      });
+
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+
+      // Before hydration the ssr column range is active (colStart/colEnd default to 0)
+      expect(vs.columnRange.start).toBe(0);
+      expect(vs.columnRange.end).toBe(5);
+      expect(wrapper.findAll('.virtual-scroll-item').length).toBeGreaterThan(0);
+
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      // After hydration and the programmatic scroll ending, the range is re-evaluated
+      vi.advanceTimersByTime(200);
+      await nextTick();
+
+      expect(vs.columnRange.end).toBe(5);
+      expect(wrapper.findAll('.virtual-scroll-item').length).toBeGreaterThan(0);
+      wrapper.unmount();
+      vi.useRealTimers();
+    });
+
+    it('renders the ssr range for horizontal lists with dynamic sizes', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          direction: 'horizontal',
+          itemSize: 0, // dynamic
+          defaultItemSize: 50,
+          items: mockItems,
+          ssrRange: { start: 5, end: 8 },
+        },
+        slots: {
+          item: (props: ItemSlotProps) => {
+            const { item } = props as ItemSlotProps<MockItem>;
+            return h('div', item.label);
+          },
+        },
+      });
+
+      // The ssr range rows are rendered before hydration
+      const items = wrapper.findAll('.virtual-scroll-item');
+      expect(items.length).toBe(3);
+      expect(items[ 0 ]?.attributes('data-index')).toBe('5');
+
+      await nextTick();
+      await nextTick();
+      await nextTick();
+      wrapper.unmount();
     });
   });
 
@@ -2571,8 +2831,15 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
+      const headerEl = wrapper.find('.virtual-scroll-header').element as HTMLElement;
+      Object.defineProperty(headerEl, 'offsetHeight', { configurable: true, value: 40 });
+      triggerResize(headerEl, 500, 40);
+      await nextTick();
+      await nextTick();
+
       const vs = wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; };
-      expect(vs.scrollDetails.totalSize.height).toBeGreaterThan(0);
+      // 100 items * 50 + 40px sticky header padding
+      expect(vs.scrollDetails.totalSize.height).toBe(5040);
     });
 
     it('resets measured padding when header/footer is removed', async () => {

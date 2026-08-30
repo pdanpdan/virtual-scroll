@@ -753,6 +753,7 @@ export function useVirtualScroll<T = unknown>(
 
   const handleScroll = (e: Event) => {
     const target = e.target;
+    // v8 ignore next 2 -- defensive SSR guard; the scroll listener is only attached when window exists
     if (typeof window === 'undefined') {
       return;
     }
@@ -762,7 +763,9 @@ export function useVirtualScroll<T = unknown>(
       scrollY.value = window.scrollY;
       viewportWidth.value = document.documentElement.clientWidth;
       viewportHeight.value = document.documentElement.clientHeight;
+    // v8 ignore start -- every attached scroll target is an element/window, and elements always have scrollLeft
     } else if (isScrollableElement(target)) {
+    // v8 ignore stop
       scrollX.value = target.scrollLeft;
       scrollY.value = target.scrollTop;
       viewportWidth.value = target.clientWidth;
@@ -881,6 +884,7 @@ export function useVirtualScroll<T = unknown>(
           pendingScroll.value = null;
         }
       } else {
+        // v8 ignore next -- pendingScroll always stores normalized options, so the string fallback is unreachable
         const correctionOptions: ScrollToIndexOptions = isScrollToIndexOptions(options) ? { ...options, isCorrection: true } : { align: options as ScrollAlignment | ScrollAlignmentOptions, isCorrection: true };
         scrollToIndex(rowIndex, colIndex, correctionOptions);
       }
@@ -936,9 +940,11 @@ export function useVirtualScroll<T = unknown>(
   };
 
   const attachEvents = (container: HTMLElement | Window | null) => {
+    // v8 ignore start -- defensive SSR guard; the scroll listener is only attached when window exists
     if (typeof window === 'undefined') {
       return;
     }
+    // v8 ignore stop
     const effectiveContainer = container || window;
     const scrollTarget = (effectiveContainer === window || (isElement(effectiveContainer) && effectiveContainer === document.documentElement)) ? document : effectiveContainer;
     scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
@@ -999,6 +1005,7 @@ export function useVirtualScroll<T = unknown>(
         if (props.value.ssrRange || props.value.initialScrollIndex !== undefined) {
           const initialIndex = props.value.initialScrollIndex !== undefined ? props.value.initialScrollIndex : props.value.ssrRange?.start;
           const initialAlign = props.value.initialScrollAlign || 'start';
+          // v8 ignore next -- SSRRange.start is required by the type, so initialIndex is always defined here
           if (initialIndex !== undefined && initialIndex !== null) {
             scrollToIndex(initialIndex, props.value.ssrRange?.colStart, { align: initialAlign, behavior: 'auto' });
           }
@@ -1034,6 +1041,7 @@ export function useVirtualScroll<T = unknown>(
     updateHostOffset();
   });
   watch(isRtl, (newRtl, oldRtl) => {
+    // v8 ignore next 2 -- registered after mount; isRtl only changes while mounted with a different value
     if (oldRtl === undefined || newRtl === oldRtl || !isMounted.value) {
       return;
     }

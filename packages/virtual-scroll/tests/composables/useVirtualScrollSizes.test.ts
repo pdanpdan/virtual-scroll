@@ -558,21 +558,140 @@ describe('useVirtualScrollSizes', () => {
     wrapper.unmount();
   });
 
-  it('covers initializeAxis needsRebuild branch when size is close but not equal', async () => {
+  it('keeps dynamic items unmeasured when re-initializing with matching sizes', async () => {
     const { result, wrapper } = setup({
-      itemSize: 50,
+      itemSize: 0,
       items: mockItems,
+      defaultItemSize: 40,
     });
+
+    result.initializeSizes();
     await nextTick();
-
-    // Manually set a value in tree that is close but not equal (e.g. 50.1)
-    result.itemSizesY.update(0, 0.1);
-
-    // Trigger initializeSizes. It should rebuild because 50.1 != 50
     result.initializeSizes();
     await nextTick();
 
-    expect(result.getSizeAt(0, 50, 40, 0, result.itemSizesY, false)).toBe(50);
+    expect(result.measuredItemsY.value[ 0 ]).toBe(0);
+    wrapper.unmount();
+  });
+
+  it('skips axis updates when re-measuring an unchanged vertical size', async () => {
+    const onScrollCorrection = vi.fn();
+    const { result, wrapper } = setup({
+      itemSize: 0,
+      items: mockItems,
+      defaultItemSize: 40,
+    });
+    result.initializeSizes();
+    await nextTick();
+
+    const getRowIndexAt = () => 0;
+    const getColIndexAt = () => 0;
+
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      getRowIndexAt,
+      getColIndexAt,
+      0,
+      0,
+      onScrollCorrection,
+    );
+    await nextTick();
+    onScrollCorrection.mockClear();
+
+    // Same measurement again: no rebuild, no correction
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      getRowIndexAt,
+      getColIndexAt,
+      0,
+      0,
+      onScrollCorrection,
+    );
+    expect(onScrollCorrection).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('skips the horizontal axis update when re-measuring an unchanged size', async () => {
+    const onScrollCorrection = vi.fn();
+    const { result, wrapper } = setup({
+      direction: 'horizontal',
+      itemSize: 0,
+      items: mockItems,
+      defaultItemSize: 40,
+    });
+    result.initializeSizes();
+    await nextTick();
+
+    const getRowIndexAt = () => 0;
+    const getColIndexAt = () => 0;
+
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      getRowIndexAt,
+      getColIndexAt,
+      0,
+      0,
+      onScrollCorrection,
+    );
+    await nextTick();
+    onScrollCorrection.mockClear();
+
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      getRowIndexAt,
+      getColIndexAt,
+      0,
+      0,
+      onScrollCorrection,
+    );
+    expect(onScrollCorrection).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('handles zero base sizes from negative gaps during initialization', async () => {
+    const { result, wrapper } = setup({
+      itemSize: 0,
+      items: mockItems,
+      defaultItemSize: 40,
+      gap: -40, // overlapping items: the base size collapses to zero
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    // The base size 40 + gap (-40) collapses to 0, so the tree keeps a zero entry
+    expect(result.itemSizesY.get(0)).toBe(0);
+    wrapper.unmount();
+  });
+
+  it('measures dynamic column widths from cells when columnWidth is a function', async () => {
+    const { result, wrapper } = setup({
+      direction: 'both',
+      columnCount: 5,
+      columnWidth: () => 100,
+      items: mockItems,
+      defaultColumnWidth: 100,
+    });
+    result.initializeSizes();
+    await nextTick();
+
+    const rowEl = document.createElement('div');
+    const cell = document.createElement('div');
+    cell.dataset.colIndex = '1';
+    Object.defineProperty(cell, 'getBoundingClientRect', { value: () => ({ width: 150 }) });
+    rowEl.appendChild(cell);
+
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      () => 0,
+      () => 1, // firstColIndex = 1
+      100, // relativeScrollX
+      0,
+      vi.fn(),
+    );
+    await nextTick();
+
+    expect(result.columnSizes.get(1)).toBe(150);
     wrapper.unmount();
   });
 });

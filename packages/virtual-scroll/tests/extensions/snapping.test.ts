@@ -220,7 +220,7 @@ describe('snap', () => {
     wrapper.unmount();
   });
 
-  it('covers the case where snap is false (line 53-66 in snapping.ts)', async () => {
+  it('does nothing when snap is disabled', async () => {
     const { wrapper, container } = setupSnapTest(false);
     await nextTick();
 
@@ -320,6 +320,46 @@ describe('snap', () => {
     await nextTick();
 
     expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ left: 100, behavior: 'smooth' }));
+    wrapper.unmount();
+  });
+
+  it('skips the horizontal snap when there are no columns configured', async () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+    let scrollTop = 0;
+    Object.defineProperty(container, 'scrollTop', {
+      configurable: true,
+      get: () => scrollTop,
+      set: (val) => { scrollTop = val; },
+    });
+    container.scrollTo = vi.fn().mockImplementation((options: ScrollToOptions) => {
+      if (options.top !== undefined) {
+        scrollTop = options.top;
+      }
+      container.dispatchEvent(new Event('scroll'));
+    });
+
+    const { wrapper } = setup({
+      container,
+      direction: 'both',
+      itemSize: 50,
+      items: mockItems,
+      snap: true,
+    });
+
+    await nextTick();
+    await nextTick();
+
+    // Scroll down only: no horizontal movement, so the X axis has no snap target
+    scrollTop = 60;
+    container.dispatchEvent(new Event('scroll'));
+    await nextTick();
+
+    vi.advanceTimersByTime(1100);
+    await nextTick();
+
+    // The vertical axis still snaps to the nearest item start
+    expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 50, behavior: 'smooth' }));
     wrapper.unmount();
   });
 

@@ -444,12 +444,66 @@ describe('useVirtualScrollKeyboard', () => {
     expect(scrollToIndex).not.toHaveBeenCalled();
   });
 
-  it('arrow right does nothing in vertical-only mode', () => {
-    const scrollDetails = ref(makeScrollDetails());
+  it('arrow left moves to the previous column when the current one starts at the viewport edge', () => {
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 500, y: 0 },
+      currentColIndex: 5,
+      currentEndColIndex: 9,
+    }));
     const scrollToIndex = vi.fn();
-    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'vertical' }), { scrollToIndex });
+    const { handleKeyDown } = makeKeyboard(
+      scrollDetails,
+      makeProps({ direction: 'horizontal' }),
+      { scrollToIndex, getItemOffset: (idx) => idx * 100 },
+    );
+
+    handleKeyDown(pressKey('ArrowLeft'));
+    // colStartPos (500) is not < viewportLeft (500) - 1, so the previous column is targeted
+    expect(scrollToIndex).toHaveBeenCalledWith(null, 4, { align: 'start' });
+  });
+
+  it('arrow left does nothing when already at the first column', () => {
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 0, y: 0 },
+      currentColIndex: 0,
+      currentEndColIndex: 9,
+    }));
+    const scrollToIndex = vi.fn();
+    const { handleKeyDown } = makeKeyboard(
+      scrollDetails,
+      makeProps({ direction: 'horizontal' }),
+      { scrollToIndex, getItemOffset: (idx) => idx * 100 },
+    );
+
+    handleKeyDown(pressKey('ArrowLeft'));
+    // colStartPos (0) is not < viewportLeft (0) - 1 and currentColIndex is 0
+    expect(scrollToIndex).not.toHaveBeenCalled();
+  });
+
+  it('arrow right with snapMode=center clamps to the last column when columnCount is set', () => {
+    const scrollDetails = ref(makeScrollDetails({ currentColIndex: 3, currentEndColIndex: 9 }));
+    const scrollToIndex = vi.fn();
+    const { handleKeyDown } = makeKeyboard(
+      scrollDetails,
+      makeProps({ direction: 'horizontal', snap: 'center', columnCount: 5 }),
+      { scrollToIndex, getColIndexAt: (o) => Math.floor(o / 50) },
+    );
 
     handleKeyDown(pressKey('ArrowRight'));
-    expect(scrollToIndex).not.toHaveBeenCalled();
+    // maxIdx = columnCount - 1 = 4
+    expect(scrollToIndex).toHaveBeenCalledWith(null, 4, { align: 'center' });
+  });
+
+  it('handles PageDown on horizontal lists when columnCount is set', () => {
+    const scrollDetails = ref(makeScrollDetails({ currentColIndex: 0, currentEndColIndex: 3 }));
+    const scrollToIndex = vi.fn();
+    const { handleKeyDown } = makeKeyboard(
+      scrollDetails,
+      makeProps({ direction: 'horizontal', columnCount: 5 }),
+      { scrollToIndex },
+    );
+
+    handleKeyDown(pressKey('PageDown'));
+    expect(scrollToIndex).toHaveBeenCalledWith(null, 3, { align: 'start' });
   });
 });

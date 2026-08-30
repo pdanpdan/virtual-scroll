@@ -1,8 +1,10 @@
+import type { VirtualScrollProps } from '../../src/types';
 import type { MockItem } from '../test-helper';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 
+import { useVirtualScroll } from '../../src/composables/useVirtualScroll';
 import { useCoordinateScalingExtension } from '../../src/extensions/coordinate-scaling';
 import { usePrependRestorationExtension } from '../../src/extensions/prepend-restoration';
 import { useSnappingExtension } from '../../src/extensions/snapping';
@@ -375,6 +377,201 @@ describe('useVirtualScroll', () => {
       // componentOffset.x should have changed because of RTL logic in calculateOffset
       expect(result.componentOffset.x).not.toBe(initialX);
 
+      wrapper.unmount();
+    });
+
+    it('re-syncs the display scroll when RTL changes on an element container', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      const hostElement = document.createElement('div');
+      const hostRef = document.createElement('div');
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 50,
+        right: 150,
+        top: 0,
+        bottom: 0,
+        width: 100,
+        height: 0,
+      } as DOMRect);
+      vi.spyOn(hostRef, 'getBoundingClientRect').mockReturnValue({
+        left: 50,
+        right: 150,
+        top: 0,
+        bottom: 0,
+        width: 100,
+        height: 0,
+      } as DOMRect);
+
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 100,
+        direction: 'horizontal',
+        container,
+        hostElement,
+        hostRef,
+      });
+      await nextTick();
+      await nextTick();
+
+      // RTL flips: the watch re-maps the horizontal scroll position from the old direction.
+      // With the element container at origin and the host at right: 150, the rtl offset is
+      // containerRect.right (0) - rect.right (150) - scrollLeft (0) = -150, so the re-map
+      // scrolls to 150 (and the direction detection then re-applies the ltr state).
+      result.isRtl.value = true;
+      await nextTick();
+      await nextTick();
+
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(150);
+      wrapper.unmount();
+    });
+
+    it('detects an rtl container without any extensions', async () => {
+      const container = document.createElement('div');
+      container.setAttribute('dir', 'rtl');
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        container,
+      }, []);
+      await nextTick();
+      await nextTick();
+
+      // The core direction detection runs without the rtl extension
+      expect(result.isRtl.value).toBe(true);
+      wrapper.unmount();
+    });
+
+    it('runs the SSR guards when window is undefined', () => {
+      vi.stubGlobal('window', undefined);
+      try {
+        const props = ref<VirtualScrollProps<MockItem>>({ itemSize: 50, items: mockItems });
+        const result = useVirtualScroll(props);
+
+        // The immediate container watch attaches events; all SSR guards return early
+        result.updateDirection();
+        result.updateHostOffset();
+
+        expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('works without a component instance (no lifecycle hooks)', () => {
+      const props = ref<VirtualScrollProps<MockItem>>({ itemSize: 50, items: mockItems });
+      const result = useVirtualScroll(props);
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+    });
+
+    it('falls back to a zero offset for a non-element container', async () => {
+      const hostElement = document.createElement('div');
+      Object.defineProperty(document, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(document, 'clientWidth', { configurable: true, value: 500 });
+      const { result, wrapper } = setup({
+        container: document as unknown as Window,
+        hostElement,
+        itemSize: 50,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      // document is neither window nor an element: the offset calculation falls back to 0
+      expect(result.componentOffset.x).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('queries dynamic sizes in the offset helpers for every direction', () => {
+      const vertical = setup({ itemSize: 0, defaultItemSize: 40, items: mockItems });
+      expect(vertical.result.getItemOffset(5)).toBe(200);
+      expect(vertical.result.getRowOffset(5)).toBe(200);
+      vertical.wrapper.unmount();
+
+      const horizontal = setup({ direction: 'horizontal', itemSize: 0, defaultItemSize: 40, items: mockItems });
+      expect(horizontal.result.getItemOffset(5)).toBe(200);
+      expect(horizontal.result.getColumnOffset(5)).toBe(200);
+      horizontal.wrapper.unmount();
+
+      const both = setup({
+        direction: 'both',
+        columnCount: 5,
+        columnWidth: 0,
+        defaultColumnWidth: 100,
+        itemSize: 50,
+        items: mockItems,
+      });
+      expect(both.result.getColumnOffset(2)).toBe(200);
+      both.wrapper.unmount();
+    });
+
+    it('tracks horizontal scroll direction on element scrolls', async () => {
+      vi.useFakeTimers();
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      let scrollLeft = 0;
+      Object.defineProperty(container, 'scrollLeft', {
+        configurable: true,
+        get: () => scrollLeft,
+        set: (val: number) => {
+          scrollLeft = val;
+        },
+      });
+
+      const { result, internalState, wrapper } = setup({
+        container,
+        direction: 'horizontal',
+        itemSize: 100,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      // The first scroll reports direction relative to the initial position (0)
+      scrollLeft = 300;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.scrollDirectionX.value).toBe('end');
+
+      // After the scroll-end timer resets the baseline, scrolling left reports 'start'
+      vi.advanceTimersByTime(200);
+      await nextTick();
+      scrollLeft = 100;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.scrollDirectionX.value).toBe('start');
+
+      // Scrolling right again reports 'end'
+      vi.advanceTimersByTime(200);
+      await nextTick();
+      scrollLeft = 200;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.scrollDirectionX.value).toBe('end');
+
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(200);
+      wrapper.unmount();
+      vi.useRealTimers();
+    });
+
+    it('re-scrolls with a correction when a pending scroll uses string alignment', async () => {
+      const { result, internalState, wrapper } = setup({
+        itemSize: 0,
+        defaultItemSize: 40,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      result.scrollToIndex(10, null, 'start');
+      await nextTick();
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBeCloseTo(400, 0);
       wrapper.unmount();
     });
   });

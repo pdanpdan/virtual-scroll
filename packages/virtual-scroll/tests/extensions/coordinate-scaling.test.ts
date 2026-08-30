@@ -123,6 +123,34 @@ describe('scaling & large lists', () => {
       expect(result.scrollDetails.value.scrollOffset.y).toBe(oldScrollY);
       wrapper.unmount();
     });
+
+    it('syncs display scroll when columnCount changes in a horizontally scaled list', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      const { result, wrapper, props } = setup({
+        container,
+        items: Array.from({ length: 100000 }, (_, i) => ({ id: i, name: `Item ${ i }` })),
+        itemSize: 1000, // 100,000,000px total -> will trigger scaling
+        direction: 'horizontal',
+      });
+      await nextTick();
+
+      result.scrollToOffset(50000000, null);
+      await nextTick();
+      await nextTick();
+
+      expect(result.scaleX.value).toBeGreaterThan(1);
+      const oldScrollX = result.scrollDetails.value.scrollOffset.x;
+
+      // Changing the column count while scaleX is active must re-sync the display scroll
+      props.value.columnCount = 5;
+      await nextTick();
+      await nextTick();
+
+      expect(result.scrollDetails.value.scrollOffset.x).toBe(oldScrollX);
+      wrapper.unmount();
+    });
   });
 
   it('handles scale and direction watchers', async () => {

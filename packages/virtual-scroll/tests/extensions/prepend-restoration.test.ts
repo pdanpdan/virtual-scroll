@@ -239,13 +239,14 @@ describe('dynamic sizing & prepending', () => {
 
     await nextTick();
 
-    // Prepend item
+    // Prepend item: with no container, the scroll correction falls back to the window
+    // and compensates the added 50px
     props.value.items = [ { id: -1 }, ...items ];
     await nextTick();
     await nextTick();
+    await nextTick();
 
-    // Should not crash
-    expect(props.value.items.length).toBe(21);
+    expect(window.scrollY).toBe(50);
     wrapper.unmount();
   });
 
@@ -277,11 +278,10 @@ describe('dynamic sizing & prepending', () => {
 
   it('handles addedSize = 0 correctly', async () => {
     const items = Array.from({ length: 20 }, (_, i) => ({ id: i + 10 }));
-    const { props, result, wrapper } = setup({
+    const { props, wrapper } = setup({
       container: window,
       direction: 'vertical',
-      itemSize: 0,
-      defaultItemSize: 0,
+      itemSize: (item: { id: number; }) => (item.id === 1 ? 0 : 50),
       items,
       restoreScrollOnPrepend: true,
       gap: 0,
@@ -292,17 +292,18 @@ describe('dynamic sizing & prepending', () => {
     document.dispatchEvent(new Event('scroll'));
     await nextTick();
 
-    const correctionSpy = vi.spyOn(result, 'handleScrollCorrection');
+    const scrollToSpy = vi.spyOn(window, 'scrollTo');
+    scrollToSpy.mockClear();
 
-    // Prepend 1 item
+    // Prepend an item with a zero base size: the computed added size stays 0,
+    // so no scroll correction must happen
     props.value.items = [ { id: 1 }, ...items ];
     await nextTick();
     await nextTick();
     await nextTick();
 
-    // addedSize should be 0 (itemSize 0 + gap 0)
-    expect(correctionSpy).not.toHaveBeenCalled();
-    // We don't care about the exact scrollY here as long as correction wasn't called
+    expect(scrollToSpy).not.toHaveBeenCalled();
+    scrollToSpy.mockRestore();
     wrapper.unmount();
   });
 });

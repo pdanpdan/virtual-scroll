@@ -1,6 +1,6 @@
 import type { Ref } from 'vue';
 
-import { onMounted, onUnmounted, watch } from 'vue';
+import { getCurrentInstance, onMounted, onUnmounted, watch } from 'vue';
 
 export interface UseVirtualScrollObserversOptions {
   hostRef: Ref<HTMLElement | null>;
@@ -119,16 +119,24 @@ export function useVirtualScrollObservers({
     }
   };
 
-  onMounted(() => {
-    if (hostRef.value) {
-      hostResizeObserver?.observe(hostRef.value);
-    }
+  if (getCurrentInstance()) {
+    onMounted(() => {
+      if (hostRef.value) {
+        hostResizeObserver?.observe(hostRef.value);
+      }
 
-    // Re-observe items that were set before observer was ready
-    for (const el of itemRefs.values()) {
-      observeItem(el, true);
-    }
-  });
+      // Re-observe items that were set before observer was ready
+      for (const el of itemRefs.values()) {
+        observeItem(el, true);
+      }
+    });
+
+    onUnmounted(() => {
+      hostResizeObserver?.disconnect();
+      itemResizeObserver?.disconnect();
+      extraResizeObserver?.disconnect();
+    });
+  }
 
   watch([ hostRef, wrapperRef ], ([ newHost ], [ oldHost ]) => {
     if (oldHost) {
@@ -137,12 +145,6 @@ export function useVirtualScrollObservers({
     if (newHost) {
       hostResizeObserver?.observe(newHost);
     }
-  });
-
-  onUnmounted(() => {
-    hostResizeObserver?.disconnect();
-    itemResizeObserver?.disconnect();
-    extraResizeObserver?.disconnect();
   });
 
   return {

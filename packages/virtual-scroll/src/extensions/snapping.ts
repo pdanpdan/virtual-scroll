@@ -80,8 +80,10 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
         const currentX = ctx.internalState.internalScrollX.value;
         const currentY = ctx.internalState.internalScrollY.value;
 
+        // v8 ignore start -- getRowIndexAt/getColIndexAt return numbers, so targets are never null here
         const diffX = (targetCol !== null) ? Math.abs(targetX - currentX) : 0;
         const diffY = (targetRow !== null) ? Math.abs(targetY - currentY) : 0;
+        // v8 ignore stop
 
         if (diffX > 0.5 || diffY > 0.5) {
           ctx.methods.scrollToIndex(targetRow, targetCol, {

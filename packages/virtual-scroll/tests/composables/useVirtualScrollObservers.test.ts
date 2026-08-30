@@ -162,9 +162,8 @@ describe('useVirtualScrollObservers', () => {
   });
 
   it('skips ResizeObserver construction when window is undefined', () => {
-    // Call useVirtualScrollObservers directly (no mount) with window === undefined
-    // by temporarily spying on ResizeObserver so we can tell it wasn't called
     const constructorSpy = vi.spyOn(globalThis, 'ResizeObserver');
+    constructorSpy.mockClear();
 
     const hostRef = ref<HTMLElement | null>(null);
     const wrapperRef = ref<HTMLElement | null>(null);
@@ -176,10 +175,10 @@ describe('useVirtualScrollObservers', () => {
     const updateHostOffset = vi.fn();
     const updateItemSizes = vi.fn();
 
-    // Simulate window === undefined by patching the typeof check's value
-    // We can't delete window here (breaks mount above), but we can verify
-    // setItemRef still works without observers when called directly
-    mount(createTestComponent(() => {
+    vi.stubGlobal('window', undefined);
+    try {
+      // Called directly (no component mount): without a window no observers
+      // are constructed, but item refs still work
       const { setItemRef } = useVirtualScrollObservers({
         hostRef,
         wrapperRef,
@@ -193,12 +192,77 @@ describe('useVirtualScrollObservers', () => {
         updateItemSizes,
       });
 
-      // Verify setItemRef works even when we stub observe/unobserve
+      expect(constructorSpy).not.toHaveBeenCalled();
       const el = document.createElement('div');
       setItemRef(el, 5);
       expect(itemRefs.get(5)).toBe(el);
-    }));
+    } finally {
+      vi.unstubAllGlobals();
+    }
 
     constructorSpy.mockRestore();
+  });
+  it('measures header and footer padding via the extra resize observer', () => {
+    const hostRef = ref<HTMLElement | null>(null);
+    const wrapperRef = ref<HTMLElement | null>(null);
+    const headerRef = ref<HTMLElement | null>(null);
+    const footerRef = ref<HTMLElement | null>(null);
+    const measuredPaddingStart = ref(0);
+    const measuredPaddingEnd = ref(0);
+    const itemRefs = new Map<number, HTMLElement>();
+    const updateHostOffset = vi.fn();
+    const updateItemSizes = vi.fn();
+
+    const resizeCallbacks: ResizeObserverCallback[] = [];
+    vi.spyOn(globalThis, 'ResizeObserver').mockImplementation(function (cb: ResizeObserverCallback) {
+      resizeCallbacks.push(cb);
+      return {
+        observe: vi.fn(),
+        unobserve: vi.fn(),
+        disconnect: vi.fn(),
+      } as unknown as ResizeObserver;
+    } as unknown as typeof ResizeObserver);
+
+    mount(createTestComponent(() => {
+      useVirtualScrollObservers({
+        hostRef,
+        wrapperRef,
+        headerRef,
+        footerRef,
+        measuredPaddingStart,
+        measuredPaddingEnd,
+        itemRefs,
+        direction: 'vertical',
+        updateHostOffset,
+        updateItemSizes,
+      });
+    }));
+
+    const header = document.createElement('div');
+    Object.defineProperty(header, 'offsetHeight', { configurable: true, get: () => 50 });
+    const footer = document.createElement('div');
+    Object.defineProperty(footer, 'offsetHeight', { configurable: true, get: () => 30 });
+
+    headerRef.value = header;
+    footerRef.value = footer;
+
+    // resizeCallbacks[2] is the extra observer (header/footer padding)
+    resizeCallbacks[ 2 ]?.([], {} as ResizeObserver);
+
+    expect(measuredPaddingStart.value).toBe(50);
+    expect(measuredPaddingEnd.value).toBe(30);
+    expect(updateHostOffset).toHaveBeenCalled();
+
+    // Unmeasured (zero-height) header/footer fall back to 0 padding
+    const flatHeader = document.createElement('div');
+    const flatFooter = document.createElement('div');
+    headerRef.value = flatHeader;
+    footerRef.value = flatFooter;
+    resizeCallbacks[ 2 ]?.([], {} as ResizeObserver);
+
+    expect(measuredPaddingStart.value).toBe(0);
+    expect(measuredPaddingEnd.value).toBe(0);
+
+    vi.restoreAllMocks();
   });
 });
