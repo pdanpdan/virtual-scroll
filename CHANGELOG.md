@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.3](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.2...v0.11.3) (2026-08-30)
+
+### Bug Fixes
+
+* do not clamp scroll before the loading slot when scrolling to end ([ceabc86](https://github.com/pdanpdan/virtual-scroll/commit/ceabc86b5f9ee3526896e78356acb8fd47b6ef71))
+* keep sticky section headers below the sticky header if it exists ([d5da8bb](https://github.com/pdanpdan/virtual-scroll/commit/d5da8bb4a0ca67170b09df81ef3b47caea4d4f9c))
+* scroll while loading new content and pg_up/down scroll for large items ([04f20e2](https://github.com/pdanpdan/virtual-scroll/commit/04f20e2338b22b89ecef61f4a145db4f025b1041))
+
 ## [0.11.2](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.1...v0.11.2) (2026-08-30)
 
 ### Bug Fixes
