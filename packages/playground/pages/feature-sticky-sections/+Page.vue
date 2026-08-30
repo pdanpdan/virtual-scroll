@@ -5,21 +5,27 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
 import { html as highlightedCode } from './+Page.vue?highlight';
 
-const sectionCount = 20;
-const itemsPerSection = 10;
+const sectionCount = ref(20);
+const itemsPerSection = ref(10);
+const itemSize = ref(50);
+const bufferBefore = ref(5);
+const bufferAfter = ref(5);
+const stickyHeader = ref(false);
+const stickyFooter = ref(false);
 
 const items = computed(() => {
   const result = [];
-  for (let s = 0; s < sectionCount; s++) {
+  for (let s = 0; s < sectionCount.value; s++) {
     // Header item
     result.push({ type: 'header', label: `Section ${ String.fromCharCode(65 + s) }` });
     // Data items
-    for (let i = 0; i < itemsPerSection; i++) {
+    for (let i = 0; i < itemsPerSection.value; i++) {
       result.push({ type: 'item', label: `Item ${ s }-${ i }` });
     }
   }
@@ -28,15 +34,18 @@ const items = computed(() => {
 
 const stickyIndices = computed(() => {
   const indices = [];
-  for (let i = 0; i < items.value.length; i += (itemsPerSection + 1)) {
+  for (let i = 0; i < items.value.length; i += (itemsPerSection.value + 1)) {
     indices.push(i);
   }
   return indices;
 });
 
 const {
+  virtualScrollRef,
   scrollDetails,
   onScroll,
+  handleScrollToIndex,
+  handleScrollToOffset,
 } = useExampleScroll();
 
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
@@ -71,17 +80,42 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
     <template #controls>
       <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+
+      <ScrollControls
+        v-model:section-count="sectionCount"
+        v-model:items-per-section="itemsPerSection"
+        v-model:item-size="itemSize"
+        v-model:buffer-before="bufferBefore"
+        v-model:buffer-after="bufferAfter"
+        v-model:sticky-header="stickyHeader"
+        v-model:sticky-footer="stickyFooter"
+        direction="vertical"
+        @scroll-to-index="handleScrollToIndex"
+        @scroll-to-offset="handleScrollToOffset"
+        @refresh="virtualScrollRef?.refresh()"
+      />
     </template>
 
     <VirtualScroll
+      ref="virtualScrollRef"
       :debug="debugMode"
       class="example-container"
       :items="items"
-      :item-size="50"
+      :item-size="itemSize"
+      :buffer-before="bufferBefore"
+      :buffer-after="bufferAfter"
       :sticky-indices="stickyIndices"
+      :sticky-header="stickyHeader"
+      :sticky-footer="stickyFooter"
       aria-label="Sticky sections list"
       @scroll="onScroll"
     >
+      <template v-if="stickyHeader" #header>
+        <div class="example-sticky-header">
+          Sticky Header
+        </div>
+      </template>
+
       <template #item="{ item, isStickyActive }">
         <div
           v-if="item.type === 'header'"
@@ -92,6 +126,12 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
         <div v-else class="example-vertical-item example-vertical-item--fixed">
           {{ item.label }}
+        </div>
+      </template>
+
+      <template v-if="stickyFooter" #footer>
+        <div class="example-sticky-footer">
+          Sticky Footer
         </div>
       </template>
     </VirtualScroll>

@@ -4,13 +4,15 @@ import type { ScrollAlignment, ScrollAlignmentOptions } from '@pdanpdan/virtual-
 import { ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
-  itemCount: number;
+  itemCount?: number;
   direction?: string;
   columnCount?: number;
   columnWidth?: number;
   itemSize?: number;
   bufferBefore?: number;
   bufferAfter?: number;
+  sectionCount?: number;
+  itemsPerSection?: number;
   stickyHeader?: boolean | undefined;
   stickyFooter?: boolean | undefined;
 }>(), {
@@ -21,6 +23,8 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:itemCount', value: number): void;
+  (e: 'update:sectionCount', value: number): void;
+  (e: 'update:itemsPerSection', value: number): void;
   (e: 'update:columnCount', value: number): void;
   (e: 'update:columnWidth', value: number): void;
   (e: 'update:itemSize', value: number): void;
@@ -33,8 +37,10 @@ const emit = defineEmits<{
   (e: 'refresh'): void;
 }>();
 
-const localItemCount = ref(props.itemCount);
+const localItemCount = ref(props.itemCount ?? 0);
 const localItemSize = ref(props.itemSize ?? 40);
+const localSectionCount = ref(props.sectionCount ?? 10);
+const localItemsPerSection = ref(props.itemsPerSection ?? 10);
 const localColumnCount = ref(props.columnCount ?? 0);
 const localColumnWidth = ref(props.columnWidth ?? 0);
 const localBufferBefore = ref(props.bufferBefore ?? 5);
@@ -50,8 +56,18 @@ const scrollAlignX = ref<ScrollAlignment>('auto');
 const scrollAlignY = ref<ScrollAlignment>('auto');
 
 function updateCounts() {
-  emit('update:itemCount', localItemCount.value);
-  emit('update:itemSize', localItemSize.value);
+  if (props.itemCount !== undefined) {
+    emit('update:itemCount', localItemCount.value);
+  }
+  if (props.itemSize !== undefined) {
+    emit('update:itemSize', localItemSize.value);
+  }
+  if (props.sectionCount !== undefined) {
+    emit('update:sectionCount', localSectionCount.value);
+  }
+  if (props.itemsPerSection !== undefined) {
+    emit('update:itemsPerSection', localItemsPerSection.value);
+  }
   if (props.direction === 'both') {
     emit('update:columnCount', localColumnCount.value);
     emit('update:columnWidth', localColumnWidth.value);
@@ -63,8 +79,10 @@ watch(localBufferAfter, (val) => emit('update:bufferAfter', val));
 watch(localStickyHeader, (val) => emit('update:stickyHeader', val));
 watch(localStickyFooter, (val) => emit('update:stickyFooter', val));
 
-watch(() => props.itemCount, (val) => localItemCount.value = val);
+watch(() => props.itemCount, (val) => localItemCount.value = val ?? 0);
 watch(() => props.itemSize, (val) => localItemSize.value = val ?? 40);
+watch(() => props.sectionCount, (val) => localSectionCount.value = val ?? 10);
+watch(() => props.itemsPerSection, (val) => localItemsPerSection.value = val ?? 10);
 watch(() => props.columnCount, (val) => localColumnCount.value = val ?? 0);
 watch(() => props.columnWidth, (val) => localColumnWidth.value = val ?? 0);
 watch(() => props.bufferBefore, (val) => localBufferBefore.value = val ?? 5);
@@ -108,12 +126,22 @@ function handleScrollToOffset() {
 
     <li class="list-row py-2">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
-        <label class="floating-label p-0">
+        <label v-if="itemCount !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Items #</span>
           <input v-model.number="localItemCount" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
 
-        <label class="floating-label p-0">
+        <label v-if="sectionCount !== undefined" class="floating-label p-0">
+          <span class="text-xs font-bold small-caps text-base-content/50">Sections #</span>
+          <input v-model.number="localSectionCount" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
+        </label>
+
+        <label v-if="itemsPerSection !== undefined" class="floating-label p-0">
+          <span class="text-xs font-bold small-caps text-base-content/50">Items/Sec</span>
+          <input v-model.number="localItemsPerSection" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
+        </label>
+
+        <label v-if="itemSize !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Item Size</span>
           <input v-model.number="localItemSize" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
