@@ -125,7 +125,26 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToOffset, getLoadingSlotSize: () => 56 });
 
     handleKeyDown(pressKey('End'));
-    expect(scrollToOffset).toHaveBeenCalledWith(null, 4556, { behavior: 'smooth' });
+    expect(scrollToOffset).toHaveBeenCalledWith(null, 4556, { behavior: 'smooth', endExtraY: 56 });
+  });
+
+  it('end key includes the loading slot height (horizontal)', () => {
+    const scrollDetails = ref(makeScrollDetails());
+    const scrollToOffset = vi.fn();
+    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToOffset, getLoadingSlotSize: () => 56 });
+
+    handleKeyDown(pressKey('End'));
+    expect(scrollToOffset).toHaveBeenCalledWith(4556, null, { behavior: 'smooth', endExtraX: 56 });
+  });
+
+  it('end key includes the loading slot height (both directions)', () => {
+    const scrollDetails = ref(makeScrollDetails());
+    const scrollToOffset = vi.fn();
+    const props = makeProps({ direction: 'both', columnCount: 10 });
+    const { handleKeyDown } = makeKeyboard(scrollDetails, props, { scrollToOffset, getLoadingSlotSize: () => 56 });
+
+    handleKeyDown(pressKey('End'));
+    expect(scrollToOffset).toHaveBeenCalledWith(4500, 4556, { behavior: 'smooth', endExtraY: 56 });
   });
 
   // ── ArrowUp / ArrowDown ─────────────────────────────────────────────────────

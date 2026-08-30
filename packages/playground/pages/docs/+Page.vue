@@ -686,7 +686,7 @@ const vs = useVirtualScroll(props, [
         </div>
         <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#loading</h4>
-          <p class="text-xs @4xl:text-sm opacity-90">Always rendered when provided — hidden via the <code>virtual-scroll-loading--hidden</code> class (<code>visibility: hidden</code>) while <code>loading</code> is false — so it reserves its space and the <code>End</code> key can include its size in the scroll target. Prevents redundant <code>load</code> events.</p>
+          <p class="text-xs @4xl:text-sm opacity-90">Always rendered when provided — hidden via the <code>virtual-scroll-loading--hidden</code> class (<code>visibility: hidden</code>) while <code>loading</code> is false — so it reserves its space and the <code>End</code> key can include its size in the scroll target. Prevents redundant <code>load</code> events. Only provide the slot while a load is expected: once there is no more data, stop passing it (e.g. <code>v-if="hasMore"</code> on <code>&lt;template #loading&gt;</code>) so the reserved space disappears.</p>
         </div>
       </div>
 
@@ -1623,7 +1623,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts an <code>UseVirtualScrollKeyboardOptions</code> object.</p>
           <ul class="list-disc ps-5 space-y-1">
-            <li><code>scrollToOffset</code>: Scrolls to a pixel position. Used by the <code>End</code> key.</li>
+            <li><code>scrollToOffset</code>: Scrolls to a pixel position. Used by the <code>End</code> key; the key passes internal <code>endExtraX</code> / <code>endExtraY</code> options so the scroll clamp extends past the virtual content (the loading slot below the items).</li>
             <li><code>getLoadingSlotSize</code> (optional): Height of the loading slot. When provided, <code>End</code> includes it in the target so the last item plus the slot fit in the viewport.</li>
           </ul>
         </div>
@@ -2291,11 +2291,12 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
             code="scrollToOffset(
 x?: number | null,
 y?: number | null,
-options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
+options?: { behavior?: 'auto' | 'smooth'; endExtraX?: number; endExtraY?: number } // behavior default: 'auto'
 ): void"
           />
           <div class="prose prose-sm max-w-none opacity-90">
-            <p>Scrolls the container to an absolute pixel position. Clamped between <code>0</code> and the calculated total size.</p>
+            <p>Scrolls the container to an absolute pixel position. Clamped between <code>0</code> and the calculated total size; the target is re-clamped when measurements settle (dynamic items).</p>
+            <p><code>endExtraX</code> / <code>endExtraY</code> (internal, used by the <code>End</code> key) extend the clamp past the virtual content end, so DOM content rendered after the wrapper — like the always-rendered loading slot — stays reachable.</p>
           </div>
         </div>
 

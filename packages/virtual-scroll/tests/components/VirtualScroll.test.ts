@@ -591,6 +591,24 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
 
+    it('end key lands past the virtual end when a loading slot is rendered', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+        slots: {
+          loading: '<div class="test-loading-slot">Loading</div>',
+        },
+      });
+      await nextTick();
+      const loadingEl = wrapper.find('.virtual-scroll-loading').element;
+      Object.defineProperty(loadingEl, 'offsetHeight', { configurable: true, value: 56 });
+
+      await wrapper.find('.virtual-scroll-container').trigger('keydown', { key: 'End' });
+      await nextTick();
+      await nextTick();
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(4556);
+      wrapper.unmount();
+    });
+
     it('responds to arrows in vertical mode', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },

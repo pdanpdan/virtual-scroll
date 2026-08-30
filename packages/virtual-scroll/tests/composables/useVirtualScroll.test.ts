@@ -145,23 +145,25 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
-    it('starts a timer for smooth scroll in scrollToOffset', async () => {
+    it('keeps the loading-slot allowance when re-clamping an offset scroll', async () => {
       vi.useFakeTimers();
       const container = document.createElement('div');
       container.scrollTo = vi.fn();
       const { result, wrapper } = setup({
         container,
+        direction: 'horizontal',
         items: mockItems,
       });
       await nextTick();
 
-      result.scrollToOffset(0, 100, { behavior: 'smooth' });
-      expect(result.scrollDetails.value.isProgrammaticScroll).toBe(true);
-
+      // 100 items * 40 - 500 viewport = 3500; the allowance extends the clamp
+      // to 3556. The mock never moves, so the settle check must re-issue the
+      // scroll as a correction carrying endExtraX.
+      result.scrollToOffset(3556, null, { behavior: 'smooth', endExtraX: 56 });
       vi.advanceTimersByTime(1000);
       await nextTick();
 
-      expect(result.scrollDetails.value.isProgrammaticScroll).toBe(false);
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ left: 3556 }));
       vi.useRealTimers();
       wrapper.unmount();
     });
@@ -572,6 +574,30 @@ describe('useVirtualScroll', () => {
       await nextTick();
 
       expect(internalState.internalScrollY.value).toBeCloseTo(400, 0);
+      wrapper.unmount();
+    });
+
+    it('scrolls to a column target with dynamic item sizes (horizontal)', async () => {
+      vi.useFakeTimers();
+      const { result, internalState, wrapper } = setup({
+        direction: 'horizontal',
+        itemSize: 0,
+        defaultItemSize: 100,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      result.scrollToIndex(null, 5, 'start');
+      await nextTick();
+      // Let the smooth programmatic scroll timer fire so the pending target
+      // is recomputed against the measured sizes.
+      vi.advanceTimersByTime(1000);
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollX.value).toBeCloseTo(500, 0);
+      vi.useRealTimers();
       wrapper.unmount();
     });
   });

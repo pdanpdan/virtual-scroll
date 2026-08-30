@@ -7,7 +7,7 @@ export interface UseVirtualScrollKeyboardOptions<T> {
   scrollDetails: Ref<ScrollDetails<T>>;
   isRtl: Ref<boolean>;
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; }) => void;
-  scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
+  scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; endExtraX?: number; endExtraY?: number; }) => void;
   stopProgrammaticScroll: () => void;
   getRowHeight: (index: number) => number;
   getColumnWidth: (index: number) => number;
@@ -224,19 +224,29 @@ export function useVirtualScrollKeyboard<T>({
         const viewport = props.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
         const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
         // The loading slot is always rendered (hidden when idle): include its
-        // height so the last item plus the slot fit in the viewport.
+        // height so the last item plus the slot fit in the viewport. The extra
+        // also extends scrollToOffset's clamp, which otherwise caps at the
+        // virtual content end and would hide the slot below it.
         const extra = getLoadingSlotSize ? getLoadingSlotSize() : 0;
 
         if (props.direction === 'both') {
           scrollToOffset(
             totalSize.width - viewportSize.width,
             totalSize.height - viewportSize.height + extra,
-            { behavior },
+            { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
           );
         } else if (props.direction === 'horizontal') {
-          scrollToOffset(totalSize.width - viewportSize.width + extra, null, { behavior });
+          scrollToOffset(
+            totalSize.width - viewportSize.width + extra,
+            null,
+            { behavior, ...(extra > 0 ? { endExtraX: extra } : {}) },
+          );
         } else {
-          scrollToOffset(null, totalSize.height - viewportSize.height + extra, { behavior });
+          scrollToOffset(
+            null,
+            totalSize.height - viewportSize.height + extra,
+            { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
+          );
         }
         break;
       }

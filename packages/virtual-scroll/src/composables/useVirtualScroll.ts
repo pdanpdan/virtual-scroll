@@ -101,6 +101,10 @@ export function useVirtualScroll<T = unknown>(
     offsetX?: number;
     /** Offset-based target (from scrollToOffset): re-clamped when measurements settle. */
     offsetY?: number;
+    /** Extra clamp allowance (loading slot) for the offset-based target; always set (0 when none). */
+    endExtraX: number;
+    /** Extra clamp allowance (loading slot) for the offset-based target; always set (0 when none). */
+    endExtraY: number;
   } | null>(null);
 
   /** Whether the current scroll operation was initiated programmatically. */
@@ -427,6 +431,9 @@ export function useVirtualScroll<T = unknown>(
           align: { x: effectiveAlignX, y: effectiveAlignY },
           ...(behavior != null ? { behavior } : {}),
         },
+        // Index-based pending: no loading-slot allowance.
+        endExtraX: 0,
+        endExtraY: 0,
       };
     }
 
@@ -471,15 +478,20 @@ export function useVirtualScroll<T = unknown>(
     return { targetX, targetY, displayTargetX, displayTargetY };
   }
 
-  function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; isCorrection?: boolean; }) {
+  function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; isCorrection?: boolean; endExtraX?: number; endExtraY?: number; }) {
     const container = props.value.container || window;
     // Internal corrections (settle re-clamps) must not restart the programmatic scroll state.
     if (!options?.isCorrection) {
       startProgrammaticScroll(options?.behavior);
     }
 
-    const clampedX = (x !== null && x !== undefined) ? Math.max(0, Math.min(x, totalWidth.value - viewportWidth.value)) : null;
-    const clampedY = (y !== null && y !== undefined) ? Math.max(0, Math.min(y, totalHeight.value - viewportHeight.value)) : null;
+    // The virtual total excludes DOM content rendered after the wrapper (e.g.
+    // the always-rendered loading slot); endExtra* lets the End key extend the
+    // clamp so that content stays reachable.
+    const clampMaxX = totalWidth.value - viewportWidth.value + (options?.endExtraX ?? 0);
+    const clampMaxY = totalHeight.value - viewportHeight.value + (options?.endExtraY ?? 0);
+    const clampedX = (x !== null && x !== undefined) ? Math.max(0, Math.min(x, clampMaxX)) : null;
+    const clampedY = (y !== null && y !== undefined) ? Math.max(0, Math.min(y, clampMaxY)) : null;
 
     // Defer the final position until measurements settle: like scrollToIndex,
     // re-clamp against the updated totals when the scroll completes.
@@ -489,6 +501,8 @@ export function useVirtualScroll<T = unknown>(
       options: { behavior: options?.behavior ?? 'auto' },
       ...(clampedX !== null ? { offsetX: clampedX } : {}),
       ...(clampedY !== null ? { offsetY: clampedY } : {}),
+      endExtraX: options?.endExtraX ?? 0,
+      endExtraY: options?.endExtraY ?? 0,
     };
 
     if (clampedX !== null) {
@@ -842,7 +856,7 @@ export function useVirtualScroll<T = unknown>(
 
   function checkPendingScroll() {
     if (pendingScroll.value && !isHydrating.value) {
-      const { rowIndex, colIndex, options, offsetX, offsetY } = pendingScroll.value;
+      const { rowIndex, colIndex, options, offsetX, offsetY, endExtraX, endExtraY } = pendingScroll.value;
       const isSmooth = isScrollToIndexOptions(options) && options.behavior === 'smooth';
       if (isSmooth && (isScrolling.value || isProgrammaticScroll.value)) {
         return;
@@ -856,11 +870,12 @@ export function useVirtualScroll<T = unknown>(
       const currentRelY = displayToVirtual(scrollValueY, 0, scaleY.value);
 
       // Offset-based pending (scrollToOffset): re-clamp against the current totals.
+      // endExtra* keeps the loading-slot allowance so the target is not pulled back.
       let targetX = offsetX !== undefined
-        ? Math.max(0, Math.min(offsetX, totalWidth.value - viewportWidth.value))
+        ? Math.max(0, Math.min(offsetX, totalWidth.value - viewportWidth.value + endExtraX))
         : currentRelX;
       let targetY = offsetY !== undefined
-        ? Math.max(0, Math.min(offsetY, totalHeight.value - viewportHeight.value))
+        ? Math.max(0, Math.min(offsetY, totalHeight.value - viewportHeight.value + endExtraY))
         : currentRelY;
 
       if (offsetX === undefined && offsetY === undefined) {
@@ -923,7 +938,7 @@ export function useVirtualScroll<T = unknown>(
         scrollToOffset(
           offsetX !== undefined ? targetX : null,
           offsetY !== undefined ? targetY : null,
-          { behavior: 'auto', isCorrection: true },
+          { behavior: 'auto', isCorrection: true, endExtraX, endExtraY },
         );
       } else {
         // v8 ignore next -- pendingScroll always stores normalized options, so the string fallback is unreachable
