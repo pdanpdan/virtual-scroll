@@ -105,22 +105,22 @@
 
   <h2 class="docs-prop-header text-secondary">Feature Matrix</h2>
 
-  <div class="docs-table-container">
-    <table class="docs-table">
+  <div class="docs-table-container max-h-[70svh]">
+    <table class="docs-table table-pin-rows table-pin-cols">
       <thead>
         <tr>
           <th class="w-56 @4xl:w-64">Feature</th>
-          <th>@pdanpdan<br />/virtual-scroll</th>
-          <th>vue-virtual-<br />scroller</th>
-          <th>@tanstack<br />/vue-virtual</th>
-          <th>virtua</th>
-          <th>vueuc</th>
-          <th>vue-virtual-<br />scroll-list</th>
+          <td role="columnheader">@pdanpdan<br />/virtual-scroll</td>
+          <td role="columnheader">vue-virtual-<br />scroller</td>
+          <td role="columnheader">@tanstack<br />/vue-virtual</td>
+          <td role="columnheader">virtua</td>
+          <td role="columnheader">vueuc</td>
+          <td role="columnheader">vue-virtual-<br />scroll-list</td>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="font-medium">Vertical list</td>
+          <th scope="row" class="font-medium">Vertical list</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -129,7 +129,7 @@
           <td class="text-center">✅</td>
         </tr>
         <tr>
-          <td class="font-medium">Horizontal list</td>
+          <th scope="row" class="font-medium">Horizontal list</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -138,7 +138,7 @@
           <td class="text-center">✅</td>
         </tr>
         <tr>
-          <td class="font-medium">Two-dimensional grid</td>
+          <th scope="row" class="font-medium">Two-dimensional grid</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
@@ -147,7 +147,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Window (page) scrolling</td>
+          <th scope="row" class="font-medium">Window (page) scrolling</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
@@ -156,7 +156,7 @@
           <td class="text-center">✅</td>
         </tr>
         <tr>
-          <td class="font-medium">Fixed item sizes</td>
+          <th scope="row" class="font-medium">Fixed item sizes</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -165,7 +165,7 @@
           <td class="text-center">✅</td>
         </tr>
         <tr>
-          <td class="font-medium">Measured dynamic item sizes</td>
+          <th scope="row" class="font-medium">Measured dynamic item sizes</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -174,7 +174,7 @@
           <td class="text-center">🟠</td>
         </tr>
         <tr>
-          <td class="font-medium">RTL</td>
+          <th scope="row" class="font-medium">RTL</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
@@ -183,7 +183,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Sticky elements / headers</td>
+          <th scope="row" class="font-medium">Sticky elements / headers</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -192,7 +192,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Keyboard navigation</td>
+          <th scope="row" class="font-medium">Keyboard navigation</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -201,7 +201,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Scroll snapping</td>
+          <th scope="row" class="font-medium">Scroll snapping</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
@@ -210,7 +210,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Custom / virtual scrollbars</td>
+          <th scope="row" class="font-medium">Custom / virtual scrollbars</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
@@ -219,7 +219,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Infinite loading</td>
+          <th scope="row" class="font-medium">Infinite loading</th>
           <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
           <td class="text-center">✅</td>
@@ -228,7 +228,7 @@
           <td class="text-center">🟠</td>
         </tr>
         <tr>
-          <td class="font-medium">Scroll restoration (prepend)</td>
+          <th scope="row" class="font-medium">Scroll restoration (prepend)</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
@@ -237,7 +237,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Smooth programmatic scroll</td>
+          <th scope="row" class="font-medium">Smooth programmatic scroll</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -246,7 +246,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">SSR support</td>
+          <th scope="row" class="font-medium">SSR support</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
@@ -255,7 +255,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Beyond browser max element height</td>
+          <th scope="row" class="font-medium">Beyond browser max element height</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -264,7 +264,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">Table virtualization</td>
+          <th scope="row" class="font-medium">Table virtualization</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
@@ -273,7 +273,7 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
-          <td class="font-medium">TypeScript</td>
+          <th scope="row" class="font-medium">TypeScript</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>

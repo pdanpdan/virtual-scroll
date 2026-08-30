@@ -464,6 +464,20 @@ body {
   tbody {
     @apply text-xs text-base-content/80 @4xl:text-sm;
   }
+
+  &.table-pin-cols {
+    @apply border-s-0;
+
+    tbody tr {
+      th[scope="row"] {
+        @apply bg-base-300;
+      }
+
+      &:nth-child(even) th[scope="row"] {
+        @apply bg-base-200;
+      }
+    }
+  }
 }
 
 @utility docs-feature-grid {
