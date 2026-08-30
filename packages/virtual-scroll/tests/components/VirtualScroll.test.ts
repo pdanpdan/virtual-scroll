@@ -561,14 +561,14 @@ describe('virtualScroll', () => {
       }
 
       const details = vs.scrollDetails;
-      // Should be at the end
-      expect(details.scrollOffset.y).toBeGreaterThanOrEqual(details.totalSize.height - details.viewportSize.height - 1);
+      // End scrolls to the end as calculated at keydown (200 * 40 - 500 viewport);
+      // later measurements re-clamp but must not push the position further.
+      expect(details.scrollOffset.y).toBe(7500);
 
       const scrollToIndexSpy = vi.spyOn(vs, 'scrollToIndex');
 
       await nextTick();
       await nextTick();
-
       // Should not be calling scrollToIndex anymore
       expect(scrollToIndexSpy).not.toHaveBeenCalled();
     });
@@ -911,7 +911,7 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'PageDown' });
       await nextTick();
-      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(450);
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(500);
 
       await container.trigger('keydown', { key: 'PageUp' });
       await nextTick();
@@ -959,7 +959,7 @@ describe('virtualScroll', () => {
 
       await container.trigger('keydown', { key: 'PageDown' });
       await nextTick();
-      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(400);
+      expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(500);
 
       await container.trigger('keydown', { key: 'PageUp' });
       await nextTick();

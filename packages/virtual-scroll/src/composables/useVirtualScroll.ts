@@ -97,6 +97,10 @@ export function useVirtualScroll<T = unknown>(
     rowIndex: number | null | undefined;
     colIndex: number | null | undefined;
     options: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
+    /** Offset-based target (from scrollToOffset): re-clamped when measurements settle. */
+    offsetX?: number;
+    /** Offset-based target (from scrollToOffset): re-clamped when measurements settle. */
+    offsetY?: number;
   } | null>(null);
 
   /** Whether the current scroll operation was initiated programmatically. */
@@ -467,13 +471,25 @@ export function useVirtualScroll<T = unknown>(
     return { targetX, targetY, displayTargetX, displayTargetY };
   }
 
-  function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) {
+  function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; isCorrection?: boolean; }) {
     const container = props.value.container || window;
-    startProgrammaticScroll(options?.behavior);
-    pendingScroll.value = null;
+    // Internal corrections (settle re-clamps) must not restart the programmatic scroll state.
+    if (!options?.isCorrection) {
+      startProgrammaticScroll(options?.behavior);
+    }
 
     const clampedX = (x !== null && x !== undefined) ? Math.max(0, Math.min(x, totalWidth.value - viewportWidth.value)) : null;
     const clampedY = (y !== null && y !== undefined) ? Math.max(0, Math.min(y, totalHeight.value - viewportHeight.value)) : null;
+
+    // Defer the final position until measurements settle: like scrollToIndex,
+    // re-clamp against the updated totals when the scroll completes.
+    pendingScroll.value = {
+      rowIndex: null,
+      colIndex: null,
+      options: { behavior: options?.behavior ?? 'auto' },
+      ...(clampedX !== null ? { offsetX: clampedX } : {}),
+      ...(clampedY !== null ? { offsetY: clampedY } : {}),
+    };
 
     if (clampedX !== null) {
       internalScrollX.value = clampedX;
@@ -812,7 +828,9 @@ export function useVirtualScroll<T = unknown>(
 
   const updateItemSizes = (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => {
     coreUpdateItemSizes(updates, getRowIndexAt, getColIndexAt, relativeScrollX.value, relativeScrollY.value, (dx, dy) => {
-      if (!pendingScroll.value && !isProgrammaticScroll.value) {
+      // While a load is in flight the appended content is still settling
+      // (estimates -> measurements): do not move the container.
+      if (!props.value.loading && !pendingScroll.value && !isProgrammaticScroll.value) {
         handleScrollCorrection(dx, dy);
       }
     });
@@ -824,7 +842,7 @@ export function useVirtualScroll<T = unknown>(
 
   function checkPendingScroll() {
     if (pendingScroll.value && !isHydrating.value) {
-      const { rowIndex, colIndex, options } = pendingScroll.value;
+      const { rowIndex, colIndex, options, offsetX, offsetY } = pendingScroll.value;
       const isSmooth = isScrollToIndexOptions(options) && options.behavior === 'smooth';
       if (isSmooth && (isScrolling.value || isProgrammaticScroll.value)) {
         return;
@@ -836,53 +854,77 @@ export function useVirtualScroll<T = unknown>(
       const scrollValueY = actualScrollY;
       const currentRelX = displayToVirtual(scrollValueX, 0, scaleX.value);
       const currentRelY = displayToVirtual(scrollValueY, 0, scaleY.value);
-      const { targetX, targetY } = calculateScrollTarget({
-        rowIndex,
-        colIndex,
-        options,
-        direction: direction.value,
-        viewportWidth: viewportWidth.value,
-        viewportHeight: viewportHeight.value,
-        totalWidth: totalWidth.value,
-        totalHeight: totalHeight.value,
-        gap: props.value.gap || 0,
-        columnGap: props.value.columnGap || 0,
-        fixedSize: fixedItemSize.value,
-        fixedWidth: fixedColumnWidth.value,
-        relativeScrollX: currentRelX,
-        relativeScrollY: currentRelY,
-        getItemSizeY: (idx) => itemSizesY.get(idx),
-        getItemSizeX: (idx) => itemSizesX.get(idx),
-        getItemQueryY: (idx) => itemSizesY.query(idx),
-        getItemQueryX: (idx) => itemSizesX.query(idx),
-        getColumnSize: (idx) => columnSizes.get(idx),
-        getColumnQuery: (idx) => columnSizes.query(idx),
-        scaleX: scaleX.value,
-        scaleY: scaleY.value,
-        hostOffsetX: componentOffset.x,
-        hostOffsetY: componentOffset.y,
-        stickyIndices: props.value.stickyIndices || [],
-        stickyStartX: stickyStartX.value,
-        stickyStartY: stickyStartY.value,
-        stickyEndX: stickyEndX.value,
-        stickyEndY: stickyEndY.value,
-        flowPaddingStartX: flowStartX.value,
-        flowPaddingStartY: flowStartY.value,
-        paddingStartX: paddingStartX.value,
-        paddingStartY: paddingStartY.value,
-        paddingEndX: paddingEndX.value,
-        paddingEndY: paddingEndY.value,
-      });
+
+      // Offset-based pending (scrollToOffset): re-clamp against the current totals.
+      let targetX = offsetX !== undefined
+        ? Math.max(0, Math.min(offsetX, totalWidth.value - viewportWidth.value))
+        : currentRelX;
+      let targetY = offsetY !== undefined
+        ? Math.max(0, Math.min(offsetY, totalHeight.value - viewportHeight.value))
+        : currentRelY;
+
+      if (offsetX === undefined && offsetY === undefined) {
+        const calculated = calculateScrollTarget({
+          rowIndex,
+          colIndex,
+          options,
+          direction: direction.value,
+          viewportWidth: viewportWidth.value,
+          viewportHeight: viewportHeight.value,
+          totalWidth: totalWidth.value,
+          totalHeight: totalHeight.value,
+          gap: props.value.gap || 0,
+          columnGap: props.value.columnGap || 0,
+          fixedSize: fixedItemSize.value,
+          fixedWidth: fixedColumnWidth.value,
+          relativeScrollX: currentRelX,
+          relativeScrollY: currentRelY,
+          getItemSizeY: (idx) => itemSizesY.get(idx),
+          getItemSizeX: (idx) => itemSizesX.get(idx),
+          getItemQueryY: (idx) => itemSizesY.query(idx),
+          getItemQueryX: (idx) => itemSizesX.query(idx),
+          getColumnSize: (idx) => columnSizes.get(idx),
+          getColumnQuery: (idx) => columnSizes.query(idx),
+          scaleX: scaleX.value,
+          scaleY: scaleY.value,
+          hostOffsetX: componentOffset.x,
+          hostOffsetY: componentOffset.y,
+          stickyIndices: props.value.stickyIndices || [],
+          stickyStartX: stickyStartX.value,
+          stickyStartY: stickyStartY.value,
+          stickyEndX: stickyEndX.value,
+          stickyEndY: stickyEndY.value,
+          flowPaddingStartX: flowStartX.value,
+          flowPaddingStartY: flowStartY.value,
+          paddingStartX: paddingStartX.value,
+          paddingStartY: paddingStartY.value,
+          paddingEndX: paddingEndX.value,
+          paddingEndY: paddingEndY.value,
+        });
+        targetX = calculated.targetX;
+        targetY = calculated.targetY;
+      }
+
       const toleranceX = 2 * scaleX.value;
       const toleranceY = 2 * scaleY.value;
-      const reachedX = (colIndex === null || colIndex === undefined) || (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX);
-      const reachedY = (rowIndex === null || rowIndex === undefined) || (viewportHeight.value > 0 && Math.abs(currentRelY - targetY) < toleranceY);
+      const reachedX = offsetX !== undefined
+        ? (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX)
+        : (colIndex === null || colIndex === undefined) || (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX);
+      const reachedY = offsetY !== undefined
+        ? (viewportHeight.value > 0 && Math.abs(currentRelY - targetY) < toleranceY)
+        : (rowIndex === null || rowIndex === undefined) || (viewportHeight.value > 0 && Math.abs(currentRelY - targetY) < toleranceY);
       if (reachedX && reachedY) {
-        const isMeasuredX = colIndex == null || colIndex === undefined || measuredColumns.value[ colIndex ] === 1;
-        const isMeasuredY = rowIndex == null || rowIndex === undefined || measuredItemsY.value[ rowIndex ] === 1;
+        const isMeasuredX = offsetX !== undefined || colIndex == null || colIndex === undefined || measuredColumns.value[ colIndex ] === 1;
+        const isMeasuredY = offsetY !== undefined || rowIndex == null || rowIndex === undefined || measuredItemsY.value[ rowIndex ] === 1;
         if (isMeasuredX && isMeasuredY && !isScrolling.value && !isProgrammaticScroll.value) {
           pendingScroll.value = null;
         }
+      } else if (offsetX !== undefined || offsetY !== undefined) {
+        scrollToOffset(
+          offsetX !== undefined ? targetX : null,
+          offsetY !== undefined ? targetY : null,
+          { behavior: 'auto', isCorrection: true },
+        );
       } else {
         // v8 ignore next -- pendingScroll always stores normalized options, so the string fallback is unreachable
         const correctionOptions: ScrollToIndexOptions = isScrollToIndexOptions(options) ? { ...options, isCorrection: true } : { align: options as ScrollAlignment | ScrollAlignmentOptions, isCorrection: true };

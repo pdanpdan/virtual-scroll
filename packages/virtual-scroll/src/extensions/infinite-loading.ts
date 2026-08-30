@@ -20,7 +20,10 @@ export function useInfiniteLoadingExtension<T = unknown>(options: {
     name: 'infinite-loading',
     onInit(ctx: ExtensionContext<T>) {
       watch(ctx.scrollDetails, (details) => {
-        if (ctx.props.value.loading || !details || !details.totalSize || (details.totalSize.width === 0 && details.totalSize.height === 0)) {
+        // Only load after a programmatic scroll (PageDown/End) has finished:
+        // firing mid-animation would append content while the target position
+        // is still being computed.
+        if (ctx.props.value.loading || ctx.internalState.isProgrammaticScroll.value || !details || !details.totalSize || (details.totalSize.width === 0 && details.totalSize.height === 0)) {
           return;
         }
 

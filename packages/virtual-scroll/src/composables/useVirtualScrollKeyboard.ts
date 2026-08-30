@@ -7,6 +7,7 @@ export interface UseVirtualScrollKeyboardOptions<T> {
   scrollDetails: Ref<ScrollDetails<T>>;
   isRtl: Ref<boolean>;
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; }) => void;
+  scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
   stopProgrammaticScroll: () => void;
   getRowHeight: (index: number) => number;
   getColumnWidth: (index: number) => number;
@@ -16,6 +17,8 @@ export interface UseVirtualScrollKeyboardOptions<T> {
   getItemSize: (index: number) => number;
   getRowIndexAt: (offset: number) => number;
   getColIndexAt: (offset: number) => number;
+  /** Height of the loading slot (when always rendered), so End can include it. */
+  getLoadingSlotSize?: () => number;
 }
 
 export function useVirtualScrollKeyboard<T>({
@@ -24,6 +27,7 @@ export function useVirtualScrollKeyboard<T>({
   scrollDetails,
   isRtl,
   scrollToIndex,
+  scrollToOffset,
   stopProgrammaticScroll,
   getRowHeight,
   getColumnWidth,
@@ -33,6 +37,7 @@ export function useVirtualScrollKeyboard<T>({
   getItemSize,
   getRowIndexAt,
   getColIndexAt,
+  getLoadingSlotSize,
 }: UseVirtualScrollKeyboardOptions<T>) {
   /**
    * Handles keyboard events for navigation (Home, End, Arrows, PageUp/Down).
@@ -182,7 +187,8 @@ export function useVirtualScrollKeyboard<T>({
         if (snapMode === 'end') {
           return Math.min(maxIdx, endIdx + pageSize);
         }
-        return endIdx;
+        // One full page forward: the item after the current last visible one.
+        return Math.min(maxIdx, endIdx + 1);
       } else {
         if (snapMode === 'center') {
           return Math.max(0, getCenterIndex(isHorizontalAxis) - pageSize);
@@ -190,7 +196,8 @@ export function useVirtualScrollKeyboard<T>({
         if (snapMode === 'start') {
           return Math.max(0, startIdx - pageSize);
         }
-        return startIdx;
+        // One full page back: the item before the current first visible one.
+        return Math.max(0, startIdx - 1);
       }
     };
 
@@ -208,8 +215,6 @@ export function useVirtualScrollKeyboard<T>({
       case 'End': {
         event.preventDefault();
         stopProgrammaticScroll();
-        const lastItemIndex = props.items.length - 1;
-        const lastColIndex = (props.columnCount || 0) > 0 ? props.columnCount! - 1 : 0;
 
         const { totalSize } = scrollDetails.value;
         const distance = Math.max(
@@ -218,15 +223,20 @@ export function useVirtualScrollKeyboard<T>({
         );
         const viewport = props.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
         const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
+        // The loading slot is always rendered (hidden when idle): include its
+        // height so the last item plus the slot fit in the viewport.
+        const extra = getLoadingSlotSize ? getLoadingSlotSize() : 0;
 
         if (props.direction === 'both') {
-          scrollToIndex(lastItemIndex, lastColIndex, { behavior, align: 'end' });
-        } else {
-          scrollToIndex(
-            props.direction === 'vertical' ? lastItemIndex : 0,
-            props.direction === 'horizontal' ? lastItemIndex : 0,
-            { behavior, align: 'end' },
+          scrollToOffset(
+            totalSize.width - viewportSize.width,
+            totalSize.height - viewportSize.height + extra,
+            { behavior },
           );
+        } else if (props.direction === 'horizontal') {
+          scrollToOffset(totalSize.width - viewportSize.width + extra, null, { behavior });
+        } else {
+          scrollToOffset(null, totalSize.height - viewportSize.height + extra, { behavior });
         }
         break;
       }

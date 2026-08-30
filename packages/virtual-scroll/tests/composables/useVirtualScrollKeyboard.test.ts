@@ -38,6 +38,8 @@ describe('useVirtualScrollKeyboard', () => {
     overrides: {
       isRtl?: boolean;
       scrollToIndex?: Mock<(rowIndex?: number | null, colIndex?: number | null, options?: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; }) => void>;
+      scrollToOffset?: Mock<(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void>;
+      getLoadingSlotSize?: () => number;
       stopProgrammaticScroll?: Mock<() => void>;
       getRowHeight?: (i: number) => number;
       getColumnWidth?: (i: number) => number;
@@ -54,6 +56,7 @@ describe('useVirtualScrollKeyboard', () => {
     scrollDetails,
     isRtl: ref(overrides.isRtl ?? false),
     scrollToIndex: overrides.scrollToIndex ?? (vi.fn() as unknown as Mock<(rowIndex?: number | null, colIndex?: number | null, options?: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; }) => void>),
+    scrollToOffset: overrides.scrollToOffset ?? (vi.fn() as unknown as Mock<(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void>),
     stopProgrammaticScroll: overrides.stopProgrammaticScroll ?? (vi.fn() as unknown as Mock<() => void>),
     getRowHeight: overrides.getRowHeight ?? (() => 50),
     getColumnWidth: overrides.getColumnWidth ?? (() => 50),
@@ -63,6 +66,7 @@ describe('useVirtualScrollKeyboard', () => {
     getItemSize: overrides.getItemSize ?? (() => 50),
     getRowIndexAt: overrides.getRowIndexAt ?? ((o) => Math.floor(o / 50)),
     getColIndexAt: overrides.getColIndexAt ?? ((o) => Math.floor(o / 50)),
+    ...(overrides.getLoadingSlotSize ? { getLoadingSlotSize: overrides.getLoadingSlotSize } : {}),
   });
 
   const pressKey = (key: string) => new KeyboardEvent('keydown', { key });
@@ -87,32 +91,41 @@ describe('useVirtualScrollKeyboard', () => {
     expect(scrollToIndex).toHaveBeenCalledWith(0, 0, { behavior: 'auto', align: 'start' });
   });
 
-  it('end key scrolls to end (vertical)', () => {
+  it('end key scrolls to the end of the content (vertical)', () => {
     const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 0, y: 0 }, totalSize: { width: 5000, height: 5000 } }));
-    const scrollToIndex = vi.fn();
-    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToIndex });
+    const scrollToOffset = vi.fn();
+    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToOffset });
 
     handleKeyDown(pressKey('End'));
-    expect(scrollToIndex).toHaveBeenCalledWith(99, 0, { behavior: 'smooth', align: 'end' });
+    expect(scrollToOffset).toHaveBeenCalledWith(null, 4500, { behavior: 'smooth' });
   });
 
-  it('end key scrolls to end (horizontal)', () => {
+  it('end key scrolls to the end of the content (horizontal)', () => {
     const scrollDetails = ref(makeScrollDetails());
-    const scrollToIndex = vi.fn();
-    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToIndex });
+    const scrollToOffset = vi.fn();
+    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToOffset });
 
     handleKeyDown(pressKey('End'));
-    expect(scrollToIndex).toHaveBeenCalledWith(0, 99, { behavior: 'smooth', align: 'end' });
+    expect(scrollToOffset).toHaveBeenCalledWith(4500, null, { behavior: 'smooth' });
   });
 
-  it('end key scrolls to end (both directions)', () => {
+  it('end key scrolls to the end of the content (both directions)', () => {
     const scrollDetails = ref(makeScrollDetails());
-    const scrollToIndex = vi.fn();
+    const scrollToOffset = vi.fn();
     const props = makeProps({ direction: 'both', columnCount: 10 });
-    const { handleKeyDown } = makeKeyboard(scrollDetails, props, { scrollToIndex });
+    const { handleKeyDown } = makeKeyboard(scrollDetails, props, { scrollToOffset });
 
     handleKeyDown(pressKey('End'));
-    expect(scrollToIndex).toHaveBeenCalledWith(99, 9, { behavior: 'smooth', align: 'end' });
+    expect(scrollToOffset).toHaveBeenCalledWith(4500, 4500, { behavior: 'smooth' });
+  });
+
+  it('end key includes the loading slot height (vertical)', () => {
+    const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 0, y: 0 }, totalSize: { width: 5000, height: 5000 } }));
+    const scrollToOffset = vi.fn();
+    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToOffset, getLoadingSlotSize: () => 56 });
+
+    handleKeyDown(pressKey('End'));
+    expect(scrollToOffset).toHaveBeenCalledWith(null, 4556, { behavior: 'smooth' });
   });
 
   // ── ArrowUp / ArrowDown ─────────────────────────────────────────────────────
@@ -322,8 +335,8 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToIndex });
 
     handleKeyDown(pressKey('PageDown'));
-    // getPageTarget returns endIdx = 9 (no snap)
-    expect(scrollToIndex).toHaveBeenCalledWith(9, null, { align: 'start' });
+    // getPageTarget returns endIdx + 1 = 10 (no snap)
+    expect(scrollToIndex).toHaveBeenCalledWith(10, null, { align: 'start' });
   });
 
   it('handles PageUp key (default, vertical)', () => {
@@ -332,8 +345,8 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToIndex });
 
     handleKeyDown(pressKey('PageUp'));
-    // getPageTarget returns startIdx = 10
-    expect(scrollToIndex).toHaveBeenCalledWith(10, null, { align: 'end' });
+    // getPageTarget returns startIdx - 1 = 9
+    expect(scrollToIndex).toHaveBeenCalledWith(9, null, { align: 'end' });
   });
 
   it('handles PageDown key (horizontal)', () => {
@@ -342,7 +355,7 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToIndex });
 
     handleKeyDown(pressKey('PageDown'));
-    expect(scrollToIndex).toHaveBeenCalledWith(null, 9, { align: 'start' });
+    expect(scrollToIndex).toHaveBeenCalledWith(null, 10, { align: 'start' });
   });
 
   it('handles PageUp key (horizontal)', () => {
@@ -351,7 +364,7 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToIndex });
 
     handleKeyDown(pressKey('PageUp'));
-    expect(scrollToIndex).toHaveBeenCalledWith(null, 10, { align: 'end' });
+    expect(scrollToIndex).toHaveBeenCalledWith(null, 9, { align: 'end' });
   });
 
   it('handles PageDown with snapMode=center', () => {
@@ -420,8 +433,8 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ snap: true }), { scrollToIndex });
 
     handleKeyDown(pressKey('PageDown'));
-    // snapMode is null (auto → null), align fallback = 'start'
-    expect(scrollToIndex).toHaveBeenCalledWith(9, null, { align: 'start' });
+    // snapMode is null (auto → null), align fallback = 'start', target = endIdx + 1
+    expect(scrollToIndex).toHaveBeenCalledWith(10, null, { align: 'start' });
   });
 
   // ── ignored keys ─────────────────────────────────────────────────────────────
@@ -504,6 +517,6 @@ describe('useVirtualScrollKeyboard', () => {
     );
 
     handleKeyDown(pressKey('PageDown'));
-    expect(scrollToIndex).toHaveBeenCalledWith(null, 3, { align: 'start' });
+    expect(scrollToIndex).toHaveBeenCalledWith(null, 4, { align: 'start' });
   });
 });

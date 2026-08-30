@@ -686,7 +686,7 @@ const vs = useVirtualScroll(props, [
         </div>
         <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#loading</h4>
-          <p class="text-xs @4xl:text-sm opacity-90">Shown at the end of the scrollable area when <code>loading</code> prop is true. Prevents redundant <code>load</code> events.</p>
+          <p class="text-xs @4xl:text-sm opacity-90">Always rendered when provided — hidden via the <code>virtual-scroll-loading--hidden</code> class (<code>visibility: hidden</code>) while <code>loading</code> is false — so it reserves its space and the <code>End</code> key can include its size in the scroll target. Prevents redundant <code>load</code> events.</p>
         </div>
       </div>
 
@@ -780,11 +780,11 @@ const vs = useVirtualScroll(props, [
           </div>
           <div class="docs-kbd-item">
             <kbd class="docs-kbd">End</kbd>
-            <span class="docs-kbd-description">Scroll to the very last row and column.</span>
+            <span class="docs-kbd-description">Scroll to the very last row and column, including the loading slot size when a <code>#loading</code> slot is present.</span>
           </div>
           <div class="docs-kbd-item">
             <kbd class="docs-kbd">PgUp</kbd> / <kbd class="docs-kbd">PgDn</kbd>
-            <span class="docs-kbd-description">Scroll by one full viewport height/width.</span>
+            <span class="docs-kbd-description">Scroll by one full viewport: target is the first visible item minus one / the last visible item plus one.</span>
           </div>
           <div class="docs-kbd-item">
             <span class="flex gap-1">
@@ -832,6 +832,10 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code>.virtual-scroll-loading</code></td>
               <td>Container for the loading slot.</td>
+            </tr>
+            <tr>
+              <td><code>.virtual-scroll-loading--hidden</code></td>
+              <td>Applied to the loading slot while <code>loading</code> is false: hides it with <code>visibility: hidden</code> while keeping its space (the slot is always rendered when provided).</td>
             </tr>
             <tr>
               <td><code>.virtual-scroll--vertical</code> / <code>--horizontal</code> / <code>--both</code></td>
@@ -1608,7 +1612,9 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
   props,
   scrollDetails,
   scrollToIndex: (row, col, opt) => { /* ... */ },
+  scrollToOffset: (x, y, opt) => { /* ... */ },
   stopProgrammaticScroll: () => { /* ... */ },
+  getLoadingSlotSize: () => loadingEl?.offsetHeight ?? 0, // optional
   // ... resolvers
 });"
         />
@@ -1616,6 +1622,10 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
         <h4 class="docs-prop-subheader">Parameters</h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts an <code>UseVirtualScrollKeyboardOptions</code> object.</p>
+          <ul class="list-disc ps-5 space-y-1">
+            <li><code>scrollToOffset</code>: Scrolls to a pixel position. Used by the <code>End</code> key.</li>
+            <li><code>getLoadingSlotSize</code> (optional): Height of the loading slot. When provided, <code>End</code> includes it in the target so the last item plus the slot fit in the viewport.</li>
+          </ul>
         </div>
 
         <h4 class="docs-prop-subheader">Return Value</h4>
@@ -1833,6 +1843,7 @@ const ext = useInfiniteLoadingExtension({
             <li>Watches <code>scrollDetails</code> reactively.</li>
             <li>Respects the <code>loadDistance</code> and <code>loading</code> props from the component.</li>
             <li>Prevents duplicate triggers while <code>loading</code> is true.</li>
+            <li>Only fires after a programmatic scroll (PageDown/End) has finished, so content is not appended while the scroll target is still being computed.</li>
           </ul>
         </div>
       </section>

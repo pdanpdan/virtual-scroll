@@ -221,8 +221,15 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `props`: Full component props.
 - `scrollDetails`: Reactive [ScrollDetails](#scrolldetails).
 - `scrollToIndex`: Method to scroll to a specific index.
+- `scrollToOffset`: Method to scroll to a pixel position.
 - `stopProgrammaticScroll`: Method to halt animations.
+- `getLoadingSlotSize` (optional): Height of the loading slot. When provided, `End` includes it in the target so the last item plus the slot fit in the viewport.
 - `...resolvers`: Various helper functions for index/offset mapping.
+
+**Key behavior:**
+- `Home` / `End`: Scroll to the start / end of the content. `End` scrolls to `totalSize - viewportSize` (plus the loading slot size when `getLoadingSlotSize` is provided); the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically.
+- `PageUp` / `PageDown`: Scroll by one full page. The target is the first visible item minus one (`startIdx - 1`) / the last visible item plus one (`endIdx + 1`), so each press advances exactly one viewport.
+- Arrows: Move one item in the scroll direction (one column in grid mode).
 
 **Returns:**
 - `handleKeyDown`: Keyboard event handler.
@@ -306,7 +313,7 @@ Allows axis-specific alignment in `scrollToIndex`.
 
 - `item`: Scoped slot for individual items. Provides `item`, `index`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
-- `loading`: Content shown at the end when `loading` prop is true.
+- `loading`: Content rendered at the end while loading. The slot is always rendered when provided — it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false — so it reserves its space and `End` can include its size in the scroll target.
 - `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.
     - `axis`: `'vertical' | 'horizontal'`
     - `positionPercent`: current position (0-1).
@@ -335,7 +342,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 
 #### Methods
 - `scrollToIndex(row, col, options)`: Programmatic scroll to index. See [ScrollToIndexOptions](#scrolltoindexoptions).
-- `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position.
+- `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling.
 - `refresh()`: Resets all measurements and state.
 - `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
 - `updateDirection()`: Manually trigger direction detection.

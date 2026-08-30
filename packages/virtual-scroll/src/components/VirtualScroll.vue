@@ -106,6 +106,7 @@ const hostRef = ref<HTMLElement | null>(null);
 const wrapperRef = ref<HTMLElement | null>(null);
 const headerRef = ref<HTMLElement | null>(null);
 const footerRef = ref<HTMLElement | null>(null);
+const loadingRef = ref<HTMLElement | null>(null);
 const itemRefs = new Map<number, HTMLElement>();
 
 const instanceId = useId();
@@ -388,6 +389,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
   scrollDetails,
   isRtl,
   scrollToIndex,
+  scrollToOffset,
   stopProgrammaticScroll,
   getRowHeight,
   getColumnWidth,
@@ -397,6 +399,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
   getItemSize,
   getRowIndexAt,
   getColIndexAt,
+  getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
 });
 
 const containerStyle = computed(() => {
@@ -1023,8 +1026,10 @@ defineExpose({
     </component>
 
     <div
-      v-if="loading && slots.loading"
+      v-if="slots.loading"
+      ref="loadingRef"
       class="virtual-scroll-loading"
+      :class="{ 'virtual-scroll-loading--hidden': !loading }"
       :style="loadingStyle"
       aria-live="polite"
       aria-atomic="true"
@@ -1144,6 +1149,10 @@ defineExpose({
   .virtual-scroll-footer {
     position: relative;
     z-index: 20;
+  }
+
+  .virtual-scroll-loading--hidden {
+    visibility: hidden;
   }
 
   .virtual-scroll--sticky {
