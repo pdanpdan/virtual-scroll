@@ -93,6 +93,7 @@ interface Link {
 const navLinks: Link[] = [
   { href: '/', label: 'Welcome' },
   { href: '/docs', label: 'Documentation' },
+  { href: '/configurator', label: 'Configurator / Code Generator' },
   { href: '/changelog', label: 'Changelog' },
   { href: '/llms.txt', label: 'LLM Support', props: { rel: 'external', target: '_blank' } },
 ];

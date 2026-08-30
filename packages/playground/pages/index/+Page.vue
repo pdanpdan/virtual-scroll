@@ -50,6 +50,37 @@ import ExampleCard from '#/components/ExampleCard.vue';
         </div>
       </div>
     </div>
+    <div class="card bg-base-300 shadow-strong border-2 border-primary/30 col-span-full group">
+      <div class="card-body p-4 @4xl:p-8 relative">
+        <figure class="absolute top-0 end-0 p-8 opacity-5 transition-transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+          <AppLogo class="size-32" />
+        </figure>
+        <h2 class="card-title text-primary text-2xl @4xl:text-3xl mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            class="size-8"
+          ><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+          Configurator / Code Generator
+        </h2>
+        <p class="text-base @4xl:text-lg opacity-80 max-w-4xl">
+          Select the features you need and generate complete typed Vue code - component, composables, or a CodePen.
+        </p>
+        <div class="card-actions mt-8">
+          <AppLink v-slot="{ href }" href="/configurator">
+            <a
+              :href
+              class="btn btn-primary btn-md @4xl:btn-lg px-10 shadow-lg shadow-primary/20 font-black small-caps tracking-widest"
+            >
+              Open Configurator
+            </a>
+          </AppLink>
+        </div>
+      </div>
+    </div>
 
     <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Essentials
