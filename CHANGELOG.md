@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.2](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.1...v0.11.2) (2026-08-30)
+
+### Bug Fixes
+
+* **build:** adapt to changes in vite config to fix location of generated d.ts file ([6a7a85b](https://github.com/pdanpdan/virtual-scroll/commit/6a7a85b1bc7f3fb44fbaa2044aed7fa25effa9ea)), closes [#2](https://github.com/pdanpdan/virtual-scroll/issues/2)
+
 ## [0.11.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.0...v0.11.1) (2026-07-20)
 
 
