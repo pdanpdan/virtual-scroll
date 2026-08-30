@@ -13,7 +13,10 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 const items = ref(Array.from({ length: 50 }, (_, i) => ({ id: i, label: `Initial Item ${ i }` })));
 const loading = ref(false);
 const autoLoad = ref(true);
-
+// The demo source is finite: once the limit is reached there is no more data,
+// so the loading slot must not show (and nothing should be fetched).
+const TOTAL_LIMIT = 500;
+const hasMore = ref(true);
 const {
   scrollDetails,
   onScroll,
@@ -22,7 +25,7 @@ const {
 const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 async function loadMore() {
-  if (loading.value) {
+  if (loading.value || !hasMore.value) {
     return;
   }
 
@@ -31,7 +34,12 @@ async function loadMore() {
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   const start = items.value.length;
-  const newItems = Array.from({ length: 20 }, (_, i) => ({
+  if (start >= TOTAL_LIMIT) {
+    hasMore.value = false;
+    loading.value = false;
+    return;
+  }
+  const newItems = Array.from({ length: Math.min(20, TOTAL_LIMIT - start) }, (_, i) => ({
     id: start + i,
     label: `Loaded Item ${ start + i }`,
   }));
@@ -54,7 +62,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
     </template>
 
     <template #description>
-      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. Currently showing {{ items.length.toLocaleString() }} items. When you reach the end of the list, more items are automatically fetched and appended.
+      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. Currently showing {{ items.length.toLocaleString() }} items. When you reach the end of the list, more items are automatically fetched and appended. The demo source is capped at {{ TOTAL_LIMIT.toLocaleString() }} items — the loading slot only appears while auto-loading is on and there is still data to fetch.
     </template>
 
     <template #icon>
@@ -108,7 +116,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
         </div>
       </template>
 
-      <template #loading>
+      <template v-if="autoLoad && hasMore" #loading>
         <div class="p-8 flex flex-col items-center justify-center gap-4 bg-base-200 border-t border-base-300">
           <span class="loading loading-spinner loading-md text-primary" />
           <span class="text-xs font-bold small-caps tracking-widest opacity-70">Fetching more items...</span>

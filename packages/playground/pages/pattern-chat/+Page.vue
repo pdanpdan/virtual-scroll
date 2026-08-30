@@ -30,6 +30,12 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 const isLoading = ref(false);
 const isAtBottom = ref(true);
 const hasNewMessages = ref(false);
+// History is finite: past this limit there is nothing to load, so the
+// loading indicator must not appear. Counts only the prepended history —
+// items.length also grows from new messages at the bottom.
+const HISTORY_LIMIT = 500;
+const historyLoaded = ref(0);
+const hasMoreHistory = computed(() => historyLoaded.value < HISTORY_LIMIT);
 
 const ssrRange = computed(() => ({
   start: Math.max(0, items.value.length - 10),
@@ -109,10 +115,12 @@ function onScroll(details: ScrollDetails) {
   }
 
   // Infinite scroll upwards (history)
-  if (details.scrollOffset.y < 100 && !isLoading.value && !details.isProgrammaticScroll && items.value.length > 0 && items.value.length < 500) {
+  if (details.scrollOffset.y < 100 && !isLoading.value && !details.isProgrammaticScroll && items.value.length > 0 && hasMoreHistory.value) {
     isLoading.value = true;
     setTimeout(() => {
-      loadMessages(20, true);
+      const count = Math.min(20, HISTORY_LIMIT - historyLoaded.value);
+      historyLoaded.value += count;
+      loadMessages(count, true);
 
       // Wait for VirtualScroll to restores scroll
       // Additional small delay to ensure all measurements and corrections are done

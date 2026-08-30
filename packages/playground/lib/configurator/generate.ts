@@ -232,14 +232,23 @@ function infiniteScript(state: ConfiguratorState, derived: ReturnType<typeof get
   return join([
     '// --- Infinite loading ---',
     `const LOAD_CHUNK = ${ state.loadChunk };`,
+    '// The demo source is finite: once the limit is reached there is no more',
+    '// data, so the loading slot is hidden (see the v-if on the #loading slot).',
+    'const TOTAL_ITEMS = ITEM_COUNT * 5;',
+    'const hasMore = ref(true);',
     '',
     'async function loadMore() {',
-    '  if (loading.value) {',
+    '  if (loading.value || !hasMore.value) {',
     '    return;',
     '  }',
     '  loading.value = true;',
     '  const start = items.value.length;',
-    '  items.value = [ ...items.value, ...await createItems(start, LOAD_CHUNK) ];',
+    '  if (start >= TOTAL_ITEMS) {',
+    '    hasMore.value = false;',
+    '    loading.value = false;',
+    '    return;',
+    '  }',
+    '  items.value = [ ...items.value, ...await createItems(start, Math.min(LOAD_CHUNK, TOTAL_ITEMS - start)) ];',
     '  loading.value = false;',
     '}',
     '',
@@ -630,7 +639,7 @@ function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typ
       `${ t }  </div>`,
     );
     if (state.infiniteScroll) {
-      lines.push(`${ t }  <div v-if="loading" class="vs-loading">Loading more…</div>`);
+      lines.push(`${ t }  <div v-if="loading && hasMore" class="vs-loading">Loading more…</div>`);
     }
     if (state.stickyFooter) {
       lines.push(`${ t }  <div class="vs-sticky-footer">Sticky footer</div>`);
@@ -669,7 +678,7 @@ function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typ
     lines.push(`${ t }  </template>`);
     if (state.infiniteScroll) {
       lines.push(
-        `${ t }  <template #loading>`,
+        `${ t }  <template v-if="hasMore" #loading>`,
         `${ t }    <div class="vs-loading">Loading more…</div>`,
         `${ t }  </template>`,
       );

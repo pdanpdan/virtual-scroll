@@ -2,7 +2,7 @@
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
@@ -30,6 +30,8 @@ const scrollContainer = ref<Window | null>(null);
 const seed = ref('virtual-scroll-blog');
 const posts = ref<BlogPost[]>([]);
 const loading = ref(false);
+// The feed is finite: the loading slot only exists while posts can still be fetched.
+const hasMore = computed(() => posts.value.length < TOTAL_POSTS);
 
 onMounted(() => {
   scrollContainer.value = window;
@@ -214,7 +216,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </article>
       </template>
 
-      <template #loading>
+      <template v-if="hasMore" #loading>
         <div class="example-blog-loading">
           <span class="loading loading-spinner loading-sm text-primary" />
           Fetching more posts…
