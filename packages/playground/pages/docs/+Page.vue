@@ -1519,6 +1519,11 @@ scrollToIndex
                 <td>Manually trigger direction (LTR/RTL) detection.</td>
               </tr>
               <tr>
+                <td><code class="docs-prop-name">scrollbarOffset</code></td>
+                <td><code>Reactive&lt;{ x: number; y: number }&gt;</code></td>
+                <td>Inline-start/block-start padding of the scroll container (DU), used to align the virtual scrollbar overlay with the scrollport.</td>
+              </tr>
+              <tr>
                 <td><code class="text-secondary font-bold">getItemAriaProps</code></td>
                 <td><code>Function</code></td>
                 <td>Helper to get ARIA attributes for an item.</td>
