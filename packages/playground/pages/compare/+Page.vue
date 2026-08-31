@@ -93,7 +93,7 @@
     </table>
   </div>
 
-  <p class="text-xs opacity-60 mb-12 -mt-6">
+  <p class="text-sm opacity-60 mb-12 -mt-6">
     Bundle sizes: min+gzip of the package's own code (regular dependencies bundled, Vue external), measured
     from the npm tarballs with esbuild; <code>vue-virtual-scroller</code> via bundlephobia.
     <code>@tanstack/vue-virtual</code> is split into two packages, so the number covers both: the Vue adapter
@@ -296,8 +296,8 @@
       <div class="docs-feature-card-body">
         <div class="docs-feature-card-icon">🟠</div>
         <div>
-          <div class="docs-feature-card-title">@tanstack/vue-virtual</div>
-          <p class="docs-feature-card-description">
+          <div class="docs-feature-card-title text-base">@tanstack/vue-virtual</div>
+          <p class="docs-feature-card-description text-sm">
             Headless by design &mdash; you own the markup, so everything not listed as ✅ is work you do
             yourself. Grid means composing two virtualizers, RTL is an <code>isRtl</code> flag that its own
             ecosystem describes as partial, and there is no scrollbar or snap logic to borrow. In exchange you
@@ -310,8 +310,8 @@
       <div class="docs-feature-card-body">
         <div class="docs-feature-card-icon">🟠</div>
         <div>
-          <div class="docs-feature-card-title">virtua</div>
-          <p class="docs-feature-card-description">
+          <div class="docs-feature-card-title text-base">virtua</div>
+          <p class="docs-feature-card-description text-sm">
             The grid is literally named <code>experimental_VGrid</code>, and its own README still lists sticky
             and keyboard navigation as things it is &ldquo;aiming&rdquo; to support. What is shipped is fast
             and the window-scroll story is good. One codebase for five frameworks &mdash; impressive, but
@@ -324,8 +324,8 @@
       <div class="docs-feature-card-body">
         <div class="docs-feature-card-icon">🟠</div>
         <div>
-          <div class="docs-feature-card-title">vue-virtual-scroll-list</div>
-          <p class="docs-feature-card-description">
+          <div class="docs-feature-card-title text-base">vue-virtual-scroll-list</div>
+          <p class="docs-feature-card-description text-sm">
             Sized via an estimate cache (<code>estimate-size</code>), never measured, so scrollbar accuracy is
             approximate. The last release is from May 2023, the README still reads like Vue 2, and there are
             no TypeScript types. Its 4,500 stars are historical.
@@ -337,8 +337,8 @@
       <div class="docs-feature-card-body">
         <div class="docs-feature-card-icon">🟠</div>
         <div>
-          <div class="docs-feature-card-title">vue-virtual-scroller</div>
-          <p class="docs-feature-card-description">
+          <div class="docs-feature-card-title text-base">vue-virtual-scroller</div>
+          <p class="docs-feature-card-description text-sm">
             Infinite loading means wiring your own scroll listener. It renders its own scroll container, so
             page scrolling needs a wrapper that reports to it. Solid components, and v3.0 is still actively
             released, but the feature set has stayed roughly the same since the Vue 2 days.
@@ -350,8 +350,8 @@
       <div class="docs-feature-card-body">
         <div class="docs-feature-card-icon">🟠</div>
         <div>
-          <div class="docs-feature-card-title">vueuc</div>
-          <p class="docs-feature-card-description">
+          <div class="docs-feature-card-title text-base">vueuc</div>
+          <p class="docs-feature-card-description text-sm">
             VVirtualList powers Naive UI's large lists and it works, but vueuc is an internal utility
             collection &mdash; the author's README says: &ldquo;I'm too lazy to write them since I'm the only
             one that uses the library.&rdquo; Adopting it means depending on Naive UI's private parts.
@@ -364,7 +364,7 @@
   <h2 class="docs-prop-header text-secondary">Where Each One Wins</h2>
 
   <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
-    <ul>
+    <ul class="space-y-4">
       <li>
         <strong>@pdanpdan/virtual-scroll</strong> &mdash; the only option that covers grid + window scrolling +
         RTL + sticky + keyboard navigation out of the box, and the only one that virtualizes past the browser's
@@ -398,7 +398,7 @@
   <div class="docs-feature-card mb-12">
     <div class="docs-feature-card-body">
       <div>
-        <p class="docs-feature-card-description">
+        <p class="docs-feature-card-description text-sm">
           If your list is vertical and your items have known sizes, every current library works &mdash; pick by
           bundle size or familiarity. The differences only show up when you need the second axis, the page as
           the scroll container, sticky headers, keyboard support, or lists that outgrow the browser's height
