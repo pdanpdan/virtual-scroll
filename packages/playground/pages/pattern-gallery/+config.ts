@@ -2,5 +2,5 @@ import type { Config } from 'vike/types';
 
 export default {
   title: 'Photo Gallery | Virtual Scroll',
-  description: 'High-performance grid gallery featuring lazy-loading placeholders and a lightbox.',
+  description: 'High-performance grid photo gallery featuring lazy-loading placeholders.',
 } satisfies Config;

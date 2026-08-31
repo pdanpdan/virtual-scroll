@@ -23,6 +23,7 @@ const bufferBefore = ref(5);
 const bufferAfter = ref(5);
 const stickyHeader = ref(false);
 const stickyFooter = ref(false);
+const virtualScrollbar = ref(true);
 
 const columnWidths = computed(() => [ Math.ceil(columnWidth.value * 1.5), columnWidth.value ]);
 
@@ -104,6 +105,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         v-model:buffer-after="bufferAfter"
         v-model:sticky-header="stickyHeader"
         v-model:sticky-footer="stickyFooter"
+        v-model:virtual-scrollbar="virtualScrollbar"
         direction="both"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
@@ -124,6 +126,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :buffer-after="bufferAfter"
       :sticky-header="stickyHeader"
       :sticky-footer="stickyFooter"
+      :virtual-scrollbar="virtualScrollbar"
       :ssr-range="ssrRange"
       aria-label="SSR enabled list"
       @scroll="onScroll"

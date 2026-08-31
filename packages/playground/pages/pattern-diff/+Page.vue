@@ -45,6 +45,7 @@ const itemCount = computed(() => diffData.value.length);
 const itemSize = ref(21);
 const bufferBefore = ref(10);
 const bufferAfter = ref(10);
+const virtualScrollbar = ref(true);
 
 function expandRegion(index: number) {
   const row = diffData.value[ index ];
@@ -132,6 +133,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
         v-model:item-size="itemSize"
         v-model:buffer-before="bufferBefore"
         v-model:buffer-after="bufferAfter"
+        v-model:virtual-scrollbar="virtualScrollbar"
         :item-count="itemCount"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
@@ -160,6 +162,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
           :item-size="itemSize"
           :buffer-before="bufferBefore"
           :buffer-after="bufferAfter"
+          :virtual-scrollbar="virtualScrollbar"
           @scroll="onScroll"
         >
           <template #item="{ item, index }">

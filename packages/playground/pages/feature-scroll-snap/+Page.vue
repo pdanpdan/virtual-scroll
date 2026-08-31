@@ -15,6 +15,7 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 const itemCount = ref(100);
 const itemSize = ref(300); // Large items to make snapping obvious
 const snap = ref<SnapMode>('next');
+const virtualScrollbar = ref(true);
 
 const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
   id: i,
@@ -75,6 +76,7 @@ const isItemTooLarge = computed(() => {
       <ScrollControls
         v-model:item-count="itemCount"
         v-model:item-size="itemSize"
+        v-model:virtual-scrollbar="virtualScrollbar"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
       />
@@ -124,6 +126,7 @@ const isItemTooLarge = computed(() => {
       :items="items"
       :item-size="itemSize"
       :snap="snap"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Snapping list"
       @scroll="onScroll"
     >

@@ -414,6 +414,18 @@ body {
 
 @utility docs-section-header {
   @apply mb-4 text-xl font-bold tracking-widest text-primary small-caps @4xl:mb-6 @4xl:text-2xl;
+
+  > a {
+    &:before {
+      @apply opacity-40;
+      content: '#';
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover:before {
+      @apply opacity-80;
+    }
+  }
 }
 
 @utility docs-code-block {
@@ -422,6 +434,18 @@ body {
 
 @utility docs-prop-header {
   @apply mb-4 border-b border-base-300 pb-2 text-lg font-semibold text-secondary @4xl:text-xl;
+
+  > a {
+    &:before {
+      @apply opacity-40;
+      content: '#';
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover:before {
+      @apply opacity-80;
+    }
+  }
 }
 @utility docs-prop-header--primary {
   @apply border-primary/30 text-primary;
@@ -432,6 +456,18 @@ body {
 
 @utility docs-prop-subheader {
   @apply mb-4 text-sm font-bold tracking-widest opacity-70 small-caps @4xl:text-base;
+
+  > a {
+    &:before {
+      @apply opacity-40;
+      content: '#';
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover:before {
+      @apply opacity-80;
+    }
+  }
 }
 @utility docs-prop-subheader--primary {
   @apply text-primary opacity-100;

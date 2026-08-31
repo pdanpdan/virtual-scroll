@@ -15,10 +15,12 @@ const props = withDefaults(defineProps<{
   itemsPerSection?: number;
   stickyHeader?: boolean | undefined;
   stickyFooter?: boolean | undefined;
+  virtualScrollbar?: boolean | undefined;
 }>(), {
   direction: 'vertical',
   stickyHeader: undefined,
   stickyFooter: undefined,
+  virtualScrollbar: undefined,
 });
 
 const emit = defineEmits<{
@@ -32,6 +34,7 @@ const emit = defineEmits<{
   (e: 'update:bufferAfter', value: number): void;
   (e: 'update:stickyHeader', value: boolean): void;
   (e: 'update:stickyFooter', value: boolean): void;
+  (e: 'update:virtualScrollbar', value: boolean): void;
   (e: 'scrollToIndex', row: number | null, col: number | null, align: ScrollAlignment | ScrollAlignmentOptions): void;
   (e: 'scrollToOffset', x: number | null, y: number | null): void;
   (e: 'refresh'): void;
@@ -47,6 +50,7 @@ const localBufferBefore = ref(props.bufferBefore ?? 5);
 const localBufferAfter = ref(props.bufferAfter ?? 5);
 const localStickyHeader = ref(props.stickyHeader ?? false);
 const localStickyFooter = ref(props.stickyFooter ?? false);
+const localVirtualScrollbar = ref(props.virtualScrollbar ?? true);
 
 const targetIndex = ref(0);
 const targetColumn = ref(0);
@@ -78,6 +82,7 @@ watch(localBufferBefore, (val) => emit('update:bufferBefore', val));
 watch(localBufferAfter, (val) => emit('update:bufferAfter', val));
 watch(localStickyHeader, (val) => emit('update:stickyHeader', val));
 watch(localStickyFooter, (val) => emit('update:stickyFooter', val));
+watch(localVirtualScrollbar, (val) => emit('update:virtualScrollbar', val));
 
 watch(() => props.itemCount, (val) => localItemCount.value = val ?? 0);
 watch(() => props.itemSize, (val) => localItemSize.value = val ?? 40);
@@ -89,6 +94,7 @@ watch(() => props.bufferBefore, (val) => localBufferBefore.value = val ?? 5);
 watch(() => props.bufferAfter, (val) => localBufferAfter.value = val ?? 5);
 watch(() => props.stickyHeader, (val) => localStickyHeader.value = val ?? false);
 watch(() => props.stickyFooter, (val) => localStickyFooter.value = val ?? false);
+watch(() => props.virtualScrollbar, (val) => localVirtualScrollbar.value = val ?? true);
 
 function handleScrollToIndex() {
   const align = { x: scrollAlignX.value, y: scrollAlignY.value };
@@ -165,7 +171,7 @@ function handleScrollToOffset() {
       </div>
     </li>
 
-    <li v-if="bufferBefore !== undefined || bufferAfter !== undefined || stickyHeader !== undefined || stickyFooter !== undefined" class="list-row py-2 border-t border-base-content/5">
+    <li v-if="bufferBefore !== undefined || bufferAfter !== undefined" class="list-row py-2 border-t border-base-content/5">
       <div class="list-col-grow flex flex-wrap gap-3 items-center">
         <label v-if="bufferBefore !== undefined" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Pre</span>
@@ -175,17 +181,23 @@ function handleScrollToOffset() {
           <span class="text-xs font-bold small-caps text-base-content/50">Buffer Post</span>
           <input v-model.number="localBufferAfter" type="number" placeholder=" " class="input input-bordered input-sm text-end w-24 font-mono" />
         </label>
+      </div>
+    </li>
 
-        <div class="flex gap-4 items-center ps-1">
-          <label v-if="stickyHeader !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
-            <input v-model="localStickyHeader" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
-            <span class="text-xs font-semibold opacity-70">Sticky Header</span>
-          </label>
-          <label v-if="stickyFooter !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
-            <input v-model="localStickyFooter" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
-            <span class="text-xs font-semibold opacity-70">Sticky Footer</span>
-          </label>
-        </div>
+    <li v-if="stickyHeader !== undefined || stickyFooter !== undefined || virtualScrollbar !== undefined" class="list-row py-2 border-t border-base-content/5">
+      <div class="list-col-grow flex flex-wrap gap-3 items-center">
+        <label v-if="stickyHeader !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
+          <input v-model="localStickyHeader" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+          <span class="text-xs font-semibold opacity-70">Sticky Header</span>
+        </label>
+        <label v-if="stickyFooter !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
+          <input v-model="localStickyFooter" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+          <span class="text-xs font-semibold opacity-70">Sticky Footer</span>
+        </label>
+        <label v-if="virtualScrollbar !== undefined" class="flex gap-2 items-center cursor-pointer select-none">
+          <input v-model="localVirtualScrollbar" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+          <span class="text-xs font-semibold opacity-70">Virtual Scrollbars</span>
+        </label>
       </div>
     </li>
 

@@ -36,6 +36,7 @@ const hasNewMessages = ref(false);
 const HISTORY_LIMIT = 500;
 const historyLoaded = ref(0);
 const hasMoreHistory = computed(() => historyLoaded.value < HISTORY_LIMIT);
+const virtualScrollbar = ref(true);
 
 const ssrRange = computed(() => ({
   start: Math.max(0, items.value.length - 10),
@@ -210,6 +211,15 @@ function scrollToBottom() {
       <ScrollStatus :scroll-details="scrollDetails" />
     </template>
 
+    <template #example-controls>
+      <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+      </div>
+    </template>
+
     <div class="example-container flex flex-col overflow-auto">
       <div v-if="isLoading" class="absolute top-2 inset-x-0 flex justify-center z-10">
         <span class="loading loading-spinner loading-sm text-primary" />
@@ -250,6 +260,7 @@ function scrollToBottom() {
         :scroll-padding-end="10"
         :gap="12"
         :sticky-footer="true"
+        :virtual-scrollbar="virtualScrollbar"
         aria-label="Chat messages"
         @scroll="onScroll"
       >

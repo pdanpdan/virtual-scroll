@@ -15,6 +15,7 @@ const itemCount = ref(1000);
 const itemSize = ref(100);
 const bufferBefore = ref(20);
 const bufferAfter = ref(20);
+const virtualScrollbar = ref(true);
 
 const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
   id: i,
@@ -67,6 +68,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         v-model:item-size="itemSize"
         v-model:buffer-before="bufferBefore"
         v-model:buffer-after="bufferAfter"
+        v-model:virtual-scrollbar="virtualScrollbar"
         direction="horizontal"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
@@ -83,6 +85,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :item-size="itemSize"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Fixed width horizontal list"
       @scroll="onScroll"
     >

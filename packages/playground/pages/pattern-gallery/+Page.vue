@@ -13,7 +13,6 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 interface Photo {
   id: number;
   thumb: string;
-  full: string;
   author: string;
 }
 
@@ -21,6 +20,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const itemCount = ref(2000);
 const columns = ref(5);
+const virtualScrollbar = ref(true);
 
 const photos = computed(() => Array.from(
   { length: Math.ceil(itemCount.value / columns.value) },
@@ -29,8 +29,7 @@ const photos = computed(() => Array.from(
 
     return {
       id,
-      thumb: `https://picsum.photos/seed/${ id + 1 }/400/400`,
-      full: `https://picsum.photos/seed/${ id + 1 }/1200/800`,
+      thumb: `https://loremflickr.com/400/400?lock=${ id + 1 }`,
       author: `Photographer ${ id }`,
     } as Photo;
   }),
@@ -49,7 +48,7 @@ const {
     </template>
 
     <template #description>
-      A high-performance grid gallery displaying {{ itemCount.toLocaleString() }} photos. Features lazy-loading placeholders and a lightbox.
+      A high-performance grid gallery displaying {{ itemCount.toLocaleString() }} photos. Features lazy-loading placeholders.
     </template>
 
     <template #icon>
@@ -75,6 +74,11 @@ const {
 
     <template #example-controls>
       <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+
         <div class="flex flex-col gap-1">
           <span class="flex justify-between items-center">
             <span class="text-xs font-bold opacity-50 small-caps tracking-wider">Grid Columns</span>
@@ -98,6 +102,7 @@ const {
       :items="photos"
       :gap="16"
       :debug="debugMode"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Photo gallery"
       @scroll="onScroll"
     >

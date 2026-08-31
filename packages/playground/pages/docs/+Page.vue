@@ -1,8 +1,60 @@
 <script setup lang="ts">
 import { DEFAULT_BUFFER, DEFAULT_COLUMN_WIDTH, DEFAULT_ITEM_SIZE } from '@pdanpdan/virtual-scroll';
+import { onMounted, onUnmounted } from 'vue';
 
 import AppLogo from '#/components/AppLogo.vue';
 import CodeBlock from '#/components/CodeBlock.vue';
+
+const headingLinkSelector = 'h2.docs-section-header > a, h3.docs-section-header > a, h3.docs-prop-header > a, h4.docs-prop-subheader > a';
+let copyToastTimer: ReturnType<typeof setTimeout> | undefined;
+
+function fallbackCopy(text: string) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  textarea.remove();
+}
+
+function showCopyToast() {
+  let toast = document.getElementById('docs-copy-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'docs-copy-toast';
+    toast.className = 'toast toast-top toast-center';
+    toast.innerHTML = '<div class="alert alert-success shadow-lg"><span class="text-sm font-semibold">Link copied to clipboard</span></div>';
+    document.body.appendChild(toast);
+  }
+  clearTimeout(copyToastTimer);
+  copyToastTimer = setTimeout(() => {
+    toast.remove();
+  }, 1500);
+}
+
+function handleHeadingLinkClick(event: MouseEvent) {
+  const link = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>(headingLinkSelector);
+  if (!link) {
+    return;
+  }
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link.href).catch(() => fallbackCopy(link.href));
+  } else {
+    fallbackCopy(link.href);
+  }
+  showCopyToast();
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleHeadingLinkClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleHeadingLinkClick);
+  clearTimeout(copyToastTimer);
+});
 </script>
 
 <template>
@@ -21,7 +73,11 @@ import CodeBlock from '#/components/CodeBlock.vue';
   <div class="space-y-8">
     <!-- 1. Introduction -->
     <section id="introduction">
-      <h2 class="docs-section-header">Introduction</h2>
+      <h2 class="docs-section-header">
+        <a href="#introduction" aria-label="Link to Introduction section">
+          Introduction
+        </a>
+      </h2>
       <div class="prose prose-sm @4xl:prose-lg max-w-none">
         <p>
           <code>@pdanpdan/virtual-scroll</code> is a high-performance Vue 3 virtual scroll library designed to handle massive lists with ease.
@@ -31,9 +87,133 @@ import CodeBlock from '#/components/CodeBlock.vue';
       </div>
     </section>
 
+    <!-- 2. Performance -->
+    <section id="performance">
+      <h2 class="docs-section-header">
+        <a href="#performance" aria-label="Link to Performance section">
+          Performance
+        </a>
+      </h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          Virtualization keeps the DOM small by rendering only the items in the viewport (plus a configurable buffer), so scrolling stays responsive regardless of dataset size.
+          Scroll handling and range calculations are optimized for every sizing mode; the biggest wins come from the configuration choices below.
+        </p>
+      </div>
+
+      <div class="docs-alert docs-alert--warning mb-8">
+        <h4 class="font-bold mb-2">Scroll performance &amp; scrollbar dragging</h4>
+        <p class="opacity-90">
+          Browsers throttle native scrollbar dragging: while the thumb is dragged, the scroll position advances in coarse per-frame steps, so the content (and the virtualized items that follow it) can lag noticeably behind the thumb on large drags — even when the target area was already rendered.
+          Wheel, touch, and keyboard scrolling are not affected.
+        </p>
+        <p class="opacity-90 mt-2">
+          To keep scrollbar dragging instant and 1:1 with the pointer, it is <strong>strongly suggested</strong> to use the built-in virtual scrollbars:
+        </p>
+        <ol class="list-decimal ps-5 space-y-1 opacity-90 mt-2">
+          <li>
+            Enable them with the <code>virtualScrollbar</code> prop on <code>VirtualScroll</code> (they are also enabled automatically for lists beyond the browser size limit).
+          </li>
+          <li>
+            Match your design using the <a href="#css-variables" class="link link-primary font-semibold">--vs-scrollbar-* CSS variables</a>, or take full control of the scrollbar UI with the <code>scrollbar</code> scoped slot.
+          </li>
+        </ol>
+        <p class="opacity-90">
+          The native scrollbar is hidden automatically (<code>.virtual-scroll--hide-scrollbar</code>) whenever virtual scrollbars are active — no extra CSS is needed.
+        </p>
+        <p class="opacity-90 mt-2">
+          Note: virtual scrollbars are not available when the scroll container is the window or the body — use an element container.
+        </p>
+      </div>
+
+      <h3 id="other-performance-advice" class="docs-section-header text-xl mt-4 mb-4">
+        <a href="#other-performance-advice" aria-label="Link to Other Performance Advice section">
+          Other Performance Advice
+        </a>
+      </h3>
+      <ul class="list-disc ps-5 space-y-2 text-base-content/90 mb-10">
+        <li>
+          <strong>Prefer fixed sizes.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> gives O(1) range math; arrays and functions use O(log n) Fenwick-tree lookups; dynamic (measured) sizes are the most expensive and re-measure with <code>ResizeObserver</code>. See the <a href="#sizing-guide" class="link">Sizing Guide</a> below.
+        </li>
+        <li>
+          <strong>Keep buffers modest.</strong> <code>bufferBefore</code> / <code>bufferAfter</code> (default 5) trade rendering cost for scrolling smoothness — a larger buffer means more DOM nodes and more work per frame.
+        </li>
+        <li>
+          <strong>Keep item content cheap.</strong> The item slot is re-rendered on scroll; avoid heavy markup, images, or effects inside items.
+        </li>
+        <li>
+          <strong>Use an element container</strong> for scrollable UIs instead of the window or body: it isolates scrolling, enables virtual scrollbars, and avoids full-page layout work.
+        </li>
+        <li>
+          <strong>Use <code>ssrRange</code></strong> to pre-render the initial viewport and skip the first measure/scroll pass on slow devices.
+        </li>
+        <li>
+          <strong>Massive lists are handled automatically.</strong> Beyond the browser's ~10,000,000&nbsp;px limit the library switches to coordinate scaling (virtual units), so no extra configuration is needed.
+        </li>
+      </ul>
+
+      <div class="divider opacity-30" />
+
+      <!-- 2.1 Sizing Guide -->
+      <section id="sizing-guide">
+        <h2 class="docs-section-header">
+          <a href="#sizing-guide" aria-label="Link to Sizing Guide section">
+            Sizing Guide
+          </a>
+        </h2>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
+          <p>
+            The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
+          </p>
+          <div class="docs-table-container mt-4">
+            <table class="docs-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th><code>itemSize</code> / <code>columnWidth</code></th>
+                  <th>Perf</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Fixed</strong></td>
+                  <td><code>number</code></td>
+                  <td><span class="badge badge-success badge-soft badge-xs">Best</span></td>
+                  <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
+                </tr>
+                <tr>
+                  <td><strong>Array (Circular Pattern)</strong></td>
+                  <td><code>number[]</code></td>
+                  <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
+                  <td>Repeating size patterns from array (e.g. <code>[50, 100]</code>). <em>O(log n)</em>.</td>
+                </tr>
+                <tr>
+                  <td><strong>Function</strong></td>
+                  <td><code>(item, idx) => number</code></td>
+                  <td><span class="badge badge-warning badge-soft badge-xs">Good</span></td>
+                  <td>Known but variable sizes. No <code>ResizeObserver</code> overhead unless measured size differs.</td>
+                </tr>
+                <tr>
+                  <td><strong>Dynamic</strong></td>
+                  <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
+                  <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
+                  <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+
     <!-- 1.1 Key Features -->
     <section id="features">
-      <h2 class="docs-section-header">Key Features</h2>
+      <h2 class="docs-section-header">
+        <a href="#features" aria-label="Link to Key Features section">
+          Key Features
+        </a>
+      </h2>
       <div class="docs-feature-grid">
         <div class="docs-feature-card">
           <div class="docs-feature-card-body">
@@ -137,9 +317,13 @@ import CodeBlock from '#/components/CodeBlock.vue';
       </div>
     </section>
 
-    <!-- 2. Quick Start -->
+    <!-- 3. Quick Start -->
     <section id="quick-start">
-      <h2 class="docs-section-header">Quick Start</h2>
+      <h2 class="docs-section-header">
+        <a href="#quick-start" aria-label="Link to Quick Start section">
+          Quick Start
+        </a>
+      </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none">
         <p>Install the package using your favorite package manager:</p>
       </div>
@@ -170,9 +354,13 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
       />
     </section>
 
-    <!-- 3. Usage Modes -->
+    <!-- 4. Usage Modes -->
     <section id="usage-modes">
-      <h2 class="docs-section-header">Usage Modes</h2>
+      <h2 class="docs-section-header">
+        <a href="#usage-modes" aria-label="Link to Usage Modes section">
+          Usage Modes
+        </a>
+      </h2>
       <div class="docs-usage-grid">
         <div class="docs-usage-card docs-usage-card--primary">
           <div class="docs-usage-card-body">
@@ -253,9 +441,13 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
       </div>
     </section>
 
-    <!-- 3.1 Extensions -->
+    <!-- 4.1 Extensions -->
     <section id="extensions">
-      <h2 class="docs-section-header">Extensions</h2>
+      <h2 class="docs-section-header">
+        <a href="#extensions" aria-label="Link to Extensions section">
+          Extensions
+        </a>
+      </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
           The library uses a highly modular architecture powered by extensions. Extensions can tap into the core lifecycle
@@ -299,59 +491,13 @@ const vs = useVirtualScroll(props, [
 
     <div class="divider opacity-30" />
 
-    <!-- 4. Sizing Guide -->
-    <section id="sizing-guide">
-      <h2 class="docs-section-header">Sizing Guide</h2>
-      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
-        <p>
-          The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
-        </p>
-        <div class="docs-table-container mt-4">
-          <table class="docs-table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th><code>itemSize</code> / <code>columnWidth</code></th>
-                <th>Perf</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Fixed</strong></td>
-                <td><code>number</code></td>
-                <td><span class="badge badge-success badge-soft badge-xs">Best</span></td>
-                <td>Uniform size for all items. Calculations are <em>O(1)</em>.</td>
-              </tr>
-              <tr>
-                <td><strong>Array (Circular Pattern)</strong></td>
-                <td><code>number[]</code></td>
-                <td><span class="badge badge-info badge-soft badge-xs">Great</span></td>
-                <td>Repeating size patterns from array (e.g. <code>[50, 100]</code>). <em>O(log n)</em>.</td>
-              </tr>
-              <tr>
-                <td><strong>Function</strong></td>
-                <td><code>(item, idx) => number</code></td>
-                <td><span class="badge badge-warning badge-soft badge-xs">Good</span></td>
-                <td>Known but variable sizes. No <code>ResizeObserver</code> overhead unless measured size differs.</td>
-              </tr>
-              <tr>
-                <td><strong>Dynamic</strong></td>
-                <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
-                <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
-                <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider opacity-30" />
-
     <!-- 5. VirtualScroll Component -->
     <section id="virtual-scroll">
-      <h2 class="docs-section-header">VirtualScroll Component</h2>
+      <h2 class="docs-section-header">
+        <a href="#virtual-scroll" aria-label="Link to VirtualScroll Component section">
+          VirtualScroll Component
+        </a>
+      </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
           The <code>VirtualScroll</code> component is the primary way to use this library. It provides a declarative Vue interface
@@ -359,9 +505,17 @@ const vs = useVirtualScroll(props, [
         </p>
       </div>
 
-      <h3 id="props" class="docs-prop-header text-primary">Props</h3>
+      <h3 id="props" class="docs-prop-header text-primary">
+        <a href="#props" aria-label="Link to Props section">
+          Props
+        </a>
+      </h3>
 
-      <h4 class="docs-prop-subheader">Core Configuration</h4>
+      <h4 id="core-configuration" class="docs-prop-subheader">
+        <a href="#core-configuration" aria-label="Link to Core Configuration section">
+          Core Configuration
+        </a>
+      </h4>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -401,7 +555,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h4 class="docs-prop-subheader">Grid Configuration <span class="text-xs normal-case opacity-60">(only for direction="both")</span></h4>
+      <h4 id="grid-configuration" class="docs-prop-subheader">
+        <a href="#grid-configuration" aria-label="Link to Grid Configuration (only for direction=&quot;both&quot;) section">
+          Grid Configuration <span class="text-xs normal-case opacity-60">(only for direction="both")</span>
+        </a>
+      </h4>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -435,7 +593,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h4 class="docs-prop-subheader">Features & Behavior</h4>
+      <h4 id="features-behavior" class="docs-prop-subheader">
+        <a href="#features-behavior" aria-label="Link to Features & Behavior section">
+          Features & Behavior
+        </a>
+      </h4>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -511,7 +673,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h4 class="docs-prop-subheader">Accessibility</h4>
+      <h4 id="accessibility-2" class="docs-prop-subheader">
+        <a href="#accessibility-2" aria-label="Link to Accessibility section">
+          Accessibility
+        </a>
+      </h4>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -551,7 +717,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h3 id="accessibility" class="docs-prop-header">Accessibility (ARIA)</h3>
+      <h3 id="accessibility" class="docs-prop-header">
+        <a href="#accessibility" aria-label="Link to Accessibility (ARIA) section">
+          Accessibility (ARIA)
+        </a>
+      </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>The component automatically manages ARIA roles and attributes to ensure screen readers can navigate virtualized content. Common roles like <code>tree</code>, <code>listbox</code>, and <code>menu</code> are also supported.</p>
         <div class="docs-table-container">
@@ -568,12 +738,20 @@ const vs = useVirtualScroll(props, [
         </div>
       </div>
 
-      <h4 class="docs-prop-subheader text-primary">ScrollAlignment</h4>
+      <h4 id="scroll-alignment" class="docs-prop-subheader text-primary">
+        <a href="#scroll-alignment" aria-label="Link to ScrollAlignment section">
+          ScrollAlignment
+        </a>
+      </h4>
       <div class="prose prose-sm mb-4 text-base-content/70">
         <p>Controls the item's final position in the viewport: <code>'start' | 'center' | 'end' | 'auto'</code>.</p>
       </div>
 
-      <h4 class="docs-prop-subheader">Advanced & Performance</h4>
+      <h4 id="advanced-performance" class="docs-prop-subheader">
+        <a href="#advanced-performance" aria-label="Link to Advanced & Performance section">
+          Advanced & Performance
+        </a>
+      </h4>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -634,7 +812,11 @@ const vs = useVirtualScroll(props, [
         </div>
       </div>
 
-      <h3 id="slots" class="docs-prop-header docs-prop-header--accent">Slots</h3>
+      <h3 id="slots" class="docs-prop-header docs-prop-header--accent">
+        <a href="#slots" aria-label="Link to Slots section">
+          Slots
+        </a>
+      </h3>
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-10">
         <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#item</h4>
@@ -691,7 +873,11 @@ const vs = useVirtualScroll(props, [
       </div>
 
       <section id="scrollbar-slot-props" class="mb-12">
-        <h4 class="docs-prop-subheader text-accent">ScrollbarSlotProps</h4>
+        <h4 class="docs-prop-subheader text-accent">
+          <a href="#scrollbar-slot-props" aria-label="Link to ScrollbarSlotProps section">
+            ScrollbarSlotProps
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
           <p>Properties passed to the 'scrollbar' scoped slot and <code>useVirtualScrollbar</code> return value.</p>
         </div>
@@ -740,7 +926,11 @@ const vs = useVirtualScroll(props, [
         </div>
       </section>
 
-      <h3 id="events" class="docs-prop-header">Events</h3>
+      <h3 id="events" class="docs-prop-header">
+        <a href="#events" aria-label="Link to Events section">
+          Events
+        </a>
+      </h3>
       <div class="docs-table-container mb-10 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -770,7 +960,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h3 id="keyboard-navigation" class="docs-prop-header">Keyboard Navigation</h3>
+      <h3 id="keyboard-navigation" class="docs-prop-header">
+        <a href="#keyboard-navigation" aria-label="Link to Keyboard Navigation section">
+          Keyboard Navigation
+        </a>
+      </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
         <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
         <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 not-prose mt-4">
@@ -803,7 +997,11 @@ const vs = useVirtualScroll(props, [
         </div>
       </div>
 
-      <h3 id="css-classes" class="docs-prop-header">CSS Classes</h3>
+      <h3 id="css-classes" class="docs-prop-header">
+        <a href="#css-classes" aria-label="Link to CSS Classes section">
+          CSS Classes
+        </a>
+      </h3>
       <div class="docs-table-container mb-10 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -869,7 +1067,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h3 id="css-variables" class="docs-prop-header">CSS Variables</h3>
+      <h3 id="css-variables" class="docs-prop-header">
+        <a href="#css-variables" aria-label="Link to CSS Variables section">
+          CSS Variables
+        </a>
+      </h3>
       <div class="prose prose-sm max-w-none mb-6 opacity-80">
         <p>
           The default <code>VirtualScrollbar</code> can be styled using the following CSS variables:
@@ -896,7 +1098,11 @@ const vs = useVirtualScroll(props, [
         </table>
       </div>
 
-      <h3 id="methods" class="docs-prop-header">Exposed Members</h3>
+      <h3 id="methods" class="docs-prop-header">
+        <a href="#methods" aria-label="Link to Exposed Members section">
+          Exposed Members
+        </a>
+      </h3>
       <div class="prose prose-sm max-w-none mb-6 opacity-80">
         <p>
           The <code>VirtualScroll</code> component exposes several reactive properties and methods from the underlying logic.
@@ -904,7 +1110,11 @@ const vs = useVirtualScroll(props, [
         </p>
       </div>
 
-      <h4 class="docs-prop-subheader docs-prop-subheader--primary">Properties</h4>
+      <h4 id="properties" class="docs-prop-subheader docs-prop-subheader--primary">
+        <a href="#properties" aria-label="Link to Properties section">
+          Properties
+        </a>
+      </h4>
       <div class="docs-link-grid mb-8">
         <a href="#props" class="docs-link-card">
           <code class="docs-link-title docs-link-title--primary">All Props</code>
@@ -952,7 +1162,11 @@ const vs = useVirtualScroll(props, [
         </div>
       </div>
 
-      <h4 class="docs-prop-subheader docs-prop-subheader--secondary">Methods</h4>
+      <h4 id="methods-2" class="docs-prop-subheader docs-prop-subheader--secondary">
+        <a href="#methods-2" aria-label="Link to Methods section">
+          Methods
+        </a>
+      </h4>
       <div class="docs-link-grid mb-10">
         <a href="#method-scrolltoindex" class="docs-link-card">
           <code class="docs-prop-name--secondary text-xs">scrollToIndex()</code>
@@ -1033,7 +1247,11 @@ const vs = useVirtualScroll(props, [
 
     <!-- 5.1 VirtualScrollbar Component -->
     <section id="virtual-scrollbar">
-      <h2 class="docs-section-header">VirtualScrollbar Component</h2>
+      <h2 class="docs-section-header">
+        <a href="#virtual-scrollbar" aria-label="Link to VirtualScrollbar Component section">
+          VirtualScrollbar Component
+        </a>
+      </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <p>
           The <code>VirtualScrollbar</code> component provides a cross-browser consistent scrollbar that can be used independently or within the <code>VirtualScroll</code> component.
@@ -1076,7 +1294,11 @@ const scrollY = ref(0);
 </template>"
       />
 
-      <h3 id="scrollbar-props" class="docs-prop-header text-primary">Props</h3>
+      <h3 id="scrollbar-props" class="docs-prop-header text-primary">
+        <a href="#scrollbar-props" aria-label="Link to Props section">
+          Props
+        </a>
+      </h3>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -1128,7 +1350,11 @@ const scrollY = ref(0);
         </table>
       </div>
 
-      <h3 id="scrollbar-events" class="docs-prop-header text-secondary">Events</h3>
+      <h3 id="scrollbar-events" class="docs-prop-header text-secondary">
+        <a href="#scrollbar-events" aria-label="Link to Events section">
+          Events
+        </a>
+      </h3>
       <div class="docs-table-container mb-10 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -1153,11 +1379,19 @@ const scrollY = ref(0);
 
     <!-- 6. Composables -->
     <section id="composables">
-      <h2 class="docs-section-header">Composables</h2>
+      <h2 class="docs-section-header">
+        <a href="#composables" aria-label="Link to Composables section">
+          Composables
+        </a>
+      </h2>
 
       <!-- useVirtualScroll -->
       <section id="use-virtual-scroll" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useVirtualScroll</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scroll" aria-label="Link to useVirtualScroll section">
+            useVirtualScroll
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Provides the core virtualization logic. Recommended for advanced use cases or when building custom wrappers.
@@ -1185,12 +1419,20 @@ scrollToIndex
 } = useVirtualScroll(props);"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters" class="docs-prop-subheader">
+          <a href="#parameters" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts a <code>MaybeRefOrGetter</code> to a <code><a href="#virtual-scroll-props" class="link link-primary font-semibold">VirtualScrollProps</a></code> object.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Return Value</h4>
+        <h4 id="return-value" class="docs-prop-subheader">
+          <a href="#return-value" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1338,7 +1580,11 @@ scrollToIndex
 
       <!-- useVirtualScrollSizes -->
       <section id="use-virtual-scroll-sizes" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useVirtualScrollSizes</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scroll-sizes" aria-label="Link to useVirtualScrollSizes section">
+            useVirtualScrollSizes
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Manages the underlying sizing logic using Fenwick Trees. This composable handles prefix sum calculations, size updates, and scroll correction adjustments.
@@ -1365,12 +1611,20 @@ const {
 });"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-2" class="docs-prop-subheader">
+          <a href="#parameters-2" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts a <code>MaybeRefOrGetter</code> to a <code><a href="#use-virtual-scroll-sizes-props" class="link link-primary font-semibold">UseVirtualScrollSizesProps</a></code> object.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Return Value</h4>
+        <h4 id="return-value-2" class="docs-prop-subheader">
+          <a href="#return-value-2" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1443,7 +1697,11 @@ const {
 
       <!-- useVirtualScrollbar -->
       <section id="use-virtual-scrollbar">
-        <h3 class="docs-prop-header text-secondary">useVirtualScrollbar</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scrollbar" aria-label="Link to useVirtualScrollbar section">
+            useVirtualScrollbar
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Provides the logic for virtual scrollbar interactions. It handles track clicks, thumb dragging, and coordinate mapping (including RTL).
@@ -1469,12 +1727,20 @@ scrollToOffset: (val) => { scrollPos = val; }
 });"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-3" class="docs-prop-subheader">
+          <a href="#parameters-3" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts a <code>MaybeRefOrGetter</code> to a <code><a href="#use-virtual-scrollbar-props" class="link link-primary font-semibold">UseVirtualScrollbarProps</a></code> object.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Return Value</h4>
+        <h4 id="return-value-3" class="docs-prop-subheader">
+          <a href="#return-value-3" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1527,7 +1793,11 @@ scrollToOffset: (val) => { scrollPos = val; }
 
       <!-- useVirtualScrollInertia -->
       <section id="use-virtual-scroll-inertia" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useVirtualScrollInertia</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scroll-inertia" aria-label="Link to useVirtualScrollInertia section">
+            useVirtualScrollInertia
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Handles pointer-based scrolling, inertia animation, and mouse wheel events for cases where native scrolling is not available (e.g., massive lists or custom scrollbars).
@@ -1553,12 +1823,20 @@ const {
 });"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-4" class="docs-prop-subheader">
+          <a href="#parameters-4" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts an <code>UseVirtualScrollInertiaOptions</code> object.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Return Value</h4>
+        <h4 id="return-value-4" class="docs-prop-subheader">
+          <a href="#return-value-4" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1596,7 +1874,11 @@ const {
 
       <!-- useVirtualScrollKeyboard -->
       <section id="use-virtual-scroll-keyboard" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useVirtualScrollKeyboard</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scroll-keyboard" aria-label="Link to useVirtualScrollKeyboard section">
+            useVirtualScrollKeyboard
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Provides keyboard navigation support for the virtual scroll container, allowing users to navigate using Arrows, Home, End, PageUp, and PageDown keys.
@@ -1619,7 +1901,11 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
 });"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-5" class="docs-prop-subheader">
+          <a href="#parameters-5" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts an <code>UseVirtualScrollKeyboardOptions</code> object.</p>
           <ul class="list-disc ps-5 space-y-1">
@@ -1628,7 +1914,11 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
           </ul>
         </div>
 
-        <h4 class="docs-prop-subheader">Return Value</h4>
+        <h4 id="return-value-5" class="docs-prop-subheader">
+          <a href="#return-value-5" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1651,7 +1941,11 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
 
       <!-- useVirtualScrollObservers -->
       <section id="use-virtual-scroll-observers">
-        <h3 class="docs-prop-header text-secondary">useVirtualScrollObservers</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scroll-observers" aria-label="Link to useVirtualScrollObservers section">
+            useVirtualScrollObservers
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Manages <code>ResizeObserver</code> instances to support fully dynamic item and container sizes.
@@ -1675,12 +1969,20 @@ const { setItemRef } = useVirtualScrollObservers({
 });"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-6" class="docs-prop-subheader">
+          <a href="#parameters-6" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts an <code>UseVirtualScrollObserversOptions</code> object.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Return Value</h4>
+        <h4 id="return-value-6" class="docs-prop-subheader">
+          <a href="#return-value-6" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
         <div class="docs-table-container mb-12 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1706,11 +2008,19 @@ const { setItemRef } = useVirtualScrollObservers({
 
     <!-- 6.1 Extension Reference -->
     <section id="extension-reference">
-      <h2 class="docs-section-header">Extension Reference</h2>
+      <h2 class="docs-section-header">
+        <a href="#extension-reference" aria-label="Link to Extension Reference section">
+          Extension Reference
+        </a>
+      </h2>
 
       <!-- useRtlExtension -->
       <section id="use-rtl-extension" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useRtlExtension</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-rtl-extension" aria-label="Link to useRtlExtension section">
+            useRtlExtension
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Automatically detects the text direction (LTR or RTL) of the scroll container and adjusts the coordinate system accordingly. It ensures that horizontal scroll offsets and item positioning are correct in RTL mode.
@@ -1723,12 +2033,20 @@ const { setItemRef } = useVirtualScrollObservers({
           code="import { useRtlExtension } from '@pdanpdan/virtual-scroll';"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-7" class="docs-prop-subheader">
+          <a href="#parameters-7" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>This extension does not accept any parameters.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Behavior</h4>
+        <h4 id="behavior" class="docs-prop-subheader">
+          <a href="#behavior" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Injects detection logic into the <code>updateDirection</code> core method.</li>
@@ -1740,7 +2058,11 @@ const { setItemRef } = useVirtualScrollObservers({
 
       <!-- useSnappingExtension -->
       <section id="use-snapping-extension" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useSnappingExtension</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-snapping-extension" aria-label="Link to useSnappingExtension section">
+            useSnappingExtension
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Adds scroll snapping behavior to the virtualizer. When user scrolling stops, the extension automatically aligns the viewport to the nearest item based on the <code>snap</code> prop configuration.
@@ -1753,12 +2075,20 @@ const { setItemRef } = useVirtualScrollObservers({
           code="import { useSnappingExtension } from '@pdanpdan/virtual-scroll';"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-8" class="docs-prop-subheader">
+          <a href="#parameters-8" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>This extension does not accept any parameters.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Behavior</h4>
+        <h4 id="behavior-2" class="docs-prop-subheader">
+          <a href="#behavior-2" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Hooks into <code>onScrollEnd</code> lifecycle event.</li>
@@ -1771,7 +2101,11 @@ const { setItemRef } = useVirtualScrollObservers({
 
       <!-- useStickyExtension -->
       <section id="use-sticky-extension" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useStickyExtension</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-sticky-extension" aria-label="Link to useStickyExtension section">
+            useStickyExtension
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Implements sticky item logic for rows and columns. It ensures that items specified in <code>stickyIndices</code> are always visible when their group is within the viewport range.
@@ -1784,12 +2118,20 @@ const { setItemRef } = useVirtualScrollObservers({
           code="import { useStickyExtension } from '@pdanpdan/virtual-scroll';"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-9" class="docs-prop-subheader">
+          <a href="#parameters-9" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>This extension does not accept any parameters.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Behavior</h4>
+        <h4 id="behavior-3" class="docs-prop-subheader">
+          <a href="#behavior-3" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Hooks into <code>transformRenderedItems</code> to inject sticky items into the render list even if they are outside the normal virtual range.</li>
@@ -1802,7 +2144,11 @@ const { setItemRef } = useVirtualScrollObservers({
 
       <!-- useInfiniteLoadingExtension -->
       <section id="use-infinite-loading-extension" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">useInfiniteLoadingExtension</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-infinite-loading-extension" aria-label="Link to useInfiniteLoadingExtension section">
+            useInfiniteLoadingExtension
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Simple extension to facilitate infinite scrolling. It monitors the scroll position and triggers a callback when the user reaches a specific distance from the end of the content.
@@ -1821,7 +2167,11 @@ const ext = useInfiniteLoadingExtension({
 });"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-10" class="docs-prop-subheader">
+          <a href="#parameters-10" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="docs-table-container mb-8 text-base-content/80 text-xs @4xl:text-sm">
           <table class="docs-table">
             <thead>
@@ -1837,7 +2187,11 @@ const ext = useInfiniteLoadingExtension({
           </table>
         </div>
 
-        <h4 class="docs-prop-subheader">Behavior</h4>
+        <h4 id="behavior-4" class="docs-prop-subheader">
+          <a href="#behavior-4" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Watches <code>scrollDetails</code> reactively.</li>
@@ -1850,7 +2204,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- usePrependRestorationExtension -->
       <section id="use-prepend-restoration-extension" class="mb-16">
-        <h3 class="docs-prop-header text-secondary">usePrependRestorationExtension</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-prepend-restoration-extension" aria-label="Link to usePrependRestorationExtension section">
+            usePrependRestorationExtension
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Essential for chat-like interfaces. When items are prepended to the beginning of the <code>items</code> array, this extension calculates the added size and applies a scroll correction to maintain the user's perceived position.
@@ -1863,12 +2221,20 @@ const ext = useInfiniteLoadingExtension({
           code="import { usePrependRestorationExtension } from '@pdanpdan/virtual-scroll';"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-11" class="docs-prop-subheader">
+          <a href="#parameters-11" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>This extension does not accept any parameters.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Behavior</h4>
+        <h4 id="behavior-5" class="docs-prop-subheader">
+          <a href="#behavior-5" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Compares new items with previous items to detect prepended count.</li>
@@ -1880,7 +2246,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- useCoordinateScalingExtension -->
       <section id="use-coordinate-scaling-extension">
-        <h3 class="docs-prop-header text-secondary">useCoordinateScalingExtension</h3>
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-coordinate-scaling-extension" aria-label="Link to useCoordinateScalingExtension section">
+            useCoordinateScalingExtension
+          </a>
+        </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
             Enables support for virtually unlimited content sizes. Since browsers have a hard limit on the physical height/width of elements (usually around 10M to 30M pixels), this extension scales the display coordinates so the virtual list can represent billions of pixels.
@@ -1893,12 +2263,20 @@ const ext = useInfiniteLoadingExtension({
           code="import { useCoordinateScalingExtension } from '@pdanpdan/virtual-scroll';"
         />
 
-        <h4 class="docs-prop-subheader">Parameters</h4>
+        <h4 id="parameters-12" class="docs-prop-subheader">
+          <a href="#parameters-12" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>This extension does not accept any parameters.</p>
         </div>
 
-        <h4 class="docs-prop-subheader">Behavior</h4>
+        <h4 id="behavior-6" class="docs-prop-subheader">
+          <a href="#behavior-6" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Calculates <code>scaleX</code> and <code>scaleY</code> factors when total size exceeds browser limits.</li>
@@ -1913,23 +2291,43 @@ const ext = useInfiniteLoadingExtension({
 
     <!-- 7. API Reference -->
     <section id="api-reference">
-      <h2 class="docs-section-header">API Reference</h2>
+      <h2 class="docs-section-header">
+        <a href="#api-reference" aria-label="Link to API Reference section">
+          API Reference
+        </a>
+      </h2>
 
-      <h3 class="docs-section-header text-2xl mt-16">Types</h3>
+      <h3 id="types" class="docs-section-header text-2xl mt-16">
+        <a href="#types" aria-label="Link to Types section">
+          Types
+        </a>
+      </h3>
 
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-4 mb-12 text-base-content/80">
         <div id="scroll-direction" class="card bg-base-300 p-4 border border-base-content/5">
-          <h4 class="docs-prop-subheader text-primary mb-2">ScrollDirection</h4>
+          <h4 id="scroll-direction-2" class="docs-prop-subheader text-primary mb-2">
+            <a href="#scroll-direction-2" aria-label="Link to ScrollDirection section">
+              ScrollDirection
+            </a>
+          </h4>
           <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal' | 'both'" />
           <p class="text-[10px] opacity-60 mt-2 italic">Defines the virtualization axes for the VirtualScroll component.</p>
         </div>
         <div id="scroll-axis" class="card bg-base-300 p-4 border border-base-content/5">
-          <h4 class="docs-prop-subheader text-primary mb-2">ScrollAxis</h4>
+          <h4 id="scroll-axis-2" class="docs-prop-subheader text-primary mb-2">
+            <a href="#scroll-axis-2" aria-label="Link to ScrollAxis section">
+              ScrollAxis
+            </a>
+          </h4>
           <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="'vertical' | 'horizontal'" />
           <p class="text-[10px] opacity-60 mt-2 italic">Used specifically for individual scrollbar instances.</p>
         </div>
         <div id="snap-mode" class="card bg-base-300 p-4 border border-base-content/5">
-          <h4 class="docs-prop-subheader text-primary mb-2">SnapMode</h4>
+          <h4 id="snap-mode-2" class="docs-prop-subheader text-primary mb-2">
+            <a href="#snap-mode-2" aria-label="Link to SnapMode section">
+              SnapMode
+            </a>
+          </h4>
           <CodeBlock class="docs-code-block font-mono text-xs" lang="ts" code="boolean | 'start' | 'center' | 'end' | 'next' | 'auto'" />
           <p class="text-[10px] opacity-60 mt-2 italic">Controls automatic alignment after scrolling stops.</p>
         </div>
@@ -1937,7 +2335,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- ScrollDetails -->
       <section id="scroll-details" class="mb-12">
-        <h4 class="docs-prop-subheader">ScrollDetails&lt;T&gt;</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#scroll-details" aria-label="Link to ScrollDetails&lt;T&gt; section">
+            ScrollDetails&lt;T&gt;
+          </a>
+        </h4>
         <div class="docs-table-container text-base-content/80">
           <table class="table table-sm @4xl:table-md table-zebra w-full">
             <thead class="bg-base-300 text-base-content">
@@ -1963,7 +2365,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- RenderedItem -->
       <section id="rendered-item" class="mb-12">
-        <h4 class="docs-prop-subheader">RenderedItem&lt;T&gt;</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#rendered-item" aria-label="Link to RenderedItem&lt;T&gt; section">
+            RenderedItem&lt;T&gt;
+          </a>
+        </h4>
         <div class="docs-table-container text-base-content/80">
           <table class="table table-sm @4xl:table-md table-zebra w-full">
             <thead class="bg-base-300 text-base-content">
@@ -1985,7 +2391,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- ColumnRange -->
       <section id="column-range" class="mb-12">
-        <h4 class="docs-prop-subheader">ColumnRange</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#column-range" aria-label="Link to ColumnRange section">
+            ColumnRange
+          </a>
+        </h4>
         <div class="docs-table-container text-base-content/80">
           <table class="table table-sm @4xl:table-md table-zebra w-full">
             <thead class="bg-base-300 text-base-content">
@@ -2003,7 +2413,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- VirtualScrollProps -->
       <section id="virtual-scroll-props" class="mb-12">
-        <h4 class="docs-prop-subheader">VirtualScrollProps&lt;T&gt;</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#virtual-scroll-props" aria-label="Link to VirtualScrollProps&lt;T&gt; section">
+            VirtualScrollProps&lt;T&gt;
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
           <p>Full property configuration shared between the component and composable.</p>
         </div>
@@ -2038,7 +2452,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- StickyParams -->
       <section id="sticky-params" class="mb-12">
-        <h4 class="docs-prop-subheader">StickyParams</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#sticky-params" aria-label="Link to StickyParams section">
+            StickyParams
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
           <p>Parameters for calculating sticky item offsets. Used by <code>calculateStickyItem</code> and the <code>useStickyExtension</code> core.</p>
         </div>
@@ -2066,7 +2484,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- UseVirtualScrollbarProps -->
       <section id="use-virtual-scrollbar-props" class="mb-12">
-        <h4 class="docs-prop-subheader">UseVirtualScrollbarProps</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#use-virtual-scrollbar-props" aria-label="Link to UseVirtualScrollbarProps section">
+            UseVirtualScrollbarProps
+          </a>
+        </h4>
         <div class="docs-table-container overflow-x-auto text-base-content/80">
           <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
             <thead class="bg-base-300 text-base-content">
@@ -2088,7 +2510,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- ScrollToIndexOptions -->
       <section id="scroll-to-index-options" class="mb-12">
-        <h4 class="docs-prop-subheader">ScrollToIndexOptions</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#scroll-to-index-options" aria-label="Link to ScrollToIndexOptions section">
+            ScrollToIndexOptions
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
           <p>Full configuration for index-based scrolling.</p>
         </div>
@@ -2107,7 +2533,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- ScrollAlignmentOptions -->
       <section id="scroll-alignment-options" class="mb-12">
-        <h4 class="docs-prop-subheader">ScrollAlignmentOptions</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#scroll-alignment-options" aria-label="Link to ScrollAlignmentOptions section">
+            ScrollAlignmentOptions
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
           <p>Allows axis-specific alignment in <code>scrollToIndex</code>.</p>
         </div>
@@ -2126,7 +2556,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- ScrollAlignment -->
       <section id="alignments" class="mb-12">
-        <h4 class="docs-prop-subheader">ScrollAlignment</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#alignments" aria-label="Link to ScrollAlignment section">
+            ScrollAlignment
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
           <p>Controls the item's final position in the viewport during <code>scrollToIndex</code>.</p>
         </div>
@@ -2162,7 +2596,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- SnapMode -->
       <section id="snap-modes" class="mb-12">
-        <h4 class="docs-prop-subheader">SnapMode</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#snap-modes" aria-label="Link to SnapMode section">
+            SnapMode
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
           <p>Defines how items align when user scrolling stops. <strong>Note:</strong> Snapping is disabled for items larger than the viewport.</p>
         </div>
@@ -2206,7 +2644,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- UseVirtualScrollSizesProps -->
       <section id="use-virtual-scroll-sizes-props" class="mb-12">
-        <h4 class="docs-prop-subheader">UseVirtualScrollSizesProps</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#use-virtual-scroll-sizes-props" aria-label="Link to UseVirtualScrollSizesProps section">
+            UseVirtualScrollSizesProps
+          </a>
+        </h4>
         <div class="docs-table-container overflow-x-auto text-base-content/80">
           <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
             <thead class="bg-base-300 text-base-content">
@@ -2226,7 +2668,11 @@ const ext = useInfiniteLoadingExtension({
 
       <!-- FenwickTree -->
       <section id="fenwick-tree" class="mb-12">
-        <h4 class="docs-prop-subheader">FenwickTree</h4>
+        <h4 class="docs-prop-subheader">
+          <a href="#fenwick-tree" aria-label="Link to FenwickTree section">
+            FenwickTree
+          </a>
+        </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
           <p>A highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates.</p>
         </div>
@@ -2248,7 +2694,11 @@ const ext = useInfiniteLoadingExtension({
         </div>
       </section>
 
-      <h3 class="docs-section-header text-2xl mt-24 text-secondary">Methods</h3>
+      <h3 id="methods-3" class="docs-section-header text-2xl mt-24 text-secondary">
+        <a href="#methods-3" aria-label="Link to Methods section">
+          Methods
+        </a>
+      </h3>
 
       <div class="space-y-8 mb-10">
         <!-- Method: scrollToIndex -->
@@ -2491,7 +2941,11 @@ element?: HTMLElement
 
     <!-- 8. Utility Functions -->
     <section id="utility-functions">
-      <h2 class="docs-section-header">Utility Functions</h2>
+      <h2 class="docs-section-header">
+        <a href="#utility-functions" aria-label="Link to Utility Functions section">
+          Utility Functions
+        </a>
+      </h2>
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-6">
         <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
@@ -2555,7 +3009,11 @@ element?: HTMLElement
 
     <!-- 9. SSR Support -->
     <section id="ssr-support">
-      <h2 class="docs-section-header">SSR & Hydration</h2>
+      <h2 class="docs-section-header">
+        <a href="#ssr-support" aria-label="Link to SSR & Hydration section">
+          SSR & Hydration
+        </a>
+      </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
         <div class="docs-alert docs-alert--warning mt-6">

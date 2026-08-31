@@ -17,6 +17,7 @@ const defaultRowHeight = ref(35);
 const defaultColWidth = ref(100);
 const bufferBefore = ref(5);
 const bufferAfter = ref(5);
+const virtualScrollbar = ref(true);
 const stickyIndices = [ 0 ];
 
 const manualRowHeights = reactive<Record<number, number>>({});
@@ -168,6 +169,7 @@ function stopResizing() {
         v-model:column-width="defaultColWidth"
         v-model:buffer-before="bufferBefore"
         v-model:buffer-after="bufferAfter"
+        v-model:virtual-scrollbar="virtualScrollbar"
         direction="both"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
@@ -188,6 +190,7 @@ function stopResizing() {
       :default-column-width="defaultColWidth"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
+      :virtual-scrollbar="virtualScrollbar"
       :sticky-indices="stickyIndices"
       aria-label="Interactive spreadsheet"
       @scroll="onScroll"

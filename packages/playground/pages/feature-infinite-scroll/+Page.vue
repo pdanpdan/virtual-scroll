@@ -13,6 +13,7 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 const items = ref(Array.from({ length: 50 }, (_, i) => ({ id: i, label: `Initial Item ${ i }` })));
 const loading = ref(false);
 const autoLoad = ref(true);
+const virtualScrollbar = ref(true);
 // The demo source is finite: once the limit is reached there is no more data,
 // so the loading slot must not show (and nothing should be fetched).
 const TOTAL_LIMIT = 500;
@@ -93,6 +94,11 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
           <input v-model="autoLoad" type="checkbox" class="toggle toggle-primary toggle-sm" />
         </label>
 
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+
         <button class="btn btn-sm btn-soft btn-primary" :disabled="loading" @click="loadMore">Load More</button>
         <button class="btn btn-sm btn-soft btn-error" @click="items = []">Clear</button>
       </div>
@@ -105,6 +111,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
       :item-size="60"
       :loading="loading"
       :load-distance="300"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Infinite scrolling list"
       @load="onLoad"
       @scroll="onScroll"

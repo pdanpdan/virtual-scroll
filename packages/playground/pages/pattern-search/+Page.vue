@@ -17,6 +17,7 @@ const itemCount = ref(10000);
 const searchQuery = ref('Ultimate');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const currentMatchIndex = ref(-1);
+const virtualScrollbar = ref(true);
 
 const reEscape = /[.*+?^${}()|[\\]/g;
 
@@ -239,6 +240,11 @@ onUnmounted(() => {
 
     <template #example-controls>
       <div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+
         <div class="join bg-base-100 rounded-field border border-base-content/10">
           <label class="input input-ghost join-item grow">
             <div>
@@ -290,6 +296,7 @@ onUnmounted(() => {
       :items="items"
       :item-size="60"
       :ssr-range="ssrRange"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Search results"
       @scroll="onScroll"
     >

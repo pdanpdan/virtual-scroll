@@ -2,8 +2,8 @@
 import type { ScrollDetails, VirtualScrollInstance } from '@pdanpdan/virtual-scroll';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
-import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { inject, nextTick, reactive, ref } from 'vue';
+import { VirtualScroll, VirtualScrollbar } from '@pdanpdan/virtual-scroll';
+import { inject, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
@@ -45,7 +45,51 @@ for (const item of items) {
 }
 
 const containerRef = ref<HTMLElement | null>(null);
+const virtualScrollbar = ref(true);
 const scrollDetails = ref<ScrollDetails | null>(null);
+
+// Standalone scrollbar state for the shared scroll container: the columns
+// each render their own virtual scrollbar, so the page provides a single one.
+const scrollY = ref(0);
+const totalHeight = ref(0);
+const viewportHeight = ref(0);
+
+function onContainerScroll() {
+  if (containerRef.value) {
+    // The column totals settle after mount (dynamic measurement), which grows
+    // scrollHeight without a container resize — keep the scrollbar in sync.
+    updateContainerSize();
+    scrollY.value = containerRef.value.scrollTop;
+  }
+}
+
+function updateContainerSize() {
+  if (containerRef.value) {
+    totalHeight.value = containerRef.value.scrollHeight;
+    viewportHeight.value = containerRef.value.clientHeight;
+  }
+}
+
+function handleScrollToOffset(offset: number) {
+  if (containerRef.value) {
+    // clamp against the live container: the column totals settle after mount
+    containerRef.value.scrollTop = Math.min(offset, containerRef.value.scrollHeight - containerRef.value.clientHeight);
+  }
+}
+
+let containerResizeObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+  updateContainerSize();
+  containerResizeObserver = new ResizeObserver(updateContainerSize);
+  if (containerRef.value) {
+    containerResizeObserver.observe(containerRef.value);
+  }
+});
+
+onUnmounted(() => {
+  containerResizeObserver?.disconnect();
+});
 
 const columnRefs = ref<VirtualScrollInstance<MasonryItem>[]>([]);
 const itemRefs = reactive(new Map<number, HTMLElement>());
@@ -176,49 +220,86 @@ function setItemRef(el: Element | null | ComponentPublicInstance, id: number) {
       <ScrollStatus :scroll-details="scrollDetails" />
     </template>
 
-    <div ref="containerRef" class="size-full overflow-auto bg-base-100">
-      <!-- Common wrapper to hold all columns -->
-      <div class="flex gap-4 p-4 min-h-full items-start">
-        <div
-          v-for="(colItems, colIndex) in columns"
-          :key="colIndex"
-          class="flex-1"
-        >
-          <VirtualScroll
-            ref="columnRefs"
-            class="outline-0"
-            style="overflow: visible"
-            :container="containerRef || undefined"
-            :items="colItems"
-            :debug="debugMode"
-            :aria-label="`Masonry column ${ colIndex + 1 }`"
-            @scroll="(details) => colIndex === 0 ? scrollDetails = details : undefined"
+    <template #example-controls>
+      <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+      </div>
+    </template>
+
+    <div class="relative flex-1 min-h-0">
+      <div
+        ref="containerRef"
+        class="size-full overflow-auto bg-base-100"
+        :class="{ 'scrollbar-hide': virtualScrollbar }"
+        @scroll="onContainerScroll"
+      >
+        <!-- Common wrapper to hold all columns -->
+        <div class="flex gap-4 p-4 min-h-full items-start">
+          <div
+            v-for="(colItems, colIndex) in columns"
+            :key="colIndex"
+            class="flex-1"
           >
-            <template #item="{ item, index }">
-              <div
-                :ref="(el) => setItemRef(el, item.id)"
-                role="button"
-                tabindex="0"
-                class="mb-4 rounded-box p-4 flex flex-col justify-between transition-transform hover:scale-[1.02] shadow-sm border border-base-content/5 outline-none focus-visible:ring-4 focus-visible:ring-primary/50 cursor-pointer"
-                :style="{
-                  height: `${ item.height }px`,
-                  backgroundColor: item.color,
-                }"
-                @keydown="handleKeyDown($event, colIndex, index, item)"
-              >
-                <div class="flex justify-between items-start">
-                  <span class="bg-base-300/30 px-2 py-0.5 rounded text-xs font-bold small-caps tracking-wider text-base-content/70">
-                    Card #{{ item.id }}
-                  </span>
+            <VirtualScroll
+              ref="columnRefs"
+              class="outline-0"
+              style="overflow: visible"
+              :container="containerRef || undefined"
+              :items="colItems"
+              :debug="debugMode"
+              :aria-label="`Masonry column ${ colIndex + 1 }`"
+              @scroll="(details) => colIndex === 0 ? scrollDetails = details : undefined"
+            >
+              <template #item="{ item, index }">
+                <div
+                  :ref="(el) => setItemRef(el, item.id)"
+                  role="button"
+                  tabindex="0"
+                  class="mb-4 rounded-box p-4 flex flex-col justify-between transition-transform hover:scale-[1.02] shadow-sm border border-base-content/5 outline-none focus-visible:ring-4 focus-visible:ring-primary/50 cursor-pointer"
+                  :style="{
+                    height: `${ item.height }px`,
+                    backgroundColor: item.color,
+                  }"
+                  @keydown="handleKeyDown($event, colIndex, index, item)"
+                >
+                  <div class="flex justify-between items-start">
+                    <span class="bg-base-300/30 px-2 py-0.5 rounded text-xs font-bold small-caps tracking-wider text-base-content/70">
+                      Card #{{ item.id }}
+                    </span>
+                  </div>
+                  <div class="text-white/90 text-xs font-medium">
+                    Dynamic Height: {{ Math.round(item.height) }}px
+                  </div>
                 </div>
-                <div class="text-white/90 text-xs font-medium">
-                  Dynamic Height: {{ Math.round(item.height) }}px
-                </div>
-              </div>
-            </template>
-          </VirtualScroll>
+              </template>
+            </VirtualScroll>
+          </div>
         </div>
       </div>
+
+      <VirtualScrollbar
+        v-if="virtualScrollbar"
+        axis="vertical"
+        :total-size="totalHeight"
+        :viewport-size="viewportHeight"
+        :position="scrollY"
+        aria-label="Masonry vertical scroll"
+        @scroll-to-offset="handleScrollToOffset"
+      />
     </div>
   </ExampleContainer>
 </template>
+
+<style scoped>
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+</style>

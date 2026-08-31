@@ -17,6 +17,7 @@ const bufferBefore = ref(5);
 const bufferAfter = ref(5);
 const stickyHeader = ref(false);
 const stickyFooter = ref(false);
+const virtualScrollbar = ref(true);
 
 // Use a deterministic function for item size
 // Pattern: base, base*2, base, base*2, ...
@@ -78,6 +79,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         v-model:buffer-after="bufferAfter"
         v-model:sticky-header="stickyHeader"
         v-model:sticky-footer="stickyFooter"
+        v-model:virtual-scrollbar="virtualScrollbar"
         direction="vertical"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
@@ -94,6 +96,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :buffer-after="bufferAfter"
       :sticky-header="stickyHeader"
       :sticky-footer="stickyFooter"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Dynamic height list"
       @scroll="onScroll"
     >

@@ -110,7 +110,7 @@ onUnmounted(() => {
             v-model.number="totalWidth"
             type="range"
             min="500"
-            max="5000"
+            max="15000"
             step="100"
             class="range range-xs range-primary w-48"
             aria-label="Content Width"
@@ -123,7 +123,7 @@ onUnmounted(() => {
             v-model.number="totalHeight"
             type="range"
             min="500"
-            max="5000"
+            max="15000"
             step="100"
             class="range range-xs range-secondary w-48"
             aria-label="Content Height"
@@ -146,7 +146,7 @@ onUnmounted(() => {
             height: `${ totalHeight }px`,
             backgroundSize: '40px 40px',
             backgroundImage: 'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
-            color: 'oklch(var(--bc) / 0.05)',
+            color: 'color-mix(in oklab, var(--color-primary) 60%, transparent)',
           }"
         >
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -158,9 +158,9 @@ onUnmounted(() => {
 
           <!-- Some content dots -->
           <div
-            v-for="i in 20"
+            v-for="i in Math.ceil(Math.max(totalWidth, totalHeight) / 25)"
             :key="i"
-            class="absolute size-4 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold"
+            class="absolute size-6 rounded-full bg-accent text-accent-content flex items-center justify-center text-sm font-bold"
             :style="{
               insetInlineStart: `${ (i * 12345) % totalWidth }px`,
               top: `${ (i * 54321) % totalHeight }px`,

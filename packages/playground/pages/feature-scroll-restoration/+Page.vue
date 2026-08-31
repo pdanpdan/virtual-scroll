@@ -13,6 +13,7 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 const items = ref(Array.from({ length: 50 }, (_, i) => ({ id: `orig-${ i }`, label: `Original Item ${ i }` })));
 const prependCount = ref(0);
 const restoreScrollOnPrepend = ref(true);
+const virtualScrollbar = ref(true);
 
 const {
   scrollDetails,
@@ -83,6 +84,11 @@ function appendItems() {
           <input v-model="restoreScrollOnPrepend" type="checkbox" class="toggle toggle-primary toggle-sm" />
         </label>
 
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+
         <button class="btn btn-sm btn-soft btn-primary" @click="prependItems">Prepend 5</button>
         <button class="btn btn-sm btn-soft btn-primary" @click="appendItems">Append 5</button>
         <button class="btn btn-sm btn-soft btn-error" @click="items = []">Clear Items</button>
@@ -95,6 +101,7 @@ function appendItems() {
       :items="items"
       :item-size="60"
       :restore-scroll-on-prepend="restoreScrollOnPrepend"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Scroll restoration list"
       @scroll="onScroll"
     >

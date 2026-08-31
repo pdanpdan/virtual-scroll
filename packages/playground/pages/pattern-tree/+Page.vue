@@ -66,6 +66,7 @@ function flatten(nodes: TreeNode[], result: TreeNode[] = []): TreeNode[] {
 }
 
 const visibleItems = computed(() => flatten(tree));
+const virtualScrollbar = ref(true);
 
 const {
   scrollDetails,
@@ -133,6 +134,11 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
 
     <template #example-controls>
       <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+
         <button
           class="btn btn-soft btn-secondary btn-sm"
           @click="setAllExpanded(tree, true)"
@@ -155,6 +161,7 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
       class="example-container"
       :items="visibleItems"
       :debug="debugMode"
+      :virtual-scrollbar="virtualScrollbar"
       role="tree"
       item-role="none"
       aria-label="Collapsible directory tree"

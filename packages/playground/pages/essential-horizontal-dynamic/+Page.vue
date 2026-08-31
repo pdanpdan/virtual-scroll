@@ -15,6 +15,7 @@ const itemCount = ref(1000);
 const baseItemSize = ref(150);
 const bufferBefore = ref(20);
 const bufferAfter = ref(20);
+const virtualScrollbar = ref(true);
 
 // Use a deterministic function for item size
 // Pattern: base, base*2, base, base*2, ...
@@ -75,6 +76,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         v-model:item-size="baseItemSize"
         v-model:buffer-before="bufferBefore"
         v-model:buffer-after="bufferAfter"
+        v-model:virtual-scrollbar="virtualScrollbar"
         direction="horizontal"
         @scroll-to-index="handleScrollToIndex"
         @scroll-to-offset="handleScrollToOffset"
@@ -90,6 +92,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :items="items"
       :buffer-before="bufferBefore"
       :buffer-after="bufferAfter"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Dynamic width horizontal list"
       @scroll="onScroll"
     >

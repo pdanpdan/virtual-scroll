@@ -165,7 +165,7 @@ Customize the default virtual scrollbar:
 - [Sticky Sections](https://pdanpdan.github.io/virtual-scroll/umd/feature-sticky-sections.html): Demonstrates iOS-style sticky headers where new headers push previous ones out of view.
 - [Chat Interface](https://pdanpdan.github.io/virtual-scroll/umd/pattern-chat.html): Chat demonstration with dynamic heights, initial scroll to bottom, and history scroll restoration.
 - [Draggable List](https://pdanpdan.github.io/virtual-scroll/umd/pattern-draggable.html): Reorder virtualized items using native drag and drop while maintaining high performance.
-- [Photo Gallery](https://pdanpdan.github.io/virtual-scroll/umd/pattern-gallery.html): High-performance grid gallery featuring lazy-loading placeholders and a lightbox.
+- [Photo Gallery](https://pdanpdan.github.io/virtual-scroll/umd/pattern-gallery.html): High-performance grid photo gallery featuring lazy-loading placeholders.
 - [Masonry Grid](https://pdanpdan.github.io/virtual-scroll/umd/pattern-masonry.html): Achieve masonry layout by combining multiple VirtualScroll columns sharing a single scroll container.
 - [Search & Highlight](https://pdanpdan.github.io/virtual-scroll/umd/pattern-search.html): Generic way to provide native search in virtualized content using data-layer searching and CSS Custom Highlight API. Triggered with Ctrl+K.
 - [Spreadsheet Grid](https://pdanpdan.github.io/virtual-scroll/umd/pattern-spreadsheet.html): Excel-like bidirectional grid with sticky row and column headers and resizable cells.

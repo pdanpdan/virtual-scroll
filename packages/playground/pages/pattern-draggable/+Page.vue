@@ -28,6 +28,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
 const draggedIndex = ref<number | null>(null);
 const dropTargetIndex = ref<number | null>(null);
+const virtualScrollbar = ref(true);
 
 const {
   virtualScrollRef,
@@ -161,6 +162,15 @@ function handleDragEnd() {
       <ScrollStatus :scroll-details="scrollDetails" />
     </template>
 
+    <template #example-controls>
+      <div class="flex flex-wrap gap-4 items-center">
+        <label class="settings-item group">
+          <span class="settings-label pe-4">Virtual Scrollbars</span>
+          <input v-model="virtualScrollbar" type="checkbox" class="toggle toggle-primary toggle-sm" />
+        </label>
+      </div>
+    </template>
+
     <template #subtitle>
       Reorder virtualized items using native drag and drop
     </template>
@@ -170,6 +180,7 @@ function handleDragEnd() {
       class="example-container"
       :items="items"
       :debug="debugMode"
+      :virtual-scrollbar="virtualScrollbar"
       aria-label="Reorderable list"
       @scroll="onScroll"
     >
