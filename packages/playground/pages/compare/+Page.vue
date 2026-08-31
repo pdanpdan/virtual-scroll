@@ -105,7 +105,7 @@
 
   <h2 class="docs-prop-header text-secondary">Feature Matrix</h2>
 
-  <div class="docs-table-container max-h-[70svh]">
+  <div class="docs-table-container max-sm:max-h-[70svh]">
     <table class="docs-table table-pin-rows table-pin-cols">
       <thead>
         <tr>
