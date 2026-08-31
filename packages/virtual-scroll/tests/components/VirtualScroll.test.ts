@@ -2446,16 +2446,23 @@ describe('virtualScroll', () => {
       expect(vs.scrollbarPropsHorizontal).toBeNull();
     });
 
-    it('forces virtual scrollbars when virtualscrollbar prop is true', async () => {
+    it('offsets the scrollbar viewport by the container padding', async () => {
       const wrapper = mount(VirtualScroll, {
+        attrs: { style: 'padding: 16px' },
         props: {
-          items: [ { id: 1 } ],
+          items: mockItems,
           itemSize: 50,
           virtualScrollbar: true,
         },
       });
       await nextTick();
-      expect(wrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(true);
+      await nextTick();
+      const viewport = wrapper.find('.virtual-scroll-scrollbar-viewport');
+      expect(viewport.exists()).toBe(true);
+      // the overlay is anchored to the content box, so it must be pulled back
+      // by the padding to align with the scrollport (otherwise it is clipped)
+      expect((viewport.element as HTMLElement).style.insetInlineStart).toBe('-16px');
+      expect((viewport.element as HTMLElement).style.insetBlockStart).toBe('-16px');
     });
 
     it('scrolls via the virtual scrollbar track (vertical)', async () => {

@@ -79,6 +79,8 @@ export function useVirtualScroll<T = unknown>(
   const hostOffset = reactive({ x: 0, y: 0 });
   /** Current offset of the root host element relative to the scroll container (DU). */
   const hostRefOffset = reactive({ x: 0, y: 0 });
+  /** Inline-start/block-start padding of the scroll container (DU): the virtual scrollbar overlay is anchored to the content box while the viewport is sized to the padding box. */
+  const scrollbarOffset = reactive({ x: 0, y: 0 });
   /** Timeout handle for the scroll end detection. */
   let scrollTimeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -996,6 +998,19 @@ export function useVirtualScroll<T = unknown>(
     }
   };
 
+  const updateScrollbarOffset = (container: HTMLElement | Window | null) => {
+    if (!isElement(container)) {
+      scrollbarOffset.x = 0;
+      scrollbarOffset.y = 0;
+      return;
+    }
+    const cs = getComputedStyle(container);
+    scrollbarOffset.x = isRtl.value
+      ? (Number.parseFloat(cs.paddingRight) || 0)
+      : (Number.parseFloat(cs.paddingLeft) || 0);
+    scrollbarOffset.y = Number.parseFloat(cs.paddingTop) || 0;
+  };
+
   const attachEvents = (container: HTMLElement | Window | null) => {
     // v8 ignore start -- defensive SSR guard; the scroll listener is only attached when window exists
     if (typeof window === 'undefined') {
@@ -1015,11 +1030,13 @@ export function useVirtualScroll<T = unknown>(
       viewportHeight.value = document.documentElement.clientHeight;
       scrollX.value = window.scrollX;
       scrollY.value = window.scrollY;
+      updateScrollbarOffset(effectiveContainer);
       const onResize = () => {
         updateDirection();
         viewportWidth.value = document.documentElement.clientWidth;
         viewportHeight.value = document.documentElement.clientHeight;
         updateHostOffset();
+        updateScrollbarOffset(effectiveContainer);
       };
       window.addEventListener('resize', onResize);
       return () => {
@@ -1032,11 +1049,13 @@ export function useVirtualScroll<T = unknown>(
       viewportHeight.value = (effectiveContainer as HTMLElement).clientHeight;
       scrollX.value = (effectiveContainer as HTMLElement).scrollLeft;
       scrollY.value = (effectiveContainer as HTMLElement).scrollTop;
+      updateScrollbarOffset(effectiveContainer);
       const resizeObserver = new ResizeObserver(() => {
         updateDirection();
         viewportWidth.value = (effectiveContainer as HTMLElement).clientWidth;
         viewportHeight.value = (effectiveContainer as HTMLElement).clientHeight;
         updateHostOffset();
+        updateScrollbarOffset(effectiveContainer);
       });
       resizeObserver.observe(effectiveContainer as HTMLElement);
       return () => {
@@ -1102,6 +1121,7 @@ export function useVirtualScroll<T = unknown>(
     if (oldRtl === undefined || newRtl === oldRtl || !isMounted.value) {
       return;
     }
+    updateScrollbarOffset(props.value.container || window);
     if (direction.value === 'vertical') {
       updateHostOffset();
       return;
@@ -1195,6 +1215,8 @@ export function useVirtualScroll<T = unknown>(
     scaleY,
     /** Absolute offset of the component within its container. */
     componentOffset,
+    /** Inline-start/block-start padding of the scroll container, used to align the virtual scrollbar overlay (DU). */
+    scrollbarOffset,
     /** Physical width of the virtualized content area (clamped). */
     renderedVirtualWidth,
     /** Physical height of the virtualized content area (clamped). */

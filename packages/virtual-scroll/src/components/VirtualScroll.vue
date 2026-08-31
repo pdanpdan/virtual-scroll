@@ -220,6 +220,7 @@ const {
   scaleY,
   isWindowContainer,
   componentOffset,
+  scrollbarOffset,
   renderedVirtualWidth,
   renderedVirtualHeight,
   getRowIndexAt,
@@ -948,6 +949,8 @@ defineExpose({
         :style="{
           'inlineSize': `${ scrollDetails.displayViewportSize.width }px`,
           'blockSize': `${ scrollDetails.displayViewportSize.height }px`,
+          'insetInlineStart': `${ -scrollbarOffset.x }px`,
+          'insetBlockStart': `${ -scrollbarOffset.y }px`,
           '--vsi-scrollbar-has-cross-gap': direction === 'both' ? 1 : 0,
         }"
       >
