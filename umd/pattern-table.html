@@ -82,12 +82,13 @@
         <div class="flex-1 overflow-auto border border-base-content/10 rounded-box bg-base-100">
           <virtual-scroll
             ref="vs"
+            virtual-scrollbar
             container-tag="table"
             wrapper-tag="tbody"
             item-tag="tr"
             :items="items"
             :item-size="itemSize"
-            :sticky-header="true"
+            sticky-header
             class="table table-xs w-full min-w-200"
             style="table-layout: fixed"
             @scroll="onScroll"
