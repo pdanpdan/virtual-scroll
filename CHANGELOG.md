@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.4](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.3...v0.11.4) (2026-08-31)
+
+### Bug Fixes
+
+* account for container padding when positioning virtual scrollbars ([88201e1](https://github.com/pdanpdan/virtual-scroll/commit/88201e18431bc3053cd929893d8d521a569e71f0))
+* scroll positioning to bottom while content is still showing ([900797f](https://github.com/pdanpdan/virtual-scroll/commit/900797f9fe10fbbac7e9c5475793c6b3ea1a6da4))
+* show the loading slot as soon as loading is trigerred in infinite scroll ([a932f01](https://github.com/pdanpdan/virtual-scroll/commit/a932f01c06c8f6c430a987d0bd5871e32b46d701))
+
 ## [0.11.3](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.2...v0.11.3) (2026-08-30)
 
 ### Bug Fixes
