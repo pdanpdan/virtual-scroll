@@ -1,138 +1,127 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { nextTick } from 'vue';
+import type { ExtensionContext } from '../../src/extensions';
+
+import { describe, expect, it, vi } from 'vitest';
+import { nextTick, ref } from 'vue';
 
 import { useInfiniteLoadingExtension } from '../../src/extensions/infinite-loading';
-import { clearMocks, mockItems, scrollState, setup, setupMocks } from '../test-helper';
 
-describe('infinite loading', () => {
-  setupMocks();
-
-  beforeEach(() => {
-    clearMocks();
+function makeCtx(overrides: Partial<{
+  direction: 'vertical' | 'horizontal' | 'both';
+  loading: boolean;
+  loadDistance: number;
+  isProgrammaticScroll: boolean;
+}> = {}) {
+  const {
+    direction = 'vertical',
+    loading = false,
+    loadDistance = 200,
+    isProgrammaticScroll = false,
+  } = overrides;
+  const scrollDetails = ref({
+    totalSize: { width: 10000, height: 10000 },
+    scrollOffset: { x: 0, y: 0 },
+    viewportSize: { width: 500, height: 500 },
   });
+  const onLoad = vi.fn();
+  const ctx = {
+    props: ref({ direction, loading, loadDistance }),
+    internalState: { isProgrammaticScroll: ref(isProgrammaticScroll) },
+    scrollDetails,
+  } as unknown as ExtensionContext<unknown>;
+  return { ctx, scrollDetails, onLoad };
+}
 
-  it('triggers onLoad when reaching the end in vertical mode', async () => {
-    const onLoad = vi.fn();
-    const { wrapper } = setup({
-      direction: 'vertical',
-      itemSize: 50,
-      items: mockItems, // 100 * 50 = 5000px
-      loadDistance: 200,
-    }, [
-      useInfiniteLoadingExtension({ onLoad }),
-    ]);
+describe('useInfiniteLoadingExtension', () => {
+  it('fires onLoad for the vertical axis when the remaining distance is within the threshold', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx();
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    await nextTick();
-    await nextTick();
-
-    // Scroll near the end. Viewport 500. Total 5000.
-    // Offset 4301 -> remaining 5000 - (4301 + 500) = 199.
-    scrollState.y = 4301;
-    document.dispatchEvent(new Event('scroll'));
-    await nextTick();
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 }, // remaining: 10000 - 9300 - 500 = 200
+    };
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('vertical');
-    wrapper.unmount();
   });
 
-  it('triggers onLoad when reaching the end in horizontal mode', async () => {
-    const onLoad = vi.fn();
-    const { wrapper } = setup({
-      direction: 'horizontal',
-      itemSize: 100,
-      items: mockItems, // 100 * 100 = 10000px
-      loadDistance: 200,
-    }, [
-      useInfiniteLoadingExtension({ onLoad }),
-    ]);
+  it('does not fire while the remaining distance is above the threshold', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx();
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    await nextTick();
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9000 }, // remaining: 500 > 200
+    };
     await nextTick();
 
-    // Scroll near the end. Viewport 500. Total 10000.
-    // Offset 9301 -> remaining 10000 - (9301 + 500) = 199.
-    scrollState.x = 9301;
-    document.dispatchEvent(new Event('scroll'));
-    await nextTick();
+    expect(onLoad).not.toHaveBeenCalled();
+  });
+
+  it('fires onLoad for the horizontal axis in horizontal mode', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'horizontal' });
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
+
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 9300, y: 0 },
+    };
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('horizontal');
-    wrapper.unmount();
   });
 
-  it('triggers onLoad for both directions in "both" mode', async () => {
-    const onLoad = vi.fn();
-    const { wrapper } = setup({
-      direction: 'both',
-      itemSize: 50,
-      columnCount: 10,
-      columnWidth: 100,
-      items: Array.from({ length: 10 }, (_, i) => ({ id: i })), // 10 rows. 10 * 50 = 500.
-      loadDistance: 50,
-    }, [
-      useInfiniteLoadingExtension({ onLoad }),
-    ]);
+  it('fires for both axes in both mode when both thresholds are reached', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'both' });
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    await nextTick();
-    await nextTick();
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 9300, y: 9300 },
+    };
     await nextTick();
 
-    // Total height 500. Viewport 500. Offset 0. remaining 0.
-    // It should trigger vertical onLoad.
     expect(onLoad).toHaveBeenCalledWith('vertical');
-
-    // Total width 1000. Viewport 500.
-    scrollState.x = 460; // remaining 1000 - (460 + 500) = 40.
-    document.dispatchEvent(new Event('scroll'));
-    await nextTick();
-    await nextTick();
-
     expect(onLoad).toHaveBeenCalledWith('horizontal');
-
-    wrapper.unmount();
   });
 
-  it('does not trigger onLoad if already loading', async () => {
-    const onLoad = vi.fn();
-    const { wrapper } = setup({
-      direction: 'vertical',
-      itemSize: 50,
-      items: mockItems,
-      loading: true,
-    }, [
-      useInfiniteLoadingExtension({ onLoad }),
-    ]);
+  it('is suppressed while loading is active', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx({ loading: true });
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    await nextTick();
-    await nextTick();
-    scrollState.y = 4500;
-    document.dispatchEvent(new Event('scroll'));
-    await nextTick();
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    };
     await nextTick();
 
     expect(onLoad).not.toHaveBeenCalled();
-    wrapper.unmount();
   });
 
-  it('does not trigger if total size is 0', async () => {
-    const onLoad = vi.fn();
-    const container = document.createElement('div');
-    Object.defineProperty(container, 'clientWidth', { value: 0, configurable: true });
-    Object.defineProperty(container, 'clientHeight', { value: 0, configurable: true });
+  it('fires even while a programmatic scroll is running (scrollbar drag, End key)', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx({ isProgrammaticScroll: true });
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    const { wrapper } = setup({
-      container,
-      items: [],
-      direction: 'both', // Both width and height will be 0 if usableWidth/Height are 0
-    }, [
-      useInfiniteLoadingExtension({ onLoad }),
-    ]);
-
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    };
     await nextTick();
+
+    expect(onLoad).toHaveBeenCalledWith('vertical');
+  });
+
+  it('does not fire when the total size is zero', async () => {
+    const { ctx, scrollDetails, onLoad } = makeCtx();
+    useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
+
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      totalSize: { width: 0, height: 0 },
+      scrollOffset: { x: 0, y: 0 },
+    };
     await nextTick();
 
     expect(onLoad).not.toHaveBeenCalled();
-    wrapper.unmount();
   });
 });

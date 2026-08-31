@@ -20,10 +20,11 @@ export function useInfiniteLoadingExtension<T = unknown>(options: {
     name: 'infinite-loading',
     onInit(ctx: ExtensionContext<T>) {
       watch(ctx.scrollDetails, (details) => {
-        // Only load after a programmatic scroll (PageDown/End) has finished:
-        // firing mid-animation would append content while the target position
-        // is still being computed.
-        if (ctx.props.value.loading || ctx.internalState.isProgrammaticScroll.value || !details || !details.totalSize || (details.totalSize.width === 0 && details.totalSize.height === 0)) {
+        // Fire as soon as the threshold is detected — including while a
+        // programmatic scroll (scrollbar drag, PageDown/End) is still running:
+        // deferring until the scroll settles delays the loading indicator and,
+        // when a drag ends without further scroll events, can skip it entirely.
+        if (ctx.props.value.loading || !details || !details.totalSize || (details.totalSize.width === 0 && details.totalSize.height === 0)) {
           return;
         }
 
