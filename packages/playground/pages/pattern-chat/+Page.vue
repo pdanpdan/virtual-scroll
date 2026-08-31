@@ -252,14 +252,15 @@ function scrollToBottom() {
         class="flex-1"
         :debug="debugMode"
         :items="items"
-        :restore-scroll-on-prepend="true"
+        restore-scroll-on-prepend
+        :default-item-size="65"
         :ssr-range="ssrRange"
         :initial-scroll-index="initialScrollIndex"
         initial-scroll-align="end"
         :scroll-padding-start="10"
         :scroll-padding-end="10"
         :gap="12"
-        :sticky-footer="true"
+        sticky-footer
         :virtual-scrollbar="virtualScrollbar"
         aria-label="Chat messages"
         @scroll="onScroll"
