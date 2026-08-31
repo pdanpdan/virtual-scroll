@@ -107,6 +107,10 @@ export function useVirtualScroll<T = unknown>(
     endExtraX: number;
     /** Extra clamp allowance (loading slot) for the offset-based target; always set (0 when none). */
     endExtraY: number;
+    /** Virtual target issued with the original scroll (index-based): detects measurement-driven target changes. */
+    targetX?: number;
+    /** Virtual target issued with the original scroll (index-based): detects measurement-driven target changes. */
+    targetY?: number;
   } | null>(null);
 
   /** Whether the current scroll operation was initiated programmatically. */
@@ -436,6 +440,8 @@ export function useVirtualScroll<T = unknown>(
         // Index-based pending: no loading-slot allowance.
         endExtraX: 0,
         endExtraY: 0,
+        targetX,
+        targetY,
       };
     }
 
@@ -860,9 +866,6 @@ export function useVirtualScroll<T = unknown>(
     if (pendingScroll.value && !isHydrating.value) {
       const { rowIndex, colIndex, options, offsetX, offsetY, endExtraX, endExtraY } = pendingScroll.value;
       const isSmooth = isScrollToIndexOptions(options) && options.behavior === 'smooth';
-      if (isSmooth && (isScrolling.value || isProgrammaticScroll.value)) {
-        return;
-      }
       const container = props.value.container || window;
       const actualScrollX = (typeof window !== 'undefined' && container === window ? window.scrollX : (container as HTMLElement).scrollLeft);
       const actualScrollY = (typeof window !== 'undefined' && container === window ? window.scrollY : (container as HTMLElement).scrollTop);
@@ -924,6 +927,28 @@ export function useVirtualScroll<T = unknown>(
 
       const toleranceX = 2 * scaleX.value;
       const toleranceY = 2 * scaleY.value;
+
+      if (isSmooth && (isScrolling.value || isProgrammaticScroll.value)) {
+        // A smooth scroll is still in flight: rebase it when measurements moved
+        // the goal (e.g. the target item was still estimated when issued), so it
+        // lands on the measured target instead of a stale one.
+        if (offsetX === undefined && offsetY === undefined && isScrollToIndexOptions(options)) {
+          const pendingTargetX = pendingScroll.value?.targetX;
+          const pendingTargetY = pendingScroll.value?.targetY;
+          const movedY = rowIndex != null && pendingTargetY !== undefined && Math.abs(targetY - pendingTargetY) > toleranceY;
+          const movedX = colIndex != null && pendingTargetX !== undefined && Math.abs(targetX - pendingTargetX) > toleranceX;
+          if (movedY || movedX) {
+            // Defer past the render flush: the wrapper height still reflects the
+            // pre-measurement totals here, so an immediate smooth scroll would be
+            // clamped to the old max by the browser.
+            nextTick(() => {
+              scrollToIndex(rowIndex, colIndex, { ...options, behavior: 'smooth' });
+            });
+            return;
+          }
+        }
+        return;
+      }
       const reachedX = offsetX !== undefined
         ? (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX)
         : (colIndex === null || colIndex === undefined) || (viewportWidth.value > 0 && Math.abs(currentRelX - targetX) < toleranceX);

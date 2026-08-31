@@ -473,6 +473,61 @@ describe('virtualScroll', () => {
       expect(items.length).toBeLessThanOrEqual(25);
     });
 
+    it('defers the smooth rebase until the wrapper height catches up with measurements', async () => {
+      // A scrollTo that clamps like a real browser: against the wrapper's current
+      // inline height, which Vue updates one flush after the measurement lands.
+      // (The default test mock writes the target unconditionally and cannot see
+      // this bug: a rebase issued before the render flush gets clamped to the
+      // stale max and the smooth scroll lands short.)
+      const originalScrollTo = HTMLElement.prototype.scrollTo;
+      HTMLElement.prototype.scrollTo = function (this: HTMLElement, options?: number | ScrollToOptions, y?: number) {
+        if (typeof options === 'object' && options.top !== undefined) {
+          const wrapperEl = this.querySelector('.virtual-scroll-wrapper') as HTMLElement | null;
+          const max = wrapperEl ? Number.parseFloat(wrapperEl.style.blockSize) - 500 : Number.POSITIVE_INFINITY;
+          Object.defineProperty(this, 'scrollTop', { configurable: true, value: Math.min(options.top, max), writable: true });
+        } else if (typeof options === 'object' && options.left !== undefined) {
+          Object.defineProperty(this, 'scrollLeft', { configurable: true, value: options.left, writable: true });
+        } else if (typeof options === 'number' && typeof y === 'number') {
+          Object.defineProperty(this, 'scrollLeft', { configurable: true, value: options, writable: true });
+          Object.defineProperty(this, 'scrollTop', { configurable: true, value: y, writable: true });
+        }
+        this.dispatchEvent(new Event('scroll'));
+      };
+
+      try {
+        const wrapper = mount(VirtualScroll, {
+          props: {
+            itemSize: 0,
+            defaultItemSize: 40,
+            items: mockItems,
+          },
+        });
+        await nextTick();
+        await nextTick();
+
+        const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+        const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+
+        // Smoothly scroll to the last item while it is still estimated at 40px.
+        vs.scrollToIndex(99, null, { align: 'end', behavior: 'smooth' });
+        await nextTick();
+        await nextTick();
+        expect(container.scrollTop).toBeCloseTo(100 * 40 - 500, 0);
+
+        // The target item measures 80px: the running smooth scroll must be
+        // re-based only after the wrapper height is updated — otherwise the
+        // browser would clamp it to the stale max and the scroll lands short.
+        vs.updateItemSizes([ { index: 99, inlineSize: 100, blockSize: 80 } ]);
+        await nextTick();
+        await nextTick();
+        await nextTick();
+
+        expect(container.scrollTop).toBeCloseTo(99 * 40 + 80 - 500, 0);
+      } finally {
+        HTMLElement.prototype.scrollTo = originalScrollTo;
+      }
+    });
+
     it('emits load event when reaching end', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {

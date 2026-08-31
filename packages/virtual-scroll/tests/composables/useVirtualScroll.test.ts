@@ -1,3 +1,4 @@
+/* global ScrollToOptions */
 import type { VirtualScrollProps } from '../../src/types';
 import type { MockItem } from '../test-helper';
 
@@ -382,6 +383,75 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
+    it('re-syncs the horizontal scroll position when RTL is enabled', async () => {
+      const container = document.createElement('div');
+      container.scrollTo = vi.fn();
+      const { result, wrapper } = setup({
+        container,
+        direction: 'horizontal',
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      (container.scrollTo as ReturnType<typeof vi.fn>).mockClear();
+
+      // Force RTL change: the non-vertical branch must re-scroll to keep the
+      // logical position stable.
+      result.isRtl.value = true;
+      await nextTick();
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'auto' }));
+      wrapper.unmount();
+    });
+
+    it('does not rebase offset-based smooth pendings', async () => {
+      vi.useFakeTimers();
+      const container = document.createElement('div');
+      container.scrollTo = vi.fn();
+      const { result, wrapper } = setup({
+        container,
+        direction: 'horizontal',
+        items: mockItems,
+      });
+      await nextTick();
+
+      result.scrollToOffset(3000, null, { behavior: 'smooth', endExtraX: 100 });
+      await nextTick();
+
+      // While the smooth scroll is still flagged as programmatic, a measurement
+      // change runs checkPendingScroll: the offset-based branch must skip the
+      // index rebase and not issue any additional scroll.
+      result.updateItemSizes([ { index: 0, inlineSize: 80, blockSize: 50 } ]);
+      await nextTick();
+      await nextTick();
+
+      expect(container.scrollTo).toHaveBeenCalledTimes(1);
+      vi.useRealTimers();
+      wrapper.unmount();
+    });
+
+    it('falls back to the window when the container is null on RTL change', async () => {
+      const { result, wrapper } = setup({
+        container: null,
+        direction: 'horizontal',
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      // updateScrollbarOffset takes the `container || window` fallback and
+      // resets the scrollbar padding instead of reading an element.
+      result.isRtl.value = true;
+      await nextTick();
+      await nextTick();
+
+      // horizontal list: the width is the items total, the height the viewport
+      expect(result.scrollDetails.value.totalSize.width).toBe(4000);
+      wrapper.unmount();
+    });
+
     it('re-syncs the display scroll when RTL changes on an element container', async () => {
       const container = document.createElement('div');
       Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
@@ -597,6 +667,43 @@ describe('useVirtualScroll', () => {
       await nextTick();
 
       expect(internalState.internalScrollX.value).toBeCloseTo(500, 0);
+      vi.useRealTimers();
+      wrapper.unmount();
+    });
+
+    it('re-bases a running smooth scroll when the target item measures taller', async () => {
+      vi.useFakeTimers();
+      const { result, wrapper } = setup({
+        itemSize: 0,
+        defaultItemSize: 40,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      const scrollTo = vi.mocked(window.scrollTo);
+      scrollTo.mockClear();
+
+      // Smoothly scroll to the last item while it is still estimated at 40px.
+      result.scrollToIndex(99, null, { align: 'end', behavior: 'smooth' });
+      await nextTick();
+      await nextTick();
+
+      const firstCall = scrollTo.mock.calls.at(-1)?.[ 0 ] as ScrollToOptions;
+      expect(firstCall.behavior).toBe('smooth');
+      expect(firstCall.top).toBeCloseTo(100 * 40 - 500, 0);
+
+      // The target item measures 80px: the running smooth scroll must be
+      // re-based immediately instead of waiting for the programmatic timeout.
+      result.updateItemSizes([ { index: 99, inlineSize: 100, blockSize: 80 } ]);
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      expect(scrollTo.mock.calls.length).toBeGreaterThan(1);
+      const lastCall = scrollTo.mock.calls.at(-1)?.[ 0 ] as ScrollToOptions;
+      expect(lastCall.behavior).toBe('smooth');
+      expect(lastCall.top).toBeCloseTo(99 * 40 + 80 - 500, 0);
       vi.useRealTimers();
       wrapper.unmount();
     });

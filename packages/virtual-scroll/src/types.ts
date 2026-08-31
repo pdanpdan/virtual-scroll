@@ -590,6 +590,8 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
   /** Resets all dynamic measurements and re-initializes from props. */
   refresh: () => void;
+  /** Batch-updates sizes for multiple items from measurements. */
+  updateItemSizes: (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => void;
   /** Immediately stops any currently active smooth scroll animation and clears pending corrections. */
   stopProgrammaticScroll: () => void;
   /** Detects the current direction (LTR/RTL) of the scroll container. */
