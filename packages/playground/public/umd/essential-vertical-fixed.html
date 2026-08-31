@@ -78,7 +78,7 @@
 
     <!-- Main Viewport Content -->
 
-    <virtual-scroll ref="vs" class="flex-1" :direction="direction" :items="items" :item-size="itemSize" @scroll="onScroll">
+    <virtual-scroll ref="vs" virtual-scrollbar class="flex-1" :direction="direction" :items="items" :item-size="itemSize" @scroll="onScroll">
       <template #item="{ index }">
         <div class="example-item h-full">
           <span class="example-badge">#{{ index }}</span>

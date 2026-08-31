@@ -209,6 +209,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       direction="both"
       :items="items"
@@ -232,6 +233,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       direction="both"
       :items="items"
@@ -264,6 +266,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       :items="items"
       @scroll="onScroll"
@@ -284,6 +287,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       direction="horizontal"
       :items="items"
@@ -303,6 +307,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       direction="horizontal"
       :items="items"
@@ -327,7 +332,7 @@ const pageConfigs = {
       class="flex-1 custom-scrollbar"
       :items="items"
       :item-size="itemSize"
-      :virtual-scrollbar="true"
+      virtual-scrollbar
       @scroll="onScroll"
     >
       <template #item="{ index }">
@@ -351,6 +356,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       :items="infiniteItems"
       :item-size="itemSize"
@@ -395,6 +401,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       :items="stickyItems"
       :sticky-indices="stickyIndices"
@@ -440,6 +447,7 @@ const pageConfigs = {
     content: `
     <virtual-scroll
       ref="vs"
+      virtual-scrollbar
       class="flex-1"
       :items="messages"
       :initial-scroll-index="itemCount - 1"
@@ -473,12 +481,13 @@ const pageConfigs = {
         <div class="flex-1 overflow-auto border border-base-content/10 rounded-box bg-base-100">
           <virtual-scroll
             ref="vs"
+            virtual-scrollbar
             container-tag="table"
             wrapper-tag="tbody"
             item-tag="tr"
             :items="items"
             :item-size="itemSize"
-            :sticky-header="true"
+            sticky-header
             class="table table-xs w-full min-w-200"
             style="table-layout: fixed"
             @scroll="onScroll"
@@ -537,7 +546,7 @@ pages.forEach((page) => {
   // Fallback to a default template for items if no specific config exists
   const pageConfig = pageConfigs[ page ] || {
     content: `
-    <virtual-scroll ref="vs" class="flex-1" :direction="direction" :items="items" :item-size="itemSize" @scroll="onScroll">
+    <virtual-scroll ref="vs" virtual-scrollbar class="flex-1" :direction="direction" :items="items" :item-size="itemSize" @scroll="onScroll">
       <template #item="{ index }">
         <div class="example-item h-full">
           <span class="example-badge">#{{ index }}</span>

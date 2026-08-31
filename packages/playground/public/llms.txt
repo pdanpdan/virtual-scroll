@@ -50,10 +50,10 @@ Features: dynamic heights, initial scroll to bottom, scroll restoration on histo
 <VirtualScroll
   ref="virtualScrollRef"
   :items="messages"
-  :restore-scroll-on-prepend="true"
+  restore-scroll-on-prepend
   :initial-scroll-index="messages.length - 1"
   initial-scroll-align="end"
-  :sticky-footer="true"
+  sticky-footer
 >
   <template #item="{ item }">
     <div class="chat-bubble">{{ item.text }}</div>
@@ -73,7 +73,7 @@ Uses custom tags for correct `<table>` semantics.
   container-tag="table"
   wrapper-tag="tbody"
   item-tag="tr"
-  :sticky-header="true"
+  sticky-header
 >
   <template #header>
     <tr><th>ID</th><th>Name</th></tr>
@@ -130,7 +130,7 @@ Headers that "push" each other as you scroll.
 ## Technical Implementation Details
 
 ### Coordinate Scaling (VU vs DU)
-When the total size exceeds the browser's limit (e.g., 15 million pixels), the library calculates a `scale` factor:
+When the total size exceeds the browser's limit (10 million pixels, `BROWSER_MAX_SIZE`), the library calculates a `scale` factor:
 `scale = Virtual_Total_Size / Browser_Max_Limit`
 The browser's native scrollbar moves through `DU` (Display Units), while items are positioned and rendered in `VU` (Virtual Units).
 Positioning formula: `translateY(VU_offset - (DU_scroll * scale))`
@@ -159,15 +159,7 @@ Customize the default virtual scrollbar:
 - [Vertical Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-dynamic.html): Vertical scrolling with variable item heights automatically measured using ResizeObserver.
 - [Vertical Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-fixed.html): Optimized for lists where every item has the same height and items are only rendered when they enter the visible viewport.
 - [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/umd/feature-custom-scrollbar.html): Demonstrates the virtual scrollbar implementation that allows the scrollbar to be designed and styled by the user.
-- [Independent Scrollbars](https://pdanpdan.github.io/virtual-scroll/umd/feature-independent-scrollbars.html): Demonstrates using VirtualScrollbar components independently to control a standard scrollable div.
 - [Infinite Scroll](https://pdanpdan.github.io/virtual-scroll/umd/feature-infinite-scroll.html): Demonstrates the load event and loading prop/slot for automatic pagination.
-- [Scroll Restoration](https://pdanpdan.github.io/virtual-scroll/umd/feature-scroll-restoration.html): Demonstrates maintaining scroll position when items are prepended to the list.
 - [Sticky Sections](https://pdanpdan.github.io/virtual-scroll/umd/feature-sticky-sections.html): Demonstrates iOS-style sticky headers where new headers push previous ones out of view.
 - [Chat Interface](https://pdanpdan.github.io/virtual-scroll/umd/pattern-chat.html): Chat demonstration with dynamic heights, initial scroll to bottom, and history scroll restoration.
-- [Draggable List](https://pdanpdan.github.io/virtual-scroll/umd/pattern-draggable.html): Reorder virtualized items using native drag and drop while maintaining high performance.
-- [Photo Gallery](https://pdanpdan.github.io/virtual-scroll/umd/pattern-gallery.html): High-performance grid photo gallery featuring lazy-loading placeholders.
-- [Masonry Grid](https://pdanpdan.github.io/virtual-scroll/umd/pattern-masonry.html): Achieve masonry layout by combining multiple VirtualScroll columns sharing a single scroll container.
-- [Search & Highlight](https://pdanpdan.github.io/virtual-scroll/umd/pattern-search.html): Generic way to provide native search in virtualized content using data-layer searching and CSS Custom Highlight API. Triggered with Ctrl+K.
-- [Spreadsheet Grid](https://pdanpdan.github.io/virtual-scroll/umd/pattern-spreadsheet.html): Excel-like bidirectional grid with sticky row and column headers and resizable cells.
 - [Table](https://pdanpdan.github.io/virtual-scroll/umd/pattern-table.html): Semantic HTML table virtualization for semantically correct and accessible tabular data grids.
-- [Collapsible Tree](https://pdanpdan.github.io/virtual-scroll/umd/pattern-tree.html): Hierarchical list where items can be expanded or collapsed while maintaining smooth performance.
