@@ -516,6 +516,18 @@ body {
   }
 }
 
+.docs-table--hover {
+  tbody tr {
+    :is(td, th[scope="row"]) {
+      transition: background-color 150ms ease;
+    }
+
+    &:hover :is(td, th[scope="row"]) {
+      background-color: color-mix(in oklab, var(--color-base-content) 10%, var(--color-base-100));
+    }
+  }
+}
+
 @utility docs-feature-grid {
   @apply grid grid-cols-1 gap-4 @4xl:grid-cols-2 @7xl:grid-cols-3;
 }

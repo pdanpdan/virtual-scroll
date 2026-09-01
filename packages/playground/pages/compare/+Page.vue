@@ -29,7 +29,7 @@
   <h2 class="docs-prop-header text-secondary">The Contenders</h2>
 
   <div class="docs-table-container">
-    <table class="docs-table">
+    <table class="docs-table docs-table--hover">
       <thead>
         <tr>
           <th>Package</th>
@@ -106,16 +106,16 @@
   <h2 class="docs-prop-header text-secondary">Feature Matrix</h2>
 
   <div class="docs-table-container max-sm:max-h-[70svh]">
-    <table class="docs-table table-pin-rows table-pin-cols">
+    <table class="docs-table docs-table--hover table-pin-rows table-pin-cols">
       <thead>
         <tr>
           <th class="w-56 @4xl:w-64">Feature</th>
-          <td role="columnheader">@pdanpdan<br />/virtual-scroll</td>
-          <td role="columnheader">vue-virtual-<br />scroller</td>
-          <td role="columnheader">@tanstack<br />/vue-virtual</td>
-          <td role="columnheader">virtua</td>
-          <td role="columnheader">vueuc</td>
-          <td role="columnheader">vue-virtual-<br />scroll-list</td>
+          <td role="columnheader" class="text-center">@pdanpdan<br />/virtual-scroll</td>
+          <td role="columnheader" class="text-center">vue-virtual-<br />scroller</td>
+          <td role="columnheader" class="text-center">@tanstack<br />/vue-virtual</td>
+          <td role="columnheader" class="text-center">virtua</td>
+          <td role="columnheader" class="text-center">vueuc</td>
+          <td role="columnheader" class="text-center">vue-virtual-<br />scroll-list</td>
         </tr>
       </thead>
       <tbody>
