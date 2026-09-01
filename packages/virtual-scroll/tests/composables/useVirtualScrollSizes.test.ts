@@ -77,18 +77,54 @@ describe('useVirtualScrollSizes', () => {
     wrapper.unmount();
   });
 
-  it('initializes sizes correctly for dynamic item size', async () => {
-    const { result, wrapper } = setup({
+  it('rebases measured sizes when the gap changes in dynamic mode', async () => {
+    const { props, result, wrapper } = setup({
       itemSize: 0,
       items: mockItems,
       defaultItemSize: 40,
+      gap: 0,
     });
 
     result.initializeSizes();
     await nextTick();
 
-    expect(result.itemSizesY.get(0)).toBe(40);
-    expect(result.itemSizesY.query(10)).toBe(400); // 10 * 40
+    // Measure items 0 and 1 through ResizeObserver-style updates
+    result.updateItemSizes(
+      [
+        { index: 0, inlineSize: 100, blockSize: 80 },
+        { index: 1, inlineSize: 100, blockSize: 60 },
+      ],
+      () => 0,
+      () => 0,
+      0,
+      0,
+      () => {},
+    );
+    await nextTick();
+
+    // The tree stores measured size + gap
+    expect(result.itemSizesY.get(0)).toBe(80);
+    expect(result.itemSizesY.get(1)).toBe(60);
+    expect(result.itemSizesY.get(2)).toBe(40);
+    const totalBefore = result.itemSizesY.query(mockItems.length);
+
+    // Changing the gap must rebase every stored entry (size + new gap)
+    props.value = { ...props.value, gap: 8 };
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.itemSizesY.get(0)).toBe(88);
+    expect(result.itemSizesY.get(1)).toBe(68);
+    expect(result.itemSizesY.get(2)).toBe(48);
+    expect(result.itemSizesY.query(mockItems.length)).toBe(totalBefore + mockItems.length * 8);
+
+    // And back to the original gap
+    props.value = { ...props.value, gap: 0 };
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.itemSizesY.get(0)).toBe(80);
+    expect(result.itemSizesY.query(mockItems.length)).toBe(totalBefore);
     wrapper.unmount();
   });
 

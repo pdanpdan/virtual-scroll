@@ -55,6 +55,10 @@ export function useVirtualScrollSizes<T>(
 
   /** Cached list of previous items to detect prepending and shift measurements. */
   let lastItems: T[] = [];
+  /** Gap used when the current measurements were stored, for rebasing on gap changes. */
+  let lastGap = 0;
+  /** Column gap used when the current measurements were stored, for rebasing on column gap changes. */
+  let lastColumnGap = 0;
 
   /**
    * Helper to get the base size of an item from props or default fallback.
@@ -142,6 +146,7 @@ export function useVirtualScrollSizes<T>(
     isDynamic: boolean,
     isX: boolean,
     shouldReset: boolean,
+    prevGap: number,
   ) => {
     let needsRebuild = false;
 
@@ -169,6 +174,14 @@ export function useVirtualScrollSizes<T>(
           needsRebuild = true;
         } else if (!isDynamic) {
           measured[ i ] = 1;
+        }
+      } else if (isDynamic && prevGap !== gap) {
+        // Rebase stored sizes (measured size + old gap) onto the new gap.
+        const adjusted = current - prevGap + gap;
+
+        if (Math.abs(adjusted - current) > 0.5) {
+          tree.set(i, adjusted);
+          needsRebuild = true;
         }
       }
     }
@@ -200,6 +213,7 @@ export function useVirtualScrollSizes<T>(
       props.value.isDynamicColumnWidth,
       true,
       false,
+      lastColumnGap,
     );
 
     // Initialize items X
@@ -213,6 +227,7 @@ export function useVirtualScrollSizes<T>(
       props.value.isDynamicItemSize,
       true,
       props.value.direction !== 'horizontal',
+      lastColumnGap,
     );
 
     // Initialize items Y
@@ -226,7 +241,11 @@ export function useVirtualScrollSizes<T>(
       props.value.isDynamicItemSize,
       false,
       props.value.direction === 'horizontal',
+      lastGap,
     );
+
+    lastColumnGap = columnGap;
+    lastGap = gap;
 
     if (colNeedsRebuild) {
       columnSizes.rebuild();
@@ -404,6 +423,10 @@ export function useVirtualScrollSizes<T>(
         onScrollCorrection(deltaX.val, deltaY.val);
       }
     }
+
+    // Measurements are now stored with the current gaps; keep the baseline for rebasing.
+    lastColumnGap = columnGap;
+    lastGap = gap;
   };
 
   /**
