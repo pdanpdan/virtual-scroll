@@ -1136,7 +1136,34 @@ export function useVirtualScroll<T = unknown>(
     () => props.value.columnGap,
     () => props.value.defaultItemSize,
     () => props.value.defaultColumnWidth,
-  ], () => initializeSizes(), { immediate: true });
+  ], () => {
+    initializeSizes();
+    // Content size (and possibly the coordinate scale) changed: after the DOM
+    // updates, re-read the actual container scroll position so the rendered
+    // range always matches the viewport. The browser may clamp the scroll
+    // offset, or the scale correction may be deferred, without a scroll event
+    // reaching the handler — leaving items rendered for a stale offset until
+    // the next scroll.
+    nextTick(() => {
+      const container = props.value.container || window;
+      if (typeof window === 'undefined') {
+        return;
+      }
+      if (container === window) {
+        scrollX.value = window.scrollX;
+        scrollY.value = window.scrollY;
+        internalScrollX.value = displayToVirtual(isRtl.value ? Math.abs(window.scrollX) : window.scrollX, componentOffset.x, scaleX.value);
+        internalScrollY.value = displayToVirtual(window.scrollY, componentOffset.y, scaleY.value);
+        return;
+      }
+      if (isElement(container)) {
+        scrollX.value = container.scrollLeft;
+        scrollY.value = container.scrollTop;
+        internalScrollX.value = displayToVirtual(isRtl.value ? Math.abs(container.scrollLeft) : container.scrollLeft, componentOffset.x, scaleX.value);
+        internalScrollY.value = displayToVirtual(container.scrollTop, componentOffset.y, scaleY.value);
+      }
+    });
+  }, { immediate: true });
 
   watch(() => [ props.value.container, props.value.hostElement ], () => {
     updateHostOffset();

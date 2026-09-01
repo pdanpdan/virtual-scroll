@@ -130,6 +130,41 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
+    it('re-syncs the internal scroll from the DOM when size props change without a scroll event', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      const { props, result, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 0,
+        items: mockItems,
+        defaultItemSize: 40,
+        gap: 0,
+      });
+
+      await nextTick();
+
+      container.scrollTop = 2000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(2000);
+
+      // The browser clamps the scroll offset after the content shrinks, but in
+      // this scenario no scroll event reaches the handler: the rendered range
+      // must still follow the actual DOM position after the gap change.
+      container.scrollTop = 400;
+      props.value = { ...props.value, gap: 8 };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(400);
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+      expect(result.renderedItems.value[ 0 ]?.index).toBeLessThanOrEqual(400 / 48);
+      wrapper.unmount();
+    });
+
     it('scrolls to specific offset', async () => {
       const container = document.createElement('div');
       container.scrollTo = vi.fn();
