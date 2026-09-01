@@ -1145,10 +1145,11 @@ export function useVirtualScroll<T = unknown>(
     // reaching the handler — leaving items rendered for a stale offset until
     // the next scroll.
     nextTick(() => {
-      const container = props.value.container || window;
+      // v8 ignore next 2 -- defensive SSR guard; the scroll listener is only attached when window exists
       if (typeof window === 'undefined') {
         return;
       }
+      const container = props.value.container || window;
       if (container === window) {
         scrollX.value = window.scrollX;
         scrollY.value = window.scrollY;
