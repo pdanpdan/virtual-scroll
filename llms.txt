@@ -112,6 +112,19 @@ Headers that "push" each other as you scroll.
 </VirtualScroll>
 ```
 
+### 7. Data Browser
+[Live Example](https://pdanpdan.github.io/virtual-scroll/pattern-data-browser)
+Grouped directory pattern: sticky section headers, instant search that rebuilds the section index, and jump-to navigation with configurable alignment over up to 250k records. `itemSize` can be a function returning different fixed sizes per item type (headers vs rows); pass `null` for ResizeObserver-measured dynamic sizes.
+```vue
+<VirtualScroll :items="items" :item-size="(item) => item.isHeader ? 40 : 64" :sticky-indices="stickyIndices" :gap="gap">
+  <template #item="{ item, isStickyActive }">
+    <div :class="{ 'sticky-header': item.type === 'header', 'active': isStickyActive }">
+      {{ item.label }}
+    </div>
+  </template>
+</VirtualScroll>
+```
+
 ## Component API Highlights
 
 ### Props
