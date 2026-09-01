@@ -1,12 +1,16 @@
 import type { ScrollDirection } from '../../src/types';
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
 
-import { mockItems, scrollState, setup, setupMocks } from '../test-helper';
+import { clearMocks, mockItems, scrollState, setup, setupMocks } from '../test-helper';
 
 describe('dynamic sizing & prepending', () => {
   setupMocks();
+
+  beforeEach(() => {
+    clearMocks();
+  });
 
   it('handles dynamic item sizes', async () => {
     const { result, wrapper } = setup({

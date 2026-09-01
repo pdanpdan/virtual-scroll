@@ -10,7 +10,7 @@ import { useCoordinateScalingExtension } from '../../src/extensions/coordinate-s
 import { usePrependRestorationExtension } from '../../src/extensions/prepend-restoration';
 import { useSnappingExtension } from '../../src/extensions/snapping';
 import { useStickyExtension } from '../../src/extensions/sticky';
-import { clearMocks, mockItems, setup, setupMocks, triggerResize } from '../test-helper';
+import { clearMocks, mockItems, scrollState, setup, setupMocks, triggerResize } from '../test-helper';
 
 describe('useVirtualScroll', () => {
   setupMocks();
@@ -162,6 +162,32 @@ describe('useVirtualScroll', () => {
       expect(internalState.internalScrollY.value).toBe(400);
       expect(result.renderedItems.value.length).toBeGreaterThan(0);
       expect(result.renderedItems.value[ 0 ]?.index).toBeLessThanOrEqual(400 / 48);
+      wrapper.unmount();
+    });
+
+    it('clamps the internal scroll when the item count shrinks without a pending scroll', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      const items = Array.from({ length: 3000 }, (_, i) => ({ id: i }));
+      const { props, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items,
+      });
+      await nextTick();
+
+      container.scrollTop = 145000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(145000);
+
+      props.value = { ...props.value, items: items.slice(0, 1000) };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBeLessThanOrEqual(1000 * 50 - 500);
       wrapper.unmount();
     });
 
@@ -549,19 +575,55 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
-    it('runs the SSR guards when window is undefined', () => {
+    it('runs the SSR guards when window is undefined', async () => {
       vi.stubGlobal('window', undefined);
       try {
         const props = ref<VirtualScrollProps<MockItem>>({ itemSize: 50, items: mockItems });
         const result = useVirtualScroll(props);
+        await nextTick();
 
         // The immediate container watch attaches events; all SSR guards return early
         result.updateDirection();
         result.updateHostOffset();
 
+        // A size-affecting prop change schedules the post-render scroll re-sync;
+        // it must return early on the server instead of touching the DOM.
+        props.value = { ...props.value, items: mockItems.slice(0, 10) };
+        await nextTick();
+        await nextTick();
+
         expect(result.renderedItems.value.length).toBeGreaterThan(0);
       } finally {
         vi.unstubAllGlobals();
+      }
+    });
+
+    it('re-syncs the window scroll position in RTL mode after a props change', async () => {
+      document.documentElement.setAttribute('dir', 'rtl');
+      try {
+        const { props, wrapper, internalState } = setup({
+          container: window,
+          direction: 'horizontal',
+          itemSize: 50,
+          items: mockItems,
+        });
+        await nextTick();
+        await nextTick();
+
+        scrollState.x = 250;
+        document.dispatchEvent(new Event('scroll'));
+        await nextTick();
+        expect(internalState.internalScrollX.value).toBe(250);
+
+        // The post-render re-sync reads the window scroll again (RTL: absolute value)
+        props.value = { ...props.value, items: mockItems.slice(0, 20) };
+        await nextTick();
+        await nextTick();
+
+        expect(internalState.internalScrollX.value).toBe(250);
+        wrapper.unmount();
+      } finally {
+        document.documentElement.removeAttribute('dir');
       }
     });
 

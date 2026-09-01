@@ -128,6 +128,38 @@ describe('useVirtualScrollSizes', () => {
     wrapper.unmount();
   });
 
+  it('keeps stored sizes when the gap change is below the rebase threshold', async () => {
+    const { props, result, wrapper } = setup({
+      itemSize: 0,
+      items: mockItems,
+      defaultItemSize: 40,
+      gap: 0,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    // Measure item 0
+    result.updateItemSizes(
+      [ { index: 0, inlineSize: 100, blockSize: 80 } ],
+      () => 0,
+      () => 0,
+      0,
+      0,
+      () => {},
+    );
+    await nextTick();
+    expect(result.itemSizesY.get(0)).toBe(80);
+
+    // A sub-pixel gap change (|0.4| <= 0.5) does not rebase stored entries
+    props.value = { ...props.value, gap: 0.4 };
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.itemSizesY.get(0)).toBe(80);
+    wrapper.unmount();
+  });
+
   it('updates item sizes and triggers scroll correction callback', async () => {
     const onScrollCorrection = vi.fn();
     const { result, wrapper } = setup({
