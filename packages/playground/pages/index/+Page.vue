@@ -318,5 +318,12 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-blog"
       group="2"
     />
+    <ExampleCard
+      type="Pattern"
+      title="Data Browser"
+      description="Grouped directory with sticky sections, instant search and jump navigation."
+      href="/pattern-data-browser"
+      group="3"
+    />
   </div>
 </template>
