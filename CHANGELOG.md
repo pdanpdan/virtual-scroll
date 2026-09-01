@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.6](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.5...v0.11.6) (2026-09-01)
+
+### Bug Fixes
+
+* guard against reading window on SSR ([c82c762](https://github.com/pdanpdan/virtual-scroll/commit/c82c7629c0f672f5db5a69589b7fe882de75d637))
+
 ## [0.11.5](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.4...v0.11.5) (2026-09-01)
 
 ### Bug Fixes
