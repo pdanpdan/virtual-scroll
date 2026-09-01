@@ -38,7 +38,7 @@ jobs:
           cache: true
       - run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter playground exec playwright install --with-deps chromium
       - run: pnpm test:e2e
 
   deploy-docs:
