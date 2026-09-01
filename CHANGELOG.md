@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.5](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.4...v0.11.5) (2026-09-01)
+
+### Bug Fixes
+
+* jump to header with sticky headers ([c65ad15](https://github.com/pdanpdan/virtual-scroll/commit/c65ad15c57efe05a78fdbe3ac5b37ef62b53a86b))
+* re-sync internal scroll when size changes without scroll event ([f074f5b](https://github.com/pdanpdan/virtual-scroll/commit/f074f5be97bda696060e6fa009039d8791e6e923))
+* recalculate item sizes when gap changes in dynamic mode ([0e185d3](https://github.com/pdanpdan/virtual-scroll/commit/0e185d31e5d7db3ac22b75118d81e07e5bc32ccd))
+
 ## [0.11.4](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.3...v0.11.4) (2026-08-31)
 
 ### Bug Fixes
