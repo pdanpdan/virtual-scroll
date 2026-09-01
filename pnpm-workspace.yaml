@@ -1,6 +1,6 @@
 minimumReleaseAgeExclude:
   - browserslist@4.28.5
-  - daisyui@5.6.14 || 5.6.17
+  - daisyui@5.6.14 || 5.6.17 || 5.7.24
   - eslint@10.7.0
   - lightningcss-android-arm64@1.33.0
   - lightningcss-darwin-arm64@1.33.0
@@ -14,6 +14,8 @@ minimumReleaseAgeExclude:
   - lightningcss-win32-arm64-msvc@1.33.0
   - lightningcss-win32-x64-msvc@1.33.0
   - lightningcss@1.33.0
+  - unplugin-dts@1.1.0
+  - vite-plugin-dts@5.1.0
 shellEmulator: true
 
 trustPolicy: no-downgrade
@@ -37,7 +39,7 @@ catalogs:
     '@vue/test-utils': ^2.5.0
     '@vue/tsconfig': ^0.9.1
     browserslist: ^4.28.8
-    daisyui: ^5.7.22
+    daisyui: ^5.7.24
     eslint: ^10.9.1
     eslint-plugin-vuejs-accessibility: ^2.6.0
     jsdom: ^30.0.1
@@ -49,7 +51,7 @@ catalogs:
     vike: ^0.4.264
     vike-vue: ^0.9.13
     vite: ^8.2.2
-    vite-plugin-dts: ^5.0.3
+    vite-plugin-dts: ^5.1.0
     vitest: ^4.1.11
     vue: ^3.5.42
     vue-tsc: ^3.3.11
