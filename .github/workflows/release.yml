@@ -73,9 +73,17 @@ jobs:
         with:
           runtime: node@24
           cache: true
+      # registry-url makes setup-node write an .npmrc that authenticates
+      # registry.npmjs.org with the NODE_AUTH_TOKEN env var
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
       - run: pnpm build
       - name: Ensure latest npm version
         run: npm install -g npm@latest
       - name: Publish to npm
-        run: NODE_AUTH_TOKEN="" npm publish --access public --provenance
+        run: npm publish --access public --provenance
         working-directory: packages/virtual-scroll
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
