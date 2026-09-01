@@ -29,6 +29,7 @@ packages:
 catalogs:
   default:
     '@antfu/eslint-config': ^9.3.0
+    '@playwright/test': ^1.62.1
     '@release-it/conventional-changelog': ^12.0.0
     '@tailwindcss/vite': ^4.3.3
     '@types/node': ^26.4.0

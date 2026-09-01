@@ -22,7 +22,8 @@ interface Manifest {
 
 beforeAll(async () => {
   rmSync(distDir, { recursive: true, force: true });
-  await build({ configFile: resolve(pkgRoot, 'vite.config.ts'), logLevel: 'silent' });
+  // pin root: vitest workers run from the repo root, and vite derives root from cwd
+  await build({ configFile: resolve(pkgRoot, 'vite.config.ts'), root: pkgRoot, logLevel: 'silent' });
 }, 60_000);
 
 afterAll(() => {

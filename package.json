@@ -23,6 +23,7 @@
     "test:watch": "vitest",
     "test:types": "pnpm --filter @pdanpdan/virtual-scroll test:types",
     "test:coverage": "pnpm --filter @pdanpdan/virtual-scroll --dir packages/virtual-scroll test:coverage",
+    "test:e2e": "pnpm --filter playground test:e2e",
     "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage",
     "release": "release-it"
   },
