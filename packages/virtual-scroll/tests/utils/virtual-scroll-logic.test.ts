@@ -958,6 +958,39 @@ describe('virtual-scroll-logic', () => {
       expect(result.targetY).toBe(7450);
     });
 
+    it('does not reserve the previous header space when the target itself is sticky (vertical start alignment)', () => {
+      const result = calculateScrollTarget({
+        scaleX: 1,
+        scaleY: 1,
+        hostOffsetX: 0,
+        hostOffsetY: 0,
+        colIndex: null,
+        viewportWidth: 500,
+        viewportHeight: 500,
+        columnGap: 0,
+        direction: 'vertical',
+        fixedSize: 50,
+        fixedWidth: null,
+        gap: 0,
+        getColumnQuery: () => 0,
+        getColumnSize: () => 0,
+        getItemQueryX: () => 0,
+        getItemQueryY: (idx) => idx * 50,
+        getItemSizeX: () => 0,
+        getItemSizeY: () => 50,
+        options: 'start',
+        relativeScrollX: 0,
+        relativeScrollY: 0,
+        rowIndex: 100,
+        totalHeight: 10000,
+        totalWidth: 0,
+        stickyIndices: [ 50, 100 ],
+      });
+      // 100 * 50 = 5000: the header lands exactly at the top, not below the
+      // previous sticky header (50) which it pushes out of view.
+      expect(result.targetY).toBe(5000);
+    });
+
     it('calculates target accounting for active sticky item (horizontal start alignment)', () => {
       const result = calculateScrollTarget({
         scaleX: 1,

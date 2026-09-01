@@ -330,7 +330,10 @@ function calculateAxisTarget({
 }) {
   let stickyOffsetStart = stickyStart;
   if (stickyIndices && stickyIndices.length > 0) {
-    const activeStickyIdx = findPrevStickyIndex(stickyIndices, index);
+    // When the target itself is sticky it occupies the sticky line and pushes
+    // the previous header out of view: do not reserve space for that header.
+    const isTargetSticky = stickyIndices.includes(index);
+    const activeStickyIdx = isTargetSticky ? undefined : findPrevStickyIndex(stickyIndices, index);
     if (activeStickyIdx !== undefined) {
       stickyOffsetStart += calculateAxisSize(1, fixedSize, 0, () => getSize(activeStickyIdx));
     }
