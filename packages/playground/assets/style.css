@@ -396,10 +396,10 @@ body {
 }
 
 @utility drawer-link {
-  @apply rounded-selector py-2.5 text-sm font-bold tracking-wide hover:bg-base-content/5 active:bg-primary/95;
+  @apply rounded-selector py-2.5 text-sm font-bold tracking-wide hover:bg-base-content/5 active:bg-primary/5 active:text-base-content;
 }
 @utility drawer-link--active {
-  @apply bg-primary text-primary-content shadow-md hover:bg-primary/90;
+  @apply bg-primary text-primary-content shadow-md hover:bg-primary/95;
 }
 
 @utility drawer-header {
