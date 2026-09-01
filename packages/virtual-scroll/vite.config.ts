@@ -10,8 +10,8 @@ export default defineConfig({
   plugins: [
     vue(),
     dts({
-      tsconfigPath: resolve(__dirname, 'tsconfig.app.json'),
-      entryRoot: resolve(__dirname, 'src'),
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.app.json'),
+      entryRoot: resolve(import.meta.dirname, 'src'),
     }),
   ],
   css: {
@@ -23,7 +23,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(import.meta.dirname, 'src/index.ts'),
       name: 'VirtualScroll',
       fileName: (format) => `index.${ format === 'es' ? 'mjs' : format === 'cjs' ? 'cjs' : 'js' }`,
       formats: [ 'es', 'cjs', 'umd' ],
