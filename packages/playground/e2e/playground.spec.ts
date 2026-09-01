@@ -2,7 +2,7 @@ import type { ConsoleMessage, Page, TestInfo } from '@playwright/test';
 import type { Buffer } from 'node:buffer';
 import type { ChildProcess } from 'node:child_process';
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
@@ -35,6 +35,17 @@ function assertPortFree(port: number): Promise<void> {
   });
   socket.once('error', () => resolve());
   return promise;
+}
+
+function generateChangelogData(): void {
+  // changelog-data.ts is generated from CHANGELOG.md and gitignored — absent in fresh checkouts
+  const result = spawnSync(process.execPath, [ 'scripts/sync-changelog.js' ], {
+    cwd: ROOT_DIR,
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) {
+    throw new Error(`sync-changelog.js failed (exit ${ result.status }):\n${ result.stdout }${ result.stderr }`);
+  }
 }
 
 function startDevServer(): Promise<void> {
@@ -150,6 +161,7 @@ async function attachServerOutput(testInfo: TestInfo): Promise<void> {
 
 test.beforeAll(async () => {
   await assertPortFree(PORT);
+  generateChangelogData();
   await startDevServer();
   await discoverAppBase();
 });
