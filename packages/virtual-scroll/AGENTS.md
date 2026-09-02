@@ -17,6 +17,7 @@ pnpm add @pdanpdan/virtual-scroll
 ```vue
 <script setup>
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+
 import '@pdanpdan/virtual-scroll/style.css';
 </script>
 ```
