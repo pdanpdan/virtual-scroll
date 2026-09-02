@@ -17,5 +17,5 @@ test-results
 .DS_Store
 
 TODO__*
-AGENTS.md
+/AGENTS.md
 sitemap.xml
