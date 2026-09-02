@@ -1,5 +1,11 @@
 # Changelog
 
+# [0.12.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.6...v0.12.0) (2026-09-02)
+
+### Features
+
+* add AGENTS.md for users and update llms.txt ([92d7252](https://github.com/pdanpdan/virtual-scroll/commit/92d725233237485fbb2c2545358f4e1bb6a4f463))
+
 ## [0.11.6](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.5...v0.11.6) (2026-09-01)
 
 ### Bug Fixes
