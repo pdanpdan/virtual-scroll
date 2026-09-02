@@ -7,8 +7,15 @@ A high-performance, flexible virtual scrolling component for Vue 3 that supports
 - **Coordinate Scaling**: Bypasses browser scroll limits (typically 10-30M pixels) by scaling "Virtual Units" (VU) to "Display Units" (DU).
 - **1:1 Movement**: Ensures 1px of wheel/touch movement equals 1px of viewport movement, regardless of scale.
 - **Multi-Directional**: Supports `vertical`, `horizontal`, and `both` (grid) directions.
-- **Dynamic Sizing**: Supports fixed, variable (function/array), and fully dynamic sizes (via `ResizeObserver`).
-- **Performance**: Uses Fenwick Tree for $O(\log N)$ prefix sum/point updates for efficient offset calculations.
+- **Dynamic Sizing**: Supports uniform sizes, per-item sizes via function, repeating circular patterns via array (e.g. `[50, 100]`), and fully dynamic sizes measured via `ResizeObserver` (pass `null`/`0`).
+- **Sticky Elements**: iOS-style pushing section headers via `stickyIndices`, plus sticky `header`/`footer` slots.
+- **Scroll Snapping**: `snap` prop (`'auto' | 'start' | 'center' | 'end' | 'next'`) for automatic alignment after scrolling stops.
+- **Any Scroll Container**: Virtualizes inside its own element or the browser `window`/`body` (`container` prop).
+- **Virtual Scrollbars**: `virtualScrollbar` prop to force custom-drawn scrollbars (built-in or via the `scrollbar` slot / `VirtualScrollbar` component).
+- **Infinite Loading**: `loading` + `loadDistance` props, `load` event and `loading` slot for pagination.
+- **SSR**: `ssrRange` prop pre-renders a static in-flow block server-side for SEO.
+- **Accessibility**: Automatic ARIA roles (list, grid, tree, listbox, menu), keyboard navigation.
+- **Performance**: Fenwick Tree for $O(\log N)$ prefix sum/point updates for efficient offset calculations.
 
 ## Installation
 ```bash
@@ -125,15 +132,30 @@ Grouped directory pattern: sticky section headers, instant search that rebuilds 
 </VirtualScroll>
 ```
 
+### More Example Pages
+- [Scroll Snap](https://pdanpdan.github.io/virtual-scroll/feature-scroll-snap): Snap modes on fixed and dynamic lists.
+- [Window / Body Scrolling](https://pdanpdan.github.io/virtual-scroll/essential-vertical-fixed-body): Virtualize using the browser window as scroll container.
+- [Scroll Restoration](https://pdanpdan.github.io/virtual-scroll/feature-scroll-restoration): Restore scroll position when items are prepended.
+- [SSR](https://pdanpdan.github.io/virtual-scroll/feature-ssr): Server-rendered static range that hydrates into virtual scrolling.
+- [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/feature-custom-scrollbar): Styling the built-in virtual scrollbar.
+- [Independent Scrollbars](https://pdanpdan.github.io/virtual-scroll/feature-independent-scrollbars): Grid with separately draggable axis scrollbars.
+- [Tree](https://pdanpdan.github.io/virtual-scroll/pattern-tree) / [Masonry](https://pdanpdan.github.io/virtual-scroll/pattern-masonry) / [Gallery](https://pdanpdan.github.io/virtual-scroll/pattern-gallery) / [Draggable](https://pdanpdan.github.io/virtual-scroll/pattern-draggable) / [Search](https://pdanpdan.github.io/virtual-scroll/pattern-search) / [Diff](https://pdanpdan.github.io/virtual-scroll/pattern-diff) / [Spreadsheet](https://pdanpdan.github.io/virtual-scroll/pattern-spreadsheet): Advanced pattern recipes.
+- [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets.
+
 ## Component API Highlights
 
 ### Props
 - `items`: `T[]` (Required) - Data to virtualize.
-- `itemSize`: `number | ((item, index) => number) | null` (Default: `40`) - Pass `null`/`0` for dynamic sizing.
+- `itemSize`: `number | number[] | ((item, index) => number) | null` (Default: `40`) - Pass `null`/`0` for dynamic sizing; arrays define repeating circular patterns.
 - `direction`: `'vertical' | 'horizontal' | 'both'`.
+- `columnCount` / `columnWidth`: Grid mode columns (also accepts arrays/functions/`null` for dynamic).
+- `container`: `HTMLElement | Window` - Scroll container; pass the `window` object for window/body scrolling.
+- `snap`: `boolean | 'auto' | 'start' | 'center' | 'end' | 'next'` (Default: `false`).
+- `stickyIndices` / `stickyHeader` / `stickyFooter`: Sticky sections and edge slots.
+- `loading` / `loadDistance`: Infinite-loading threshold and state.
 - `virtualScrollbar`: `boolean` - Force virtual scrollbars even when browser limits aren't hit.
 - `restoreScrollOnPrepend`: `boolean` - Prevents "jumping" when adding items to the top.
-- `ssrRange`: `{ start: number, end: number }` - Pre-render specific items for SEO/SSR.
+- `ssrRange`: `{ start: number, end: number, colStart?: number, colEnd?: number }` - Pre-render specific items for SEO/SSR.
 
 ### Exposed Methods (via Ref)
 - `scrollToIndex(row, col?, options?)`: Options include `align: 'start' | 'center' | 'end' | 'auto'` and `behavior: 'auto' | 'smooth'`.
@@ -161,6 +183,7 @@ Customize the default virtual scrollbar:
 
 ## Links
 - [Documentation & Examples](https://pdanpdan.github.io/virtual-scroll/)
+- [Full API Reference](https://pdanpdan.github.io/virtual-scroll/docs/) - complete props/slots/exposed tables
 - [GitHub Repository](https://github.com/pdanpdan/virtual-scroll)
 - [NPM Package](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
 
