@@ -48,7 +48,7 @@ const {
     </template>
 
     <template #description>
-      A high-performance grid gallery displaying {{ itemCount.toLocaleString() }} photos. Features lazy-loading placeholders.
+      A high-performance grid gallery displaying {{ itemCount.toLocaleString() }} photos. Placeholders show while images load as their rows enter the viewport.
     </template>
 
     <template #icon>
@@ -65,7 +65,7 @@ const {
     </template>
 
     <template #subtitle>
-      Lazy-loaded image grid with row-based virtualization
+      Virtualized image grid with loading placeholders
     </template>
 
     <template #controls>
@@ -121,7 +121,6 @@ const {
               :src="photo.thumb"
               :alt="`Photo by ${ photo.author }`"
               class="size-full object-cover transition-transform duration-500 group-hover:scale-110"
-              loading="lazy"
             />
             <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 @4xl:p-4">
               <span class="text-white text-xs @4xl:text-sm font-medium truncate">{{ photo.author }}</span>

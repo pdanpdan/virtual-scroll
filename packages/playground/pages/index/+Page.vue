@@ -290,7 +290,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Pattern"
       title="Photo Gallery"
-      description="Lazy-loaded image grid with bidirectional virtualization."
+      description="Virtualized image grid with loading placeholders."
       href="/pattern-gallery"
       group="6"
     />

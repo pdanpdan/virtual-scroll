@@ -208,7 +208,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
             :width="item.imageWidth"
             :height="item.imageHeight"
             :alt="`Post ${ index + 1 } cover`"
-            loading="lazy"
             class="example-blog-image"
           />
           <p class="example-blog-intro">{{ item.subtitle }}</p>
