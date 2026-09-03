@@ -1204,5 +1204,43 @@ describe('useVirtualScroll', () => {
       expect(internalState.internalScrollY.value).toBe(3000);
       wrapper.unmount();
     });
+
+    it('keeps the topmost content stable when the grid column count changes', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 900 });
+      const { result, props, wrapper } = setup({
+        container,
+        direction: 'both',
+        itemSize: 40,
+        columnWidth: 90,
+        columnCount: 8,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      result.scrollToOffset(null, 1200, { behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+      const before = result.scrollDetails.value;
+      expect(before.scrollOffset.y).toBeCloseTo(1200, 4);
+      const topRowBefore = before.currentIndex;
+
+      // Grid rows and their offsets are pure functions of the row index, so a
+      // column-count change re-lays the horizontal extent only: the topmost
+      // content stays anchored at the same pixel offsets (no wrap re-flow).
+      props.value.columnCount = 4;
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      const after = result.scrollDetails.value;
+      expect(Number.isFinite(after.totalSize.width)).toBe(true);
+      expect(after.currentIndex).toBe(topRowBefore);
+      expect(after.scrollOffset.y).toBeCloseTo(before.scrollOffset.y, 4);
+      expect(after.scrollOffset.x).toBe(before.scrollOffset.x);
+      wrapper.unmount();
+    });
   });
 });
