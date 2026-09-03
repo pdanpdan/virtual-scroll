@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { ColumnRange, ScrollDetails } from '@pdanpdan/virtual-scroll';
+import type { ColumnRange, MasonryScrollDetails, ScrollDetails } from '@pdanpdan/virtual-scroll';
 
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { currentFps, efficiency, refreshRate, startDetection, stopDetection } from '#/lib/fps';
 
 const props = defineProps<{
-  scrollDetails: ScrollDetails | null;
+  /** Scroll details of a `VirtualScroll`/`VirtualScrollTable` or `VirtualScrollMasonry` instance. */
+  scrollDetails: ScrollDetails | MasonryScrollDetails | null;
   direction?: string;
   columnRange?: ColumnRange;
   /** CSS selector of the virtualized container whose live DOM row count is shown. */
