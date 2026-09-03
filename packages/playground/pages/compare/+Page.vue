@@ -7,7 +7,7 @@
     <h1 class="text-2xl @4xl:text-4xl font-bold text-primary">Virtual Scroll Comparison</h1>
     <p class="text-sm @4xl:text-base opacity-70 mt-2 max-w-4xl">
       <code>@pdanpdan/virtual-scroll</code> vs. other main Vue 3 virtualization libraries.
-      Versions, publish dates and bundle sizes were checked on August 30, 2026.
+      Versions, publish dates and bundle sizes were checked on September 3, 2026.
     </p>
   </div>
 
@@ -19,15 +19,12 @@
       ships today, not what its README promised three years ago.
     </p>
     <p>
-      Six framework libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
+      Seven framework libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
       <code>@tanstack/vue-virtual</code>, the small and fast <code>virtua</code>, <code>vueuc</code> (a utility
-      collection that happens to include a virtual list), and <code>vue-virtual-scroll-list</code>, which is
-      here mostly to show what an unmaintained package looks like.
-    </p>
-    <p>
-      The reference implementation this project was mined against, <code>cerious-scroll</code>, is not a
-      framework library — it is an imperative class — so it gets its own section instead of a column
-      here: comparing it directly would be comparing a component to a render loop.
+      collection that happens to include a virtual list), <code>vue-virtual-scroll-list</code>, which is
+      here mostly to show what an unmaintained package looks like, and
+      <code>@ceriousdevtech/vue-cerious-scroll</code>, the component + composable newcomer with measured
+      sizes.
     </p>
   </div>
 
@@ -48,10 +45,10 @@
       <tbody>
         <tr>
           <td class="font-bold whitespace-nowrap">@pdanpdan/virtual-scroll</td>
-          <td><code>0.11.2</code></td>
-          <td>2026-08-30</td>
+          <td><code>0.12.0</code></td>
+          <td>2026-09-02</td>
           <td>12</td>
-          <td>56.1 / 17.4 kB</td>
+          <td>59.9 / 18.4 kB</td>
           <td>Component + composables + extensions</td>
         </tr>
         <tr>
@@ -72,8 +69,8 @@
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">virtua</td>
-          <td><code>0.50.6</code></td>
-          <td>2026-08-27</td>
+          <td><code>0.51.0</code></td>
+          <td>2026-08-31</td>
           <td>3,700</td>
           <td>14.3 / 6.1 kB</td>
           <td>Components (VList, VGrid) + handle</td>
@@ -82,7 +79,7 @@
           <td class="font-bold whitespace-nowrap">vueuc</td>
           <td><code>0.4.66</code></td>
           <td>2026-08-19</td>
-          <td>313</td>
+          <td>312</td>
           <td>n/a (utility collection)</td>
           <td>Component (VVirtualList)</td>
         </tr>
@@ -93,6 +90,14 @@
           <td>4,500</td>
           <td>14.3 / 4.6 kB</td>
           <td>Component</td>
+        </tr>
+        <tr>
+          <td class="font-bold whitespace-nowrap">@ceriousdevtech/vue-cerious-scroll</td>
+          <td><code>1.1.3</code></td>
+          <td>2026-08-26</td>
+          <td>9</td>
+          <td>91.5 / 23.8 kB</td>
+          <td>Component + composable</td>
         </tr>
       </tbody>
     </table>
@@ -105,7 +110,8 @@
     is ~0.5&nbsp;kB gzip, <code>@tanstack/virtual-core</code> (3.17.8, the version it depends on) is
     ~6.7&nbsp;kB gzip &mdash; together 7.0&nbsp;kB, which is what lands in your bundle. The whole
     <code>virtua</code> package covers React, Vue, Solid, Svelte and Angular &mdash; the Vue entry alone is
-    roughly 3&nbsp;kB, per its README.
+    roughly 3&nbsp;kB, per its README. The <code>vue-cerious-scroll</code> number bundles its runtime
+    dependency (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
   </p>
 
   <h2 class="docs-prop-header text-secondary">Feature Matrix</h2>
@@ -121,11 +127,13 @@
           <td role="columnheader" class="text-center">virtua</td>
           <td role="columnheader" class="text-center">vueuc</td>
           <td role="columnheader" class="text-center">vue-virtual-<br />scroll-list</td>
+          <td role="columnheader" class="text-center">@ceriousdevtech/<br />vue-cerious-scroll</td>
         </tr>
       </thead>
       <tbody>
         <tr>
           <th scope="row" class="font-medium">Vertical list</th>
+          <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -141,6 +149,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Two-dimensional grid</th>
@@ -148,6 +157,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
           <td class="text-center">🟠</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
         </tr>
@@ -159,9 +169,21 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Native scroll container (browser wheel/touch physics)</th>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Fixed item sizes</th>
+          <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -177,6 +199,17 @@
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
+          <td class="text-center">✅</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Measured rows without size estimates (no default-size first paint)</th>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">RTL</th>
@@ -186,10 +219,12 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Sticky elements / headers</th>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -204,12 +239,14 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Scroll snapping</th>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">🟠</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -222,6 +259,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Infinite loading</th>
@@ -229,6 +267,7 @@
           <td class="text-center">🟠</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
+          <td class="text-center">🟠</td>
           <td class="text-center">🟠</td>
           <td class="text-center">🟠</td>
         </tr>
@@ -240,6 +279,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Smooth programmatic scroll</th>
@@ -248,6 +288,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -258,10 +299,12 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Beyond browser max element height</th>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -276,6 +319,7 @@
           <td class="text-center">🟠</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Masonry layout (one scroll container)</th>
@@ -285,6 +329,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Real table rows in flow + auto-size columns</th>
@@ -294,6 +339,47 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Index-only lists (no per-row data objects)</th>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Custom item identity keys (<code>getItemKey</code> / <code>getKey</code>)</th>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Automatic ARIA roles &amp; item indices</th>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Official siblings for other frameworks (React, Solid, &hellip;)</th>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">TypeScript</th>
@@ -303,6 +389,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
         </tr>
       </tbody>
     </table>
@@ -382,57 +469,22 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <h2 class="docs-prop-header text-secondary">The Reference: cerious-scroll</h2>
-
-  <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-6">
-    <p>
-      <code>cerious-scroll</code> v1.1.3 (MIT, Cerious DevTech LLC) is an imperative TypeScript virtual list
-      without any framework binding: you drive a <code>CeriousScroll</code> instance and recycle DOM rows from
-      scroll callbacks. Its review fed several features on this site — the masonry layout engine, table-flow
-      rows, measured-then-settle behavior and the test invariants. It is a great design reference, not a
-      competitor: nothing here is a drop-in alternative for it, and it is not a drop-in alternative for
-      anything on this page. (Not published under this name on npm when checked; the comparison below is
-      grounded in its source, not its README.)
-    </p>
-  </div>
-
-  <div class="docs-table-container max-sm:max-h-[60svh] mb-6">
-    <table class="docs-table docs-table--hover table-pin-rows">
-      <thead>
-        <tr>
-          <th class="w-72">Feature</th>
-          <th class="text-center">cerious-scroll</th>
-          <th class="text-center">@pdanpdan/virtual-scroll</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><th scope="row" class="font-medium">Vertical virtual list</th><td class="text-center">✅</td><td class="text-center">✅</td></tr>
-        <tr><th scope="row" class="font-medium">Framework binding (Vue / React)</th><td class="text-center">❌ imperative</td><td class="text-center">✅ Vue (components + composables)</td></tr>
-        <tr><th scope="row" class="font-medium">Scroll model</th><td class="text-center">🟠 synthetic host (wheel/touch controllers reimplement the browser)</td><td class="text-center">✅ native scroll container — the browser owns wheel, touch and momentum physics</td></tr>
-        <tr><th scope="row" class="font-medium">Masonry in one container</th><td class="text-center">✅ canonical + measured modes</td><td class="text-center">✅ canonical oracle or measured heights, anchored reflow</td></tr>
-        <tr><th scope="row" class="font-medium">Real table rows in flow</th><td class="text-center">✅</td><td class="text-center">✅ <code>VirtualScrollTable</code> flow mode with auto-size/colgroup widths</td></tr>
-        <tr><th scope="row" class="font-medium">Global geometry</th><td class="text-center">🟠 bounded sliding cache with 1&nbsp;px placeholders — approximate totals</td><td class="text-center">✅ Fenwick prefix sums — exact for every measured/estimated region</td></tr>
-        <tr><th scope="row" class="font-medium">Recycled DOM window</th><td class="text-center">✅ raw node pool + manual callbacks</td><td class="text-center">✅ keyed <code>v-for</code> + identity caching</td></tr>
-        <tr><th scope="row" class="font-medium">Browser window/body as container</th><td class="text-center">❌ own <code>overflow: hidden</code> host</td><td class="text-center">✅</td></tr>
-        <tr><th scope="row" class="font-medium">Two-dimensional grid / horizontal list</th><td class="text-center">❌</td><td class="text-center">✅</td></tr>
-        <tr><th scope="row" class="font-medium">RTL</th><td class="text-center">❌</td><td class="text-center">✅</td></tr>
-        <tr><th scope="row" class="font-medium">Beyond the browser’s max element height</th><td class="text-center">❌</td><td class="text-center">✅ coordinate scaling</td></tr>
-        <tr><th scope="row" class="font-medium">SSR pre-render + hydration</th><td class="text-center">❌</td><td class="text-center">✅</td></tr>
-        <tr><th scope="row" class="font-medium">Test discipline</th><td class="text-center">✅ brute-force oracle invariants</td><td class="text-center">✅ same invariants, adapted to the engine + masonry suites at ~100% coverage</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
-    <p>
-      What was genuinely portable from the reference — masonry column frontiers, table-flow rows, content-space
-      anchoring, measured-not-estimated layout — now lives in this library on top of a native scroll
-      container. Everything that existed only to fake native scrolling (its wheel classifier, touch momentum,
-      drag-echo rejection, the 1&nbsp;px-placeholder cache) was deliberately left behind: a real scrollport
-      gives you those behaviors for free, and the Fenwick model keeps every offset exact instead of approximate.
-    </p>
+    <div class="docs-feature-card">
+      <div class="docs-feature-card-body">
+        <div class="docs-feature-card-icon">🟠</div>
+        <div>
+          <div class="docs-feature-card-title text-base">@ceriousdevtech/vue-cerious-scroll</div>
+          <p class="docs-feature-card-description text-sm">
+            It measures rows and ships masonry and real table layouts, but infinite loading is manual:
+            detect the near-end condition in your own handler, append, then call <code>updateTotalElements</code>
+            and re-render. It is also the only entry that does not scroll natively: wheel/touch/keyboard
+            handling runs on its own hidden-overflow host instead of the browser's scrollport. The ❌s are its
+            own roadmap &mdash; horizontal virtualization, grids and sticky headers are listed there as future
+            work.
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <h2 class="docs-prop-header text-secondary">Where Each One Wins</h2>
@@ -442,9 +494,19 @@
       <li>
         <strong>@pdanpdan/virtual-scroll</strong> &mdash; the only option that covers grid + window scrolling +
         RTL + sticky + keyboard navigation out of the box, the only one that virtualizes past the browser's
-        max element height, and the only one that ships masonry and real table-flow layouts as first-class
-        modes (canonical oracle or measured heights, single scroll container). It is also the largest, and at
-        12 stars it has no community to fall back on.
+        max element height, and the only Vue library that ships masonry and real table-flow layouts as
+        first-class modes (canonical oracle or measured heights, single scroll container) on top of a native
+        scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
+        a headless composable + extensions surface round out the picture. It is also the second-largest
+        bundle here, and at 12 stars it has no community to fall back on.
+      </li>
+      <li>
+        <strong>@ceriousdevtech/vue-cerious-scroll</strong> &mdash; the only other Vue entry that ships real
+        table rows and masonry layouts (canonical or DOM-measured), with built-in keyboard navigation. It is
+        vertical-only &mdash; no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
+        beyond-browser-max support &mdash; and it scrolls on its own hidden-overflow host instead of the
+        browser's scrollport. Newest and heaviest entry here (23.8&nbsp;kB gzip, dependencies bundled) and at
+        9 stars it has no community either.
       </li>
       <li>
         <strong>vue-virtual-scroller</strong> &mdash; the safe, boring choice. Ten years of production use,
@@ -480,7 +542,9 @@
           the scroll container, sticky headers, keyboard support, or lists that outgrow the browser's height
           limit. That is exactly where <code>@pdanpdan/virtual-scroll</code> is positioned, and the trade-off is
           a bigger bundle and a young project. The demos on this site &mdash; grid, blog, spreadsheet, tree,
-          table flow, masonry &mdash; are each a feature the competitors cannot do without custom code, so this
+          table flow, masonry &mdash; are each a feature the mainstream competitors cannot do without custom
+          code; only <code>vue-cerious-scroll</code> also ships masonry and real table rows, and it stops
+          there (vertical only, no native scrollport, no grid, window, RTL or beyond-max support). So this
           page doubles as the pitch.
         </p>
       </div>
@@ -488,7 +552,7 @@
   </div>
 
   <p class="text-xs opacity-50">
-    Sources: npm registry, GitHub API and project READMEs, checked on 2026-08-30.
+    Sources: npm registry, GitHub API and project READMEs, checked on 2026-09-03.
     <a href="https://www.npmjs.com/package/vue-virtual-scroller" target="_blank" rel="noopener" class="link">vue-virtual-scroller</a>
     &nbsp;•&nbsp;
     <a href="https://www.npmjs.com/package/@tanstack/vue-virtual" target="_blank" rel="noopener" class="link">@tanstack/vue-virtual</a>
@@ -498,5 +562,7 @@
     <a href="https://www.npmjs.com/package/vueuc" target="_blank" rel="noopener" class="link">vueuc</a>
     &nbsp;•&nbsp;
     <a href="https://www.npmjs.com/package/vue-virtual-scroll-list" target="_blank" rel="noopener" class="link">vue-virtual-scroll-list</a>
+    &nbsp;•&nbsp;
+    <a href="https://www.npmjs.com/package/@ceriousdevtech/vue-cerious-scroll" target="_blank" rel="noopener" class="link">@ceriousdevtech/vue-cerious-scroll</a>
   </p>
 </template>
