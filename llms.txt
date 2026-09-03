@@ -16,6 +16,7 @@ A high-performance, flexible virtual scrolling component for Vue 3 that supports
 - **Infinite Loading**: `loading` + `loadDistance` props, `load` event and `loading` slot for pagination.
 - **SSR**: `ssrRange` prop pre-renders a static in-flow block server-side for SEO.
 - **Accessibility**: Automatic ARIA roles (list, grid, tree, listbox, menu), keyboard navigation.
+- **Authoring guidance for recycled rows**: row components are reused as items scroll in/out — keep row state in the model, render idempotently, reserve media space (`aspect-ratio`), avoid native `loading="lazy"`, and bound/deprioritise offscreen prefetch.
 - **Performance**: Fenwick Tree for $O(\log N)$ prefix sum/point updates for efficient offset calculations.
 
 ## Installation
