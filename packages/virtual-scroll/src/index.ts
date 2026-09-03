@@ -10,7 +10,10 @@ export { default as VirtualScrollTable } from './components/VirtualScrollTable.v
 export { default as VirtualScrollMasonry } from './components/VirtualScrollMasonry.vue';
 export { default as VirtualScrollbar } from './components/VirtualScrollbar.vue';
 export * from './composables/useVirtualScroll';
+export * from './composables/useVirtualScrollInertia';
+export * from './composables/useVirtualScrollKeyboard';
 export * from './composables/useVirtualScrollMasonry';
+export * from './composables/useVirtualScrollObservers';
 export * from './composables/useVirtualScrollbar';
 export * from './composables/useVirtualScrollSizes';
 export * from './types';

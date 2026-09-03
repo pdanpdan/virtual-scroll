@@ -143,7 +143,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **Circular Patterns**: Pass an array to `itemSize` or `columnWidth` to define a repeating size pattern (e.g., `[50, 100]` will repeat for all items).
 - **Multi-Directional**: Works in `vertical`, `horizontal`, or `both` (grid) directions.
 - **Virtual Scrollbars**: Optimized virtual scrollbars that handle massive scales and provide consistent cross-browser styling.
-- **Extensions Architecture**: Highly modular system via extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration).
+- **Extensions Architecture**: Highly modular system via extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration, Coordinate Scaling).
 - **Container Flexibility**: Can use a custom element or the browser `window`/`body` as the scroll container.
 - **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
 - **Accessibility**: Automatic ARIA role mapping for lists, grids, trees, listboxes, and menus.
@@ -263,13 +263,13 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `props`: Full component props.
 - `scrollDetails`: Reactive [ScrollDetails](#scrolldetails).
 - `scrollToIndex`: Method to scroll to a specific index.
-- `scrollToOffset`: Method to scroll to a pixel position. The keyboard passes `endExtraX` / `endExtraY` (internal options) with the `End` key so the scroll clamp extends past the virtual content — e.g. to reach an always-rendered loading slot below the items.
+- `scrollToOffset`: Method to scroll to a pixel position. For the `End` key the composable requests extra range beyond the virtual content end (engine `endExtraX` / `endExtraY` options), so an always-rendered loading slot below the items stays reachable.
 - `stopProgrammaticScroll`: Method to halt animations.
 - `getLoadingSlotSize` (optional): Height of the loading slot. When provided, `End` includes it in the target so the last item plus the slot fit in the viewport.
 - `...resolvers`: Various helper functions for index/offset mapping.
 
 **Key behavior:**
-- `Home` / `End`: Scroll to the start / end of the content. `End` scrolls to `totalSize - viewportSize` (plus the loading slot size when `getLoadingSlotSize` is provided); the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically. Because the slot lives in the DOM *after* the virtual wrapper, the extra is also applied to the scroll clamp (`endExtraX` / `endExtraY` on `scrollToOffset`), so the slot is actually reachable.
+- `Home` / `End`: Scroll to the start / end of the content. `End` scrolls to `totalSize - viewportSize` (plus the loading slot size when `getLoadingSlotSize` is provided); the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically. Because the slot lives in the DOM *after* the virtual wrapper, the requested range also extends the engine's scroll clamp, so the slot is actually reachable.
 - `PageUp` / `PageDown`: Scroll by one full page. The target is the first visible item minus one (`startIdx - 1`) / the last visible item plus one (`endIdx + 1`), so each press advances exactly one viewport.
 - Arrows: Move one item in the scroll direction (one column in grid mode).
 
@@ -323,7 +323,7 @@ Masonry-specific props:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `itemHeight` | `fn(item, index, columnWidth)` | Required | Canonical height oracle in px. **Must be deterministic**: the same `(index, columnWidth)` must always return the same height, because placements are committed to a frontier chain. Non-finite/non-positive results fall back to `40`. |
+| `itemHeight` | `fn(item, index, columnWidth)` | Required | Canonical height oracle in px. **Must be deterministic**: the same `(index, columnWidth)` must always return the same height, because placements are committed to a frontier chain. Non-finite results fall back to `40`; finite non-positive results clamp to `1`. |
 | `measuredHeights` | `boolean` | `false` | Measure mounted cards with a `ResizeObserver` and drive the layout from the measured boxes ("local" determinism). Off: canonical oracle layout, nothing measured. On: cards size to their content (the oracle height becomes the pre-measure minimum) and every measurement batch re-lays-out with the viewport re-anchored. |
 | `targetColumnWidth` | `number` | `240` | Desired column width in px; the column count is derived so columns land as close as possible to it. |
 | `minColumns` / `maxColumns` | `number` | `1` / `10` | Column count bounds for responsive reflow. |
@@ -339,14 +339,14 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 - **Events**: `scroll` with `MasonryScrollDetails` (items, `currentIndex`/`currentEndIndex`, `range`, `scrollOffset.y`, `viewportSize`, `totalSize`, `isScrolling`, …).
 - **Exposed (via ref)**: `scrollDetails`, `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })`, `scrollToOffset(offset)`, `refresh()`.
 
-> **Masonry sizing contract**: in the default canonical mode cards must render at exactly the oracle height — reserve media space (`aspect-ratio`, fixed model heights, …) and never rely on DOM measurement. With `measuredHeights` cards size to their content instead and the measured box drives the layout (mounted cards only; unmounted regions fall back to the oracle, and measurements reset when the `items` array is replaced). In-place item edits or oracle changes need a `refresh()` (or a new `items` array) to re-layout; relayouts keep the topmost visible card pinned at its screen offset. Vertical only: no RTL/horizontal mode yet, and very tall datasets stay below the browser's ~10M px scroll limit (no coordinate scaling in masonry mode).
+> **Masonry sizing contract**: in the default canonical mode cards must render at exactly the oracle height — reserve media space (`aspect-ratio`, fixed model heights, …) and never rely on DOM measurement. With `measuredHeights` cards size to their content instead and the measured box drives the layout (mounted cards only; unmounted regions fall back to the oracle, and measurements reset when the `items` array is replaced). In-place item edits or oracle changes need a `refresh()` (or a new `items` array) to re-layout; relayouts keep the topmost visible card pinned at its screen offset. Vertical axis only: no RTL/horizontal/both mode and no coordinate scaling — very tall datasets stay below the browser's ~10M px scroll limit.
 
 ### Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `items` | `T[]` | Required | Array of items to be virtualized. May contain `undefined` entries (e.g. `new Array(n)` for data-less lists): every index in range renders and `item` is `undefined` for holes; only the visible window is accessed. |
-| `itemSize` | `number \| fn \| null` | `40` | Fixed size or function. Pass `0`/`null` for dynamic. |
+| `itemSize` | `number \| number[] \| fn \| null` | `40` | Fixed size, repeating array pattern, or function. Pass `0`/`null` for dynamic. |
 | `direction` | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Scroll direction. |
 | `columnCount` | `number` | `0` | Number of columns for grid mode. |
 | `columnWidth` | `num \| num[] \| fn \| null` | `100` | Width for columns in grid mode. |
@@ -357,6 +357,8 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 | `ssrRange` | `object` | - | Range of items to pre-render for SSR. |
 | `virtualScrollbar` | `boolean` | `false` | Whether to force virtual scrollbars. |
 | `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
+| `loading` | `boolean` | `false` | While `true`, reveals the `#loading` slot (kept mounted and hidden via CSS while `false`) and suppresses repeated `load` events. |
+| `loadDistance` | `number` | `200` | Distance from the end (DU) at which the `load` event triggers. |
 | `container` | `HTMLElement \| Window` | `hostRef` | The scrollable container element. |
 | `containerTag` | `string` | `'div'` | HTML tag for the root container. |
 | `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper — pair `'ul'`/`'ol'` with `itemTag: 'li'` for semantic lists. |
@@ -426,6 +428,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 - **All Props**: All properties defined in [Props](#props) are available on the instance.
 - `scrollDetails`: Full reactive state of the virtual scroll system. See [ScrollDetails](#scrolldetails).
 - `columnRange`: Information about the current visible range of columns. See [ColumnRange](#columnrange).
+- `wrapperRole` / `cellRole`: The ARIA roles currently applied to the items wrapper and its cells.
 - `isHydrated`: `true` when the component is mounted and hydrated.
 - `isRtl`: `true` if the container is in Right-to-Left mode.
 - `scrollbarPropsVertical` / `scrollbarPropsHorizontal`: Reactive `ScrollbarSlotProps`.
@@ -435,12 +438,12 @@ The following properties and methods are available on the `VirtualScroll` compon
 
 #### Methods
 - `scrollToIndex(row, col, options)`: Programmatic scroll to index. An end-anchored scroll (last row or content end) keeps re-clamping while settling measurements move the real end, so the first jump to the end lands flush even on dynamic lists. See [ScrollToIndexOptions](#scrolltoindexoptions).
-- `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling. `options.endExtraX` / `options.endExtraY` (internal) extend the scroll clamp past the virtual content end — used by the `End` key to reach the loading slot.
+- `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling.
 - `refresh()`: Resets all measurements and state.
 - `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
 - `updateDirection()`: Manually trigger direction detection.
 - `updateHostOffset()`: Recalculate component position.
-- `updateItemSize(index, w, h, el?)`: Register single measurement.
+- `updateItemSize(index, inlineSize, blockSize, el?)`: Register single measurement.
 - `updateItemSizes(updates)`: Batch register measurements.
 - `getRowHeight(index)`: Returns the calculated height of a row.
 - `getColumnWidth(index)`: Returns the calculated width of a column.
@@ -474,11 +477,13 @@ The component automatically manages ARIA roles and attributes to ensure screen r
 | Property | Type | Description |
 |----------|------|-------------|
 | `items` | `RenderedItem[]` | List of items currently in DOM. |
-| `currentIndex` | `number` | Index of first visible row. |
-| `currentColIndex` | `number` | Index of first visible column. |
+| `currentIndex` | `number` | Index of the first visible row below any sticky header. |
+| `currentEndIndex` | `number` | Index of the last visible row above any sticky footer. |
+| `currentColIndex` | `number` | Index of the first visible column after any sticky column. |
+| `currentEndColIndex` | `number` | Index of the last visible column before any sticky end column (grid mode). |
 | `scrollOffset` | `Point` | Current virtual scroll position (VU). |
 | `displayScrollOffset` | `Point` | Current physical scroll position (DU). |
-| `viewportSize` | `Size` | Dimensions of visible area (DU). |
+| `viewportSize` | `Size` | Dimensions of visible area (VU). |
 | `displayViewportSize` | `Size` | Physical dimensions of visible area (DU). |
 | `totalSize` | `Size` | Total size of all items (VU). |
 | `isScrolling` | `boolean` | Whether scrolling is active. |
@@ -507,7 +512,7 @@ The component automatically manages ARIA roles and attributes to ensure screen r
 | Option Type | `itemSize` / `columnWidth` | Performance | Description |
 |-------------|----------------------------|-------------|-------------|
 | **Fixed** | `number` (e.g., `50`) | **Best** | Every item has the exact same size. Calculations are *O(1)*. |
-| **Array** | `number[]` (cols only) | **Great** | Each column has a fixed size from the array (cycles if shorter). |
+| **Array** | `number[]` | **Great** | Repeating size pattern: entries cycle for items or columns when the array is shorter than the data. |
 | **Function** | `(item, index) => number` | **Good** | Size is known but varies per item. |
 | **Dynamic** | `0`, `null`, or `undefined` | **Fair** | Sizes are measured automatically via `ResizeObserver`. |
 
