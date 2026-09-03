@@ -388,7 +388,7 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
-    it('covers skipping undefined items in renderedItems', async () => {
+    it('renders every index when items contain holes (undefined entries)', async () => {
       const items = [ { id: 1 }, { id: 2 } ];
       const { result, wrapper, props } = setup({
         items,
@@ -396,7 +396,7 @@ describe('useVirtualScroll', () => {
       });
       await nextTick();
 
-      // Mock items having an undefined entry
+      // Sparse datasets (e.g. `new Array(n)`) render by index; holes yield `undefined` items
       const sparseItems = [];
       sparseItems[ 0 ] = { id: 1 };
       // index 1 is undefined
@@ -404,9 +404,12 @@ describe('useVirtualScroll', () => {
       props.value.items = sparseItems as MockItem[];
       await nextTick();
 
-      // Should only have 2 rendered items
-      expect(result.renderedItems.value.length).toBe(2);
-      expect(result.renderedItems.value.map((i) => i.index)).toEqual([ 0, 2 ]);
+      // Every index in the visible range renders, holes included
+      expect(result.renderedItems.value.length).toBe(3);
+      expect(result.renderedItems.value.map((i) => i.index)).toEqual([ 0, 1, 2 ]);
+      expect(result.renderedItems.value[ 0 ]!.item).toEqual({ id: 1 });
+      expect(result.renderedItems.value[ 1 ]!.item).toBeUndefined();
+      expect(result.renderedItems.value[ 2 ]!.item).toEqual({ id: 3 });
       wrapper.unmount();
     });
 

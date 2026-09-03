@@ -712,10 +712,9 @@ export function useVirtualScroll<T = unknown>(
     const colRange = columnRange.value;
     let currentStickyIndexPtr = 0;
     for (const i of sortedIndices) {
-      const item = props.value.items[ i ];
-      if (item === undefined) {
-        continue;
-      }
+      // Hole-y datasets (e.g. `new Array(n)` for index-only rows) render every
+      // index in range; the item slot prop is `undefined` for holes.
+      const item = props.value.items[ i ] as T;
       const { x, y, width, height } = calculateItemPosition({ index: i, direction: direction.value, fixedSize: fixedItemSize.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, usableWidth: usableWidth.value, usableHeight: usableHeight.value, totalWidth: totalSize.value.width, queryY: queryYCached, queryX: queryXCached, getSizeY: (idx) => itemSizesY.get(idx), getSizeX: (idx) => itemSizesX.get(idx), columnRange: colRange });
       const isSticky = stickySet.has(i);
       const originalX = x;

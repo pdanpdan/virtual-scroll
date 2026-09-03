@@ -218,7 +218,12 @@ export type SnapMode = boolean | 'start' | 'center' | 'end' | 'next' | 'auto';
 
 /** Base configuration properties shared between the component and the composable. */
 export interface VirtualScrollBaseProps<T = unknown> {
-  /** Array of data items to virtualize. */
+  /**
+   * Array of data items to virtualize.
+   * Entries may be `undefined` (e.g. a sparse `new Array(n)` for index-only
+   * datasets): every index in the visible range renders and the item slot prop
+   * is `undefined` for holes. Only indices in the rendered window are accessed.
+   */
   items: T[];
 
   /**
