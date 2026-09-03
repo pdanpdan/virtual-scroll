@@ -82,6 +82,40 @@ describe('fenwickTree', () => {
       expect(tree.query(10)).toBe(10);
       tree.resize(10); // same size
     });
+
+    it('shrinks within capacity and regrows without stale sums', () => {
+      const tree = new FenwickTree(8);
+      for (let i = 0; i < 8; i++) {
+        tree.update(i, i + 1); // values 1..8, total 36
+      }
+      tree.resize(5);
+      expect(tree.length).toBe(5);
+      expect(tree.query(5)).toBe(15);
+      tree.resize(7); // regrow within the retained capacity
+      expect(tree.length).toBe(7);
+      expect(tree.query(5)).toBe(15);
+      expect(tree.query(7)).toBe(15);
+      // Updates after a regrow behave normally.
+      tree.update(5, 10);
+      expect(tree.query(7)).toBe(25);
+      expect(tree.findLowerBound(20)).toBe(5);
+    });
+
+    it('releases buffers on big shrink and regrows from a fresh capacity', () => {
+      const tree = new FenwickTree(8);
+      for (let i = 0; i < 8; i++) {
+        tree.update(i, i + 1); // values 1..8, total 36
+      }
+      tree.resize(2); // below half capacity -> reallocated
+      expect(tree.length).toBe(2);
+      expect(tree.query(2)).toBe(3);
+      tree.resize(10); // fresh allocation, incremental fill above old size
+      expect(tree.length).toBe(10);
+      expect(tree.query(2)).toBe(3);
+      expect(tree.query(10)).toBe(3);
+      tree.update(9, 7);
+      expect(tree.query(10)).toBe(10);
+    });
   });
 
   describe('search & bounds', () => {
