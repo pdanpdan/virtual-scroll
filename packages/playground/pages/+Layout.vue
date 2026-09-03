@@ -132,6 +132,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-diff', label: 'Side-by-Side Code Diff' },
   { href: '/pattern-blog', label: 'Blog Posts' },
   { href: '/pattern-data-browser', label: 'Data Browser' },
+  { href: '/pattern-log-viewer', label: 'Log Viewer' },
 ];
 
 const isExamplePage = computed(() => {

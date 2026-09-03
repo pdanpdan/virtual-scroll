@@ -325,5 +325,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-data-browser"
       group="3"
     />
+
+    <ExampleCard
+      type="Pattern"
+      title="Log Viewer"
+      description="Filter and search 200,000 lazy generated log lines with virtualization."
+      href="/pattern-log-viewer"
+      group="4"
+    />
   </div>
 </template>
