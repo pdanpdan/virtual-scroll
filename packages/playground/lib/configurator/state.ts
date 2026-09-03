@@ -5,6 +5,8 @@
  */
 
 export type Direction = 'vertical' | 'horizontal' | 'both';
+export type RendererMode = 'list' | 'table';
+export type TableColumnMode = 'auto' | 'first' | 'custom';
 export type SizeMode = 'fixed' | 'pattern' | 'function' | 'dynamic';
 export type ScrollbarStyle = 'auto' | 'virtual' | 'custom' | 'independent';
 export type DataSource = 'lorem' | 'local';
@@ -16,6 +18,9 @@ export type AlignMode = 'auto' | 'start' | 'center' | 'end';
 export interface ConfiguratorState {
   // --- Basics ---
   direction: Direction;
+  renderer: RendererMode;
+  tableColumnMode: TableColumnMode;
+  tableColumnWidths: string;
   itemCount: number;
   containerMode: ContainerMode;
   rtl: boolean;
@@ -74,6 +79,9 @@ export interface ConfiguratorState {
 
 export const defaultState: ConfiguratorState = {
   direction: 'vertical',
+  renderer: 'list',
+  tableColumnMode: 'first',
+  tableColumnWidths: '72, 96, 320, 120',
   itemCount: 200,
   containerMode: 'element',
   rtl: false,
@@ -132,17 +140,20 @@ export interface ConfiguratorDerived {
   hasSections: boolean;
   isIndependent: boolean;
   usesVirtualScroll: boolean;
+  isTable: boolean;
 }
 
 export function getDerived(state: ConfiguratorState): ConfiguratorDerived {
-  const isGrid = state.direction === 'both';
-  const hasSections = state.stickySections && state.itemsPerSection > 0;
-  const isIndependent = state.scrollbarStyle === 'independent';
+  const isGrid = state.direction === 'both' && state.renderer === 'list';
+  const hasSections = state.stickySections && state.itemsPerSection > 0 && state.renderer === 'list';
+  const isTable = state.renderer === 'table';
+  const isIndependent = state.scrollbarStyle === 'independent' && !isTable;
   return {
     isGrid,
     hasSections,
     isIndependent,
     usesVirtualScroll: !isIndependent,
+    isTable,
   };
 }
 

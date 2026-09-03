@@ -222,6 +222,60 @@ function openInCodePen() {
         <p v-if="state.containerMode === 'window'" class="text-[11px] opacity-60">
           The page itself scrolls. Virtual scrollbars and coordinate scaling are disabled for window containers (so the content is limited to the supported browser content max size).
         </p>
+
+        <div class="divider divider-sm my-1 text-xs font-bold small-caps text-base-content/50">Renderer</div>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 items-center">
+          <label class="flex gap-2 items-center cursor-pointer select-none">
+            <input
+              v-model="state.renderer"
+              type="radio"
+              name="renderer-mode"
+              value="list"
+              class="radio radio-sm radio-primary"
+            />
+            <span class="text-xs font-semibold opacity-70">List (divs)</span>
+          </label>
+
+          <label class="flex gap-2 items-center cursor-pointer select-none">
+            <input
+              v-model="state.renderer"
+              type="radio"
+              name="renderer-mode"
+              value="table"
+              class="radio radio-sm radio-primary"
+            />
+            <span class="text-xs font-semibold opacity-70">Table (VirtualScrollTable)</span>
+          </label>
+        </div>
+
+        <template v-if="state.renderer === 'table'">
+          <div class="flex flex-wrap gap-3 items-center mt-1">
+            <label class="floating-label p-0 grow basis-44">
+              <span class="text-xs font-bold small-caps text-base-content/50">Column widths</span>
+              <select v-model="state.tableColumnMode" class="select select-bordered select-sm w-full">
+                <option value="auto">Auto (current rows)</option>
+                <option value="first">First window (auto-size)</option>
+                <option value="custom">Custom colgroup (px)</option>
+              </select>
+            </label>
+
+            <label v-if="state.tableColumnMode === 'custom'" class="floating-label p-0 grow basis-52">
+              <span class="text-xs font-bold small-caps text-base-content/50">Column widths (px, comma-separated)</span>
+              <input
+                v-model="state.tableColumnWidths"
+                type="text"
+                placeholder="72, 96, 320, 120"
+                class="input input-bordered input-sm w-full font-mono"
+              />
+            </label>
+          </div>
+          <p class="text-[11px] opacity-60 mt-1">
+            Table output renders real <code>&lt;table&gt;</code> flow with dynamic measured heights and works in every
+            output (component tab, composable tab via the <code>VirtualScrollTable</code> component, CodePen and
+            standalone). Table mode is vertical-only; grid, sections, gaps, scroll padding, sticky indices, window
+            containers and independent scrollbars do not apply to the generated table code.
+          </p>
+        </template>
       </FieldSet>
 
       <FieldSet

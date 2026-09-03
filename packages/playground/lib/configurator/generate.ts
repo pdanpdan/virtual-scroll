@@ -1327,6 +1327,10 @@ function sfcTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDer
 export function generateSfc(state: ConfiguratorState, mode: GenerateMode): string {
   const derived = getDerived(state);
 
+  if (derived.isTable) {
+    return generateTableSfc(state, mode === 'composable');
+  }
+
   if (derived.isIndependent) {
     return generateSfcIndependent(state);
   }
@@ -1801,6 +1805,10 @@ function penBasePayload(state: ConfiguratorState, js: string, jsPreProcessor: Co
 export function generateCodePenForState(state: ConfiguratorState): CodePenPayload {
   const derived = getDerived(state);
 
+  if (derived.isTable) {
+    return generateTablePen(state);
+  }
+
   if (derived.isIndependent) {
     return generatePenIndependent(state);
   }
@@ -1814,6 +1822,10 @@ export function generateCodePenForState(state: ConfiguratorState): CodePenPayloa
  */
 export function generateCodePenTypeScript(state: ConfiguratorState): CodePenPayload {
   const derived = getDerived(state);
+
+  if (derived.isTable) {
+    return generateTablePen(state, true);
+  }
 
   if (derived.isIndependent) {
     return generatePenIndependent(state);
@@ -2037,6 +2049,282 @@ function generatePenIndependent(state: ConfiguratorState): CodePenPayload {
     css,
     js,
     jsPreProcessor: 'none',
+    jsExternal: [ CDN_VUE, CDN_VS_JS ],
+    cssExternal: [ CDN_VS_CSS ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// table renderer (VirtualScrollTable): SFC + CodePen/standalone outputs
+// ---------------------------------------------------------------------------
+
+const TABLE_HEADERS = [ '#', 'ID', 'Text', 'Value' ];
+
+function tableColumnWidths(state: ConfiguratorState): number[] {
+  const parsed = state.tableColumnWidths
+    .split(',')
+    .map((part) => Number.parseInt(part.trim(), 10))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  return TABLE_HEADERS.map((_, i) => parsed[ i ] ?? [ 72, 96, 320, 120 ][ i ] ?? 96);
+}
+
+/** Table SFC used by both the component and composable tabs. */
+function generateTableSfc(state: ConfiguratorState, composableTab: boolean): string {
+  const lines: string[] = [];
+  const virtual = state.scrollbarStyle === 'virtual' || state.scrollbarStyle === 'custom';
+  const firstWindow = state.tableColumnMode === 'first';
+  const custom = state.tableColumnMode === 'custom';
+  const widths = tableColumnWidths(state);
+
+  lines.push('<script setup lang="ts">');
+  if (composableTab) {
+    lines.push('// Table output uses the VirtualScrollTable component: the composable (engine) API has no table mode.');
+  }
+  lines.push(
+    "import type { ScrollDetails, VirtualScrollTableInstance, VirtualScrollTableProps } from '@pdanpdan/virtual-scroll';",
+    "import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';",
+    '',
+    "import '@pdanpdan/virtual-scroll/style.css';",
+    '',
+    "import { computed, onMounted, ref } from 'vue';",
+    '',
+  );
+  lines.push(dataModelScript(state, getDerived(state), true));
+  lines.push('');
+  lines.push(dataSourceScript(state, getDerived(state), true));
+  lines.push('');
+  lines.push('const items = ref<Item[]>([]);');
+  lines.push('');
+  lines.push('onMounted(async () => {');
+  lines.push('  items.value = await createItems(0, ITEM_COUNT);');
+  lines.push('});');
+  lines.push('');
+  lines.push('// --- Scroll state ---');
+  lines.push('const scrollDetails = ref<ScrollDetails<Item> | null>(null);');
+  lines.push('const virtualScrollRef = ref<VirtualScrollTableInstance<Item> | null>(null);');
+  lines.push('');
+  lines.push('function onScroll(details: ScrollDetails<Item>) {');
+  lines.push('  scrollDetails.value = details;');
+  lines.push('}');
+  lines.push('');
+  if (custom) {
+    lines.push('// --- Pinned column widths (px) ---');
+    lines.push(`const columnWidths = [ ${ widths.join(', ') } ];`);
+    lines.push('');
+  }
+  lines.push('// --- Configuration (typed against VirtualScrollTableProps) ---');
+  lines.push('const config = computed<VirtualScrollTableProps<Item>>(() => ({');
+  lines.push('  items: items.value,');
+  lines.push("  direction: 'vertical',");
+  lines.push('  flowTable: true,');
+  if (firstWindow) {
+    lines.push('  autoSizeColumns: true,');
+  }
+  if (custom) {
+    lines.push('  columnWidths,');
+  }
+  lines.push(`  virtualScrollbar: ${ virtual },`);
+  lines.push(`  stickyHeader: ${ state.stickyHeader },`);
+  lines.push(`  stickyFooter: ${ state.stickyFooter },`);
+  lines.push('}));');
+  lines.push('</script>');
+  lines.push('');
+  lines.push('<template>');
+  lines.push('  <div class="vs-app">');
+  lines.push('    <header class="vs-toolbar">');
+  lines.push('      <h1 class="vs-title">Virtual Scroll Table Demo</h1>');
+  lines.push('      <div v-if="scrollDetails" class="vs-status">');
+  lines.push(`        <span>${ statusExpression({ ...state, direction: 'vertical' }) }</span>`);
+  lines.push('      </div>');
+  lines.push('      <div class="vs-actions">');
+  lines.push('        <button type="button" class="vs-btn" @click="virtualScrollRef?.refresh()">Refresh</button>');
+  lines.push(`        <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`);
+  lines.push('      </div>');
+  lines.push('    </header>');
+  lines.push('');
+  lines.push('    <VirtualScrollTable ref="virtualScrollRef" v-bind="config" class="vs-table" @scroll="onScroll">');
+  lines.push('      <template #header>');
+  lines.push('        <tr>');
+  TABLE_HEADERS.forEach((label, col) => {
+    const cls = col === 0 || col === 1 ? ' vs-num' : col === 3 ? ' vs-num' : '';
+    lines.push(`          <th class="vs-th${ cls }">${ label }</th>`);
+  });
+  lines.push('        </tr>');
+  lines.push('      </template>');
+  lines.push('      <template #item="{ item, index }">');
+  lines.push('        <td class="vs-td vs-mono vs-num">#{{ index }}</td>');
+  lines.push('        <td class="vs-td vs-mono vs-num">{{ item?.id }}</td>');
+  lines.push('        <td class="vs-td">{{ item?.text }}</td>');
+  lines.push('        <td class="vs-td vs-mono vs-num">{{ (index * 37) % 100 }}</td>');
+  lines.push('      </template>');
+  if (state.stickyFooter) {
+    lines.push('      <template #footer>');
+    lines.push('        <tr>');
+    lines.push(`          <td class="vs-td vs-footer" colspan="${ TABLE_HEADERS.length }">End of {{ items.length }} rows</td>`);
+    lines.push('        </tr>');
+    lines.push('      </template>');
+  }
+  lines.push('    </VirtualScrollTable>');
+  lines.push('  </div>');
+  lines.push('</template>');
+  lines.push('');
+  lines.push('<style scoped>');
+  lines.push('body { margin: 0; }');
+  lines.push('.vs-app {');
+  lines.push('  display: flex;');
+  lines.push('  flex-direction: column;');
+  lines.push('  block-size: 100dvh;');
+  lines.push('  background: #fafafa;');
+  lines.push('  color: #18181b;');
+  lines.push('  font-family: system-ui, sans-serif;');
+  lines.push('}');
+  lines.push('.vs-toolbar {');
+  lines.push('  display: flex;');
+  lines.push('  align-items: center;');
+  lines.push('  gap: 0.75rem 1rem;');
+  lines.push('  padding: 0.5rem 1rem;');
+  lines.push('  background: #e4e4e7;');
+  lines.push('  border-bottom: 1px solid #d4d4d8;');
+  lines.push('  flex: none;');
+  lines.push('}');
+  lines.push('.vs-title { font-size: 0.875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }');
+  lines.push('.vs-status { font-family: ui-monospace, monospace; font-size: 0.6875rem; opacity: 0.6; }');
+  lines.push('.vs-actions { margin-inline-start: auto; display: flex; gap: 0.5rem; align-items: center; }');
+  lines.push('.vs-btn { padding: 0.25rem 0.75rem; border: 1px solid #a1a1aa; border-radius: 0.375rem; background: #fff; font-size: 0.75rem; font-weight: 600; cursor: pointer; }');
+  lines.push('.vs-link { font-size: 0.75rem; font-weight: 700; color: #2563eb; text-decoration: none; }');
+  lines.push('.vs-table {');
+  lines.push('  flex: 1;');
+  lines.push('  min-block-size: 0;');
+  lines.push('  border-collapse: separate;');
+  lines.push('  border-spacing: 0;');
+  lines.push('  background: #fff;');
+  lines.push('}');
+  lines.push('.vs-th, .vs-td {');
+  lines.push('  padding: 0.375rem 0.875rem;');
+  lines.push('  border-bottom: 1px solid #e4e4e7;');
+  lines.push('  font-size: 0.8125rem;');
+  lines.push('  text-align: left;');
+  lines.push('  vertical-align: top;');
+  lines.push('  white-space: nowrap;');
+  lines.push('}');
+  lines.push('.vs-th {');
+  lines.push('  position: sticky;');
+  lines.push('  inset-block-start: 0;');
+  lines.push('  background: #f4f4f5;');
+  lines.push('  font-size: 0.6875rem;');
+  lines.push('  text-transform: uppercase;');
+  lines.push('  letter-spacing: 0.08em;');
+  lines.push('  opacity: 0.75;');
+  lines.push('}');
+  lines.push('.vs-td { overflow: hidden; text-overflow: ellipsis; max-inline-size: 24rem; }');
+  lines.push('.vs-mono { font-family: ui-monospace, monospace; }');
+  lines.push('.vs-num { text-align: right; }');
+  lines.push('.vs-footer { font-weight: 700; text-align: center; background: #f4f4f5; }');
+  lines.push('</style>');
+  lines.push('');
+  return join(lines);
+}
+
+const TABLE_PEN_CSS = [
+  '[v-cloak] { display: none; }',
+  'body { margin: 0; }',
+  '.vs-app { display: flex; flex-direction: column; block-size: 100dvh; background: #fafafa; color: #18181b; font-family: system-ui, sans-serif; }',
+  '.vs-toolbar { display: flex; align-items: center; gap: 0.75rem 1rem; padding: 0.5rem 1rem; background: #e4e4e7; border-bottom: 1px solid #d4d4d8; flex: none; }',
+  '.vs-title { font-size: 0.875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }',
+  '.vs-status { font-family: ui-monospace, monospace; font-size: 0.6875rem; opacity: 0.6; }',
+  '.vs-actions { margin-inline-start: auto; display: flex; gap: 0.5rem; align-items: center; }',
+  '.vs-btn { padding: 0.25rem 0.75rem; border: 1px solid #a1a1aa; border-radius: 0.375rem; background: #fff; font-size: 0.75rem; font-weight: 600; cursor: pointer; }',
+  '.vs-link { font-size: 0.75rem; font-weight: 700; color: #2563eb; text-decoration: none; }',
+  '.vs-table { flex: 1; min-block-size: 0; border-collapse: separate; border-spacing: 0; background: #fff; }',
+  '.vs-th, .vs-td { padding: 0.375rem 0.875rem; border-bottom: 1px solid #e4e4e7; font-size: 0.8125rem; text-align: left; vertical-align: top; white-space: nowrap; }',
+  '.vs-th { position: sticky; inset-block-start: 0; background: #f4f4f5; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }',
+  '.vs-td { overflow: hidden; text-overflow: ellipsis; max-inline-size: 24rem; }',
+  '.vs-mono { font-family: ui-monospace, monospace; }',
+  '.vs-num { text-align: right; }',
+  '.vs-footer { font-weight: 700; text-align: center; background: #f4f4f5; }',
+].join('\n');
+
+/** Self-contained CodePen/standalone table demo (no lorem API needed). */
+function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayload {
+  const firstWindow = state.tableColumnMode === 'first';
+  const custom = state.tableColumnMode === 'custom';
+  const widths = tableColumnWidths(state);
+  const vsName = isTs
+    ? 'const VirtualScrollTable = (window as unknown as { VirtualScroll: { VirtualScrollTable: unknown } }).VirtualScroll.VirtualScrollTable;'
+    : 'const { VirtualScrollTable } = window.VirtualScroll;';
+
+  const th = TABLE_HEADERS.map((label, col) => {
+    const cls = col === 0 || col === 1 || col === 3 ? ' vs-num' : '';
+    return `        <th class="vs-th${ cls }">${ label }</th>`;
+  }).join('\n');
+
+  const html = [
+    '<div id="app" v-cloak class="vs-app">',
+    '  <header class="vs-toolbar">',
+    '    <h1 class="vs-title">Virtual Scroll Table Demo</h1>',
+    '    <div v-if="scrollDetails" class="vs-status">',
+    '      <span>range {{ scrollDetails.range.start }}–{{ scrollDetails.range.end }}</span>',
+    '    </div>',
+    '    <div class="vs-actions">',
+    '      <button type="button" class="vs-btn" @click="vs?.refresh()">Refresh</button>',
+    `      <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`,
+    '    </div>',
+    '  </header>',
+    '',
+    '  <virtual-scroll-table ref="vs" v-bind="config" class="vs-table" @scroll="onScroll">',
+    '    <template #header>',
+    '      <tr>',
+    th,
+    '      </tr>',
+    '    </template>',
+    '    <template #item="{ item, index }">',
+    '      <td class="vs-td vs-mono vs-num">#{{ index }}</td>',
+    '      <td class="vs-td vs-mono vs-num">{{ item.id }}</td>',
+    '      <td class="vs-td">{{ item.text }}</td>',
+    '      <td class="vs-td vs-mono vs-num">{{ (index * 37) % 100 }}</td>',
+    '    </template>',
+    state.stickyFooter ? '    <template #footer><tr><td class="vs-td vs-footer" colspan="4">End of {{ items.length }} rows</td></tr></template>' : '',
+    '  </virtual-scroll-table>',
+    '</div>',
+  ].join('\n');
+
+  const js = join([
+    'const { createApp, ref, computed } = Vue;',
+    vsName,
+    '',
+    'const words = ["alpha", "beta", "gamma", "delta", "epsilon"];',
+    'const ITEMS = Array.from({ length: 200 }, (_, i) => ({ id: i, text: "Row " + i + " \u2014 " + words[i % words.length] }));',
+    '',
+    'createApp({',
+    '  setup() {',
+    '    const items = ref(ITEMS);',
+    '    const vs = ref(null);',
+    '    const scrollDetails = ref(null);',
+    '    function onScroll(details) { scrollDetails.value = details; }',
+    custom ? `    const columnWidths = [ ${ widths.join(', ') } ];` : '',
+    '    const config = computed(() => ({',
+    '      items: items.value,',
+    "      direction: 'vertical',",
+    '      flowTable: true,',
+    firstWindow ? '      autoSizeColumns: true,' : '',
+    custom ? '      columnWidths,' : '',
+    '      virtualScrollbar: true,',
+    `      stickyHeader: ${ state.stickyHeader },`,
+    `      stickyFooter: ${ state.stickyFooter },`,
+    '    }));',
+    '    return { items, vs, scrollDetails, config, onScroll };',
+    '  },',
+    '})',
+    "  .component('virtual-scroll-table', VirtualScrollTable)",
+    "  .mount('#app');",
+  ]);
+
+  return {
+    title: 'Virtual Scroll — Configurator Demo (Table)',
+    html,
+    css: TABLE_PEN_CSS,
+    js,
+    jsPreProcessor: isTs ? 'typescript' : 'none',
     jsExternal: [ CDN_VUE, CDN_VS_JS ],
     cssExternal: [ CDN_VS_CSS ],
   };
