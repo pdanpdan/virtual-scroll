@@ -109,6 +109,7 @@ const essentialLinks: Link[] = [
   { href: '/essential-grid-fixed', label: 'Grid Fixed' },
   { href: '/essential-grid-dynamic', label: 'Grid Dynamic' },
   { href: '/essential-flow-table', label: 'Flow Table' },
+  { href: '/essential-masonry', label: 'Masonry Grid' },
 ];
 
 const featureLinks: Link[] = [
@@ -136,7 +137,6 @@ const patternLinks: Link[] = [
   { href: '/pattern-tree', label: 'Collapsible Tree' },
   { href: '/pattern-draggable', label: 'Draggable List' },
   { href: '/pattern-gallery', label: 'Photo Gallery' },
-  { href: '/pattern-masonry', label: 'Masonry Grid' },
 ];
 
 const isExamplePage = computed(() => {
