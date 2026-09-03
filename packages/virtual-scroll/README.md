@@ -148,6 +148,18 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
 - **Accessibility**: Automatic ARIA role mapping for lists, grids, trees, listboxes, and menus.
 
+
+## Authoring Content for Virtualized Lists
+
+Rows are recycled: they mount as they enter the viewport and unmount when they leave, so content should behave well under recycling:
+
+- **Keep row state in the model, not the DOM** — selection, expansion, and likes belong in your data/store keyed by item id; anything stored in the element vanishes when the row scrolls away.
+- **Make row rendering idempotent** — the `item` slot re-renders on every entry into the window; rendering the same item twice must produce the same result.
+- **Reserve space for media** — explicit `width`/`height` or `aspect-ratio` prevents post-mount row growth (which the engine measures and corrects, but which causes jumps).
+- **Avoid native `loading="lazy"` on images** — the visible window is already the only mounted content; lazy-loading adds browser heuristics on a changing scroll container and can starve on-screen images. Use eager loading or your own bounded, low-priority prefetch window.
+- **Dynamic heights are fine** — late content growth is measured via `ResizeObserver` and the layout self-corrects; stable or reserved sizes just scroll smoother (see the playground docs "Authoring Content for Virtualized Lists").
+
+
 ## Extensions
 
 The library uses a modular extension system. You can use the built-in extensions or create your own.

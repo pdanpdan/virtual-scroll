@@ -157,6 +157,68 @@ onUnmounted(() => {
 
       <div class="divider opacity-30" />
 
+      <!-- 2.0 Authoring content -->
+      <section id="authoring-content">
+        <h2 class="docs-section-header">
+          <a href="#authoring-content" aria-label="Link to Authoring content for virtualized lists section">
+            Authoring Content for Virtualized Lists
+          </a>
+        </h2>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
+          <p>
+            Virtualization reuses a small window of DOM nodes: rows mount as they enter the viewport and unmount
+            when they leave. Most authoring works exactly like any other Vue list, but content that relies on being
+            mounted once, loads late, or grows after mount needs extra care to stay smooth and correct.
+          </p>
+          <ul class="list-disc ps-5 space-y-2">
+            <li>
+              <strong>Keep row state in the model, not the DOM.</strong> Selection, expanded rows, likes, cart state,
+              or carousel positions belong in your data (keyed by item id) or a store — never in the row's own DOM.
+              Rows are recycled by index, so anything stored in the element disappears when the row scrolls away and
+              would also leak across items.
+            </li>
+            <li>
+              <strong>Make row rendering idempotent.</strong> The <code>item</code> slot re-renders whenever the item
+              enters the window (and again on scroll). Rendering the same item twice must produce the same result —
+              no one-time setup, no listeners bound per mount that are never removed, no DOM the component does not own.
+            </li>
+            <li>
+              <strong>Prefer delegated or component-scoped events.</strong> Interactions on rows should bubble to the
+              container or live in the item component's own handlers. State updates flow back into the model and the
+              visible rows re-render from it — never mutate row content from outside.
+            </li>
+            <li>
+              <strong>Reserve space for media.</strong> Give images/videos an explicit <code>width</code>/<code>height</code>
+              or <code>aspect-ratio</code>. Media that loads with unknown dimensions resizes the row after mount, which
+              the engine measures and corrects — but repeated late growth causes visible jumps and extra work.
+            </li>
+            <li>
+              <strong>Do not combine native <code>loading="lazy"</code> with virtualization.</strong> The visible window is
+              already the only mounted content; native lazy-loading adds browser heuristics on top of a scroll container
+              whose content keeps changing and can starve or delay the very images on screen. Load visible images eagerly
+              (or via your own bounded, low-priority prefetch window ahead of the viewport).
+            </li>
+            <li>
+              <strong>Prefetch offscreen content in bounded, deprioritised windows.</strong> If rows show remote data
+              (images, fetched text), prefetch only a small range past the viewport and give it lower priority than what
+              is visible, so on-screen content is never starved.
+            </li>
+            <li>
+              <strong>Avoid content that mounts asynchronously and changes row height late.</strong> Dynamic heights are
+              fully supported (<code>ResizeObserver</code> measures and the layout self-corrects), but the smoothest
+              experience comes from content whose size is stable or reserved up front — especially in lists that also use
+              snapping or sticky items.
+            </li>
+          </ul>
+          <p>
+            The chat, gallery, blog, and data-browser examples in the playground demonstrate these patterns with real
+            content: dynamic bubbles, media cards, grouped headers, and interactive rows.
+          </p>
+        </div>
+      </section>
+
+      <div class="divider opacity-30" />
+
       <!-- 2.1 Sizing Guide -->
       <section id="sizing-guide">
         <h2 class="docs-section-header">
