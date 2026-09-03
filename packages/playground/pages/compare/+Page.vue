@@ -19,10 +19,15 @@
       ships today, not what its README promised three years ago.
     </p>
     <p>
-      Six libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
+      Six framework libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
       <code>@tanstack/vue-virtual</code>, the small and fast <code>virtua</code>, <code>vueuc</code> (a utility
       collection that happens to include a virtual list), and <code>vue-virtual-scroll-list</code>, which is
       here mostly to show what an unmaintained package looks like.
+    </p>
+    <p>
+      The reference implementation this project was mined against, <code>cerious-scroll</code>, is not a
+      framework library — it is an imperative class — so it gets its own section instead of a column
+      here: comparing it directly would be comparing a component to a render loop.
     </p>
   </div>
 
@@ -273,6 +278,24 @@
           <td class="text-center">❌</td>
         </tr>
         <tr>
+          <th scope="row" class="font-medium">Masonry layout (one scroll container)</th>
+          <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+        </tr>
+        <tr>
+          <th scope="row" class="font-medium">Real table rows in flow + auto-size columns</th>
+          <td class="text-center">✅</td>
+          <td class="text-center">🟠</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
+        </tr>
+        <tr>
           <th scope="row" class="font-medium">TypeScript</th>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -361,14 +384,67 @@
     </div>
   </div>
 
+  <h2 class="docs-prop-header text-secondary">The Reference: cerious-scroll</h2>
+
+  <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-6">
+    <p>
+      <code>cerious-scroll</code> v1.1.3 (MIT, Cerious DevTech LLC) is an imperative TypeScript virtual list
+      without any framework binding: you drive a <code>CeriousScroll</code> instance and recycle DOM rows from
+      scroll callbacks. Its review fed several features on this site — the masonry layout engine, table-flow
+      rows, measured-then-settle behavior and the test invariants. It is a great design reference, not a
+      competitor: nothing here is a drop-in alternative for it, and it is not a drop-in alternative for
+      anything on this page. (Not published under this name on npm when checked; the comparison below is
+      grounded in its source, not its README.)
+    </p>
+  </div>
+
+  <div class="docs-table-container max-sm:max-h-[60svh] mb-6">
+    <table class="docs-table docs-table--hover table-pin-rows">
+      <thead>
+        <tr>
+          <th class="w-72">Feature</th>
+          <th class="text-center">cerious-scroll</th>
+          <th class="text-center">@pdanpdan/virtual-scroll</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row" class="font-medium">Vertical virtual list</th><td class="text-center">✅</td><td class="text-center">✅</td></tr>
+        <tr><th scope="row" class="font-medium">Framework binding (Vue / React)</th><td class="text-center">❌ imperative</td><td class="text-center">✅ Vue (components + composables)</td></tr>
+        <tr><th scope="row" class="font-medium">Scroll model</th><td class="text-center">🟠 synthetic host (wheel/touch controllers reimplement the browser)</td><td class="text-center">✅ native scroll container — the browser owns wheel, touch and momentum physics</td></tr>
+        <tr><th scope="row" class="font-medium">Masonry in one container</th><td class="text-center">✅ canonical + measured modes</td><td class="text-center">✅ canonical oracle or measured heights, anchored reflow</td></tr>
+        <tr><th scope="row" class="font-medium">Real table rows in flow</th><td class="text-center">✅</td><td class="text-center">✅ <code>VirtualScrollTable</code> flow mode with auto-size/colgroup widths</td></tr>
+        <tr><th scope="row" class="font-medium">Global geometry</th><td class="text-center">🟠 bounded sliding cache with 1&nbsp;px placeholders — approximate totals</td><td class="text-center">✅ Fenwick prefix sums — exact for every measured/estimated region</td></tr>
+        <tr><th scope="row" class="font-medium">Recycled DOM window</th><td class="text-center">✅ raw node pool + manual callbacks</td><td class="text-center">✅ keyed <code>v-for</code> + identity caching</td></tr>
+        <tr><th scope="row" class="font-medium">Browser window/body as container</th><td class="text-center">❌ own <code>overflow: hidden</code> host</td><td class="text-center">✅</td></tr>
+        <tr><th scope="row" class="font-medium">Two-dimensional grid / horizontal list</th><td class="text-center">❌</td><td class="text-center">✅</td></tr>
+        <tr><th scope="row" class="font-medium">RTL</th><td class="text-center">❌</td><td class="text-center">✅</td></tr>
+        <tr><th scope="row" class="font-medium">Beyond the browser’s max element height</th><td class="text-center">❌</td><td class="text-center">✅ coordinate scaling</td></tr>
+        <tr><th scope="row" class="font-medium">SSR pre-render + hydration</th><td class="text-center">❌</td><td class="text-center">✅</td></tr>
+        <tr><th scope="row" class="font-medium">Test discipline</th><td class="text-center">✅ brute-force oracle invariants</td><td class="text-center">✅ same invariants, adapted to the engine + masonry suites at ~100% coverage</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
+    <p>
+      What was genuinely portable from the reference — masonry column frontiers, table-flow rows, content-space
+      anchoring, measured-not-estimated layout — now lives in this library on top of a native scroll
+      container. Everything that existed only to fake native scrolling (its wheel classifier, touch momentum,
+      drag-echo rejection, the 1&nbsp;px-placeholder cache) was deliberately left behind: a real scrollport
+      gives you those behaviors for free, and the Fenwick model keeps every offset exact instead of approximate.
+    </p>
+  </div>
+
   <h2 class="docs-prop-header text-secondary">Where Each One Wins</h2>
 
   <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
     <ul class="space-y-4">
       <li>
         <strong>@pdanpdan/virtual-scroll</strong> &mdash; the only option that covers grid + window scrolling +
-        RTL + sticky + keyboard navigation out of the box, and the only one that virtualizes past the browser's
-        max element height. It is also the largest, and at 12 stars it has no community to fall back on.
+        RTL + sticky + keyboard navigation out of the box, the only one that virtualizes past the browser's
+        max element height, and the only one that ships masonry and real table-flow layouts as first-class
+        modes (canonical oracle or measured heights, single scroll container). It is also the largest, and at
+        12 stars it has no community to fall back on.
       </li>
       <li>
         <strong>vue-virtual-scroller</strong> &mdash; the safe, boring choice. Ten years of production use,
@@ -404,8 +480,8 @@
           the scroll container, sticky headers, keyboard support, or lists that outgrow the browser's height
           limit. That is exactly where <code>@pdanpdan/virtual-scroll</code> is positioned, and the trade-off is
           a bigger bundle and a young project. The demos on this site &mdash; grid, blog, spreadsheet, tree,
-          masonry &mdash; are each a feature the competitors cannot do without custom code, so this page doubles
-          as the pitch.
+          table flow, masonry &mdash; are each a feature the competitors cannot do without custom code, so this
+          page doubles as the pitch.
         </p>
       </div>
     </div>
