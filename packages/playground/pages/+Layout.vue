@@ -135,6 +135,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-log-viewer', label: 'Log Viewer' },
   { href: '/pattern-code-viewer', label: 'Code Viewer' },
   { href: '/pattern-streaming', label: 'Live Streaming' },
+  { href: '/pattern-async-content', label: 'Async Content' },
 ];
 
 const isExamplePage = computed(() => {

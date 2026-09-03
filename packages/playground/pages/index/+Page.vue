@@ -349,5 +349,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-streaming"
       group="6"
     />
+
+    <ExampleCard
+      type="Pattern"
+      title="Async Content"
+      description="Rows fetch simulated content on demand with a shared cache and measured heights."
+      href="/pattern-async-content"
+      group="7"
+    />
   </div>
 </template>
