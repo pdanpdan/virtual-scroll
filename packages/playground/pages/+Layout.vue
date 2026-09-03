@@ -18,13 +18,72 @@ const rtlMode = ref(false);
 provide('rtlMode', rtlMode);
 
 const theme = ref<'light' | 'dark' | null>(null);
+const themeToggleEl = ref<HTMLElement | null>(null);
+
+function applyTheme(next: 'light' | 'dark') {
+  theme.value = next;
+  document.documentElement.setAttribute('data-theme', next);
+  window.localStorage.setItem('vs-theme', next);
+}
 
 function toggleTheme() {
-  if (theme.value == null) {
-    theme.value = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
-  } else {
-    theme.value = theme.value === 'light' ? 'dark' : 'light';
+  const next = theme.value === 'dark' ? 'light' : 'dark';
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (typeof document.startViewTransition !== 'function' || prefersReducedMotion) {
+    applyTheme(next);
+    return;
   }
+
+  // Circular reveal from the toggle (pattern: headless-components playground).
+  // Use fractions of the viewport, not pixels: the snapshot box is
+  // page-anchored and may be scaled on mobile, so a fraction of the box
+  // always matches the toggle. Scroll offsets make the rect page-relative.
+  const origin = themeToggleEl.value;
+  if (!origin) {
+    applyTheme(next);
+    return;
+  }
+  const rect = origin.getBoundingClientRect();
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  const x = rect.left + rect.width / 2 + scrollX;
+  const y = rect.top + rect.height / 2 + scrollY;
+  const ratioX = (100 * x) / window.innerWidth;
+  const ratioY = (100 * y) / window.innerHeight;
+  // Cover the viewport: radius as a fraction of the box's half-diagonal.
+  const endRadius = Math.hypot(
+    Math.max(x - scrollX, scrollX + window.innerWidth - x),
+    Math.max(y - scrollY, scrollY + window.innerHeight - y),
+  );
+  const halfDiagonal = Math.hypot(window.innerWidth, window.innerHeight) / Math.SQRT2;
+  const ratioR = (100 * endRadius) / halfDiagonal;
+
+  // The site's page-transition system names the sidebar/navbar/main groups, so
+  // the root snapshot would exclude them from the wipe; drop the names for the
+  // duration of the theme switch so the whole page is one root snapshot.
+  document.documentElement.classList.add('vs-theme-switch');
+  const transition = document.startViewTransition(() => {
+    applyTheme(next);
+  });
+  transition.finished.finally(() => {
+    document.documentElement.classList.remove('vs-theme-switch');
+  });
+  // WAAPI avoids CSS variables: the values go straight to the pseudo-element.
+  transition.ready.then(() => {
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0% at ${ ratioX }% ${ ratioY }%)`,
+          `circle(${ ratioR }% at ${ ratioX }% ${ ratioY }%)`,
+        ],
+      },
+      {
+        duration: 600,
+        easing: 'ease',
+        pseudoElement: '::view-transition-new(root)',
+      },
+    );
+  });
 }
 
 const drawerOpen = ref(false);
@@ -285,7 +344,7 @@ const linkGroups = [
       >
         <label class="settings-item group p-2 min-w-32">
           <span class="settings-label me-2">Theme</span>
-          <div class="swap swap-rotate me-2">
+          <div ref="themeToggleEl" class="swap swap-rotate me-2">
             <input type="checkbox" class="theme-controller" :checked="theme === 'dark'" @change="toggleTheme" />
             <svg class="swap-off size-6 fill-primary transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
@@ -309,3 +368,22 @@ const linkGroups = [
     </div>
   </div>
 </template>
+
+<style>
+/* The reveal is animated from toggleTheme via WAAPI on
+   ::view-transition-new(root); disable the UA cross-fade so the two do not
+   fight. Reduced motion is handled in JS. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* While a theme switch transition is running, the page is captured as one
+   root snapshot: the VS-* page-transition groups (style.css) would otherwise
+   be excluded from the circular wipe. */
+html.vs-theme-switch .drawer-side,
+html.vs-theme-switch .navbar,
+html.vs-theme-switch main {
+  view-transition-name: none;
+}
+</style>
