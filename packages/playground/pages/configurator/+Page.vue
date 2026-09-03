@@ -233,7 +233,7 @@ function openInCodePen() {
               value="list"
               class="radio radio-sm radio-primary"
             />
-            <span class="text-xs font-semibold opacity-70">List (divs)</span>
+            <span class="text-xs font-semibold opacity-70">List (VirtualScroll)</span>
           </label>
 
           <label class="flex gap-2 items-center cursor-pointer select-none">
