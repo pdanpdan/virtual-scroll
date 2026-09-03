@@ -189,7 +189,7 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-4">Log Viewer</span>
+      <span class="example-title example-title--group-2">Log Viewer</span>
     </template>
 
     <template #description>
@@ -203,7 +203,7 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-4"
+        class="example-icon example-icon--group-2"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25h6.75l2.25 2.25H21M3 5.25A2.25 2.25 0 0 0 .75 7.5v9A2.25 2.25 0 0 0 3 18.75h18A2.25 2.25 0 0 0 23.25 16.5v-9A2.25 2.25 0 0 0 21 5.25h-9" />
         <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12.75h3m-3 3h6m-6-6h9" />

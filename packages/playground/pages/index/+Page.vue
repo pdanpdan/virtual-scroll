@@ -181,6 +181,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/essential-grid-dynamic"
       group="4"
     />
+    <ExampleCard
+      type="Essential"
+      title="Flow Table"
+      description="Virtualized rows in a real flow table with dynamic heights and column-width modes."
+      href="/essential-flow-table"
+      group="5"
+    />
 
     <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Features
@@ -245,117 +252,125 @@ import ExampleCard from '#/components/ExampleCard.vue';
 
     <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Patterns & Recipes
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-chat"
+        group="1"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-blog"
+        group="2"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-async-content"
+        group="3"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-streaming"
+        group="4"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-table"
+        group="5"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-spreadsheet"
+        group="6"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-data-browser"
+        group="7"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-code-viewer"
+        group="1"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-log-viewer"
+        group="2"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-diff"
+        group="3"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-search"
+        group="4"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-tree"
+        group="5"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-draggable"
+        group="6"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-gallery"
+        group="7"
+      />
+
+      <ExampleCard
+        type="Pattern"
+        title="Side-by-Side Code Diff"
+        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+        href="/pattern-masonry"
+        group="1"
+      />
     </div>
-
-    <ExampleCard
-      type="Pattern"
-      title="Chat Interface"
-      description="Smooth auto-scrolling, history loading, and dynamic message heights."
-      href="/pattern-chat"
-      group="1"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Table"
-      description="Semantic HTML <table> virtualization for accessible data grids."
-      href="/pattern-table"
-      group="2"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Spreadsheet"
-      description="Excel-like bidirectional grid with sticky row and column headers."
-      href="/pattern-spreadsheet"
-      group="3"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Collapsible Tree"
-      description="Virtualized hierarchical list with expandable/collapsible nodes."
-      href="/pattern-tree"
-      group="4"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Draggable List"
-      description="Reorder virtualized items using native drag and drop."
-      href="/pattern-draggable"
-      group="5"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Photo Gallery"
-      description="Virtualized image grid with loading placeholders."
-      href="/pattern-gallery"
-      group="6"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Masonry Grid"
-      description="Achieve masonry layout by combining multiple columns."
-      href="/pattern-masonry"
-      group="7"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Search & Highlight"
-      description="Implement high-performance search across thousands of virtualized items."
-      href="/pattern-search"
-      group="1"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Blog Posts"
-      description="Blog feed with dynamic heights and on-demand post loading."
-      href="/pattern-blog"
-      group="2"
-    />
-    <ExampleCard
-      type="Pattern"
-      title="Data Browser"
-      description="Grouped directory with sticky sections, instant search and jump navigation."
-      href="/pattern-data-browser"
-      group="3"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Log Viewer"
-      description="Filter and search 200,000 lazy generated log lines with virtualization."
-      href="/pattern-log-viewer"
-      group="4"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Code Viewer"
-      description="Browse and search the real C++ source used in the code diff example."
-      href="/pattern-code-viewer"
-      group="5"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Live Streaming"
-      description="Simulated market feed mutating only the visible window of 5,000 symbols."
-      href="/pattern-streaming"
-      group="6"
-    />
-
-    <ExampleCard
-      type="Pattern"
-      title="Async Content"
-      description="Rows fetch simulated content on demand with a shared cache and measured heights."
-      href="/pattern-async-content"
-      group="7"
-    />
   </div>
 </template>

@@ -108,6 +108,7 @@ const essentialLinks: Link[] = [
   { href: '/essential-horizontal-dynamic', label: 'Horizontal Dynamic' },
   { href: '/essential-grid-fixed', label: 'Grid Fixed' },
   { href: '/essential-grid-dynamic', label: 'Grid Dynamic' },
+  { href: '/essential-flow-table', label: 'Flow Table' },
 ];
 
 const featureLinks: Link[] = [
@@ -122,20 +123,20 @@ const featureLinks: Link[] = [
 
 const patternLinks: Link[] = [
   { href: '/pattern-chat', label: 'Chat Interface' },
+  { href: '/pattern-blog', label: 'Blog Posts' },
+  { href: '/pattern-async-content', label: 'Async Content' },
+  { href: '/pattern-streaming', label: 'Live Streaming' },
   { href: '/pattern-table', label: 'Table' },
   { href: '/pattern-spreadsheet', label: 'Spreadsheet' },
+  { href: '/pattern-data-browser', label: 'Data Browser' },
+  { href: '/pattern-code-viewer', label: 'Code Viewer' },
+  { href: '/pattern-log-viewer', label: 'Log Viewer' },
+  { href: '/pattern-diff', label: 'Side-by-Side Code Diff' },
+  { href: '/pattern-search', label: 'Search & Highlight' },
   { href: '/pattern-tree', label: 'Collapsible Tree' },
   { href: '/pattern-draggable', label: 'Draggable List' },
   { href: '/pattern-gallery', label: 'Photo Gallery' },
   { href: '/pattern-masonry', label: 'Masonry Grid' },
-  { href: '/pattern-search', label: 'Search & Highlight' },
-  { href: '/pattern-diff', label: 'Side-by-Side Code Diff' },
-  { href: '/pattern-blog', label: 'Blog Posts' },
-  { href: '/pattern-data-browser', label: 'Data Browser' },
-  { href: '/pattern-log-viewer', label: 'Log Viewer' },
-  { href: '/pattern-code-viewer', label: 'Code Viewer' },
-  { href: '/pattern-streaming', label: 'Live Streaming' },
-  { href: '/pattern-async-content', label: 'Async Content' },
 ];
 
 const isExamplePage = computed(() => {

@@ -138,7 +138,7 @@ function handleDragEnd() {
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-5">Draggable List</span>
+      <span class="example-title example-title--group-6">Draggable List</span>
     </template>
 
     <template #description>
@@ -152,7 +152,7 @@ function handleDragEnd() {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-5"
+        class="example-icon example-icon--group-6"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
       </svg>

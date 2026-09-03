@@ -56,7 +56,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-7">Async Content</span>
+      <span class="example-title example-title--group-3">Async Content</span>
     </template>
 
     <template #description>
@@ -70,7 +70,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-7"
+        class="example-icon example-icon--group-3"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75 9 18l2.25-2.25" />

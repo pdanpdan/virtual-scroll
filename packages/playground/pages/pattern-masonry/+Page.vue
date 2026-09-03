@@ -192,7 +192,7 @@ function setItemRef(el: Element | null | ComponentPublicInstance, id: number) {
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-7">Masonry Grid</span>
+      <span class="example-title example-title--group-1">Masonry Grid</span>
     </template>
 
     <template #description>
@@ -206,7 +206,7 @@ function setItemRef(el: Element | null | ComponentPublicInstance, id: number) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-7"
+        class="example-icon example-icon--group-1"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h8v11H3z M3 16h8v5H3z M13 3h8v6h-8z M13 11h8v10h-8z" />
       </svg>

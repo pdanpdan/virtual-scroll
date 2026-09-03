@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
 
-import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
@@ -43,7 +43,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-2">Table</span>
+      <span class="example-title example-title--group-5">Table</span>
     </template>
 
     <template #description>
@@ -57,7 +57,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-2"
+        class="example-icon example-icon--group-5"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h16.5v16.5H3.75V3.75ZM12 3.75v16.5M3.75 12h16.5" />
       </svg>
@@ -85,7 +85,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       />
     </template>
 
-    <VirtualScroll
+    <VirtualScrollTable
       ref="virtualScrollRef"
       :debug="debugMode"
       class="example-container table table-zebra"
@@ -96,9 +96,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       :sticky-header="stickyHeader"
       :sticky-footer="stickyFooter"
       :virtual-scrollbar="virtualScrollbar"
-      container-tag="table"
-      wrapper-tag="tbody"
-      item-tag="tr"
       aria-label="User data table"
       @scroll="onScroll"
     >
@@ -149,6 +146,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           </td>
         </tr>
       </template>
-    </VirtualScroll>
+    </VirtualScrollTable>
   </ExampleContainer>
 </template>

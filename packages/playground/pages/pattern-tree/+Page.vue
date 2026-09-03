@@ -101,7 +101,7 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-4">Collapsible Tree</span>
+      <span class="example-title example-title--group-5">Collapsible Tree</span>
     </template>
 
     <template #description>
@@ -115,7 +115,7 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-4"
+        class="example-icon example-icon--group-5"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 8v10m0-5h6m-6 5h6" />
         <circle cx="8" cy="8" r="1.5" fill="currentColor" />

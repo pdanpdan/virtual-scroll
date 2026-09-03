@@ -139,7 +139,7 @@ function jumpToRandom() {
 <template>
   <ExampleContainer :code="highlightedCode">
     <template #title>
-      <span class="example-title example-title--group-6">Live Streaming</span>
+      <span class="example-title example-title--group-4">Live Streaming</span>
     </template>
 
     <template #description>
@@ -153,7 +153,7 @@ function jumpToRandom() {
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="example-icon example-icon--group-6"
+        class="example-icon example-icon--group-4"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
       </svg>
