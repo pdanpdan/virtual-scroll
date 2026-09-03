@@ -296,6 +296,51 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 
 For tabular data use the dedicated `VirtualScrollTable` component instead: it renders a real `<table>` structure with optional real-table-flow rows (`flowTable`, supporting measured dynamic row heights), sticky header/footer slots, and three column-width strategies — browser auto layout, first-window auto-sizing (`autoSizeColumns`), or explicit `columnWidths`; overflowing tables get a horizontal scrollbar. See the [Flow Table example](https://pdanpdan.github.io/virtual-scroll/essential-flow-table).
 
+### VirtualScrollMasonry
+
+For a real masonry grid inside a **single** scroll container use the dedicated `VirtualScrollMasonry` component: the column count and a fractional column width are derived from the container width, cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only the window around the scroll position is mounted. Heights come exclusively from the `itemHeight` oracle, so the layout is canonical: far `scrollToIndex` calls land exactly without ever mounting the path, the total is exact once the frontier chain reaches the end (`totalHeightExact`), and reflows re-anchor the topmost visible card in content space. See the [Masonry example](https://pdanpdan.github.io/virtual-scroll/essential-masonry).
+
+```vue
+<VirtualScrollMasonry
+  ref="masonryRef"
+  :items="items"
+  :item-height="itemHeight"
+  :target-column-width="240"
+  :min-columns="2"
+  :max-columns="8"
+  :gap="16"
+  @scroll="onScroll"
+>
+  <template #item="{ item, index, column, width, height }">
+    <div class="card" :style="{ height: '100%', backgroundColor: item.color }">
+      #{{ index }} · col {{ column }} · {{ Math.round(height) }}px
+    </div>
+  </template>
+</VirtualScrollMasonry>
+```
+
+Masonry-specific props:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `itemHeight` | `fn(item, index, columnWidth)` | Required | Canonical height oracle in px. **Must be deterministic**: the same `(index, columnWidth)` must always return the same height, because placements are committed to a frontier chain. Non-finite/non-positive results fall back to `40`. |
+| `measuredHeights` | `boolean` | `false` | Measure mounted cards with a `ResizeObserver` and drive the layout from the measured boxes ("local" determinism). Off: canonical oracle layout, nothing measured. On: cards size to their content (the oracle height becomes the pre-measure minimum) and every measurement batch re-lays-out with the viewport re-anchored. |
+| `targetColumnWidth` | `number` | `240` | Desired column width in px; the column count is derived so columns land as close as possible to it. |
+| `minColumns` / `maxColumns` | `number` | `1` / `10` | Column count bounds for responsive reflow. |
+| `gap` | `number` | `10` | Spacing between cards, both between columns and rows. |
+| `segmentSize` | `number` | `500` | Items per stored frontier snapshot (memory vs. chain-step tradeoff). |
+| `virtualScrollbar` | `boolean` | `true` | Overlay scrollbar over the native one (native bar is hidden while enabled). |
+| `debug` | `boolean` | `false` | Outline card bounds and show a geometry badge per card. |
+| `role` / `ariaLabel` / `ariaLabelledby` / `itemRole` | `string` | - | ARIA semantics (wrapper defaults to `list` with `listitem` cards). |
+
+All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **not** apply to the masonry component.
+
+- **Item slot props**: `{ item, index, column, x, y, width, height }` (px, relative to the cards wrapper).
+- **Events**: `scroll` with `MasonryScrollDetails` (items, `currentIndex`/`currentEndIndex`, `range`, `scrollOffset.y`, `viewportSize`, `totalSize`, `isScrolling`, …).
+- **Exposed (via ref)**: `scrollDetails`, `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })`, `scrollToOffset(offset)`, `refresh()`.
+
+> **Masonry sizing contract**: in the default canonical mode cards must render at exactly the oracle height — reserve media space (`aspect-ratio`, fixed model heights, …) and never rely on DOM measurement. With `measuredHeights` cards size to their content instead and the measured box drives the layout (mounted cards only; unmounted regions fall back to the oracle, and measurements reset when the `items` array is replaced). In-place item edits or oracle changes need a `refresh()` (or a new `items` array) to re-layout; relayouts keep the topmost visible card pinned at its screen offset. Vertical only: no RTL/horizontal mode yet, and very tall datasets stay below the browser's ~10M px scroll limit (no coordinate scaling in masonry mode).
+
 ### Props
 
 | Prop | Type | Default | Description |

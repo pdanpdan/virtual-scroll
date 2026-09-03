@@ -956,3 +956,190 @@ export interface TotalSizeParams {
   /** Function to query the prefix sum of column widths. */
   queryColumn: (index: number) => number;
 }
+
+/* ---------------------------------- Masonry ---------------------------------- */
+
+/** Default target column width for masonry layouts, in px. */
+export const DEFAULT_MASONRY_TARGET_COLUMN_WIDTH = 240;
+
+/** Default minimum number of masonry columns. */
+export const DEFAULT_MASONRY_MIN_COLUMNS = 1;
+
+/** Default maximum number of masonry columns. */
+export const DEFAULT_MASONRY_MAX_COLUMNS = 10;
+
+/** Default gap between masonry cards, in px (applied on both axes). */
+export const DEFAULT_MASONRY_GAP = 10;
+
+/** Default number of items between stored masonry frontier snapshots. */
+export const DEFAULT_MASONRY_SEGMENT_SIZE = 500;
+
+/**
+ * Configuration properties for the `VirtualScrollMasonry` component and the
+ * `useVirtualScrollMasonry` composable.
+ */
+export interface VirtualScrollMasonryProps<T = unknown> {
+  /**
+   * Array of data items to virtualize.
+   * Entries may be `undefined` (e.g. a sparse `new Array(n)` for index-only
+   * datasets): every index in the rendered window is placed and the item slot
+   * prop is `undefined` for holes. Only indices in the rendered window are
+   * accessed.
+   */
+  items: T[];
+
+  /**
+   * Canonical height oracle: the height in px of the card for `index` at the
+   * resolved `columnWidth`.
+   * The oracle MUST be deterministic — the same `(index, columnWidth)` pair
+   * must always produce the same height — because masonry placements are
+   * committed to a column-frontier chain and replayed from stored snapshots.
+   * Pure functions of the item model are the intended use (a seeded
+   * pseudo-random height, an `aspect-ratio`-derived height, a model field).
+   * Non-finite or non-positive results fall back to {@link DEFAULT_ITEM_SIZE}.
+   */
+  itemHeight: (item: T | undefined, index: number, columnWidth: number) => number;
+
+  /**
+   * Target column width in px. The column count is derived from the container
+   * width so columns are as close as possible to this width, and the actual
+   * column width is fractional so gutters divide the width exactly.
+   * @default 240
+   */
+  targetColumnWidth?: number | undefined;
+
+  /**
+   * Minimum number of columns to keep at any container width.
+   * @default 1
+   */
+  minColumns?: number | undefined;
+
+  /**
+   * Maximum number of columns at wide container widths.
+   * @default 10
+   */
+  maxColumns?: number | undefined;
+
+  /**
+   * Gap between cards in px, applied both between columns and between rows
+   * (the layout frontier prices it into every column).
+   * @default 10
+   */
+  gap?: number | undefined;
+
+  /**
+   * Measure mounted cards with a ResizeObserver and let the measured box
+   * heights drive the layout ("local" determinism) instead of the oracle
+   * alone ("canonical"). While false (default), cards must be sized to the
+   * oracle height and nothing is measured. When true, rendered cards size
+   * themselves (the oracle height becomes a minimum and the pre-measure
+   * estimate) and each measurement batch re-lays-out with the topmost visible
+   * card re-anchored; the layout is deterministic per measurement history.
+   * @default false
+   */
+  measuredHeights?: boolean | undefined;
+
+  /**
+   * Items per layout segment — the cadence at which the real column frontier
+   * is snapshotted. Larger segments store less frontier state but make each
+   * layout step cross more items.
+   * @default 500
+   */
+  segmentSize?: number | undefined;
+
+  /**
+   * The scroll container element. `VirtualScrollMasonry` sets this to its own
+   * root element; composable users provide their scrollable element.
+   */
+  hostRef?: HTMLElement | null | undefined;
+
+  /**
+   * ARIA role for the cards wrapper.
+   * @default 'list'
+   */
+  role?: string | undefined;
+
+  /**
+   * ARIA label for the scroll container.
+   */
+  ariaLabel?: string | undefined;
+
+  /**
+   * ID of the element that labels the scroll container.
+   */
+  ariaLabelledby?: string | undefined;
+
+  /**
+   * ARIA role for each rendered card.
+   * Defaults to `'listitem'` for list roles; set to `'none'` or
+   * `'presentation'` to disable role assignment on the wrapper.
+   */
+  itemRole?: string | undefined;
+
+  /**
+   * Whether to render the overlay virtual scrollbar (and hide the native one).
+   * @default true
+   */
+  virtualScrollbar?: boolean | undefined;
+
+  /**
+   * Enable debug visualization of the rendered card bounds and indices.
+   * @default false
+   */
+  debug?: boolean | undefined;
+}
+
+/** Configuration properties for the `VirtualScrollMasonry` component. */
+export type VirtualScrollMasonryComponentProps<T = unknown> = Omit<VirtualScrollMasonryProps<T>, 'hostRef'>;
+
+/** Geometry and data of one placed masonry card, in px relative to the wrapper. */
+export interface MasonryRenderedItem<T = unknown> {
+  /** The original data item (undefined for holes of sparse arrays). */
+  item: T | undefined;
+  /** The 0-based index of the card in the dataset. */
+  index: number;
+  /** The 0-based column the card was placed into. */
+  column: number;
+  /** Left offset in px relative to the cards wrapper. */
+  x: number;
+  /** Top offset in px relative to the cards wrapper. */
+  y: number;
+  /** Card width in px (the resolved column width). */
+  width: number;
+  /** Card height in px (from the height oracle). */
+  height: number;
+}
+
+/** Properties passed to the masonry `item` scoped slot. */
+export type MasonryItemSlotProps<T = unknown> = MasonryRenderedItem<T>;
+
+/**
+ * Scroll details of the masonry scroller.
+ * The `items` list contains the cards currently mounted in the DOM window;
+ * the masonry layout has no horizontal axis, so `currentColIndex`,
+ * `currentEndColIndex` and the x fields stay 0/empty.
+ */
+export interface MasonryScrollDetails<T = unknown> extends Omit<ScrollDetails<T>, 'items'> {
+  /** The cards currently rendered in the DOM window. */
+  items: MasonryRenderedItem<T>[];
+}
+
+/** Exposed methods and properties of the `VirtualScrollMasonry` instance. */
+export interface VirtualScrollMasonryInstance<T = unknown> {
+  /** Detailed information about the current scroll state. */
+  scrollDetails: MasonryScrollDetails<T>;
+  /** Currently resolved number of columns (0 until the container is measured). */
+  columns: number;
+  /** Currently resolved column width in px (0 until the container is measured). */
+  columnWidth: number;
+  /** Total content height in px (estimated until the layout chain reaches the end). */
+  totalHeight: number;
+  /** Whether `totalHeight` is exact, i.e. the layout chain has reached the last item. */
+  totalHeightExact: boolean;
+  /** Programmatically scroll to a card index with an optional alignment. */
+  scrollToIndex: (index?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
+  /** Programmatically scroll to a pixel offset; use ±Infinity for the very end/start. */
+  scrollToOffset: (offset?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
+  /** Drop every cached layout frontier and re-layout from the current anchor. */
+  refresh: () => void;
+}
