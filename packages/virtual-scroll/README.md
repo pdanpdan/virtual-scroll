@@ -292,6 +292,10 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 
 ## Component Reference: VirtualScroll
 
+### VirtualScrollTable
+
+For tabular data use the dedicated `VirtualScrollTable` component instead: it renders a real `<table>` structure with optional real-table-flow rows (`flowTable`, supporting measured dynamic row heights), sticky header/footer slots, and three column-width strategies — browser auto layout, first-window auto-sizing (`autoSizeColumns`), or explicit `columnWidths`; overflowing tables get a horizontal scrollbar. See the [Flow Table example](https://pdanpdan.github.io/virtual-scroll/essential-flow-table).
+
 ### Props
 
 | Prop | Type | Default | Description |
@@ -310,8 +314,10 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 | `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
 | `container` | `HTMLElement \| Window` | `hostRef` | The scrollable container element. |
 | `containerTag` | `string` | `'div'` | HTML tag for the root container. |
-| `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper. |
-| `itemTag` | `string` | `'div'` | HTML tag for each rendered item. |
+| `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper — pair `'ul'`/`'ol'` with `itemTag: 'li'` for semantic lists. |
+| `itemTag` | `string` | `'div'` | HTML tag for each virtualized item. For tabular data use `VirtualScrollTable` instead. |
+| `headerTag` | `string` | `'div'` | HTML tag for the `header` slot wrapper (e.g. `'header'`). |
+| `footerTag` | `string` | `'div'` | HTML tag for the `footer` slot wrapper (e.g. `'footer'`). |
 | `scrollPaddingStart` / `End` | `num \| {x, y}` | `0` | Padding for scroll calculations. |
 | `bufferBefore` / `bufferAfter` | `number` | `5` | Items to render outside the viewport. |
 | `initialScrollIndex` | `number` | `undefined` | Index to jump to on mount. |

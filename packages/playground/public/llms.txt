@@ -13,6 +13,7 @@ A high-performance, flexible virtual scrolling component for Vue 3 that supports
 - **Scroll Snapping**: `snap` prop (`'auto' | 'start' | 'center' | 'end' | 'next'`) for automatic alignment after scrolling stops.
 - **Any Scroll Container**: Virtualizes inside its own element or the browser `window`/`body` (`container` prop).
 - **Virtual Scrollbars**: `virtualScrollbar` prop to force custom-drawn scrollbars (built-in or via the `scrollbar` slot / `VirtualScrollbar` component).
+- **Table Mode**: dedicated `VirtualScrollTable` component renders semantic `<table>` rows in real flow between engine-sized spacers (`flowTable`) with dynamic measured row heights, column pinning (`autoSizeColumns`/`columnWidths`), sticky header/footer slots and a horizontal scrollbar when the table overflows its container.
 - **Infinite Loading**: `loading` + `loadDistance` props, `load` event and `loading` slot for pagination.
 - **SSR**: `ssrRange` prop pre-renders a static in-flow block server-side for SEO.
 - **Accessibility**: Automatic ARIA roles (list, grid, tree, listbox, menu), keyboard navigation.
@@ -149,6 +150,7 @@ const items = new Array(10_000_000); // sparse placeholder, no data objects
 Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive content from `index`. ResizeObserver-measured dynamic sizes work the same way (sizes come from the rendered DOM).
 
 ### More Example Pages
+- [Flow Table (Essential)](https://pdanpdan.github.io/virtual-scroll/essential-flow-table): real `<table>` rows in flow between engine-sized spacers (`flowTable`) with dynamic measured row heights, column-width modes (auto / first-window `autoSizeColumns` / explicit `columnWidths` colgroup), sticky header/footer and a horizontal scrollbar when the table overflows.
 - [Scroll Snap](https://pdanpdan.github.io/virtual-scroll/feature-scroll-snap): Snap modes on fixed and dynamic lists.
 - [Window / Body Scrolling](https://pdanpdan.github.io/virtual-scroll/essential-vertical-fixed-body): Virtualize using the browser window as scroll container.
 - [Scroll Restoration](https://pdanpdan.github.io/virtual-scroll/feature-scroll-restoration): Restore scroll position when items are prepended.
@@ -156,11 +158,12 @@ Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive c
 - [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/feature-custom-scrollbar): Styling the built-in virtual scrollbar.
 - [Independent Scrollbars](https://pdanpdan.github.io/virtual-scroll/feature-independent-scrollbars): Grid with separately draggable axis scrollbars.
 - [Tree](https://pdanpdan.github.io/virtual-scroll/pattern-tree) / [Masonry](https://pdanpdan.github.io/virtual-scroll/pattern-masonry) / [Gallery](https://pdanpdan.github.io/virtual-scroll/pattern-gallery) / [Draggable](https://pdanpdan.github.io/virtual-scroll/pattern-draggable) / [Search](https://pdanpdan.github.io/virtual-scroll/pattern-search) / [Diff](https://pdanpdan.github.io/virtual-scroll/pattern-diff) / [Spreadsheet](https://pdanpdan.github.io/virtual-scroll/pattern-spreadsheet): Advanced pattern recipes.
-- [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets.
+- [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets for list or table (`VirtualScrollTable`) rendering - component SFC, composable tab (table output uses the component), CodePen/TypeScript and standalone HTML, with column widths in auto / first-window (`autoSizeColumns`) / custom colgroup modes.
 - [Log Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-log-viewer): 200k lazy generated lines, level filter + debounced search, filtered index rebuild.
 - [Code Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-code-viewer): virtualized real C++ source (the simdutf file from the code diff example, ~10.5k lines), find-next jumps and highlights matching terms.
 - [Live Streaming](https://pdanpdan.github.io/virtual-scroll/pattern-streaming): simulated market feed; each tick mutates only the visible window of 5,000 symbols (lazy per-row state), pause/resume and speed controls.
 - [Async Content](https://pdanpdan.github.io/virtual-scroll/pattern-async-content): rows are ids rendered by a component that fetches simulated content (module-level cache, single in-flight per id), dynamic measured heights, network profile + cache controls.
+
 
 ## Component API Highlights
 

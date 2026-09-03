@@ -829,22 +829,40 @@ const vs = useVirtualScroll(props, [
           </thead>
           <tbody>
             <tr>
-              <td><code class="docs-prop-name">container</code></td>
-              <td><code>El | Window | null</code></td>
-              <td><code>undefined</code></td>
-              <td>The scrollable container. Defaults to component root.</td>
+              <td><code class="docs-prop-name">containerTag</code></td>
+              <td><code>string</code></td>
+              <td><code>'div'</code></td>
+              <td>HTML tag for the scroll container, e.g. for semantic list markup. For tabular data use the <a href="#virtual-scroll-table" class="link link-primary font-bold">VirtualScrollTable</a> component.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">wrapperTag</code></td>
+              <td><code>string</code></td>
+              <td><code>'div'</code></td>
+              <td>HTML tag for the items wrapper. Combine <code>'ul'</code>/<code>'ol'</code> with <code>itemTag: 'li'</code> for semantic lists. Tables should use the <a href="#virtual-scroll-table" class="link link-primary font-bold">VirtualScrollTable</a> component.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">itemTag</code></td>
+              <td><code>string</code></td>
+              <td><code>'div'</code></td>
+              <td>HTML tag for each virtualized item (e.g. <code>'li'</code>). For table rows use <a href="#virtual-scroll-table" class="link link-primary font-bold">VirtualScrollTable</a>.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">headerTag</code></td>
+              <td><code>string</code></td>
+              <td><code>'div'</code></td>
+              <td>HTML tag for the <code>header</code> slot wrapper (e.g. <code>'header'</code>). Tables use <a href="#virtual-scroll-table" class="link link-primary font-bold">VirtualScrollTable</a>, whose header slot renders the <code>&lt;thead&gt;</code>.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">footerTag</code></td>
+              <td><code>string</code></td>
+              <td><code>'div'</code></td>
+              <td>HTML tag for the <code>footer</code> slot wrapper (e.g. <code>'footer'</code>). Tables use <a href="#virtual-scroll-table" class="link link-primary font-bold">VirtualScrollTable</a>, whose footer slot renders the <code>&lt;tfoot&gt;</code>.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">scrollPaddingStart</code> / <code class="docs-prop-name">End</code></td>
               <td><code>num | {x, y}</code></td>
               <td><code>0</code></td>
               <td>Additional padding for scroll offsets.</td>
-            </tr>
-            <tr>
-              <td><code class="docs-prop-name">containerTag</code> / <code class="docs-prop-name">wrapperTag</code> / <code class="docs-prop-name">itemTag</code></td>
-              <td><code>string</code></td>
-              <td><code>'div'</code></td>
-              <td>HTML tags for different parts of the component.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">bufferBefore</code> / <code class="docs-prop-name">bufferAfter</code></td>
@@ -981,7 +999,7 @@ const vs = useVirtualScroll(props, [
               <tr><td><code>viewportPercent</code></td><td><code>number</code></td><td>Viewport percentage of total (0-1).</td></tr>
               <tr><td><code>thumbSizePercent</code></td><td><code>number</code></td><td>Calculated thumb size percentage (0-100).</td></tr>
               <tr><td><code>thumbPositionPercent</code></td><td><code>number</code></td><td>Calculated thumb position percentage (0-100).</td></tr>
-              <tr><td><code>scrollToOffset</code></td><td><code>Function</code></td><td>Scroll to pixel offset on this axis.</td></tr>
+              <tr><td><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a></td><td><code>Function</code></td><td>Scroll to pixel offset on this axis.</td></tr>
               <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Current RTL state.</td></tr>
               <tr><td><code>trackProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the track. Bind with <code>v-bind="trackProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
               <tr><td><code>thumbProps</code></td><td><code>Record&lt;string, unknown&gt;</code></td><td>Attributes/listeners for the thumb. Bind with <code>v-bind="thumbProps"</code>. Includes <code>class</code> and <code>style</code>.</td></tr>
@@ -1114,7 +1132,7 @@ const vs = useVirtualScroll(props, [
             </tr>
             <tr>
               <td><code>.virtual-scroll--table</code></td>
-              <td>Applied when <code>containerTag="table"</code> is used.</td>
+              <td>Applied by the <code>VirtualScrollTable</code> component.</td>
             </tr>
             <tr>
               <td><code>.virtual-scroll--sticky</code></td>
@@ -1311,6 +1329,133 @@ const vs = useVirtualScroll(props, [
     <div class="divider opacity-30" />
 
     <!-- 5.1 VirtualScrollbar Component -->
+    <section id="virtual-scroll-table">
+      <h2 class="docs-section-header">
+        <a href="#virtual-scroll-table" aria-label="Link to VirtualScrollTable Component section">
+          VirtualScrollTable Component
+        </a>
+      </h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          For tabular data use the dedicated <code>VirtualScrollTable</code> component: it renders semantic
+          <code>&lt;table&gt;</code>/<code>&lt;tbody&gt;</code>/<code>&lt;tr&gt;</code> structure, keeps the
+          virtual offsets with spacer rows in real table flow (<code>flowTable</code>) or with absolute rows
+          (fallback), measures dynamic row heights, and exposes the <code>header</code>, <code>footer</code>
+          and <code>item</code> slots. When the table is wider than its container it gets its own horizontal
+          virtual scrollbar.
+          See the <a href="/virtual-scroll/essential-flow-table" class="link link-primary font-bold">Flow Table example</a>
+          and the <a href="/virtual-scroll/pattern-table" class="link link-primary font-bold">Table example</a>.
+          Scroll snapping is supported in table mode: flow rows and absolute rows snap to the same row offsets
+          as list mode.
+        </p>
+      </div>
+
+      <h3 id="table-props" class="docs-prop-header text-primary">
+        <a href="#table-props" aria-label="Link to Props section">
+          Props
+        </a>
+      </h3>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="docs-prop-name">flowTable</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Render rows in real table flow between spacer rows instead of absolutely positioning them. Vertical lists only; row heights may be uniform (<code>itemSize</code>) or dynamic (measured). Unsupported configurations fall back to absolute rows.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">autoSizeColumns</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Pin column widths from the first rendered window via a <code>colgroup</code> with <code>table-layout: fixed</code>, so later windows never reflow the columns. Requires <code>flowTable</code> and equal direct-cell counts across rows.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">columnWidths</code></td>
+              <td><code>number[]</code></td>
+              <td>-</td>
+              <td>Explicit column widths (px) pinned via the <code>colgroup</code>; takes precedence over <code>autoSizeColumns</code>.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">stickyHeader</code> / <code class="docs-prop-name">stickyFooter</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Measure and reserve the <code>header</code>/<code>footer</code> slots; the row groups stick to the viewport edges.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">virtualScrollbar</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Force virtual scrollbars; vertical and, when the table overflows horizontally, horizontal bars are rendered.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="table-shared" class="docs-prop-header text-primary">
+        <a href="#table-shared" aria-label="Link to Shared API section">
+          Shared API with VirtualScroll
+        </a>
+      </h3>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          <code>VirtualScrollTable</code> is the same virtualization component with table semantics — almost
+          everything on the <code>VirtualScroll</code> component still applies:
+        </p>
+        <ul class="list-disc ps-5 space-y-2">
+          <li>
+            <strong>Slots</strong>: the same <code>item</code>, <code>header</code>, <code>footer</code>,
+            <code>loading</code> and <code>scrollbar</code> slots. The <code>item</code> slot receives the same scoped
+            props (item, index, sticky flags, offsets, column range helpers). In table mode the slot content is
+            rendered inside the row elements provided by the component, so items slot in <code>&lt;td&gt;</code> cells
+            and header/footer slot in <code>&lt;th&gt;</code>/<code>&lt;td&gt;</code> cells. See
+            <a href="#slots" class="link link-primary font-bold">Slots</a>.
+          </li>
+          <li>
+            <strong>Events</strong>: identical <code>scroll</code>, <code>visibleRangeChange</code> and
+            <code>load</code> events. See <a href="#events" class="link link-primary font-bold">Events</a>.
+          </li>
+          <li>
+            <strong>Exposed instance (via ref)</strong>: the same methods and state — <code>scrollToIndex</code>,
+            <a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a>, <code>refresh</code>, <code>updateItemSizes</code>,
+            <code>stopProgrammaticScroll</code>, <code>scrollDetails</code>, <code>isHydrated</code>,
+            <code>getItemOffset</code>/<code>getItemSize</code> and the rest — plus table constants
+            (<code>isTable: true</code>, <code>itemTag: 'tr'</code>, <code>containerTag: 'table'</code>,
+            <code>wrapperTag: 'tbody'</code>). See
+            <a href="#methods" class="link link-primary font-bold">Methods</a>.
+          </li>
+          <li>
+            <strong>Props</strong>: the shared base surface applies unchanged — <code>items</code>,
+            <code>itemSize</code> (uniform or dynamic), <code>bufferBefore</code>/<code>bufferAfter</code>,
+            <code>initialScrollIndex</code>/<code>initialScrollAlign</code>, <code>restoreScrollOnPrepend</code>,
+            <code>infiniteScroll</code>-related props (<code>loadDistance</code>, <code>loading</code>),
+            <code>ssrRange</code>, <code>debug</code>, <code>role</code>/ARIA props and <code>rtl</code>.
+            Tag customization (<code>containerTag</code>/<code>wrapperTag</code>/<code>itemTag</code>) lives on
+            <code>VirtualScroll</code> for semantic lists (e.g. <code>ul/ol &gt; li</code>). On
+            <code>VirtualScrollTable</code> the container, wrapper and row elements are fixed to their semantic
+            table tags — use this component for tabular data. Grid/gap/sticky-index/scroll-padding props are not
+            part of the table flow surface (they fall
+            back to absolute rows), and <code>direction</code> is vertical. See
+            <a href="#props" class="link link-primary font-bold">Props</a>.
+          </li>
+          <li>
+            <strong>Behavior &amp; theming</strong>: the same engine wiring — keyboard navigation, coordinate
+            scaling, custom scrollbar slot support, sticky measurements, prepend restoration — and the same CSS
+            classes and <a href="#css-variables" class="link link-primary font-bold">CSS variables</a>. The snap
+            caveat above applies.
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <section id="virtual-scrollbar">
       <h2 class="docs-section-header">
         <a href="#virtual-scrollbar" aria-label="Link to VirtualScrollbar Component section">
@@ -1509,14 +1654,19 @@ scrollToIndex
             </thead>
             <tbody>
               <tr>
-                <td><a href="#rendered-item" class="link font-bold text-primary">renderedItems</a></td>
-                <td><code>Ref&lt;RenderedItem&lt;T&gt;[]&gt;</code></td>
+                <td><code class="docs-prop-name">renderedItems</code></td>
+                <td><code>Ref&lt;<a href="#rendered-item" class="link font-bold text-primary">RenderedItem</a>&lt;T&gt;[]&gt;</code></td>
                 <td>List of items to render in the current buffer.</td>
               </tr>
               <tr>
-                <td><a href="#scroll-details" class="link font-bold text-primary">scrollDetails</a></td>
-                <td><code>Ref&lt;ScrollDetails&lt;T&gt;&gt;</code></td>
+                <td><code class="docs-prop-name">scrollDetails</code></td>
+                <td><code>Ref&lt;<a href="#scroll-details" class="link font-bold text-primary">ScrollDetails</a>&lt;T&gt;&gt;</code></td>
                 <td>Full reactive state of the virtual scroll system.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">columnRange</code></td>
+                <td><code>Ref&lt;<a href="#column-range" class="link font-bold text-primary">ColumnRange</a>&gt;</code></td>
+                <td>Visible columns and their associated paddings.</td>
               </tr>
               <tr>
                 <td><code class="docs-prop-name">totalWidth</code> / <code class="docs-prop-name">totalHeight</code></td>
@@ -1528,11 +1678,6 @@ scrollToIndex
                 <td><code>Ref&lt;number&gt;</code></td>
                 <td>Total dimensions to be rendered in the DOM (clamped to browser limits, DU).</td>
               </tr>
-              <tr>
-                <td><a href="#column-range" class="link font-bold text-primary">columnRange</a></td>
-                <td><code>Ref&lt;ColumnRange&gt;</code></td>
-                <td>Visible columns and their associated paddings.</td>
-              </tr>
               <tr id="is-hydrated">
                 <td><code class="docs-prop-name">isHydrated</code></td>
                 <td><code>Ref&lt;boolean&gt;</code></td>
@@ -1542,6 +1687,21 @@ scrollToIndex
                 <td><code class="docs-prop-name">isRtl</code></td>
                 <td><code>Ref&lt;boolean&gt;</code></td>
                 <td><code>true</code> if the scroll container is in Right-to-Left mode.</td>
+              </tr>
+              <tr id="scale-factors">
+                <td><code class="docs-prop-name">scaleX</code> / <code class="docs-prop-name">scaleY</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td>Current coordinate scaling factors (VU / DU).</td>
+              </tr>
+              <tr id="component-offset">
+                <td><code class="docs-prop-name">componentOffset</code></td>
+                <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
+                <td>Absolute offset of the component in its container (DU).</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">scrollbarOffset</code></td>
+                <td><code>Reactive&lt;{ x: number; y: number }&gt;</code></td>
+                <td>Inline-start/block-start padding of the scroll container (DU), used to align the virtual scrollbar overlay with the scrollport.</td>
               </tr>
               <tr>
                 <td><a href="#method-scrolltoindex" class="link font-bold text-secondary">scrollToIndex</a></td>
@@ -1554,17 +1714,22 @@ scrollToIndex
                 <td>Programmatic scroll to a pixel offset.</td>
               </tr>
               <tr>
-                <td><code class="text-secondary font-bold">stopProgrammaticScroll</code></td>
+                <td><a href="#method-stopprogrammaticscroll" class="link font-bold text-secondary">stopProgrammaticScroll</a></td>
                 <td><code>Function</code></td>
                 <td>Cancel any active smooth scroll animation.</td>
               </tr>
               <tr>
-                <td><code class="text-secondary font-bold">handleScrollCorrection</code></td>
+                <td><a href="#method-handlescrollcorrection" class="link font-bold text-secondary">handleScrollCorrection</a></td>
                 <td><code>Function</code></td>
                 <td>Adjust scroll position to compensate for measurement changes.</td>
               </tr>
               <tr>
-                <td><code class="text-secondary font-bold">updateItemSize</code></td>
+                <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
+                <td><code>Function</code></td>
+                <td>Resets all measurements and state.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-updateitemsize" class="link font-bold text-secondary">updateItemSize</a></td>
                 <td><code>Function</code></td>
                 <td>Register a manual item measurement.</td>
               </tr>
@@ -1579,27 +1744,12 @@ scrollToIndex
                 <td>Force update the container's relative position.</td>
               </tr>
               <tr>
-                <td><code class="text-secondary font-bold">updateDirection</code></td>
+                <td><a href="#method-updatedirection" class="link font-bold text-secondary">updateDirection</a></td>
                 <td><code>Function</code></td>
                 <td>Manually trigger direction (LTR/RTL) detection.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">scrollbarOffset</code></td>
-                <td><code>Reactive&lt;{ x: number; y: number }&gt;</code></td>
-                <td>Inline-start/block-start padding of the scroll container (DU), used to align the virtual scrollbar overlay with the scrollport.</td>
-              </tr>
-              <tr>
-                <td><code class="text-secondary font-bold">getItemAriaProps</code></td>
-                <td><code>Function</code></td>
-                <td>Helper to get ARIA attributes for an item.</td>
-              </tr>
-              <tr>
-                <td><code class="text-secondary font-bold">getCellAriaProps</code></td>
-                <td><code>Function</code></td>
-                <td>Helper to get ARIA attributes for a cell.</td>
-              </tr>
-              <tr>
-                <td><code class="text-secondary font-bold">getColumnWidth</code></td>
+                <td><a href="#method-getcolumnwidth" class="link font-bold text-secondary">getColumnWidth</a></td>
                 <td><code>Function</code></td>
                 <td>Helper to get a column's width.</td>
               </tr>
@@ -1629,19 +1779,14 @@ scrollToIndex
                 <td>Helper to get an item's size along scroll axis (VU).</td>
               </tr>
               <tr>
-                <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
+                <td><a href="#method-getitemariaprops" class="link font-bold text-secondary">getItemAriaProps</a></td>
                 <td><code>Function</code></td>
-                <td>Resets all measurements and state.</td>
+                <td>Helper to get ARIA attributes for an item.</td>
               </tr>
-              <tr id="scale-factors">
-                <td><code class="docs-prop-name">scaleX</code> / <code class="docs-prop-name">scaleY</code></td>
-                <td><code>Ref&lt;number&gt;</code></td>
-                <td>Current coordinate scaling factors (VU / DU).</td>
-              </tr>
-              <tr id="component-offset">
-                <td><code class="docs-prop-name">componentOffset</code></td>
-                <td><code>{ x: Ref&lt;number&gt;, y: Ref&lt;number&gt; }</code></td>
-                <td>Absolute offset of the component in its container (DU).</td>
+              <tr>
+                <td><a href="#method-getcellariaprops" class="link font-bold text-secondary">getCellAriaProps</a></td>
+                <td><code>Function</code></td>
+                <td>Helper to get ARIA attributes for a cell.</td>
               </tr>
             </tbody>
           </table>
@@ -1736,27 +1881,27 @@ const {
                 <td>True after initial sizes are calculated.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">getItemBaseSize</code></td>
+                <td><a href="#method-getitembasesize" class="link font-bold text-secondary">getItemBaseSize</a></td>
                 <td><code>Function</code></td>
                 <td>Helper to get item size from props.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">getSizeAt</code></td>
+                <td><a href="#method-getsizeat" class="link font-bold text-secondary">getSizeAt</a></td>
                 <td><code>Function</code></td>
                 <td>Helper to get current size at index.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">initializeSizes</code></td>
+                <td><a href="#method-initializesizes" class="link font-bold text-secondary">initializeSizes</a></td>
                 <td><code>Function</code></td>
                 <td>Setup trees from component props.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">updateItemSizes</code></td>
+                <td><a href="#method-updateitemsizes" class="link font-bold text-secondary">updateItemSizes</a></td>
                 <td><code>Function</code></td>
                 <td>Batch register measurements and trigger corrections.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">refresh</code></td>
+                <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
                 <td><code>Function</code></td>
                 <td>Reset all measurements and state.</td>
               </tr>
@@ -1923,17 +2068,17 @@ const {
                 <td>True when user is actively dragging the content.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">handlePointerDown/Move/Up</code></td>
+                <td><a href="#method-handlepointerdown" class="link font-bold text-secondary">handlePointerDown</a> / <a href="#method-handlepointermove" class="link font-bold text-secondary">handlePointerMove</a> / <a href="#method-handlepointerup" class="link font-bold text-secondary">handlePointerUp</a></td>
                 <td><code>Function</code></td>
                 <td>Pointer event handlers to be bound to the scroll container.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">handleWheel</code></td>
+                <td><a href="#method-handlewheel" class="link font-bold text-secondary">handleWheel</a></td>
                 <td><code>Function</code></td>
                 <td>Wheel event handler to be bound to the scroll container.</td>
               </tr>
               <tr>
-                <td><code class="docs-prop-name">stopInertia</code></td>
+                <td><a href="#method-stopinertia" class="link font-bold text-secondary">stopInertia</a></td>
                 <td><code>Function</code></td>
                 <td>Immediately stops any active momentum animation.</td>
               </tr>
@@ -1979,7 +2124,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <p>Accepts an <code>UseVirtualScrollKeyboardOptions</code> object.</p>
           <ul class="list-disc ps-5 space-y-1">
-            <li><code>scrollToOffset</code>: Scrolls to a pixel position. Used by the <code>End</code> key; the key passes internal <code>endExtraX</code> / <code>endExtraY</code> options so the scroll clamp extends past the virtual content (the loading slot below the items).</li>
+            <li><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a>: Scrolls to a pixel position. Used by the <code>End</code> key; the key passes internal <code>endExtraX</code> / <code>endExtraY</code> options so the scroll clamp extends past the virtual content (the loading slot below the items).</li>
             <li><code>getLoadingSlotSize</code> (optional): Height of the loading slot. When provided, <code>End</code> includes it in the target so the last item plus the slot fit in the viewport.</li>
           </ul>
         </div>
@@ -2000,7 +2145,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
             </thead>
             <tbody>
               <tr>
-                <td><code class="docs-prop-name">handleKeyDown</code></td>
+                <td><a href="#method-handlekeydown" class="link font-bold text-secondary">handleKeyDown</a></td>
                 <td><code>Function</code></td>
                 <td>Keyboard event handler to be bound to the focusable scroll container.</td>
               </tr>
@@ -2064,7 +2209,7 @@ const { setItemRef } = useVirtualScrollObservers({
             </thead>
             <tbody>
               <tr>
-                <td><code class="docs-prop-name">setItemRef</code></td>
+                <td><a href="#method-setitemref" class="link font-bold text-secondary">setItemRef</a></td>
                 <td><code>Function</code></td>
                 <td>Callback ref to be used on rendered items to track and measure them.</td>
               </tr>
@@ -2249,7 +2394,7 @@ const ext = useInfiniteLoadingExtension({
             </thead>
             <tbody>
               <tr>
-                <td><code>onLoad</code></td>
+                <td><a href="#method-onload" class="link font-bold text-secondary">onLoad</a></td>
                 <td><code>(axis) => void</code></td>
                 <td>Callback triggered when thresholds are met. Receives <code>'vertical' | 'horizontal'</code>.</td>
               </tr>
@@ -2569,7 +2714,7 @@ const ext = useInfiniteLoadingExtension({
               <tr><td><code>totalSize</code></td><td><code>number</code></td><td>Total size of content in pixels.</td></tr>
               <tr><td><code>position</code></td><td><code>number</code></td><td>Current scroll position in pixels.</td></tr>
               <tr><td><code>viewportSize</code></td><td><code>number</code></td><td>Visible area size in pixels.</td></tr>
-              <tr><td><code>scrollToOffset</code></td><td><code>(offset: number) => void</code></td><td>Callback to update position.</td></tr>
+              <tr><td><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a></td><td><code>(offset: number) => void</code></td><td>Callback to update position.</td></tr>
               <tr><td><code>containerId</code></td><td><code>string</code></td><td>ID for accessibility.</td></tr>
               <tr><td><code>isRtl</code></td><td><code>boolean</code></td><td>Enable RTL mapping.</td></tr>
               <tr><td><code>ariaLabel</code></td><td><code>string</code></td><td>Accessible label for the scrollbar.</td></tr>
@@ -3002,6 +3147,162 @@ element?: HTMLElement
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
             <p>Immediately halts any active smooth scroll animation and clears pending scroll requests.</p>
+          </div>
+        </div>
+        <div id="method-handlescrollcorrection" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handleScrollCorrection()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handleScrollCorrection(addedX: number, addedY: number): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Applies the delta accumulated by measurement changes above the viewport, keeping the visible content stable when item sizes settle.</p>
+          </div>
+        </div>
+        <div id="method-getitembasesize" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> getItemBaseSize()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="getItemBaseSize(item: T, index: number): number"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Returns the configured base size for an item (itemSize function result or the default size) used before measurement.</p>
+          </div>
+        </div>
+        <div id="method-getsizeat" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> getSizeAt()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="getSizeAt(index: number, sizeProp, defaultSize: number, gap: number, tree: FenwickTree, isX: boolean): number"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Queries the size of an index from a Fenwick tree, honoring the configured size source, defaults, gaps and tree updates.</p>
+          </div>
+        </div>
+        <div id="method-initializesizes" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> initializeSizes()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="initializeSizes(): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Rebuilds the size trees from the configured sizes and clears all measurement flags.</p>
+          </div>
+        </div>
+        <div id="method-handlepointerdown" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handlePointerDown()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handlePointerDown(event: PointerEvent): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Starts scaled drag/inertia handling on pointer down.</p>
+          </div>
+        </div>
+        <div id="method-handlepointermove" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handlePointerMove()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handlePointerMove(event: PointerEvent): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Tracks pointer movement while dragging (used by scaled touch/wheel inertia).</p>
+          </div>
+        </div>
+        <div id="method-handlepointerup" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handlePointerUp()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handlePointerUp(event: PointerEvent): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Ends a drag sequence and launches inertia when needed.</p>
+          </div>
+        </div>
+        <div id="method-handlewheel" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handleWheel()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handleWheel(event: WheelEvent): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Handles wheel input when coordinate scaling is active so 1:1 movement is preserved.</p>
+          </div>
+        </div>
+        <div id="method-stopinertia" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> stopInertia()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="stopInertia(): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Immediately halts any running inertia animation.</p>
+          </div>
+        </div>
+        <div id="method-handlekeydown" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handleKeyDown()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handleKeyDown(event: KeyboardEvent): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Implements keyboard navigation (arrows, Home/End, PageUp/PageDown) with alignment support.</p>
+          </div>
+        </div>
+        <div id="method-setitemref" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> setItemRef()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="setItemRef(el: unknown, index: number): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Callback ref used by rendered items: registers/unregisters elements for dynamic measurement.</p>
+          </div>
+        </div>
+        <div id="method-onload" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> onLoad()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="onLoad(direction: 'vertical' | 'horizontal'): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>Callback invoked when the scroll position crosses the loading threshold (infinite loading).</p>
           </div>
         </div>
       </div>
