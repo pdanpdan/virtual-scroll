@@ -157,6 +157,7 @@ Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive c
 - [Independent Scrollbars](https://pdanpdan.github.io/virtual-scroll/feature-independent-scrollbars): Grid with separately draggable axis scrollbars.
 - [Tree](https://pdanpdan.github.io/virtual-scroll/pattern-tree) / [Masonry](https://pdanpdan.github.io/virtual-scroll/pattern-masonry) / [Gallery](https://pdanpdan.github.io/virtual-scroll/pattern-gallery) / [Draggable](https://pdanpdan.github.io/virtual-scroll/pattern-draggable) / [Search](https://pdanpdan.github.io/virtual-scroll/pattern-search) / [Diff](https://pdanpdan.github.io/virtual-scroll/pattern-diff) / [Spreadsheet](https://pdanpdan.github.io/virtual-scroll/pattern-spreadsheet): Advanced pattern recipes.
 - [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets.
+- [Log Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-log-viewer): 200k lazy generated lines, level filter + debounced search, filtered index rebuild.
 
 ## Component API Highlights
 
