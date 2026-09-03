@@ -86,6 +86,35 @@ const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ 
 </style>
 ```
 
+
+## Data-less Lists (Index-only Rows)
+
+Rows can be rendered purely from their `index` without storing any per-row data. Pass a sparse array — only its `length` is used — and derive the content from the slot's `index`:
+
+```vue
+<script setup>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+
+// Sparse placeholder: 10 million rows, zero data objects allocated.
+const items = new Array(10_000_000);
+</script>
+
+<template>
+  <VirtualScroll :items="items" :item-size="40" class="my-container">
+    <template #item="{ index }">
+      <div class="my-item">Fixed Item {{ index }}</div>
+    </template>
+  </VirtualScroll>
+</template>
+```
+
+Notes:
+
+- `items` entries may be `undefined` (holes): every index in the rendered range produces a row, and the `item` slot prop is `undefined` for holes. Don't read `item` fields in the slot for such datasets.
+- Only indices in the visible window (plus buffer) are ever accessed from the `items` array.
+- Combined with a numeric `itemSize` (arithmetic positioning, no per-row storage), uniform lists scale to 10M+ rows with flat memory — the playground essential examples use this pattern.
+- Dynamic (ResizeObserver-measured) sizes work the same way: sizes are measured from the rendered DOM.
+
 ## Technical Overview
 
 ### Scaled Virtual Scroll
@@ -103,7 +132,8 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 
 ### Performance
 
-- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, allowing for extremely fast calculation of item offsets even in dynamic lists with millions of items.
+- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, allowing for extremely fast calculation of item offsets even in dynamic lists with millions of items. Appends resize the tree incrementally — no full rebuild per batch — and re-initialization only revisits regions that actually changed.
+- **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
 
@@ -254,7 +284,7 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `items` | `T[]` | Required | Array of items to be virtualized. |
+| `items` | `T[]` | Required | Array of items to be virtualized. May contain `undefined` entries (e.g. `new Array(n)` for data-less lists): every index in range renders and `item` is `undefined` for holes; only the visible window is accessed. |
 | `itemSize` | `number \| fn \| null` | `40` | Fixed size or function. Pass `0`/`null` for dynamic. |
 | `direction` | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Scroll direction. |
 | `columnCount` | `number` | `0` | Number of columns for grid mode. |
@@ -311,7 +341,7 @@ Allows axis-specific alignment in `scrollToIndex`.
 
 ### Slots
 
-- `item`: Scoped slot for individual items. Provides `item`, `index`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
+- `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets), `index`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
 - `loading`: Content rendered at the end while loading. The slot is always rendered when provided — it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false — so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is actually expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
 - `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.

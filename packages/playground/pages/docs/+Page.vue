@@ -136,6 +136,9 @@ onUnmounted(() => {
           <strong>Prefer fixed sizes.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> gives O(1) range math; arrays and functions use O(log n) Fenwick-tree lookups; dynamic (measured) sizes are the most expensive and re-measure with <code>ResizeObserver</code>. See the <a href="#sizing-guide" class="link">Sizing Guide</a> below.
         </li>
         <li>
+          <strong>Skip per-row data for uniform lists.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> allocates no per-row storage and positions rows arithmetically, so index-only lists (sparse <code>items</code>, e.g. <code>new Array(10_000_000)</code>) keep memory flat at any scale — render row content from the slot's <code>index</code> instead of <code>item</code>.
+        </li>
+        <li>
           <strong>Keep buffers modest.</strong> <code>bufferBefore</code> / <code>bufferAfter</code> (default 5) trade rendering cost for scrolling smoothness — a larger buffer means more DOM nodes and more work per frame.
         </li>
         <li>
@@ -531,7 +534,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">items</code></td>
               <td><code>T[]</code></td>
               <td>-</td>
-              <td>The array of items to render. Required.</td>
+              <td>The array of items to render. Required. Entries may be <code>undefined</code> (e.g. <code>new Array(n)</code> for index-only lists): every index in range renders and the slot <code>item</code> is <code>undefined</code> for holes; only the visible window is ever accessed.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">itemSize</code></td>
@@ -822,7 +825,7 @@ const vs = useVirtualScroll(props, [
           <h4 class="font-bold text-accent mb-2">#item</h4>
           <p class="text-xs @4xl:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
           <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
-            <li><code>item: T</code>: The data item from the source array.</li>
+            <li><code>item: T</code>: The data item from the source array (<code>undefined</code> for holes in sparse/index-only datasets).</li>
             <li><code>index: number</code>: The original 0-based index of the item.</li>
             <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
             <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
