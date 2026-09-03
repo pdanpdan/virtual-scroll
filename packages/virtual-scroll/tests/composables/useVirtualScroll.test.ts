@@ -941,4 +941,123 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
   });
+
+  describe('regression invariants', () => {
+    const manyItems: MockItem[] = Array.from({ length: 5000 }, (_, i) => ({ id: i }));
+    const container = () => {
+      const el = document.createElement('div');
+      Object.defineProperty(el, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(el, 'clientWidth', { configurable: true, value: 500 });
+      return el;
+    };
+
+    it('keeps geometry finite and bounded across pathological scroll landings', async () => {
+      const el = container();
+      const { result, wrapper } = setup({
+        container: el,
+        items: manyItems,
+        itemSize: 50,
+        bufferBefore: 5,
+        bufferAfter: 5,
+      });
+      await nextTick();
+      await nextTick();
+
+      // Wild landings: top, middle, fractions, way past the end, near-end.
+      const landings = [ 0, 5, 0.5, 249950, 249949, 123456.789, 250000, 250001, 99999, 7, 249999 ];
+      for (const top of landings) {
+        el.scrollTop = top;
+        el.dispatchEvent(new Event('scroll'));
+        await nextTick();
+        await nextTick();
+
+        const items = result.renderedItems.value;
+        expect(items.length).toBeLessThanOrEqual(30);
+        expect(items.length).toBeGreaterThan(0);
+        for (const item of items) {
+          expect(Number.isFinite(item.offset.x)).toBe(true);
+          expect(Number.isFinite(item.offset.y)).toBe(true);
+          expect(item.offset.y).toBeGreaterThanOrEqual(0);
+          expect(item.index).toBeGreaterThanOrEqual(0);
+          expect(item.index).toBeLessThan(manyItems.length);
+        }
+        const details = result.scrollDetails.value;
+        expect(Number.isFinite(details.scrollOffset.y)).toBe(true);
+        expect(Number.isFinite(details.totalSize.height)).toBe(true);
+        expect(details.range.start).toBeLessThanOrEqual(details.range.end);
+        expect(details.range.start).toBeGreaterThanOrEqual(0);
+      }
+      wrapper.unmount();
+    });
+
+    it('stays bounded and finite across many alternating far programmatic jumps', async () => {
+      const el = container();
+      const { result, wrapper } = setup({
+        container: el,
+        items: manyItems,
+        itemSize: 50,
+      });
+      await nextTick();
+      await nextTick();
+
+      // Alternating extremes: first row, last row, middle, last, second, ...
+      const targets = [ 0, 4999, 2500, 4999, 1, 4998, 2501, 4999, 0 ];
+      for (let round = 0; round < 4; round++) {
+        for (const target of targets) {
+          result.scrollToIndex(target, null, { behavior: 'auto' });
+          await nextTick();
+          await nextTick();
+
+          const items = result.renderedItems.value;
+          expect(items.length).toBeLessThanOrEqual(30);
+          const details = result.scrollDetails.value;
+          for (const item of items) {
+            expect(Number.isFinite(item.offset.x)).toBe(true);
+            expect(Number.isFinite(item.offset.y)).toBe(true);
+            expect(item.offset.y).toBeGreaterThanOrEqual(0);
+          }
+          expect(Number.isFinite(details.totalSize.height)).toBe(true);
+          expect(details.totalSize.height).toBe(5000 * 50);
+        }
+      }
+      wrapper.unmount();
+    });
+
+    it('read-only size queries do not mutate layout state', async () => {
+      const el = container();
+      const { result, wrapper } = setup({
+        container: el,
+        items: manyItems,
+        itemSize: 50,
+      });
+      await nextTick();
+      await nextTick();
+
+      const totalBefore = result.scrollDetails.value.totalSize.height;
+      const rangeBefore = { ...result.scrollDetails.value.range };
+
+      // 5000 reads spanning the whole dataset must be side-effect free.
+      for (let i = 0; i < manyItems.length; i++) {
+        expect(result.getRowHeight(i)).toBe(50);
+        expect(result.getItemOffset(i)).toBe(i * 50);
+        result.getRowIndexAt(i * 50);
+        result.getItemSize(i);
+      }
+
+      await nextTick();
+      expect(result.scrollDetails.value.totalSize.height).toBe(totalBefore);
+      expect(result.scrollDetails.value.range).toEqual(rangeBefore);
+      expect(result.renderedItems.value.length).toBeGreaterThan(0);
+
+      // The dataset still scrolls correctly after the read storm (the last row
+      // clamps flush against the viewport bottom at the content end).
+      result.scrollToIndex(4999, null, { align: 'start', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+      const rendered = result.renderedItems.value;
+      expect(rendered[ rendered.length - 1 ]!.index).toBe(4999);
+      expect(result.scrollDetails.value.currentEndIndex).toBe(4999);
+      wrapper.unmount();
+    });
+  });
 });
