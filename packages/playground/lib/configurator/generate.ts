@@ -20,8 +20,20 @@ export type GenerateMode = 'component' | 'composable';
 const LOREM_API = 'https://lorem-api.com/api/lorem';
 const GITHUB_REPO = 'https://github.com/pdanpdan/virtual-scroll';
 const CDN_VUE = 'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js';
-const CDN_VS_JS = 'https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/index.js';
-const CDN_VS_CSS = 'https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/virtual-scroll.css';
+/**
+ * Library version used in generated standalone/CodePen outputs.
+ *
+ * MUST be pinned to the latest npm release: the unversioned jsdelivr URL is cached
+ * by browsers for 7 days (and by CDN edges for 12 h), so right after a publish it
+ * can keep serving the previous dist — one that lacks components exported since
+ * (VirtualScrollTable, VirtualScrollMasonry), which breaks the generated pens with
+ * `Cannot read properties of undefined (reading 'mount')`.
+ *
+ * Bump this constant to the new version on every release.
+ */
+const CDN_VS_VERSION = '0.13.0';
+const CDN_VS_JS = `https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ CDN_VS_VERSION }/dist/index.js`;
+const CDN_VS_CSS = `https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ CDN_VS_VERSION }/dist/virtual-scroll.css`;
 
 export interface CodePenPayload {
   title: string;

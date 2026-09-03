@@ -22,6 +22,18 @@ const reMatchTile = /title: ['"](.*?)['"]/;
 const reMatchDescription = /description: ['"](.*?)['"]/;
 
 /**
+ * Library version for the CDN URLs in generated examples.
+ *
+ * Pinned to the current release: the unversioned jsdelivr URL is cached by browsers
+ * for 7 days, so right after a publish it can keep serving the previous dist and
+ * break examples using components exported since. Keep in sync with
+ * `packages/virtual-scroll/package.json` (auto-resolved when regenerating).
+ */
+const vsVersion = JSON.parse(
+  readFileSync('packages/virtual-scroll/package.json', 'utf8'),
+).version;
+
+/**
  * Relevant pages to generate - each shows a unique feature or pattern
  */
 const RELEVANT_PAGES = [
@@ -80,8 +92,8 @@ const baseHtml = `<!DOCTYPE html>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/index.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll/dist/virtual-scroll.css">
+  <script src="https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ vsVersion }/dist/index.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ vsVersion }/dist/virtual-scroll.css">
 
   <!-- Minimal Essential Styles -->
   <style>
