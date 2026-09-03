@@ -159,6 +159,7 @@ Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive c
 - [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets.
 - [Log Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-log-viewer): 200k lazy generated lines, level filter + debounced search, filtered index rebuild.
 - [Code Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-code-viewer): virtualized real C++ source (the simdutf file from the code diff example, ~10.5k lines), find-next jumps and highlights matching terms.
+- [Live Streaming](https://pdanpdan.github.io/virtual-scroll/pattern-streaming): simulated market feed; each tick mutates only the visible window of 5,000 symbols (lazy per-row state), pause/resume and speed controls.
 
 ## Component API Highlights
 

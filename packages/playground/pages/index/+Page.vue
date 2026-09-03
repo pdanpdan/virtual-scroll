@@ -341,5 +341,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-code-viewer"
       group="5"
     />
+
+    <ExampleCard
+      type="Pattern"
+      title="Live Streaming"
+      description="Simulated market feed mutating only the visible window of 5,000 symbols."
+      href="/pattern-streaming"
+      group="6"
+    />
   </div>
 </template>
