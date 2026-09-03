@@ -5,7 +5,7 @@
  */
 
 export type Direction = 'vertical' | 'horizontal' | 'both';
-export type RendererMode = 'list' | 'table';
+export type RendererMode = 'list' | 'table' | 'masonry';
 export type TableColumnMode = 'auto' | 'first' | 'custom';
 export type SizeMode = 'fixed' | 'pattern' | 'function' | 'dynamic';
 export type ScrollbarStyle = 'auto' | 'virtual' | 'custom' | 'independent';
@@ -21,6 +21,11 @@ export interface ConfiguratorState {
   renderer: RendererMode;
   tableColumnMode: TableColumnMode;
   tableColumnWidths: string;
+
+  // --- Masonry (renderer 'masonry') ---
+  masonryTargetColumnWidth: number;
+  masonryMinColumns: number;
+  masonryMaxColumns: number;
   itemCount: number;
   containerMode: ContainerMode;
   rtl: boolean;
@@ -82,6 +87,9 @@ export const defaultState: ConfiguratorState = {
   renderer: 'list',
   tableColumnMode: 'first',
   tableColumnWidths: '72, 96, 320, 120',
+  masonryTargetColumnWidth: 240,
+  masonryMinColumns: 1,
+  masonryMaxColumns: 8,
   itemCount: 200,
   containerMode: 'element',
   rtl: false,
@@ -141,19 +149,22 @@ export interface ConfiguratorDerived {
   isIndependent: boolean;
   usesVirtualScroll: boolean;
   isTable: boolean;
+  isMasonry: boolean;
 }
 
 export function getDerived(state: ConfiguratorState): ConfiguratorDerived {
   const isGrid = state.direction === 'both' && state.renderer === 'list';
   const hasSections = state.stickySections && state.itemsPerSection > 0 && state.renderer === 'list';
   const isTable = state.renderer === 'table';
-  const isIndependent = state.scrollbarStyle === 'independent' && !isTable;
+  const isMasonry = state.renderer === 'masonry';
+  const isIndependent = state.scrollbarStyle === 'independent' && !isTable && !isMasonry;
   return {
     isGrid,
     hasSections,
     isIndependent,
     usesVirtualScroll: !isIndependent,
     isTable,
+    isMasonry,
   };
 }
 

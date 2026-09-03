@@ -246,6 +246,17 @@ function openInCodePen() {
             />
             <span class="text-xs font-semibold opacity-70">Table (VirtualScrollTable)</span>
           </label>
+
+          <label class="flex gap-2 items-center cursor-pointer select-none">
+            <input
+              v-model="state.renderer"
+              type="radio"
+              name="renderer-mode"
+              value="masonry"
+              class="radio radio-sm radio-primary"
+            />
+            <span class="text-xs font-semibold opacity-70">Masonry (VirtualScrollMasonry)</span>
+          </label>
         </div>
 
         <template v-if="state.renderer === 'table'">
@@ -274,6 +285,55 @@ function openInCodePen() {
             output (component tab, composable tab via the <code>VirtualScrollTable</code> component, CodePen and
             standalone). Table mode is vertical-only; grid, sections, gaps, scroll padding, sticky indices, window
             containers and independent scrollbars do not apply to the generated table code.
+          </p>
+        </template>
+
+        <template v-else-if="state.renderer === 'masonry'">
+          <div class="flex flex-wrap gap-3 items-center">
+            <label class="floating-label p-0 grow basis-24">
+              <span class="text-xs font-bold small-caps text-base-content/50">Target column width</span>
+              <input
+                v-model.number="state.masonryTargetColumnWidth"
+                type="number"
+                min="120"
+                max="480"
+                placeholder=" "
+                class="input input-bordered input-sm w-full font-mono"
+              />
+            </label>
+
+            <label class="floating-label p-0 grow basis-20">
+              <span class="text-xs font-bold small-caps text-base-content/50">Min columns</span>
+              <input
+                v-model.number="state.masonryMinColumns"
+                type="number"
+                min="1"
+                max="12"
+                placeholder=" "
+                class="input input-bordered input-sm w-full font-mono"
+              />
+            </label>
+
+            <label class="floating-label p-0 grow basis-20">
+              <span class="text-xs font-bold small-caps text-base-content/50">Max columns</span>
+              <input
+                v-model.number="state.masonryMaxColumns"
+                type="number"
+                min="1"
+                max="12"
+                placeholder=" "
+                class="input input-bordered input-sm w-full font-mono"
+              />
+            </label>
+          </div>
+          <p class="text-[11px] opacity-60 mt-1">
+            Masonry output renders a real masonry grid in one <code>VirtualScrollMasonry</code> container with
+            canonical oracle heights and works in every output (component tab, composable tab via the
+            <code>VirtualScrollMasonry</code> component, CodePen and standalone). The card height oracle is
+            deterministic from the generated data and the resolved column width, so every layout is reproducible.
+            Masonry mode is vertical-only and element-container-only; grid, sections, scroll padding, sticky
+            indices, window containers and independent scrollbars do not apply. With <em>Scrollbar style</em> set
+            to anything but <em>auto</em> the overlay virtual scrollbar is used.
           </p>
         </template>
       </FieldSet>

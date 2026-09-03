@@ -1331,6 +1331,10 @@ export function generateSfc(state: ConfiguratorState, mode: GenerateMode): strin
     return generateTableSfc(state, mode === 'composable');
   }
 
+  if (derived.isMasonry) {
+    return generateMasonrySfc(state, mode === 'composable');
+  }
+
   if (derived.isIndependent) {
     return generateSfcIndependent(state);
   }
@@ -1809,6 +1813,10 @@ export function generateCodePenForState(state: ConfiguratorState): CodePenPayloa
     return generateTablePen(state);
   }
 
+  if (derived.isMasonry) {
+    return generateMasonryPen(state);
+  }
+
   if (derived.isIndependent) {
     return generatePenIndependent(state);
   }
@@ -1825,6 +1833,10 @@ export function generateCodePenTypeScript(state: ConfiguratorState): CodePenPayl
 
   if (derived.isTable) {
     return generateTablePen(state, true);
+  }
+
+  if (derived.isMasonry) {
+    return generateMasonryPen(state, true);
   }
 
   if (derived.isIndependent) {
@@ -2323,6 +2335,189 @@ function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayloa
     title: 'Virtual Scroll — Configurator Demo (Table)',
     html,
     css: TABLE_PEN_CSS,
+    js,
+    jsPreProcessor: isTs ? 'typescript' : 'none',
+    jsExternal: [ CDN_VUE, CDN_VS_JS ],
+    cssExternal: [ CDN_VS_CSS ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// masonry renderer (VirtualScrollMasonry): SFC + CodePen/standalone outputs
+// ---------------------------------------------------------------------------
+
+/** Shared demo card styles (SFC scoped block and CodePen CSS). */
+const MASONRY_DEMO_CSS = [
+  'body { margin: 0; }',
+  '.vs-app { display: flex; flex-direction: column; block-size: 100dvh; background: #fafafa; color: #18181b; font-family: system-ui, sans-serif; }',
+  '.vs-toolbar { display: flex; align-items: center; gap: 0.75rem 1rem; padding: 0.5rem 1rem; background: #e4e4e7; border-bottom: 1px solid #d4d4d8; flex: none; }',
+  '.vs-title { font-size: 0.875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }',
+  '.vs-status { font-family: ui-monospace, monospace; font-size: 0.6875rem; opacity: 0.6; }',
+  '.vs-actions { margin-inline-start: auto; display: flex; gap: 0.5rem; align-items: center; }',
+  '.vs-btn { padding: 0.25rem 0.75rem; border: 1px solid #a1a1aa; border-radius: 0.375rem; background: #fff; font-size: 0.75rem; font-weight: 600; cursor: pointer; }',
+  '.vs-link { font-size: 0.75rem; font-weight: 700; color: #2563eb; text-decoration: none; }',
+  '.vs-masonry { flex: 1; min-block-size: 0; }',
+  '.vs-card { position: relative; box-sizing: border-box; block-size: 100%; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.625rem; border-radius: 0.5rem; border: 1px solid rgba(0, 0, 0, 0.08); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); overflow: hidden; }',
+  '.vs-card-badge { align-self: flex-start; padding: 0.125rem 0.375rem; border-radius: 0.25rem; background: rgba(255, 255, 255, 0.55); font-family: ui-monospace, monospace; font-size: 0.625rem; font-weight: 800; }',
+  '.vs-card-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.75rem; line-height: 1.4; }',
+  '.vs-card-meta { margin-block-start: auto; font-family: ui-monospace, monospace; font-size: 0.625rem; opacity: 0.75; }',
+].join('\n');
+
+/** Masonry SFC used by both the component and composable tabs. */
+function generateMasonrySfc(state: ConfiguratorState, composableTab: boolean): string {
+  const lines: string[] = [];
+  const virtual = state.scrollbarStyle === 'virtual' || state.scrollbarStyle === 'custom';
+
+  lines.push('<script setup lang="ts">');
+  if (composableTab) {
+    lines.push('// Masonry output uses the VirtualScrollMasonry component: the headless composable needs manual DOM wiring.');
+  }
+  lines.push(
+    "import type { MasonryScrollDetails, VirtualScrollMasonryInstance, VirtualScrollMasonryProps } from '@pdanpdan/virtual-scroll';",
+    "import { VirtualScrollMasonry } from '@pdanpdan/virtual-scroll';",
+    '',
+    "import '@pdanpdan/virtual-scroll/style.css';",
+    '',
+    "import { computed, onMounted, ref } from 'vue';",
+    '',
+  );
+  lines.push(dataModelScript(state, getDerived(state), true));
+  lines.push('');
+  lines.push(dataSourceScript(state, getDerived(state), true));
+  lines.push('');
+  lines.push('const items = ref<Item[]>([]);');
+  lines.push('');
+  lines.push('onMounted(async () => {');
+  lines.push('  items.value = await createItems(0, ITEM_COUNT);');
+  lines.push('});');
+  lines.push('');
+  lines.push('// --- Scroll state ---');
+  lines.push('const scrollDetails = ref<MasonryScrollDetails<Item> | null>(null);');
+  lines.push('const masonryRef = ref<VirtualScrollMasonryInstance<Item> | null>(null);');
+  lines.push('');
+  lines.push('function onScroll(details: MasonryScrollDetails<Item>) {');
+  lines.push('  scrollDetails.value = details;');
+  lines.push('}');
+  lines.push('');
+  lines.push('// --- Canonical height oracle: deterministic per (item, index, width) ---');
+  lines.push('function cardHeight(item: Item | undefined, index: number, width: number): number {');
+  lines.push('  const base = 104 + (index % 5) * 34 + ((item?.id ?? index) % 3) * 14;');
+  lines.push('  return Math.max(56, Math.round(base * (width / 240)));');
+  lines.push('}');
+  lines.push('');
+  lines.push('// --- Configuration (typed against VirtualScrollMasonryProps) ---');
+  lines.push('const config = computed<VirtualScrollMasonryProps<Item>>(() => ({');
+  lines.push('  items: items.value,');
+  lines.push('  itemHeight: cardHeight,');
+  lines.push(`  targetColumnWidth: ${ state.masonryTargetColumnWidth },`);
+  lines.push(`  minColumns: ${ state.masonryMinColumns },`);
+  lines.push(`  maxColumns: ${ state.masonryMaxColumns },`);
+  lines.push(`  gap: ${ state.gap },`);
+  lines.push(`  virtualScrollbar: ${ virtual },`);
+  lines.push('}));');
+  lines.push('</script>');
+  lines.push('');
+  lines.push('<template>');
+  lines.push('  <div class="vs-app">');
+  lines.push('    <header class="vs-toolbar">');
+  lines.push('      <h1 class="vs-title">Virtual Scroll Masonry Demo</h1>');
+  lines.push('      <div v-if="scrollDetails" class="vs-status">');
+  lines.push('        <span>cards {{ scrollDetails.range.start }}–{{ scrollDetails.range.end }} · {{ scrollDetails.items.length }} mounted</span>');
+  lines.push('      </div>');
+  lines.push('      <div class="vs-actions">');
+  lines.push('        <button type="button" class="vs-btn" @click="masonryRef?.scrollToIndex(ITEM_COUNT - 1, { align: \'end\' })">Jump to end</button>');
+  lines.push(`        <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`);
+  lines.push('      </div>');
+  lines.push('    </header>');
+  lines.push('');
+  lines.push('    <VirtualScrollMasonry ref="masonryRef" v-bind="config" class="vs-masonry" @scroll="onScroll">');
+  lines.push('      <template #item="{ item, index, height }">');
+  lines.push('        <div class="vs-card" :style="{ backgroundColor: `hsl(${ (index * 137.5) % 360 }, 60%, 78%)` }">');
+  lines.push('          <span class="vs-card-badge">#{{ index }}</span>');
+  lines.push('          <p class="vs-card-text">{{ item?.text }}</p>');
+  lines.push('          <span class="vs-card-meta">{{ Math.round(height) }}px</span>');
+  lines.push('        </div>');
+  lines.push('      </template>');
+  lines.push('    </VirtualScrollMasonry>');
+  lines.push('  </div>');
+  lines.push('</template>');
+  lines.push('');
+  lines.push('<style scoped>');
+  lines.push(MASONRY_DEMO_CSS);
+  lines.push('</style>');
+  lines.push('');
+  return join(lines);
+}
+
+/** Self-contained CodePen/standalone masonry demo (no lorem API needed). */
+function generateMasonryPen(state: ConfiguratorState, isTs = false): CodePenPayload {
+  const virtual = state.scrollbarStyle === 'virtual' || state.scrollbarStyle === 'custom';
+  const vsName = isTs
+    ? 'const VirtualScrollMasonry = (window as unknown as { VirtualScroll: { VirtualScrollMasonry: unknown } }).VirtualScroll.VirtualScrollMasonry;'
+    : 'const { VirtualScrollMasonry } = window.VirtualScroll;';
+
+  const html = [
+    '<div id="app" v-cloak class="vs-app">',
+    '  <header class="vs-toolbar">',
+    '    <h1 class="vs-title">Virtual Scroll Masonry Demo</h1>',
+    '    <div v-if="scrollDetails" class="vs-status">',
+    '      <span>cards {{ scrollDetails.range.start }}–{{ scrollDetails.range.end }} · {{ scrollDetails.items.length }} mounted</span>',
+    '    </div>',
+    '    <div class="vs-actions">',
+    '      <button type="button" class="vs-btn" @click="vs?.scrollToIndex(ITEMS.length - 1, { align: \'end\' })">Jump to end</button>',
+    `      <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`,
+    '    </div>',
+    '  </header>',
+    '',
+    '  <virtual-scroll-masonry ref="vs" v-bind="config" class="vs-masonry" @scroll="onScroll">',
+    '    <template #item="{ item, index, height }">',
+    '      <div class="vs-card" :style="{ backgroundColor: `hsl(${ (index * 137.5) % 360 }, 60%, 78%)` }">',
+    '        <span class="vs-card-badge">#{{ index }}</span>',
+    '        <p class="vs-card-text">{{ item.text }}</p>',
+    '        <span class="vs-card-meta">{{ Math.round(height) }}px</span>',
+    '      </div>',
+    '    </template>',
+    '  </virtual-scroll-masonry>',
+    '</div>',
+  ].join('\n');
+
+  const js = join([
+    'const { createApp, ref, computed } = Vue;',
+    vsName,
+    '',
+    'const words = ["alpha", "beta", "gamma", "delta", "epsilon"];',
+    `const ITEMS = Array.from({ length: ${ state.itemCount } }, (_, i) => ({ id: i, text: "Card " + i + " \\u2014 " + words[i % words.length] }));`,
+    '',
+    'function cardHeight(item, index, width) {',
+    '  const base = 104 + (index % 5) * 34 + ((item ? item.id : index) % 3) * 14;',
+    '  return Math.max(56, Math.round(base * (width / 240)));',
+    '}',
+    '',
+    'createApp({',
+    '  setup() {',
+    '    const vs = ref(null);',
+    '    const scrollDetails = ref(null);',
+    '    function onScroll(details) { scrollDetails.value = details; }',
+    '    const config = computed(() => ({',
+    '      items: ITEMS,',
+    '      itemHeight: cardHeight,',
+    `      targetColumnWidth: ${ state.masonryTargetColumnWidth },`,
+    `      minColumns: ${ state.masonryMinColumns },`,
+    `      maxColumns: ${ state.masonryMaxColumns },`,
+    `      gap: ${ state.gap },`,
+    `      virtualScrollbar: ${ virtual },`,
+    '    }));',
+    '    return { vs, scrollDetails, config, onScroll };',
+    '  },',
+    '})',
+    "  .component('virtual-scroll-masonry', VirtualScrollMasonry)",
+    "  .mount('#app');",
+  ]);
+
+  return {
+    title: 'Virtual Scroll — Configurator Demo (Masonry)',
+    html,
+    css: MASONRY_DEMO_CSS,
     js,
     jsPreProcessor: isTs ? 'typescript' : 'none',
     jsExternal: [ CDN_VUE, CDN_VS_JS ],
