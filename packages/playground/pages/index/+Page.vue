@@ -333,5 +333,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-log-viewer"
       group="4"
     />
+
+    <ExampleCard
+      type="Pattern"
+      title="Code Viewer"
+      description="Browse and search the real C++ source used in the code diff example."
+      href="/pattern-code-viewer"
+      group="5"
+    />
   </div>
 </template>

@@ -133,6 +133,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-blog', label: 'Blog Posts' },
   { href: '/pattern-data-browser', label: 'Data Browser' },
   { href: '/pattern-log-viewer', label: 'Log Viewer' },
+  { href: '/pattern-code-viewer', label: 'Code Viewer' },
 ];
 
 const isExamplePage = computed(() => {
