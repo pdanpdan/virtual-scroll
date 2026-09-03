@@ -8,6 +8,7 @@ A high-performance, flexible virtual scrolling component for Vue 3 that supports
 - **1:1 Movement**: Ensures 1px of wheel/touch movement equals 1px of viewport movement, regardless of scale.
 - **Multi-Directional**: Supports `vertical`, `horizontal`, and `both` (grid) directions.
 - **Dynamic Sizing**: Supports uniform sizes, per-item sizes via function, repeating circular patterns via array (e.g. `[50, 100]`), and fully dynamic sizes measured via `ResizeObserver` (pass `null`/`0`).
+- **Data-less (index-only) rows**: `items` may be a sparse array (`new Array(n)`); holes render by index and only the visible window is accessed — uniform-size lists scale to 10M+ rows with constant memory and no per-row data objects.
 - **Sticky Elements**: iOS-style pushing section headers via `stickyIndices`, plus sticky `header`/`footer` slots.
 - **Scroll Snapping**: `snap` prop (`'auto' | 'start' | 'center' | 'end' | 'next'`) for automatic alignment after scrolling stops.
 - **Any Scroll Container**: Virtualizes inside its own element or the browser `window`/`body` (`container` prop).
@@ -132,6 +133,20 @@ Grouped directory pattern: sticky section headers, instant search that rebuilds 
 </VirtualScroll>
 ```
 
+### 8. Data-less Uniform List (10M+ rows)
+[Live Example](https://pdanpdan.github.io/virtual-scroll/essential-vertical-fixed)
+A sparse `items` placeholder plus a numeric `itemSize`: zero per-row data and constant memory at any scale. Render content from `index` only.
+```vue
+const items = new Array(10_000_000); // sparse placeholder, no data objects
+
+<VirtualScroll :items="items" :item-size="40">
+  <template #item="{ index }">
+    <div class="item">Fixed Item {{ index }}</div>
+  </template>
+</VirtualScroll>
+```
+Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive content from `index`. ResizeObserver-measured dynamic sizes work the same way (sizes come from the rendered DOM).
+
 ### More Example Pages
 - [Scroll Snap](https://pdanpdan.github.io/virtual-scroll/feature-scroll-snap): Snap modes on fixed and dynamic lists.
 - [Window / Body Scrolling](https://pdanpdan.github.io/virtual-scroll/essential-vertical-fixed-body): Virtualize using the browser window as scroll container.
@@ -145,7 +160,7 @@ Grouped directory pattern: sticky section headers, instant search that rebuilds 
 ## Component API Highlights
 
 ### Props
-- `items`: `T[]` (Required) - Data to virtualize.
+- `items`: `T[]` (Required) - Data to virtualize; may be sparse (`undefined` entries) for index-only lists — holes render and the slot `item` is `undefined` for them.
 - `itemSize`: `number | number[] | ((item, index) => number) | null` (Default: `40`) - Pass `null`/`0` for dynamic sizing; arrays define repeating circular patterns.
 - `direction`: `'vertical' | 'horizontal' | 'both'`.
 - `columnCount` / `columnWidth`: Grid mode columns (also accepts arrays/functions/`null` for dynamic).
@@ -172,6 +187,9 @@ Positioning formula: `translateY(VU_offset - (DU_scroll * scale))`
 
 ### Performance Optimization
 - **Fenwick Tree**: Used to store and update item sizes. Prefix sums (finding the offset of the N-th item) and point updates (updating the size of an item) both take $O(\log N)$ time.
+- **Incremental growth**: Appending items resizes the tree incrementally (no full rebuild per batch), and initialization only revisits regions that actually changed.
+- **Uniform sizes need no storage**: A numeric `itemSize` / `columnWidth` resolves positions arithmetically (O(1)) — no per-row arrays are allocated, so fixed-size lists run at 10M+ rows with constant memory.
+- **Index-only lists**: Sparse `items` render every index in range; only the visible window is accessed, so rows can be rendered from `index` without data objects.
 - **ResizeObserver**: Automatically tracks size changes of rendered items and updates the Fenwick Tree, triggering a layout adjustment only when necessary.
 
 ## CSS Variables for Styling
