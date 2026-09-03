@@ -535,28 +535,90 @@ export interface ItemSlotProps<T = unknown> {
 
 /** Configuration properties for the `VirtualScroll` component. */
 export interface VirtualScrollComponentProps<T = unknown> extends VirtualScrollBaseProps<T> {
-  /** The HTML tag to use for the root container. */
+  /**
+   * HTML tag for the scroll container. Custom tags enable semantic markup
+   * around the list, e.g. an `<ol>`/`<ul>` wrapper with `<li>` items.
+   * @default 'div'
+   */
   containerTag?: string;
-  /** The HTML tag to use for the items wrapper. */
+
+  /**
+   * HTML tag for the items wrapper. Use `'ul'`/`'ol'` together with
+   * `itemTag: 'li'` for semantic lists.
+   * @default 'div'
+   */
   wrapperTag?: string;
-  /** The HTML tag to use for each item. */
+
+  /**
+   * HTML tag for each virtualized item (e.g. `'li'` inside a `'ul'`/`'ol'`
+   * wrapper). Tabular data should use the `VirtualScrollTable` component
+   * instead, which fixes the semantic table tags itself.
+   * @default 'div'
+   */
   itemTag?: string;
-  /** Whether the content in the 'header' slot is sticky. */
+
+  /**
+   * HTML tag for the optional `header` slot wrapper (e.g. `'header'` or a
+   * semantic list element). Tables use `VirtualScrollTable`, where the
+   * header slot renders its own `<thead>` structure.
+   * @default 'div'
+   */
+  headerTag?: string;
+
+  /**
+   * HTML tag for the optional `footer` slot wrapper (e.g. `'footer'`).
+   * Tables use `VirtualScrollTable`, where the footer slot renders its own
+   * `<tfoot>` structure.
+   * @default 'div'
+   */
+  footerTag?: string;
+
   /**
    * If true, measures the header slot size and adds it to the scroll padding.
    * Can be combined with CSS for sticky headers.
    */
   stickyHeader?: boolean;
+
   /**
    * If true, measures the footer slot size and adds it to the scroll padding.
    * Can be combined with CSS for sticky footers.
    */
   stickyFooter?: boolean;
+
   /**
    * Whether to use virtual scrollbars.
    * Automatically enabled when content size exceeds browser limits.
    */
   virtualScrollbar?: boolean;
+}
+
+/** Configuration properties for the `VirtualScrollTable` component. */
+export interface VirtualScrollTableComponentProps<T = unknown> extends VirtualScrollComponentProps<T> {
+  /**
+   * Renders table rows in real table flow (leading/trailing spacer rows keep
+   * the virtual offsets) so the browser's table layout engine sizes and
+   * aligns columns from the content, instead of absolutely positioning rows.
+   * Supported for vertical lists (row heights numeric uniform or dynamic with
+   * measured heights), optional sticky/non-sticky `header`/`footer` slots,
+   * and no `scrollPadding`, `gap`, `stickyIndices`, or `columnCount`.
+   * Unsupported configurations fall back to the absolute row mode.
+   * @default false
+   */
+  flowTable?: boolean;
+
+  /**
+   * With `flowTable`, measures the column widths once from the first rendered
+   * window (header + rows) and pins them via a `<colgroup>` with
+   * `table-layout: fixed`, so column widths stay stable while virtualized
+   * windows change. Every row must expose the same number of direct cells.
+   */
+  autoSizeColumns?: boolean;
+
+  /**
+   * With `flowTable`, explicit column widths (px) pinned via a `<colgroup>`
+   * with `table-layout: fixed`. Takes precedence over `autoSizeColumns`.
+   */
+  columnWidths?: number[];
 }
 
 /** Exposed methods and properties of the `VirtualScroll` component instance. */
@@ -585,10 +647,6 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   getItemOffset: (index: number) => number;
   /** Helper to get the size of a specific item along the scroll axis. */
   getItemSize: (index: number) => number;
-  /** Whether the component is in table mode. */
-  isTable: boolean;
-  /** The tag used for rendering items. */
-  itemTag: string;
   /** Programmatically scroll to a specific row and/or column. */
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
   /** Programmatically scroll to a specific pixel offset. */
@@ -619,6 +677,18 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   scrollbarPropsVertical: ScrollbarSlotProps | null;
   /** Properties for the horizontal scrollbar. */
   scrollbarPropsHorizontal: ScrollbarSlotProps | null;
+}
+
+/** Exposed methods and properties of the `VirtualScrollTable` component instance. */
+export interface VirtualScrollTableInstance<T = unknown> extends VirtualScrollInstance<T> {
+  /** Whether the component is in table mode. */
+  isTable: true;
+  /** The tag used for rendering rows. */
+  itemTag: 'tr';
+  /** The tag used for the root container element. */
+  containerTag: 'table';
+  /** The tag used for the items wrapper. */
+  wrapperTag: 'tbody';
 }
 
 /** Parameters for calculating the scroll target position. */

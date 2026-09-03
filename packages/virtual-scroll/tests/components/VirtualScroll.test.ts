@@ -113,6 +113,83 @@ interface MockItem {
 describe('virtualScroll', () => {
   const mockItems: MockItem[] = Array.from({ length: 100 }, (_, i) => ({ id: i, label: `Item ${ i }` }));
 
+  describe('semantic list tags', () => {
+    it('renders custom wrapper and item tags as a semantic list', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems.slice(0, 10),
+          itemSize: 50,
+          wrapperTag: 'ul',
+          itemTag: 'li',
+        },
+      });
+      await nextTick();
+      await nextTick();
+      const wrapperEl = wrapper.find('.virtual-scroll-wrapper');
+      expect(wrapperEl.element.tagName).toBe('UL');
+      const items = wrapper.findAll('.virtual-scroll-item');
+      expect(items.length).toBeGreaterThan(0);
+      expect(items[ 0 ]!.element.tagName).toBe('LI');
+      wrapper.unmount();
+    });
+
+    it('renders a custom root container tag', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems.slice(0, 5),
+          itemSize: 50,
+          containerTag: 'main',
+        },
+      });
+      await nextTick();
+      expect(wrapper.find('.virtual-scroll-container').element.tagName).toBe('MAIN');
+      wrapper.unmount();
+    });
+
+    it('renders custom header and footer tags', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems.slice(0, 5),
+          itemSize: 50,
+          headerTag: 'header',
+          footerTag: 'footer',
+        },
+        slots: {
+          header: '<div class="h">HEADER</div>',
+          footer: '<div class="f">FOOTER</div>',
+        },
+      });
+      await nextTick();
+      expect(wrapper.find('.virtual-scroll-header').element.tagName).toBe('HEADER');
+      expect(wrapper.find('.virtual-scroll-footer').element.tagName).toBe('FOOTER');
+      wrapper.unmount();
+    });
+  });
+
+  describe('aria breadth', () => {
+    it('exposes column count when grid columns are configured', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          items: mockItems.slice(0, 10),
+          direction: 'both',
+          columnCount: 3,
+        },
+      });
+      await nextTick();
+      const wrapperEl = wrapper.find('.virtual-scroll-wrapper');
+      expect(wrapperEl.attributes('aria-colcount')).toBe('3');
+      expect(wrapperEl.attributes('aria-rowcount')).toBe('10');
+      wrapper.unmount();
+
+      const plain = mount(VirtualScroll, {
+        props: { items: mockItems.slice(0, 10), direction: 'both' },
+      });
+      await nextTick();
+      expect(plain.find('.virtual-scroll-wrapper').attributes('aria-colcount')).toBeUndefined();
+      plain.unmount();
+    });
+  });
+
   beforeEach(() => {
     Object.defineProperty(window, 'scrollX', { configurable: true, value: 0, writable: true });
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 0, writable: true });
@@ -225,29 +302,6 @@ describe('virtualScroll', () => {
       expect(() => wrapper.unmount()).not.toThrow();
     });
 
-    it('handles hostRef change', async () => {
-      const observeSpy = vi.spyOn(ResizeObserver.prototype, 'observe');
-      const unobserveSpy = vi.spyOn(ResizeObserver.prototype, 'unobserve');
-
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          items: mockItems,
-          containerTag: 'div',
-        },
-      });
-      await nextTick();
-      const firstHost = wrapper.find('.virtual-scroll-container').element;
-
-      await wrapper.setProps({ containerTag: 'section' });
-      await nextTick();
-
-      expect(unobserveSpy).toHaveBeenCalledWith(firstHost);
-      expect(observeSpy).toHaveBeenCalled();
-
-      observeSpy.mockRestore();
-      unobserveSpy.mockRestore();
-    });
-
     it('stops active smooth scroll via stopProgrammaticScroll', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },
@@ -264,25 +318,6 @@ describe('virtualScroll', () => {
 
       // Should not have moved significantly or at all from where it was stopped
       expect(vs.scrollDetails.scrollOffset.y).toBe(posBefore);
-    });
-
-    it('handles table container tag correctly', async () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          items: mockItems,
-          containerTag: 'table',
-          direction: 'vertical',
-        },
-      });
-      await nextTick();
-      const container = wrapper.find('.virtual-scroll-container');
-      expect(container.element.tagName).toBe('TABLE');
-      expect(container.attributes('role')).toBeUndefined();
-      expect(container.classes()).toContain('virtual-scroll--table');
-
-      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
-      expect(vs.wrapperRole).toBeNull();
-      expect(vs.cellRole).toBe('cell');
     });
 
     it('handles custom roles and orientation', async () => {
@@ -2835,19 +2870,6 @@ describe('virtualScroll', () => {
       expect(wrapper.text()).toContain('LOADING...');
     });
 
-    it('uses correct html tags', () => {
-      const wrapper = mount(VirtualScroll, {
-        props: {
-          containerTag: 'table',
-          itemTag: 'tr',
-          items: [],
-          wrapperTag: 'tbody',
-        },
-      });
-      expect(wrapper.element.tagName).toBe('TABLE');
-      expect(wrapper.find('tbody').exists()).toBe(true);
-    });
-
     it('triggers refresh and updates items', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
@@ -3141,128 +3163,6 @@ describe('virtualScroll', () => {
       await nextTick();
 
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(15);
-    });
-
-    describe('table virtualization', () => {
-      it('correctly virtualizes when using table tags and constrained height', async () => {
-        const items = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
-        const wrapper = mount(VirtualScroll, {
-          props: {
-            items,
-            itemSize: 40,
-            containerTag: 'table',
-            wrapperTag: 'tbody',
-            itemTag: 'tr',
-            style: { height: '400px', display: 'block' },
-          },
-          slots: {
-            item: '<td class="item">{{ index }}</td>',
-          },
-        });
-
-        await nextTick();
-        // Since it's mounted in JSDOM, we need to mock clientHeight/clientWidth if they are 0
-        const el = wrapper.element as HTMLElement;
-        Object.defineProperty(el, 'clientHeight', { value: 400, configurable: true });
-        Object.defineProperty(el, 'clientWidth', { value: 800, configurable: true });
-
-        // Trigger resize observation
-        const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
-        vs.refresh();
-        await nextTick();
-        await nextTick();
-
-        // 400px height / 40px itemSize = 10 items + buffer
-        const renderedCount = wrapper.findAll('tr.virtual-scroll-item').length;
-        expect(renderedCount).toBeLessThan(30);
-        expect(renderedCount).toBeGreaterThan(10);
-      });
-
-      it('renders spacer and table tags correctly in grid mode', async () => {
-        const wrapper = mount(VirtualScroll, {
-          props: {
-            items: mockItems,
-            containerTag: 'table',
-            itemTag: 'tr',
-            direction: 'both',
-            columnCount: 5,
-            showHeader: true,
-            showFooter: true,
-          },
-          slots: {
-            header: () => h('tr', [ h('th', 'Header') ]),
-            footer: () => h('tr', [ h('td', 'Footer') ]),
-          },
-        });
-
-        await nextTick();
-        await nextTick();
-
-        const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
-        expect(vs.isTable).toBe(true);
-        expect(vs.itemTag).toBe('tr');
-
-        expect(wrapper.find('thead').exists()).toBe(true);
-        expect(wrapper.find('tfoot').exists()).toBe(true);
-        expect(wrapper.find('.virtual-scroll-spacer').exists()).toBe(true);
-        expect(wrapper.find('.virtual-scroll-spacer').element.tagName).toBe('TR');
-
-        wrapper.unmount();
-      });
-
-      it('covers sticky header and footer tags in table mode', async () => {
-        const wrapper = mount(VirtualScroll, {
-          props: {
-            items: mockItems,
-            containerTag: 'table',
-            stickyHeader: true,
-            stickyFooter: true,
-            showHeader: true,
-            showFooter: true,
-          },
-          slots: {
-            header: () => h('tr', [ h('th', 'H') ]),
-            footer: () => h('tr', [ h('td', 'F') ]),
-          },
-        });
-        await nextTick();
-
-        expect(wrapper.find('thead').classes()).toContain('virtual-scroll--sticky');
-        expect(wrapper.find('tfoot').classes()).toContain('virtual-scroll--sticky');
-        wrapper.unmount();
-      });
-
-      it('covers spacerStyle in horizontal mode', async () => {
-        const wrapper = mount(VirtualScroll, {
-          props: {
-            items: mockItems,
-            direction: 'horizontal',
-            containerTag: 'table',
-            itemTag: 'tr',
-          },
-        });
-        await nextTick();
-        const spacer = wrapper.find('.virtual-scroll-spacer');
-        expect((spacer.element as HTMLElement).style.blockSize).toBe('1px');
-        wrapper.unmount();
-      });
-
-      it('covers spacerStyle in vertical mode', async () => {
-        const wrapper = mount(VirtualScroll, {
-          props: {
-            items: mockItems,
-            direction: 'vertical',
-            containerTag: 'table',
-            itemTag: 'tr',
-          },
-        });
-        await nextTick();
-        const spacer = wrapper.find('.virtual-scroll-spacer');
-        if (spacer.exists()) {
-          expect((spacer.element as HTMLElement).style.inlineSize).toBe('1px');
-        }
-        wrapper.unmount();
-      });
     });
   });
 
