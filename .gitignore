@@ -19,6 +19,3 @@ test-results
 TODO__*
 /AGENTS.md
 sitemap.xml
-
-# Local reference copy of an external project (kept out of the toolchain)
-/wip/

@@ -196,9 +196,4 @@ export default antfu(
       'vue-a11y/media-has-caption': 'off',
     },
   },
-  {
-    ignores: [
-      'wip/**',
-    ],
-  },
 );
