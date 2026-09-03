@@ -1060,6 +1060,7 @@ defineExpose({
     block-size: 100%;
     inline-size: 100%;
     outline-offset: 1px;
+    overflow-anchor: none;
 
     &:not(.virtual-scroll--window) {
       overflow: auto;
