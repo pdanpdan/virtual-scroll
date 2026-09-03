@@ -1,5 +1,39 @@
 # Changelog
 
+# [0.13.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.12.0...v0.13.0) (2026-09-03)
+
+### Bug Fixes
+
+* **playground:** accept masonry scroll details in ScrollStatus ([c6c02e5](https://github.com/pdanpdan/virtual-scroll/commit/c6c02e5af3715f7fd99c9509252db59ae3aebacb))
+* **playground:** drop native lazy loading from virtualized images ([a929c4c](https://github.com/pdanpdan/virtual-scroll/commit/a929c4cd5bb83533fb9e7f8e57354bfee1d5cad9))
+* **virtual-scroll:** anchor scroll targets at the container padding box ([03945c6](https://github.com/pdanpdan/virtual-scroll/commit/03945c6cccd840ef6b059b579697a5806b600e96))
+* **virtual-scroll:** opt out of browser scroll anchoring ([7168285](https://github.com/pdanpdan/virtual-scroll/commit/71682859e72363c688a8dca2aecb8c79cd205926))
+
+### Features
+
+* **playground:** add async content pattern example ([e86221d](https://github.com/pdanpdan/virtual-scroll/commit/e86221d534cadac0225d1d64d68b74221e760b33))
+* **playground:** add code viewer pattern example ([3686333](https://github.com/pdanpdan/virtual-scroll/commit/3686333d5924f4f1c7d5c1252474a2f6e8e1ef37))
+* **playground:** add live streaming pattern example ([13bd896](https://github.com/pdanpdan/virtual-scroll/commit/13bd89661e7541475e9272b77e359c3de2840720))
+* **playground:** add log viewer pattern example ([791ffbd](https://github.com/pdanpdan/virtual-scroll/commit/791ffbdc5e1a197fea80189bffc782214aa376c8))
+* **playground:** cerious-scroll comparison section and masonry rows ([a7c3463](https://github.com/pdanpdan/virtual-scroll/commit/a7c34632cc59c02427a9776f030f9ad73ecb1ccf))
+* **playground:** flow table essential example and regrouped examples ([94f43d2](https://github.com/pdanpdan/virtual-scroll/commit/94f43d28266be2e6c2afe0626b615f46d20a560a))
+* **playground:** masonry essential example with measured-heights showcase ([5c9b158](https://github.com/pdanpdan/virtual-scroll/commit/5c9b158898ac93cb0a5f9b441eef459bfc607d00))
+* **playground:** masonry example cards on the home page ([a923b27](https://github.com/pdanpdan/virtual-scroll/commit/a923b27dc3fe2e06f4576e42acc82ef869755031))
+* **playground:** masonry gallery pattern with bounded image prefetch ([fffd94d](https://github.com/pdanpdan/virtual-scroll/commit/fffd94d3cecc80cadd9edfab75fea8f9f7426117))
+* **playground:** masonry renderer in the configurator generator ([7b14689](https://github.com/pdanpdan/virtual-scroll/commit/7b14689129d96b2284adef09e31313b829cd519c))
+* **playground:** show live DOM item count in example status ([ed03ff2](https://github.com/pdanpdan/virtual-scroll/commit/ed03ff2ed2e49e7e9bfdb2c70fe4c3d3f967e083))
+* **playground:** table renderer in the configurator ([8733c70](https://github.com/pdanpdan/virtual-scroll/commit/8733c705ab162931fb78c72fd6898fac1e799bfe))
+* **virtual-scroll:** dedicated VirtualScrollTable and semantic tag props ([ea5b4a2](https://github.com/pdanpdan/virtual-scroll/commit/ea5b4a2f9c3ed34752433d76eee0f77ab14c7d05))
+* **virtual-scroll:** masonry column layout module ([66d61ff](https://github.com/pdanpdan/virtual-scroll/commit/66d61ff3fe59147bcd52e2ddc632398d0bd1e743))
+* **virtual-scroll:** masonry virtualization in one scroll container ([c8eedf7](https://github.com/pdanpdan/virtual-scroll/commit/c8eedf7e63fd5786e3dae806dfb3089adac2e80f))
+* **virtual-scroll:** re-clamp end-anchored scrolls as measurements settle ([a60d79c](https://github.com/pdanpdan/virtual-scroll/commit/a60d79c843042f441c4eaf7c5e470e08153146ed))
+* **virtual-scroll:** support sparse index-only items arrays ([a323cbe](https://github.com/pdanpdan/virtual-scroll/commit/a323cbed1d42759a9bc3f2218198ba510c1893e7))
+
+### Performance Improvements
+
+* **virtual-scroll:** drop per-row storage and re-walks for uniform axes ([fdcdb0f](https://github.com/pdanpdan/virtual-scroll/commit/fdcdb0feb225c41e83743148116320a555f4a394))
+* **virtual-scroll:** grow Fenwick tree incrementally on resize ([039fa01](https://github.com/pdanpdan/virtual-scroll/commit/039fa01048fa921335198897b03351f071836d7a))
+
 # [0.12.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.11.6...v0.12.0) (2026-09-02)
 
 ### Features
