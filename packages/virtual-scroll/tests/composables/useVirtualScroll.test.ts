@@ -1060,4 +1060,149 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
   });
+
+  describe('end-anchored scroll re-clamping', () => {
+    const waitForProgrammaticEnd = () => new Promise((resolve) => setTimeout(resolve, 180));
+    const containerEl = () => {
+      const el = document.createElement('div');
+      Object.defineProperty(el, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(el, 'clientWidth', { configurable: true, value: 500 });
+      return el;
+    };
+    const dynamicItems: MockItem[] = Array.from({ length: 200 }, (_, i) => ({ id: i }));
+
+    const measure = (result: ReturnType<typeof setup>[ 'result' ], indices: number[], size: number) => {
+      result.updateItemSizes(indices.map((index) => ({ index, inlineSize: size, blockSize: size })));
+    };
+
+    it('re-clamps to the real bottom when tail measurements settle after a jump to the end', async () => {
+      const el = containerEl();
+      const { result, wrapper, internalState } = setup({
+        container: el,
+        items: dynamicItems,
+        itemSize: 0,
+        defaultItemSize: 40,
+      });
+      await nextTick();
+      await nextTick();
+
+      // Jump to the last row, end-aligned: bottom is estimated at 200*40 - 500.
+      result.scrollToIndex(199, null, { align: 'end', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(7500);
+
+      await waitForProgrammaticEnd();
+
+      // The browser applied the jump: a real scroll event clears the pending
+      // programmatic target, leaving only the end intent.
+      el.scrollTop = 7500;
+      el.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      await waitForProgrammaticEnd();
+
+      // The tail rows settle 20px taller than their estimates -> real max 7600.
+      // No pending scroll remains, so the end-anchored re-clamp moves the
+      // viewport to the freshly measured bottom.
+      measure(result, [ 195, 196, 197, 198, 199 ], 60);
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBeCloseTo(7600, 6);
+      await waitForProgrammaticEnd();
+
+      // The end intent stays active while the user rests at the bottom: the
+      // viewport glues to the growing end instead of drifting short.
+      measure(result, [ 199 ], 100);
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBeCloseTo(7640, 6);
+
+      // Scrolling away cancels the glue: later growth must not drag the viewport.
+      el.scrollTop = 5000;
+      el.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      await waitForProgrammaticEnd();
+      measure(result, [ 198 ], 120);
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(5000);
+      wrapper.unmount();
+    });
+
+    it('tracks the end intent on the horizontal axis too', async () => {
+      const el = containerEl();
+      const { result, wrapper, internalState } = setup({
+        container: el,
+        direction: 'horizontal',
+        items: dynamicItems,
+        itemSize: 0,
+        defaultItemSize: 50,
+      });
+      await nextTick();
+      await nextTick();
+
+      result.scrollToIndex(null, 199, { align: 'end', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollX.value).toBe(9500); // 200*50 - 500
+
+      await waitForProgrammaticEnd();
+
+      // The browser applied the jump: a scroll event clears the pending target.
+      el.scrollLeft = 9500;
+      el.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      await waitForProgrammaticEnd();
+
+      // Tail widths settle 10px wider -> real max 9550; the end intent re-clamps.
+      measure(result, [ 195, 196, 197, 198, 199 ], 60);
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollX.value).toBeCloseTo(9550, 6);
+
+      // Scrolling away cancels the horizontal end intent as well.
+      el.scrollLeft = 1000;
+      el.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollX.value).toBe(1000);
+      wrapper.unmount();
+    });
+
+    it('cancels the end re-clamp when the user scrolls away before settling', async () => {
+      const el = containerEl();
+      const { result, wrapper, internalState } = setup({
+        container: el,
+        items: dynamicItems,
+        itemSize: 0,
+        defaultItemSize: 40,
+      });
+      await nextTick();
+      await nextTick();
+
+      result.scrollToIndex(199, null, { align: 'end', behavior: 'auto' });
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(7500);
+
+      await waitForProgrammaticEnd();
+
+      // User scrolls back up before any tail measurement arrives.
+      el.scrollTop = 3000;
+      el.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(3000);
+
+      // Tail growth afterwards must not drag the viewport back to the end.
+      measure(result, [ 195, 196, 197, 198, 199 ], 60);
+      await nextTick();
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(3000);
+      wrapper.unmount();
+    });
+  });
 });

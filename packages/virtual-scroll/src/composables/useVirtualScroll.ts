@@ -123,6 +123,17 @@ export function useVirtualScroll<T = unknown>(
 
   /** Whether the current scroll operation was initiated programmatically. */
   const isProgrammaticScroll = ref(false);
+
+  /**
+   * Set when a programmatic scroll targets the content end (bottom/right edge).
+   * While set, measurement settle updates re-clamp to the new end so the first
+   * jump-to-end lands flush even when the tail rows were only estimates.
+   */
+  let bottomIntentX = false;
+  let bottomIntentY = false;
+  /** End allowance (loading slot) captured with the intent, kept during re-clamps. */
+  let bottomExtraX = 0;
+  let bottomExtraY = 0;
   /** Timeout handle for smooth programmatic scroll completion. */
   let programmaticScrollTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -388,6 +399,28 @@ export function useVirtualScroll<T = unknown>(
     });
   };
 
+  /**
+   * Marks end-intent axes when a programmatic target reaches the content end.
+   */
+  const markBottomIntents = (targetX: number | null, targetY: number | null, endExtraX = 0, endExtraY = 0) => {
+    bottomIntentX = false;
+    bottomIntentY = false;
+    if (targetX !== null && !isRtl.value && direction.value !== 'vertical') {
+      const maxX = Math.max(0, totalWidth.value - viewportWidth.value + endExtraX);
+      if (targetX >= maxX - 0.5) {
+        bottomIntentX = true;
+        bottomExtraX = endExtraX;
+      }
+    }
+    if (targetY !== null) {
+      const maxY = Math.max(0, totalHeight.value - viewportHeight.value + endExtraY);
+      if (targetY >= maxY - 0.5) {
+        bottomIntentY = true;
+        bottomExtraY = endExtraY;
+      }
+    }
+  };
+
   function scrollToIndex(
     rowIndex?: number | null,
     colIndex?: number | null,
@@ -480,6 +513,10 @@ export function useVirtualScroll<T = unknown>(
       scrollTo(container, scrollOptions);
     }
 
+    if (!isCorrection && !dryRun) {
+      markBottomIntents(targetX, targetY);
+    }
+
     if (!dryRun && (scrollBehavior === 'auto' || scrollBehavior === undefined)) {
       if (colIndex !== null && colIndex !== undefined) {
         scrollX.value = (isRtl.value ? finalX : Math.max(0, finalX));
@@ -508,6 +545,10 @@ export function useVirtualScroll<T = unknown>(
     const clampMaxY = totalHeight.value - viewportHeight.value + (options?.endExtraY ?? 0);
     const clampedX = (x !== null && x !== undefined) ? Math.max(0, Math.min(x, clampMaxX)) : null;
     const clampedY = (y !== null && y !== undefined) ? Math.max(0, Math.min(y, clampMaxY)) : null;
+
+    if (!options?.isCorrection) {
+      markBottomIntents(clampedX, clampedY, options?.endExtraX ?? 0, options?.endExtraY ?? 0);
+    }
 
     // Defer the final position until measurements settle: like scrollToIndex,
     // re-clamp against the updated totals when the scroll completes.
@@ -836,6 +877,15 @@ export function useVirtualScroll<T = unknown>(
       }
     }
 
+    // A move away from the content end cancels the end-anchored re-clamp
+    // (the engine's own re-anchor only ever moves towards the end).
+    if (bottomIntentX && virtualX < internalScrollX.value - 0.5) {
+      bottomIntentX = false;
+    }
+    if (bottomIntentY && virtualY < internalScrollY.value - 0.5) {
+      bottomIntentY = false;
+    }
+
     internalScrollX.value = virtualX;
     internalScrollY.value = virtualY;
     if (!isProgrammaticScroll.value) {
@@ -982,10 +1032,39 @@ export function useVirtualScroll<T = unknown>(
     }
   }
 
-  watch([ treeUpdateFlag, viewportWidth, viewportHeight, isHydrating ], checkPendingScroll);
+  /**
+   * Re-clamps an end-anchored scroll once settling measurements moved the real
+   * content end (dynamic rows measured after the first landing, appends, or
+   * viewport changes): the first jump-to-end ends flush instead of short.
+   */
+  const checkBottomReanchor = () => {
+    if (!isHydrated.value || isHydrating.value || isScrolling.value || isProgrammaticScroll.value || pendingScroll.value) {
+      return;
+    }
+    if (!bottomIntentX && !bottomIntentY) {
+      return;
+    }
+    const maxX = Math.max(0, totalWidth.value - viewportWidth.value + bottomExtraX);
+    const maxY = Math.max(0, totalHeight.value - viewportHeight.value + bottomExtraY);
+    const targetX = bottomIntentX && !isRtl.value && internalScrollX.value < maxX - 0.5 ? maxX : null;
+    const targetY = bottomIntentY && internalScrollY.value < maxY - 0.5 ? maxY : null;
+    if (targetX === null && targetY === null) {
+      // Already flush at the end (or empty content): stay glued — further
+      // settling measurements may still move the real end. The intent is only
+      // cancelled when the user scrolls away from the end.
+      return;
+    }
+    scrollToOffset(targetX, targetY, { behavior: 'auto', isCorrection: true });
+  };
+
+  watch([ treeUpdateFlag, viewportWidth, viewportHeight, isHydrating ], () => {
+    checkPendingScroll();
+    checkBottomReanchor();
+  });
   watch(isScrolling, (scrolling) => {
     if (!scrolling) {
       checkPendingScroll();
+      checkBottomReanchor();
     }
   });
 

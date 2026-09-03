@@ -1546,7 +1546,7 @@ scrollToIndex
               <tr>
                 <td><a href="#method-scrolltoindex" class="link font-bold text-secondary">scrollToIndex</a></td>
                 <td><code>Function</code></td>
-                <td>Programmatic scroll to a specific index.</td>
+                <td>Programmatic scroll to a specific index. End-anchored scrolls re-clamp while settling measurements move the real end, so a first jump to the end lands flush on dynamic lists.</td>
               </tr>
               <tr>
                 <td><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a></td>

@@ -383,7 +383,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `componentOffset`: Absolute offset of the component within its container (DU).
 
 #### Methods
-- `scrollToIndex(row, col, options)`: Programmatic scroll to index. See [ScrollToIndexOptions](#scrolltoindexoptions).
+- `scrollToIndex(row, col, options)`: Programmatic scroll to index. An end-anchored scroll (last row or content end) keeps re-clamping while settling measurements move the real end, so the first jump to the end lands flush even on dynamic lists. See [ScrollToIndexOptions](#scrolltoindexoptions).
 - `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling. `options.endExtraX` / `options.endExtraY` (internal) extend the scroll clamp past the virtual content end — used by the `End` key to reach the loading slot.
 - `refresh()`: Resets all measurements and state.
 - `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
