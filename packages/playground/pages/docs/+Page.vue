@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DEFAULT_BUFFER, DEFAULT_COLUMN_WIDTH, DEFAULT_ITEM_SIZE } from '@pdanpdan/virtual-scroll';
+import { DEFAULT_BUFFER, DEFAULT_COLUMN_WIDTH, DEFAULT_ITEM_SIZE, DEFAULT_MASONRY_GAP, DEFAULT_MASONRY_MAX_COLUMNS, DEFAULT_MASONRY_MIN_COLUMNS, DEFAULT_MASONRY_SEGMENT_SIZE, DEFAULT_MASONRY_TARGET_COLUMN_WIDTH } from '@pdanpdan/virtual-scroll';
 import { onMounted, onUnmounted } from 'vue';
 
 import AppLogo from '#/components/AppLogo.vue';
@@ -376,6 +376,15 @@ onUnmounted(() => {
             <div>
               <h4 class="docs-feature-card-title">Circular Sizing Patterns</h4>
               <p class="docs-feature-card-description">Pass arrays to define repeating size patterns for items or columns.</p>
+            </div>
+          </div>
+        </div>
+        <div class="docs-feature-card">
+          <div class="docs-feature-card-body">
+            <div class="docs-feature-card-icon">✓</div>
+            <div>
+              <h4 class="docs-feature-card-title">Masonry Layout</h4>
+              <p class="docs-feature-card-description">Real masonry in one scroll container: responsive columns, canonical oracle heights, anchored reflow, bounded DOM at any scale.</p>
             </div>
           </div>
         </div>
@@ -1456,6 +1465,222 @@ const vs = useVirtualScroll(props, [
       </div>
     </section>
 
+    <section id="virtual-scroll-masonry">
+      <h2 class="docs-section-header">
+        <a href="#virtual-scroll-masonry" aria-label="Link to VirtualScrollMasonry Component section">
+          VirtualScrollMasonry Component
+        </a>
+      </h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          <code>VirtualScrollMasonry</code> renders a real masonry grid inside a <strong>single</strong> native
+          scroll container: the column count and a fractional column width are derived from the container width,
+          cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only
+          the window around the scroll position is mounted (plus one segment of overscan) — the DOM stays bounded
+          no matter the dataset size or how far the user jumps.
+        </p>
+        <p>
+          Heights come from the deterministic <code>itemHeight</code> oracle by default (canonical layout: far
+          <code>scrollToIndex</code> calls land on the exact greedy position without ever mounting the path,
+          unvisited segments are priced arithmetically, and the total is exact once the frontier chain reaches the
+          end). With <code>measuredHeights</code>, mounted cards are measured instead and the measured boxes drive
+          the layout (local determinism: reproducible per measurement history). Container reflows (resize,
+          column-geometry changes, dataset replacement) re-anchor the topmost visible card at its screen offset
+          instead of holding a raw pixel position.
+          See the <a href="/virtual-scroll/essential-masonry" class="link link-primary font-bold">Masonry example</a>.
+        </p>
+      </div>
+
+      <h3 id="masonry-props" class="docs-prop-header text-primary">
+        <a href="#masonry-props" aria-label="Link to Props section">
+          Props
+        </a>
+      </h3>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th class="w-1/6">Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="docs-prop-name">items</code></td>
+              <td><code>T[]</code></td>
+              <td>Required</td>
+              <td>Array of data items to virtualize. May be sparse (<code>new Array(n)</code>): holes render and the slot <code>item</code> is <code>undefined</code> for them; only the rendered window is accessed.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">itemHeight</code></td>
+              <td><code>fn(item, index, columnWidth)</code></td>
+              <td>Required</td>
+              <td>Canonical height oracle in px. MUST be deterministic — the same <code>(index, columnWidth)</code> must always return the same height — because placements are committed to a frontier chain and replayed from stored snapshots. Non-finite/non-positive results fall back to <code>40</code>.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">targetColumnWidth</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_MASONRY_TARGET_COLUMN_WIDTH }}</code></td>
+              <td>Desired column width in px. The column count is derived from the container width so columns land as close as possible to this target; the actual width is fractional so the gutters divide the width exactly.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">minColumns</code> / <code class="docs-prop-name">maxColumns</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_MASONRY_MIN_COLUMNS }}</code> / <code>{{ DEFAULT_MASONRY_MAX_COLUMNS }}</code></td>
+              <td>Column count bounds for the responsive reflow.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">measuredHeights</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Measure mounted cards with a <code>ResizeObserver</code> and drive the layout from the measured boxes instead of the oracle. Off: canonical oracle layout, nothing is measured. On: cards size to their content (the oracle height becomes the pre-measure minimum, so estimate-sized first mounts do not re-flow) and every accepted measurement re-lays-out with the topmost visible card re-anchored.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">gap</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_MASONRY_GAP }}</code></td>
+              <td>Spacing between cards in px, applied both between columns and between rows of the layout.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">segmentSize</code></td>
+              <td><code>number</code></td>
+              <td><code>{{ DEFAULT_MASONRY_SEGMENT_SIZE }}</code></td>
+              <td>Items per layout segment — the cadence at which the real column frontier is snapshotted. Larger segments store less frontier state but make each layout step cross more items.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">virtualScrollbar</code></td>
+              <td><code>boolean</code></td>
+              <td><code>true</code></td>
+              <td>Render the overlay virtual scrollbar (the native one is hidden while enabled). Hidden automatically when the content fits the viewport.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">role</code> / <code class="docs-prop-name">itemRole</code></td>
+              <td><code>string</code></td>
+              <td><code>'list'</code> / <code>'listitem'</code></td>
+              <td>ARIA roles for the cards wrapper and each card (grid/tree/listbox/menu wrappers map to their child roles). Set <code>itemRole: 'none'</code> to disable role assignment.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">ariaLabel</code> / <code class="docs-prop-name">ariaLabelledby</code></td>
+              <td><code>string</code></td>
+              <td>-</td>
+              <td>Accessible label for the scroll container (the container role becomes <code>region</code> when labelled).</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">debug</code></td>
+              <td><code>boolean</code></td>
+              <td><code>false</code></td>
+              <td>Outline rendered card bounds and overlay a geometry badge (<code>#index (x, y)</code>) per card.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="masonry-slot" class="docs-prop-header text-primary">
+        <a href="#masonry-slot" aria-label="Link to Item Slot section">
+          Item Slot
+        </a>
+      </h3>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th class="w-1/4">Prop</th>
+              <th class="w-1/4">Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="docs-prop-name">item</code> / <code class="docs-prop-name">index</code></td>
+              <td><code>T | undefined</code> / <code>number</code></td>
+              <td>The original data item and its 0-based dataset index (<code>undefined</code> for sparse holes).</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">column</code></td>
+              <td><code>number</code></td>
+              <td>The 0-based column the card was placed into.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">x</code> / <code class="docs-prop-name">y</code></td>
+              <td><code>number</code></td>
+              <td>Card offset in px relative to the cards wrapper (the component positions the card itself via <code>translate</code>).</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">width</code> / <code class="docs-prop-name">height</code></td>
+              <td><code>number</code></td>
+              <td>Card size in px — the resolved column width and the oracle height. Render content to exactly fill the oracle height.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="masonry-exposed" class="docs-prop-header text-primary">
+        <a href="#masonry-exposed" aria-label="Link to Exposed Members section">
+          Exposed Members &amp; Events
+        </a>
+      </h3>
+      <div class="docs-table-container mb-8 text-base-content/80">
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th class="w-1/4">Member</th>
+              <th class="w-1/4">Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="docs-prop-name">scroll</code> (event)</td>
+              <td><code>MasonryScrollDetails&lt;T&gt;</code></td>
+              <td>Emitted on scroll and every layout change: rendered <code>items</code> (card geometry), <code>currentIndex</code>/<code>currentEndIndex</code>, <code>range</code>, <code>scrollOffset</code>/<code>displayScrollOffset</code> (y), <code>viewportSize</code>, <code>totalSize</code>, <code>columnRange</code> and scrolling flags.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">scrollDetails</code></td>
+              <td><code>MasonryScrollDetails&lt;T&gt;</code></td>
+              <td>Current scroll state (same shape as the <code>scroll</code> event payload).</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">columns</code> / <code class="docs-prop-name">columnWidth</code></td>
+              <td><code>number</code></td>
+              <td>Live resolved column count and column width in px (0 until the container is measured) — e.g. for <code>srcset</code> candidates or text budgets.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">totalHeight</code> / <code class="docs-prop-name">totalHeightExact</code></td>
+              <td><code>number</code> / <code>boolean</code></td>
+              <td>Content height in px — extrapolated from the known frontier prefix until the chain reaches the end, then exact. End-anchored scrolls re-clamp as estimates settle.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">scrollToIndex</code></td>
+              <td><code>fn(index?, options?)</code></td>
+              <td>Scroll to a card with <code>align</code> (<code>'start' | 'center' | 'end' | 'auto'</code>), <code>behavior</code> and <code>dryRun</code>; far jumps land on the exact canonical position.</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">scrollToOffset</code></td>
+              <td><code>fn(offset?, options?)</code></td>
+              <td>Scroll to a pixel offset (use ±Infinity for the very end/start; end intents follow the content as totals settle).</td>
+            </tr>
+            <tr>
+              <td><code class="docs-prop-name">refresh</code></td>
+              <td><code>fn()</code></td>
+              <td>Drop every cached frontier and re-layout from the current anchor — after in-place item edits or oracle changes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
+        <h4 class="docs-prop-subheader">Sizing contract &amp; current limitations</h4>
+        <ul class="list-disc ps-5 space-y-2">
+          <li>Default canonical mode: cards must render at exactly the oracle height — reserve media space (<code>aspect-ratio</code>, fixed model heights) and never rely on DOM measurement. With <code>measuredHeights</code> cards size to their content and mounted cards are measured (unmounted regions keep the oracle estimate; measurements reset when the <code>items</code> array is replaced). In-place item edits or oracle changes need <code>refresh()</code> (or a new <code>items</code> array).</li>
+          <li>Item height oracle results feed an internal fallback of 40 px when non-finite; the height oracle must stay pure — the same <code>(index, columnWidth)</code> always returns the same value.</li>
+          <li>Vertical axis only: no RTL/horizontal/both mode and no coordinate scaling yet, so very tall datasets stay below the browser's ~10M px scroll limit (reports <code>totalHeightExact</code> so callers can tell measured from estimated totals).</li>
+          <li>Not available for SSR pre-rendering yet: content mounts after the container is measured. Extensions/snap/sticky/loading of the list engine do not apply.</li>
+        </ul>
+      </div>
+    </section>
+
     <section id="virtual-scrollbar">
       <h2 class="docs-section-header">
         <a href="#virtual-scrollbar" aria-label="Link to VirtualScrollbar Component section">
@@ -1790,6 +2015,63 @@ scrollToIndex
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- useVirtualScrollMasonry -->
+      <section id="use-virtual-scroll-masonry" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-virtual-scroll-masonry" aria-label="Link to useVirtualScrollMasonry section">
+            useVirtualScrollMasonry
+          </a>
+        </h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Masonry virtualization driver for a single native scroll container — the engine behind
+            <a href="#virtual-scroll-masonry" class="link link-primary font-semibold">VirtualScrollMasonry</a>.
+            Owns one <code>MasonryLayout</code> frontier chain, renders only the cards intersecting the viewport
+            (plus one segment of overscan per side), derives responsive column geometry from the container width
+            and re-anchors the topmost visible card in content space on every relayout. Headless composable users
+            provide their scrollable element via the <code>hostRef</code> prop.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useVirtualScrollMasonry } from '@pdanpdan/virtual-scroll';
+import { computed, ref } from 'vue';
+
+const items = ref([...]);
+const hostRef = ref<HTMLElement | null>(null);
+const props = computed(() => ({
+  items: items.value,
+  itemHeight: (item, index, width) => item.aspect * width,
+  hostRef: hostRef.value
+}));
+
+const {
+  renderedCards,
+  scrollDetails,
+  columns,
+  columnWidth,
+  totalHeight,
+  scrollToIndex
+} = useVirtualScrollMasonry(props);"
+        />
+
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p>
+            Accepts a <code>MaybeRefOrGetter</code> to a
+            <a href="#virtual-scroll-masonry" class="link link-primary font-semibold">VirtualScrollMasonryProps</a>
+            object (the component prop set plus <code>hostRef</code>). Returns <code>renderedCards</code>,
+            <code>scrollDetails</code>, <code>columns</code>, <code>columnWidth</code>, <code>totalHeight</code>,
+            <code>totalHeightExact</code>, <code>scrollToIndex</code>, <code>scrollToOffset</code>,
+            <code>refresh</code> and the reactive <code>internalState</code> (scrollY, viewport size, scrolling
+            flags) — see the
+            <a href="#masonry-exposed" class="link link-primary font-semibold">component members</a> for the
+            semantics of each member.
+          </p>
         </div>
       </section>
 
@@ -3365,6 +3647,26 @@ element?: HTMLElement
             <div class="flex items-center justify-between text-xs @4xl:text-sm">
               <code class="text-primary">DEFAULT_BUFFER</code>
               <code class="opacity-60">{{ DEFAULT_BUFFER }} items</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_MASONRY_TARGET_COLUMN_WIDTH</code>
+              <code class="opacity-60">{{ DEFAULT_MASONRY_TARGET_COLUMN_WIDTH }}px</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_MASONRY_MIN_COLUMNS</code>
+              <code class="opacity-60">{{ DEFAULT_MASONRY_MIN_COLUMNS }}</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_MASONRY_MAX_COLUMNS</code>
+              <code class="opacity-60">{{ DEFAULT_MASONRY_MAX_COLUMNS }}</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_MASONRY_GAP</code>
+              <code class="opacity-60">{{ DEFAULT_MASONRY_GAP }}px</code>
+            </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">DEFAULT_MASONRY_SEGMENT_SIZE</code>
+              <code class="opacity-60">{{ DEFAULT_MASONRY_SEGMENT_SIZE }} items</code>
             </div>
             <div class="flex items-center justify-between text-xs @4xl:text-sm">
               <code class="text-primary">BROWSER_MAX_SIZE</code>
