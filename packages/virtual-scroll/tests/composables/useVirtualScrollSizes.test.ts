@@ -229,7 +229,9 @@ describe('useVirtualScrollSizes', () => {
     const correctionSpy = vi.fn();
     const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
     const { props, result, wrapper } = setup({
-      itemSize: 50,
+      // Dynamic sizing so the tree stores per-index default estimates that shift on prepend.
+      itemSize: 0,
+      defaultItemSize: 50,
       items,
       restoreScrollOnPrepend: true,
     });
@@ -245,9 +247,10 @@ describe('useVirtualScrollSizes', () => {
 
     // Should detect 2 new items. Data structures shift, but correction is now handled by extension
     expect(correctionSpy).not.toHaveBeenCalled();
-    // Check that items shifted: old item 0 (id:0) was at index 0, now at index 2
-    // itemSizesY stores size + gap. size=50, gap=0 (default) -> 50.
+    // Check that items shifted: old item 0 (id:0) was at index 0, now at index 2.
+    // itemSizesY stores size + gap for the default estimate (50, gap 0).
     expect(result.itemSizesY.get(2)).toBe(50);
+    expect(result.itemSizesY.get(0)).toBe(50);
     wrapper.unmount();
   });
 
@@ -301,16 +304,14 @@ describe('useVirtualScrollSizes', () => {
       defaultItemSize: 40,
     });
 
-    // Manually ensure it's 0 first (simulate unmeasured state)
-    // By default initializeSizes sets them to defaultItemSize if not dynamic?
-    // Wait, initializeMeasurements sets them if isDynamicItemSize is false or if not measured.
-    // If we want to simulate the "0 to measured" transition without default assumption:
-    // Actually, updateItemSizes logic checks `oldWidth > 0` before correcting.
-    // If we have defaultItemSize, it will be > 0.
-    // To test the fix, we need a case where tree value is 0.
-    // Fenwick tree initialized with 0s.
+    result.initializeSizes();
+    await nextTick();
 
-    // Don't call initializeSizes right away, or modify tree manually.
+    // Simulate a row whose stored value is still 0: default estimates are 40,
+    // so zero the entry and rebuild before measuring to exercise the
+    // `oldSize > 0` correction guard.
+    result.itemSizesY.set(0, 0);
+    result.itemSizesY.rebuild();
 
     // Mock getRowIndexAt/getColIndexAt
     const getRowIndexAt = () => 5; // Viewport starts at index 5
@@ -363,7 +364,10 @@ describe('useVirtualScrollSizes', () => {
     await nextTick();
 
     expect(result.sizesInitialized.value).toBe(true);
-    expect(result.itemSizesY.length).toBe(mockItems.length);
+    // Uniform numeric sizes no longer allocate per-row Fenwick storage; the
+    // measured flags still track the used axis at dataset length.
+    expect(result.itemSizesY.length).toBe(0);
+    expect(result.measuredItemsY.value.length).toBe(mockItems.length);
     wrapper.unmount();
   });
 
@@ -610,6 +614,8 @@ describe('useVirtualScrollSizes', () => {
       itemSize: 0,
       items: mockItems,
     });
+
+    result.initializeSizes();
     await nextTick();
 
     const onScrollCorrection = vi.fn();
@@ -623,6 +629,112 @@ describe('useVirtualScrollSizes', () => {
     );
     await nextTick();
     expect(result.getSizeAt(0, 0, 40, 0, result.itemSizesX, true)).toBe(120);
+    wrapper.unmount();
+  });
+
+  it('rebases densely measured horizontal sizes through the dense rebuild path', async () => {
+    const manyItems = Array.from({ length: 2000 }, (_, i) => ({ id: i }));
+    const { props, result, wrapper } = setup({
+      direction: 'horizontal',
+      itemSize: 0,
+      items: manyItems,
+      defaultItemSize: 40,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    // Measure every row so the gap-change rebase runs the measured branch.
+    const updates = manyItems.map((_, i) => ({ index: i, inlineSize: 40, blockSize: 30 }));
+    result.updateItemSizes(updates, () => 0, () => 0, 0, 0, () => {});
+    await nextTick();
+    expect(result.itemSizesX.get(0)).toBe(40);
+
+    // Gap change with >1024 stored measurements must fall back to set() + rebuild().
+    props.value.columnGap = 4;
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.itemSizesX.get(0)).toBe(44);
+    expect(result.itemSizesX.get(1999)).toBe(44);
+    expect(result.itemSizesX.query(2000)).toBe(2000 * 44);
+    wrapper.unmount();
+  });
+
+  it('initializes many dynamic columns through the dense rebuild path', async () => {
+    const { props, result, wrapper } = setup({
+      direction: 'both',
+      columnCount: 2000,
+      columnWidth: 0, // dynamic
+      items: mockItems,
+      defaultColumnWidth: 100,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.measuredColumns.value.length).toBe(2000);
+    expect(result.columnSizes.get(0)).toBe(100);
+    expect(result.columnSizes.get(1999)).toBe(100);
+    expect(result.columnSizes.query(2000)).toBe(2000 * 100);
+
+    // Re-initializing with an already-filled tree takes the watermark path.
+    result.initializeSizes();
+    await nextTick();
+    expect(result.columnSizes.query(2000)).toBe(2000 * 100);
+
+    // A column-gap change on a dense tree exercises the full rebase + rebuild.
+    props.value.columnGap = 4;
+    result.initializeSizes();
+    await nextTick();
+    expect(result.columnSizes.get(0)).toBe(104);
+    expect(result.columnSizes.query(2000)).toBe(2000 * 104);
+    wrapper.unmount();
+  });
+
+  it('releases horizontal storage when the direction switches to vertical', async () => {
+    const { props, result, wrapper } = setup({
+      direction: 'horizontal',
+      itemSize: 0,
+      items: mockItems,
+      defaultItemSize: 40,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+    expect(result.itemSizesX.length).toBe(mockItems.length);
+    expect(result.measuredItemsX.value.length).toBe(mockItems.length);
+
+    props.value.direction = 'vertical';
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.itemSizesX.length).toBe(0);
+    expect(result.measuredItemsX.value.length).toBe(0);
+    expect(result.itemSizesY.length).toBe(mockItems.length);
+    wrapper.unmount();
+  });
+
+  it('initializes very large dynamic datasets through the dense rebuild path', async () => {
+    // More than 1024 changes in one pass must fall back to set() + rebuild()
+    // instead of applying unbounded incremental updates.
+    const manyItems = Array.from({ length: 2000 }, (_, i) => ({ id: i }));
+    const { result, wrapper } = setup({
+      itemSize: 0,
+      items: manyItems,
+      defaultItemSize: 40,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    expect(result.itemSizesY.get(0)).toBe(40);
+    expect(result.itemSizesY.get(1999)).toBe(40);
+    expect(result.itemSizesY.query(2000)).toBe(2000 * 40);
+    // Estimates stay unmeasured: re-initializing with matching sizes is a no-op pass.
+    result.initializeSizes();
+    await nextTick();
+    expect(result.itemSizesY.query(2000)).toBe(2000 * 40);
     wrapper.unmount();
   });
 

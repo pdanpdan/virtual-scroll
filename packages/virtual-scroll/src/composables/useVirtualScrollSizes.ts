@@ -25,21 +25,32 @@ export interface UseVirtualScrollSizesProps<T> {
   direction: 'vertical' | 'horizontal' | 'both';
 }
 
+/** True when a size prop is a plain positive number (uniform size: math-only, no Fenwick storage). */
+const isFixedNumber = (value: unknown): value is number => typeof value === 'number' && value > 0;
+
 /**
  * Composable for managing item and column sizes using Fenwick Trees.
  * Handles prefix sum calculations, size updates, and scroll correction adjustments.
+ *
+ * Storage is allocated per axis only when that axis can hold non-uniform sizes
+ * (dynamic ResizeObserver measurement or array/function size props) and the
+ * direction actually uses the axis. A uniform numeric size never allocates a
+ * tree — the engine resolves those positions with arithmetic. Re-initialization
+ * passes only fill the regions not covered by the previous pass (`processedTo*`
+ * watermarks), so growing or appending to very large lists stays O(k log n) and
+ * never walks the whole dataset again.
  */
 export function useVirtualScrollSizes<T>(
   propsInput: MaybeRefOrGetter<UseVirtualScrollSizesProps<T>>,
 ) {
   const props = computed(() => toValue(propsInput));
 
-  /** Fenwick Tree for item widths (horizontal mode). */
-  const itemSizesX = new FenwickTree(props.value.props.items?.length || 0);
-  /** Fenwick Tree for item heights (vertical/both mode). */
-  const itemSizesY = new FenwickTree(props.value.props.items?.length || 0);
-  /** Fenwick Tree for column widths (grid mode). */
-  const columnSizes = new FenwickTree(props.value.props.columnCount || 0);
+  /** Fenwick Tree for item widths (horizontal mode). Created empty; sized on first initialization. */
+  const itemSizesX = new FenwickTree(0);
+  /** Fenwick Tree for item heights (vertical/both mode). Created empty; sized on first initialization. */
+  const itemSizesY = new FenwickTree(0);
+  /** Fenwick Tree for column widths (grid mode). Created empty; sized on first initialization. */
+  const columnSizes = new FenwickTree(0);
 
   /** Track which columns have been measured (Uint8Array for memory efficiency). */
   const measuredColumns = shallowRef(new Uint8Array(0));
@@ -59,6 +70,17 @@ export function useVirtualScrollSizes<T>(
   let lastGap = 0;
   /** Column gap used when the current measurements were stored, for rebasing on column gap changes. */
   let lastColumnGap = 0;
+
+  /**
+   * Number of leading indices of each axis whose stored values already match
+   * the current props (gap, size source). Re-initialization starts at this
+   * watermark instead of walking the whole dataset; reset to 0 whenever the
+   * underlying storage is cleared or re-indexed (resize to zero, direction
+   * switch, prepend shift).
+   */
+  let processedToX = 0;
+  let processedToY = 0;
+  let processedToCols = 0;
 
   /**
    * Helper to get the base size of an item from props or default fallback.
@@ -107,23 +129,36 @@ export function useVirtualScrollSizes<T>(
 
   /**
    * Resizes internal arrays and Fenwick Trees while preserving existing measurements.
+   * Axes that cannot hold per-item data (uniform numeric sizes, axes unused by the
+   * current direction) are kept at size 0 to avoid allocating per-row storage for
+   * very large datasets.
    *
    * @param len - New item count.
    * @param colCount - New column count.
    */
   const resizeMeasurements = (len: number, colCount: number) => {
-    itemSizesX.resize(len);
-    itemSizesY.resize(len);
-    columnSizes.resize(colCount);
+    const propsVal = props.value.props;
+    const useX = propsVal.direction === 'horizontal';
+    const useY = propsVal.direction !== 'horizontal';
+    const itemStorage = !isFixedNumber(propsVal.itemSize);
+    const colStorage = !isFixedNumber(propsVal.columnWidth);
 
-    if (measuredItemsX.value.length !== len) {
-      const newMeasuredX = new Uint8Array(len);
-      newMeasuredX.set(measuredItemsX.value.subarray(0, Math.min(len, measuredItemsX.value.length)));
+    const prevXLen = itemSizesX.length;
+    const prevYLen = itemSizesY.length;
+    const prevColLen = columnSizes.length;
+
+    itemSizesX.resize(useX && itemStorage ? len : 0);
+    itemSizesY.resize(useY && itemStorage ? len : 0);
+    columnSizes.resize(colCount > 0 && colStorage ? colCount : 0);
+
+    if (measuredItemsX.value.length !== (useX ? len : 0)) {
+      const newMeasuredX = new Uint8Array(useX ? len : 0);
+      newMeasuredX.set(measuredItemsX.value.subarray(0, Math.min(useX ? len : 0, measuredItemsX.value.length)));
       measuredItemsX.value = newMeasuredX;
     }
-    if (measuredItemsY.value.length !== len) {
-      const newMeasuredY = new Uint8Array(len);
-      newMeasuredY.set(measuredItemsY.value.subarray(0, Math.min(len, measuredItemsY.value.length)));
+    if (measuredItemsY.value.length !== (useY ? len : 0)) {
+      const newMeasuredY = new Uint8Array(useY ? len : 0);
+      newMeasuredY.set(measuredItemsY.value.subarray(0, Math.min(useY ? len : 0, measuredItemsY.value.length)));
       measuredItemsY.value = newMeasuredY;
     }
     if (measuredColumns.value.length !== colCount) {
@@ -131,10 +166,15 @@ export function useVirtualScrollSizes<T>(
       newMeasuredCols.set(measuredColumns.value.subarray(0, Math.min(colCount, measuredColumns.value.length)));
       measuredColumns.value = newMeasuredCols;
     }
+
+    processedToX = (itemSizesX.length === 0 || prevXLen === 0) ? 0 : Math.min(processedToX, len);
+    processedToY = (itemSizesY.length === 0 || prevYLen === 0) ? 0 : Math.min(processedToY, len);
+    processedToCols = (columnSizes.length === 0 || prevColLen === 0) ? 0 : Math.min(processedToCols, colCount);
   };
 
   /**
-   * Helper to initialize measurements for a single axis.
+   * Helper to initialize measurements for a single axis, starting at `startFrom`.
+   * Indices below `startFrom` already hold values matching the current config.
    */
   const initializeAxis = (
     count: number,
@@ -145,23 +185,17 @@ export function useVirtualScrollSizes<T>(
     gap: number,
     isDynamic: boolean,
     isX: boolean,
-    shouldReset: boolean,
+    startFrom: number,
     prevGap: number,
   ) => {
+    // Dense changes (initial fills, gap rebases) go through set() + one final
+    // rebuild(); sparse changes (appended tails, most re-initializations) are
+    // applied incrementally with O(log n) updates so large datasets are never
+    // walked or rebuilt on every append.
     let needsRebuild = false;
+    let sparseUpdates = 0;
 
-    if (shouldReset) {
-      for (let i = 0; i < count; i++) {
-        if (tree.get(i) !== 0) {
-          tree.set(i, 0);
-          measured[ i ] = 0;
-          needsRebuild = true;
-        }
-      }
-      return needsRebuild;
-    }
-
-    for (let i = 0; i < count; i++) {
+    for (let i = startFrom; i < count; i++) {
       const current = tree.get(i);
       const isMeasured = measured[ i ] === 1;
 
@@ -169,9 +203,14 @@ export function useVirtualScrollSizes<T>(
         const baseSize = getSizeAt(i, sizeProp, defaultSize, gap, tree, isX) + gap;
 
         if (Math.abs(current - baseSize) > 0.5) {
-          tree.set(i, baseSize);
+          if (sparseUpdates < 1024) {
+            tree.update(i, baseSize - current);
+            sparseUpdates++;
+          } else {
+            tree.set(i, baseSize);
+            needsRebuild = true;
+          }
           measured[ i ] = isDynamic ? 0 : 1;
-          needsRebuild = true;
         } else if (!isDynamic) {
           measured[ i ] = 1;
         }
@@ -180,8 +219,13 @@ export function useVirtualScrollSizes<T>(
         const adjusted = current - prevGap + gap;
 
         if (Math.abs(adjusted - current) > 0.5) {
-          tree.set(i, adjusted);
-          needsRebuild = true;
+          if (sparseUpdates < 1024) {
+            tree.update(i, adjusted - current);
+            sparseUpdates++;
+          } else {
+            tree.set(i, adjusted);
+            needsRebuild = true;
+          }
         }
       }
     }
@@ -190,8 +234,11 @@ export function useVirtualScrollSizes<T>(
 
   /**
    * Initializes prefix sum trees from props (fixed sizes, width arrays, or functions).
+   *
+   * @param prepended - Whether this call follows a detected prepend (forces a full
+   * pass because stored values were re-indexed).
    */
-  const initializeMeasurements = () => {
+  const initializeMeasurements = (prepended = false) => {
     const propsVal = props.value.props;
     const len = propsVal.items.length;
     const colCount = propsVal.columnCount || 0;
@@ -202,65 +249,54 @@ export function useVirtualScrollSizes<T>(
     const defaultColWidth = propsVal.defaultColumnWidth || DEFAULT_COLUMN_WIDTH;
     const defaultItemSize = propsVal.defaultItemSize || props.value.defaultSize;
 
+    const useX = propsVal.direction === 'horizontal';
+    const useY = propsVal.direction !== 'horizontal';
+    const uniformItems = isFixedNumber(itemSize);
+    const uniformCols = isFixedNumber(cw);
+
     // Initialize columns
-    const colNeedsRebuild = initializeAxis(
-      colCount,
-      columnSizes,
-      measuredColumns.value,
-      cw,
-      defaultColWidth,
-      columnGap,
-      props.value.isDynamicColumnWidth,
-      true,
-      false,
-      lastColumnGap,
-    );
+    if (colCount > 0) {
+      if (uniformCols) {
+        measuredColumns.value.fill(1);
+      } else {
+        const startFrom = (prepended || lastColumnGap !== columnGap) ? 0 : Math.min(processedToCols, colCount);
+        if (startFrom < colCount && initializeAxis(colCount, columnSizes, measuredColumns.value, cw, defaultColWidth, columnGap, props.value.isDynamicColumnWidth, true, startFrom, lastColumnGap)) {
+          columnSizes.rebuild();
+        }
+        processedToCols = colCount;
+      }
+    }
 
-    // Initialize items X
-    const itemsXNeedsRebuild = initializeAxis(
-      len,
-      itemSizesX,
-      measuredItemsX.value,
-      itemSize,
-      defaultItemSize,
-      columnGap,
-      props.value.isDynamicItemSize,
-      true,
-      props.value.direction !== 'horizontal',
-      lastColumnGap,
-    );
+    // Initialize items X (widths of items in horizontal mode)
+    if (useX) {
+      if (uniformItems) {
+        measuredItemsX.value.fill(1);
+      } else {
+        const startFrom = (prepended || lastColumnGap !== columnGap) ? 0 : Math.min(processedToX, len);
+        if (startFrom < len && initializeAxis(len, itemSizesX, measuredItemsX.value, itemSize, defaultItemSize, columnGap, props.value.isDynamicItemSize, true, startFrom, lastColumnGap)) {
+          itemSizesX.rebuild();
+        }
+        processedToX = len;
+      }
+    }
 
-    // Initialize items Y
-    const itemsYNeedsRebuild = initializeAxis(
-      len,
-      itemSizesY,
-      measuredItemsY.value,
-      itemSize,
-      defaultItemSize,
-      gap,
-      props.value.isDynamicItemSize,
-      false,
-      props.value.direction === 'horizontal',
-      lastGap,
-    );
+    // Initialize items Y (heights of items in vertical/both mode)
+    if (useY) {
+      if (uniformItems) {
+        measuredItemsY.value.fill(1);
+      } else {
+        const startFrom = (prepended || lastGap !== gap) ? 0 : Math.min(processedToY, len);
+        if (startFrom < len && initializeAxis(len, itemSizesY, measuredItemsY.value, itemSize, defaultItemSize, gap, props.value.isDynamicItemSize, false, startFrom, lastGap)) {
+          itemSizesY.rebuild();
+        }
+        processedToY = len;
+      }
+    }
 
     lastColumnGap = columnGap;
     lastGap = gap;
-
-    if (colNeedsRebuild) {
-      columnSizes.rebuild();
-    }
-    if (itemsXNeedsRebuild) {
-      itemSizesX.rebuild();
-    }
-    if (itemsYNeedsRebuild) {
-      itemSizesY.rebuild();
-    }
   };
 
-  /**
-   * Helper to update a single size in the tree.
-   */
   /**
    * Helper to update a single size in the tree.
    * @param index - Index to update.
@@ -299,27 +335,31 @@ export function useVirtualScrollSizes<T>(
     const len = newItems.length;
     const colCount = propsVal.columnCount || 0;
 
-    resizeMeasurements(len, colCount);
-
     const prependCount = propsVal.restoreScrollOnPrepend
       ? calculatePrependCount(lastItems, newItems)
       : 0;
 
+    resizeMeasurements(len, colCount);
+
     if (prependCount > 0) {
       itemSizesX.shift(prependCount);
       itemSizesY.shift(prependCount);
+      processedToX = 0;
+      processedToY = 0;
 
       const newMeasuredX = new Uint8Array(len);
       const newMeasuredY = new Uint8Array(len);
-      newMeasuredX.set(measuredItemsX.value.subarray(0, Math.min(len - prependCount, measuredItemsX.value.length)), prependCount);
-      newMeasuredY.set(measuredItemsY.value.subarray(0, Math.min(len - prependCount, measuredItemsY.value.length)), prependCount);
+      newMeasuredX.set(measuredItemsX.value.subarray(0, Math.max(0, Math.min(len - prependCount, measuredItemsX.value.length))), prependCount);
+      newMeasuredY.set(measuredItemsY.value.subarray(0, Math.max(0, Math.min(len - prependCount, measuredItemsY.value.length))), prependCount);
       measuredItemsX.value = newMeasuredX;
       measuredItemsY.value = newMeasuredY;
     }
 
-    initializeMeasurements();
+    initializeMeasurements(prependCount > 0);
 
-    lastItems = [ ...newItems ];
+    // Keep the previous items snapshot only while prepend detection is enabled;
+    // copying a very large dataset otherwise would be pure overhead.
+    lastItems = propsVal.restoreScrollOnPrepend ? [ ...newItems ] : [];
     sizesInitialized.value = true;
     treeUpdateFlag.value++;
   };
@@ -453,7 +493,7 @@ export function useVirtualScrollSizes<T>(
     measuredItemsX,
     /** Measured item heights. */
     measuredItemsY,
-    /** Measured column widths. */
+    /** Measured column heights. */
     measuredColumns,
     /** Flag that updates when any tree changes. */
     treeUpdateFlag,
