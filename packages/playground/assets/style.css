@@ -354,6 +354,10 @@ body {
   @apply absolute start-0 end-0 bottom-0 z-50 h-1 cursor-row-resize transition-colors hover:bg-primary/40;
 }
 
+:not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
 /* --- General Utilities --- */
 
 @utility app-card {
@@ -614,7 +618,7 @@ body {
 }
 
 @utility docs-method-title {
-  @apply mb-4 flex items-center gap-2 text-lg font-bold;
+  @apply mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-lg font-bold;
 }
 @utility docs-method-title--primary {
   @apply text-primary;

@@ -260,125 +260,126 @@ import ExampleCard from '#/components/ExampleCard.vue';
 
     <div class="divider col-span-full font-black small-caps text-sm tracking-widest opacity-80">
       Patterns & Recipes
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-chat"
-        group="1"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-blog"
-        group="2"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-async-content"
-        group="3"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-streaming"
-        group="4"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-table"
-        group="5"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-spreadsheet"
-        group="6"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Data Browser"
-        description="Grouped directory pattern with iOS-style sticky section headers, instant search over a rebuilt section index and jump-to navigation."
-        href="/pattern-data-browser"
-        group="7"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Code Viewer"
-        description="Browse and search the real simdutf source file used in the code diff example."
-        href="/pattern-code-viewer"
-        group="1"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Log Viewer"
-        description="Filter and search 200,000 lazy generated log lines with virtualization."
-        href="/pattern-log-viewer"
-        group="2"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Side-by-Side Code Diff"
-        description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
-        href="/pattern-diff"
-        group="3"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Search & Highlight"
-        description="Data-layer search over virtualized content with the CSS Custom Highlight API (Ctrl+K)."
-        href="/pattern-search"
-        group="4"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Collapsible Tree"
-        description="Hierarchical list where items can be expanded or collapsed while maintaining smooth performance."
-        href="/pattern-tree"
-        group="5"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Draggable List"
-        description="Reorder virtualized items using native drag and drop while maintaining high performance."
-        href="/pattern-draggable"
-        group="6"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Photo Gallery"
-        description="High-performance grid photo gallery with loading placeholders for images as rows stream in."
-        href="/pattern-gallery"
-        group="7"
-      />
-
-      <ExampleCard
-        type="Pattern"
-        title="Masonry Gallery"
-        description="Remote images in a single masonry container: aspect-ratio oracle heights and bounded low-priority prefetch."
-        href="/pattern-masonry-gallery"
-        group="7"
-      />
     </div>
+
+    <ExampleCard
+      type="Pattern"
+      title="Chat Interface"
+      description="Chat with dynamic heights, an initial scroll to bottom, and history restoration when older messages are prepended."
+      href="/pattern-chat"
+      group="1"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Blog Posts"
+      description="Blog feed with dynamic heights and on-demand post loading."
+      href="/pattern-blog"
+      group="2"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Async Content"
+      description="Virtualized feed whose rows fetch simulated content on demand, with a shared cache and auto-measured heights."
+      href="/pattern-async-content"
+      group="3"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Live Streaming"
+      description="A simulated market feed that mutates only the visible window of 5,000 virtualized symbols."
+      href="/pattern-streaming"
+      group="4"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Table"
+      description="Semantic HTML table virtualization for accessible tabular data grids."
+      href="/pattern-table"
+      group="5"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Spreadsheet"
+      description="Excel-like bidirectional grid with sticky row and column headers and resizable cells."
+      href="/pattern-spreadsheet"
+      group="6"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Data Browser"
+      description="Grouped directory pattern with iOS-style sticky section headers, instant search over a rebuilt section index and jump-to navigation."
+      href="/pattern-data-browser"
+      group="7"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Code Viewer"
+      description="Browse and search the real simdutf source file used in the code diff example."
+      href="/pattern-code-viewer"
+      group="1"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Log Viewer"
+      description="Filter and search 200,000 lazy generated log lines with virtualization."
+      href="/pattern-log-viewer"
+      group="2"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Side-by-Side Code Diff"
+      description="Synced side-by-side virtualized diff of two code versions with search and highlighted changes."
+      href="/pattern-diff"
+      group="3"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Search & Highlight"
+      description="Data-layer search over virtualized content with the CSS Custom Highlight API (Ctrl+K)."
+      href="/pattern-search"
+      group="4"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Collapsible Tree"
+      description="Hierarchical list where items can be expanded or collapsed while maintaining smooth performance."
+      href="/pattern-tree"
+      group="5"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Draggable List"
+      description="Reorder virtualized items using native drag and drop while maintaining high performance."
+      href="/pattern-draggable"
+      group="6"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Photo Gallery"
+      description="High-performance grid photo gallery with loading placeholders for images as rows stream in."
+      href="/pattern-gallery"
+      group="7"
+    />
+
+    <ExampleCard
+      type="Pattern"
+      title="Masonry Gallery"
+      description="Remote images in a single masonry container: aspect-ratio oracle heights and bounded low-priority prefetch."
+      href="/pattern-masonry-gallery"
+      group="1"
+    />
   </div>
 </template>
