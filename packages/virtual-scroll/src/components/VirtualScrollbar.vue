@@ -40,6 +40,9 @@ const { trackProps, thumbProps } = useVirtualScrollbar(() => ({
 </template>
 
 <style>
+/* Not scoped on purpose: `trackProps`/`thumbProps` are also applied to
+   consumer-built scrollbars (via the `scrollbar` slot or standalone usage),
+   which live outside this component's scoped data attributes. */
 @layer components {
   .virtual-scrollbar-track {
     --vsi-scrollbar-bg: var(--vs-scrollbar-bg, light-dark(rgba(230, 230, 230, 0.9), rgba(30, 30, 30, 0.9)));

@@ -1511,9 +1511,6 @@ defineExpose({
     table-layout: auto;
   }
 
-  /* Pinned columns: the table takes its full column sum (fixed layout
-     ignores content), so wider-than-viewport tables overflow horizontally
-     instead of squeezing the columns. */
   .virtual-scroll-flow-table.virtual-scroll--flow-fixed {
     table-layout: fixed;
   }
@@ -1551,30 +1548,24 @@ defineExpose({
   .virtual-scroll--flow .virtual-scroll-footer {
     display: table-footer-group;
   }
+  /* Rows and cells come from user slot content (outside the scope), so they
+     are reached with :deep() — the rules stay in this scoped block. */
+  .virtual-scroll--flow :deep(.virtual-scroll-wrapper > tr.virtual-scroll-item > td),
+  .virtual-scroll--flow :deep(.virtual-scroll-wrapper > tr.virtual-scroll-item > th) {
+    display: table-cell;
+  }
 
-  /* Header/footer rows and cells come from user slots: pierce the scope so
-     the real table layout roles apply to them. */
-}
-</style>
+  .virtual-scroll--flow :deep(.virtual-scroll-header > tr),
+  .virtual-scroll--flow :deep(.virtual-scroll-footer > tr) {
+    display: table-row;
+  }
 
-<style>
-/* Flow-mode header/footer content arrives through user slots (no scope attr),
-   so these rules live in a global block keyed by component classes. */
-.virtual-scroll--flow .virtual-scroll-wrapper > tr.virtual-scroll-item > td,
-.virtual-scroll--flow .virtual-scroll-wrapper > tr.virtual-scroll-item > th {
-  display: table-cell;
-}
-
-.virtual-scroll--flow .virtual-scroll-header > tr,
-.virtual-scroll--flow .virtual-scroll-footer > tr {
-  display: table-row;
-}
-
-.virtual-scroll--flow .virtual-scroll-header > tr > td,
-.virtual-scroll--flow .virtual-scroll-header > tr > th,
-.virtual-scroll--flow .virtual-scroll-footer > tr > td,
-.virtual-scroll--flow .virtual-scroll-footer > tr > th {
-  display: table-cell;
-  align-items: center;
+  .virtual-scroll--flow :deep(.virtual-scroll-header > tr > td),
+  .virtual-scroll--flow :deep(.virtual-scroll-header > tr > th),
+  .virtual-scroll--flow :deep(.virtual-scroll-footer > tr > td),
+  .virtual-scroll--flow :deep(.virtual-scroll-footer > tr > th) {
+    display: table-cell;
+    align-items: center;
+  }
 }
 </style>
