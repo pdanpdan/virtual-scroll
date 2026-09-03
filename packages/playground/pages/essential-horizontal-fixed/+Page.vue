@@ -17,10 +17,10 @@ const bufferBefore = ref(20);
 const bufferAfter = ref(20);
 const virtualScrollbar = ref(true);
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-  text: `Fixed Item ${ i }`,
-})));
+// Items render purely from their index: the items array is a sparse placeholder
+// of the right length, so no per-row data is materialized even for 10M+ rows
+// (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const {
   virtualScrollRef,
@@ -89,10 +89,10 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       aria-label="Fixed width horizontal list"
       @scroll="onScroll"
     >
-      <template #item="{ item, index }">
+      <template #item="{ index }">
         <div class="example-horizontal-item example-horizontal-item--fixed">
           <span class="example-badge mb-4">#{{ index }}</span>
-          <div class="font-bold text-sm">{{ item.text }}</div>
+          <div class="font-bold text-sm">Fixed Item {{ index }}</div>
         </div>
       </template>
     </VirtualScroll>

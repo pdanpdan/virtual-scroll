@@ -22,10 +22,10 @@ const itemSize = ref(90);
 const bufferBefore = ref(5);
 const bufferAfter = ref(5);
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-  text: `Body Scroll Fixed Item ${ i }`,
-})));
+// Items render purely from their index: the items array is a sparse placeholder
+// of the right length, so no per-row data is materialized even for 10M+ rows
+// (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const {
   virtualScrollRef,
@@ -99,12 +99,12 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
 
-      <template #item="{ item, index }">
+      <template #item="{ index }">
         <div class="example-vertical-item example-vertical-item--fixed">
           <span class="example-badge me-8">#{{ index }}</span>
           <div>
             <div class="font-bold">Item {{ index }}</div>
-            <div class="text-xs opacity-60">{{ item.text }}</div>
+            <div class="text-xs opacity-60">Body Scroll Fixed Item {{ index }}</div>
           </div>
         </div>
       </template>

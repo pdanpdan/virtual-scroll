@@ -26,10 +26,10 @@ const itemSizeFn = computed(() => {
   return (_: unknown, index: number) => index % 2 === 0 ? base : base * 2;
 });
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-  text: `Dynamic Item ${ i } (Height: ${ itemSizeFn.value(null, i) }px)`,
-})));
+// Items render purely from their index: the items array is a sparse placeholder
+// of the right length, so no per-row data is materialized even for 10M+ rows
+// (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const {
   virtualScrollRef,
@@ -106,10 +106,13 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
 
-      <template #item="{ item, index }">
+      <template #item="{ index }">
         <div class="example-vertical-item py-4">
           <span class="example-badge me-8">#{{ index }}</span>
-          <div class="font-bold" :style="{ minBlockSize: `${ itemSizeFn(null, index) }px` }">{{ item.text }}</div>
+          <div class="font-bold" :style="{ minBlockSize: `${ itemSizeFn(null, index) }px` }">
+            Dynamic Item {{ index }}
+            <span class="opacity-50 font-normal">(Height: {{ itemSizeFn(null, index) }}px)</span>
+          </div>
         </div>
       </template>
 

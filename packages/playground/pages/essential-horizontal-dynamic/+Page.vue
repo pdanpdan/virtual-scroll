@@ -24,11 +24,10 @@ const itemSizeFn = computed(() => {
   return (item: unknown, index: number) => index % 2 === 0 ? base : base * 2;
 });
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-  text1: `Dynamic Item ${ i }`,
-  text2: `Width: ${ itemSizeFn.value(null, i) }px`,
-})));
+// Items render purely from their index: the items array is a sparse placeholder
+// of the right length, so no per-row data is materialized even for 10M+ rows
+// (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const {
   virtualScrollRef,
@@ -96,13 +95,13 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       aria-label="Dynamic width horizontal list"
       @scroll="onScroll"
     >
-      <template #item="{ item, index }">
+      <template #item="{ index }">
         <div class="example-horizontal-item px-4">
           <span class="example-badge mb-4">#{{ index }}</span>
           <div class="font-bold text-sm mb-1" :style="{ inlineSize: `${ itemSizeFn(null, index) }px` }">
-            {{ item.text1 }}
+            Dynamic Item {{ index }}
           </div>
-          <div class="text-xs small-caps tracking-widest opacity-50">{{ item.text2 }}</div>
+          <div class="text-xs small-caps tracking-widest opacity-50">Width: {{ itemSizeFn(null, index) }}px</div>
         </div>
       </template>
     </VirtualScroll>

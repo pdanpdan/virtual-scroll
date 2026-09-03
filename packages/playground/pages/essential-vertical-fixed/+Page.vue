@@ -19,10 +19,10 @@ const stickyHeader = ref(false);
 const stickyFooter = ref(false);
 const virtualScrollbar = ref(true);
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-  text: `Fixed Item ${ i }`,
-})));
+// Uniform sizes mean rows can be rendered purely from their index: the items
+// array is a sparse placeholder of the right length, so no per-row data is
+// materialized even for 10M+ rows (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const {
   virtualScrollRef,
@@ -100,10 +100,10 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
 
-      <template #item="{ item, index }">
+      <template #item="{ index }">
         <div class="example-vertical-item example-vertical-item--fixed">
           <span class="example-badge me-8">#{{ index }}</span>
-          <span class="font-bold">{{ item.text }}</span>
+          <span class="font-bold">Fixed Item {{ index }}</span>
         </div>
       </template>
 

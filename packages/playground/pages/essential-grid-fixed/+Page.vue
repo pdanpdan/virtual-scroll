@@ -23,9 +23,10 @@ const virtualScrollbar = ref(true);
 
 const columnWidths = computed(() => [ columnWidth.value, Math.ceil(columnWidth.value * 1.5) ]);
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-})));
+// Rows render purely from their index: the items array is a sparse placeholder
+// of the right length, so no per-row data is materialized even for 10M+ rows
+// (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const {
   virtualScrollRef,

@@ -39,9 +39,10 @@ const columnWidthFn = computed(() => {
   };
 });
 
-const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
-  id: i,
-})));
+// Rows render purely from their index: the items array is a sparse placeholder
+// of the right length, so no per-row data is materialized even for 10M+ rows
+// (only the visible window is ever accessed).
+const items = computed(() => new Array(itemCount.value));
 
 const stickyIndices = computed(() => {
   const indices: number[] = [];
@@ -136,7 +137,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
 
-      <template #item="{ index, columnRange, getColumnWidth, isStickyActive, getCellAriaProps }">
+      <template #item="{ index, columnRange, isStickyActive, getCellAriaProps }">
         <div
           :key="`r_${ index }`"
           class="example-grid-row"
@@ -154,7 +155,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
             v-bind="getCellAriaProps(columnRange.start + c - 1)"
           >
             <div class="example-badge mb-2">R{{ index }} &times; C{{ columnRange.start + c - 1 }}</div>
-            <div class="opacity-40 tabular-nums">{{ getColumnWidth(columnRange.start + c - 1) }}px</div>
+            <div class="opacity-40 tabular-nums">{{ columnWidthFn(columnRange.start + c - 1) }}px</div>
           </div>
         </div>
       </template>
