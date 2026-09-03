@@ -137,6 +137,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-tree', label: 'Collapsible Tree' },
   { href: '/pattern-draggable', label: 'Draggable List' },
   { href: '/pattern-gallery', label: 'Photo Gallery' },
+  { href: '/pattern-masonry-gallery', label: 'Masonry Gallery' },
 ];
 
 const isExamplePage = computed(() => {
