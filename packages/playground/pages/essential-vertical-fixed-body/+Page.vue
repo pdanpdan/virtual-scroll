@@ -66,7 +66,11 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #controls>
-      <ScrollStatus :scroll-details="scrollDetails" direction="vertical" />
+      <ScrollStatus
+        dom-count-selector=".example-container"
+        :scroll-details="scrollDetails"
+        direction="vertical"
+      />
 
       <ScrollControls
         v-model:item-count="itemCount"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ColumnRange, ScrollDetails } from '@pdanpdan/virtual-scroll';
 
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { currentFps, efficiency, refreshRate, startDetection, stopDetection } from '#/lib/fps';
 
@@ -9,12 +9,31 @@ const props = defineProps<{
   scrollDetails: ScrollDetails | null;
   direction?: string;
   columnRange?: ColumnRange;
+  /** CSS selector of the virtualized container whose live DOM row count is shown. */
+  domCountSelector?: string;
 }>();
 
 const itemsRange = computed(() => ({
   start: props.scrollDetails?.range?.start ?? 0,
   end: props.scrollDetails?.range?.end ?? 0,
 }));
+
+// Proof-of-scope readout: the actual number of mounted item nodes stays bounded
+// no matter the dataset size. Only counted on the client (mounted) to keep the
+// server-rendered markup identical during hydration.
+const domCount = ref(0);
+const isMounted = ref(false);
+function syncDomCount() {
+  if (!isMounted.value || !props.domCountSelector || typeof document === 'undefined') {
+    return;
+  }
+  domCount.value = document.querySelectorAll(`${ props.domCountSelector } .virtual-scroll-item`).length;
+}
+onMounted(() => {
+  isMounted.value = true;
+  syncDomCount();
+});
+watch(() => props.scrollDetails, syncDomCount);
 
 const fpsClass = computed(() => {
   const val = efficiency.value;
@@ -69,6 +88,14 @@ onUnmounted(stopDetection);
           <span class="opacity-50 mx-1">&times;</span>
           {{ columnRange.start }}:{{ columnRange.end }}
         </template>
+      </div>
+    </li>
+
+    <li v-if="domCountSelector" class="list-row py-2 items-center border-t border-base-content/5">
+      <div class="text-xs font-bold small-caps opacity-40 tracking-wider">DOM Items #</div>
+      <div />
+      <div class="inline-flex font-mono font-bold text-accent">
+        {{ isMounted ? domCount : '\u2014' }}
       </div>
     </li>
 

@@ -92,6 +92,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
     <template #controls>
       <ScrollStatus
+        dom-count-selector=".example-container"
         :scroll-details="scrollDetails"
         direction="both"
         :column-range="virtualScrollRef?.columnRange"
