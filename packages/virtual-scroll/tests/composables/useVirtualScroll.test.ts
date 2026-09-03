@@ -447,6 +447,39 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
+    it('measures host offsets from the container padding box (border excluded)', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      container.style.borderLeft = '3px solid red';
+      container.style.borderTop = '2px solid red';
+      const hostElement = document.createElement('div');
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 8, // container 0 + border 3 + content offset 5
+        right: 108,
+        top: 7, // container 0 + border 2 + content offset 5
+        bottom: 0,
+        width: 100,
+        height: 0,
+      } as DOMRect);
+
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        direction: 'vertical',
+        container,
+        hostElement,
+      });
+      await nextTick();
+      await nextTick();
+
+      // The scrollport origin is the padding box: rendered borders must not leak
+      // into the content offset used by scroll target math.
+      expect(result.componentOffset.x).toBe(5);
+      expect(result.componentOffset.y).toBe(5);
+      wrapper.unmount();
+    });
+
     it('re-syncs the horizontal scroll position when RTL is enabled', async () => {
       const container = document.createElement('div');
       container.scrollTo = vi.fn();
@@ -513,6 +546,48 @@ describe('useVirtualScroll', () => {
 
       // horizontal list: the width is the items total, the height the viewport
       expect(result.scrollDetails.value.totalSize.width).toBe(4000);
+      wrapper.unmount();
+    });
+
+    it('measures RTL host offsets from the right padding edge (border excluded)', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      container.style.borderRight = '3px solid red';
+      vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+        left: 0,
+        right: 200,
+        top: 0,
+        bottom: 0,
+        width: 200,
+        height: 0,
+      } as DOMRect);
+      const hostElement = document.createElement('div');
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
+        left: 0,
+        right: 192, // container right 200 - border 3 - content offset 5
+        top: 0,
+        bottom: 0,
+        width: 100,
+        height: 0,
+      } as DOMRect);
+
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        direction: 'vertical',
+        container,
+        hostElement,
+      });
+      await nextTick();
+      await nextTick();
+
+      // Force RTL so calculateOffset uses the right-edge padding-box math.
+      result.isRtl.value = true;
+      await nextTick();
+      await nextTick();
+
+      expect(result.componentOffset.x).toBe(5);
       wrapper.unmount();
     });
 

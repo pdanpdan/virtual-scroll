@@ -54,6 +54,14 @@ export function useVirtualScroll<T = unknown>(
 
   // --- State ---
   /** Current horizontal display scroll position (DU). */
+  /**
+   * Resolves the effective scroll container.
+   * Falls back to the host element (not straight to `window`) so a self-scrolling
+   * host gets zero offsets and element-targeted scroll writes even while the host
+   * ref is still being wired during hydration/mount.
+   */
+  const getContainer = () => props.value.container || props.value.hostRef || window;
+
   const scrollX = ref(0);
   /** Current vertical display scroll position (DU). */
   const scrollY = ref(0);
@@ -388,7 +396,7 @@ export function useVirtualScroll<T = unknown>(
     const isCorrection = isScrollToIndexOptions(options) ? options.isCorrection : false;
     const dryRun = isScrollToIndexOptions(options) ? options.dryRun : false;
 
-    const container = props.value.container || window;
+    const container = getContainer();
 
     const { targetX, targetY, effectiveAlignX, effectiveAlignY } = calculateScrollTarget({
       rowIndex,
@@ -487,7 +495,7 @@ export function useVirtualScroll<T = unknown>(
   }
 
   function scrollToOffset(x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; isCorrection?: boolean; endExtraX?: number; endExtraY?: number; }) {
-    const container = props.value.container || window;
+    const container = getContainer();
     // Internal corrections (settle re-clamps) must not restart the programmatic scroll state.
     if (!options?.isCorrection) {
       startProgrammaticScroll(options?.behavior);
@@ -865,7 +873,7 @@ export function useVirtualScroll<T = unknown>(
     if (pendingScroll.value && !isHydrating.value) {
       const { rowIndex, colIndex, options, offsetX, offsetY, endExtraX, endExtraY } = pendingScroll.value;
       const isSmooth = isScrollToIndexOptions(options) && options.behavior === 'smooth';
-      const container = props.value.container || window;
+      const container = getContainer();
       const actualScrollX = (typeof window !== 'undefined' && container === window ? window.scrollX : (container as HTMLElement).scrollLeft);
       const actualScrollY = (typeof window !== 'undefined' && container === window ? window.scrollY : (container as HTMLElement).scrollTop);
       const scrollValueX = isRtl.value ? Math.abs(actualScrollX) : actualScrollX;
@@ -985,7 +993,7 @@ export function useVirtualScroll<T = unknown>(
     if (typeof window === 'undefined') {
       return;
     }
-    const container = props.value.container || window;
+    const container = getContainer();
     const calculateOffset = (el: HTMLElement) => {
       const rect = el.getBoundingClientRect();
       if (container === window) {
@@ -999,9 +1007,22 @@ export function useVirtualScroll<T = unknown>(
       }
       if (isElement(container)) {
         const containerRect = container.getBoundingClientRect();
+        // Measure from the container's padding box: scroll positions are relative
+        // to the scrollport origin, so a rendered border must not leak into the
+        // content offset (it would shift every programmatic scroll target by the
+        // border width). `border-style: none` widths have no layout effect.
+        const containerStyle = getComputedStyle(container);
+        const borderX = (isRtl.value
+          ? containerStyle.borderRightStyle !== 'none' && Number.parseFloat(containerStyle.borderRightWidth) > 0
+          : containerStyle.borderLeftStyle !== 'none' && Number.parseFloat(containerStyle.borderLeftWidth) > 0)
+          ? Number.parseFloat(isRtl.value ? containerStyle.borderRightWidth : containerStyle.borderLeftWidth)
+          : 0;
+        const borderY = (containerStyle.borderTopStyle !== 'none' && Number.parseFloat(containerStyle.borderTopWidth) > 0)
+          ? Number.parseFloat(containerStyle.borderTopWidth)
+          : 0;
         return {
-          x: isRtl.value ? containerRect.right - rect.right - container.scrollLeft : rect.left - containerRect.left + container.scrollLeft,
-          y: rect.top - containerRect.top + container.scrollTop,
+          x: isRtl.value ? containerRect.right - borderX - rect.right - container.scrollLeft : rect.left - containerRect.left - borderX + container.scrollLeft,
+          y: rect.top - containerRect.top - borderY + container.scrollTop,
         };
       }
       return { x: 0, y: 0 };
@@ -1035,13 +1056,13 @@ export function useVirtualScroll<T = unknown>(
     scrollbarOffset.y = Number.parseFloat(cs.paddingTop) || 0;
   };
 
-  const attachEvents = (container: HTMLElement | Window | null) => {
+  const attachEvents = (container: HTMLElement | Window) => {
     // v8 ignore start -- defensive SSR guard; the scroll listener is only attached when window exists
     if (typeof window === 'undefined') {
       return;
     }
     // v8 ignore stop
-    const effectiveContainer = container || window;
+    const effectiveContainer = container;
     const scrollTarget = (effectiveContainer === window || (isElement(effectiveContainer) && effectiveContainer === document.documentElement)) ? document : effectiveContainer;
     scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
     updateDirection();
@@ -1095,9 +1116,9 @@ export function useVirtualScroll<T = unknown>(
     onMounted(() => {
       isMounted.value = true;
       updateDirection();
-      watch(() => props.value.container, (newContainer) => {
+      watch(() => props.value.container, () => {
         cleanup?.();
-        cleanup = attachEvents(newContainer || null);
+        cleanup = attachEvents(getContainer());
       }, { immediate: true });
       updateHostOffset();
       nextTick(() => {
@@ -1148,7 +1169,7 @@ export function useVirtualScroll<T = unknown>(
       if (typeof window === 'undefined') {
         return;
       }
-      const container = props.value.container || window;
+      const container = getContainer();
       if (container === window) {
         scrollX.value = window.scrollX;
         scrollY.value = window.scrollY;
@@ -1173,7 +1194,7 @@ export function useVirtualScroll<T = unknown>(
     if (oldRtl === undefined || newRtl === oldRtl || !isMounted.value) {
       return;
     }
-    updateScrollbarOffset(props.value.container || window);
+    updateScrollbarOffset(getContainer());
     if (direction.value === 'vertical') {
       updateHostOffset();
       return;
