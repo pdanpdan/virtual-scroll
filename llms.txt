@@ -14,6 +14,7 @@ A high-performance, flexible virtual scrolling component for Vue 3 that supports
 - **Any Scroll Container**: Virtualizes inside its own element or the browser `window`/`body` (`container` prop).
 - **Virtual Scrollbars**: `virtualScrollbar` prop to force custom-drawn scrollbars (built-in or via the `scrollbar` slot / `VirtualScrollbar` component).
 - **Table Mode**: dedicated `VirtualScrollTable` component renders semantic `<table>` rows in real flow between engine-sized spacers (`flowTable`) with dynamic measured row heights, column pinning (`autoSizeColumns`/`columnWidths`), sticky header/footer slots and a horizontal scrollbar when the table overflows its container.
+- **Masonry Mode**: dedicated `VirtualScrollMasonry` component renders a true masonry grid in ONE scroll container — responsive column count and fractional column width derived from the container width (`targetColumnWidth`/`minColumns`/`maxColumns`/`gap`), canonical deterministic card heights from an `itemHeight` oracle (far `scrollToIndex` lands exactly without mounting the path; optional `measuredHeights` measures mounted cards for local-determinism layout instead), segment-snapshotted column frontiers (bounded memory at any scale), content-space anchoring on reflow/resize, exposed live column count/width and estimated-total reporting until the chain is exact.
 - **Infinite Loading**: `loading` + `loadDistance` props, `load` event and `loading` slot for pagination.
 - **SSR**: `ssrRange` prop pre-renders a static in-flow block server-side for SEO.
 - **Accessibility**: Automatic ARIA roles (list, grid, tree, listbox, menu), keyboard navigation.
@@ -149,7 +150,38 @@ const items = new Array(10_000_000); // sparse placeholder, no data objects
 ```
 Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive content from `index`. ResizeObserver-measured dynamic sizes work the same way (sizes come from the rendered DOM).
 
+### 9. Masonry Grid (single scroll container)
+[Live Example](https://pdanpdan.github.io/virtual-scroll/essential-masonry)
+`VirtualScrollMasonry` virtualizes cards of a real masonry layout inside one scroll container. The column count re-flows from the container width and the layout re-anchors the topmost visible card on reflow. Heights come from a deterministic `itemHeight` oracle — reserve media space so content matches the oracle and the layout stays canonical.
+```vue
+const items = ref(cards); // model holds id, aspectRatio (or height), color
+
+// pure function of (item, index, resolved columnWidth) — MUST be deterministic
+function itemHeight(item, _index, width) {
+  return Math.max(60, item.height * (width / 240));
+}
+
+<VirtualScrollMasonry
+  :items="items"
+  :item-height="itemHeight"
+  :target-column-width="240"
+  :min-columns="2"
+  :max-columns="8"
+  :gap="16"
+  @scroll="(d) => stats = d"
+>
+  <template #item="{ item, index, column, width, height }">
+    <div class="card" :style="{ height, backgroundColor: item.color }">
+      Card {{ index }} · col {{ column }} · {{ Math.round(height) }}px
+    </div>
+  </template>
+</VirtualScrollMasonry>
+```
+The instance (via `ref`) exposes `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })` and `scrollToOffset(offset)`. Default (canonical) mode requires cards sized exactly to the oracle height; set `measuredHeights` to let mounted cards size to their content and drive the layout from measured boxes instead.
+
 ### More Example Pages
+- [Masonry Grid (Essential)](https://pdanpdan.github.io/virtual-scroll/essential-masonry): masonry in one `VirtualScrollMasonry` container — responsive column count/width, deterministic oracle heights (canonical layout), anchored reflow on resize, jump-to-card, live DOM count + column/width readouts.
+- [Masonry Gallery (Pattern)](https://pdanpdan.github.io/virtual-scroll/pattern-masonry-gallery): remote `picsum` images in one masonry container — canonical heights from each picture's `aspect-ratio`, reserved space (no layout shift on load), per-card state model-side, and a bounded low-priority prefetch batch just past the rendered window.
 - [Flow Table (Essential)](https://pdanpdan.github.io/virtual-scroll/essential-flow-table): real `<table>` rows in flow between engine-sized spacers (`flowTable`) with dynamic measured row heights, column-width modes (auto / first-window `autoSizeColumns` / explicit `columnWidths` colgroup), sticky header/footer and a horizontal scrollbar when the table overflows.
 - [Scroll Snap](https://pdanpdan.github.io/virtual-scroll/feature-scroll-snap): Snap modes on fixed and dynamic lists.
 - [Window / Body Scrolling](https://pdanpdan.github.io/virtual-scroll/essential-vertical-fixed-body): Virtualize using the browser window as scroll container.
@@ -157,8 +189,8 @@ Note: with sparse/holey `items` the `item` slot prop is `undefined` — derive c
 - [SSR](https://pdanpdan.github.io/virtual-scroll/feature-ssr): Server-rendered static range that hydrates into virtual scrolling.
 - [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/feature-custom-scrollbar): Styling the built-in virtual scrollbar.
 - [Independent Scrollbars](https://pdanpdan.github.io/virtual-scroll/feature-independent-scrollbars): Grid with separately draggable axis scrollbars.
-- [Tree](https://pdanpdan.github.io/virtual-scroll/pattern-tree) / [Masonry](https://pdanpdan.github.io/virtual-scroll/pattern-masonry) / [Gallery](https://pdanpdan.github.io/virtual-scroll/pattern-gallery) / [Draggable](https://pdanpdan.github.io/virtual-scroll/pattern-draggable) / [Search](https://pdanpdan.github.io/virtual-scroll/pattern-search) / [Diff](https://pdanpdan.github.io/virtual-scroll/pattern-diff) / [Spreadsheet](https://pdanpdan.github.io/virtual-scroll/pattern-spreadsheet): Advanced pattern recipes.
-- [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets for list or table (`VirtualScrollTable`) rendering - component SFC, composable tab (table output uses the component), CodePen/TypeScript and standalone HTML, with column widths in auto / first-window (`autoSizeColumns`) / custom colgroup modes.
+- [Tree](https://pdanpdan.github.io/virtual-scroll/pattern-tree) / [Gallery](https://pdanpdan.github.io/virtual-scroll/pattern-gallery) / [Draggable](https://pdanpdan.github.io/virtual-scroll/pattern-draggable) / [Search](https://pdanpdan.github.io/virtual-scroll/pattern-search) / [Diff](https://pdanpdan.github.io/virtual-scroll/pattern-diff) / [Spreadsheet](https://pdanpdan.github.io/virtual-scroll/pattern-spreadsheet): Advanced pattern recipes.
+- [Configurator](https://pdanpdan.github.io/virtual-scroll/configurator): Live playground that generates code snippets for list, table (`VirtualScrollTable`) or masonry (`VirtualScrollMasonry`) rendering - component SFC, composable tab (table/masonry output uses the component), CodePen/TypeScript and standalone HTML; table column widths in auto / first-window (`autoSizeColumns`) / custom colgroup modes; masonry column geometry from target width + min/max columns.
 - [Log Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-log-viewer): 200k lazy generated lines, level filter + debounced search, filtered index rebuild.
 - [Code Viewer](https://pdanpdan.github.io/virtual-scroll/pattern-code-viewer): virtualized real C++ source (the simdutf file from the code diff example, ~10.5k lines), find-next jumps and highlights matching terms.
 - [Live Streaming](https://pdanpdan.github.io/virtual-scroll/pattern-streaming): simulated market feed; each tick mutates only the visible window of 5,000 symbols (lazy per-row state), pause/resume and speed controls.
