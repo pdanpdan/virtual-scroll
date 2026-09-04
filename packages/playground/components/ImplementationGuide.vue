@@ -59,6 +59,7 @@ withDefaults(defineProps<{
 
 :deep(li) {
   margin-block-end: 0.25rem;
+  list-style-type: square;
 }
 
 :deep(strong) {
