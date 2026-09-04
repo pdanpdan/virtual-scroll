@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.13.0...v0.13.1) (2026-09-04)
+
+### Bug Fixes
+
+* **VirtualScroll:** autodetect changes in starting scroll position of first item in the list ([e14dd4c](https://github.com/pdanpdan/virtual-scroll/commit/e14dd4c52e86a4385d9ce3e1ae3957c3e0bbb286))
+
 # [0.13.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.12.0...v0.13.0) (2026-09-03)
 
 ### Bug Fixes
