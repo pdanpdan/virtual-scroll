@@ -30,7 +30,7 @@
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-keyword)">import</span><span style="color:var(--shiki-token-string-expression)"> '@pdanpdan/virtual-scroll/style.css'</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:var(--shiki-token-comment)">// Real row records: each entry becomes one virtualized <tr>.</span></span>
+<span class="line"><span style="color:var(--shiki-token-comment)">// Real row records: each entry becomes one virtualized &lt;tr>.</span></span>
 <span class="line"><span style="color:var(--shiki-token-keyword)">const</span><span style="color:var(--shiki-token-constant)"> rows</span><span style="color:var(--shiki-token-keyword)"> =</span><span style="color:var(--shiki-token-function)"> ref</span><span style="color:var(--shiki-foreground)">(</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  Array</span><span style="color:var(--shiki-token-function)">.from</span><span style="color:var(--shiki-foreground)">({ length</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 100_000</span><span style="color:var(--shiki-foreground)"> }</span><span style="color:var(--shiki-token-punctuation)">,</span><span style="color:var(--shiki-foreground)"> (_</span><span style="color:var(--shiki-token-punctuation)">,</span><span style="color:var(--shiki-foreground)"> id) </span><span style="color:var(--shiki-token-keyword)">=></span><span style="color:var(--shiki-foreground)"> ({</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">    id</span><span style="color:var(--shiki-token-punctuation)">,</span></span>
@@ -72,24 +72,34 @@
 <span class="line"><span style="color:var(--shiki-foreground)">&lt;/</span><span style="color:var(--shiki-token-string-expression)">template</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-foreground)"><</span><span style="color:var(--shiki-token-string-expression)">style</span><span style="color:var(--shiki-token-function)"> scoped</span><span style="color:var(--shiki-foreground)">></span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">height</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 480</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  height</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 480</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">&lt;/</span><span style="color:var(--shiki-token-string-expression)">style</span><span style="color:var(--shiki-foreground)">></span></span></code></pre></div></div></div><h3>2. Choose how row heights are known</h3><p> Row sizing offers the same two modes as list virtualization. Leave <code>item-size</code> unset (or pass <code>0</code>) so every mounted row is measured with a <code>ResizeObserver</code>: cells may pad or wrap freely, and the fallback estimate (<code>default-item-size</code>, default <code>40</code>) is used only until a row mounts. For uniform rows, pass a numeric <code>item-size</code>: positions then resolve arithmetically, at the cost that the rendered cell height must equal that number exactly (padding and borders included). When sizes follow a known per-row pattern, an array or a size function works as well. </p><h3>3. Pin the column layout</h3><p> Table layout is driven by the cells present in the DOM — the header plus whatever rows are currently mounted. As the window moves, different cell content would renegotiate column widths and the table would shift under the cursor; content in unmounted rows never contributes at all. Give every column the same explicit width on the header <code>&lt;th&gt;</code> and the body <code>&lt;td&gt;</code>, either with matching width classes or with <code>nth-child</code> rules as below. Each virtualized row <code>&lt;tr&gt;</code> also carries the library class <code>.virtual-scroll-item</code> (the leading spacer row does not), which gives row-pattern selectors a stable hook for striping. </p><div class="code-block code-block--copyable has-line-numbers guide-code-block" data-theme="dark" data-v-cfe9fe9a><div class="code-block-toolbar" data-v-cfe9fe9a><button type="button" class="code-copy" data-v-cfe9fe9a><svg class="code-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-v-cfe9fe9a><rect x="9" y="9" width="13" height="13" rx="2" ry="2" data-v-cfe9fe9a></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" data-v-cfe9fe9a></path></svg><span data-v-cfe9fe9a>Copy</span></button></div><div class="code-block-scroll" data-v-cfe9fe9a><div class="shiki-container" data-v-cfe9fe9a><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0"><code><span class="line"><span style="color:var(--shiki-token-comment)">/* Table layout sees only the header plus the mounted window of rows, so</span></span>
-<span class="line"><span style="color:var(--shiki-token-comment)">   column widths must be pinned: set the SAME width on the header <th> and</span></span>
-<span class="line"><span style="color:var(--shiki-token-comment)">   the body <td> of every column. */</span></span>
+<span class="line"><span style="color:var(--shiki-token-comment)">   column widths must be pinned: set the SAME width on the header &lt;th> and</span></span>
+<span class="line"><span style="color:var(--shiki-token-comment)">   the body &lt;td> of every column. */</span></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> th</span><span style="color:var(--shiki-token-function)">.col-id</span><span style="color:var(--shiki-token-punctuation)">,</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-id</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 6</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-id</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 6</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> th</span><span style="color:var(--shiki-token-function)">.col-name</span><span style="color:var(--shiki-token-punctuation)">,</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-name</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 14</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-name</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 14</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> th</span><span style="color:var(--shiki-token-function)">.col-email</span><span style="color:var(--shiki-token-punctuation)">,</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-email</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 18</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-email</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 18</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> th</span><span style="color:var(--shiki-token-function)">.col-role</span><span style="color:var(--shiki-token-punctuation)">,</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-role</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 8</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-string-expression)"> td</span><span style="color:var(--shiki-token-function)">.col-role</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 8</span><span style="color:var(--shiki-token-keyword)">rem</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:var(--shiki-token-comment)">/* Zebra striping and cell chrome are plain CSS. Every virtualized row <tr></span></span>
-<span class="line"><span style="color:var(--shiki-token-comment)">   carries the library class .virtual-scroll-item (the leading spacer <tr></span></span>
+<span class="line"><span style="color:var(--shiki-token-comment)">/* Zebra striping and cell chrome are plain CSS. Every virtualized row &lt;tr></span></span>
+<span class="line"><span style="color:var(--shiki-token-comment)">   carries the library class .virtual-scroll-item (the leading spacer &lt;tr></span></span>
 <span class="line"><span style="color:var(--shiki-token-comment)">   does not), so row-pattern selectors can use it to skip the spacer. */</span></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.data-table</span><span style="color:var(--shiki-token-function)"> .virtual-scroll-item:nth-child</span><span style="color:var(--shiki-foreground)">(</span><span style="color:var(--shiki-token-constant)">even</span><span style="color:var(--shiki-foreground)">) </span><span style="color:var(--shiki-token-string-expression)">td</span><span style="color:var(--shiki-foreground)"> {</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  background</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-function)"> oklch</span><span style="color:var(--shiki-token-constant)">(50</span><span style="color:var(--shiki-token-keyword)">%</span><span style="color:var(--shiki-token-constant)"> 0 0 / 0.04)</span><span style="color:var(--shiki-foreground)">;</span></span>
@@ -308,7 +318,7 @@
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">import '@pdanpdan/virtual-scroll/style.css';</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">// Real row records: each entry becomes one virtualized &#x26;lt;tr>.</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">// Real row records: each entry becomes one virtualized &#x26;amp;lt;tr>.</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">const rows = ref(</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  Array.from({ length: 100_000 }, (_, id) => ({</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">    id,</span></span>
@@ -350,7 +360,9 @@
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;lt;/template></span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;lt;style scoped></span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table { height: 480px; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  height: 480px;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;lt;/style>"</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">        /></span></span>
 <span class="line"></span>
@@ -369,22 +381,30 @@
 <span class="line"><span style="color:var(--shiki-token-function)">          lang</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"css"</span></span>
 <span class="line"><span style="color:var(--shiki-token-function)">          line-numbers</span></span>
 <span class="line"><span style="color:var(--shiki-token-function)">          code</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"/* Table layout sees only the header plus the mounted window of rows, so</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">   column widths must be pinned: set the SAME width on the header &#x26;lt;th> and</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">   the body &#x26;lt;td> of every column. */</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">   column widths must be pinned: set the SAME width on the header &#x26;amp;lt;th> and</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">   the body &#x26;amp;lt;td> of every column. */</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table th.col-id,</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-id { width: 6rem; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-id {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  width: 6rem;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table th.col-name,</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-name { width: 14rem; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-name {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  width: 14rem;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table th.col-email,</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-email { width: 18rem; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-email {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  width: 18rem;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table th.col-role,</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-role { width: 8rem; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table td.col-role {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  width: 8rem;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">/* Zebra striping and cell chrome are plain CSS. Every virtualized row &#x26;lt;tr></span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">   carries the library class .virtual-scroll-item (the leading spacer &#x26;lt;tr></span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">/* Zebra striping and cell chrome are plain CSS. Every virtualized row &#x26;amp;lt;tr></span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">   carries the library class .virtual-scroll-item (the leading spacer &#x26;amp;lt;tr></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">   does not), so row-pattern selectors can use it to skip the spacer. */</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.data-table .virtual-scroll-item:nth-child(even) td {</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  background: oklch(50% 0 0 / 0.04);</span></span>
@@ -442,8 +462,8 @@
         <div id="teleported"></div>
         <script id="vike_pageContext" type="application/json">{"fromHtmlRenderer":{},"pageId":"\/pages\/pattern-table","routeParams":{}}</script>
         <script id="vike_globalContext" type="application/json">{}</script>
-        <script src="/virtual-scroll/assets/entries/entry-client-routing.BcjJojhW.js" type="module" async></script>
-        <link rel="modulepreload" href="/virtual-scroll/assets/entries/pages_pattern-table.BWnDCLYL.js" as="script" type="text/javascript">
+        <script src="/virtual-scroll/assets/entries/entry-client-routing.CC_AXNTI.js" type="module" async></script>
+        <link rel="modulepreload" href="/virtual-scroll/assets/entries/pages_pattern-table.C_peL49L.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-Cy6GuP5E.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-2Jn3d6rB.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-CmedOgZj.js" as="script" type="text/javascript">

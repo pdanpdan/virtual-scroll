@@ -425,7 +425,9 @@ import{b as e}from"../chunks/chunk-Cy6GuP5E.js";import{$ as t,C as n,D as r,J as
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  white-space: nowrap;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  background: #fff;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.row--header { background: #f3f4f6; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.row--header {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  background: #f3f4f6;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.cell {</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  position: relative;</span></span>
@@ -450,7 +452,9 @@ import{b as e}from"../chunks/chunk-Cy6GuP5E.js";import{$ as t,C as n,D as r,J as
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  background: #f3f4f6;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  font-weight: 700;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.row--header .cell--row-head { z-index: 3; } /* corner above column headers */</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.row--header .cell--row-head {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  z-index: 3;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">} /* corner above column headers */</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">/* Row-versus-row stacking belongs to the engine: while a sticky row is</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">   pinned it is marked .virtual-scroll--sticky and raised (z-index 10 in the</span></span>
@@ -620,7 +624,9 @@ import{b as e}from"../chunks/chunk-Cy6GuP5E.js";import{$ as t,C as n,D as r,J as
 <span class="line"><span style="color:var(--shiki-token-constant)">  white-space</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> nowrap</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  background</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> #fff</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.row--header</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">background</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> #f3f4f6</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.row--header</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  background</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> #f3f4f6</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.cell</span><span style="color:var(--shiki-foreground)"> {</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  position</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> relative</span><span style="color:var(--shiki-foreground)">;</span></span>
@@ -645,7 +651,9 @@ import{b as e}from"../chunks/chunk-Cy6GuP5E.js";import{$ as t,C as n,D as r,J as
 <span class="line"><span style="color:var(--shiki-token-constant)">  background</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> #f3f4f6</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  font-weight</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 700</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.row--header</span><span style="color:var(--shiki-token-function)"> .cell--row-head</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">z-index</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 3</span><span style="color:var(--shiki-foreground)">; } </span><span style="color:var(--shiki-token-comment)">/* corner above column headers */</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.row--header</span><span style="color:var(--shiki-token-function)"> .cell--row-head</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  z-index</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 3</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">} </span><span style="color:var(--shiki-token-comment)">/* corner above column headers */</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:var(--shiki-token-comment)">/* Row-versus-row stacking belongs to the engine: while a sticky row is</span></span>
 <span class="line"><span style="color:var(--shiki-token-comment)">   pinned it is marked .virtual-scroll--sticky and raised (z-index 10 in the</span></span>

@@ -68,11 +68,7 @@
 <span class="line"><span style="color:var(--shiki-foreground)">         it are covered; when the NEXT header reaches the line it slides over</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">         and pushes the previous one out (the "iOS pushing" effect). --></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">    <</span><span style="color:var(--shiki-token-string-expression)">template</span><span style="color:var(--shiki-foreground)"> #</span><span style="color:var(--shiki-token-function)">item</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-foreground)">"</span><span style="color:var(--shiki-foreground)">{ item</span><span style="color:var(--shiki-token-punctuation)">,</span><span style="color:var(--shiki-foreground)"> index</span><span style="color:var(--shiki-token-punctuation)">,</span><span style="color:var(--shiki-foreground)"> isStickyActive }</span><span style="color:var(--shiki-foreground)">"</span><span style="color:var(--shiki-foreground)">></span></span>
-<span class="line"><span style="color:var(--shiki-foreground)">      <</span><span style="color:var(--shiki-token-string-expression)">div</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">        v-if</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"item.type === 'header'"</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">        class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"section-header"</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">        :class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"{ active: isStickyActive }"</span></span>
-<span class="line"><span style="color:var(--shiki-foreground)">      ></span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">      <</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-token-function)"> v-if</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"item.type === 'header'"</span><span style="color:var(--shiki-token-function)"> class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"section-header"</span><span style="color:var(--shiki-token-function)"> :class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"{ active: isStickyActive }"</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">        {{ item.label }} <</span><span style="color:var(--shiki-token-string-expression)">span</span><span style="color:var(--shiki-token-function)"> class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"idx"</span><span style="color:var(--shiki-foreground)">>#{{ index }}&lt;/</span><span style="color:var(--shiki-token-string-expression)">span</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">      &lt;/</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">      <</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-token-function)"> v-else</span><span style="color:var(--shiki-token-function)"> class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"row"</span><span style="color:var(--shiki-foreground)">>{{ item.label }}&lt;/</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-foreground)">></span></span>
@@ -342,11 +338,7 @@
 <span class="line"><span style="color:var(--shiki-token-string-expression)">         it are covered; when the NEXT header reaches the line it slides over</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">         and pushes the previous one out (the &#x26;quot;iOS pushing&#x26;quot; effect). --></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">    &#x26;lt;template #item=&#x26;quot;{ item, index, isStickyActive }&#x26;quot;></span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;lt;div</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">        v-if=&#x26;quot;item.type === 'header'&#x26;quot;</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">        class=&#x26;quot;section-header&#x26;quot;</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">        :class=&#x26;quot;{ active: isStickyActive }&#x26;quot;</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">      ></span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;lt;div v-if=&#x26;quot;item.type === 'header'&#x26;quot; class=&#x26;quot;section-header&#x26;quot; :class=&#x26;quot;{ active: isStickyActive }&#x26;quot;></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">        {{ item.label }} &#x26;lt;span class=&#x26;quot;idx&#x26;quot;>#{{ index }}&#x26;lt;/span></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;lt;/div></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;lt;div v-else class=&#x26;quot;row&#x26;quot;>{{ item.label }}&#x26;lt;/div></span></span>
@@ -413,8 +405,8 @@
         <div id="teleported"></div>
         <script id="vike_pageContext" type="application/json">{"fromHtmlRenderer":{},"pageId":"\/pages\/feature-sticky-sections","routeParams":{}}</script>
         <script id="vike_globalContext" type="application/json">{}</script>
-        <script src="/virtual-scroll/assets/entries/entry-client-routing.BcjJojhW.js" type="module" async></script>
-        <link rel="modulepreload" href="/virtual-scroll/assets/entries/pages_feature-sticky-sections.D4Qmwf7J.js" as="script" type="text/javascript">
+        <script src="/virtual-scroll/assets/entries/entry-client-routing.CC_AXNTI.js" type="module" async></script>
+        <link rel="modulepreload" href="/virtual-scroll/assets/entries/pages_feature-sticky-sections.DxjEp6MH.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-Cy6GuP5E.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-2Jn3d6rB.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-CmedOgZj.js" as="script" type="text/javascript">

@@ -100,7 +100,9 @@
 <span class="line"><span style="color:var(--shiki-foreground)">&lt;/</span><span style="color:var(--shiki-token-string-expression)">template</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)"> </span></span>
 <span class="line"><span style="color:var(--shiki-foreground)"><</span><span style="color:var(--shiki-token-string-expression)">style</span><span style="color:var(--shiki-token-function)"> scoped</span><span style="color:var(--shiki-foreground)">></span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.gallery</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">height</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 480</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">; } </span><span style="color:var(--shiki-token-comment)">/* the scroll viewport needs a definite height */</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.gallery</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  height</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 480</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">} </span><span style="color:var(--shiki-token-comment)">/* the scroll viewport needs a definite height */</span></span>
 <span class="line"><span style="color:var(--shiki-token-function)">.card</span><span style="color:var(--shiki-foreground)"> {</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  position</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> relative</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  width</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 100</span><span style="color:var(--shiki-token-keyword)">%</span><span style="color:var(--shiki-foreground)">;</span></span>
@@ -116,7 +118,11 @@
 <span class="line"><span style="color:var(--shiki-token-constant)">  height</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 100</span><span style="color:var(--shiki-token-keyword)">%</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-token-constant)">  object-fit</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> cover</span><span style="color:var(--shiki-foreground)">;</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
-<span class="line"><span style="color:var(--shiki-token-function)">.badge</span><span style="color:var(--shiki-foreground)"> { </span><span style="color:var(--shiki-token-constant)">position</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> absolute</span><span style="color:var(--shiki-foreground)">; </span><span style="color:var(--shiki-token-constant)">inset-block-end</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 4</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">; </span><span style="color:var(--shiki-token-constant)">inset-inline-end</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 4</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">.badge</span><span style="color:var(--shiki-foreground)"> {</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  position</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> absolute</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  inset-block-end</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 4</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-token-constant)">  inset-inline-end</span><span style="color:var(--shiki-token-keyword)">:</span><span style="color:var(--shiki-token-constant)"> 4</span><span style="color:var(--shiki-token-keyword)">px</span><span style="color:var(--shiki-foreground)">;</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">}</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">&lt;/</span><span style="color:var(--shiki-token-string-expression)">style</span><span style="color:var(--shiki-foreground)">></span></span></code></pre></div></div></div><h3>4. Prefetch the next images after a scroll settle</h3><p> Visible cards load eagerly at mount, so revealed cards are already filled. To make the <em>next</em> screen ready too, warm a small batch of images beyond the rendered window — but only after the scroll settles, and only up to a bounded count, or a fast fling fires dozens of request batches. The <code>@scroll</code> event hands you a <code>MasonryScrollDetails</code> payload whose <code>range</code> tells you the rendered window; the instance (<code>ref</code>) exposes the current <code>columnWidth</code>. Request the prefetch at that same width so the browser cache serves the future card. Prefetching is optional: without it, images load when their cards enter the window. </p><div class="code-block code-block--copyable guide-code-block" data-theme="dark" data-v-cfe9fe9a><div class="code-block-toolbar" data-v-cfe9fe9a><button type="button" class="code-copy" data-v-cfe9fe9a><svg class="code-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-v-cfe9fe9a><rect x="9" y="9" width="13" height="13" rx="2" ry="2" data-v-cfe9fe9a></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" data-v-cfe9fe9a></path></svg><span data-v-cfe9fe9a>Copy</span></button></div><div class="code-block-scroll" data-v-cfe9fe9a><div class="shiki-container" data-v-cfe9fe9a><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0"><code><span class="line"><span style="color:var(--shiki-token-comment)">// Bounded, low-priority prefetch. Visible cards are already loading eagerly</span></span>
 <span class="line"><span style="color:var(--shiki-token-comment)">// (they are the only mounted content), so this only warms the images beyond</span></span>
 <span class="line"><span style="color:var(--shiki-token-comment)">// the rendered window - and only after the scroll settles, so a fast</span></span>
@@ -555,7 +561,9 @@
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;lt;/template></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;nbsp;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;lt;style scoped></span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.gallery { height: 480px; } /* the scroll viewport needs a definite height */</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.gallery {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  height: 480px;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">} /* the scroll viewport needs a definite height */</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">.card {</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  position: relative;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  width: 100%;</span></span>
@@ -571,7 +579,11 @@
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  height: 100%;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">  object-fit: cover;</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">.badge { position: absolute; inset-block-end: 4px; inset-inline-end: 4px; }</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">.badge {</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  position: absolute;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  inset-block-end: 4px;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">  inset-inline-end: 4px;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">}</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">&#x26;lt;/style>"</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">        /></span></span>
 <span class="line"></span>
@@ -645,8 +657,8 @@
         <div id="teleported"></div>
         <script id="vike_pageContext" type="application/json">{"fromHtmlRenderer":{},"pageId":"\/pages\/pattern-masonry-gallery","routeParams":{}}</script>
         <script id="vike_globalContext" type="application/json">{}</script>
-        <script src="/virtual-scroll/assets/entries/entry-client-routing.BcjJojhW.js" type="module" async></script>
-        <link rel="modulepreload" href="/virtual-scroll/assets/entries/pages_pattern-masonry-gallery.CVA9FJHk.js" as="script" type="text/javascript">
+        <script src="/virtual-scroll/assets/entries/entry-client-routing.CC_AXNTI.js" type="module" async></script>
+        <link rel="modulepreload" href="/virtual-scroll/assets/entries/pages_pattern-masonry-gallery.Ci3GDr2x.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-Cy6GuP5E.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-2Jn3d6rB.js" as="script" type="text/javascript">
         <link rel="modulepreload" href="/virtual-scroll/assets/chunks/chunk-CmedOgZj.js" as="script" type="text/javascript">

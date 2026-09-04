@@ -229,7 +229,12 @@ import{b as e}from"../chunks/chunk-Cy6GuP5E.js";import{$ as t,D as n,E as r,I as
 <span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;lt;strong>{{ post.author }}&#x26;lt;/strong></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;lt;p>{{ post.excerpt }}&#x26;lt;/p></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">    &#x26;lt;/div></span></span>
-<span class="line"><span style="color:var(--shiki-token-string-expression)">    &#x26;lt;div v-else class=&#x26;quot;skeleton&#x26;quot; role=&#x26;quot;status&#x26;quot; aria-label=&#x26;quot;Loading&#x26;quot;></span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">    &#x26;lt;div</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">      v-else</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">      class=&#x26;quot;skeleton&#x26;quot;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">      role=&#x26;quot;status&#x26;quot;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">      aria-label=&#x26;quot;Loading&#x26;quot;</span></span>
+<span class="line"><span style="color:var(--shiki-token-string-expression)">    ></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">      &#x26;amp;lt;!-- placeholder sized like the content it will become, so the row's</span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">           measured height barely changes when the real content lands --></span></span>
 <span class="line"><span style="color:var(--shiki-token-string-expression)">    &#x26;lt;/div></span></span>
@@ -354,7 +359,12 @@ import{b as e}from"../chunks/chunk-Cy6GuP5E.js";import{$ as t,D as n,E as r,I as
 <span class="line"><span style="color:var(--shiki-foreground)">      <</span><span style="color:var(--shiki-token-string-expression)">strong</span><span style="color:var(--shiki-foreground)">>{{ post.author }}&lt;/</span><span style="color:var(--shiki-token-string-expression)">strong</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">      <</span><span style="color:var(--shiki-token-string-expression)">p</span><span style="color:var(--shiki-foreground)">>{{ post.excerpt }}&lt;/</span><span style="color:var(--shiki-token-string-expression)">p</span><span style="color:var(--shiki-foreground)">></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">    &lt;/</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-foreground)">></span></span>
-<span class="line"><span style="color:var(--shiki-foreground)">    <</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-token-function)"> v-else</span><span style="color:var(--shiki-token-function)"> class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"skeleton"</span><span style="color:var(--shiki-token-function)"> role</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"status"</span><span style="color:var(--shiki-token-function)"> aria-label</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"Loading"</span><span style="color:var(--shiki-foreground)">></span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">    <</span><span style="color:var(--shiki-token-string-expression)">div</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">      v-else</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">      class</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"skeleton"</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">      role</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"status"</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">      aria-label</span><span style="color:var(--shiki-token-keyword)">=</span><span style="color:var(--shiki-token-string-expression)">"Loading"</span></span>
+<span class="line"><span style="color:var(--shiki-foreground)">    ></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">      &lt;!-- placeholder sized like the content it will become, so the row's</span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">           measured height barely changes when the real content lands --></span></span>
 <span class="line"><span style="color:var(--shiki-foreground)">    &lt;/</span><span style="color:var(--shiki-token-string-expression)">div</span><span style="color:var(--shiki-foreground)">></span></span>
