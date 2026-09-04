@@ -5,6 +5,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { inject, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -196,59 +197,68 @@ function jumpToRandom() {
       </div>
     </template>
 
-    <VirtualScroll
-      ref="virtualScrollRef"
-      :debug="debugMode"
-      class="example-container"
-      :items="baseItems"
-      :item-size="ROW_HEIGHT"
-      :buffer-before="6"
-      :buffer-after="6"
-      virtual-scrollbar
-      aria-label="Live streaming market list"
-      @scroll="onScroll"
-    >
-      <template #item="{ index }">
-        <div class="flex items-center gap-3 h-11 px-3 border-b border-base-content/5">
-          <div class="w-24 shrink-0">
-            <div class="font-bold text-xs leading-tight">{{ symbolOf(index) }}</div>
-            <div class="text-[10px] leading-tight opacity-50 truncate">{{ nameOf(index) }}</div>
-          </div>
+    <div class="relative flex min-h-0 flex-1 flex-col">
+      <VirtualScroll
+        ref="virtualScrollRef"
+        :debug="debugMode"
+        class="example-container"
+        :items="baseItems"
+        :item-size="ROW_HEIGHT"
+        :buffer-before="6"
+        :buffer-after="6"
+        virtual-scrollbar
+        aria-label="Live streaming market list"
+        @scroll="onScroll"
+      >
+        <template #item="{ index }">
+          <div class="flex items-center gap-3 h-11 px-3 border-b border-base-content/5">
+            <div class="w-24 shrink-0">
+              <div class="font-bold text-xs leading-tight">{{ symbolOf(index) }}</div>
+              <div class="text-[10px] leading-tight opacity-50 truncate">{{ nameOf(index) }}</div>
+            </div>
 
-          <div class="w-28 shrink-0 text-end">
-            <div class="font-mono tabular-nums font-bold text-sm leading-tight">
-              ${{ priceOf(index).toFixed(2) }}
+            <div class="w-28 shrink-0 text-end">
+              <div class="font-mono tabular-nums font-bold text-sm leading-tight">
+                ${{ priceOf(index).toFixed(2) }}
+              </div>
+            </div>
+
+            <div class="w-20 shrink-0">
+              <span
+                class="badge badge-xs tabular-nums"
+                :class="changeOf(index) >= 0 ? 'badge-success' : 'badge-error'"
+              >{{ changeOf(index) >= 0 ? '▲' : '▼' }} {{ Math.abs(changeOf(index)).toFixed(2) }}</span>
+            </div>
+
+            <svg
+              class="h-6 w-28 shrink-0 overflow-visible"
+              viewBox="0 0 100 26"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path
+                :d="sparkPath(index)"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                vector-effect="non-scaling-stroke"
+                :class="changeOf(index) >= 0 ? 'text-success' : 'text-error'"
+              />
+            </svg>
+
+            <div class="hidden @4xl:block text-[10px] tabular-nums opacity-50 truncate flex-1 min-w-0">
+              #{{ index }} · {{ nameOf(index) }} · vol {{ ((index * 7919) % 90000 + 1000).toLocaleString() }}
             </div>
           </div>
-
-          <div class="w-20 shrink-0">
-            <span
-              class="badge badge-xs tabular-nums"
-              :class="changeOf(index) >= 0 ? 'badge-success' : 'badge-error'"
-            >{{ changeOf(index) >= 0 ? '▲' : '▼' }} {{ Math.abs(changeOf(index)).toFixed(2) }}</span>
-          </div>
-
-          <svg
-            class="h-6 w-28 shrink-0 overflow-visible"
-            viewBox="0 0 100 26"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              :d="sparkPath(index)"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              vector-effect="non-scaling-stroke"
-              :class="changeOf(index) >= 0 ? 'text-success' : 'text-error'"
-            />
-          </svg>
-
-          <div class="hidden @4xl:block text-[10px] tabular-nums opacity-50 truncate flex-1 min-w-0">
-            #{{ index }} · {{ nameOf(index) }} · vol {{ ((index * 7919) % 90000 + 1000).toLocaleString() }}
-          </div>
-        </div>
-      </template>
-    </VirtualScroll>
+        </template>
+      </VirtualScroll>
+      <ExampleXScrollbar />
+    </div>
   </ExampleContainer>
 </template>
+
+<style scoped>
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) {
+  contain: none;
+}
+</style>

@@ -5,6 +5,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref, watch } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -40,6 +41,11 @@ const activeFile = ref<'original' | 'changed'>('original');
 
 const lines = computed(() => FILES[ activeFile.value ].lines);
 const totalLines = computed(() => lines.value.length);
+
+/** Longest line of the active file, in characters. */
+const maxChars = computed(() => Math.max(0, ...lines.value.map((line) => line.length)));
+/** Uniform row width: keeps the horizontal scroll range stable while virtualized rows recycle. */
+const codeMinStyle = computed(() => ({ minInlineSize: `${ maxChars.value }ch` }));
 
 // --- Find & highlight ---
 
@@ -383,30 +389,39 @@ watch(activeFile, () => {
       </div>
     </template>
 
-    <VirtualScroll
-      ref="virtualScrollRef"
-      :debug="debugMode"
-      class="example-container"
-      :items="lines"
-      :item-size="LINE_HEIGHT"
-      :buffer-before="10"
-      :buffer-after="10"
-      virtual-scrollbar
-      aria-label="Code viewer list"
-      @scroll="onScroll"
-    >
-      <template #item="{ index }">
-        <div class="flex items-center h-5 overflow-hidden px-2 text-xs leading-none">
-          <span class="w-20 shrink-0 pe-5 text-end select-none font-mono tabular-nums text-base-content/35">{{ index + 1 }}</span>
-          <span class="flex-1 min-w-0 whitespace-pre font-mono">
-            <template v-for="(segment, k) in lineSegments(index)" :key="k">
-              <span
-                :class="[segment.cls, { 'bg-primary/25 rounded-[2px]': segment.mark }]"
-              >{{ segment.text }}</span>
-            </template>
-          </span>
-        </div>
-      </template>
-    </VirtualScroll>
+    <div class="relative flex min-h-0 flex-1 flex-col">
+      <VirtualScroll
+        ref="virtualScrollRef"
+        :debug="debugMode"
+        class="example-container"
+        :items="lines"
+        :item-size="LINE_HEIGHT"
+        :buffer-before="10"
+        :buffer-after="10"
+        virtual-scrollbar
+        aria-label="Code viewer list"
+        @scroll="onScroll"
+      >
+        <template #item="{ index }">
+          <div class="flex items-center h-5 px-2 text-xs leading-none">
+            <span class="w-20 shrink-0 pe-5 text-end select-none font-mono tabular-nums text-base-content/35">{{ index + 1 }}</span>
+            <span class="flex-1 whitespace-pre font-mono" :style="codeMinStyle">
+              <template v-for="(segment, k) in lineSegments(index)" :key="k">
+                <span
+                  :class="[segment.cls, { 'bg-primary/25 rounded-[2px]': segment.mark }]"
+                >{{ segment.text }}</span>
+              </template>
+            </span>
+          </div>
+        </template>
+      </VirtualScroll>
+      <ExampleXScrollbar />
+    </div>
   </ExampleContainer>
 </template>
+
+<style scoped>
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) {
+  contain: none;
+}
+</style>

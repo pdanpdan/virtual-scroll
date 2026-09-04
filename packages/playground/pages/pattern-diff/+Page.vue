@@ -5,6 +5,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, ref } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
@@ -16,6 +17,26 @@ import originalRaw from './original.txt?raw';
 
 const originalLines = originalRaw.split('\n');
 const changedLines = changedRaw.split('\n');
+
+function maxLineLength(lines: string[]): number {
+  let max = 0;
+  for (const line of lines) {
+    if (line.length > max) {
+      max = line.length;
+    }
+  }
+  return max;
+}
+
+/** Longest line (in characters) across both files. */
+const maxChars = Math.max(maxLineLength(originalLines), maxLineLength(changedLines));
+/**
+ * Uniform row width: both sides keep their columns aligned across rows with
+ * different line lengths, and the horizontal scroll range stays stable.
+ * `10rem` covers the two gutters plus the side paddings; `1ch` resolves in the
+ * diff's monospace font, so the width tracks the responsive font size.
+ */
+const rowMinStyle = { minInlineSize: `calc(${ maxChars * 2 } * 1ch + 10rem)` };
 
 const diffData = ref<DiffRow[]>(initialDiffData);
 
@@ -141,7 +162,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
       />
     </template>
 
-    <div class="diff-container flex flex-col border border-base-300 rounded-lg overflow-hidden">
+    <div class="diff-container relative flex flex-col border border-base-300 rounded-lg overflow-hidden">
       <!-- File Header -->
       <div class="diff-header flex items-center gap-2 px-4 py-2 bg-base-200 border-b border-base-300 text-xs font-medium sticky top-0 z-10">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 -mt-[2px] opacity-70">
@@ -166,7 +187,13 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
           @scroll="onScroll"
         >
           <template #item="{ item, index }">
-            <button v-if="item.type === 'collapsed'" type="button" class="diff-row diff-row--collapsed bg-info/20 hover:bg-info/30 appearance-none flex items-center" @click="expandRegion(index)">
+            <button
+              v-if="item.type === 'collapsed'"
+              type="button"
+              class="diff-row diff-row--collapsed bg-info/20 hover:bg-info/30 appearance-none flex items-center"
+              :style="rowMinStyle"
+              @click="expandRegion(index)"
+            >
               <div class="w-10 sm:w-12 flex-none flex justify-center opacity-50 bg-info/5">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +209,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
               <div class="px-2 text-[11px]">@@ Expand {{ item.count }} lines @@</div>
             </button>
 
-            <div v-else class="diff-row flex divide-x divide-base-300 hover:bg-base-200/50">
+            <div v-else class="diff-row flex divide-x divide-base-300 hover:bg-base-200/50" :style="rowMinStyle">
               <!-- Left Side (Old) -->
               <div
                 class="diff-side diff-side--old flex-1 flex pt-px"
@@ -202,7 +229,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
                   <span>{{ item.oldLine || '' }}</span>
                   <span v-if="item.oldContent !== null && item.newContent === null" class="opacity-50 w-1">-</span>
                 </div>
-                <div class="diff-content flex-1 px-2 whitespace-pre overflow-hidden">
+                <div class="diff-content flex-1 px-2 whitespace-pre">
                   <template v-if="item.oldContent !== null && item.newContent !== null && item.oldContent !== item.newContent">
                     <span
                       v-for="(part, pIdx) in getDiffParts(item.oldContent, item.newContent).oldParts"
@@ -234,7 +261,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
                   <span>{{ item.newLine || '' }}</span>
                   <span v-if="item.oldContent === null && item.newContent !== null" class="opacity-50 w-1">+</span>
                 </div>
-                <div class="diff-content flex-1 px-2 whitespace-pre overflow-hidden">
+                <div class="diff-content flex-1 px-2 whitespace-pre">
                   <template v-if="item.oldContent !== null && item.newContent !== null && item.oldContent !== item.newContent">
                     <span
                       v-for="(part, pIdx) in getDiffParts(item.oldContent, item.newContent).newParts"
@@ -251,25 +278,17 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
           </template>
         </VirtualScroll>
       </div>
+      <ExampleXScrollbar :enabled="virtualScrollbar" />
     </div>
   </ExampleContainer>
 </template>
 
 <style scoped>
-:deep(.virtual-scroll-item) {
-  container-type: inline-size;
-}
-
 .diff-row {
   line-height: 20px;
-  width: 100cqw;
 }
 
-.diff-side {
-  min-width: 0;
-}
-
-.diff-content {
-  text-overflow: clip;
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) {
+  contain: none;
 }
 </style>

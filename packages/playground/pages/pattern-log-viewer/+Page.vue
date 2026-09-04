@@ -5,6 +5,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref, watch } from 'vue';
 
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -265,30 +266,33 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
       </div>
     </template>
 
-    <VirtualScroll
-      ref="virtualScrollRef"
-      :debug="debugMode"
-      class="example-container"
-      :items="items"
-      :item-size="LINE_HEIGHT"
-      :buffer-before="10"
-      :buffer-after="10"
-      virtual-scrollbar
-      aria-label="Log viewer list"
-      @scroll="onScroll"
-    >
-      <template #item="{ item, index }">
-        <div class="log-row">
-          <span class="log-col log-col--index font-mono">{{ String(rowIndexFor(item, index)).padStart(6, '0') }}</span>
-          <span class="log-col log-col--time font-mono">{{ timeOf(rowIndexFor(item, index)) }}</span>
-          <span
-            class="log-col log-col--level badge badge-xs min-w-14"
-            :class="levelBadge[ levelOf(rowIndexFor(item, index)) ]"
-          >{{ levelOf(rowIndexFor(item, index)) }}</span>
-          <span class="log-col log-col--message font-mono truncate">{{ messageOf(rowIndexFor(item, index)) }}</span>
-        </div>
-      </template>
-    </VirtualScroll>
+    <div class="relative flex min-h-0 flex-1 flex-col">
+      <VirtualScroll
+        ref="virtualScrollRef"
+        :debug="debugMode"
+        class="example-container"
+        :items="items"
+        :item-size="LINE_HEIGHT"
+        :buffer-before="10"
+        :buffer-after="10"
+        virtual-scrollbar
+        aria-label="Log viewer list"
+        @scroll="onScroll"
+      >
+        <template #item="{ item, index }">
+          <div class="log-row">
+            <span class="log-col log-col--index font-mono">{{ String(rowIndexFor(item, index)).padStart(6, '0') }}</span>
+            <span class="log-col log-col--time font-mono">{{ timeOf(rowIndexFor(item, index)) }}</span>
+            <span
+              class="log-col log-col--level badge badge-xs min-w-14"
+              :class="levelBadge[ levelOf(rowIndexFor(item, index)) ]"
+            >{{ levelOf(rowIndexFor(item, index)) }}</span>
+            <span class="log-col log-col--message font-mono">{{ messageOf(rowIndexFor(item, index)) }}</span>
+          </div>
+        </template>
+      </VirtualScroll>
+      <ExampleXScrollbar />
+    </div>
   </ExampleContainer>
 </template>
 
@@ -325,7 +329,12 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
 
   .log-col--message {
     flex: 1;
-    min-inline-size: 0;
+    /* 58ch = longest generated message; uniform rows keep the horizontal scroll range stable. */
+    min-inline-size: 58ch;
   }
+}
+
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) {
+  contain: none;
 }
 </style>
