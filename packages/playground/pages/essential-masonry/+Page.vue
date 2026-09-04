@@ -5,7 +5,9 @@ import type { Ref } from 'vue';
 import { VirtualScrollMasonry } from '@pdanpdan/virtual-scroll';
 import { computed, inject, onBeforeUnmount, ref, watch } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { createSeededRandom } from '#/lib/random';
 
@@ -312,5 +314,154 @@ function handleJump() {
         </template>
       </VirtualScrollMasonry>
     </div>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          Real masonry in a single scroll container: the component derives a responsive column count from its own
+          measured width, places every card greedily on the shortest column, and mounts only the cards around the
+          scroll position — the DOM stays bounded regardless of dataset size. Card heights come from a
+          <em>canonical oracle</em>: a deterministic function of <code>(item, index, columnWidth)</code> that prices
+          every card without touching the DOM, so layouts are reproducible, far jumps land exactly, and the total
+          height is known once the layout chain reaches the end. When content must size itself (wrapped text, media),
+          a <code>measured-heights</code> mode reads mounted cards back with a <code>ResizeObserver</code> instead.
+        </p>
+
+        <h3>1. Size a single vertical scroll container</h3>
+        <p>
+          <code>VirtualScrollMasonry</code> renders its own host: it fills the width and height you give it and scrolls
+          vertically (<code>overflow-y</code>; there is no horizontal axis, so never lay cards out side by side
+          yourself). Give it a definite height — an explicit value or a flex/grid slot with <code>min-height: 0</code> —
+          and a width that can change: the container is observed and the column layout reflows responsively on
+          resize. Masonry runs at scale 1 with no coordinate scaling, so keep the total content height under the
+          browser's ~10M px scroll limit.
+        </p>
+
+        <h3>2. Model the cards and write the height oracle</h3>
+        <p>
+          <code>items</code> is an array of one object per card. The required <code>item-height</code> prop is an
+          oracle: a function <code>(item, index, columnWidth) =&gt; px</code> that returns the rendered height of a
+          card at the resolved column width. It must be deterministic — the same <code>(index, columnWidth)</code> must
+          always produce the same height, because placements are committed to a layout chain and replayed from stored
+          snapshots. Derive it from model fields (a line count, an aspect ratio, a stored height); never read the DOM
+          or use <code>Math.random()</code>. Non-finite results fall back to <code>40</code> and non-positive values
+          clamp to <code>1</code>.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="// One model object per card; layout-relevant fields drive the oracle.
+interface Card {
+  id: number;
+  hue: number;   // hsl hue, for the card background
+  lines: number; // number of body text lines
+}
+
+function makeCards(count: number): Card[] {
+  return Array.from({ length: count }, (_, id) => ({
+    id,
+    hue: (id * 137.508) % 360,
+    lines: 2 + (id % 4),
+  }));
+}
+
+// Natural px height of one card at the reference width (240px).
+function naturalHeight(card: Card): number {
+  return 48 + card.lines * 28;
+}
+
+// Canonical height oracle. It MUST be a pure function of
+// (item, index, columnWidth): the same inputs always yield the same height,
+// because placements are committed to a layout chain and replayed from
+// stored snapshots. Never read the DOM here.
+function itemHeight(card: Card | undefined, _index: number, width: number): number {
+  const estimate = card ? naturalHeight(card) * 1.3 : 200;
+  return Math.max(48, Math.round(estimate * (width / 240)));
+}"
+        />
+
+        <h3>3. Let the container width drive the columns</h3>
+        <p>
+          The column count is derived, not chosen: <code>target-column-width</code> (default <code>240</code>) is the
+          desired card width, and the component derives the count so columns land as close as possible to it, bounded
+          by <code>min-columns</code> / <code>max-columns</code> (defaults <code>1</code> / <code>10</code>). The
+          resolved column width is fractional so the gutters (<code>gap</code>, default <code>10</code>, applied
+          between columns and rows) divide the container width exactly. Because heights come from the oracle alone,
+          unvisited regions never need mounting: layout is remembered in steps of <code>segment-size</code> items (default <code>500</code>), so far <code>scrollToIndex</code> targets land on
+          the exact canonical position, and the exposed <code>totalHeightExact</code> flips true once every step down to the last item has been laid out.
+        </p>
+
+        <h3>4. Render the windowed cards</h3>
+        <p>
+          The <code>#item</code> slot provides <code>{ item, index, column, x, y, width, height }</code>. The engine
+          absolutely places each card at <code>(x, y)</code> with the column width and the oracle height — cards are
+          mounted only around the viewport (with overscan), so slot content must be self-contained and derived purely
+          from the model. In canonical mode the wrapper is exactly oracle-height: make the card fill it and guarantee
+          its content never exceeds that height (reserve media space with <code>aspect-ratio</code> or keep the content
+          deterministic), because an overflowing card would overlap the next one.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScrollMasonry } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+
+const cards = makeCards(10_000);
+
+const WORDS = [ 'amber', 'cobalt', 'dune', 'ember', 'fjord', 'kelp' ];
+function lineOf(card: Card, row: number): string {
+  return `${ WORDS[ (card.id * 13 + row * 7) % WORDS.length ] } ${ WORDS[ (card.id * 29 + row * 11) % WORDS.length ] }`;
+}
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScrollMasonry class=&quot;masonry&quot; :items=&quot;cards&quot; :item-height=&quot;itemHeight&quot;
+    :min-columns=&quot;2&quot; :max-columns=&quot;8&quot; :gap=&quot;16&quot; aria-label=&quot;Masonry of cards&quot;>
+    &lt;template #item=&quot;{ item, index, column }&quot;>
+      &lt;div v-if=&quot;item&quot; class=&quot;card&quot; :style=&quot;{ backgroundColor: `hsl(${ item.hue } 60% 80%)` }&quot;>
+        &lt;p class=&quot;card-title&quot;>Card #{{ index }} - col {{ column }}&lt;/p>
+        &lt;p v-for=&quot;row in item.lines&quot; :key=&quot;row&quot; class=&quot;card-line&quot;>{{ lineOf(item, row - 1) }}&lt;/p>
+      &lt;/div>
+    &lt;/template>
+  &lt;/VirtualScrollMasonry>
+&lt;/template>
+
+&lt;style scoped>
+/* Definite height; the width is observed and reflows the column count. */
+.masonry { height: 560px; border: 1px solid oklch(50% 0 0 / 0.2); }
+
+/* Canonical mode: the wrapper is exactly oracle-height, so the card fills it
+   and content must never exceed it (reserve media with aspect-ratio or model
+   fields). Cards are absolutely placed; overflow would overlap neighbors. */
+.card {
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 12px;
+}
+.card-title { margin: 0 0 8px; font-weight: 700; }
+.card-line { margin: 0; font-size: 12px; line-height: 20px; }
+&lt;/style>"
+        />
+
+        <h3>5. Switch to measured heights when only the DOM knows the size</h3>
+        <p>
+          For cards whose real height depends on layout (wrapped text, images, dynamic content), set
+          <code>measured-heights</code>. Mounted cards are then observed and their measured boxes drive the layout: the
+          oracle height becomes the pre-measure minimum and estimate, each measurement batch re-lays-out with the
+          topmost visible card pinned at its screen offset, and the result is deterministic per measurement history.
+          Regions that were never mounted still fall back to the oracle, and the measurements reset when the
+          <code>items</code> array is replaced. After in-place item edits or an oracle change, call the exposed
+          <code>refresh()</code> to drop the cached layout and re-flow from the current anchor. The instance also
+          exposes <code>columns</code>, <code>columnWidth</code>, <code>totalHeight</code>,
+          <code>totalHeightExact</code>, and the <code>scrollToIndex</code> / <code>scrollToOffset</code> methods for
+          programmatic navigation.
+        </p>
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>

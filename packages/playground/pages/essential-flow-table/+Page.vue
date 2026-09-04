@@ -4,7 +4,9 @@ import type { Ref } from 'vue';
 import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -214,5 +216,184 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </tr>
       </template>
     </VirtualScrollTable>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          <code>VirtualScrollTable</code> already renders real table markup (<code>&lt;table&gt;</code> /
+          <code>&lt;thead&gt;</code> / <code>&lt;tbody&gt;</code> / <code>&lt;tfoot&gt;</code>) for accessible tabular
+          data. The <code>flow-table</code> flag goes one step further: instead of absolutely positioning each row at a
+          computed pixel offset, mounted rows stay in <em>real table flow</em> between two invisible spacer rows (the
+          leading one stands in for the skipped rows above, the trailing one keeps the scroll height). The browser's
+          own table layout then sizes and column-aligns the rows — including across the header — so row heights are
+          their natural content heights (measured) and the result reads as a genuine table to screen readers and CSS
+          table styling alike.
+        </p>
+
+        <h3>1. Size the scroll viewport</h3>
+        <p>
+          The component renders a scrollable host around the inner table. Give the host a definite height (an explicit
+          <code>height</code>, or a flex/grid slot with <code>min-height: 0</code>); the vertical axis is virtualized,
+          so the table can hold hundreds of thousands of rows while only the window is in the DOM. Width is automatic:
+          the table is as wide as its content, and when that exceeds the host width the host scrolls horizontally with
+          its own native scrollbar while the vertical range keeps working.
+        </p>
+
+        <h3>2. Model the rows and choose a height strategy</h3>
+        <p>
+          Flow mode is orthogonal to how row heights are known: pass a numeric <code>item-size</code> for uniform rows
+          (arithmetic positioning), or leave it unset so each row is measured and keeps its natural height — the right
+          choice when rows carry one to several lines of text, badges, or anything whose height only the browser knows.
+          Rows re-measure automatically when their content changes, and the spacer rows absorb the difference so later
+          rows never drift.
+        </p>
+
+        <h3>3. Write semantic slots and turn the flag on</h3>
+        <p>
+          Three slots make the table. The <code>#header</code> slot emits a <code>&lt;tr&gt;</code> of
+          <code>&lt;th&gt;</code> cells (it lands in the <code>&lt;thead&gt;</code>), the optional <code>#footer</code>
+          slot emits a <code>&lt;tr&gt;</code> of <code>&lt;td&gt;</code>s (the <code>&lt;tfoot&gt;</code>), and the
+          <code>#item</code> slot is called once per mounted row — its content must be bare <code>&lt;td&gt;</code>
+          cells, because they become the direct children of the engine's <code>&lt;tr&gt;</code>. Every row must emit
+          the same number of cells or the browser cannot align the columns.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+
+// Real row objects; every row renders the same number of &lt;td> cells.
+interface Member { id: number; name: string; email: string; role: string; meta: string[]; }
+const members: Member[] = Array.from({ length: 20_000 }, (_, id) => ({
+  id,
+  name: `Member ${ id }`,
+  email: `member${ id }@example.com`,
+  role: [ 'Admin', 'Editor', 'Viewer' ][ id % 3 ]!,
+  meta: Array.from({ length: id % 3 }, (_, line) => `detail ${ id }.${ line }`), // extra name lines
+}));
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScrollTable
+    class=&quot;members&quot;
+    :items=&quot;members&quot;
+    flow-table
+    aria-label=&quot;Members table&quot;
+  >
+    &lt;template #header>
+      &lt;tr>
+        &lt;th>#&lt;/th>
+        &lt;th>Name&lt;/th>
+        &lt;th>Email&lt;/th>
+        &lt;th>Role&lt;/th>
+      &lt;/tr>
+    &lt;/template>
+
+    &amp;lt;!-- The item slot emits bare &lt;td> cells: they become children of the
+         engine's &lt;tr>, so every row must emit the same column count. -->
+    &lt;template #item=&quot;{ item }&quot;>
+      &lt;td class=&quot;num&quot;>{{ item.id }}&lt;/td>
+      &lt;td>
+        &lt;div class=&quot;name&quot;>{{ item.name }}&lt;/div>
+        &lt;div v-for=&quot;(line, i) in item.meta&quot; :key=&quot;i&quot; class=&quot;meta&quot;>{{ line }}&lt;/div>
+      &lt;/td>
+      &lt;td class=&quot;email&quot;>{{ item.email }}&lt;/td>
+      &lt;td>&lt;span class=&quot;badge&quot;>{{ item.role }}&lt;/span>&lt;/td>
+    &lt;/template>
+  &lt;/VirtualScrollTable>
+&lt;/template>
+
+&lt;style scoped>
+.members { height: 480px; border: 1px solid oklch(50% 0 0 / 0.2); } /* scroll viewport */
+/* Real table cells, laid out and column-aligned by the browser. */
+.members :deep(td), .members :deep(th) {
+  padding: 8px 12px; text-align: start;
+  border-bottom: 1px solid oklch(50% 0 0 / 0.08);
+}
+.name { font-weight: 600; }
+.meta { font-size: 11px; opacity: 0.6; }
+.num { font-variant-numeric: tabular-nums; opacity: 0.5; }
+.email { font-size: 12px; opacity: 0.8; }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px;
+  background: oklch(90% 0.02 240 / 0.6);
+}
+&lt;/style>"
+        />
+
+        <h3>4. Pin column widths when you need them stable</h3>
+        <p>
+          In flow mode the column layout belongs to the browser. With plain auto layout the widths derive from the
+          currently mounted rows, so they can shift as virtualized windows change. For stable columns the component
+          pins a <code>&lt;colgroup&gt;</code> and switches the table to <code>table-layout: fixed</code>:
+          <code>auto-size-columns</code> measures the first window (header plus rows) once and pins those widths, while
+          <code>column-widths</code> pins your own pixel list and takes precedence over auto-sizing. Both require
+          every row (and the header) to emit the same number of cells; otherwise the browser auto layout is kept.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          code="&lt;script setup lang=&quot;ts&quot;>
+type WidthMode = 'auto' | 'first' | 'fixed';
+const widthMode = ref&lt;WidthMode>('auto');
+const PINNED = [ 90, 260, 360, 140 ]; // px per column
+&lt;/script>
+&nbsp;
+&lt;template>
+  &amp;lt;!--With flow-table you choose how column widths are pinned. Browser auto
+    layout (default) sizes columns from the rows currently mounted, so widths
+    can shift as windows change; the two pinned modes keep them stable:
+    - auto-size-columns: measures the first window (header + rows) once and
+      pins it through a &amp;lt;colgroup> + table-layout: fixed. Needs every row to
+      emit the same number of direct cells, or the browser auto layout wins.
+    - column-widths: your own px per column, pinned the same way and taking
+      precedence over auto-size-columns. -->
+  &lt;VirtualScrollTable
+    class=&quot;members&quot;
+    :items=&quot;members&quot;
+    flow-table
+    :auto-size-columns=&quot;widthMode === 'first'&quot;
+    :column-widths=&quot;widthMode === 'fixed' ? PINNED : []&quot;
+    aria-label=&quot;Members table&quot;
+  >
+    &lt;template #header>
+      &lt;tr>
+        &lt;th>#&lt;/th>
+        &lt;th>Name&lt;/th>
+        &lt;th>Email&lt;/th>
+        &lt;th>Role&lt;/th>
+      &lt;/tr>
+    &lt;/template>
+
+    &lt;template #item=&quot;{ item }&quot;>
+      &lt;td class=&quot;num&quot;>{{ item.id }}&lt;/td>
+      &lt;td>
+        &lt;div class=&quot;name&quot;>{{ item.name }}&lt;/div>
+        &lt;div v-for=&quot;(line, i) in item.meta&quot; :key=&quot;i&quot; class=&quot;meta&quot;>{{ line }}&lt;/div>
+      &lt;/td>
+      &lt;td class=&quot;email&quot;>{{ item.email }}&lt;/td>
+      &lt;td>&lt;span class=&quot;badge&quot;>{{ item.role }}&lt;/span>&lt;/td>
+    &lt;/template>
+  &lt;/VirtualScrollTable>
+&lt;/template>"
+        />
+
+        <h3>5. Know when flow mode applies</h3>
+        <p>
+          Real flow is a vertical-only mode: it needs a single vertical axis with no per-row gap, no scroll padding,
+          no sticky indices, and no column grid, and it requires the total content height to stay below the browser's
+          ~10M px scroll limit (above that, coordinate scaling kicks in and rows return to absolute positioning).
+          Outside those constraints the component automatically falls back to its default absolute row layout — rows
+          positioned at engine-computed pixel offsets instead of in real flow — which the Table pattern example
+          demonstrates. Choose flow mode when natural row heights and browser-driven column layout matter more than
+          pixel-exact control.
+        </p>
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>

@@ -255,8 +255,8 @@ export class MasonryLayout {
 
   /**
    * Declare a segment to be a fresh origin with level columns. Used when the
-   * camera lands somewhere the chain never reached: chaining there honestly
-   * costs one height per card crossed, so anchoring starts level at the landing
+   * camera lands somewhere the chain never reached: chaining there costs one
+   * height per card crossed, so anchoring starts level at the landing
    * segment instead. No-op when the segment's frontier is already known.
    */
   anchorFlushAt(segment: number): boolean {

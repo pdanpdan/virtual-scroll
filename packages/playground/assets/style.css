@@ -436,6 +436,10 @@ body {
   @apply mb-4 rounded-[inherit] border border-base-content/10;
 }
 
+@utility guide-code-block {
+  @apply overflow-hidden rounded-box border border-base-content/10;
+}
+
 @utility docs-prop-header {
   @apply mb-4 border-b border-base-300 pb-2 text-lg font-semibold text-secondary @4xl:text-xl;
 

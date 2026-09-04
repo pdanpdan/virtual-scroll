@@ -4,7 +4,9 @@ import type { Ref } from 'vue';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
@@ -109,5 +111,106 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         </div>
       </template>
     </VirtualScroll>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          To virtualize a horizontal list whose items differ in width, the engine cannot place items arithmetically the way it
+          does with uniform sizes — each item's offset depends on the widths of everything before it. Dynamic mode solves this
+          by <em>measuring</em> each rendered cell with a <code>ResizeObserver</code> so totals follow the measured sizes. The cost is real but bounded: layout starts from an estimate that is corrected as cells
+          mount, and totals only become exact once the relevant range has been measured. This page shows how to choose that mode
+          deliberately rather than by accident.
+        </p>
+
+        <h3>1. Choose the size strategy that matches your data</h3>
+        <p>
+          <code>item-size</code> accepts four forms, each trading speed against flexibility. A positive <code>number</code>
+          means uniform sizes and pure O(1) arithmetic — the fastest, but only valid when every item really is that size. An
+          <code>array</code> describes a repeating width pattern (e.g. <code>[150, 300]</code>), and a function
+          <code>(item, index) =&gt; number</code> expresses a width known up front that varies per item; both let the engine
+          lay out far-off items from the declared pattern or function without mounting them — avoiding dynamic measurement, at
+          the cost of per-item storage rather than a uniform number's O(1). Pass <code>0</code>, <code>null</code>, or
+          <code>undefined</code> — or omit the prop entirely — to switch to <strong>dynamic</strong> mode, where sizes are
+          measured from the DOM. Use dynamic only when widths are genuinely content-driven and unknowable until rendered
+          (wrapping text, media, responsive cells); if you can compute them, an array or function skips the measuring cost.
+        </p>
+
+        <h3>2. Give every cell a definite, stable width</h3>
+        <p>
+          A measured cell must render at the width you intend and not change after it mounts. Drive the width from your data and
+          apply it as an explicit inline size on the cell (the snippet uses <code>inlineSize</code> from a per-item
+          <code>width</code>), and reserve space for late media content so a post-mount resize does not shift neighbors. Because
+          each rendered box is observed, a live resize (window resize, data-driven width change) is caught and the axis is
+          re-laid automatically.
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+
+// Each item knows its own width; no `item-size` prop is passed, so the engine
+// treats the axis as dynamic and measures the rendered boxes.
+const items = Array.from({ length: 1000 }, (_, i) => ({
+  id: i,
+  width: i % 2 === 0 ? 150 : 300,
+}));
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScroll
+    virtual-scrollbar
+    class=&quot;h-dyn&quot;
+    direction=&quot;horizontal&quot;
+    :items=&quot;items&quot;
+    :default-item-size=&quot;220&quot;
+    aria-label=&quot;Dynamic width list&quot;
+  >
+    &lt;template #item=&quot;{ item }&quot;>
+      &amp;lt;!-- Omit item-size → ResizeObserver reports this box's inline size. -->
+      &lt;div class=&quot;card&quot; :style=&quot;{ inlineSize: `${ item.width }px` }&quot;>
+        #{{ item.id }} — {{ item.width }}px
+      &lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>
+
+&lt;style scoped>
+.h-dyn {
+  block-size: 160px; /* rows span the viewport height */
+  border: 1px solid oklch(50% 0 0 / 0.2);
+}
+.card {
+  box-sizing: border-box;
+  block-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border-inline-end: 1px solid oklch(50% 0 0 / 0.1);
+}
+&lt;/style>"
+        />
+
+        <h3>3. Accept the estimate-then-measure pipeline</h3>
+        <p>
+          Only cells that are actually mounted can be measured, so the engine cannot know the width of an item that has never
+          been in the viewport. Until a row mounts it keeps the fallback <code>default-item-size</code> (default <code>40</code>),
+          which drives the initial range and the total scroll width; as cells enter the window their real measurements replace the estimate, which is why a dynamic list "settles": the
+          first paint (and any deep <code>scrollToIndex</code>) can be slightly off and correct itself over a couple of frames.
+          Set <code>default-item-size</code> near your average width to shrink the initial error.
+        </p>
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>
