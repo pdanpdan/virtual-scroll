@@ -705,6 +705,116 @@ describe('useVirtualScroll', () => {
       }
     });
 
+    it('re-maps window scroll when content before the list resizes (no scroll/resize event)', async () => {
+      const hostElement = document.createElement('div');
+      // Position of the list inside the document. Growing it simulates a
+      // collapsible header (or any sibling) above the list changing height
+      // without resizing the host element or firing a window resize/scroll.
+      let hostDocTop = 0;
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockImplementation(() => ({
+        // viewport-relative: rect.top + window.scrollY === host doc offset
+        top: hostDocTop - scrollState.y,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: 100,
+        height: 500,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect);
+
+      const { wrapper, internalState } = setup({
+        container: window,
+        hostElement,
+        itemSize: 50,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      // Scroll the window 1000px "into" the list (host at the document top).
+      scrollState.y = 1000;
+      document.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(1000);
+
+      // The space before the first list element grows by 400px. No scroll and
+      // no resize fire — only the list's position in the document changes, so
+      // the same viewport spot now maps 400px earlier into the list.
+      hostDocTop = 400;
+      scrollState.y = 1400; // absolute page offset: user stays at the same spot
+      document.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      // The mapping must use the refreshed host offset: 1400 - 400 = 1000px.
+      expect(internalState.internalScrollY.value).toBe(1000);
+      wrapper.unmount();
+    });
+
+    it('re-maps an external element container scroll when content before the list resizes', async () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'scrollTop', { configurable: true, value: 0, writable: true });
+
+      const hostElement = document.createElement('div');
+      // The list's offset inside the external scroller. Grow it to simulate a
+      // collapsible header (or any sibling) above the list inside the same
+      // scroll container changing height without resizing the host element.
+      let hostContentTop = 0;
+      const rectMock = () => ({
+        // viewport-relative: rect.top === hostContentTop - container.scrollTop
+        top: hostContentTop - container.scrollTop,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: 0,
+        height: 500,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect;
+      vi.spyOn(hostElement, 'getBoundingClientRect').mockImplementation(rectMock);
+      vi.spyOn(container, 'getBoundingClientRect').mockImplementation(() => ({
+        top: 0,
+        bottom: 500,
+        left: 0,
+        right: 500,
+        width: 500,
+        height: 500,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect);
+
+      const { wrapper, internalState } = setup({
+        container,
+        hostElement,
+        itemSize: 50,
+        items: mockItems,
+      });
+      await nextTick();
+      await nextTick();
+
+      // Scroll 1000px into the list (host at the container's content top).
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(1000);
+
+      // Space before the first list element grows by 400px — no scroll fires,
+      // the host keeps its own size, only its offset inside the container moves.
+      hostContentTop = 400;
+      container.scrollTop = 1400; // user stays at the same content spot
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      // Mapping uses the refreshed host offset: 1400 - 400 = 1000px of list.
+      expect(internalState.internalScrollY.value).toBe(1000);
+      wrapper.unmount();
+    });
+
     it('works without a component instance (no lifecycle hooks)', () => {
       const props = ref<VirtualScrollProps<MockItem>>({ itemSize: 50, items: mockItems });
       const result = useVirtualScroll(props);

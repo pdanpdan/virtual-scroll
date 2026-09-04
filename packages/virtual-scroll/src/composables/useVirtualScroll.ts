@@ -857,6 +857,18 @@ export function useVirtualScroll<T = unknown>(
       viewportWidth.value = target.clientWidth;
       viewportHeight.value = target.clientHeight;
     }
+    // Content before the list can grow/shrink without resizing the host — e.g.
+    // a collapsible header above a window-scrolled list, or preceding content
+    // inside an external scrollable element — moving the list within its scroll
+    // container without a resize event. For user scrolls, re-measure the host
+    // offset before mapping into item coordinates. Our own programmatic scrolls
+    // don't move the list, so they skip the re-measure.
+    if (!isProgrammaticScroll.value && (target === window || target === document || isScrollableElement(target))) {
+      // updateHostOffset is defined below; handleScroll only runs at runtime
+      // (module fully initialized), so this is not a real use-before-define.
+      // eslint-disable-next-line ts/no-use-before-define
+      updateHostOffset();
+    }
     const scrollValueX = isRtl.value ? Math.abs(scrollX.value) : scrollX.value;
     const virtualX = displayToVirtual(scrollValueX, componentOffset.x, scaleX.value);
     const virtualY = displayToVirtual(scrollY.value, componentOffset.y, scaleY.value);
@@ -1106,7 +1118,13 @@ export function useVirtualScroll<T = unknown>(
       }
       return { x: 0, y: 0 };
     };
-    if (props.value.hostElement) {
+    if (props.value.hostElement && (container === window || container !== props.value.hostRef)) {
+      // When the scroll container is the component's own host (default), the
+      // wrapper is the first content of the scrollport, so its offset is a
+      // constant 0 — re-measuring it against (possibly layout-less) rects on
+      // every scroll would drift. Only the window and external-element
+      // containers can have the list preceded by other content, so only there
+      // do we re-measure the wrapper offset.
       const newOffset = calculateOffset(props.value.hostElement);
       if (Math.abs(hostOffset.x - newOffset.x) > 0.1 || Math.abs(hostOffset.y - newOffset.y) > 0.1) {
         hostOffset.x = newOffset.x;

@@ -334,6 +334,25 @@ describe('virtualScrollTable', () => {
       await nextTick();
       expect(wrapper.find('table').classes()).toContain('virtual-scroll--flow');
 
+      // The list is the first content of the external scroller, so in real
+      // layout its viewport-relative rect tracks the scroll (top === -scrollTop).
+      // jsdom reports 0 rects, which would make the engine's per-scroll offset
+      // re-measure drift to scrollTop; mock the geometry the browser would give.
+      const rectMock = () => ({
+        top: -external.scrollTop,
+        bottom: 0,
+        left: 0,
+        right: 800,
+        width: 800,
+        height: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect;
+      wrapper.findAll('.virtual-scroll-container, .virtual-scroll-wrapper').forEach((node) => {
+        vi.spyOn(node.element as HTMLElement, 'getBoundingClientRect').mockImplementation(rectMock);
+      });
+
       external.scrollTop = 2500;
       external.dispatchEvent(new Event('scroll'));
       await nextTick();
