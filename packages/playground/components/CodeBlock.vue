@@ -14,7 +14,7 @@ withDefaults(defineProps<Props>(), {
   code: '',
   lang: 'vue',
   lineNumbers: false,
-  copyable: false,
+  copyable: true,
 });
 
 const shellRef = ref<HTMLElement | null>(null);
@@ -66,7 +66,14 @@ async function copyCode() {
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <rect
+            x="9"
+            y="9"
+            width="13"
+            height="13"
+            rx="2"
+            ry="2"
+          />
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
         </svg>
         <svg
@@ -103,18 +110,66 @@ async function copyCode() {
 
 <style scoped>
 .code-block {
-  text-align: start;
+  overflow: auto;
+
+  :deep(pre.shiki) {
+    margin: 0;
+    padding: 0.75rem 0;
+    background-color: transparent !important;
+    display: block;
+    min-inline-size: max-content;
+    line-height: 1.4;
+
+    code {
+      display: block;
+      counter-reset: line;
+      padding: 0;
+    }
+
+    .line {
+      display: flex;
+      padding: 0 1rem;
+
+      & + .line {
+        margin-block-start: -1.3em;
+      }
+    }
+  }
+
+  &.is-bash :deep(pre.shiki) .line::before {
+    content: '$';
+    width: 1rem;
+    flex-shrink: 0;
+    margin-inline-end: 0.5rem;
+    opacity: 0.5;
+    text-align: end;
+    user-select: none;
+  }
+
+  &.has-line-numbers :deep(pre.shiki) .line::before {
+    counter-increment: line;
+    content: counter(line);
+    width: 1rem;
+    flex-shrink: 0;
+    margin-inline-end: 1rem;
+    opacity: 0.3;
+    text-align: end;
+    user-select: none;
+  }
 }
 
+/* Copyable variant: the toolbar stays fixed while only the code scrolls. */
 .code-block--copyable {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .code-block-toolbar {
   display: flex;
   justify-content: flex-end;
-  padding: 0.25rem 0.5rem 0;
+  flex: none;
+  padding: 0.375rem 0.5rem 0;
 }
 
 .code-copy {
@@ -149,54 +204,5 @@ async function copyCode() {
 .code-block-scroll {
   overflow: auto;
   min-block-size: 0;
-}
-
-.code-block {
-  .code-block-scroll {
-    :deep(pre.shiki) {
-      margin: 0;
-      padding: 0.25rem 0 0.75rem;
-      background-color: transparent !important;
-      display: block;
-      min-inline-size: max-content;
-      line-height: 1.4;
-
-      code {
-        display: block;
-        counter-reset: line;
-        padding: 0;
-      }
-
-      .line {
-        display: flex;
-        padding: 0 1rem;
-
-        & + .line {
-          margin-block-start: -1.3em;
-        }
-      }
-    }
-
-    &.is-bash :deep(pre.shiki) .line::before {
-      content: '$';
-      width: 1rem;
-      flex-shrink: 0;
-      margin-inline-end: 0.5rem;
-      opacity: 0.5;
-      text-align: end;
-      user-select: none;
-    }
-
-    &.has-line-numbers :deep(pre.shiki) .line::before {
-      counter-increment: line;
-      content: counter(line);
-      width: 1rem;
-      flex-shrink: 0;
-      margin-inline-end: 1rem;
-      opacity: 0.3;
-      text-align: end;
-      user-select: none;
-    }
-  }
 }
 </style>

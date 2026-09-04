@@ -206,6 +206,7 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
         lang="vue"
         :code="code"
         line-numbers
+        :copyable="false"
       />
     </div>
   </div>
