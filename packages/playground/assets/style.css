@@ -894,7 +894,7 @@ body {
   view-transition-name: VS-sidebar;
 }
 
-.navbar {
+.app-mobile-header {
   view-transition-name: VS-navbar;
 }
 
@@ -937,45 +937,6 @@ main {
     transform: translateX(-100px);
   }
 }
-
-::view-transition-old(VS-main) {
-  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out;
-}
-
-::view-transition-new(VS-main) {
-  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in;
-}
-
-html.page-forward-transition::view-transition-old(VS-main),
-html:active-view-transition-type(forward)::view-transition-old(VS-main) {
-  animation:
-    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
-    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-left;
-}
-
-html.page-forward-transition::view-transition-new(VS-main),
-html:active-view-transition-type(forward)::view-transition-new(VS-main) {
-  animation:
-    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
-    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-right;
-}
-
-/* Backward transition */
-html.page-back-transition::view-transition-old(VS-main),
-html:active-view-transition-type(back)::view-transition-old(VS-main) {
-  animation:
-    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
-    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-right;
-}
-
-html.page-back-transition::view-transition-new(VS-main),
-html:active-view-transition-type(back)::view-transition-new(VS-main) {
-  animation:
-    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
-    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-left;
-}
-
-/* Transitions between non-welcome pages travel top-to-bottom. */
 @keyframes VS-slide-to-bottom {
   to {
     transform: translateY(100px);
@@ -988,16 +949,54 @@ html:active-view-transition-type(back)::view-transition-new(VS-main) {
   }
 }
 
+::view-transition-old(VS-main) {
+  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out;
+}
+
+::view-transition-new(VS-main) {
+  animation: 250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in;
+}
+
+html.page-forward-transition::view-transition-old(VS-main),
+html:active-view-transition-type(forward)::view-transition-old(VS-main) {
+  animation:
+    500ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-left;
+}
+
+html.page-forward-transition::view-transition-new(VS-main),
+html:active-view-transition-type(forward)::view-transition-new(VS-main) {
+  animation:
+    500ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-right;
+}
+
+/* Backward transition */
+html.page-back-transition::view-transition-old(VS-main),
+html:active-view-transition-type(back)::view-transition-old(VS-main) {
+  animation:
+    500ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-right;
+}
+
+html.page-back-transition::view-transition-new(VS-main),
+html:active-view-transition-type(back)::view-transition-new(VS-main) {
+  animation:
+    500ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+    250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-left;
+}
+
+/* Transitions between non-welcome pages travel top-to-bottom. */
 html.page-vertical-transition::view-transition-old(VS-main),
 html:active-view-transition-type(vertical)::view-transition-old(VS-main) {
   animation:
-    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
+    500ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-out,
     250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-to-bottom;
 }
 
 html.page-vertical-transition::view-transition-new(VS-main),
 html:active-view-transition-type(vertical)::view-transition-new(VS-main) {
   animation:
-    200ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
+    500ms cubic-bezier(0.4, 0, 0.2, 1) both VS-fade-in,
     250ms cubic-bezier(0.4, 0, 0.2, 1) both VS-slide-from-top;
 }

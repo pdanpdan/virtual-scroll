@@ -219,7 +219,7 @@ const linkGroups = [
     <input id="app-drawer-main" v-model="drawerOpen" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content flex flex-col">
       <!-- Mobile header: navbar plus the docs "On this page" strip -->
-      <div class="sticky top-0 z-1 bg-base-300 border-b border-base-content/10 shadow-sm lg:hidden mb-4">
+      <div class="app-mobile-header sticky top-0 z-1 bg-base-300 border-b border-base-content/10 shadow-sm lg:hidden mb-4">
         <div class="navbar">
           <div class="flex-none">
             <label for="app-drawer-main" class="btn btn-ghost btn-square drawer-button">
