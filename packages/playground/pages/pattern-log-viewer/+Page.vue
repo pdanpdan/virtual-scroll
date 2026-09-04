@@ -4,8 +4,10 @@ import type { Ref } from 'vue';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, ref, watch } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -293,6 +295,144 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
       </VirtualScroll>
       <ExampleXScrollbar />
     </div>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          A log or dataset too large to materialize — or whose lines are a pure function of an index — does not need an array of
+          stored objects. With an index-only model every visible row derives its text on demand, so memory stays flat across
+          200,000+ lines and rendering costs only what is on screen. Filtering and searching then reduce to building a small
+          array of matching <em>indices</em> and handing it to the same <code>VirtualScroll</code>, which draws only those rows
+          in view. Uniform fixed heights keep layout O(1) and make any jump land precisely. The tradeoff: derived text must be
+          deterministic and inexpensive to compute, because rows are re-derived on every scroll — so this suits generated logs,
+          time series, and lookup-backed tables, not heavy or non-deterministic content.
+        </p>
+
+        <h3>1. Model rows as a function of their index</h3>
+        <p>
+          If you already hold the logs as an in-memory list, just pass that array and read each row's fields from the
+          <code>#item</code> slot's <code>item</code>; add a numeric <code>item-size</code> when rows share one height so layout
+          is O(1) with no DOM measurement. Choose the index-only model when the dataset is very large or each line derives
+          deterministically from its position: <code>items</code> is a sparse placeholder (<code>new Array(count)</code>), the
+          slot renders from <code>index</code>, and content (timestamp, level, message) is computed on demand. Uniform rows keep
+          the horizontal and vertical geometry stable, so a monospace, fixed-height line is the natural row shape.
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+import { computed, ref } from 'vue';
+
+const log = ref&lt;InstanceType&lt;typeof VirtualScroll> | null>(null);
+
+const TOTAL = 200_000;
+
+// Index-only model: a row's text is a pure function of its index, so the
+// dataset is a sparse placeholder and every visible row derives its content on
+// demand. A numeric item-size keeps the layout O(1). (If your logs are a
+// bounded in-memory list instead, just pass that array and read item.level /
+// item.message from the #item slot — same props.)
+const base = new Array(TOTAL);
+const levelFilter = ref&lt;string[]>([]);
+
+// All matching GLOBAL indices — never the derived log objects themselves.
+const filtered = ref&lt;number[] | null>(null);
+const items = computed(() => filtered.value ?? base);
+
+// A filtered slot holds a number = global log index; an undefined hole (no
+// filter active) falls back to the slot index itself.
+function globalOf(item: unknown, index: number) {
+  return typeof item === 'number' ? item : index;
+}
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScroll
+    virtual-scrollbar
+    ref=&quot;log&quot;
+    class=&quot;log-view&quot;
+    :items=&quot;items&quot;
+    :item-size=&quot;40&quot;
+  >
+    &lt;template #item=&quot;{ item, index }&quot;>
+      &lt;div class=&quot;line&quot;>{{ globalOf(item, index) }} — {{ textOf(globalOf(item, index)) }}&lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>
+
+&lt;style scoped>
+.log-view { height: 480px; }
+.line {
+  box-sizing: border-box; height: 40px; /* must equal item-size */
+  display: flex; align-items: center; padding-inline: 12px;
+  font-family: ui-monospace, monospace; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+&lt;/style>"
+        />
+
+        <h3>2. Filter and search without materializing rows</h3>
+        <p>
+          Never touch the source rows when filtering an index-only list — you cannot (they do not exist as objects). Instead scan
+          the dataset, test each candidate index against the active filter, and collect the matching <em>global indices</em> into
+          an array that becomes the new <code>items</code>. Each slot then holds a number (the real log index) instead of a hole,
+          so the row must map it back before deriving content — the snippet's <code>globalOf(item, index)</code> returns the
+          stored number when present and falls back to the slot index when filtering is off. This works because row height is
+          uniform: the filtered array is just a shorter list of the same fixed-size rows.
+        </p>
+        <p>
+          Debounce free-text input before rebuilding: testing every candidate derivation on each keystroke is real work even at
+          one index per line. A short delay (a few hundred ms) waits for the user to pause, then the scan runs once and
+          virtualization mounts only the matches in view.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="import { ref, watch } from 'vue';
+
+const query = ref('');
+const debounced = ref('');
+
+// Debounce free-text search: scanning every candidate derivation per keystroke
+// is real work, so wait until the user pauses before rebuilding the indices.
+let timer: ReturnType&lt;typeof setTimeout> | undefined;
+watch(query, () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    debounced.value = query.value.trim().toLowerCase();
+  }, 250);
+});
+
+// Any filter change is a different coordinate space (row 0 = the first match),
+// so a stale scroll offset is meaningless — rebuild the index array and jump to
+// the top of the new result set.
+watch([levelFilter, debounced], () => {
+  filtered.value = collectMatchingIndices(); // scan source, gather global indices
+  log.value?.scrollToIndex(0, null, { align: 'start', behavior: 'auto' });
+});"
+        />
+
+        <h3>3. Jump by index after a filter change</h3>
+        <p>
+          A filter change renumbers the space: row 0 is now the first match, so any previously held scroll offset is meaningless.
+          After rebuilding the index array, reset to the top with <code>scrollToIndex(0, null, { align: 'start', behavior: 'auto'
+            })</code> so the user lands on the first result deterministically. The same API moves you anywhere by index — read the
+          first visible row from <code>ScrollDetails.currentIndex</code> to step one match at a time, or jump to any row of the
+          filtered set directly; because sizes are uniform, the target is computed exactly with no measurement round-trip.
+        </p>
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>
 

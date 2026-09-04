@@ -4,8 +4,10 @@ import type { Ref } from 'vue';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { inject, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -254,6 +256,135 @@ function jumpToRandom() {
       </VirtualScroll>
       <ExampleXScrollbar />
     </div>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          Dashboards, market feeds, and log tails show a steady stream of data over a <em>stable</em> set of rows. When updates
+          mutate values in place — no rows are inserted or removed, and every row keeps its size — the list has a decisive
+          property for live refresh: the engine's geometry never changes, so an update cannot shift the layout or move the
+          user's scroll position. The technique is to keep that geometry fixed and drive each tick from the visible range the
+          engine reports, touching only mounted rows so the per-tick cost is O(viewport) no matter how large the dataset is.
+          The tradeoff is architectural: you design for a fixed set of uniform-height rows that refresh in place, which is the
+          right fit for live values but not for an ever-growing tail (that case needs the end-anchored append pattern instead).
+        </p>
+
+        <h3>1. Model rows for in-place updates</h3>
+        <p>
+          Two models fit a live feed. The mainstream one is a real array of row objects: every tick mutates a field (such as
+          <code>price</code>) on existing items, reactivity re-renders the mounted rows, and a uniform numeric
+          <code>item-size</code> keeps layout O(1) with no DOM measurement. Pass <code>items</code> the reactive array and read
+          each row from the <code>#item</code> slot's <code>item</code>, as in the snippet below.
+        </p>
+        <p>
+          If the dataset is huge, or each row's payload is a pure function of its index so storing every row is wasteful, use an
+          index-only list instead: a sparse placeholder as <code>items</code> (<code>new Array(count)</code>), content derived
+          inside the slot from <code>index</code>, and — when rows carry state — a reactive store keyed by index (a
+          <code>Map</code>) that materializes a value only when the row first enters the viewport. The VirtualScroll props are
+          identical; only the slot differs (<code>item</code> vs <code>index</code>). Reach for real objects when you already own
+          the data, and index-only when deriving each row is inexpensive and you want zero storage cost for the unseen rows.
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+import { reactive } from 'vue';
+
+// Mainstream model: a real array of row objects. All rows share one fixed
+// height, so a numeric item-size keeps layout O(1) with no DOM measurement.
+const rows = reactive(
+  Array.from({ length: 5_000 }, (_, index) => ({ id: index, price: 100 })),
+);
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScroll
+    virtual-scrollbar
+    ref=&quot;feed&quot;
+    class=&quot;feed&quot;
+    :items=&quot;rows&quot;
+    :item-size=&quot;44&quot;
+    :buffer-before=&quot;6&quot;
+    :buffer-after=&quot;6&quot;
+    @scroll=&quot;onScroll&quot;
+  >
+    &lt;template #item=&quot;{ item }&quot;>
+      &lt;div class=&quot;row&quot;>{{ item.id }} — ${{ item.price.toFixed(2) }}&lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>
+
+&lt;style scoped>
+.feed { height: 480px; }
+.row {
+  box-sizing: border-box;
+  height: 44px; /* must equal item-size */
+  display: flex; align-items: center; padding-inline: 12px;
+  font-variant-numeric: tabular-nums; /* digits keep a stable width */
+}
+&lt;/style>"
+        />
+
+        <h3>2. Keep the geometry fixed — that is what preserves the scroll</h3>
+        <p>
+          For updates not to jump the viewport, the list's geometry must stay constant: pass an <code>item-size</code> that equals
+          the rendered row height, and keep value text from reflowing its row or column — fixed widths plus
+          <code>font-variant-numeric: tabular-nums</code> so a price change does not change digit widths. Because the row count
+          and every row's size are constant, the total content height never changes, so the browser keeps a valid
+          <code>scrollTop</code> and you need no anchoring or restoration code for in-place updates.
+        </p>
+        <p>
+          This is the key contrast with an appending list: when you push rows onto the end the content height grows, and keeping
+          the newest row visible requires anchoring to the last index after each append (an end-aligned
+          <code>scrollToIndex</code>) — a separate mechanism from the in-place refresh shown here.
+        </p>
+
+        <h3>3. Drive each tick from the reported visible range</h3>
+        <p>
+          The <code>@scroll</code> event emits a <code>ScrollDetails</code> whose <code>range</code> field
+          (<code>{ start, end }</code>) is the window of mounted rows (buffers included). Cache it, and on every tick mutate only
+          <code>[start − k, end + k]</code>, with a small <code>k</code> overscan so rows about to scroll into view are already
+          fresh. Mutating an existing reactive item re-renders just that mounted row, so the work per tick stays proportional to
+          what is visible — it never grows with the dataset, which is the point of pairing virtualization with a live feed.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
+
+// The visible window, refreshed from every @scroll event.
+let range: { start: number; end: number } | undefined;
+function onScroll(d: ScrollDetails) {
+  range = d.range;
+}
+
+// One feed tick updates only the rows that are (nearly) on screen, so the work
+// is O(viewport) and never grows with the dataset. Mutating an existing
+// reactive item re-renders just its mounted row.
+function applyTick() {
+  if (!range) return;
+  const from = Math.max(0, range.start - 2);
+  const to = Math.min(rows.length - 1, range.end + 2);
+  for (let i = from; i &lt;= to; i++) {
+    rows[i].price = Math.max(1, rows[i].price * (1 + (Math.random() - 0.5) * 0.02));
+  }
+}
+
+setInterval(applyTick, 1000);"
+        />
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>
 

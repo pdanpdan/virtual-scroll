@@ -5,7 +5,9 @@ import type { Ref } from 'vue';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, onUnmounted, ref, watch } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -595,6 +597,228 @@ onUnmounted(() => clearTimeout(toastTimer));
         </div>
       </div>
     </div>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          A grouped, searchable directory is still one virtualized vertical list: the array passed to <code>items</code>
+          holds rows, and turning some of them into section headers is a data-modeling decision rather than a library
+          mode. Each header is an ordinary row object flagged as such, and its index is listed in
+          <code>sticky-indices</code>; the engine then pins that row to the top edge while you scroll and lets the next
+          pinned row push the current one out of view — the familiar iOS-style section effect. Because filtering and
+          section jumps only ever reshape the row array and call <code>scrollToIndex()</code>, the hard part of this UI
+          is data shaping, and the virtualizer&apos;s job stays constant: render the visible rows of whatever array it is
+          given.
+        </p>
+
+        <h3>1. Size the scroll container</h3>
+        <p>
+          Virtualization needs a viewport of known size: when the host element is not height-constrained it grows with
+          its content and never produces scroll events. Give the list an explicit height (the demo&apos;s resizable card
+          sizes it with flex, <code>flex-1 min-h-0</code>); in your own layout any explicit or viewport-relative height
+          works. In flex/grid parents remember <code>min-height: 0</code> so the box may shrink below its content.
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+import { ref } from 'vue';
+
+type Row =
+  | { kind: 'header'; title: string; count: number }
+  | { kind: 'record'; id: number; name: string };
+
+// Grouping is a data concern: one flat array where a section is a header row
+// followed by its records; the virtualizer only sees rows.
+const items = ref&lt;Row[]>([
+  { kind: 'header', title: 'Section A', count: 2 },
+  { kind: 'record', id: 1, name: 'Ada Lovelace' },
+  { kind: 'record', id: 2, name: 'Alan Turing' },
+]);
+
+// Header row indices pin to the top edge while scrolling; consecutive ones
+// push each other out iOS-style when the next header reaches the top.
+const stickyIndices = items.value
+  .flatMap((row, index) => (row.kind === 'header' ? [index] : []));
+
+const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64);
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScroll
+    virtual-scrollbar
+    class=&quot;browser&quot;
+    :items=&quot;items&quot;
+    :item-size=&quot;rowSize&quot;
+    :sticky-indices=&quot;stickyIndices&quot;
+    :gap=&quot;4&quot;
+    aria-label=&quot;Sectioned list&quot;
+  >
+    &lt;template #item=&quot;{ item, isStickyActive }&quot;>
+      &lt;div
+        v-if=&quot;item.kind === 'header'&quot;
+        class=&quot;section-header&quot;
+        :class=&quot;{ 'section-header--pinned': isStickyActive }&quot;
+      >
+        {{ item.title }} · {{ item.count }} records
+      &lt;/div>
+      &lt;div v-else class=&quot;record&quot;>#{{ item.id }} — {{ item.name }}&lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>
+
+&lt;style scoped>
+.browser { height: 480px; border: 1px solid #8884; } /* definite viewport */
+.section-header,
+.record {
+  box-sizing: border-box; /* wrappers are sized to :item-size: fill them */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-inline: 0.75rem;
+  border-bottom: 1px solid #8883;
+}
+.section-header { font-weight: 700; background: #eee; }
+.section-header--pinned { box-shadow: 0 2px 6px #0003; } /* isStickyActive */
+&lt;/style>"
+        />
+
+        <h3>2. Model every section as rows in one flat array</h3>
+        <p>
+          Flatten the grouped data so each section is a header row followed by its record rows; the same <code>#item</code>
+          slot renders both, branching on a type flag on the row object. Headers stay ordinary items — they occupy their
+          own index, scroll with the list, and can be addressed by <code>scrollToIndex()</code>. Build the
+          <code>sticky-indices</code> list from the header positions: rows at those indices pin to the viewport top, and
+          when several sticky rows are consecutive an approaching header pushes the previous one out of view. While a row
+          is actually pinned the slot reports <code>isStickyActive</code> — the hook for the elevated &quot;stuck&quot;
+          look. Keep the data nested and derive the flat array with a <code>computed</code> when your source is grouped by
+          a field or folder tree.
+        </p>
+
+        <h3>3. Choose a sizing strategy</h3>
+        <p>
+          The scroll math needs a height for every row; three strategies, in increasing cost: a single numeric
+          <code>item-size</code> when all rows share one height (positions are then pure arithmetic); a function
+          <code>(item, index) =&gt; number</code> when heights are known per row but differ (headers vs. records,
+          compact vs. expanded rows); or <code>null</code>/<code>0</code>/<code>undefined</code> for fully dynamic sizing,
+          where each mounted row is measured with a ResizeObserver and the layout follows the real content. With known
+          sizes the returned value is a contract: the engine sizes each row wrapper to it, so the slot root must fill the
+          wrapper (<code>height: 100%</code>, borders inside via <code>box-sizing: border-box</code>). With dynamic sizing
+          the contract is inverted — let the content decide the height and do not force one on the slot root. Dynamic
+          measurement costs per mounted row and corrects as you scroll; pass <code>default-item-size</code> so the first
+          frame and the scrollbar are not empty. <code>gap</code> adds spacing between rows in the scroll math, and
+          <code>buffer-before</code>/<code>buffer-after</code> (default <code>5</code>) keep extra rows mounted around the
+          viewport so fast scrolling does not flash blanks.
+        </p><CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          code="// Content-driven heights: pass null (or 0 / undefined) as :item-size — every
+// mounted row is then measured with a ResizeObserver and the layout follows
+// the actual content (wrapped text, expandable rows, ...). Give the engine a
+// fallback estimate so the first frame and scrollbar are not empty.
+const dynamicSizing = ref(false);
+
+&lt;template>
+  &lt;VirtualScroll
+    virtual-scrollbar
+    :items=&quot;items&quot;
+    :item-size=&quot;dynamicSizing ? null : rowSize&quot;
+    :default-item-size=&quot;64&quot;
+    :gap=&quot;4&quot;
+    :sticky-indices=&quot;stickyIndices&quot;
+  >
+    &lt;template #item=&quot;{ item, isStickyActive }&quot;>
+      &amp;lt;!-- same slot markup as before -->
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>"
+        />
+
+        <h3>4. Filter by deriving new arrays</h3>
+        <p>
+          Search is not a library feature: on every query, compute a new <code>items</code> array plus a matching
+          <code>sticky-indices</code> list and pass them down — the component re-ranges automatically when the props
+          change. Re-emit a header (cloned, with its count rebuilt from matches) only when its section keeps at least one
+          matching record, because the sticky list must refer to the filtered array&apos;s indices; keep the unfiltered
+          arrays as the fallback for an empty query. Then bind the derived arrays —
+          <code>:items="display.rows"</code> with <code>:sticky-indices="display.sticky"</code> —
+          instead of the originals.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+// Filtering happens BEFORE virtualization: derive a fresh row array and a
+// matching sticky-index list; the component re-ranges whenever a prop
+// changes. (Add `computed` to the vue import, plus the type import.)
+import type { ScrollAlignment } from '@pdanpdan/virtual-scroll';
+import { computed } from 'vue';
+
+const query = ref('');
+const display = computed(() => {
+  const q = query.value.trim().toLowerCase();
+  if (!q) return { rows: items.value, sticky: stickyIndices };
+
+  const rows: Row[] = [];
+  const sticky: number[] = [];
+  let header: Row | null = null;
+  let headerIndex = -1;
+
+  for (const row of items.value) {
+    if (row.kind === 'header') {
+      header = { ...row, count: 0 };
+      headerIndex = -1;
+      continue;
+    }
+    if (!row.name.toLowerCase().includes(q)) continue;
+    if (headerIndex === -1) {
+      headerIndex = rows.length; // header goes live with its first match
+      sticky.push(headerIndex);
+      rows.push(header!);
+    }
+    const current = rows[headerIndex];
+    if (current &amp;&amp; current.kind === 'header') current.count += 1;
+    rows.push(row);
+  }
+  return { rows, sticky };
+});
+
+// Programmatic jumps use the methods exposed on the component ref.
+const list = ref&lt;InstanceType&lt;typeof VirtualScroll> | null>(null);
+
+function jumpToSection(headerIndex: number) {
+  list.value?.scrollToIndex(headerIndex, null, { align: 'start' });
+}
+function jumpToRow(rowIndex: number, align: ScrollAlignment) {
+  list.value?.scrollToIndex(rowIndex, null, { align });
+}
+&lt;/script>"
+        />
+
+        <h3>5. Jump to a section or a row</h3>
+        <p>
+          The component instance (template ref) exposes <code>scrollToIndex(rowIndex, colIndex, options)</code> — for a
+          vertical list pass <code>null</code> for the column. Alignment options make jumps land predictably:
+          <code>start</code> puts the row at the top edge, <code>center</code> centers it, <code>end</code> pins it to the
+          bottom, and <code>auto</code> (the default) scrolls only when the row is not already fully visible. Jumping to
+          a section is scrolling to that header row&apos;s index, so the section picker, a &quot;jump to #520&quot; input
+          and random-access buttons are all the same call. If a dataset or query change invalidates stored targets (header
+          indices shift after filtering), clear the selection in a <code>watch</code> on those inputs.
+        </p>
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 
   <dialog ref="itemModalRef" class="modal modal-bottom sm:modal-middle" aria-labelledby="item-modal-title">

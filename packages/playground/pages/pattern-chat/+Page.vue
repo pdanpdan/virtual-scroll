@@ -5,7 +5,9 @@ import type { Ref } from 'vue';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { createSeededRandom } from '#/lib/random';
 import { useExampleScroll } from '#/lib/useExampleScroll';
@@ -289,5 +291,202 @@ function scrollToBottom() {
         </template>
       </VirtualScroll>
     </div>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          A chat is a vertical list that grows at the bottom with rows of uneven height — one of the harder cases for a
+          virtualized list to auto-scroll well. Two behaviors matter: a newly appended message scrolls into view so
+          the list &quot;sticks&quot; to the newest message, and when the user has scrolled up to read history the viewport is
+          never yanked away from them. The mechanism is a single <code>@scroll</code> handler that derives &quot;am I at the
+          bottom?&quot; from the emitted <code>ScrollDetails</code>, plus a programmatic end-anchored
+          <code>scrollToIndex()</code> after each append; loading older messages relies on the engine's prepend restoration so
+          the line being read stays put. The main tradeoff: because bubbles have measured (dynamic) heights, rows must mount and
+          be measured, and an end-anchored scroll keeps re-clamping until those measurements settle.
+        </p>
+
+        <h3>1. Size the host and choose a sizing mode</h3>
+        <p>
+          <code>VirtualScroll</code> renders its own scrollable host, and virtualization needs a known viewport: if the host is
+          not height-constrained it grows with its content and never scrolls. Give it a definite height, or flex/grid space with
+          <code>min-height: 0</code> so the box can shrink below its content and actually scroll.
+        </p>
+        <p>
+          Fixed-height or variable-height rows is the first sizing decision. If every row has the same height, pass a numeric
+          <code>item-size</code> and the engine derives the whole layout arithmetically with no DOM measurement. Chat bubbles wrap
+          to different heights, so instead leave <code>item-size</code> unset: that puts the list in dynamic mode, where each
+          mounted row is measured with a <code>ResizeObserver</code> and its measured size drives layout. Dynamic rows need
+          <strong>real data</strong> — <code>items</code> is an array of message objects read from the <code>#item</code> slot's
+          <code>item</code> prop, because there is no height oracle an index-only array could fall back on. While a row is
+          unmeasured the engine lays it out at <code>default-item-size</code> (default <code>40</code>); set it near the average
+          rendered row so the scrollbar, total height, and far <code>scrollToIndex</code> targets stay accurate until the
+          measurements arrive. Keep each bubble sized to its content.
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+import { ref } from 'vue';
+
+const chatScroll = ref();
+const messages = ref([{ id: 1, text: 'Hello', isMe: true }]);
+&lt;/script>
+
+&lt;template>
+  &lt;VirtualScroll
+    virtual-scrollbar
+    ref=&quot;chatScroll&quot;
+    class=&quot;chat-list&quot;
+    :items=&quot;messages&quot;
+    :default-item-size=&quot;64&quot;
+    @scroll=&quot;onScroll&quot;
+  >
+    &lt;template #item=&quot;{ item }&quot;>
+      &lt;div class=&quot;chat&quot; :class=&quot;item.isMe ? 'chat--me' : 'chat--other'&quot;>{{ item.text }}&lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>
+
+&lt;style scoped>
+/* The scroll host needs a definite height; min-h-0 lets it shrink inside a
+   column flex parent so the list can actually scroll. */
+.chat-list { height: 480px; }
+.chat { padding: 8px 12px; margin-block: 4px; border-radius: 12px; }
+.chat--me { text-align: right; }
+&lt;/style>"
+        />
+
+        <h3>2. Open at the newest message</h3>
+        <p>
+          To start showing the tail rather than the empty top, point <code>initial-scroll-index</code> at the last row and pair
+          it with <code>initial-scroll-align="end"</code> so that row is pinned to the bottom edge on mount. Pin the
+          <em>last</em> index rather than guessing a pixel offset: the engine re-clamps an end-anchored target while dynamic
+          measurements settle, so even on variable-height rows the first frame corrects itself flush against the real end.
+        </p>
+
+        <h3>3. Stick to the bottom only while the user is there</h3>
+        <p>
+          Two intents are in tension: when the user is at the newest message an incoming append should scroll the list down to
+          reveal it, but when the user has scrolled up to read history the same append must <em>not</em> move the viewport.
+          Resolve this in one <code>@scroll</code> handler that keeps a reactive &quot;at the bottom?&quot; flag.
+        </p>
+        <p>
+          The geometry is plain arithmetic over <code>ScrollDetails</code>: <code>totalSize.height</code> is the full content
+          height, <code>scrollOffset.y</code> is where the viewport top sits, and adding <code>viewportSize.height</code> locates
+          the viewport bottom — so <code>totalSize.height − (scrollOffset.y + viewportSize.height)</code> is the distance
+          remaining to the content end (virtual units, which equal rendered pixels once rows are measured). Compare it to a
+          small threshold of a few tens of pixels that absorbs rounding and the scrollbar, so &quot;at the bottom&quot; is
+          forgiving.
+        </p>
+        <p>
+          Read that flag <em>before</em> mutating <code>items</code>. If the user was at the bottom — or the append is their own
+          action, which should always be revealed — scroll after the new row mounts: call <code>scrollToIndex(items.length − 1,
+            0, { align: 'end', behavior: 'smooth' })</code> inside <code>nextTick</code>. End alignment is the right target even
+          though the new row's height is not measured yet, because an end-anchored scroll keeps re-clamping until the settling
+          measurements define the true end. If the user was <em>not</em> at the bottom and the row is incoming, leave the
+          viewport untouched and surface a &quot;jump to newest&quot; affordance instead — never steal the reader's position.
+        </p>
+        <p>
+          Choose the scroll <code>behavior</code> to match the traffic: <code>'smooth'</code> animates a gentle follow but can
+          look laggy when several rows land in a burst, while <code>'auto'</code> snaps instantly and stays responsive under
+          load.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="import type { ScrollDetails } from '@pdanpdan/virtual-scroll';
+
+import { nextTick, ref } from 'vue';
+
+const isAtBottom = ref(true);
+const hasNewMessages = ref(false);
+
+// Distance from the bottom edge of the viewport to the content end, in virtual
+// units (VU). With dynamic heights one VU equals one rendered pixel, so the
+// math is the same as on a plain scroll container.
+function onScroll(d: ScrollDetails) {
+  const remaining =
+    d.totalSize.height - (d.scrollOffset.y + d.viewportSize.height);
+  isAtBottom.value = remaining &lt; 20; // within 20px of the newest message
+  if (isAtBottom.value) hasNewMessages.value = false;
+}
+
+function append(msg: { id: number; text: string; isMe: boolean }) {
+  const wasAtBottom = isAtBottom.value; // read BEFORE mutating the list
+  messages.value = [...messages.value, msg];
+
+  if (wasAtBottom || msg.isMe) {
+    // Let the new row mount, then pin the last message to the bottom edge.
+    // align: 'end' keeps re-clamping while dynamic measurements settle, so the
+    // first jump lands flush even though the row's real height is unknown yet.
+    nextTick(() => {
+      chatScroll.value?.scrollToIndex(messages.value.length - 1, 0, {
+        align: 'end',
+        behavior: 'smooth',
+      });
+    });
+  } else {
+    // The user scrolled up to read history: never yank the viewport. Surface a
+    // &quot;New messages&quot; button (hasNewMessages) that jumps on click instead.
+    hasNewMessages.value = true;
+  }
+}"
+        />
+
+        <h3>4. Prepend history without losing your place</h3>
+        <p>
+          Loading older messages prepends to the top of the list, which otherwise lets the browser's scroll anchor drift and
+          yanks the user away from the line they were reading. The <code>restore-scroll-on-prepend</code> prop (default
+          <code>false</code>) makes the engine hold the first visible row at the same screen offset across the prepend — add it
+          whenever your list can grow at the start (paged-up history, infinite scroll upward).
+        </p>
+        <p>
+          Trigger the load from the same <code>@scroll</code> handler, guarded so it cannot fire redundantly: only when the
+          viewport is near the top (<code>scrollOffset.y</code> below a small threshold), the scroll was user-driven (the
+          <code>isProgrammaticScroll</code> flag in <code>ScrollDetails</code> is <code>false</code>), no load is already running,
+          and more history remains. Unshift the older batch and replace <code>items</code> wholesale (a fresh array) so the
+          engine re-initializes against the new length while the restoration prop keeps the anchor stable.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="import { ref } from 'vue';
+
+const hasMoreHistory = ref(true);
+const isLoading = ref(false);
+
+// Called from the scroll handler while the user is near the top (&lt; 100px),
+// not mid-programmatic scroll, and not already loading.
+function loadOlder() {
+  if (isLoading.value || !hasMoreHistory.value) return;
+  isLoading.value = true;
+
+  // Simulated fetch: the new batch is PREPENDED (older messages go first).
+  setTimeout(() => {
+    const older = Array.from({ length: 20 }, (_, i) => ({
+      id: messages.value[0].id - 20 + i,
+      text: `older #${i}`,
+      isMe: false,
+    }));
+    messages.value = [...older, ...messages.value];
+    hasMoreHistory.value = messages.value.length &lt; 10_000;
+    isLoading.value = false;
+  }, 500);
+}"
+        />
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>

@@ -4,8 +4,10 @@ import type { DiffRow } from './diff-data';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, ref } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
 import ExampleXScrollbar from '#/components/ExampleXScrollbar.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollControls from '#/components/ScrollControls.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
@@ -280,6 +282,221 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
       </div>
       <ExampleXScrollbar :enabled="virtualScrollbar" />
     </div>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          A side-by-side diff of two large files is a two-pane layout that must stay in vertical lockstep. The scalable
+          approach is not two synchronized scroll lists but <strong>one</strong> virtualized list whose rows each paint
+          both panes: content that belongs together is a single row, so alignment is structural, scroll state exists
+          once, and only one set of rows is ever mounted. Because every row is one text line, the list is
+          uniform-height, which gives arithmetic positioning and turns folded-context expansion into a plain reactive
+          splice. The two hard parts are modeling rows whose sides can be absent (added/removed lines) and keeping
+          rows from wrapping, which would silently break the uniform-height contract.
+        </p>
+
+        <h3>1. Model each pair of lines as one row</h3>
+        <p>
+          The naive layout — two lists side by side — forces you to synchronize scroll offsets by hand, and the sides
+          stop being index-aligned at the first insertion or deletion. Model the pairing instead: each row owns its
+          old and new line numbers and carries <em>nullable</em> content for the side that has no line. Produce these
+          rows once, ahead of rendering, by running your diff algorithm over the two files; the shape below also
+          includes a placeholder for a folded run of unchanged lines (see step 5).
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="// Each virtual row is ONE model object that describes both panes. Line
+// numbers live on the row rather than being derived from index + 1: an added
+// or removed line shifts only its own side, so the old and new numbering are
+// free to diverge (null = that side has no line here).
+type DiffRow =
+  | { type: 'common'; oldLine: number; newLine: number; oldContent: string; newContent: string }
+  | { type: 'change'; oldLine: number | null; newLine: number | null; oldContent: string | null; newContent: string | null }
+  | { type: 'collapsed'; oldStart: number; newStart: number; count: number };
+
+// Produce these rows once, ahead of rendering, by running a real diff
+// algorithm (Myers, patience, ...) over the two files. A removed line keeps
+// newContent === null, an added line keeps oldContent === null, and long runs
+// of unchanged lines can be folded into one 'collapsed' placeholder row.
+const diffRows: DiffRow[] = [
+  { type: 'common', oldLine: 1, newLine: 1, oldContent: 'const answer = 42;', newContent: 'const answer = 42;' },
+  { type: 'change', oldLine: 2, newLine: null, oldContent: 'let enabled = true;', newContent: null },
+  { type: 'change', oldLine: null, newLine: 2, oldContent: null, newContent: 'const enabled = true;' },
+  { type: 'collapsed', oldStart: 3, newStart: 3, count: 120 },
+];"
+        />
+
+        <h3>2. Virtualize the uniform-height rows</h3>
+        <p>
+          Every variant — changed rows and the full-width expand placeholder — shares one height, so a numeric
+          <code>item-size</code> turns range and offset math into pure arithmetic: no <code>ResizeObserver</code>, no
+          per-row allocation, <em>O(1)</em> positioning. Give the scroll host a definite height (or a flex-fill with
+          <code>min-height: 0</code>), then bind the row array and the size. The <code>#item</code> slot renders either
+          the expand button or the two panes; <code>index</code> addresses the data but is never used to display a line
+          number — the row owns those.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import '@pdanpdan/virtual-scroll/style.css';
+import { computed, ref } from 'vue';
+
+import { diffRows, type DiffRow } from './diff-data';
+
+// Longest line (in characters) over both files decides the row width. Every
+// row must be able to hold its longest half on a single line, or heights stop
+// being uniform. `ch` is the width of '0' in the monospace font, so the
+// formula follows the font size; the constant covers both gutters + paddings.
+const maxChars = computed(() =>
+  Math.max(0, ...diffRows.map((row) =>
+    Math.max(row.oldContent?.length ?? 0, row.newContent?.length ?? 0))),
+);
+const rowMinStyle = computed(() => ({
+  minInlineSize: `calc(${maxChars.value * 2} * 1ch + 10rem)`,
+}));
+
+const rows = ref&lt;DiffRow[]>(diffRows);
+&lt;/script>
+&nbsp;
+&lt;template>
+  &amp;lt;!-- ONE vertical list whose rows each paint both panes: the sides are in
+       lockstep by construction, so no scroll synchronization is involved. -->
+  &lt;VirtualScroll
+    virtual-scrollbar
+    class=&quot;diff-viewer&quot;
+    :items=&quot;rows&quot;
+    :item-size=&quot;20&quot;
+    :buffer-before=&quot;10&quot;
+    :buffer-after=&quot;10&quot;
+    aria-label=&quot;Side-by-side diff&quot;
+  >
+    &lt;template #item=&quot;{ item, index }&quot;>
+      &lt;button v-if=&quot;item.type === 'collapsed'&quot; class=&quot;row collapsed&quot; @click=&quot;expand(index)&quot;>
+        Expand {{ item.count }} lines
+      &lt;/button>
+
+      &lt;div v-else class=&quot;row&quot; :style=&quot;rowMinStyle&quot;>
+        &lt;div class=&quot;side&quot;>
+          &lt;div class=&quot;gutter&quot;>{{ item.oldLine ?? '' }}&lt;/div>
+          &lt;div class=&quot;code&quot;>{{ item.oldContent ?? '' }}&lt;/div>
+        &lt;/div>
+        &lt;div class=&quot;side&quot;>
+          &lt;div class=&quot;gutter&quot;>{{ item.newLine ?? '' }}&lt;/div>
+          &lt;div class=&quot;code&quot;>{{ item.newContent ?? '' }}&lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>"
+        />
+
+        <h3>3. Size rows so they can never wrap</h3>
+        <p>
+          A long line must overflow horizontally, never wrap onto a second line — a wrapped row changes height and
+          breaks the uniform-size contract. In a monospace font the width of a line is exactly
+          <code>length × 1ch</code>, so give each row a <code>min-inline-size</code> that fits its longest half: twice
+          the longest line in <code>ch</code>, plus an allowance for both gutters and side paddings. Because
+          <code>ch</code> tracks the font size, the rule survives responsive font changes. The wide rows overflow the
+          host, which pans them with its native horizontal overflow — opt the items wrapper out of its default
+          <code>contain: layout</code> so the overflow actually extends the host's scrollable area.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="css"
+          code="&lt;style scoped>
+.diff-viewer {
+  height: 480px; /* the scroll viewport needs a definite height */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* item-size (20) must equal the rendered row height: the 20px line box keeps
+   every variant - the collapsed button and the two-pane row - exactly one
+   line tall, so the engine's arithmetic matches the DOM. */
+.row { display: flex; line-height: 20px; }
+.collapsed {
+  font: inherit;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.side { flex: 1; display: flex; min-width: 0; }
+.gutter {
+  flex: none;
+  width: 3.5rem;
+  padding-inline-end: 0.5rem;
+  text-align: end;
+  color: color-mix(in oklab, currentColor 45%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.code { flex: 1; white-space: pre; }
+
+/* Long lines make rows wider than the viewport; the host pans them natively.
+   The wrapper's default `contain: layout` would keep that overflow inside, so
+   opt out to make the wide rows part of the host's scrollable area. */
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) { contain: none; }
+&lt;/style>"
+        />
+
+        <h3>4. Signal the change kind per row</h3>
+        <p>
+          Each side renders its own gutter (right-aligned, tabular numbers) and its code. Derive color and marker from
+          the model: a removed line keeps <code>newContent === null</code>, an added line keeps
+          <code>oldContent === null</code>, and a modified line has both sides present but different. For a word-level
+          highlight, split the changed pair into unchanged-prefix / changed-middle / unchanged-suffix segments and
+          emphasize the middle. The segments are a pure function of the row, which keeps rendering idempotent under
+          row recycling.
+        </p>
+
+        <h3>5. Fold context runs and expand them on demand</h3>
+        <p>
+          Files with large untouched regions do not need a row per line: fold each run of identical lines into one
+          placeholder row carrying the run metadata, then materialize on click by splicing the real rows into the
+          array at that index. With a numeric <code>item-size</code> the engine derives everything from the length, so
+          a mid-list splice is a plain reactive array update. Keep the two raw file line arrays in scope — the
+          expansion rebuilds content from them.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          code="// Optional context folding: keep the two raw files around and expand a folded
+// run into real rows on demand instead of mounting thousands of lines.
+function expand(index: number) {
+  const row = rows.value[index];
+  if (row.type !== 'collapsed' || !row.count) {
+    return;
+  }
+
+  const expanded: DiffRow[] = Array.from({ length: row.count }, (_, i) => ({
+    type: 'common',
+    oldLine: row.oldStart + i,
+    newLine: row.newStart + i,
+    oldContent: oldLines[row.oldStart + i - 1] ?? '',
+    newContent: newLines[row.newStart + i - 1] ?? '',
+  }));
+
+  // Splice in place: with a numeric item-size the engine derives everything
+  // from the length, so inserting rows mid-list is a plain array update.
+  rows.value.splice(index, 1, ...expanded);
+}"
+        />
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>
 

@@ -4,7 +4,9 @@ import type { Ref } from 'vue';
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import { computed, inject, reactive, ref } from 'vue';
 
+import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
+import ImplementationGuide from '#/components/ImplementationGuide.vue';
 import ScrollStatus from '#/components/ScrollStatus.vue';
 import { useExampleScroll } from '#/lib/useExampleScroll';
 
@@ -200,5 +202,133 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
         </div>
       </template>
     </VirtualScroll>
+
+    <template #implementation>
+      <ImplementationGuide>
+        <p>
+          A tree is recursive, but a virtual scroller is linear: it positions a flat array of rows by integer index and mounts only the window around the scroll offset. The bridge is a flattening step — keep the real hierarchy in your data, then derive the array of <em>visible</em> rows (each node followed by its descendants while it is expanded) and pass that to <code>:items</code>. Expanding or collapsing then mutates the model and re-runs the flatten; nothing in the DOM tree needs rebuilding, so the cost scales with the visible nodes, not with layout of the whole tree. Each recompute yields a new array instance, which the engine picks up automatically — no <code>refresh()</code> call and nothing to reset.
+        </p>
+
+        <h3>1. Flatten the visible subset of a real tree</h3>
+        <p>
+          Keep expand state in the model, never in the DOM: rows recycle — they unmount when they leave the window and remount on return, so a flag stored on an element is lost. A boolean on each node (or a <code>Set</code> of expanded ids in a store) survives recycling. The flatten walk pushes a node and, when it is expanded, recurses into its children — a pre-order traversal that stops at collapsed branches. Entries are the node objects themselves, so the <code>#item</code> slot receives the node and <code>toggle()</code> can mutate the reactive source directly.
+        </p>
+
+        <p>
+          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
+          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
+          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="ts"
+          line-numbers
+          code="// Keep the real hierarchy in your data (API response, file walk, store, ...)
+// and derive the flat list of *visible* rows from it.
+export interface TreeNode {
+  id: string;
+  label: string;
+  level: number;      // depth, root = 0: drives indentation and aria-level
+  expanded: boolean;  // UI state lives in the model, never in the DOM
+  children: TreeNode[];
+}
+
+// Depth-first flatten that stops at collapsed nodes. The result is the array
+// VirtualScroll renders: expanding/collapsing only re-runs this walk, whose
+// cost scales with the visible nodes, not with layout of the whole tree.
+export function flattenVisible(nodes: TreeNode[], out: TreeNode[] = []): TreeNode[] {
+  for (const node of nodes) {
+    out.push(node);
+    if (node.expanded &amp;&amp; node.children.length > 0) {
+      flattenVisible(node.children, out);
+    }
+  }
+  return out;
+}
+
+// Tiny generator for the example - replace with your data source.
+export function createTree(depth: number, breadth: number, prefix = 'node', level = 0): TreeNode[] {
+  return Array.from({ length: breadth }, (_, i) => {
+    const id = `${ prefix }-${ i }`;
+    return {
+      id,
+      label: `Node ${ id }`,
+      level,
+      expanded: false,
+      children: depth > 1 ? createTree(depth - 1, breadth, id, level + 1) : [],
+    };
+  });
+}"
+        />
+
+        <h3>2. Virtualize the flattened array with content-sized rows</h3>
+        <p>
+          Bind the <code>visibleItems</code> <code>computed</code> to <code>:items</code> and let rows size themselves: with no <code>item-size</code>, the engine measures every mounted row with a <code>ResizeObserver</code>, so a row can be exactly as tall as its label, twisty, and padding need. Rows that have not mounted yet are budgeted at <code>default-item-size</code> (default <code>40</code>) and settle to their measured height the frame they mount. If every row of your tree genuinely has one fixed height, pass it as a numeric <code>item-size</code> instead and all positions become pure arithmetic — the smoothest option, but wrapped or taller content then overflows its row box.
+        </p>
+
+        <CodeBlock
+          class="guide-code-block"
+          lang="vue"
+          line-numbers
+          code="&lt;script setup lang=&quot;ts&quot;>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+import { computed, reactive } from 'vue';
+
+import '@pdanpdan/virtual-scroll/style.css';
+
+import { createTree, flattenVisible, type TreeNode } from './tree';
+
+const tree = reactive(createTree(4, 4)); // four levels, four children each
+const visibleItems = computed(() => flattenVisible(tree));
+
+function toggle(node: TreeNode) {
+  node.expanded = !node.expanded;
+}
+&lt;/script>
+
+&lt;template>
+  &amp;lt;!-- item-role=&quot;none&quot;: the wrapper row is not the treeitem - the interactive
+       row inside the slot is (it carries focus and the toggle handler). -->
+  &lt;VirtualScroll
+  virtual-scrollbar class=&quot;tree&quot; :items=&quot;visibleItems&quot; role=&quot;tree&quot; item-role=&quot;none&quot;
+    aria-label=&quot;Collapsible tree&quot;>
+    &amp;lt;!-- No item-size: rows are measured from rendered content, so each row is
+         exactly as tall as its label needs. -->
+    &lt;template #item=&quot;{ item, index, getItemAriaProps }&quot;>
+      &lt;div role=&quot;treeitem&quot; v-bind=&quot;getItemAriaProps(index)&quot; tabindex=&quot;0&quot;
+        :aria-level=&quot;item.level + 1&quot;
+        :aria-expanded=&quot;item.children.length > 0 ? item.expanded : undefined&quot;
+        class=&quot;tree-row&quot; :style=&quot;{ paddingInlineStart: `${ item.level * 20 + 12 }px` }&quot;
+        @click=&quot;toggle(item)&quot; @keydown.enter=&quot;toggle(item)&quot;
+        @keydown.space.prevent=&quot;toggle(item)&quot;>
+        &lt;span class=&quot;twisty&quot; aria-hidden=&quot;true&quot;>{{ item.children.length > 0 ? (item.expanded ? '▾' : '▸') : '' }}&lt;/span>
+        &lt;span>{{ item.label }}&lt;/span>
+      &lt;/div>
+    &lt;/template>
+  &lt;/VirtualScroll>
+&lt;/template>
+
+&lt;style scoped>
+.tree { height: 480px; }
+.tree-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding-block: 0.35rem; }
+.twisty { width: 1rem; }
+&lt;/style>"
+        />
+
+        <h3>3. What expand and collapse do to the scroll math</h3>
+        <p>
+          Toggling a node inserts or removes its whole subtree between two neighbors, so every later index shifts. The engine watches the identity and length of <code>:items</code>: sizes are re-initialized per index — indices measured earlier keep their measurements, indices never mounted use the estimate — and the browser keeps its pixel scroll offset, which the engine re-reads after the DOM updates. The visible result matches a non-virtualized tree: content below the toggled node reflows, and collapsing rows above the viewport or shrinking the total below the current offset clamps to the new end. The engine does not re-anchor the viewport to the toggled node — after a toggle, look up the node's index in the new flattened array and call <code>scrollToIndex()</code> if you want to follow it.
+        </p>
+        <p>
+          Uniform rows make all of this invisible, because estimates equal measurements. With variable heights, a freshly mounted row may settle by a frame; reserving space for late-loading content keeps scrolling stable. Row rendering must stay idempotent and read only the model, since rows are recycled, and expand-all/collapse-all is the same recursion over the model with <code>expanded</code> set to a constant.
+        </p>
+
+        <h3>4. Keep the tree semantics for assistive technology</h3>
+        <p>
+          Pass <code>role="tree"</code> and the component maps item roles to <code>treeitem</code>. When the row content — not the wrapper — is the interactive element (it carries focus and the click handler), set <code>item-role="none"</code> and make the row root the <code>treeitem</code> yourself, binding <code>getItemAriaProps(index)</code> from the slot props for <code>aria-setsize</code> and <code>aria-posinset</code>. Add a 1-based <code>aria-level</code>, and <code>aria-expanded</code> only on nodes that have children. Make the row focusable (<code>tabindex="0"</code>) and toggle on <code>Enter</code> and <code>Space</code> so the tree works without a pointer. The twisty is decorative: mark it <code>aria-hidden</code> and swap or rotate its glyph according to <code>expanded</code>.
+        </p>
+      </ImplementationGuide>
+    </template>
   </ExampleContainer>
 </template>

@@ -41,6 +41,28 @@ async function copyCode() {
   }, 2000);
 }
 
+/**
+ * Expand the (collapsible) implementation guide and scroll it into view below
+ * the sticky header. The guide is rendered above the example, so it starts
+ * closed to keep the demo readable; this is the header button that reveals it.
+ */
+function goToGuide() {
+  const el = document.getElementById('implementation-guide') as HTMLDetailsElement;
+  if (!el || el.tagName !== 'DETAILS') {
+    return;
+  }
+  el.open = true;
+  // Wait a frame so the expansion reflows before we compute the scroll target.
+  requestAnimationFrame(() => {
+    const rect = el.getBoundingClientRect();
+    const scrollPadding = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    window.scrollTo({
+      top: window.scrollY + rect.top - scrollPadding,
+      behavior: 'smooth',
+    });
+  });
+}
+
 const pageContext = usePageContext();
 const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchHref('/index', pageContext.urlPathname));
 </script>
@@ -84,10 +106,12 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
           </AppLink>
 
           <div class="flex flex-wrap items-center justify-end gap-2">
-            <a
+            <button
               v-if="$slots.implementation"
-              href="#implementation-guide"
+              type="button"
               class="btn btn-sm btn-soft gap-1.5"
+              aria-controls="implementation-guide"
+              @click="goToGuide"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -99,13 +123,17 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
               </svg>
-              <span class="small-caps font-bold tracking-widest">Details</span>
-            </a>
+              <span class="small-caps font-bold tracking-widest">How To</span>
+            </button>
 
             <ViewSource class="btn btn-sm btn-soft gap-1.5" />
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-if="$slots.implementation">
+      <slot name="implementation" />
     </div>
 
     <div class="card flex flex-col bg-base-300 shadow-soft overflow-auto resize" :style="containerStyle">
@@ -179,10 +207,6 @@ const isIndex = computed(() => matchHref('/', pageContext.urlPathname) || matchH
         :code="code"
         line-numbers
       />
-    </div>
-
-    <div v-if="$slots.implementation">
-      <slot name="implementation" />
     </div>
   </div>
 
