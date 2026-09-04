@@ -425,7 +425,9 @@ function cellText(row: number, col: number) {
   white-space: nowrap;
   background: #fff;
 }
-.row--header { background: #f3f4f6; }
+.row--header {
+  background: #f3f4f6;
+}
 
 .cell {
   position: relative;
@@ -450,7 +452,9 @@ function cellText(row: number, col: number) {
   background: #f3f4f6;
   font-weight: 700;
 }
-.row--header .cell--row-head { z-index: 3; } /* corner above column headers */
+.row--header .cell--row-head {
+  z-index: 3;
+} /* corner above column headers */
 
 /* Row-versus-row stacking belongs to the engine: while a sticky row is
    pinned it is marked .virtual-scroll--sticky and raised (z-index 10 in the

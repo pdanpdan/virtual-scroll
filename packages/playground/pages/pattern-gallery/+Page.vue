@@ -169,7 +169,7 @@ const columns = 5;
 const photoCount = 2000;
 
 // One ITEM per grid ROW: virtualization ranges over rows, not photos, so the
-// DOM stays tiny even though each mounted row paints `columns` &lt;img> cells.
+// DOM stays tiny even though each mounted row paints `columns` &amp;lt;img> cells.
 const rows = computed(() => {
   const rowCount = Math.ceil(photoCount / columns);
   return Array.from({ length: rowCount }, (_, r) =>
@@ -200,13 +200,15 @@ const rows = computed(() => {
           class="guide-code-block"
           lang="css"
           line-numbers
-          code=".gallery { height: 100%; } /* needs a definite viewport in a flex/grid parent */
+          code=".gallery {
+  height: 100%;
+} /* needs a definite viewport in a flex/grid parent */
 .grid-row {
-  display: grid;      /* columns are set inline: repeat(N, 1fr) */
-  column-gap: 1rem;   /* horizontal spacing is plain CSS */
+  display: grid; /* columns are set inline: repeat(N, 1fr) */
+  column-gap: 1rem; /* horizontal spacing is plain CSS */
 }
 .cell {
-  aspect-ratio: 1;    /* square box reserved per cell — no layout shift */
+  aspect-ratio: 1; /* square box reserved per cell — no layout shift */
   border-radius: 0.5rem;
   overflow: hidden;
   background: #ececec; /* loading placeholder behind the image */
@@ -242,10 +244,7 @@ const rows = computed(() => {
     aria-label=&quot;Photo gallery&quot;
   >
     &lt;template #item=&quot;{ item: row }&quot;>
-      &lt;div
-        class=&quot;grid-row&quot;
-        :style=&quot;{ gridTemplateColumns: `repeat(${columns}, 1fr)` }&quot;
-      >
+      &lt;div class=&quot;grid-row&quot; :style=&quot;{ gridTemplateColumns: `repeat(${columns}, 1fr)` }&quot;>
         &lt;figure v-for=&quot;photo in row&quot; :key=&quot;photo.id&quot; class=&quot;cell&quot;>
           &lt;img :src=&quot;photo.thumb&quot; :alt=&quot;photo.author&quot; />
         &lt;/figure>

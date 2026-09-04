@@ -545,12 +545,17 @@ const codeMinStyle = computed(() => ({ minInlineSize: `${maxChars.value}ch` }));
   color: color-mix(in oklab, currentColor 45%, transparent);
   font-variant-numeric: tabular-nums; /* digits do not jitter while scrolling */
 }
-.code { flex: 1; white-space: pre; }
+.code {
+  flex: 1;
+  white-space: pre;
+}
 
 /* Wide rows overflow the viewport and the host pans them natively; opt the
    wrapper out of its default `contain: layout` so they extend the host's
    scrollable area. */
-:deep(.virtual-scroll-container .virtual-scroll-wrapper) { contain: none; }
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) {
+  contain: none;
+}
 &lt;/style>"
         />
         <p>

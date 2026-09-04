@@ -235,11 +235,7 @@ const stickyIndices = computed(() => {
          it are covered; when the NEXT header reaches the line it slides over
          and pushes the previous one out (the &quot;iOS pushing&quot; effect). -->
     &lt;template #item=&quot;{ item, index, isStickyActive }&quot;>
-      &lt;div
-        v-if=&quot;item.type === 'header'&quot;
-        class=&quot;section-header&quot;
-        :class=&quot;{ active: isStickyActive }&quot;
-      >
+      &lt;div v-if=&quot;item.type === 'header'&quot; class=&quot;section-header&quot; :class=&quot;{ active: isStickyActive }&quot;>
         {{ item.label }} &lt;span class=&quot;idx&quot;>#{{ index }}&lt;/span>
       &lt;/div>
       &lt;div v-else class=&quot;row&quot;>{{ item.label }}&lt;/div>

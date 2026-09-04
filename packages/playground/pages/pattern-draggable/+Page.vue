@@ -418,9 +418,17 @@ function stopAutoScroll() {
   padding: 0.5rem 1rem;
   border-bottom: 1px solid rgb(0 0 0 / 0.08);
 }
-.handle { cursor: grab; touch-action: pan-y; user-select: none; }
-.row.is-dragging { opacity: 0.3; } /* the row being carried */
-.row.is-target { border-top: 3px solid oklch(55% 0.2 260); } /* drop marker */"
+.handle {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+.row.is-dragging {
+  opacity: 0.3;
+} /* the row being carried */
+.row.is-target {
+  border-top: 3px solid oklch(55% 0.2 260);
+} /* drop marker */"
         />
       </ImplementationGuide>
     </template>

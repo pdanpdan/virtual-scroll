@@ -665,11 +665,7 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
     aria-label=&quot;Sectioned list&quot;
   >
     &lt;template #item=&quot;{ item, isStickyActive }&quot;>
-      &lt;div
-        v-if=&quot;item.kind === 'header'&quot;
-        class=&quot;section-header&quot;
-        :class=&quot;{ 'section-header--pinned': isStickyActive }&quot;
-      >
+      &lt;div v-if=&quot;item.kind === 'header'&quot; class=&quot;section-header&quot; :class=&quot;{ 'section-header--pinned': isStickyActive }&quot;>
         {{ item.title }} · {{ item.count }} records
       &lt;/div>
       &lt;div v-else class=&quot;record&quot;>#{{ item.id }} — {{ item.name }}&lt;/div>
@@ -678,7 +674,10 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
 &lt;/template>
 
 &lt;style scoped>
-.browser { height: 480px; border: 1px solid #8884; } /* definite viewport */
+.browser {
+  height: 480px;
+  border: 1px solid #8884;
+} /* definite viewport */
 .section-header,
 .record {
   box-sizing: border-box; /* wrappers are sized to :item-size: fill them */
@@ -688,8 +687,13 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
   padding-inline: 0.75rem;
   border-bottom: 1px solid #8883;
 }
-.section-header { font-weight: 700; background: #eee; }
-.section-header--pinned { box-shadow: 0 2px 6px #0003; } /* isStickyActive */
+.section-header {
+  font-weight: 700;
+  background: #eee;
+}
+.section-header--pinned {
+  box-shadow: 0 2px 6px #0003;
+} /* isStickyActive */
 &lt;/style>"
         />
 

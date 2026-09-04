@@ -242,7 +242,12 @@ const items = new Array(1_000_000);
 &lt;/script>
 
 &lt;template>
-  &lt;VirtualScroll class=&quot;virtual-list&quot; :items=&quot;items&quot; :item-size=&quot;50&quot; virtual-scrollbar>
+  &lt;VirtualScroll
+    class=&quot;virtual-list&quot;
+    :items=&quot;items&quot;
+    :item-size=&quot;50&quot;
+    virtual-scrollbar
+  >
     &amp;lt;!-- item is undefined for sparse holes; render from the index. -->
     &lt;template #item=&quot;{ index }&quot;>
       &lt;div class=&quot;row&quot;>Row #{{ index }}&lt;/div>

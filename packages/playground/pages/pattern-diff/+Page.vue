@@ -424,7 +424,10 @@ const rows = ref&lt;DiffRow[]>(diffRows);
 /* item-size (20) must equal the rendered row height: the 20px line box keeps
    every variant - the collapsed button and the two-pane row - exactly one
    line tall, so the engine's arithmetic matches the DOM. */
-.row { display: flex; line-height: 20px; }
+.row {
+  display: flex;
+  line-height: 20px;
+}
 .collapsed {
   font: inherit;
   border: 0;
@@ -434,7 +437,11 @@ const rows = ref&lt;DiffRow[]>(diffRows);
   justify-content: center;
   gap: 0.5rem;
 }
-.side { flex: 1; display: flex; min-width: 0; }
+.side {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
 .gutter {
   flex: none;
   width: 3.5rem;
@@ -443,12 +450,17 @@ const rows = ref&lt;DiffRow[]>(diffRows);
   color: color-mix(in oklab, currentColor 45%, transparent);
   font-variant-numeric: tabular-nums;
 }
-.code { flex: 1; white-space: pre; }
+.code {
+  flex: 1;
+  white-space: pre;
+}
 
 /* Long lines make rows wider than the viewport; the host pans them natively.
    The wrapper's default `contain: layout` would keep that overflow inside, so
    opt out to make the wide rows part of the host's scrollable area. */
-:deep(.virtual-scroll-container .virtual-scroll-wrapper) { contain: none; }
+:deep(.virtual-scroll-container .virtual-scroll-wrapper) {
+  contain: none;
+}
 &lt;/style>"
         />
 

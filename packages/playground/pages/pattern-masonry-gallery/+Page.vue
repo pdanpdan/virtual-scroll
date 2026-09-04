@@ -396,7 +396,9 @@ const imageUrl = (item: GalleryItem, width: number) =>
 &lt;/template>
 &nbsp;
 &lt;style scoped>
-.gallery { height: 480px; } /* the scroll viewport needs a definite height */
+.gallery {
+  height: 480px;
+} /* the scroll viewport needs a definite height */
 .card {
   position: relative;
   width: 100%;
@@ -412,7 +414,11 @@ const imageUrl = (item: GalleryItem, width: number) =>
   height: 100%;
   object-fit: cover;
 }
-.badge { position: absolute; inset-block-end: 4px; inset-inline-end: 4px; }
+.badge {
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-end: 4px;
+}
 &lt;/style>"
         />
 

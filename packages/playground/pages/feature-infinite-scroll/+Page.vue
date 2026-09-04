@@ -208,8 +208,14 @@ async function loadMore(direction: 'vertical' | 'horizontal') {
 
 &lt;template>
   &lt;VirtualScroll
-  virtual-scrollbar class=&quot;feed&quot; :items=&quot;items&quot; :item-size=&quot;60&quot;
-    :loading=&quot;loading&quot; :load-distance=&quot;300&quot; @load=&quot;loadMore&quot;>
+    virtual-scrollbar
+    class=&quot;feed&quot;
+    :items=&quot;items&quot;
+    :item-size=&quot;60&quot;
+    :loading=&quot;loading&quot;
+    :load-distance=&quot;300&quot;
+    @load=&quot;loadMore&quot;
+  >
     &lt;template #item=&quot;{ item, index }&quot;>
       &lt;div class=&quot;row&quot;>#{{ index }} · {{ item }}&lt;/div>
     &lt;/template>
@@ -223,10 +229,21 @@ async function loadMore(direction: 'vertical' | 'horizontal') {
 &lt;/template>
 
 &lt;style scoped>
-.feed { height: 480px; } /* the scroll viewport needs a definite height */
-.row { box-sizing: border-box; display: flex; align-items: center;
-  height: 100%; padding-inline: 1rem; border-bottom: 1px solid rgb(0 0 0 / .1); }
-.spinner { padding: 1rem; text-align: center; }
+.feed {
+  height: 480px;
+} /* the scroll viewport needs a definite height */
+.row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-inline: 1rem;
+  border-bottom: 1px solid rgb(0 0 0 / .1);
+}
+.spinner {
+  padding: 1rem;
+  text-align: center;
+}
 &lt;/style>"
         />
 

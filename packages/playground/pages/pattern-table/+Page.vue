@@ -179,7 +179,7 @@ import { ref } from 'vue';
 
 import '@pdanpdan/virtual-scroll/style.css';
 
-// Real row records: each entry becomes one virtualized &lt;tr>.
+// Real row records: each entry becomes one virtualized &amp;lt;tr>.
 const rows = ref(
   Array.from({ length: 100_000 }, (_, id) => ({
     id,
@@ -221,7 +221,9 @@ const rows = ref(
 &lt;/template>
 
 &lt;style scoped>
-.data-table { height: 480px; }
+.data-table {
+  height: 480px;
+}
 &lt;/style>"
         />
 
@@ -240,22 +242,30 @@ const rows = ref(
           lang="css"
           line-numbers
           code="/* Table layout sees only the header plus the mounted window of rows, so
-   column widths must be pinned: set the SAME width on the header &lt;th> and
-   the body &lt;td> of every column. */
+   column widths must be pinned: set the SAME width on the header &amp;lt;th> and
+   the body &amp;lt;td> of every column. */
 .data-table th.col-id,
-.data-table td.col-id { width: 6rem; }
+.data-table td.col-id {
+  width: 6rem;
+}
 
 .data-table th.col-name,
-.data-table td.col-name { width: 14rem; }
+.data-table td.col-name {
+  width: 14rem;
+}
 
 .data-table th.col-email,
-.data-table td.col-email { width: 18rem; }
+.data-table td.col-email {
+  width: 18rem;
+}
 
 .data-table th.col-role,
-.data-table td.col-role { width: 8rem; }
+.data-table td.col-role {
+  width: 8rem;
+}
 
-/* Zebra striping and cell chrome are plain CSS. Every virtualized row &lt;tr>
-   carries the library class .virtual-scroll-item (the leading spacer &lt;tr>
+/* Zebra striping and cell chrome are plain CSS. Every virtualized row &amp;lt;tr>
+   carries the library class .virtual-scroll-item (the leading spacer &amp;lt;tr>
    does not), so row-pattern selectors can use it to skip the spacer. */
 .data-table .virtual-scroll-item:nth-child(even) td {
   background: oklch(50% 0 0 / 0.04);

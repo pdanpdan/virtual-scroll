@@ -360,9 +360,17 @@ const messages = ref([{ id: 1, text: 'Hello', isMe: true }]);
 &lt;style scoped>
 /* The scroll host needs a definite height; min-h-0 lets it shrink inside a
    column flex parent so the list can actually scroll. */
-.chat-list { height: 480px; }
-.chat { padding: 8px 12px; margin-block: 4px; border-radius: 12px; }
-.chat--me { text-align: right; }
+.chat-list {
+  height: 480px;
+}
+.chat {
+  padding: 8px 12px;
+  margin-block: 4px;
+  border-radius: 12px;
+}
+.chat--me {
+  text-align: right;
+}
 &lt;/style>"
         />
 

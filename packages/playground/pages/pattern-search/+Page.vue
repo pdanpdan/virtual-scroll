@@ -369,9 +369,22 @@ const filtered = computed(() => {
 &lt;/template>
 
 &lt;style scoped>
-.page { display: flex; flex-direction: column; gap: 0.5rem; }
-.list { height: 480px; border: 1px solid oklch(50% 0 0 / 0.2); }
-.row { box-sizing: border-box; height: 40px; display: flex; align-items: center; padding-inline: 1rem; }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.list {
+  height: 480px;
+  border: 1px solid oklch(50% 0 0 / 0.2);
+}
+.row {
+  box-sizing: border-box;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding-inline: 1rem;
+}
 &lt;/style>"
         />
 
@@ -415,11 +428,21 @@ function jump(step: 1 | -1) {
 &lt;template>
   &lt;div class=&quot;page&quot;>
     &lt;div class=&quot;bar&quot;>
-      &lt;input v-model=&quot;query&quot; type=&quot;search&quot; placeholder=&quot;Search...&quot; @keydown.enter=&quot;jump(1)&quot; />
+      &lt;input
+        v-model=&quot;query&quot;
+        type=&quot;search&quot;
+        placeholder=&quot;Search...&quot;
+        @keydown.enter=&quot;jump(1)&quot;
+      />
       &lt;span>{{ matches.length ? current + 1 : 0 }}/{{ matches.length }}&lt;/span>
       &lt;button :disabled=&quot;!matches.length&quot; @click=&quot;jump(-1)&quot;>Prev&lt;/button> &lt;button :disabled=&quot;!matches.length&quot; @click=&quot;jump(1)&quot;>Next&lt;/button>
     &lt;/div>
-    &lt;VirtualScroll ref=&quot;listRef&quot; class=&quot;list&quot; :items=&quot;rows&quot; :item-size=&quot;60&quot;>
+    &lt;VirtualScroll
+      ref=&quot;listRef&quot;
+      class=&quot;list&quot;
+      :items=&quot;rows&quot;
+      :item-size=&quot;60&quot;
+    >
       &lt;template #item=&quot;{ item, index }&quot;>
         &lt;div class=&quot;row&quot; :class=&quot;{ 'row--current': index === matches[current] }&quot;>
           #{{ index }} {{ item.text }}
@@ -430,10 +453,26 @@ function jump(step: 1 | -1) {
 &lt;/template>
 
 &lt;style scoped>
-.page { display: flex; flex-direction: column; gap: 0.5rem; }
-.list { height: 480px; border: 1px solid oklch(50% 0 0 / 0.2); }
-.row { box-sizing: border-box; height: 60px; display: flex; align-items: center; padding-inline: 1rem; }
-.row--current { outline: 2px solid oklch(60% 0.2 25 / 0.7); outline-offset: -2px; }
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.list {
+  height: 480px;
+  border: 1px solid oklch(50% 0 0 / 0.2);
+}
+.row {
+  box-sizing: border-box;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding-inline: 1rem;
+}
+.row--current {
+  outline: 2px solid oklch(60% 0.2 25 / 0.7);
+  outline-offset: -2px;
+}
 &lt;/style>"
         />
 

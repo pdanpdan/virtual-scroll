@@ -371,11 +371,17 @@ function globalOf(item: unknown, index: number) {
 &lt;/template>
 
 &lt;style scoped>
-.log-view { height: 480px; }
+.log-view {
+  height: 480px;
+}
 .line {
-  box-sizing: border-box; height: 40px; /* must equal item-size */
-  display: flex; align-items: center; padding-inline: 12px;
-  font-family: ui-monospace, monospace; white-space: nowrap;
+  box-sizing: border-box;
+  height: 40px; /* must equal item-size */
+  display: flex;
+  align-items: center;
+  padding-inline: 12px;
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 &lt;/style>"

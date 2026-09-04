@@ -266,7 +266,11 @@ const ssrRange = { start: 0, end: 15 };
 
 &lt;template>
   &lt;VirtualScroll
-  virtual-scrollbar :items=&quot;items&quot; :item-size=&quot;48&quot; :ssr-range=&quot;ssrRange&quot;>
+    virtual-scrollbar
+    :items=&quot;items&quot;
+    :item-size=&quot;48&quot;
+    :ssr-range=&quot;ssrRange&quot;
+  >
     &lt;template #item=&quot;{ index }&quot;>
       &lt;div class=&quot;row&quot;>#{{ index }}&lt;/div>
     &lt;/template>

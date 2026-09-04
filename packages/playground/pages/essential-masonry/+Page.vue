@@ -419,8 +419,15 @@ function lineOf(card: Card, row: number): string {
 &lt;/script>
 
 &lt;template>
-  &lt;VirtualScrollMasonry class=&quot;masonry&quot; :items=&quot;cards&quot; :item-height=&quot;itemHeight&quot;
-    :min-columns=&quot;2&quot; :max-columns=&quot;8&quot; :gap=&quot;16&quot; aria-label=&quot;Masonry of cards&quot;>
+  &lt;VirtualScrollMasonry
+    class=&quot;masonry&quot;
+    :items=&quot;cards&quot;
+    :item-height=&quot;itemHeight&quot;
+    :min-columns=&quot;2&quot;
+    :max-columns=&quot;8&quot;
+    :gap=&quot;16&quot;
+    aria-label=&quot;Masonry of cards&quot;
+  >
     &lt;template #item=&quot;{ item, index, column }&quot;>
       &lt;div v-if=&quot;item&quot; class=&quot;card&quot; :style=&quot;{ backgroundColor: `hsl(${ item.hue } 60% 80%)` }&quot;>
         &lt;p class=&quot;card-title&quot;>Card #{{ index }} - col {{ column }}&lt;/p>
@@ -432,7 +439,10 @@ function lineOf(card: Card, row: number): string {
 
 &lt;style scoped>
 /* Definite height; the width is observed and reflows the column count. */
-.masonry { height: 560px; border: 1px solid oklch(50% 0 0 / 0.2); }
+.masonry {
+  height: 560px;
+  border: 1px solid oklch(50% 0 0 / 0.2);
+}
 
 /* Canonical mode: the wrapper is exactly oracle-height, so the card fills it
    and content must never exceed it (reserve media with aspect-ratio or model
@@ -443,8 +453,15 @@ function lineOf(card: Card, row: number): string {
   overflow: hidden;
   padding: 12px;
 }
-.card-title { margin: 0 0 8px; font-weight: 700; }
-.card-line { margin: 0; font-size: 12px; line-height: 20px; }
+.card-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.card-line {
+  margin: 0;
+  font-size: 12px;
+  line-height: 20px;
+}
 &lt;/style>"
         />
 

@@ -266,7 +266,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';
 import '@pdanpdan/virtual-scroll/style.css';
 
-// Real row objects; every row renders the same number of &lt;td> cells.
+// Real row objects; every row renders the same number of &amp;lt;td> cells.
 interface Member { id: number; name: string; email: string; role: string; meta: string[]; }
 const members: Member[] = Array.from({ length: 20_000 }, (_, id) => ({
   id,
@@ -308,18 +308,36 @@ const members: Member[] = Array.from({ length: 20_000 }, (_, id) => ({
 &lt;/template>
 
 &lt;style scoped>
-.members { height: 480px; border: 1px solid oklch(50% 0 0 / 0.2); } /* scroll viewport */
+.members {
+  height: 480px;
+  border: 1px solid oklch(50% 0 0 / 0.2);
+} /* scroll viewport */
 /* Real table cells, laid out and column-aligned by the browser. */
 .members :deep(td), .members :deep(th) {
-  padding: 8px 12px; text-align: start;
+  padding: 8px 12px;
+  text-align: start;
   border-bottom: 1px solid oklch(50% 0 0 / 0.08);
 }
-.name { font-weight: 600; }
-.meta { font-size: 11px; opacity: 0.6; }
-.num { font-variant-numeric: tabular-nums; opacity: 0.5; }
-.email { font-size: 12px; opacity: 0.8; }
+.name {
+  font-weight: 600;
+}
+.meta {
+  font-size: 11px;
+  opacity: 0.6;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.5;
+}
+.email {
+  font-size: 12px;
+  opacity: 0.8;
+}
 .badge {
-  display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
   background: oklch(90% 0.02 240 / 0.6);
 }
 &lt;/style>"

@@ -325,11 +325,15 @@ const rows = reactive(
 &lt;/template>
 
 &lt;style scoped>
-.feed { height: 480px; }
+.feed {
+  height: 480px;
+}
 .row {
   box-sizing: border-box;
   height: 44px; /* must equal item-size */
-  display: flex; align-items: center; padding-inline: 12px;
+  display: flex;
+  align-items: center;
+  padding-inline: 12px;
   font-variant-numeric: tabular-nums; /* digits keep a stable width */
 }
 &lt;/style>"

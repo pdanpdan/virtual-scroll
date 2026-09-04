@@ -267,14 +267,25 @@ const cellText = (note: Note, col: number) =>
 
 &lt;template>
   &lt;VirtualScroll
-  virtual-scrollbar class=&quot;board&quot; direction=&quot;both&quot; :items=&quot;notes&quot; :column-count=&quot;columnCount&quot;
-    :default-item-size=&quot;120&quot; :default-column-width=&quot;140&quot; aria-label=&quot;Note board grid&quot;>
+    virtual-scrollbar
+    class=&quot;board&quot;
+    direction=&quot;both&quot;
+    :items=&quot;notes&quot;
+    :column-count=&quot;columnCount&quot;
+    :default-item-size=&quot;120&quot;
+    :default-column-width=&quot;140&quot;
+    aria-label=&quot;Note board grid&quot;
+  >
     &lt;template #item=&quot;{ item, columnRange, getCellAriaProps }&quot;>
       &lt;div class=&quot;grid-row&quot;>
-        &lt;div v-for=&quot;c in columnRange.end - columnRange.start&quot; :key=&quot;columnRange.start + c - 1&quot;
-          :data-col-index=&quot;columnRange.start + c - 1&quot; class=&quot;grid-cell&quot;
+        &lt;div
+          v-for=&quot;c in columnRange.end - columnRange.start&quot;
+          :key=&quot;columnRange.start + c - 1&quot;
+          :data-col-index=&quot;columnRange.start + c - 1&quot;
+          class=&quot;grid-cell&quot;
           :style=&quot;cellStyle(columnRange.start + c - 1)&quot;
-          v-bind=&quot;getCellAriaProps(columnRange.start + c - 1)&quot;>
+          v-bind=&quot;getCellAriaProps(columnRange.start + c - 1)&quot;
+        >
           &lt;template v-if=&quot;columnRange.start + c - 1 === 2&quot;>
             &lt;p v-for=&quot;(line, i) in item.lines&quot; :key=&quot;i&quot; class=&quot;line&quot;>{{ line }}&lt;/p>
           &lt;/template>
@@ -286,14 +297,27 @@ const cellText = (note: Note, col: number) =>
 &lt;/template>
 
 &lt;style scoped>
-.board { height: 480px; border: 1px solid oklch(50% 0 0 / 0.2); } /* definite 2-D viewport */
-.grid-row { display: flex; align-items: stretch; } /* rows stretch to the tallest cell */
+.board {
+  height: 480px;
+  border: 1px solid oklch(50% 0 0 / 0.2);
+} /* definite 2-D viewport */
+.grid-row {
+  display: flex;
+  align-items: stretch;
+} /* rows stretch to the tallest cell */
 .grid-cell {
-  box-sizing: border-box; flex: none; padding: 8px; overflow: hidden;
+  box-sizing: border-box;
+  flex: none;
+  padding: 8px;
+  overflow: hidden;
   border-right: 1px solid oklch(50% 0 0 / 0.1);
   border-bottom: 1px solid oklch(50% 0 0 / 0.1);
 }
-.line { margin: 0; font-size: 12px; line-height: 18px; }
+.line {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
 &lt;/style>"
         />
 

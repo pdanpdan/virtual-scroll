@@ -219,14 +219,24 @@ function cellText(row: Row, col: number): string {
 
 &lt;template>
   &lt;VirtualScroll
-  virtual-scrollbar class=&quot;grid&quot; direction=&quot;both&quot; :items=&quot;rows&quot; :item-size=&quot;itemSize&quot;
-    :column-count=&quot;columnCount&quot; :column-width=&quot;columnWidth&quot; aria-label=&quot;Data grid&quot;>
+    virtual-scrollbar
+    class=&quot;grid&quot;
+    direction=&quot;both&quot;
+    :items=&quot;rows&quot;
+    :item-size=&quot;itemSize&quot;
+    :column-count=&quot;columnCount&quot;
+    :column-width=&quot;columnWidth&quot;
+    aria-label=&quot;Data grid&quot;
+  >
     &lt;template #item=&quot;{ item, columnRange, getColumnWidth, getCellAriaProps }&quot;>
       &lt;div class=&quot;grid-row&quot;>
-        &lt;div v-for=&quot;c in columnRange.end - columnRange.start&quot; :key=&quot;columnRange.start + c - 1&quot;
+        &lt;div
+          v-for=&quot;c in columnRange.end - columnRange.start&quot;
+          :key=&quot;columnRange.start + c - 1&quot;
           class=&quot;grid-cell&quot;
           :style=&quot;{ inlineSize: `${ getColumnWidth(columnRange.start + c - 1) }px` }&quot;
-          v-bind=&quot;getCellAriaProps(columnRange.start + c - 1)&quot;>
+          v-bind=&quot;getCellAriaProps(columnRange.start + c - 1)&quot;
+        >
           {{ cellText(item, columnRange.start + c - 1) }}
         &lt;/div>
       &lt;/div>
@@ -235,15 +245,27 @@ function cellText(row: Row, col: number): string {
 &lt;/template>
 
 &lt;style scoped>
-.grid { height: 480px; border: 1px solid oklch(50% 0 0 / 0.2); } /* definite 2-D viewport */
+.grid {
+  height: 480px;
+  border: 1px solid oklch(50% 0 0 / 0.2);
+} /* definite 2-D viewport */
 
 /* Each row wrapper is exactly item-size tall; the row must fill it. */
-.grid-row { display: flex; align-items: stretch; height: 100%; }
+.grid-row {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
 
 /* Cells are laid out by you, sized by the engine's width oracle. */
 .grid-cell {
-  box-sizing: border-box; flex: none; display: flex; align-items: center;
-  padding-inline: 0.5rem; overflow: hidden; white-space: nowrap;
+  box-sizing: border-box;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding-inline: 0.5rem;
+  overflow: hidden;
+  white-space: nowrap;
   border-right: 1px solid oklch(50% 0 0 / 0.1);
   border-bottom: 1px solid oklch(50% 0 0 / 0.1);
 }

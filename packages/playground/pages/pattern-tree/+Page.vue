@@ -291,17 +291,28 @@ function toggle(node: TreeNode) {
   &amp;lt;!-- item-role=&quot;none&quot;: the wrapper row is not the treeitem - the interactive
        row inside the slot is (it carries focus and the toggle handler). -->
   &lt;VirtualScroll
-  virtual-scrollbar class=&quot;tree&quot; :items=&quot;visibleItems&quot; role=&quot;tree&quot; item-role=&quot;none&quot;
-    aria-label=&quot;Collapsible tree&quot;>
+    virtual-scrollbar
+    class=&quot;tree&quot;
+    :items=&quot;visibleItems&quot;
+    role=&quot;tree&quot;
+    item-role=&quot;none&quot;
+    aria-label=&quot;Collapsible tree&quot;
+  >
     &amp;lt;!-- No item-size: rows are measured from rendered content, so each row is
          exactly as tall as its label needs. -->
     &lt;template #item=&quot;{ item, index, getItemAriaProps }&quot;>
-      &lt;div role=&quot;treeitem&quot; v-bind=&quot;getItemAriaProps(index)&quot; tabindex=&quot;0&quot;
+      &lt;div
+        role=&quot;treeitem&quot;
+        v-bind=&quot;getItemAriaProps(index)&quot;
+        tabindex=&quot;0&quot;
         :aria-level=&quot;item.level + 1&quot;
         :aria-expanded=&quot;item.children.length > 0 ? item.expanded : undefined&quot;
-        class=&quot;tree-row&quot; :style=&quot;{ paddingInlineStart: `${ item.level * 20 + 12 }px` }&quot;
-        @click=&quot;toggle(item)&quot; @keydown.enter=&quot;toggle(item)&quot;
-        @keydown.space.prevent=&quot;toggle(item)&quot;>
+        class=&quot;tree-row&quot;
+        :style=&quot;{ paddingInlineStart: `${ item.level * 20 + 12 }px` }&quot;
+        @click=&quot;toggle(item)&quot;
+        @keydown.enter=&quot;toggle(item)&quot;
+        @keydown.space.prevent=&quot;toggle(item)&quot;
+      >
         &lt;span class=&quot;twisty&quot; aria-hidden=&quot;true&quot;>{{ item.children.length > 0 ? (item.expanded ? '▾' : '▸') : '' }}&lt;/span>
         &lt;span>{{ item.label }}&lt;/span>
       &lt;/div>
@@ -310,9 +321,19 @@ function toggle(node: TreeNode) {
 &lt;/template>
 
 &lt;style scoped>
-.tree { height: 480px; }
-.tree-row { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding-block: 0.35rem; }
-.twisty { width: 1rem; }
+.tree {
+  height: 480px;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding-block: 0.35rem;
+}
+.twisty {
+  width: 1rem;
+}
 &lt;/style>"
         />
 

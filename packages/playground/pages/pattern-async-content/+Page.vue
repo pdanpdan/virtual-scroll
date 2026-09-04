@@ -229,7 +229,12 @@ onUnmounted(() => {
       &lt;strong>{{ post.author }}&lt;/strong>
       &lt;p>{{ post.excerpt }}&lt;/p>
     &lt;/div>
-    &lt;div v-else class=&quot;skeleton&quot; role=&quot;status&quot; aria-label=&quot;Loading&quot;>
+    &lt;div
+      v-else
+      class=&quot;skeleton&quot;
+      role=&quot;status&quot;
+      aria-label=&quot;Loading&quot;
+    >
       &amp;lt;!-- placeholder sized like the content it will become, so the row's
            measured height barely changes when the real content lands -->
     &lt;/div>
