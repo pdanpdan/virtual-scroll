@@ -211,7 +211,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 // used and every `item` slot prop is undefined, so render from `index`.
 const items = new Array(1_000_000);
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &lt;VirtualScroll
     virtual-scrollbar

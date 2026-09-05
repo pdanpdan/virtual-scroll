@@ -361,7 +361,7 @@ type WidthMode = 'auto' | 'first' | 'fixed';
 const widthMode = ref&lt;WidthMode>('auto');
 const PINNED = [ 90, 260, 360, 140 ]; // px per column
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &amp;lt;!--With flow-table you choose how column widths are pinned. Browser auto
     layout (default) sizes columns from the rows currently mounted, so widths

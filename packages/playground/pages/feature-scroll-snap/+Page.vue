@@ -184,7 +184,7 @@ const pages = Array.from({ length: 60 }, (_, i) => ({
   color: `hsl(${ (i * 47) % 360 } 70% 80%)`,
 }));
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &amp;lt;!-- Page-sized rows (300px) in a 480px viewport: each fling settles with one
        full page in view. buffer-* counts rows, so keep the overscan small. -->
@@ -206,7 +206,7 @@ const pages = Array.from({ length: 60 }, (_, i) => ({
     &lt;/template>
   &lt;/VirtualScroll>
 &lt;/template>
-&nbsp;
+
 &lt;style scoped>
 .pages {
   height: 480px;

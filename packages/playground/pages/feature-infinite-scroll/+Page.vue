@@ -292,7 +292,7 @@ function onLoad(axis: 'vertical' | 'horizontal') {
   }
 }
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &amp;lt;!-- :loading also disables the button while a request is running. -->
   &lt;button :disabled=&quot;loading&quot; @click=&quot;loadMore('vertical')&quot;>Load more&lt;/button>

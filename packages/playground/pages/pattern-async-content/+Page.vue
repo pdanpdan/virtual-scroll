@@ -222,7 +222,7 @@ onUnmounted(() => {
   alive = false;
 });
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &lt;div class=&quot;row&quot;>
     &lt;div v-if=&quot;post&quot; class=&quot;content&quot;>

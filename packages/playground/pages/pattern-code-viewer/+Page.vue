@@ -470,7 +470,7 @@ const lines = ref&lt;string[]>([]); // lines[0] === file line 1
 const maxChars = computed(() => lines.value.reduce((m, l) => Math.max(m, l.length), 0));
 const codeMinStyle = computed(() => ({ minInlineSize: `${maxChars.value}ch` }));
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &amp;lt;!-- Uniform-height, vertical-only virtualization. -->
   &lt;VirtualScroll

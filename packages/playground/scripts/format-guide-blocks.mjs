@@ -29,8 +29,8 @@
 //   (lib/highlight.ts), which entity-decodes it once and feeds the result to
 //   shiki. To keep the displayed text identical, the new content is
 //   re-encoded with the same scheme: & -> &amp;, < -> &lt;, " -> &quot;,
-//   NBSP -> &nbsp;. Lines that are pure &nbsp; keep visible blank spacing in
-//   the rendered block and must not be converted to empty lines.
+//   NBSP -> &nbsp;. Blank source lines are preserved as empty lines and
+//   render at full height (CodeBlock reserves empty `.line` rows).
 //
 // Integrity guard
 //   Each rewritten block must be identical to the source modulo whitespace

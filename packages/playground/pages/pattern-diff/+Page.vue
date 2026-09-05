@@ -368,7 +368,7 @@ const rowMinStyle = computed(() => ({
 
 const rows = ref&lt;DiffRow[]>(diffRows);
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &amp;lt;!-- ONE vertical list whose rows each paint both panes: the sides are in
        lockstep by construction, so no scroll synchronization is involved. -->

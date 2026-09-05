@@ -89,6 +89,13 @@ watch(() => props.source, update);
     }
   }
 
+  /* Empty source lines (no line-number gutter) collapse to zero height
+     because .line is a flex container with no flex items. Give them an nbsp
+     placeholder so blank lines keep their full line height. */
+  &:not(.has-line-numbers) :deep(pre.shiki) .line:empty::before {
+    content: '\00a0';
+  }
+
   &.has-line-numbers :deep(pre.shiki) .line::before {
     counter-increment: line;
     content: counter(line);

@@ -272,7 +272,7 @@ function scrollToY(v: number) {
   }
 }
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &lt;div class=&quot;stage&quot;>
     &amp;lt;!-- A real, scrollable element whose native bar is hidden; the two
@@ -306,7 +306,7 @@ function scrollToY(v: number) {
     />
   &lt;/div>
 &lt;/template>
-&nbsp;
+
 &lt;style scoped>
 .stage {
   position: relative; /* the absolutely positioned bars anchor to this box */

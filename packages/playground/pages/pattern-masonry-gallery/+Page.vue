@@ -394,7 +394,7 @@ const imageUrl = (item: GalleryItem, width: number) =>
     &lt;/template>
   &lt;/VirtualScrollMasonry>
 &lt;/template>
-&nbsp;
+
 &lt;style scoped>
 .gallery {
   height: 480px;

@@ -324,7 +324,7 @@ import '@pdanpdan/virtual-scroll/style.css';
 
 const rows = Array.from({ length: 5000 }, (_, i) => `Row ${ i }`);
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &lt;VirtualScroll class=&quot;list&quot; :items=&quot;rows&quot; virtual-scrollbar>
     &amp;lt;!-- Called once per active axis, only while content overflows that axis.
@@ -348,7 +348,7 @@ const rows = Array.from({ length: 5000 }, (_, i) => `Row ${ i }`);
     &lt;/template>
   &lt;/VirtualScroll>
 &lt;/template>
-&nbsp;
+
 &lt;style scoped>
 .list {
   height: 480px;

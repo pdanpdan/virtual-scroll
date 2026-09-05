@@ -290,7 +290,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 // length is enough - only the windowed indices are ever touched.
 const rows = new Array(10_000_000);
 &lt;/script>
-&nbsp;
+
 &lt;template>
   &lt;VirtualScroll
     virtual-scrollbar
