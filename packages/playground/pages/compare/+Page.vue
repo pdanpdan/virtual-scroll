@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Static comparison page — no virtual scroll involved.
+// Static comparison page - no virtual scroll involved.
 </script>
 
 <template>

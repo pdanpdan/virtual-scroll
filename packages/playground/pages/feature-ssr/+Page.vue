@@ -165,7 +165,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A virtualized list normally mounts only a small, viewport-sized window — and when the page is server-rendered there is
+          A virtualized list normally mounts only a small, viewport-sized window - and when the page is server-rendered there is
           no browser layout yet, so a plain render would emit an empty scroll box that crawlers and no-JS clients can never read.
           To virtualize for the server you instead pick which rows (and, in a grid, columns) should already exist as real static
           HTML, describe them with the <code>ssrRange</code> prop, and let the component scroll to that range once the client
@@ -177,14 +177,14 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
         <h3>1. Feed the list from a data source both renders share</h3>
         <p>
-          Pass your rows to <code>:items</code> and add <code>:ssr-range</code> — an object of the shape
+          Pass your rows to <code>:items</code> and add <code>:ssr-range</code> - an object of the shape
           <code>{ start, end, colStart?, colEnd? }</code> where <code>start</code>/<code>end</code> bound the rows and
           <code>colStart</code>/<code>colEnd</code> bound columns in grid mode; <code>end</code> and <code>colEnd</code> are
           <em>exclusive</em>. Vue hydration matches the first client render against the server HTML, so load <code>items</code>
-          and <code>ssrRange</code> through a mechanism that runs identically on both sides — your framework's data loader (for
-          example a Vike <code>+data.ts</code>) or any SSR-capable store — never inside a client-only <code>onMounted</code>
+          and <code>ssrRange</code> through a mechanism that runs identically on both sides - your framework's data loader (for
+          example a Vike <code>+data.ts</code>) or any SSR-capable store - never inside a client-only <code>onMounted</code>
           effect. The range is your chosen first paint; it does not have to begin at index <code>0</code>, because the component
-          scrolls to it on hydration. Keep it small enough to be a sensible initial paint — the client virtualizes everything
+          scrolls to it on hydration. Keep it small enough to be a sensible initial paint - the client virtualizes everything
           around it.
         </p>
 
@@ -243,14 +243,14 @@ const ssrRange = { start: 200, end: 215 };
 &lt;/style>"
         />
 
-        <h3>2. Render rows from your data — and when to skip payloads</h3>
+        <h3>2. Render rows from your data - and when to skip payloads</h3>
         <p>
           The <code>#item</code> slot holds your row markup and re-renders every time a row enters the window. The mainstream
           form is real objects: the slot destructures <code>{ item }</code> and renders the payload's fields, keeping the content
-          in one source of truth. The specialized form applies when a row is fully described by its position — numbering,
+          in one source of truth. The specialized form applies when a row is fully described by its position - numbering,
           separators, ticks, or content you address by index: read only <code>{ index }</code> and pass a length-only placeholder
           array instead of materializing a per-row object. Prefer the real-object form unless your rows are purely positional, and
-          render idempotently either way — a recycled row can mount and unmount many times as you scroll.
+          render idempotently either way - a recycled row can mount and unmount many times as you scroll.
         </p><CodeBlock
           class="guide-code-block"
           lang="vue"
@@ -280,8 +280,8 @@ const ssrRange = { start: 0, end: 15 };
 
         <h3>3. Give the pre-rendered slice deterministic sizes</h3>
         <p>
-          Before hydration the component lays the range out as a real static in-flow block — normal document flow, no absolute
-          positioning — so that markup exists in the HTML without any JavaScript. Because there is no layout pass on the server
+          Before hydration the component lays the range out as a real static in-flow block - normal document flow, no absolute
+          positioning - so that markup exists in the HTML without any JavaScript. Because there is no layout pass on the server
           (and the first client render must match it), that block cannot be sized by <code>ResizeObserver</code>. Describe it with
           fixed sizes: a numeric <code>item-size</code> for uniform rows, a repeating array such as <code>[180, 120]</code>, or a
           size function for per-row variation. Dynamic, measured sizing still works after hydration but cannot define the
@@ -290,12 +290,12 @@ const ssrRange = { start: 0, end: 15 };
           it can scroll.
         </p>
 
-        <h3>4. Extend to a grid — pre-render a rectangle of rows &times; columns</h3>
+        <h3>4. Extend to a grid - pre-render a rectangle of rows &times; columns</h3>
         <p>
           For a <code>direction="both"</code> grid the same mechanism covers two axes: set <code>column-count</code> and
           <code>column-width</code> alongside <code>item-size</code>, and add <code>colStart</code>/<code>colEnd</code> to
           <code>ssrRange</code> so the pre-rendered slice becomes a rectangle. The <code>#item</code> slot receives a
-          <code>columnRange</code> (<code>{ start, end }</code>) describing the visible — or, pre-hydration, pre-rendered — column
+          <code>columnRange</code> (<code>{ start, end }</code>) describing the visible - or, pre-hydration, pre-rendered - column
           window plus a <code>getColumnWidth()</code> helper to size each cell; map the row across that column window exactly as in the interactive grid examples.
         </p>
 
@@ -355,13 +355,13 @@ const ssrRange = { start: 100, end: 115, colStart: 50, colEnd: 70 };
 
         <h3>6. Pitfalls: guard <code>window</code> and keep the first render identical</h3>
         <p>
-          The component itself is SSR-safe — scroll listeners and its <code>ResizeObserver</code> attach only inside
+          The component itself is SSR-safe - scroll listeners and its <code>ResizeObserver</code> attach only inside
           <code>onMounted</code>, and it starts with <code>isHydrated = false</code>, so nothing touches <code>window</code> while
           rendering on the server. What <em>you</em> run during that render must be careful too: loading <code>items</code>,
           computing <code>ssrRange</code>, or anything in the slot for the pre-rendered slice must not read
           <code>window</code>/<code>location</code>/<code>matchMedia</code>, and the first client render must be byte-identical to
-          the server output. Keep range and row content deterministic — no client-only randomness, timestamps, or
-          async-fetch-after-mount inside the slice — by sourcing the data from the shared server path.
+          the server output. Keep range and row content deterministic - no client-only randomness, timestamps, or
+          async-fetch-after-mount inside the slice - by sourcing the data from the shared server path.
         </p>
       </ImplementationGuide>
     </template>

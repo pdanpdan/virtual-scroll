@@ -259,7 +259,7 @@ function stopResizing() {
           A spreadsheet scrolls on two independent axes, so it needs two virtualizations at once: rows are virtualized
           vertically like any list, and every mounted row must contain only the narrow slice of columns that fits the
           viewport. With <code>direction=&quot;both&quot;</code> and a <code>column-count</code>, one
-          <code>VirtualScroll</code> instance handles both axes — it mounts only the visible rows and, inside each row,
+          <code>VirtualScroll</code> instance handles both axes - it mounts only the visible rows and, inside each row,
           only the visible columns (the slot&apos;s <code>columnRange</code>). The two header rails are pinned by
           different mechanisms: the column-header row sticks to the top through the engine&apos;s
           <code>sticky-indices</code>, while the row-header column sticks to the left through plain CSS
@@ -273,9 +273,9 @@ function stopResizing() {
           In grid mode (<code>direction=&quot;both&quot;</code>) the <code>items</code> array is a flat list of rows and
           each row is rendered by the <code>#item</code> slot. Reserve index 0 on each axis for the headers: render
           <code>ROWS + 1</code> items and set <code>:column-count=&quot;COLS + 1&quot;</code> so the top row holds the
-          column labels and column 0 of every row holds the row number — the data cells live in the
+          column labels and column 0 of every row holds the row number - the data cells live in the
           <code>1..ROWS × 1..COLS</code> region in between. The scroll host needs a definite width and height (both axes
-          scroll, so give it a real box — an explicit size or a flex parent with <code>min-height: 0</code>).
+          scroll, so give it a real box - an explicit size or a flex parent with <code>min-height: 0</code>).
           <code>buffer-before</code>/<code>buffer-after</code> (default <code>5</code>) keep extra rows mounted around
           the viewport; <code>gap</code>/<code>column-gap</code> add spacing between rows/columns in the scroll math.
         </p>
@@ -328,7 +328,7 @@ function cellText(row: number, col: number) {
           The <code>#item</code> slot exposes <code>index</code>, <code>columnRange</code> (the visible column interval,
           inclusive start / exclusive end), <code>getColumnWidth(col)</code>, <code>getCellAriaProps(col)</code> and
           <code>offset</code>. Only rows inside the vertical window are mounted, and each mounted row contains only the
-          columns in <code>columnRange</code> — loop that range instead of iterating every column. Cells must carry their
+          columns in <code>columnRange</code> - loop that range instead of iterating every column. Cells must carry their
           exact size inline (column width, row height) because the row is a flex strip whose alignment depends on those
           widths; the first column (the pinned row-header cell, rendered separately below) is skipped in the loop. When
           the visible range starts past column 0 the pinned cell still occupies its flow slot, so the first mounted data
@@ -402,9 +402,9 @@ function cellText(row: number, col: number) {
           <code>isStickyActive</code> on the slot while it is pinned. In <code>both</code> mode that index list applies to
           rows on the vertical axis only, so the horizontal rail is a CSS job: render column 0 as a dedicated first cell
           in every row and pin it with <code>position: sticky; inset-inline-start: 0</code>. It sticks because the rest
-          of the row strip actually moves underneath it inside the scrollport — each mounted row is translated with the
+          of the row strip actually moves underneath it inside the scrollport - each mounted row is translated with the
           scroll offset and remounts its visible column window. Two details matter: the cell needs an opaque background
-          (data cells slide under it while it overlaps them), and stacking must be ordered — row-versus-row layering is
+          (data cells slide under it while it overlaps them), and stacking must be ordered - row-versus-row layering is
           handled by the engine (a pinned row is marked <code>virtual-scroll--sticky</code> and raised with z-index 10 in
           the library stylesheet), while the cell z-indexes here only lift the pinned cell above its own row&apos;s data
           cells. The top-left corner cell combines both rails: it belongs to the sticky header row and carries the same
@@ -416,7 +416,7 @@ function cellText(row: number, col: number) {
           lang="css"
           line-numbers
           code=".sheet {
-  height: 480px; /* definite size — virtualization needs a real viewport */
+  height: 480px; /* definite size - virtualization needs a real viewport */
   border: 1px solid #8884;
 }
 
@@ -468,7 +468,7 @@ function cellText(row: number, col: number) {
           library mode: keep per-index override maps, read them first in the size functions, and let a drag write into
           them. Cells update reactively (their inline width/height re-evaluates), and calling the exposed
           <code>refresh()</code> makes the engine rebuild offsets, ranges and the total scroll extent from the new sizes
-          — coalesce that call with <code>requestAnimationFrame</code> while dragging and issue one final
+          - coalesce that call with <code>requestAnimationFrame</code> while dragging and issue one final
           <code>refresh()</code> on pointer-up. Attach the drag to thin hit areas: along the bottom edge of every
           row-header cell for row heights, along the inline-end edge of every column-header cell for column widths, both
           absolutely positioned with <code>row-resize</code>/<code>col-resize</code> cursors. A window-level

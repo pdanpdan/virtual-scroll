@@ -857,9 +857,9 @@ export function useVirtualScroll<T = unknown>(
       viewportWidth.value = target.clientWidth;
       viewportHeight.value = target.clientHeight;
     }
-    // Content before the list can grow/shrink without resizing the host — e.g.
+    // Content before the list can grow/shrink without resizing the host - e.g.
     // a collapsible header above a window-scrolled list, or preceding content
-    // inside an external scrollable element — moving the list within its scroll
+    // inside an external scrollable element - moving the list within its scroll
     // container without a resize event. For user scrolls, re-measure the host
     // offset before mapping into item coordinates. Our own programmatic scrolls
     // don't move the list, so they skip the re-measure.
@@ -1061,7 +1061,7 @@ export function useVirtualScroll<T = unknown>(
     const targetX = bottomIntentX && !isRtl.value && internalScrollX.value < maxX - 0.5 ? maxX : null;
     const targetY = bottomIntentY && internalScrollY.value < maxY - 0.5 ? maxY : null;
     if (targetX === null && targetY === null) {
-      // Already flush at the end (or empty content): stay glued — further
+      // Already flush at the end (or empty content): stay glued - further
       // settling measurements may still move the real end. The intent is only
       // cancelled when the user scrolls away from the end.
       return;
@@ -1121,7 +1121,7 @@ export function useVirtualScroll<T = unknown>(
     if (props.value.hostElement && (container === window || container !== props.value.hostRef)) {
       // When the scroll container is the component's own host (default), the
       // wrapper is the first content of the scrollport, so its offset is a
-      // constant 0 — re-measuring it against (possibly layout-less) rects on
+      // constant 0 - re-measuring it against (possibly layout-less) rects on
       // every scroll would drift. Only the window and external-element
       // containers can have the list preceded by other content, so only there
       // do we re-measure the wrapper offset.
@@ -1259,7 +1259,7 @@ export function useVirtualScroll<T = unknown>(
     // updates, re-read the actual container scroll position so the rendered
     // range always matches the viewport. The browser may clamp the scroll
     // offset, or the scale correction may be deferred, without a scroll event
-    // reaching the handler — leaving items rendered for a stale offset until
+    // reaching the handler - leaving items rendered for a stale offset until
     // the next scroll.
     nextTick(() => {
       // v8 ignore next 2 -- defensive SSR guard; the scroll listener is only attached when window exists

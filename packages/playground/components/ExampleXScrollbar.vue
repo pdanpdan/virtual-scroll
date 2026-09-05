@@ -10,7 +10,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
  * VirtualScroll draws a horizontal scrollbar only in `horizontal`/`both`
  * direction, so this component watches the example's `.virtual-scroll-container`,
  * lets the native horizontal overflow happen (rows must be laid out with
- * `contain: none` — done by the page CSS) and mirrors it as a styled scrollbar.
+ * `contain: none` - done by the page CSS) and mirrors it as a styled scrollbar.
  */
 const props = withDefaults(defineProps<{
   /** Whether the overlay should be shown; disable when native scrollbars are visible. */

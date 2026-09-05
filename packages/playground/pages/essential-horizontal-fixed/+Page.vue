@@ -109,7 +109,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           To virtualize a horizontal strip in which every item has the same width, switch the axis to horizontal and give the
           engine a numeric <code>item-size</code>. Uniform sizes are the best case for virtualization: the visible window, each
           item's position, and the total scroll width are all derived arithmetically (<code>index × itemSize</code>), so range math stays arithmetic and scrolling a very long dataset stays smooth. That speed is the
-          reward for a promise you make to the engine — that every item is exactly the declared width — so this mode is the
+          reward for a promise you make to the engine - that every item is exactly the declared width - so this mode is the
           right choice only while that promise holds.
         </p>
 
@@ -128,7 +128,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           The mainstream data model is an ordinary array of item objects. The <code>#item</code> slot receives both
           <code>item</code> and <code>index</code>; render your cell from <code>item</code> and use <code>index</code> for
-          position or keys. Only the window in view (plus the buffer) is mounted, but the full array still lives in memory —
+          position or keys. Only the window in view (plus the buffer) is mounted, but the full array still lives in memory -
           virtualization saves DOM nodes, not your data.
         </p>
 
@@ -196,8 +196,8 @@ const items = Array.from({ length: 10_000 }, (_, i) => ({
         <h3>3. Use an index-only array when rows carry no data</h3>
         <p>
           When a cell is fully described by its position (a tick, an ordinal sequence, a pagination page) you can skip allocating
-          data objects entirely. <code>items</code> only needs to provide a length — entries are read only for the rendered
-          window — so a sparse <code>new Array(count)</code> works: the <code>item</code> slot prop is <code>undefined</code>
+          data objects entirely. <code>items</code> only needs to provide a length - entries are read only for the rendered
+          window - so a sparse <code>new Array(count)</code> works: the <code>item</code> slot prop is <code>undefined</code>
           for every hole and you render from <code>index</code>. Paired with a numeric <code>item-size</code> this keeps memory
           flat even into the millions of rows. Do not reach for it when rows carry content or vary in size; those need real data
           plus an <code>item-size</code> function/array or dynamic measurement.

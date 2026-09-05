@@ -107,7 +107,7 @@ onUnmounted(() => {
       <div class="docs-alert docs-alert--warning mb-8">
         <h4 class="font-bold mb-2">Scroll performance &amp; scrollbar dragging</h4>
         <p class="opacity-90">
-          Browsers throttle native scrollbar dragging: while the thumb is dragged, the scroll position advances in coarse per-frame steps, so the content (and the virtualized items that follow it) can lag noticeably behind the thumb on large drags — even when the target area was already rendered.
+          Browsers throttle native scrollbar dragging: while the thumb is dragged, the scroll position advances in coarse per-frame steps. As a result, the content (and the virtualized items that follow it) can lag noticeably behind the thumb on large drags, even when the target area was already rendered.
           Wheel, touch, and keyboard scrolling are not affected.
         </p>
         <p class="opacity-90 mt-2">
@@ -122,10 +122,10 @@ onUnmounted(() => {
           </li>
         </ol>
         <p class="opacity-90">
-          The native scrollbar is hidden automatically (<code>.virtual-scroll--hide-scrollbar</code>) whenever virtual scrollbars are active — no extra CSS is needed.
+          The native scrollbar is hidden automatically (<code>.virtual-scroll--hide-scrollbar</code>) whenever virtual scrollbars are active - no extra CSS is needed.
         </p>
         <p class="opacity-90 mt-2">
-          Note: virtual scrollbars are not available when the scroll container is the window or the body — use an element container.
+          Note: virtual scrollbars are not available when the scroll container is the window or the body - use an element container.
         </p>
       </div>
 
@@ -139,10 +139,10 @@ onUnmounted(() => {
           <strong>Prefer fixed sizes.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> gives O(1) range math; arrays and functions use O(log n) Fenwick-tree lookups; dynamic (measured) sizes are the most expensive and re-measure with <code>ResizeObserver</code>. See the <a href="#sizing-guide" class="link">Sizing Guide</a> below.
         </li>
         <li>
-          <strong>Skip per-row data for uniform lists.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> allocates no per-row storage and positions rows arithmetically, so index-only lists (sparse <code>items</code>, e.g. <code>new Array(10_000_000)</code>) keep memory flat at any scale — render row content from the slot's <code>index</code> instead of <code>item</code>.
+          <strong>Skip per-row data for uniform lists.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> allocates no per-row storage and positions rows arithmetically, so index-only lists (sparse <code>items</code>, e.g. <code>new Array(10_000_000)</code>) keep memory flat at any scale - render row content from the slot's <code>index</code> instead of <code>item</code>.
         </li>
         <li>
-          <strong>Keep buffers modest.</strong> <code>bufferBefore</code> / <code>bufferAfter</code> (default 5) trade rendering cost for scrolling smoothness — a larger buffer means more DOM nodes and more work per frame.
+          <strong>Keep buffers modest.</strong> <code>bufferBefore</code> / <code>bufferAfter</code> (default 5) trade rendering cost for scrolling smoothness - a larger buffer means more DOM nodes and more work per frame.
         </li>
         <li>
           <strong>Keep item content cheap.</strong> The item slot is re-rendered on scroll; avoid heavy markup, images, or effects inside items.
@@ -154,7 +154,7 @@ onUnmounted(() => {
           <strong>Use <code>ssrRange</code></strong> to pre-render the initial viewport and skip the first measure/scroll pass on slow devices.
         </li>
         <li>
-          <strong>Massive lists are handled automatically.</strong> Beyond the browser's ~10,000,000&nbsp;px limit the library switches to coordinate scaling — virtual content units (VU) are mapped onto the browser's display units (DU) — so no extra configuration is needed, except with window/body containers, where coordinate scaling and virtual scrollbars are disabled.
+          <strong>Massive lists are handled automatically.</strong> Beyond the browser's ~10,000,000&nbsp;px limit the library switches to coordinate scaling - virtual content units (VU) are mapped onto the browser's display units (DU) - so no extra configuration is needed, except with window/body containers, where coordinate scaling and virtual scrollbars are disabled.
         </li>
       </ul>
 
@@ -176,30 +176,30 @@ onUnmounted(() => {
           <ul class="list-disc ps-5 space-y-2">
             <li>
               <strong>Keep row state in the model, not the DOM.</strong> Selection, expanded rows, likes, cart state,
-              or carousel positions belong in your data (keyed by item id) or a store — never in the row's own DOM.
+              or carousel positions belong in your data (keyed by item id) or a store - never in the row's own DOM.
               Rows are recycled by index, so anything stored in the element disappears when the row scrolls away and
               would also leak across items.
             </li>
             <li>
               <strong>Make row rendering idempotent.</strong> The <code>item</code> slot re-renders whenever the item
-              enters the window (and again on scroll). Rendering the same item twice must produce the same result —
+              enters the window (and again on scroll). Rendering the same item twice must produce the same result -
               no one-time setup, no listeners bound per mount that are never removed, no DOM the component does not own.
             </li>
             <li>
               <strong>Prefer delegated or component-scoped events.</strong> Interactions on rows should bubble to the
               container or live in the item component's own handlers. State updates flow back into the model and the
-              visible rows re-render from it — never mutate row content from outside.
+              visible rows re-render from it - never mutate row content from outside.
             </li>
             <li>
               <strong>Reserve space for media.</strong> Give images/videos an explicit <code>width</code>/<code>height</code>
               or <code>aspect-ratio</code>. Media that loads with unknown dimensions resizes the row after mount, which
-              the engine measures and corrects — but repeated late growth causes visible jumps and extra work.
+              the engine measures and corrects - but repeated late growth causes visible jumps and extra work.
             </li>
             <li>
               <strong>Do not combine native <code>loading="lazy"</code> with virtualization.</strong> The visible window is
               already the only mounted content; native lazy-loading adds browser heuristics on top of a scroll container
-              whose content keeps changing and can starve or delay the very images on screen. Load visible images eagerly
-              (or via your own bounded, low-priority prefetch window ahead of the viewport).
+              whose content keeps changing. This can starve or delay the very images on screen. Load visible images eagerly,
+              or via your own bounded, low-priority prefetch window ahead of the viewport.
             </li>
             <li>
               <strong>Prefetch offscreen content in bounded, deprioritised windows.</strong> If rows show remote data
@@ -209,7 +209,7 @@ onUnmounted(() => {
             <li>
               <strong>Avoid content that mounts asynchronously and changes row height late.</strong> Dynamic heights are
               fully supported (<code>ResizeObserver</code> measures and the layout self-corrects), but the smoothest
-              experience comes from content whose size is stable or reserved up front — especially in lists that also use
+              experience comes from content whose size is stable or reserved up front - especially in lists that also use
               snapping or sticky items.
             </li>
           </ul>
@@ -442,7 +442,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Item ${i}`
         <div class="docs-usage-card docs-usage-card--primary">
           <div class="docs-usage-card-body">
             <h3 class="docs-usage-card-title docs-usage-card-title--primary">Compiled Component</h3>
-            <p class="docs-usage-card-description">Recommended for most projects. Uses pre-compiled JS.</p>
+            <p class="docs-usage-card-description">Recommended for most projects. Uses pre-compiled JavaScript.</p>
             <CodeBlock
               class="docs-code-block"
               lang="ts"
@@ -477,7 +477,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <div class="docs-usage-card docs-usage-card--accent">
           <div class="docs-usage-card-body">
             <h3 class="docs-usage-card-title docs-usage-card-title--accent">CDN Usage</h3>
-            <p class="docs-usage-card-description">Use directly in browser without build step.</p>
+            <p class="docs-usage-card-description">Use directly in the browser without a build step.</p>
             <CodeBlock
               class="docs-code-block"
               lang="html"
@@ -614,7 +614,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">itemSize</code></td>
               <td><code>num | arr | fn | null</code></td>
               <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
-              <td>Fixed size, circular array pattern, or function. See <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
+              <td>Fixed size, circular array pattern, or function. See the <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">direction</code></td>
@@ -626,7 +626,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">gap</code></td>
               <td><code>number</code></td>
               <td><code>0</code></td>
-              <td>Spacings between items (vertical or horizontal).</td>
+              <td>Spacing between items (vertical or horizontal).</td>
             </tr>
           </tbody>
         </table>
@@ -664,7 +664,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">columnGap</code></td>
               <td><code>number</code></td>
               <td><code>0</code></td>
-              <td>Spacings between columns.</td>
+              <td>Spacing between columns.</td>
             </tr>
           </tbody>
         </table>
@@ -690,13 +690,13 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">stickyIndices</code></td>
               <td><code>number[]</code></td>
               <td><code>[]</code></td>
-              <td>Indices of items that should remain sticky. When <code>stickyHeader</code>/<code>stickyFooter</code> are enabled, they stick below/above them.</td>
+              <td>Indices of items that should remain sticky. When <code>stickyHeader</code> or <code>stickyFooter</code> are enabled, they stick below or above them.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">stickyHeader</code> / <code class="docs-prop-name">stickyFooter</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
-              <td>If true, header/footer size is measured and added to padding. Sticky <code>stickyIndices</code> items align below/above them.</td>
+              <td>If true, the header or footer size is measured and added to padding. Sticky <code>stickyIndices</code> items align below or above them.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">ssrRange</code></td>
@@ -714,7 +714,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">loadDistance</code></td>
               <td><code>number</code></td>
               <td><code>200</code></td>
-              <td>Distance from end to trigger <code>load</code> event.</td>
+              <td>Distance from the end to trigger the <code>load</code> event.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">snap</code></td>
@@ -726,7 +726,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">virtualScrollbar</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
-              <td>Whether to force use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window/body</code> as container.</td>
+              <td>Whether to force the use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window</code> or <code>body</code> as the container.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">restoreScrollOnPrepend</code></td>
@@ -738,7 +738,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">container</code></td>
               <td><code>HTMLElement | Window</code></td>
               <td><code>hostRef</code></td>
-              <td>The scrollable container. Defaults to the component's root element; pass <code>window</code> or <code>document.body</code> to scroll the page.</td>
+              <td>The scrollable container. Defaults to the component's root element. Pass <code>window</code> or <code>document.body</code> to scroll the page.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">initialScrollIndex</code></td>
@@ -923,11 +923,11 @@ const vs = useVirtualScroll(props, [
           <h4 class="font-bold text-accent mb-2">#item</h4>
           <p class="text-xs @4xl:text-sm opacity-90 mb-2">Scoped slot for individual items.</p>
           <ul class="text-xs opacity-80 list-disc ps-5 space-y-1 text-base-content/80">
-            <li><code>item: T</code>: The data item from the source array (<code>undefined</code> for holes in sparse/index-only datasets).</li>
+            <li><code>item: T</code>: The data item from the source array (<code>undefined</code> for holes in sparse or index-only datasets).</li>
             <li><code>index: number</code>: The original 0-based index of the item.</li>
             <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
             <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
-            <li><code>isStickyActiveX / Y: boolean</code>: <code>true</code> if the item is stuck at the horizontal/vertical threshold.</li>
+            <li><code>isStickyActiveX / Y: boolean</code>: <code>true</code> if the item is stuck at the horizontal or vertical threshold.</li>
             <li><code>offset: { x, y }</code>: Calculated physical position in display units (DU).</li>
             <li><code>columnRange: <a href="#column-range" class="link link-accent">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
             <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
@@ -966,11 +966,11 @@ const vs = useVirtualScroll(props, [
         </div>
         <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#header / #footer</h4>
-          <p class="text-xs @4xl:text-sm opacity-90">Content rendered above/below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
+          <p class="text-xs @4xl:text-sm opacity-90">Content rendered above or below the virtualized items. Can be made sticky using the <code>stickyHeader</code> / <code>stickyFooter</code> props.</p>
         </div>
         <div class="docs-card docs-card--accent">
           <h4 class="font-bold text-accent mb-2">#loading</h4>
-          <p class="text-xs @4xl:text-sm opacity-90">Always rendered when provided — hidden via the <code>virtual-scroll-loading--hidden</code> class (<code>visibility: hidden</code>) while <code>loading</code> is false — so it reserves its space and the <code>End</code> key can include its size in the scroll target. While <code>loading</code> is true, further <code>load</code> events are suppressed. Only provide the slot while a load is expected: once there is no more data, stop passing it (e.g. <code>v-if="hasMore"</code> on <code>&lt;template #loading&gt;</code>) so the reserved space disappears.</p>
+          <p class="text-xs @4xl:text-sm opacity-90">Always rendered when provided - hidden via the <code>virtual-scroll-loading--hidden</code> class (<code>visibility: hidden</code>) while <code>loading</code> is false - so it reserves its space and the <code>End</code> key can include its size in the scroll target. While <code>loading</code> is true, further <code>load</code> events are suppressed. Only provide the slot while a load is expected: once there is no more data, stop passing it (e.g. <code>v-if="hasMore"</code> on <code>&lt;template #loading&gt;</code>) so the reserved space disappears.</p>
         </div>
       </div>
 
@@ -1422,7 +1422,7 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          <code>VirtualScrollTable</code> is the same virtualization component with table semantics — almost
+          <code>VirtualScrollTable</code> is the same virtualization component with table semantics - almost
           everything on the <code>VirtualScroll</code> component still applies:
         </p>
         <ul class="list-disc ps-5 space-y-2">
@@ -1439,16 +1439,16 @@ const vs = useVirtualScroll(props, [
             <code>load</code> events. See <a href="#events" class="link link-primary font-bold">Events</a>.
           </li>
           <li>
-            <strong>Exposed instance (via ref)</strong>: the same methods and state — <code>scrollToIndex</code>,
+            <strong>Exposed instance (via ref)</strong>: the same methods and state - <code>scrollToIndex</code>,
             <a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a>, <code>refresh</code>, <code>updateItemSizes</code>,
             <code>stopProgrammaticScroll</code>, <code>scrollDetails</code>, <code>isHydrated</code>,
-            <code>getItemOffset</code>/<code>getItemSize</code> and the rest — plus table constants
+            <code>getItemOffset</code>/<code>getItemSize</code> and the rest - plus table constants
             (<code>isTable: true</code>, <code>itemTag: 'tr'</code>, <code>containerTag: 'table'</code>,
             <code>wrapperTag: 'tbody'</code>). See
             <a href="#methods" class="link link-primary font-bold">Methods</a>.
           </li>
           <li>
-            <strong>Props</strong>: the shared base surface applies unchanged — <code>items</code>,
+            <strong>Props</strong>: the shared base surface applies unchanged - <code>items</code>,
             <code>itemSize</code> (uniform or dynamic), <code>bufferBefore</code>/<code>bufferAfter</code>,
             <code>initialScrollIndex</code>/<code>initialScrollAlign</code>, <code>restoreScrollOnPrepend</code>,
             <code>infiniteScroll</code>-related props (<code>loadDistance</code>, <code>loading</code>),
@@ -1456,14 +1456,14 @@ const vs = useVirtualScroll(props, [
             Tag customization (<code>containerTag</code>/<code>wrapperTag</code>/<code>itemTag</code>) lives on
             <code>VirtualScroll</code> for semantic lists (e.g. <code>ul/ol &gt; li</code>). On
             <code>VirtualScrollTable</code> the container, wrapper and row elements are fixed to their semantic
-            table tags — use this component for tabular data. Grid/gap/sticky-index/scroll-padding props are not
+            table tags - use this component for tabular data. Grid/gap/sticky-index/scroll-padding props are not
             part of the table flow surface (they fall
             back to absolute rows), and <code>direction</code> is vertical. See
             <a href="#props" class="link link-primary font-bold">Props</a>.
           </li>
           <li>
-            <strong>Behavior &amp; theming</strong>: the same engine wiring — keyboard navigation, coordinate
-            scaling, custom scrollbar slot support, sticky measurements, prepend restoration — and the same CSS
+            <strong>Behavior &amp; theming</strong>: the same engine wiring - keyboard navigation, coordinate
+            scaling, custom scrollbar slot support, sticky measurements, prepend restoration - and the same CSS
             classes and <a href="#css-variables" class="link link-primary font-bold">CSS variables</a>. The snap
             caveat above applies.
           </li>
@@ -1482,7 +1482,7 @@ const vs = useVirtualScroll(props, [
           <code>VirtualScrollMasonry</code> renders a real masonry grid inside a <strong>single</strong> native
           scroll container: the column count and a fractional column width are derived from the container width,
           cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only
-          the window around the scroll position is mounted (plus one segment of overscan) — the DOM stays bounded
+          the window around the scroll position is mounted (plus one segment of overscan) - the DOM stays bounded
           no matter the dataset size or how far the user jumps.
         </p>
         <p>
@@ -1523,7 +1523,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">itemHeight</code></td>
               <td><code>fn(item, index, columnWidth)</code></td>
               <td>Required</td>
-              <td>Canonical height oracle in px. MUST be deterministic — the same <code>(index, columnWidth)</code> must always return the same height — because placements are committed to a frontier chain and replayed from stored snapshots. Non-finite results fall back to <code>40</code>; finite non-positive results clamp to <code>1</code>.</td>
+              <td>Canonical height oracle in px. MUST be deterministic - the same <code>(index, columnWidth)</code> must always return the same height - because placements are committed to a frontier chain and replayed from stored snapshots. Non-finite results fall back to <code>40</code>; finite non-positive results clamp to <code>1</code>.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">targetColumnWidth</code></td>
@@ -1553,7 +1553,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">segmentSize</code></td>
               <td><code>number</code></td>
               <td><code>{{ DEFAULT_MASONRY_SEGMENT_SIZE }}</code></td>
-              <td>Items per layout segment — the cadence at which the real column frontier is snapshotted. Larger segments store less frontier state but make each layout step cross more items.</td>
+              <td>Items per layout segment - the cadence at which the real column frontier is snapshotted. Larger segments store less frontier state but make each layout step cross more items.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">virtualScrollbar</code></td>
@@ -1616,7 +1616,7 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code class="docs-prop-name">width</code> / <code class="docs-prop-name">height</code></td>
               <td><code>number</code></td>
-              <td>Card size in px — the resolved column width and the layout-resolved height (oracle height in canonical mode; measured height with <code>measuredHeights</code>). In canonical mode render content to exactly fill the oracle height; with <code>measuredHeights</code> cards size to their content.</td>
+              <td>Card size in px - the resolved column width and the layout-resolved height (oracle height in canonical mode; measured height with <code>measuredHeights</code>). In canonical mode render content to exactly fill the oracle height; with <code>measuredHeights</code> cards size to their content.</td>
             </tr>
           </tbody>
         </table>
@@ -1650,12 +1650,12 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code class="docs-prop-name">columns</code> / <code class="docs-prop-name">columnWidth</code></td>
               <td><code>number</code></td>
-              <td>Live resolved column count and column width in px (0 until the container is measured) — e.g. for <code>srcset</code> candidates or text budgets.</td>
+              <td>Live resolved column count and column width in px (0 until the container is measured) - e.g. for <code>srcset</code> candidates or text budgets.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">totalHeight</code> / <code class="docs-prop-name">totalHeightExact</code></td>
               <td><code>number</code> / <code>boolean</code></td>
-              <td>Content height in px — extrapolated from the known frontier prefix until the chain reaches the end, then exact. End-anchored scrolls re-clamp as estimates settle.</td>
+              <td>Content height in px - extrapolated from the known frontier prefix until the chain reaches the end, then exact. End-anchored scrolls re-clamp as estimates settle.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">scrollToIndex</code></td>
@@ -1670,7 +1670,7 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code class="docs-prop-name">refresh</code></td>
               <td><code>fn()</code></td>
-              <td>Drop every cached frontier and re-layout from the current anchor — after in-place item edits or oracle changes.</td>
+              <td>Drop every cached frontier and re-layout from the current anchor - after in-place item edits or oracle changes.</td>
             </tr>
           </tbody>
         </table>
@@ -1679,8 +1679,8 @@ const vs = useVirtualScroll(props, [
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <h4 class="docs-prop-subheader">Sizing contract &amp; limitations</h4>
         <ul class="list-disc ps-5 space-y-2">
-          <li>In canonical mode cards must render at exactly the oracle height — reserve media space (<code>aspect-ratio</code>, fixed model heights) and never rely on DOM measurement. With <code>measuredHeights</code>, cards size to their content and only mounted cards are measured (unmounted regions keep the oracle estimate).</li>
-          <li>Vertical axis only: no RTL, horizontal, or <code>both</code> mode and no coordinate scaling — very tall datasets stay below the browser's ~10M px scroll limit.</li>
+          <li>In canonical mode cards must render at exactly the oracle height - reserve media space (<code>aspect-ratio</code>, fixed model heights) and never rely on DOM measurement. With <code>measuredHeights</code>, cards size to their content and only mounted cards are measured (unmounted regions keep the oracle estimate).</li>
+          <li>Vertical axis only: no RTL, horizontal, or <code>both</code> mode and no coordinate scaling - very tall datasets stay below the browser's ~10M px scroll limit.</li>
           <li>Not available for SSR pre-rendering: content mounts after the container is measured. Extensions/snap/sticky/loading of the list engine do not apply.</li>
         </ul>
       </div>
@@ -2044,7 +2044,7 @@ scrollToIndex
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Masonry virtualization driver for a single native scroll container — the engine behind
+            Masonry virtualization driver for a single native scroll container - the engine behind
             <a href="#virtual-scroll-masonry" class="link link-primary font-semibold">VirtualScrollMasonry</a>.
             Owns one <code>MasonryLayout</code> frontier chain, renders only the cards intersecting the viewport
             (plus one segment of overscan per side), derives responsive column geometry from the container width
@@ -2085,7 +2085,7 @@ const {
             <code>scrollDetails</code>, <code>columns</code>, <code>columnWidth</code>, <code>totalHeight</code>,
             <code>totalHeightExact</code>, <code>scrollToIndex</code>, <code>scrollToOffset</code>,
             <code>refresh</code> and the reactive <code>internalState</code> (scrollY, viewport size, scrolling
-            flags) — see the
+            flags) - see the
             <a href="#masonry-exposed" class="link link-primary font-semibold">component members</a> for the
             semantics of each member.
           </p>
@@ -2625,7 +2625,7 @@ const { setItemRef } = useVirtualScrollObservers({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Sticky rows and columns. <code>VirtualScroll</code> registers this extension automatically; the sticky behavior itself lives in the core engine, keyed on the <code>stickyIndices</code>, <code>stickyHeader</code> and <code>stickyFooter</code> props — the extension is a pass-through kept for the composable wiring contract.
+            Sticky rows and columns. <code>VirtualScroll</code> registers this extension automatically; the sticky behavior itself lives in the core engine, keyed on the <code>stickyIndices</code>, <code>stickyHeader</code> and <code>stickyFooter</code> props - the extension is a pass-through kept for the composable wiring contract.
           </p>
         </div>
 
@@ -2712,7 +2712,7 @@ const ext = useInfiniteLoadingExtension({
             <li>Watches <code>scrollDetails</code> reactively.</li>
             <li>Respects the <code>loadDistance</code> and <code>loading</code> props from the component.</li>
             <li>Prevents duplicate triggers while <code>loading</code> is true.</li>
-            <li>Fires as soon as the threshold is reached — including while a programmatic scroll (scrollbar drag, PageDown/End) is still settling — so the loading indicator appears promptly and is not skipped.</li>
+            <li>Fires as soon as the threshold is reached - including while a programmatic scroll (scrollbar drag, PageDown/End) is still settling - so the loading indicator appears promptly and is not skipped.</li>
           </ul>
         </div>
       </section>
@@ -3213,7 +3213,7 @@ const ext = useInfiniteLoadingExtension({
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          Detailed reference for the methods exposed on the <code>VirtualScroll</code> component instance (via a template <code>ref</code>) and for the helpers returned by the composables — the badge names the owning API. Methods on the instance are also returned by <code>useVirtualScroll</code>.
+          Detailed reference for the methods exposed on the <code>VirtualScroll</code> component instance (via a template <code>ref</code>) and for the helpers returned by the composables - the badge names the owning API. Methods on the instance are also returned by <code>useVirtualScroll</code>.
         </p>
       </div>
 

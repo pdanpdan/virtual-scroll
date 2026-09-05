@@ -280,7 +280,7 @@ describe('useVirtualScrollInertia', () => {
       stopProgrammaticScroll: vi.fn(),
     });
 
-    // Not started yet — should do nothing
+    // Not started yet - should do nothing
     handlePointerMove({ clientX: 50, clientY: 50 } as unknown as PointerEvent);
     expect(scrollToOffset).not.toHaveBeenCalled();
   });

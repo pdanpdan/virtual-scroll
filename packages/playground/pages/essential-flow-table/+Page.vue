@@ -95,7 +95,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      A real <code>&lt;table&gt;</code> virtualized in flow: rows carry 1–3 text lines each and are <strong>measured</strong>, so every row has its natural height while spacer rows keep the virtual offsets exact. Column widths can be left to the browser (<em>auto</em>), pinned from the first window, or pinned from an explicit <code>colgroup</code>; when the table is wider than the container it scrolls horizontally with its own scrollbar.
+      A real <code>&lt;table&gt;</code> virtualized in flow: rows carry 1-3 text lines each and are <strong>measured</strong>, so every row has its natural height while spacer rows keep the virtual offsets exact. Column widths can be left to the browser (<em>auto</em>), pinned from the first window, or pinned from an explicit <code>colgroup</code>; when the table is wider than the container it scrolls horizontally with its own scrollbar.
     </template>
 
     <template #icon>
@@ -225,7 +225,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           data. The <code>flow-table</code> flag goes one step further: instead of absolutely positioning each row at a
           computed pixel offset, mounted rows stay in <em>real table flow</em> between two invisible spacer rows (the
           leading one stands in for the skipped rows above, the trailing one keeps the scroll height). The browser's
-          own table layout then sizes and column-aligns the rows — including across the header — so row heights are
+          own table layout then sizes and column-aligns the rows - including across the header - so row heights are
           their natural content heights (measured) and the result reads as a genuine table to screen readers and CSS
           table styling alike.
         </p>
@@ -242,7 +242,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <h3>2. Model the rows and choose a height strategy</h3>
         <p>
           Flow mode is orthogonal to how row heights are known: pass a numeric <code>item-size</code> for uniform rows
-          (arithmetic positioning), or leave it unset so each row is measured and keeps its natural height — the right
+          (arithmetic positioning), or leave it unset so each row is measured and keeps its natural height - the right
           choice when rows carry one to several lines of text, badges, or anything whose height only the browser knows.
           Rows re-measure automatically when their content changes, and the spacer rows absorb the difference so later
           rows never drift.
@@ -253,7 +253,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           Three slots make the table. The <code>#header</code> slot emits a <code>&lt;tr&gt;</code> of
           <code>&lt;th&gt;</code> cells (it lands in the <code>&lt;thead&gt;</code>), the optional <code>#footer</code>
           slot emits a <code>&lt;tr&gt;</code> of <code>&lt;td&gt;</code>s (the <code>&lt;tfoot&gt;</code>), and the
-          <code>#item</code> slot is called once per mounted row — its content must be bare <code>&lt;td&gt;</code>
+          <code>#item</code> slot is called once per mounted row - its content must be bare <code>&lt;td&gt;</code>
           cells, because they become the direct children of the engine's <code>&lt;tr&gt;</code>. Every row must emit
           the same number of cells or the browser cannot align the columns.
         </p>
@@ -406,8 +406,8 @@ const PINNED = [ 90, 260, 360, 140 ]; // px per column
           Real flow is a vertical-only mode: it needs a single vertical axis with no per-row gap, no scroll padding,
           no sticky indices, and no column grid, and it requires the total content height to stay below the browser's
           ~10M px scroll limit (above that, coordinate scaling kicks in and rows return to absolute positioning).
-          Outside those constraints the component automatically falls back to its default absolute row layout — rows
-          positioned at engine-computed pixel offsets instead of in real flow — which the Table pattern example
+          Outside those constraints the component automatically falls back to its default absolute row layout - rows
+          positioned at engine-computed pixel offsets instead of in real flow - which the Table pattern example
           demonstrates. Choose flow mode when natural row heights and browser-driven column layout matter more than
           pixel-exact control.
         </p>

@@ -120,7 +120,7 @@ export const defaultState: ConfiguratorState = {
   defaultColumnWidth: 120,
   columnGap: 8,
 
-  scrollbarStyle: 'auto',
+  scrollbarStyle: 'virtual',
   snap: false,
   snapMode: 'next',
   stickyHeader: false,

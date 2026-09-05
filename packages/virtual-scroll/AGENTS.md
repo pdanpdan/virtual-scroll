@@ -1,7 +1,7 @@
-# @pdanpdan/virtual-scroll — Agent Guide
+# @pdanpdan/virtual-scroll - Agent Guide
 
 > Written for AI coding agents (Claude Code, Codex, Cursor, Copilot, …) that integrate this package into Vue 3 apps.
-> For humans: `README.md`. Full interactive reference: https://pdanpdan.github.io/virtual-scroll/docs/ — compact LLM summary: https://pdanpdan.github.io/virtual-scroll/llms.txt
+> For humans: `README.md`. Full interactive reference: https://pdanpdan.github.io/virtual-scroll/docs/ - compact LLM summary: https://pdanpdan.github.io/virtual-scroll/llms.txt
 
 ## What it is
 
@@ -13,7 +13,7 @@
 pnpm add @pdanpdan/virtual-scroll
 ```
 
-1. **Compiled entry (recommended for bundlers)** — CSS must be imported separately:
+1. **Compiled entry (recommended for bundlers)** - CSS must be imported separately:
 ```vue
 <script setup>
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
@@ -21,13 +21,13 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import '@pdanpdan/virtual-scroll/style.css';
 </script>
 ```
-2. **Raw SFC passthrough** — styles already included, no CSS import:
+2. **Raw SFC passthrough** - styles already included, no CSS import:
 ```js
 import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 ```
-3. **CDN (UMD)** — `https://unpkg.com/@pdanpdan/virtual-scroll` after the Vue global, plus `https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css`.
+3. **CDN (UMD)** - `https://unpkg.com/@pdanpdan/virtual-scroll` after the Vue global, plus `https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css`.
 
-Exact TypeScript signatures for everything below ship in `dist/index.d.ts` — read it before guessing option shapes.
+Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - read it before guessing option shapes.
 
 ## Public exports (from the package entry)
 
@@ -42,19 +42,19 @@ Exact TypeScript signatures for everything below ship in `dist/index.d.ts` — r
 
 ## Core props (exact names)
 
-- `items: T[]` — required, reactive data source.
-- `itemSize`: `number | number[] | ((item, index) => number) | null` (default `40`) — number = fixed; array = repeating circular pattern (`[50, 100]`); function = per-item; `null`/`0`/`undefined` = **dynamic**, measured via `ResizeObserver`.
+- `items: T[]` - required, reactive data source.
+- `itemSize`: `number | number[] | ((item, index) => number) | null` (default `40`) - number = fixed; array = repeating circular pattern (`[50, 100]`); function = per-item; `null`/`0`/`undefined` = **dynamic**, measured via `ResizeObserver`.
 - `direction`: `'vertical' | 'horizontal' | 'both'` (default `'vertical'`). `'both'` = grid.
-- `columnCount` / `columnWidth` — grid columns; `columnWidth` accepts number/array/function/`null` (dynamic) like `itemSize`.
-- `gap`, `columnGap` — spacing in virtual units.
-- `stickyIndices: number[]` — iOS-style pushing section headers; plus `stickyHeader` / `stickyFooter` booleans for the `header`/`footer` slots.
+- `columnCount` / `columnWidth` - grid columns; `columnWidth` accepts number/array/function/`null` (dynamic) like `itemSize`.
+- `gap`, `columnGap` - spacing in virtual units.
+- `stickyIndices: number[]` - iOS-style pushing section headers; plus `stickyHeader` / `stickyFooter` booleans for the `header`/`footer` slots.
 - `snap`: `boolean | 'auto' | 'start' | 'center' | 'end' | 'next'` (default `false`).
-- `container?: HTMLElement | Window` — omit for self-contained scroll; pass the `window` object to virtualize the page scroll.
-- `virtualScrollbar: boolean` — force custom scrollbars even under the browser limit.
-- `loading: boolean`, `loadDistance: number` (default `200`) — infinite loading; while `loading` is true the `#loading` slot shows and `load` events are suppressed.
-- `restoreScrollOnPrepend: boolean` — keeps position when items are prepended (chat history).
-- `initialScrollIndex: number`, `initialScrollAlign: 'start' | 'center' | 'end' | 'auto'` — initial jump.
-- `ssrRange: { start, end, colStart?, colEnd? }` — pre-render static items server-side for SEO.
+- `container?: HTMLElement | Window` - omit for self-contained scroll; pass the `window` object to virtualize the page scroll.
+- `virtualScrollbar: boolean` - force custom scrollbars even under the browser limit.
+- `loading: boolean`, `loadDistance: number` (default `200`) - infinite loading; while `loading` is true the `#loading` slot shows and `load` events are suppressed.
+- `restoreScrollOnPrepend: boolean` - keeps position when items are prepended (chat history).
+- `initialScrollIndex: number`, `initialScrollAlign: 'start' | 'center' | 'end' | 'auto'` - initial jump.
+- `ssrRange: { start, end, colStart?, colEnd? }` - pre-render static items server-side for SEO.
 - `bufferBefore` / `bufferAfter` (default `5`), `defaultItemSize` (40), `defaultColumnWidth` (100).
 - Tag overrides: `containerTag`, `wrapperTag`, `itemTag` (e.g. `'table'`/`'tbody'`/`'tr'`).
 - A11y: `role`, `ariaLabel`, `ariaLabelledby`, `itemRole` (auto roles for list/grid/tree/listbox/menu).
@@ -64,15 +64,15 @@ In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-
 
 ## Slots
 
-- `#header`, `#footer` — fixed content at flow edges (sticky via props above).
-- `#item="{ item, index, offset, gap, columnGap, isSticky, isStickyActive, getItemAriaProps, getCellAriaProps, columnRange, getColumnWidth }"` — the only required slot. Must render a single root element per item.
-- `#loading` — shown while `loading` is true.
-- `#scrollbar="{ axis, positionPercent, viewportPercent, thumbSizePercent, thumbPositionPercent, trackProps, thumbProps, scrollbarProps, isDragging }"` — when provided it **replaces** the default scrollbar; bind `trackProps`/`thumbProps` to your track/thumb elements (or spread `scrollbarProps` onto `<VirtualScrollbar>`).
+- `#header`, `#footer` - fixed content at flow edges (sticky via props above).
+- `#item="{ item, index, offset, gap, columnGap, isSticky, isStickyActive, getItemAriaProps, getCellAriaProps, columnRange, getColumnWidth }"` - the only required slot. Must render a single root element per item.
+- `#loading` - shown while `loading` is true.
+- `#scrollbar="{ axis, positionPercent, viewportPercent, thumbSizePercent, thumbPositionPercent, trackProps, thumbProps, scrollbarProps, isDragging }"` - when provided it **replaces** the default scrollbar; bind `trackProps`/`thumbProps` to your track/thumb elements (or spread `scrollbarProps` onto `<VirtualScrollbar>`).
 
 ## Events
 
-- `@scroll="(details: ScrollDetails)"` — full state (offsets, range, viewport, totalSize…).
-- `@load="(axis: 'vertical' | 'horizontal')"` — infinite-loading trigger.
+- `@scroll="(details: ScrollDetails)"` - full state (offsets, range, viewport, totalSize…).
+- `@load="(axis: 'vertical' | 'horizontal')"` - infinite-loading trigger.
 - `@visible-range-change="{ start, end, colStart, colEnd }"`.
 
 ## Exposed (template ref) methods
@@ -93,7 +93,7 @@ In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-
 10. **Snap carousels**: `snap="'start' | 'center' | 'end' | 'next' | 'auto'"`.
 11. **Custom scrollbars**: `virtual-scrollbar` + `#scrollbar` slot, or `<VirtualScrollbar>` with the slot's `scrollbarProps`.
 12. **SSR**: pass `ssr-range` to pre-render items; identical client render hydrates and takes over scrolling on mount.
-13. **Billions of pixels**: nothing to configure — coordinate scaling engages automatically past the browser limit.
+13. **Billions of pixels**: nothing to configure - coordinate scaling engages automatically past the browser limit.
 
 ## Decision tree
 
@@ -103,7 +103,7 @@ In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-
 
 ## Mistakes agents must avoid
 
-- ❌ Importing without the CSS in bundler mode — layout relies on shipped `virtual-scroll.css`. ✅ `import '@pdanpdan/virtual-scroll/style.css'` (only the raw `VirtualScroll.vue` passthrough skips this).
+- ❌ Importing without the CSS in bundler mode - layout relies on shipped `virtual-scroll.css`. ✅ `import '@pdanpdan/virtual-scroll/style.css'` (only the raw `VirtualScroll.vue` passthrough skips this).
 - ❌ `:item-size` fixed at `40` while items have different real heights → overlap/misalignment. ✅ Match it to real content or use `null` (dynamic).
 - ❌ Camel-case props in templates (`:itemSize`) in non-SFC/string templates. ✅ Kebab-case (`:item-size`); camelCase only in TS/composable props.
 - ❌ Rendering multiple roots or the item slot content inside the scroll container instead of the `#item` slot. ✅ One root element per `#item` render.

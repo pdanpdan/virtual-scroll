@@ -16,7 +16,7 @@ import originalRaw from '../pattern-diff/original.txt?raw';
 import { html as highlightedCode } from './+Page.vue?highlight';
 
 // The same source files shown in the Side-by-Side Code Diff example (simdutf
-// amalgamated headers) — virtualized and colorized on the fly.
+// amalgamated headers) - virtualized and colorized on the fly.
 
 const LINE_HEIGHT = 20;
 
@@ -424,7 +424,7 @@ watch(activeFile, () => {
       <ImplementationGuide>
         <p>
           A code viewer is the ideal virtual-scroll workload: thousands of rows that are all exactly one text line
-          tall. Treat the file as an array of strings and virtualize with a numeric <code>item-size</code>, so the engine positions rows arithmetically — no DOM measurement — and only the visible window is ever mounted. Uniformity holds because monospace text on one line cannot wrap away from the fixed
+          tall. Treat the file as an array of strings and virtualize with a numeric <code>item-size</code>, so the engine positions rows arithmetically - no DOM measurement - and only the visible window is ever mounted. Uniformity holds because monospace text on one line cannot wrap away from the fixed
           row height, and <code>1ch</code> gives you exact, font-size-relative widths for the gutter and the longest
           line. Two further behaviors make it an editor rather than a pager: find-and-jump that scrolls
           programmatically to a model-side match index, and on-the-fly coloring that runs per mounted row as a pure
@@ -433,10 +433,10 @@ watch(activeFile, () => {
 
         <h3>1. Model the file as an array of uniform lines</h3>
         <p>
-          Split the source into an array — element <code>i</code> is line <code>i + 1</code> — and pass it as
+          Split the source into an array - element <code>i</code> is line <code>i + 1</code> - and pass it as
           <code>items</code> with a numeric <code>item-size</code>. A real array is the mainstream choice: rows carry
           the text they render. (If a view truly needs only numbering, an index-only sparse array
-          works too — the slot receives <code>index</code> and never reads a payload.) Give the scroll host a definite
+          works too - the slot receives <code>index</code> and never reads a payload.) Give the scroll host a definite
           height, or flex-fill it with <code>min-height: 0</code> in a flex/grid parent.
         </p>
 
@@ -501,19 +501,19 @@ const codeMinStyle = computed(() => ({ minInlineSize: `${maxChars.value}ch` }));
           Every row is exactly <code>LINE_HEIGHT</code> tall: the row root fixes the height, flex centering plus a
           compact <code>line-height</code> keep the row height independent of font metrics, and
           <code>white-space: pre</code> guarantees the code is one line that never wraps. The gutter is a fixed-width,
-          right-aligned span <em>inside</em> the row — no second scroll surface to keep in sync, and the number
+          right-aligned span <em>inside</em> the row - no second scroll surface to keep in sync, and the number
           provably matches the code beside it. Because each line is one row, the line box math is uniform even when
           content differs; a fixed-height row with wrapping text would be the case for dynamic measurement instead.
         </p>
         <ul>
           <li>
             Use a monospace font: every glyph advances exactly <code>1ch</code>, so a line's pixel width is its length
-            in <code>ch</code> — the formula above is exact, and gutter digits stay constant-width.
+            in <code>ch</code> - the formula above is exact, and gutter digits stay constant-width.
           </li>
           <li>Give the numbers <code>font-variant-numeric: tabular-nums</code> so digits do not jitter while scrolling.</li>
           <li>
             If numbers must stay pinned like an editor's, the gutter has to live outside the scroll host as a fixed
-            sibling column that shares the row-height math — inside-row gutters scroll away with their lines, which is
+            sibling column that shares the row-height math - inside-row gutters scroll away with their lines, which is
             the zero-sync approach shown here.
           </li>
         </ul>
@@ -561,15 +561,15 @@ const codeMinStyle = computed(() => ({ minInlineSize: `${maxChars.value}ch` }));
         <p>
           Note why the min-width is applied to <em>every</em> row and not left to content: rows mount and unmount as
           you scroll, so a scroll range derived from whatever is currently mounted would shrink and grow with each
-          window. Reserving <code>maxChars × 1ch</code> on every row keeps the horizontal range — and the horizontal
-          scrollbar — stable for the whole scroll.
+          window. Reserving <code>maxChars × 1ch</code> on every row keeps the horizontal range - and the horizontal
+          scrollbar - stable for the whole scroll.
         </p>
 
         <h3>3. Find and jump with programmatic scroll</h3>
         <p>
           Searching is kept out of the DOM: on a debounced query, scan the file once and store the matching line
           indices; the renderer only consults that array when a row is mounted. Navigation is then
-          <code>scrollToIndex(matchIndex, null, options)</code> — the second argument is the column (grid mode only, so
+          <code>scrollToIndex(matchIndex, null, options)</code> - the second argument is the column (grid mode only, so
           <code>null</code> here) and the options choose alignment and animation. With uniform sizes the engine jumps
           straight to the row offset, so a <code>'center'</code> jump to match #500 costs no more than a jump to #1.
         </p>
@@ -630,7 +630,7 @@ function findNext() {
           Syntax coloring is applied only to mounted rows: call the tokenizer from the
           <code>#item</code> slot, so a 5,000-line file pays for only the mounted window (a few dozen rows) per frame
           instead of 5,000 passes, and scrolling stays smooth because rows recycle. Make the tokenizer a pure function
-          of the line text — same input, same segments — which is exactly what recycled rows require. Handle block comments by pre-stripping them per line
+          of the line text - same input, same segments - which is exactly what recycled rows require. Handle block comments by pre-stripping them per line
           with a carry-over state machine (one pass over the file), then append the trailing comment as a single
           styled segment. Active search terms can be split out of any segment as an extra marked piece using the match
           array from step 3.

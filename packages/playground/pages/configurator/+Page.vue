@@ -175,7 +175,7 @@ function openInCodePen() {
             <span class="text-xs font-bold small-caps text-base-content/50">ARIA role</span>
             <select v-model="state.ariaRole" class="select select-bordered select-sm w-full">
               <option v-for="role in roleOptions" :key="role.value" :value="role.value">
-                {{ role.label }} — {{ role.description }}
+                {{ role.label }} - {{ role.description }}
               </option>
             </select>
           </label>
@@ -706,7 +706,7 @@ function openInCodePen() {
                 <span class="text-xs font-bold small-caps text-base-content/50">Snap mode</span>
                 <select v-model="state.snapMode" class="select select-bordered select-sm w-full">
                   <option v-for="option in snapOptions" :key="option.value" :value="option.value">
-                    {{ option.label }} — {{ option.description }}
+                    {{ option.label }} - {{ option.description }}
                   </option>
                 </select>
               </label>
@@ -799,7 +799,7 @@ function openInCodePen() {
                 <span class="text-xs font-bold small-caps text-base-content/50">Alignment</span>
                 <select v-model="state.initialScrollAlign" class="select select-bordered select-sm w-full">
                   <option v-for="option in alignOptions" :key="option.value" :value="option.value">
-                    {{ option.label }} — {{ option.description }}
+                    {{ option.label }} - {{ option.description }}
                   </option>
                 </select>
               </label>
@@ -963,7 +963,7 @@ function openInCodePen() {
 
           <p class="text-[11px] opacity-60 leading-relaxed">
             <span v-if="activeTab === 'component'">
-              Single-file component using <code class="font-mono">VirtualScroll</code> — imports, typed data and configuration, template and styles included.
+              Single-file component using <code class="font-mono">VirtualScroll</code> - imports, typed data and configuration, template and styles included.
             </span>
             <span v-else-if="activeTab === 'composable'">
               Single-file component using <code class="font-mono">useVirtualScroll</code> with one extension per enabled feature and manual rendering.

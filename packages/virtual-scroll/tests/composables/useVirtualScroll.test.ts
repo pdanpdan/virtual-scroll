@@ -740,7 +740,7 @@ describe('useVirtualScroll', () => {
       expect(internalState.internalScrollY.value).toBe(1000);
 
       // The space before the first list element grows by 400px. No scroll and
-      // no resize fire — only the list's position in the document changes, so
+      // no resize fire - only the list's position in the document changes, so
       // the same viewport spot now maps 400px earlier into the list.
       hostDocTop = 400;
       scrollState.y = 1400; // absolute page offset: user stays at the same spot
@@ -803,7 +803,7 @@ describe('useVirtualScroll', () => {
       await nextTick();
       expect(internalState.internalScrollY.value).toBe(1000);
 
-      // Space before the first list element grows by 400px — no scroll fires,
+      // Space before the first list element grows by 400px - no scroll fires,
       // the host keeps its own size, only its offset inside the container moves.
       hostContentTop = 400;
       container.scrollTop = 1400; // user stays at the same content spot

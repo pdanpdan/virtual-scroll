@@ -64,7 +64,7 @@ function messageOf(i: number): string {
     case 'DEBUG':
       return `${ service }: cache ${ i % 2 === 0 ? 'hit' : 'miss' } for ${ token } #${ id } (${ (i * 13) % 100 } entries)`;
     case 'WARN':
-      return `${ service }: slow ${ token } #${ id } — took ${ 300 + (i % 700) }ms`;
+      return `${ service }: slow ${ token } #${ id } - took ${ 300 + (i % 700) }ms`;
     case 'ERROR':
       return `${ service }: failed ${ token } #${ id }: ${ pick(ERROR_CAUSES, i, 11) }`;
   }
@@ -299,12 +299,12 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A log or dataset too large to materialize — or whose lines are a pure function of an index — does not need an array of
+          A log or dataset too large to materialize - or whose lines are a pure function of an index - does not need an array of
           stored objects. With an index-only model every visible row derives its text on demand, so memory stays flat across
           200,000+ lines and rendering costs only what is on screen. Filtering and searching then reduce to building a small
           array of matching <em>indices</em> and handing it to the same <code>VirtualScroll</code>, which draws only those rows
           in view. Uniform fixed heights keep layout O(1) and make any jump land precisely. The tradeoff: derived text must be
-          deterministic and inexpensive to compute, because rows are re-derived on every scroll — so this suits generated logs,
+          deterministic and inexpensive to compute, because rows are re-derived on every scroll - so this suits generated logs,
           time series, and lookup-backed tables, not heavy or non-deterministic content.
         </p>
 
@@ -341,11 +341,11 @@ const TOTAL = 200_000;
 // dataset is a sparse placeholder and every visible row derives its content on
 // demand. A numeric item-size keeps the layout O(1). (If your logs are a
 // bounded in-memory list instead, just pass that array and read item.level /
-// item.message from the #item slot — same props.)
+// item.message from the #item slot - same props.)
 const base = new Array(TOTAL);
 const levelFilter = ref&lt;string[]>([]);
 
-// All matching GLOBAL indices — never the derived log objects themselves.
+// All matching GLOBAL indices - never the derived log objects themselves.
 const filtered = ref&lt;number[] | null>(null);
 const items = computed(() => filtered.value ?? base);
 
@@ -365,7 +365,7 @@ function globalOf(item: unknown, index: number) {
     :item-size=&quot;40&quot;
   >
     &lt;template #item=&quot;{ item, index }&quot;>
-      &lt;div class=&quot;line&quot;>{{ globalOf(item, index) }} — {{ textOf(globalOf(item, index)) }}&lt;/div>
+      &lt;div class=&quot;line&quot;>{{ globalOf(item, index) }} - {{ textOf(globalOf(item, index)) }}&lt;/div>
     &lt;/template>
   &lt;/VirtualScroll>
 &lt;/template>
@@ -389,10 +389,10 @@ function globalOf(item: unknown, index: number) {
 
         <h3>2. Filter and search without materializing rows</h3>
         <p>
-          Never touch the source rows when filtering an index-only list — you cannot (they do not exist as objects). Instead scan
+          Never touch the source rows when filtering an index-only list - you cannot (they do not exist as objects). Instead scan
           the dataset, test each candidate index against the active filter, and collect the matching <em>global indices</em> into
           an array that becomes the new <code>items</code>. Each slot then holds a number (the real log index) instead of a hole,
-          so the row must map it back before deriving content — the snippet's <code>globalOf(item, index)</code> returns the
+          so the row must map it back before deriving content - the snippet's <code>globalOf(item, index)</code> returns the
           stored number when present and falls back to the slot index when filtering is off. This works because row height is
           uniform: the filtered array is just a shorter list of the same fixed-size rows.
         </p>
@@ -421,7 +421,7 @@ watch(query, () => {
 });
 
 // Any filter change is a different coordinate space (row 0 = the first match),
-// so a stale scroll offset is meaningless — rebuild the index array and jump to
+// so a stale scroll offset is meaningless - rebuild the index array and jump to
 // the top of the new result set.
 watch([levelFilter, debounced], () => {
   filtered.value = collectMatchingIndices(); // scan source, gather global indices
@@ -433,7 +433,7 @@ watch([levelFilter, debounced], () => {
         <p>
           A filter change renumbers the space: row 0 is now the first match, so any previously held scroll offset is meaningless.
           After rebuilding the index array, reset to the top with <code>scrollToIndex(0, null, { align: 'start', behavior: 'auto'
-            })</code> so the user lands on the first result deterministically. The same API moves you anywhere by index — read the
+            })</code> so the user lands on the first result deterministically. The same API moves you anywhere by index - read the
           first visible row from <code>ScrollDetails.currentIndex</code> to step one match at a time, or jump to any row of the
           filtered set directly; because sizes are uniform, the target is computed exactly with no measurement round-trip.
         </p>

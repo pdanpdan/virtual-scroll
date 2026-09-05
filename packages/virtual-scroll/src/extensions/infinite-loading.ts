@@ -20,7 +20,7 @@ export function useInfiniteLoadingExtension<T = unknown>(options: {
     name: 'infinite-loading',
     onInit(ctx: ExtensionContext<T>) {
       watch(ctx.scrollDetails, (details) => {
-        // Fire as soon as the threshold is detected — including while a
+        // Fire as soon as the threshold is detected - including while a
         // programmatic scroll (scrollbar drag, PageDown/End) is still running:
         // deferring until the scroll settles delays the loading indicator and,
         // when a drag ends without further scroll events, can skip it entirely.

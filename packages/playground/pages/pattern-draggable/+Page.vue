@@ -239,14 +239,14 @@ function handleDragEnd() {
           operation in <em>data</em>, not in the DOM: each mounted row reports its own <code>index</code> from the slot, that
           index is the drop target whenever the pointer is over the row, auto-scrolling mounts the rows in between, and the
           reorder itself is a single array splice performed on <code>drop</code>. Because rows recycle as you scroll, the two
-          pieces of state that matter — which row is being dragged and which row is the current target — are plain refs that
+          pieces of state that matter - which row is being dragged and which row is the current target - are plain refs that
           survive every unmount, and the virtualization engine re-ranges around the mutated array for you.
         </p>
 
         <h3>1. Make a row (or its handle) a drag source and record the origin</h3>
         <p>
-          Native HTML5 drag and drop needs an element with the <code>draggable</code> attribute. Put it on the whole row, or —
-          to avoid hijacking text selection and inner images — on a dedicated handle inside the row. Either way, attach the drag
+          Native HTML5 drag and drop needs an element with the <code>draggable</code> attribute. Put it on the whole row, or -
+          to avoid hijacking text selection and inner images - on a dedicated handle inside the row. Either way, attach the drag
           handlers to the mounted row: <code>dragstart</code>/<code>dragover</code>/<code>drop</code>/<code>dragend</code>
           bubble from the handle to the row's listeners. On <code>dragstart</code>, capture the slot <code>index</code> into a
           <code>draggedIndex</code> ref, set <code>effectAllowed = 'move'</code>, store the index on the
@@ -313,12 +313,12 @@ function onDragEnd() {
         <h3>2. Make the drop target an index, not a DOM element</h3>
         <p>
           An unmounted row can never receive <code>dragover</code>, so the only rows you can drop onto are the ones currently in
-          the window — and their identity can change under your cursor as the list scrolls. Because every mounted row already
+          the window - and their identity can change under your cursor as the list scrolls. Because every mounted row already
           knows its position from the slot, the simplest correct target is that <code>index</code>: on <code>dragover.prevent</code>
           (the <code>.prevent</code> is required or the browser rejects the drop) set <code>dropTargetIndex</code> to the row's
           index. There is no offset arithmetic because the library hands each row its own index. An alternative when you want a
           whole-list drop zone is to compute the target from the pointer instead: the instance exposes
-          <code>getRowIndexAt(offset)</code>/<code>scrollToOffset</code> helpers — useful with pointer events, but unnecessary
+          <code>getRowIndexAt(offset)</code>/<code>scrollToOffset</code> helpers - useful with pointer events, but unnecessary
           when each row can report its index directly.
         </p>
 
@@ -357,11 +357,11 @@ function onDragEnd() {
 
         <h3>3. Auto-scroll to reach targets outside the window</h3>
         <p>
-          Dragging to a row far below (or above) the viewport cannot work by waiting for the pointer to cross it — the target is
+          Dragging to a row far below (or above) the viewport cannot work by waiting for the pointer to cross it - the target is
           not mounted. Drive the scroll yourself while the pointer sits in an edge zone of the container: repeatedly call the
           instance's programmatic scroll (reading the current offset from <code>scrollDetails.scrollOffset</code> and nudging it
           with <code>scrollToOffset</code>), which mounts the intermediate rows under the cursor until the desired index appears.
-          Virtualization means you never manipulate a wrapper's <code>scrollTop</code> — always go through the exposed scroll
+          Virtualization means you never manipulate a wrapper's <code>scrollTop</code> - always go through the exposed scroll
           methods so the engine keeps its internal state consistent.
         </p>
 
@@ -404,7 +404,7 @@ function stopAutoScroll() {
           leaving the window), also reset both refs and stop any auto-scroll in <code>dragend</code>. Add lightweight feedback
           from the same state: dim the carried row (<code>draggedIndex</code>) and show an insertion marker on the target row
           (<code>dropTargetIndex</code>). If your rows are all the same height, sizing them arithmetically with a numeric
-          <code>item-size</code> makes offsets deterministic and the offset-based drop-zone alternative exact — but drag reorder
+          <code>item-size</code> makes offsets deterministic and the offset-based drop-zone alternative exact - but drag reorder
           itself is agnostic to measured vs. fixed rows.
         </p>
 

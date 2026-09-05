@@ -132,7 +132,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          This pattern combines two independent mechanisms. First, the list is not scrolled by its own host — the browser window
+          This pattern combines two independent mechanisms. First, the list is not scrolled by its own host - the browser window
           is the scroller, which the <code>container</code> prop declares. Second, rows have <em>variable</em> heights, so
           <code>item-size</code> is left unset and each rendered row's height is measured with a <code>ResizeObserver</code>
           rather than computed. Understand them separately and the combination is straightforward; conflating them is the usual
@@ -143,7 +143,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           <code>container</code> defaults to the component's own host, which gives a self-contained internal scroller. To make
           the page itself scroll instead, pass the <code>window</code> (or <code>body</code>) element. Because
-          <code>window</code> exists only on the client, hold it in a ref assigned in <code>onMounted</code> — that is also
+          <code>window</code> exists only on the client, hold it in a ref assigned in <code>onMounted</code> - that is also
           SSR-safe. Do not cap the list height: the host grows with the full virtual content so the document becomes tall enough
           for the window to scroll, and the header/footer slots scroll past as ordinary in-flow content.
         </p>
@@ -169,7 +169,7 @@ import { onMounted, ref } from 'vue';
 
 const scrollContainer = ref&lt;Window | null>(null);
 onMounted(() => {
-  scrollContainer.value = window; // client only — SSR-safe
+  scrollContainer.value = window; // client only - SSR-safe
 });
 
 const items = Array.from({ length: 1000 }, (_, i) => ({

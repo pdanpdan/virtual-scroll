@@ -127,7 +127,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           scroll container with a definite height, an <code>items</code> array, and a numeric
           <code>item-size</code>. With a uniform size the engine derives every row position from
           <code>index × item-size</code>, so computing the visible window on each scroll is
-          <em>O(1)</em> and only the window — plus a small overscan buffer — is ever mounted, no matter
+          <em>O(1)</em> and only the window - plus a small overscan buffer - is ever mounted, no matter
           whether the list has 1,000 or millions of rows. Rows may carry real data objects or be pure
           index placeholders; both models are shown below.
         </p>
@@ -137,7 +137,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           <code>&lt;VirtualScroll&gt;</code> renders its own scrollable host element, so your CSS must
           give that box a definite size along the scroll axis: a fixed height, a viewport-relative one
           (e.g. <code>h-dvh</code>), or a flex/grid fill inside a sized parent. If the box is
-          unconstrained it grows with its content and never scrolls — there is no viewport to serve.
+          unconstrained it grows with its content and never scrolls - there is no viewport to serve.
           Inside a flex column parent add <code>min-height: 0</code>: flex items default to
           <code>min-height: auto</code> and refuse to shrink below their content.
         </p>
@@ -145,7 +145,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           class="guide-code-block"
           lang="css"
           line-numbers
-          code="/* The scroll box needs a definite height from your layout — fixed
+          code="/* The scroll box needs a definite height from your layout - fixed
    (480px), viewport-based, or flex fill with min-height: 0. */
 .virtual-list {
   height: 480px;
@@ -154,7 +154,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
         <h3>2. Provide the data: real item objects, or index-only placeholders</h3>
         <p>
-          The common case is a real array of your records — API results, store state, computed values.
+          The common case is a real array of your records - API results, store state, computed values.
           <code>VirtualScroll</code> only needs the array; its length is the row count. The
           <code>#item</code> slot decides what each row renders and receives the payload as
           <code>item</code> together with <code>index</code>.
@@ -167,7 +167,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import '@pdanpdan/virtual-scroll/style.css';
 
-// Real rows — typical case: objects fetched from an API or held in state.
+// Real rows - typical case: objects fetched from an API or held in state.
 // The list reads only the length; the slot decides what to render per row.
 const items = Array.from({ length: 10_000 }, (_, i) => ({
   id: i,
@@ -194,7 +194,7 @@ const items = Array.from({ length: 10_000 }, (_, i) => ({
 &lt;/template>
 
 &lt;style scoped>
-/* The scroll viewport needs a definite height (480px here) — without it the
+/* The scroll viewport needs a definite height (480px here) - without it the
    container cannot scroll and virtualization has no viewport to serve. */
 .virtual-list {
   height: 480px;
@@ -221,8 +221,8 @@ const items = Array.from({ length: 10_000 }, (_, i) => ({
         />
 
         <p>
-          The payload is optional. When a row's content derives entirely from its index — numbered rows,
-          patterns, skeleton placeholders — you can skip the data objects and pass a sparse array of the
+          The payload is optional. When a row's content derives entirely from its index - numbered rows,
+          patterns, skeleton placeholders - you can skip the data objects and pass a sparse array of the
           right length: <code>new Array(count)</code>. The engine accesses only the length and the visible
           window, so holes are never materialized and memory stays flat however long the list is. With a
           sparse array <code>item</code> is <code>undefined</code>, so render from <code>index</code>. Type
@@ -234,7 +234,7 @@ const items = Array.from({ length: 10_000 }, (_, i) => ({
           lang="vue"
           line-numbers
           code="&lt;script setup lang=&quot;ts&quot;>
-// Alternative — index-only rows: nothing is rendered from the payload, so no
+// Alternative - index-only rows: nothing is rendered from the payload, so no
 // objects are needed. A sparse array of the right length costs nothing: the
 // list only accesses the visible window, so memory stays O(1) no matter how
 // long the list is (uniform sizes keep the math purely arithmetic).
@@ -260,16 +260,16 @@ const items = new Array(1_000_000);
         <p>
           <code>item-size</code> is a contract, not a hint: the engine sizes every row wrapper to exactly
           this value and derives total scroll size, range math, and scrollbar geometry from it. Your slot
-          root must therefore fill that box — <code>height: 100%</code> with
+          root must therefore fill that box - <code>height: 100%</code> with
           <code>box-sizing: border-box</code> so borders and padding do not add to the measured size (see
-          <code>.row</code> above). Because omitting <code>item-size</code> switches the axis to measured (dynamic) mode, declare the numeric size whenever your rows really are uniform — and use a value that matches your CSS row height.
-          Uniform sizes are one option — if rows vary you would pass a size function or repeating pattern
+          <code>.row</code> above). Because omitting <code>item-size</code> switches the axis to measured (dynamic) mode, declare the numeric size whenever your rows really are uniform - and use a value that matches your CSS row height.
+          Uniform sizes are one option - if rows vary you would pass a size function or repeating pattern
           array instead, or <code>0</code>/<code>null</code> to measure dynamically (covered by the dynamic
           example pages).
         </p>
         <p>
           The boolean <code>virtual-scrollbar</code> draws the built-in overlay bars instead of the native ones; besides
-          consistent cross-browser styling it is a performance improvement — the bars are driven by the engine's own
+          consistent cross-browser styling it is a performance improvement - the bars are driven by the engine's own
           scroll math, so their rendering cost stays flat no matter how long the list grows. It is also turned on
           automatically once content exceeds the browser's ~10M px limit.
         </p>
@@ -277,7 +277,7 @@ const items = new Array(1_000_000);
         <p>
           <code>buffer-before</code> / <code>buffer-after</code> (default <code>5</code>) keep extra rows
           mounted past each edge of the viewport so fast scrolling or inertia never flashes empty space
-          while new rows mount. They count rows, not pixels — raise them when rows are expensive to render
+          while new rows mount. They count rows, not pixels - raise them when rows are expensive to render
           (images, complex layouts) and keep them low otherwise, because every buffered row is real DOM.
         </p>
       </ImplementationGuide>

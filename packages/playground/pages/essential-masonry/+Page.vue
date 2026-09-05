@@ -89,7 +89,7 @@ watch(count, (value) => {
 
 /**
  * Canonical oracle: pure function of the item model and the resolved column
- * width — the same (index, width) always yields the same height, so every
+ * width - the same (index, width) always yields the same height, so every
  * layout is reproducible and far jumps need no DOM measurement. It slightly
  * over-estimates the base content so measured mode has room to correct.
  */
@@ -121,7 +121,7 @@ function handleScroll(details: MasonryScrollDetails<MasonryItem>) {
  * Measured-mode showcase: while the toggle is on, note rows are added to a
  * couple of visible cards every tick. The cards grow in the DOM, the
  * ResizeObserver measurements drive the layout, and every re-layout keeps
- * the topmost visible card pinned — canonical mode cannot track content it
+ * the topmost visible card pinned - canonical mode cannot track content it
  * never measures.
  */
 const extraLines = ref(new Map<number, number>());
@@ -182,7 +182,7 @@ function handleJump() {
 
     <template #description>
       Real masonry in a single scroll container: responsive columns derived from the container width and a bounded
-      DOM window no matter the dataset size. Card heights come from a deterministic oracle (canonical layout) — or
+      DOM window no matter the dataset size. Card heights come from a deterministic oracle (canonical layout) - or
       flip <em>Measure card heights</em> on: mounted cards are measured and every few ticks two visible cards grow
       a note row, so you can watch the measured layout track the real DOM with the viewport pinned.
     </template>
@@ -320,7 +320,7 @@ function handleJump() {
         <p>
           Real masonry in a single scroll container: the component derives a responsive column count from its own
           measured width, places every card greedily on the shortest column, and mounts only the cards around the
-          scroll position — the DOM stays bounded regardless of dataset size. Card heights come from a
+          scroll position - the DOM stays bounded regardless of dataset size. Card heights come from a
           <em>canonical oracle</em>: a deterministic function of <code>(item, index, columnWidth)</code> that prices
           every card without touching the DOM, so layouts are reproducible, far jumps land exactly, and the total
           height is known once the layout chain reaches the end. When content must size itself (wrapped text, media),
@@ -331,7 +331,7 @@ function handleJump() {
         <p>
           <code>VirtualScrollMasonry</code> renders its own host: it fills the width and height you give it and scrolls
           vertically (<code>overflow-y</code>; there is no horizontal axis, so never lay cards out side by side
-          yourself). Give it a definite height — an explicit value or a flex/grid slot with <code>min-height: 0</code> —
+          yourself). Give it a definite height - an explicit value or a flex/grid slot with <code>min-height: 0</code> -
           and a width that can change: the container is observed and the column layout reflows responsively on
           resize. Masonry runs at scale 1 with no coordinate scaling, so keep the total content height under the
           browser's ~10M px scroll limit.
@@ -341,7 +341,7 @@ function handleJump() {
         <p>
           <code>items</code> is an array of one object per card. The required <code>item-height</code> prop is an
           oracle: a function <code>(item, index, columnWidth) =&gt; px</code> that returns the rendered height of a
-          card at the resolved column width. It must be deterministic — the same <code>(index, columnWidth)</code> must
+          card at the resolved column width. It must be deterministic - the same <code>(index, columnWidth)</code> must
           always produce the same height, because placements are committed to a layout chain and replayed from stored
           snapshots. Derive it from model fields (a line count, an aspect ratio, a stored height); never read the DOM
           or use <code>Math.random()</code>. Non-finite results fall back to <code>40</code> and non-positive values
@@ -395,7 +395,7 @@ function itemHeight(card: Card | undefined, _index: number, width: number): numb
         <h3>4. Render the windowed cards</h3>
         <p>
           The <code>#item</code> slot provides <code>{ item, index, column, x, y, width, height }</code>. The engine
-          absolutely places each card at <code>(x, y)</code> with the column width and the oracle height — cards are
+          absolutely places each card at <code>(x, y)</code> with the column width and the oracle height - cards are
           mounted only around the viewport (with overscan), so slot content must be self-contained and derived purely
           from the model. In canonical mode the wrapper is exactly oracle-height: make the card fill it and guarantee
           its content never exceeds that height (reserve media space with <code>aspect-ratio</code> or keep the content

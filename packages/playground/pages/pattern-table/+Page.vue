@@ -153,7 +153,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A data table with thousands of rows is still a table: column headers, row semantics, and CSS table styling matter as much as scroll performance. <code>VirtualScrollTable</code> virtualizes the <em>rows</em> — the same windowing math <code>VirtualScroll</code> applies to list items — while keeping the document a genuine <code>&lt;table&gt;</code>. The scrollable element is the <code>&lt;table&gt;</code> itself; your header lives in a real <code>&lt;thead&gt;</code>, every item becomes its own <code>&lt;tr&gt;</code> inside the <code>&lt;tbody&gt;</code>, and an invisible spacer row holds the total scroll height. Because only the visible window of rows is ever mounted, the browser can no longer derive column widths from the whole dataset — pinning them is the second half of the work.
+          A data table with thousands of rows is still a table: column headers, row semantics, and CSS table styling matter as much as scroll performance. <code>VirtualScrollTable</code> virtualizes the <em>rows</em> - the same windowing math <code>VirtualScroll</code> applies to list items - while keeping the document a genuine <code>&lt;table&gt;</code>. The scrollable element is the <code>&lt;table&gt;</code> itself; your header lives in a real <code>&lt;thead&gt;</code>, every item becomes its own <code>&lt;tr&gt;</code> inside the <code>&lt;tbody&gt;</code>, and an invisible spacer row holds the total scroll height. Because only the visible window of rows is ever mounted, the browser can no longer derive column widths from the whole dataset - pinning them is the second half of the work.
         </p>
 
         <h3>1. Shape the slots like a real table</h3>
@@ -161,12 +161,12 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           <code>VirtualScrollTable</code> renders the table structure; you supply the parts that carry your markup and data:
         </p>
         <ul>
-          <li><code>#header</code> — a single <code>&lt;tr&gt;</code> of <code>&lt;th&gt;</code> cells; the component places it inside its <code>&lt;thead&gt;</code>.</li>
-          <li><code>#item</code> — the cells of one row (<code>&lt;td&gt;</code>s) <em>without</em> a wrapping <code>&lt;tr&gt;</code>; the component emits one <code>&lt;tr&gt;</code> per item and provides <code>{ item, index }</code>.</li>
-          <li><code>#footer</code> — an optional <code>&lt;tr&gt;</code> placed in <code>&lt;tfoot&gt;</code>; a summary row spans every column with <code>colspan</code>.</li>
+          <li><code>#header</code> - a single <code>&lt;tr&gt;</code> of <code>&lt;th&gt;</code> cells; the component places it inside its <code>&lt;thead&gt;</code>.</li>
+          <li><code>#item</code> - the cells of one row (<code>&lt;td&gt;</code>s) <em>without</em> a wrapping <code>&lt;tr&gt;</code>; the component emits one <code>&lt;tr&gt;</code> per item and provides <code>{ item, index }</code>.</li>
+          <li><code>#footer</code> - an optional <code>&lt;tr&gt;</code> placed in <code>&lt;tfoot&gt;</code>; a summary row spans every column with <code>colspan</code>.</li>
         </ul>
         <p>
-          Class and <code>aria-label</code> pass through to the root <code>&lt;table&gt;</code>, so borders, striping, and captions are ordinary table CSS. That same element is the scroll container, so — like any virtualized list — it needs a definite height (a fixed <code>height</code>, viewport units, or <code>flex-1 min-h-0</code> inside a flex column) before it can scroll.
+          Class and <code>aria-label</code> pass through to the root <code>&lt;table&gt;</code>, so borders, striping, and captions are ordinary table CSS. That same element is the scroll container, so - like any virtualized list - it needs a definite height (a fixed <code>height</code>, viewport units, or <code>flex-1 min-h-0</code> inside a flex column) before it can scroll.
         </p>
 
         <CodeBlock
@@ -234,7 +234,7 @@ const rows = ref(
 
         <h3>3. Pin the column layout</h3>
         <p>
-          Table layout is driven by the cells present in the DOM — the header plus whatever rows are currently mounted. As the window moves, different cell content would renegotiate column widths and the table would shift under the cursor; content in unmounted rows never contributes at all. Give every column the same explicit width on the header <code>&lt;th&gt;</code> and the body <code>&lt;td&gt;</code>, either with matching width classes or with <code>nth-child</code> rules as below. Each virtualized row <code>&lt;tr&gt;</code> also carries the library class <code>.virtual-scroll-item</code> (the leading spacer row does not), which gives row-pattern selectors a stable hook for striping.
+          Table layout is driven by the cells present in the DOM - the header plus whatever rows are currently mounted. As the window moves, different cell content would renegotiate column widths and the table would shift under the cursor; content in unmounted rows never contributes at all. Give every column the same explicit width on the header <code>&lt;th&gt;</code> and the body <code>&lt;td&gt;</code>, either with matching width classes or with <code>nth-child</code> rules as below. Each virtualized row <code>&lt;tr&gt;</code> also carries the library class <code>.virtual-scroll-item</code> (the leading spacer row does not), which gives row-pattern selectors a stable hook for striping.
         </p>
 
         <CodeBlock
@@ -279,7 +279,7 @@ const rows = ref(
         />
 
         <p>
-          When column widths or row heights should follow content instead of CSS, set <code>flow-table</code>: rows stay in real table flow (invisible spacer rows keep the virtual offsets) and the browser sizes rows and columns itself. In that mode two strategies replace hand-pinned widths — <code>auto-size-columns</code> measures the first mounted window and pins it as a <code>&lt;colgroup&gt;</code> with <code>table-layout: fixed</code>, and <code>column-widths</code> pins an explicit pixel array. Both require every row to expose the same number of direct cells. Note the root element is then a plain scroll container wrapping the real table, so size that container; wide pinned tables scroll horizontally on their own axis, because only the vertical axis is virtualized.
+          When column widths or row heights should follow content instead of CSS, set <code>flow-table</code>: rows stay in real table flow (invisible spacer rows keep the virtual offsets) and the browser sizes rows and columns itself. In that mode two strategies replace hand-pinned widths - <code>auto-size-columns</code> measures the first mounted window and pins it as a <code>&lt;colgroup&gt;</code> with <code>table-layout: fixed</code>, and <code>column-widths</code> pins an explicit pixel array. Both require every row to expose the same number of direct cells. Note the root element is then a plain scroll container wrapping the real table, so size that container; wide pinned tables scroll horizontally on their own axis, because only the vertical axis is virtualized.
         </p>
 
         <CodeBlock

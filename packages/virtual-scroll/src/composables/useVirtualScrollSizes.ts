@@ -35,7 +35,7 @@ const isFixedNumber = (value: unknown): value is number => typeof value === 'num
  * Storage is allocated per axis only when that axis can hold non-uniform sizes
  * (dynamic ResizeObserver measurement or array/function size props) and the
  * direction actually uses the axis. A uniform numeric size never allocates a
- * tree — the engine resolves those positions with arithmetic. Re-initialization
+ * tree - the engine resolves those positions with arithmetic. Re-initialization
  * passes only fill the regions not covered by the previous pass (`processedTo*`
  * watermarks), so growing or appending to very large lists stays O(k log n) and
  * never walks the whole dataset again.

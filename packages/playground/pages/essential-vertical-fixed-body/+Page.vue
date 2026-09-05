@@ -127,7 +127,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       <ImplementationGuide>
         <p>
           Usually <code>&lt;VirtualScroll&gt;</code> renders its own scrollable host and virtualizes inside it. Sometimes you
-          want the list to live directly in the page so that the browser window itself scrolls — items pass under your normal
+          want the list to live directly in the page so that the browser window itself scrolls - items pass under your normal
           page chrome, with headers and footers scrolling past naturally. The mechanism that enables this is the
           <code>container</code> prop: it tells the engine which element actually scrolls, and it may be another
           <code>HTMLElement</code> or the browser <code>window</code>/<code>body</code>. The rows are still virtualized (only the
@@ -138,14 +138,14 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           <code>container</code> defaults to the component's own host element, which gives you a self-contained, internal
           scroller. Pass a different element or the <code>window</code>/<code>body</code> to virtualize against whatever actually
-          scrolls — handy when the list must flow with the page rather than sit in a fixed-height box. Because the scroller is
+          scrolls - handy when the list must flow with the page rather than sit in a fixed-height box. Because the scroller is
           now outside the component, the component must be told about it explicitly; this is a case where the library's default
           ("the host scrolls") is not what you want.
         </p>
 
         <h3>2. Wire the window client-side and let the host grow</h3>
         <p>
-          <code>window</code> only exists on the client, so hold it in a ref and assign it in <code>onMounted</code> — this keeps
+          <code>window</code> only exists on the client, so hold it in a ref and assign it in <code>onMounted</code> - this keeps
           server-side rendering safe. Then, unlike the element-scroller demos, do <em>not</em> cap the list's height: the host
           must grow with the full virtual content so the document becomes tall enough for the window to scroll. The
           <code>#header</code> / <code>#footer</code> slots are ordinary in-flow content that scrolls past rather than sticking.
@@ -160,7 +160,7 @@ import { VirtualScroll } from '@pdanpdan/virtual-scroll';
 import '@pdanpdan/virtual-scroll/style.css';
 import { onMounted, ref } from 'vue';
 
-// `window` exists only on the client — assign after mount (SSR-safe).
+// `window` exists only on the client - assign after mount (SSR-safe).
 const scrollContainer = ref&lt;Window | null>(null);
 onMounted(() => {
   scrollContainer.value = window;
@@ -214,7 +214,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
 &lt;/style>"
         />
 
-        <h3>3. Uniform rows are O(1) — and may be index-only</h3>
+        <h3>3. Uniform rows are O(1) - and may be index-only</h3>
         <p>
           With a numeric <code>item-size</code> the engine places rows arithmetically and never reads payloads outside the
           rendered window, so uniform lists can equally be data-less: a sparse <code>new Array(count)</code> works and you render
@@ -227,7 +227,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
         <p>
           Two conveniences drop away when the browser itself scrolls: the virtual scrollbar is disabled for a
           <code>window</code>/<code>body</code> container and coordinate scaling for the <code>window</code>, so native
-          scrolling is used. The practical consequence is a size ceiling — content must stay under the browser's ~10M px DOM
+          scrolling is used. The practical consequence is a size ceiling - content must stay under the browser's ~10M px DOM
           scroll limit, because nothing rescales it. Reserve element-scroller mode (where scaling and the themed scrollbar are
           available) for lists large enough to need them. The buffers still overscan rows and the virtualization logic is
           otherwise identical.

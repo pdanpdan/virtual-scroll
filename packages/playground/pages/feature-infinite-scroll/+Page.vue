@@ -65,7 +65,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
     </template>
 
     <template #description>
-      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. Currently showing {{ items.length.toLocaleString() }} items. When you reach the end of the list, more items are automatically fetched and appended. The demo source is capped at {{ TOTAL_LIMIT.toLocaleString() }} items — the loading slot only appears while auto-loading is on and there is still data to fetch.
+      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. Currently showing {{ items.length.toLocaleString() }} items. When you reach the end of the list, more items are automatically fetched and appended. The demo source is capped at {{ TOTAL_LIMIT.toLocaleString() }} items - the loading slot only appears while auto-loading is on and there is still data to fetch.
     </template>
 
     <template #icon>
@@ -142,7 +142,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
           emits <code>load</code> with the axis that crossed the threshold. Your handler fetches and appends rows, and the
           <code>loading</code> prop reveals the <code>#loading</code> slot <em>and</em> suppresses repeated <code>load</code>
           events while a request is in flight. The main thing to design around: an "endless" feed is still a finite source, so
-          it must be able to signal that no more data exists — otherwise the reserved loading slot would keep showing forever.
+          it must be able to signal that no more data exists - otherwise the reserved loading slot would keep showing forever.
         </p>
 
         <h3>1. Constrain the scroll box and model a source that can end</h3>
@@ -159,7 +159,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
           <code>load-distance</code> to a lead-in of at least one viewport, measured in display pixels (the default is
           <code>200</code>; <code>300</code> suits a ~600px viewport). Two re-entrancy guards matter: set <code>loading</code>
           <code>true</code> for
-          the whole fetch (the engine then suppresses further <code>load</code> events), and also check <code>hasMore</code> —
+          the whole fetch (the engine then suppresses further <code>load</code> events), and also check <code>hasMore</code> -
           because the event can fire again immediately after an append when you are still inside <code>loadDistance</code> of the
           <em>new</em> end. Prefer reassigning <code>items.value = [...items, ...chunk]</code> over mutating in place, and always
           reset <code>loading</code> in a <code>finally</code> so an error does not leave the spinner stuck.
@@ -251,7 +251,7 @@ async function loadMore(direction: 'vertical' | 'horizontal') {
         <p>
           The <code>#loading</code> slot is <em>always rendered</em> once you provide it: while <code>loading</code> is false it
           is kept mounted and hidden with <code>visibility: hidden</code> (class <code>virtual-scroll-loading--hidden</code>), so
-          it still reserves its height below the items — which is also why the <code>End</code> key can include its size in the
+          it still reserves its height below the items - which is also why the <code>End</code> key can include its size in the
           scroll target. Because it always reserves space, stop providing it once there is no more data: put your own condition on
           the slot (e.g. <code>v-if="autoLoadEnabled &amp;&amp; hasMore"</code> on <code>&lt;template #loading&gt;</code>) so that
           disabling auto-loading or exhausting the source makes the reserved space disappear instead of leaving a permanent empty

@@ -136,13 +136,13 @@ const {
       <ImplementationGuide>
         <p>
           Virtualizing an image grid runs into one obstacle: a photo's rendered height is unknown until it loads and differs
-          from image to image. The clean way around it is structural rather than measured — decide up front what the engine
+          from image to image. The clean way around it is structural rather than measured - decide up front what the engine
           treats as an <em>item</em>, and give every item a geometry that does not depend on the network. In practice that means
           making one virtualization item a whole grid <em>row</em> of photos (so only a single vertical axis scrolls and a row
           mounts atomically), and forcing each cell to a fixed <code>aspect-ratio</code> box that an <code>object-fit: cover</code>
           image crops to fill. Row height then equals cell width and is identical for every row, so nothing shifts when an image
           lands. With that in place you choose the sizing model: rows can be measured automatically with
-          <code>ResizeObserver</code>, or — when the container width is known — sized arithmetically with a numeric
+          <code>ResizeObserver</code>, or - when the container width is known - sized arithmetically with a numeric
           <code>item-size</code>.
         </p>
 
@@ -154,7 +154,7 @@ const {
           grid. Choose this when your grid has a fixed column count and uniform rows. If you truly need images flowing across
           both axes independently, the library offers a bidirectional <code>direction=&quot;both&quot;</code> grid with
           <code>column-count</code>/<code>column-width</code>, or the dedicated <code>VirtualScrollMasonry</code> component for a
-          real unequal-height masonry layout — reserve hand-rolled cell math for cases neither covers.
+          real unequal-height masonry layout - reserve hand-rolled cell math for cases neither covers.
         </p>
 
         <CodeBlock
@@ -190,7 +190,7 @@ const rows = computed(() => {
           ratio works) with <code>overflow: hidden</code> and a neutral background that doubles as the loading placeholder, then
           fill it with <code>width/height: 100%</code> and <code>object-fit: cover</code> so any source aspect ratio is cropped to
           the box. Because every grid column is an equal <code>1fr</code>, all cells in a row share one width and every row is
-          exactly as tall as a cell — the block size is uniform across the grid and no photo can shift its neighbours, whether it
+          exactly as tall as a cell - the block size is uniform across the grid and no photo can shift its neighbours, whether it
           is loading, loaded, or scrolled back in from the browser's image cache. Inter-row spacing belongs to the library's
           <code>:gap</code> prop (part of its scroll math, default <code>0</code>); the column gap inside a row is ordinary CSS
           (<code>column-gap</code>) on the grid.
@@ -208,7 +208,7 @@ const rows = computed(() => {
   column-gap: 1rem; /* horizontal spacing is plain CSS */
 }
 .cell {
-  aspect-ratio: 1; /* square box reserved per cell — no layout shift */
+  aspect-ratio: 1; /* square box reserved per cell - no layout shift */
   border-radius: 0.5rem;
   overflow: hidden;
   background: #ececec; /* loading placeholder behind the image */
@@ -224,11 +224,11 @@ const rows = computed(() => {
         <h3>3. Size the rows: measured, or arithmetic</h3>
         <p>
           With every row the same height you have two valid sizing routes. Leave <code>item-size</code> unset (or set it to
-          <code>0</code>/<code>null</code>) and each mounted row is measured with <code>ResizeObserver</code> — robust when the
+          <code>0</code>/<code>null</code>) and each mounted row is measured with <code>ResizeObserver</code> - robust when the
           container is responsive or the column count can change at runtime, because a re-measured row re-flows only its local
           range. Alternatively, if the container width is known and stable, derive the row height yourself (cell width = grid
           width ÷ columns, which equals row height for <code>aspect-ratio: 1</code>) and pass it as a numeric
-          <code>item-size</code> for <em>O(1)</em> arithmetic sizing — with the caveat that you must keep that number in sync
+          <code>item-size</code> for <em>O(1)</em> arithmetic sizing - with the caveat that you must keep that number in sync
           (recompute on resize or column changes). The <code>#item</code> slot receives the row array; bind the grid's columns
           inline and iterate the row's photos into cells.
         </p>

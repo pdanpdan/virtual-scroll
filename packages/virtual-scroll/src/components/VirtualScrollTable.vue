@@ -1549,7 +1549,7 @@ defineExpose({
     display: table-footer-group;
   }
   /* Rows and cells come from user slot content (outside the scope), so they
-     are reached with :deep() — the rules stay in this scoped block. */
+     are reached with :deep() - the rules stay in this scoped block. */
   .virtual-scroll--flow :deep(.virtual-scroll-wrapper > tr.virtual-scroll-item > td),
   .virtual-scroll--flow :deep(.virtual-scroll-wrapper > tr.virtual-scroll-item > th) {
     display: table-cell;

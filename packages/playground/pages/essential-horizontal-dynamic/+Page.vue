@@ -116,7 +116,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       <ImplementationGuide>
         <p>
           To virtualize a horizontal list whose items differ in width, the engine cannot place items arithmetically the way it
-          does with uniform sizes — each item's offset depends on the widths of everything before it. Dynamic mode solves this
+          does with uniform sizes - each item's offset depends on the widths of everything before it. Dynamic mode solves this
           by <em>measuring</em> each rendered cell with a <code>ResizeObserver</code> so totals follow the measured sizes. The cost is real but bounded: layout starts from an estimate that is corrected as cells
           mount, and totals only become exact once the relevant range has been measured. This page shows how to choose that mode
           deliberately rather than by accident.
@@ -125,12 +125,12 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <h3>1. Choose the size strategy that matches your data</h3>
         <p>
           <code>item-size</code> accepts four forms, each trading speed against flexibility. A positive <code>number</code>
-          means uniform sizes and pure O(1) arithmetic — the fastest, but only valid when every item really is that size. An
+          means uniform sizes and pure O(1) arithmetic - the fastest, but only valid when every item really is that size. An
           <code>array</code> describes a repeating width pattern (e.g. <code>[150, 300]</code>), and a function
           <code>(item, index) =&gt; number</code> expresses a width known up front that varies per item; both let the engine
-          lay out far-off items from the declared pattern or function without mounting them — avoiding dynamic measurement, at
+          lay out far-off items from the declared pattern or function without mounting them - avoiding dynamic measurement, at
           the cost of per-item storage rather than a uniform number's O(1). Pass <code>0</code>, <code>null</code>, or
-          <code>undefined</code> — or omit the prop entirely — to switch to <strong>dynamic</strong> mode, where sizes are
+          <code>undefined</code> - or omit the prop entirely - to switch to <strong>dynamic</strong> mode, where sizes are
           measured from the DOM. Use dynamic only when widths are genuinely content-driven and unknowable until rendered
           (wrapping text, media, responsive cells); if you can compute them, an array or function skips the measuring cost.
         </p>
@@ -178,7 +178,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
     &lt;template #item=&quot;{ item }&quot;>
       &amp;lt;!-- Omit item-size → ResizeObserver reports this box's inline size. -->
       &lt;div class=&quot;card&quot; :style=&quot;{ inlineSize: `${ item.width }px` }&quot;>
-        #{{ item.id }} — {{ item.width }}px
+        #{{ item.id }} - {{ item.width }}px
       &lt;/div>
     &lt;/template>
   &lt;/VirtualScroll>

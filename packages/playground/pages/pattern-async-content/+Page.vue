@@ -44,7 +44,7 @@ function clearCache() {
 }
 
 const items = computed(() => new Array(itemCount.value));
-const latencyLabel = computed(() => `${ latency.value.min }–${ latency.value.max } ms`);
+const latencyLabel = computed(() => `${ latency.value.min }-${ latency.value.max } ms`);
 
 const {
   virtualScrollRef,
@@ -103,7 +103,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <label class="flex items-center gap-2 text-xs">
           <span class="small-caps font-bold tracking-widest opacity-60">Network</span>
           <select v-model="latency" class="select select-sm">
-            <option v-for="option in LATENCY_OPTIONS" :key="option.label" :value="option">{{ option.label }} ({{ option.min }}–{{ option.max }} ms)</option>
+            <option v-for="option in LATENCY_OPTIONS" :key="option.label" :value="option">{{ option.label }} ({{ option.min }}-{{ option.max }} ms)</option>
           </select>
         </label>
 
@@ -135,8 +135,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          Rows whose content is fetched asynchronously — an API call per row that resolves to text of a different length each
-          time — combine two concerns: <em>when</em> a row fetches (only rows in the window should, since only they are mounted)
+          Rows whose content is fetched asynchronously - an API call per row that resolves to text of a different length each
+          time - combine two concerns: <em>when</em> a row fetches (only rows in the window should, since only they are mounted)
           and <em>how</em> the engine knows a row's height before and after its content arrives. Virtualization makes the data
           model the anchor: keep the list as index-only items (<code>new Array(n)</code>) and let each visible row mount a small
           child component that fetches its own content, keyed by <code>id</code>. Sizes are dynamic: the row renders a
@@ -149,8 +149,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           When the payloads come from per-row requests you do not have the data up front, so the main (index-only) list is the
           fit: <code>items</code> only supplies a length, the slot provides <code>index</code>, and each mounted row renders a
-          child component with that index. Fetching therefore happens only for rows that actually mount — never for the other
-          ~99,990 — which is exactly the cost profile virtualization is meant to deliver. This is the index-only variant of the
+          child component with that index. Fetching therefore happens only for rows that actually mount - never for the other
+          ~99,990 - which is exactly the cost profile virtualization is meant to deliver. This is the index-only variant of the
           library's data-less rows: if you already hold full objects you would pass them and render from <code>item</code>
           instead; index-only rows defer all data work to the visible window and scale to very large counts.
         </p>
@@ -189,7 +189,7 @@ const items = computed(() => new Array(itemCount));
         <h3>2. Fetch in the row, but guard against unmounting</h3>
         <p>
           The row component fetches when its <code>id</code> changes (<code>watch</code> + <code>immediate</code>): it nulls the
-          post to show the skeleton again, awaits the load, and stores the result. The critical detail is lifecycle safety — a
+          post to show the skeleton again, awaits the load, and stores the result. The critical detail is lifecycle safety - a
           row can scroll out of the window (and be unmounted) while its request is in flight. Keep an <code>alive</code> flag set
           false in <code>onUnmounted</code> and only assign the resolved post when it is still true, so a recycled row never
           receives a stale write. Rendering the skeleton (<code>v-if=&quot;post&quot;</code> / <code>v-else</code>) gives the row
@@ -244,7 +244,7 @@ onUnmounted(() => {
 
         <h3>3. Cache and dedupe outside the rows</h3>
         <p>
-          Virtualization mounts a row when it enters the window and unmounts it when it leaves — so a naive component-level
+          Virtualization mounts a row when it enters the window and unmounts it when it leaves - so a naive component-level
           cache is wiped every time the row scrolls away, and coming back would refetch. Keep the store at module scope, shared
           by every mount: a resolved <code>Map</code> makes a revisit resolve from memory (instant), and a second map of in-flight
           promises dedupes concurrent mounts of the same id (two overscanned rows requesting once). Because rows recycle, all
@@ -288,7 +288,7 @@ export function loadPost(id: number): Promise&lt;Post> {
 }"
         />
 
-        <h3>4. Let heights be measured — skeleton first, then the real row</h3>
+        <h3>4. Let heights be measured - skeleton first, then the real row</h3>
         <p>
           Each row's final height is unknown until its content renders, so leave <code>item-size</code> unset (or pass
           <code>0</code>/<code>null</code>) to select dynamic mode: the engine measures every mounted row with
@@ -296,7 +296,7 @@ export function loadPost(id: number): Promise&lt;Post> {
           content it precedes (a <code>min-height</code> close to the expected row, matching avatar/title/excerpt blocks) so the
           first frame and the initial scroll estimate are sane and the measured correction is small; you can also provide a
           <code>default-item-size</code> estimate for the engine until the first measurements land. Because the fetch is
-          client-only work, render the skeleton during SSR and fetch on the client after mount — never run (or schedule) the
+          client-only work, render the skeleton during SSR and fetch on the client after mount - never run (or schedule) the
           simulated request server-side or server-rendered output becomes nondeterministic. Buffers above the default help
           because a still-loading row keeps a small skeleton height; <code>buffer-before</code>/<code>buffer-after</code> of a
           few rows give the engine time to measure before a row scrolls fully into view.

@@ -89,7 +89,7 @@ const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ 
 
 ## Data-less Lists (Index-only Rows)
 
-Rows can be rendered purely from their `index` without storing any per-row data. Pass a sparse array — only its `length` is used — and derive the content from the slot's `index`:
+Rows can be rendered purely from their `index` without storing any per-row data. Pass a sparse array - only its `length` is used - and derive the content from the slot's `index`:
 
 ```vue
 <script setup>
@@ -112,7 +112,7 @@ Notes:
 
 - `items` entries may be `undefined` (holes): every index in the rendered range produces a row, and the `item` slot prop is `undefined` for holes. Don't read `item` fields in the slot for such datasets.
 - Only indices in the visible window (plus buffer) are ever accessed from the `items` array.
-- Combined with a numeric `itemSize` (arithmetic positioning, no per-row storage), uniform lists scale to 10M+ rows with flat memory — the playground essential examples use this pattern.
+- Combined with a numeric `itemSize` (arithmetic positioning, no per-row storage), uniform lists scale to 10M+ rows with flat memory - the playground essential examples use this pattern.
 - Dynamic (ResizeObserver-measured) sizes work the same way: sizes are measured from the rendered DOM.
 
 ## Technical Overview
@@ -132,7 +132,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 
 ### Performance
 
-- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, allowing for extremely fast calculation of item offsets even in dynamic lists with millions of items. Appends resize the tree incrementally — no full rebuild per batch — and re-initialization only revisits regions that actually changed.
+- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, allowing for extremely fast calculation of item offsets even in dynamic lists with millions of items. Appends resize the tree incrementally - no full rebuild per batch - and re-initialization only revisits regions that actually changed.
 - **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
@@ -153,11 +153,11 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 
 Rows are recycled: they mount as they enter the viewport and unmount when they leave, so content should behave well under recycling:
 
-- **Keep row state in the model, not the DOM** — selection, expansion, and likes belong in your data/store keyed by item id; anything stored in the element vanishes when the row scrolls away.
-- **Make row rendering idempotent** — the `item` slot re-renders on every entry into the window; rendering the same item twice must produce the same result.
-- **Reserve space for media** — explicit `width`/`height` or `aspect-ratio` prevents post-mount row growth (which the engine measures and corrects, but which causes jumps).
-- **Avoid native `loading="lazy"` on images** — the visible window is already the only mounted content; lazy-loading adds browser heuristics on a changing scroll container and can starve on-screen images. Use eager loading or your own bounded, low-priority prefetch window.
-- **Dynamic heights are fine** — late content growth is measured via `ResizeObserver` and the layout self-corrects; stable or reserved sizes just scroll smoother (see the playground docs "Authoring Content for Virtualized Lists").
+- **Keep row state in the model, not the DOM** - selection, expansion, and likes belong in your data/store keyed by item id; anything stored in the element vanishes when the row scrolls away.
+- **Make row rendering idempotent** - the `item` slot re-renders on every entry into the window; rendering the same item twice must produce the same result.
+- **Reserve space for media** - explicit `width`/`height` or `aspect-ratio` prevents post-mount row growth (which the engine measures and corrects, but which causes jumps).
+- **Avoid native `loading="lazy"` on images** - the visible window is already the only mounted content; lazy-loading adds browser heuristics on a changing scroll container and can starve on-screen images. Use eager loading or your own bounded, low-priority prefetch window.
+- **Dynamic heights are fine** - late content growth is measured via `ResizeObserver` and the layout self-corrects; stable or reserved sizes just scroll smoother (see the playground docs "Authoring Content for Virtualized Lists").
 
 
 ## Extensions
@@ -294,7 +294,7 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 
 ### VirtualScrollTable
 
-For tabular data use the dedicated `VirtualScrollTable` component instead: it renders a real `<table>` structure with optional real-table-flow rows (`flowTable`, supporting measured dynamic row heights), sticky header/footer slots, and three column-width strategies — browser auto layout, first-window auto-sizing (`autoSizeColumns`), or explicit `columnWidths`; overflowing tables get a horizontal scrollbar. See the [Flow Table example](https://pdanpdan.github.io/virtual-scroll/essential-flow-table).
+For tabular data use the dedicated `VirtualScrollTable` component instead: it renders a real `<table>` structure with optional real-table-flow rows (`flowTable`, supporting measured dynamic row heights), sticky header/footer slots, and three column-width strategies - browser auto layout, first-window auto-sizing (`autoSizeColumns`), or explicit `columnWidths`; overflowing tables get a horizontal scrollbar. See the [Flow Table example](https://pdanpdan.github.io/virtual-scroll/essential-flow-table).
 
 ### VirtualScrollMasonry
 
@@ -339,7 +339,7 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 - **Events**: `scroll` with `MasonryScrollDetails` (items, `currentIndex`/`currentEndIndex`, `range`, `scrollOffset.y`, `viewportSize`, `totalSize`, `isScrolling`, …).
 - **Exposed (via ref)**: `scrollDetails`, `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })`, `scrollToOffset(offset)`, `refresh()`.
 
-> **Masonry sizing contract**: in the default canonical mode cards must render at exactly the oracle height — reserve media space (`aspect-ratio`, fixed model heights, …) and never rely on DOM measurement. With `measuredHeights` cards size to their content instead and the measured box drives the layout (mounted cards only; unmounted regions fall back to the oracle, and measurements reset when the `items` array is replaced). In-place item edits or oracle changes need a `refresh()` (or a new `items` array) to re-layout; relayouts keep the topmost visible card pinned at its screen offset. Vertical axis only: no RTL/horizontal/both mode and no coordinate scaling — very tall datasets stay below the browser's ~10M px scroll limit.
+> **Masonry sizing contract**: in the default canonical mode cards must render at exactly the oracle height - reserve media space (`aspect-ratio`, fixed model heights, …) and never rely on DOM measurement. With `measuredHeights` cards size to their content instead and the measured box drives the layout (mounted cards only; unmounted regions fall back to the oracle, and measurements reset when the `items` array is replaced). In-place item edits or oracle changes need a `refresh()` (or a new `items` array) to re-layout; relayouts keep the topmost visible card pinned at its screen offset. Vertical axis only: no RTL/horizontal/both mode and no coordinate scaling - very tall datasets stay below the browser's ~10M px scroll limit.
 
 ### Props
 
@@ -361,7 +361,7 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 | `loadDistance` | `number` | `200` | Distance from the end (DU) at which the `load` event triggers. |
 | `container` | `HTMLElement \| Window` | `hostRef` | The scrollable container element. |
 | `containerTag` | `string` | `'div'` | HTML tag for the root container. |
-| `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper — pair `'ul'`/`'ol'` with `itemTag: 'li'` for semantic lists. |
+| `wrapperTag` | `string` | `'div'` | HTML tag for the items wrapper - pair `'ul'`/`'ol'` with `itemTag: 'li'` for semantic lists. |
 | `itemTag` | `string` | `'div'` | HTML tag for each virtualized item. For tabular data use `VirtualScrollTable` instead. |
 | `headerTag` | `string` | `'div'` | HTML tag for the `header` slot wrapper (e.g. `'header'`). |
 | `footerTag` | `string` | `'div'` | HTML tag for the `footer` slot wrapper (e.g. `'footer'`). |
@@ -408,7 +408,7 @@ Allows axis-specific alignment in `scrollToIndex`.
 
 - `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets), `index`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
-- `loading`: Content rendered at the end while loading. The slot is always rendered when provided — it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false — so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is actually expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
+- `loading`: Content rendered at the end while loading. The slot is always rendered when provided - it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false - so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is actually expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
 - `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.
     - `axis`: `'vertical' | 'horizontal'`
     - `positionPercent`: current position (0-1).

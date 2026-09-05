@@ -136,18 +136,18 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           offset depends on the heights of all the rows before it. Dynamic mode solves this by <em>measuring</em> each rendered
           row with a <code>ResizeObserver</code> so exact
           offsets and the total scroll height emerge from measured sizes rather than a formula. The real cost is that dynamic
-          lists are heavier than uniform ones — they start from an estimate that corrects itself as rows mount, and only mounted
+          lists are heavier than uniform ones - they start from an estimate that corrects itself as rows mount, and only mounted
           rows can be measured.
         </p>
 
         <h3>1. Choose the size strategy that matches your data</h3>
         <p>
-          <code>item-size</code> accepts four forms. A positive <code>number</code> means uniform heights and O(1) arithmetic —
+          <code>item-size</code> accepts four forms. A positive <code>number</code> means uniform heights and O(1) arithmetic -
           fastest, but only valid when every row really is that tall. An <code>array</code> describes a repeating pattern
           (e.g. <code>[50, 100]</code>) and a function <code>(item, index) =&gt; number</code> a height known up front that
           varies per row; both let the engine lay out far-off rows from the declared pattern or function without mounting them
-          — avoiding measurement, at the cost of per-item storage rather than a uniform number's O(1). Pass
-          <code>0</code>, <code>null</code>, or <code>undefined</code> — or omit the prop — to enable <strong>dynamic</strong>
+          - avoiding measurement, at the cost of per-item storage rather than a uniform number's O(1). Pass
+          <code>0</code>, <code>null</code>, or <code>undefined</code> - or omit the prop - to enable <strong>dynamic</strong>
           mode, where heights are measured from the DOM. Use dynamic only when heights are content-driven and unknowable until
           rendered (wrapping text, images, live data); if you can compute them, an array or function skips the measuring cost.
         </p>
@@ -155,7 +155,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <h3>2. Render real rows at a definite, stable height</h3>
         <p>
           In dynamic mode the engine measures whatever box each rendered row actually has. Carry the intended size on your data
-          and express it on the row — a <code>min-block-size</code> or a real height — so the box cannot collapse, and reserve
+          and express it on the row - a <code>min-block-size</code> or a real height - so the box cannot collapse, and reserve
           space for media (<code>width</code>/<code>height</code> or <code>aspect-ratio</code>) so late content growth does not
           push neighbors down. The row's measured box (its border-box size, padding included) drives the layout, and a live
           resize is caught by the same observer and re-lays the list.
@@ -194,7 +194,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
     &lt;template #item=&quot;{ item }&quot;>
       &amp;lt;!-- Omit item-size → ResizeObserver reports this row's block size. -->
       &lt;div class=&quot;row&quot; :style=&quot;{ minBlockSize: `${ item.height }px` }&quot;>
-        #{{ item.id }} — {{ item.height }}px tall
+        #{{ item.id }} - {{ item.height }}px tall
       &lt;/div>
     &lt;/template>
   &lt;/VirtualScroll>
@@ -219,7 +219,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
         <p>
           Only rows that are mounted can be measured, so any row that has never entered the viewport keeps the fallback
           <code>default-item-size</code> (default <code>40</code>). That estimate drives the initial range and the total scroll
-          height until the row renders, at which point the observed height replaces it. Expect the first layout — and any deep <code>scrollToIndex</code> into unmeasured regions — to settle over a frame or
+          height until the row renders, at which point the observed height replaces it. Expect the first layout - and any deep <code>scrollToIndex</code> into unmeasured regions - to settle over a frame or
           two as measurements land. Set <code>default-item-size</code> near your average row height to shrink the initial error;
           the <code>buffer-before</code>/<code>buffer-after</code> overscan (default <code>5</code>) keeps rows mounted just
           off-screen so this measuring happens before they scroll into view.

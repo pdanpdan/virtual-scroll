@@ -198,24 +198,24 @@ onUnmounted(() => {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          <code>VirtualScrollbar</code> is exported on its own, so you can reuse the exact scrollbar UX on content that <code>VirtualScroll</code> does not drive — a plain <code>overflow: auto</code> element, a grid inside a fixed box, a pager around a canvas, anywhere a scrollbar would normally come from the browser. The component never reads your DOM. You hand it three numbers per axis — <code>total-size</code> (content), <code>viewport-size</code> (visible area), <code>position</code> (current scroll) — and it answers with one callback, <code>@scroll-to-offset</code>, whose target you apply to your own scroller. Thumb sizing, track-click jumps, and thumb dragging are all handled internally, so the visible scrollbar is fully interactive with almost no wiring. The tradeoff is that you own the state pipeline <code>VirtualScroll</code> would manage for you: a scroll listener to keep <code>position</code> fresh and a <code>ResizeObserver</code> to keep <code>viewport-size</code> accurate.
+          <code>VirtualScrollbar</code> is exported on its own, so you can reuse the exact scrollbar UX on content that <code>VirtualScroll</code> does not drive - a plain <code>overflow: auto</code> element, a grid inside a fixed box, a pager around a canvas, anywhere a scrollbar would normally come from the browser. The component never reads your DOM. You hand it three numbers per axis - <code>total-size</code> (content), <code>viewport-size</code> (visible area), <code>position</code> (current scroll) - and it answers with one callback, <code>@scroll-to-offset</code>, whose target you apply to your own scroller. Thumb sizing, track-click jumps, and thumb dragging are all handled internally, so the visible scrollbar is fully interactive with almost no wiring. The tradeoff is that you own the state pipeline <code>VirtualScroll</code> would manage for you: a scroll listener to keep <code>position</code> fresh and a <code>ResizeObserver</code> to keep <code>viewport-size</code> accurate.
         </p>
         <h3>1. Start from a real scroller with its native bar hidden</h3>
         <p>
-          Begin with a normal scrollable element — an <code>overflow: auto</code> box whose content is as large as you need on each axis. Because the custom bars are drawn over it, hide the native scrollbar (<code>scrollbar-width: none</code> plus the WebKit rules) so the two affordances do not both show. The library bars are absolutely positioned, so the element you overlay them on (or an ancestor) must establish a positioning context with <code>position: relative</code>. Content here is fully rendered and sized to its model width/height; this pattern is about the scrollbar, not about virtualization.
+          Begin with a normal scrollable element - an <code>overflow: auto</code> box whose content is as large as you need on each axis. Because the custom bars are drawn over it, hide the native scrollbar (<code>scrollbar-width: none</code> plus the WebKit rules) so the two affordances do not both show. The library bars are absolutely positioned, so the element you overlay them on (or an ancestor) must establish a positioning context with <code>position: relative</code>. Content here is fully rendered and sized to its model width/height; this pattern is about the scrollbar, not about virtualization.
         </p>
         <h3>2. Keep the bar fed with live numbers</h3>
         <p>
           The bar computes its thumb purely from the three props, so keep each prop in sync with the DOM as the user scrolls and the box resizes:
         </p>
         <ul>
-          <li><code>total-size</code> — the scrollable content size on that axis (the natural scroll range + the viewport).</li>
-          <li><code>position</code> — the current scroll offset; read <code>scrollTop</code>/<code>scrollLeft</code> in the element's native <code>@scroll</code> event and store into a ref.</li>
-          <li><code>viewport-size</code> — the visible size; the bar cannot infer it, so measure <code>clientWidth</code>/<code>clientHeight</code> on mount and again with a <code>ResizeObserver</code> when the box resizes.</li>
-          <li><code>is-rtl</code> — set for a right-to-left layout (default <code>false</code>) so the horizontal thumb offset mirrors correctly; <code>aria-label</code> (and an optional <code>container-id</code>) wire up the accessibility attributes.</li>
+          <li><code>total-size</code> - the scrollable content size on that axis (the natural scroll range + the viewport).</li>
+          <li><code>position</code> - the current scroll offset; read <code>scrollTop</code>/<code>scrollLeft</code> in the element's native <code>@scroll</code> event and store into a ref.</li>
+          <li><code>viewport-size</code> - the visible size; the bar cannot infer it, so measure <code>clientWidth</code>/<code>clientHeight</code> on mount and again with a <code>ResizeObserver</code> when the box resizes.</li>
+          <li><code>is-rtl</code> - set for a right-to-left layout (default <code>false</code>) so the horizontal thumb offset mirrors correctly; <code>aria-label</code> (and an optional <code>container-id</code>) wire up the accessibility attributes.</li>
         </ul>
         <p>
-          Because <code>position</code> and <code>viewport-size</code> are ordinary reactive numbers, this also composes with non-DOM sources — e.g. a translated/scaled coordinate space or a model-driven offset — not just a native scroller.
+          Because <code>position</code> and <code>viewport-size</code> are ordinary reactive numbers, this also composes with non-DOM sources - e.g. a translated/scaled coordinate space or a model-driven offset - not just a native scroller.
         </p>
         <CodeBlock
           class="guide-code-block"
@@ -337,7 +337,7 @@ function scrollToY(v: number) {
         />
         <h3>3. Apply the offset the bar asks for</h3>
         <p>
-          The entire contract in the other direction is <code>@scroll-to-offset</code>: when the user drags the thumb or clicks the track, the component resolves the pointer travel (or click position) against the totals you supplied and emits the resulting pixel target. All you do is write it back onto your scroller — <code>scrollTop = v</code> for a vertical bar, <code>scrollLeft = v</code> for horizontal. Setting the native property moves the content, which fires <code>@scroll</code>, which updates <code>position</code>, which moves the thumb — a closed loop that needs no math on your side. Mount one component per axis and give each its own <code>axis</code>, totals, viewport, and position.
+          The entire contract in the other direction is <code>@scroll-to-offset</code>: when the user drags the thumb or clicks the track, the component resolves the pointer travel (or click position) against the totals you supplied and emits the resulting pixel target. All you do is write it back onto your scroller - <code>scrollTop = v</code> for a vertical bar, <code>scrollLeft = v</code> for horizontal. Setting the native property moves the content, which fires <code>@scroll</code>, which updates <code>position</code>, which moves the thumb - a closed loop that needs no math on your side. Mount one component per axis and give each its own <code>axis</code>, totals, viewport, and position.
         </p>
         <h3>4. Handle the corner when both axes are active</h3>
         <p>

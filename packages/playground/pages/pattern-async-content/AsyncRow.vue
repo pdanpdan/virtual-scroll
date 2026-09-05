@@ -6,7 +6,7 @@ import { computed, onUnmounted, shallowRef, watch } from 'vue';
 import { loadPost } from './post-feed';
 
 const props = withDefaults(defineProps<{
-  /** Row id — the only data the component receives. */
+  /** Row id - the only data the component receives. */
   id: number;
   latencyMin?: number;
   latencyMax?: number;

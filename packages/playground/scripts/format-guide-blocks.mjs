@@ -338,7 +338,7 @@ function lexBody(body, base, lineOf) {
     if (body.startsWith('/*', i)) {
       const e = body.indexOf('*/', i + 2);
       if (declBuf.trim() !== '') {
-        // comment inside a declaration value — keep inline
+        // comment inside a declaration value - keep inline
         declBuf += ` ${ body.slice(i, e + 2).replace(/\s+/g, ' ').trim() } `;
       } else {
         flush();
@@ -975,7 +975,7 @@ function formatVueBlock(p1, formatCssFn) {
           break;
         }
         // A blank line followed by a script/style open ends the markup; blank
-        // lines INSIDE markup are kept (trimmed at flush) — we must be careful:
+        // lines INSIDE markup are kept (trimmed at flush) - we must be careful:
         // blank lines that separate markup from a following <script> must not
         // be swallowed into the markup region. Lookahead approach:
         if (blankish(lines[ i ])) {

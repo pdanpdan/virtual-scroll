@@ -195,7 +195,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       <template #header>
         <div class="example-body-header">
           <h2>Lorem Blog</h2>
-          <p>Seeded by <code class="font-mono">{{ seed }}</code> — scroll to load more posts</p>
+          <p>Seeded by <code class="font-mono">{{ seed }}</code> - scroll to load more posts</p>
         </div>
       </template>
 
@@ -238,11 +238,11 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           A feed of long-form posts shapes the design around two facts: each post's rendered height is unknowable before its
           content renders (text wraps at the container width and a cover image has its own ratio), and such a list is usually
           your page's own content rather than a small fixed box. VirtualScroll lets you pick each axis independently: which
-          element scrolls (<code>:container</code> — a bounded box, or the browser window), and how row sizes are known
+          element scrolls (<code>:container</code> - a bounded box, or the browser window), and how row sizes are known
           (arithmetic <code>item-size</code> for uniform rows, or per-row <code>ResizeObserver</code> measurement for variable
           ones). For posts, variable-height measured rows are the right model; a <code>default-item-size</code> estimate keeps
-          scroll height and navigation sane until the first real measurements arrive. Fetching further content on demand — near
-          the end of the list, or from a button — then appends to <code>items</code> and the engine re-ranges around the current
+          scroll height and navigation sane until the first real measurements arrive. Fetching further content on demand - near
+          the end of the list, or from a button - then appends to <code>items</code> and the engine re-ranges around the current
           scroll position.
         </p>
 
@@ -259,7 +259,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           The <code>items</code> array should hold the real post objects: the slot reads <code>item.title</code>,
           <code>item.content</code>, and so on, so each entry must carry its payload. (The data-less sparse-array pattern only
-          fits rows whose content is derivable from the index — see the uniform list case below.)
+          fits rows whose content is derivable from the index - see the uniform list case below.)
         </p>
 
         <CodeBlock
@@ -294,11 +294,11 @@ async function loadMore() {
         <h3>2. Reserve the cover-image box so late loads cannot shift layout</h3>
         <p>
           A cover image that has not loaded yet renders as zero height, so a row would first paint short and then jump when the
-          image arrives — moving the very content the reader is looking at. That is a general image-list concern, not something
+          image arrives - moving the very content the reader is looking at. That is a general image-list concern, not something
           virtualization can fix for you: give the <code>&lt;img&gt;</code> its intrinsic <code>width</code> and
           <code>height</code> attributes plus <code>inline-size: 100%; block-size: auto</code>. The browser then reserves the
           aspect-ratio box up front, so the row measures the same whether the image is pending or painted. The remaining height
-          variance comes from wrapped prose, which only rendering can reveal — which is what dynamic measurement (next step)
+          variance comes from wrapped prose, which only rendering can reveal - which is what dynamic measurement (next step)
           absorbs.
         </p>
 
@@ -335,14 +335,14 @@ async function loadMore() {
         <h3>3. Match the sizing model to your content</h3>
         <p>
           If every row is the same height you can pass a numeric <code>item-size</code> and the engine resolves positions
-          arithmetically in <em>O(1)</em> — and because uniform rows are fully described by their index, you may pass a sparse
+          arithmetically in <em>O(1)</em> - and because uniform rows are fully described by their index, you may pass a sparse
           array (<code>new Array(n)</code>) and render from the slot's <code>index</code> alone. Variable-height content needs
           the other model: leave <code>item-size</code> unset or set it to <code>0</code>/<code>null</code> (all three select
           dynamic mode) and each mounted row is measured with <code>ResizeObserver</code>, updating the offset tree as rows
           settle. A measurement can only happen once a row is mounted, so pass <code>default-item-size</code> as an estimate
           (here <code>1000</code>) for the initial scroll height and for far-target navigation; measured values replace it
           locally and only the affected range re-flows. When rows are tall, remember <code>buffer-before</code> /
-          <code>buffer-after</code> count <em>rows</em>, not pixels — the default <code>5</code> keeps five extra rows mounted on
+          <code>buffer-after</code> count <em>rows</em>, not pixels - the default <code>5</code> keeps five extra rows mounted on
           each side, which for ~1,000px posts is a lot of DOM; <code>1</code> is usually enough.
         </p>
 
@@ -390,7 +390,7 @@ async function loadMore() {
           <code>@load</code> event fires. Drive it from state: keep a <code>loading</code> flag that both reveals your
           <code>#loading</code> slot while a fetch is in flight and suppresses repeated <code>load</code> events (early-return
           while true). The <code>#loading</code> slot stays mounted and merely hidden via CSS while <code>loading</code> is
-          false, so it reserves its space — keeping the total scrollable height and the far-end scroll target correct while a
+          false, so it reserves its space - keeping the total scrollable height and the far-end scroll target correct while a
           fetch runs. Only render it while a load is actually expected (<code>v-if=&quot;hasMore&quot;</code>), otherwise the
           reserved space lingers after the data runs out and you scroll past an empty stretch. Trigger the same handler
           from an explicit “Load more” button if you prefer paging over auto-load; the wiring is identical. Whatever the trigger,

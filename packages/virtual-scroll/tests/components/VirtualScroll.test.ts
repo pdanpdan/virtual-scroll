@@ -550,7 +550,7 @@ describe('virtualScroll', () => {
         expect(container.scrollTop).toBeCloseTo(100 * 40 - 500, 0);
 
         // The target item measures 80px: the running smooth scroll must be
-        // re-based only after the wrapper height is updated — otherwise the
+        // re-based only after the wrapper height is updated - otherwise the
         // browser would clamp it to the stale max and the scroll lands short.
         vs.updateItemSizes([ { index: 99, inlineSize: 100, blockSize: 80 } ]);
         await nextTick();

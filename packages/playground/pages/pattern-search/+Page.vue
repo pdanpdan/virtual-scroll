@@ -318,12 +318,12 @@ onUnmounted(() => {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          Only the visible window of a virtualized list exists in the DOM, so search cannot scan rendered content the way a browser search scans a document. Search the <em>data</em> instead, then reconcile the results with the virtual window. Two shapes cover most needs: <strong>filtering</strong>, where a computed subset replaces <code>:items</code> and the results become the whole list; and <strong>find-and-jump</strong>, where <code>:items</code> stays the full dataset, matches are stored as indices, and navigation moves the viewport with <code>scrollToIndex()</code>. Highlighting applies to whatever rows are mounted at the moment and is repainted as the window moves — the CSS Custom Highlight API does that without touching row markup.
+          Only the visible window of a virtualized list exists in the DOM, so search cannot scan rendered content the way a browser search scans a document. Search the <em>data</em> instead, then reconcile the results with the virtual window. Two shapes cover most needs: <strong>filtering</strong>, where a computed subset replaces <code>:items</code> and the results become the whole list; and <strong>find-and-jump</strong>, where <code>:items</code> stays the full dataset, matches are stored as indices, and navigation moves the viewport with <code>scrollToIndex()</code>. Highlighting applies to whatever rows are mounted at the moment and is repainted as the window moves - the CSS Custom Highlight API does that without touching row markup.
         </p>
 
         <h3>1. Filter: replace :items with a computed subset</h3>
         <p>
-          Derive the visible rows from the query with a <code>computed</code> and bind it to <code>:items</code>. Every keystroke yields a new array instance, which is the supported update path: the engine watches the identity and length of <code>:items</code>, re-initializes sizes, and re-reads the scroll offset after the DOM updates. Rows are positioned by index, so after a replacement the same pixel offset lands on the same index — which now holds a different record; when the filtered list is shorter than the current offset, the viewport clamps to the new end. Keep rows uniform (numeric <code>item-size</code>) so the offset math stays exact, and remember that the rendered <code>index</code> is a position in the filtered array, not in the original data — keep an id on each row when you need the source record. This shape fits search-as-filter UIs where the results are the list.
+          Derive the visible rows from the query with a <code>computed</code> and bind it to <code>:items</code>. Every keystroke yields a new array instance, which is the supported update path: the engine watches the identity and length of <code>:items</code>, re-initializes sizes, and re-reads the scroll offset after the DOM updates. Rows are positioned by index, so after a replacement the same pixel offset lands on the same index - which now holds a different record; when the filtered list is shorter than the current offset, the viewport clamps to the new end. Keep rows uniform (numeric <code>item-size</code>) so the offset math stays exact, and remember that the rendered <code>index</code> is a position in the filtered array, not in the original data - keep an id on each row when you need the source record. This shape fits search-as-filter UIs where the results are the list.
         </p>
 
         <CodeBlock
@@ -390,7 +390,7 @@ const filtered = computed(() => {
 
         <h3>2. Find: keep the full dataset, navigate between matches</h3>
         <p>
-          When matches must be found anywhere in the dataset while original numbering and positions stay put, keep <code>:items</code> untouched and compute matching indices over the data; per-row state and absolute indices then stay stable while the user walks the hits. Move the viewport with the exposed <code>scrollToIndex(row, col, options)</code> — vertical lists pass <code>null</code> for the column; <code>align: 'auto'</code> scrolls only when the row is offscreen, and the default <code>behavior</code> is already <code>'smooth'</code>. Enforce a minimum query length so single characters do not scan the whole dataset, and lowercase both sides for a case-insensitive match. On a query change, reset the cursor to the first match and jump to it.
+          When matches must be found anywhere in the dataset while original numbering and positions stay put, keep <code>:items</code> untouched and compute matching indices over the data; per-row state and absolute indices then stay stable while the user walks the hits. Move the viewport with the exposed <code>scrollToIndex(row, col, options)</code> - vertical lists pass <code>null</code> for the column; <code>align: 'auto'</code> scrolls only when the row is offscreen, and the default <code>behavior</code> is already <code>'smooth'</code>. Enforce a minimum query length so single characters do not scan the whole dataset, and lowercase both sides for a case-insensitive match. On a query change, reset the cursor to the first match and jump to it.
         </p>
 
         <CodeBlock
@@ -530,7 +530,7 @@ export function applyHighlights(
 
         <h3>4. Style the marks and cover older engines</h3>
         <p>
-          <code>::highlight()</code> rules apply at paint time, so matches are colored without inserting elements and rows do not re-render while scrolling. For engines without the Custom Highlight API, fall back to wrapping matches in a <code>&lt;mark&gt;</code> during row rendering: escape the query's regular-expression metacharacters, build a <code>RegExp</code>, and emit the highlighted HTML through <code>v-html</code>. Keep server and initial client markup identical — for example, render the raw text until the component has mounted — so hydration does not mismatch.
+          <code>::highlight()</code> rules apply at paint time, so matches are colored without inserting elements and rows do not re-render while scrolling. For engines without the Custom Highlight API, fall back to wrapping matches in a <code>&lt;mark&gt;</code> during row rendering: escape the query's regular-expression metacharacters, build a <code>RegExp</code>, and emit the highlighted HTML through <code>v-html</code>. Keep server and initial client markup identical - for example, render the raw text until the component has mounted - so hydration does not mismatch.
         </p>
 
         <CodeBlock

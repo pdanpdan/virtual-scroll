@@ -146,7 +146,7 @@ function jumpToRandom() {
     </template>
 
     <template #description>
-      A simulated market feed over {{ SYMBOL_COUNT.toLocaleString() }} symbols. Prices are kept only for rows that entered the viewport, and every tick mutates just the visible window — the per-tick cost stays constant however large the dataset grows. Pause, resume, or change the feed speed.
+      A simulated market feed over {{ SYMBOL_COUNT.toLocaleString() }} symbols. Prices are kept only for rows that entered the viewport, and every tick mutates just the visible window - the per-tick cost stays constant however large the dataset grows. Pause, resume, or change the feed speed.
     </template>
 
     <template #icon>
@@ -261,7 +261,7 @@ function jumpToRandom() {
       <ImplementationGuide>
         <p>
           Dashboards, market feeds, and log tails show a steady stream of data over a <em>stable</em> set of rows. When updates
-          mutate values in place — no rows are inserted or removed, and every row keeps its size — the list has a decisive
+          mutate values in place - no rows are inserted or removed, and every row keeps its size - the list has a decisive
           property for live refresh: the engine's geometry never changes, so an update cannot shift the layout or move the
           user's scroll position. The technique is to keep that geometry fixed and drive each tick from the visible range the
           engine reports, touching only mounted rows so the per-tick cost is O(viewport) no matter how large the dataset is.
@@ -279,7 +279,7 @@ function jumpToRandom() {
         <p>
           If the dataset is huge, or each row's payload is a pure function of its index so storing every row is wasteful, use an
           index-only list instead: a sparse placeholder as <code>items</code> (<code>new Array(count)</code>), content derived
-          inside the slot from <code>index</code>, and — when rows carry state — a reactive store keyed by index (a
+          inside the slot from <code>index</code>, and - when rows carry state - a reactive store keyed by index (a
           <code>Map</code>) that materializes a value only when the row first enters the viewport. The VirtualScroll props are
           identical; only the slot differs (<code>item</code> vs <code>index</code>). Reach for real objects when you already own
           the data, and index-only when deriving each row is inexpensive and you want zero storage cost for the unseen rows.
@@ -319,7 +319,7 @@ const rows = reactive(
     @scroll=&quot;onScroll&quot;
   >
     &lt;template #item=&quot;{ item }&quot;>
-      &lt;div class=&quot;row&quot;>{{ item.id }} — ${{ item.price.toFixed(2) }}&lt;/div>
+      &lt;div class=&quot;row&quot;>{{ item.id }} - ${{ item.price.toFixed(2) }}&lt;/div>
     &lt;/template>
   &lt;/VirtualScroll>
 &lt;/template>
@@ -339,10 +339,10 @@ const rows = reactive(
 &lt;/style>"
         />
 
-        <h3>2. Keep the geometry fixed — that is what preserves the scroll</h3>
+        <h3>2. Keep the geometry fixed - that is what preserves the scroll</h3>
         <p>
           For updates not to jump the viewport, the list's geometry must stay constant: pass an <code>item-size</code> that equals
-          the rendered row height, and keep value text from reflowing its row or column — fixed widths plus
+          the rendered row height, and keep value text from reflowing its row or column - fixed widths plus
           <code>font-variant-numeric: tabular-nums</code> so a price change does not change digit widths. Because the row count
           and every row's size are constant, the total content height never changes, so the browser keeps a valid
           <code>scrollTop</code> and you need no anchoring or restoration code for in-place updates.
@@ -350,7 +350,7 @@ const rows = reactive(
         <p>
           This is the key contrast with an appending list: when you push rows onto the end the content height grows, and keeping
           the newest row visible requires anchoring to the last index after each append (an end-aligned
-          <code>scrollToIndex</code>) — a separate mechanism from the in-place refresh shown here.
+          <code>scrollToIndex</code>) - a separate mechanism from the in-place refresh shown here.
         </p>
 
         <h3>3. Drive each tick from the reported visible range</h3>
@@ -359,7 +359,7 @@ const rows = reactive(
           (<code>{ start, end }</code>) is the window of mounted rows (buffers included). Cache it, and on every tick mutate only
           <code>[start − k, end + k]</code>, with a small <code>k</code> overscan so rows about to scroll into view are already
           fresh. Mutating an existing reactive item re-renders just that mounted row, so the work per tick stays proportional to
-          what is visible — it never grows with the dataset, which is the point of pairing virtualization with a live feed.
+          what is visible - it never grows with the dataset, which is the point of pairing virtualization with a live feed.
         </p>
 
         <CodeBlock

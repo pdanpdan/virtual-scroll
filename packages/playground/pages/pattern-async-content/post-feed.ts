@@ -2,7 +2,7 @@ import { reactive } from 'vue';
 
 // Module-scoped simulated backend: fetched posts are cached by id and shared
 // across row mounts, so scrolling a row back into view is instant. Rows are
-// recycled by virtualization — state must live here (the model), never in the
+// recycled by virtualization - state must live here (the model), never in the
 // row DOM.
 
 export interface Post {

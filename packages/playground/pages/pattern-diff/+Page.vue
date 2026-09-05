@@ -297,7 +297,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
 
         <h3>1. Model each pair of lines as one row</h3>
         <p>
-          The naive layout — two lists side by side — forces you to synchronize scroll offsets by hand, and the sides
+          The naive layout - two lists side by side - forces you to synchronize scroll offsets by hand, and the sides
           stop being index-aligned at the first insertion or deletion. Model the pairing instead: each row owns its
           old and new line numbers and carries <em>nullable</em> content for the side that has no line. Produce these
           rows once, ahead of rendering, by running your diff algorithm over the two files; the shape below also
@@ -336,12 +336,12 @@ const diffRows: DiffRow[] = [
 
         <h3>2. Virtualize the uniform-height rows</h3>
         <p>
-          Every variant — changed rows and the full-width expand placeholder — shares one height, so a numeric
+          Every variant - changed rows and the full-width expand placeholder - shares one height, so a numeric
           <code>item-size</code> turns range and offset math into pure arithmetic: no <code>ResizeObserver</code>, no
           per-row allocation, <em>O(1)</em> positioning. Give the scroll host a definite height (or a flex-fill with
           <code>min-height: 0</code>), then bind the row array and the size. The <code>#item</code> slot renders either
           the expand button or the two panes; <code>index</code> addresses the data but is never used to display a line
-          number — the row owns those.
+          number - the row owns those.
         </p>
 
         <CodeBlock
@@ -403,12 +403,12 @@ const rows = ref&lt;DiffRow[]>(diffRows);
 
         <h3>3. Size rows so they can never wrap</h3>
         <p>
-          A long line must overflow horizontally, never wrap onto a second line — a wrapped row changes height and
+          A long line must overflow horizontally, never wrap onto a second line - a wrapped row changes height and
           breaks the uniform-size contract. In a monospace font the width of a line is exactly
           <code>length × 1ch</code>, so give each row a <code>min-inline-size</code> that fits its longest half: twice
           the longest line in <code>ch</code>, plus an allowance for both gutters and side paddings. Because
           <code>ch</code> tracks the font size, the rule survives responsive font changes. The wide rows overflow the
-          host, which pans them with its native horizontal overflow — opt the items wrapper out of its default
+          host, which pans them with its native horizontal overflow - opt the items wrapper out of its default
           <code>contain: layout</code> so the overflow actually extends the host's scrollable area.
         </p>
 
@@ -479,7 +479,7 @@ const rows = ref&lt;DiffRow[]>(diffRows);
           Files with large untouched regions do not need a row per line: fold each run of identical lines into one
           placeholder row carrying the run metadata, then materialize on click by splicing the real rows into the
           array at that index. With a numeric <code>item-size</code> the engine derives everything from the length, so
-          a mid-list splice is a plain reactive array update. Keep the two raw file line arrays in scope — the
+          a mid-list splice is a plain reactive array update. Keep the two raw file line arrays in scope - the
           expansion rebuilds content from them.
         </p>
 

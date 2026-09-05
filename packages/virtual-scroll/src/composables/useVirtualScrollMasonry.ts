@@ -111,8 +111,8 @@ export interface UseVirtualScrollMasonryReturn<T = unknown> {
  * relayout re-anchors the content: the card pinned at the top of the viewport
  * keeps its screen offset instead of the scroll position jumping.
  *
- * By default heights come exclusively from the `itemHeight` oracle — nothing
- * is measured in the DOM — so unvisited regions are priced without mounting
+ * By default heights come exclusively from the `itemHeight` oracle - nothing
+ * is measured in the DOM - so unvisited regions are priced without mounting
  * anything and far `scrollToIndex` calls land on the exact canonical
  * position. Cards must therefore size themselves to the oracle height
  * (reserve media space with `aspect-ratio` etc.), and the oracle must be a
@@ -148,7 +148,7 @@ export function useVirtualScrollMasonry<T>(
   const resolvedGap = computed(() => Math.max(0, props.value.gap ?? DEFAULT_MASONRY_GAP));
   const resolvedSegmentSize = computed(() => Math.max(1, Math.floor(props.value.segmentSize ?? DEFAULT_MASONRY_SEGMENT_SIZE)));
 
-  /** Measured card heights (px) overriding the oracle — `measuredHeights` mode. */
+  /** Measured card heights (px) overriding the oracle - `measuredHeights` mode. */
   const measuredHeights = new Map<number, number>();
 
   let scrollEndTimer: ReturnType<typeof setTimeout> | undefined;
@@ -263,7 +263,7 @@ export function useVirtualScrollMasonry<T>(
       scheduleScrollEnd();
     }, behavior === 'smooth' ? PROGRAMMATIC_SMOOTH_DELAY : SCROLL_END_DELAY);
     // behavior 'auto' fires a scroll event right away; 'smooth' streams events
-    // while animating — both keep scrollY in sync through handleScroll.
+    // while animating - both keep scrollY in sync through handleScroll.
     el.scrollTo({ top: Math.max(0, y), behavior });
   }
 

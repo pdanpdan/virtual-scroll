@@ -141,11 +141,11 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A two-dimensional grid — rows of equal height, columns of declared width — needs two virtual windows at
+          A two-dimensional grid - rows of equal height, columns of declared width - needs two virtual windows at
           once: one that picks which rows are mounted along the vertical axis, and one that picks which columns each
           mounted row renders along the horizontal axis. Because both axes have known sizes (a numeric
           and <code>column-width</code> forms you use), row placement is pure arithmetic with a numeric <code>item-size</code>, and the DOM stays bounded to roughly <code>row-window × column-window</code> cells instead of <code>rows × columns</code>. The trade-off is the
-          contract: all rows share one height and column widths must be expressible as numbers — when content decides
+          contract: all rows share one height and column widths must be expressible as numbers - when content decides
           sizes, use the measured (dynamic) grid instead.
         </p>
 
@@ -160,25 +160,25 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
         <h3>2. Model the rows, then declare the column geometry</h3>
         <p>
-          The row axis is your data: <code>items</code> is an array with one entry per row. Columns are not data —
+          The row axis is your data: <code>items</code> is an array with one entry per row. Columns are not data -
           they are a declared grid: <code>column-count</code> sets how many columns exist in total (it drives the
           horizontal scroll extent and the column-window clamp), while <code>column-width</code> provides the width in
           px for each column. You can pass one number for a uniform width, an array that cycles as a repeating pattern
           over the column indices, or a function of the column index. A numeric <code>item-size</code> declares the
-          uniform row height; both sizes are contracts — every rendered cell must match them, borders and padding
+          uniform row height; both sizes are contracts - every rendered cell must match them, borders and padding
           included (<code>box-sizing: border-box</code>).
         </p>
 
         <h3>3. Render one windowed row per item</h3>
         <p>
           The <code>#item</code> slot is invoked once per mounted row and receives the row's <code>item</code> and
-          <code>index</code> plus the current <code>columnRange</code> — <code>{ start, end }</code> with an exclusive
-          <code>end</code> — and two helpers: <code>getColumnWidth(colIndex)</code> returns the declared width of any
+          <code>index</code> plus the current <code>columnRange</code> - <code>{ start, end }</code> with an exclusive
+          <code>end</code> - and two helpers: <code>getColumnWidth(colIndex)</code> returns the declared width of any
           column, and <code>getCellAriaProps(colIndex)</code> returns the ARIA attributes for a cell. Loop over the
           range and emit one cell per column, sizing each cell's width from <code>getColumnWidth</code> and binding
           the aria props. The engine translates each row so its content starts at the first visible column and already
           accounts for the skipped columns (<code>columnRange.padStart</code>/<code>padEnd</code>), so the slot must
-          not add its own horizontal offsets — lay the cells out flush (flex row) and make the row fill its
+          not add its own horizontal offsets - lay the cells out flush (flex row) and make the row fill its
           wrapper, which is exactly <code>item-size</code> tall. In <code>both</code> mode the row wrapper carries
           the <code>row</code> role and <code>aria-rowindex</code> automatically.
         </p>
@@ -276,7 +276,7 @@ function cellText(row: Row, col: number): string {
         <p>
           Uniform grids often have no payload: cell content is derived from the <code>(row, column)</code> coordinates
           (indices, metrics, formulas), so materializing a million row objects buys nothing. Pass a sparse array of the
-          right length — <code>new Array(n)</code> — and render from the slot's <code>index</code>; only the windowed
+          right length - <code>new Array(n)</code> - and render from the slot's <code>index</code>; only the windowed
           indices are ever read from <code>items</code>, so memory stays flat. Keep the <code>.grid-row</code> /
           <code>.grid-cell</code> styles from the full example above; they are all this variant needs.
         </p><CodeBlock
@@ -325,7 +325,7 @@ const rows = new Array(10_000_000);
           window keeps its own small built-in overscan on each side, so horizontal panning is covered too. Watch the
           cost model: the DOM holds roughly
           <code>(visible rows + buffers) × (visible columns + column overscan)</code> cells, so make the buffers large
-          enough to hide mounting latency but no larger — every extra buffered row multiplies the cell count of the
+          enough to hide mounting latency but no larger - every extra buffered row multiplies the cell count of the
           whole window.
         </p>
       </ImplementationGuide>

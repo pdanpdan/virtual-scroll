@@ -145,7 +145,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       <ImplementationGuide>
         <p>
           To build an iOS-contacts-style list whose section headers stick to the top of the scroll container and are pushed out
-          by the next section's header, you mark the header rows with the <code>stickyIndices</code> prop — an array of item
+          by the next section's header, you mark the header rows with the <code>stickyIndices</code> prop - an array of item
           indices that should remain sticky. Each marked row scrolls normally until its natural position would pass the
           container's leading edge, then sticks there while later rows scroll beneath it, and releases when the following sticky
           row arrives at that edge; that hand-off is what produces the "push". Because the marked rows are ordinary content, you
@@ -210,7 +210,7 @@ const stickyIndices = computed(() => {
         <h3>2. Pass sticky-indices and render the marked rows distinctly</h3>
         <p>
           Bind <code>:sticky-indices="stickyIndices"</code> together with <code>:item-size</code>. A sticky row is a regular row
-          in the list flow — a header is one full <code>item-size</code>-tall row — so keep the slot root filling that row
+          in the list flow - a header is one full <code>item-size</code>-tall row - so keep the slot root filling that row
           height. In the <code>#item</code> slot branch on <code>item.type</code> to render a header versus a body row. The slot
           exposes <code>isSticky</code> (this index is configured sticky) and <code>isStickyActive</code> (the row is currently
           pinned at the edge); use the latter to raise and shade the pinned header. Give the header an opaque background and a
@@ -271,11 +271,11 @@ const stickyIndices = computed(() => {
 &lt;/style>"
         />
 
-        <h3>3. Mark every section's leading row — headers are ordinary content</h3>
+        <h3>3. Mark every section's leading row - headers are ordinary content</h3>
         <p>
           <code>stickyIndices</code> accepts any indices, not only section headers: every marked row becomes sticky, and once at
           the edge it is only released when the next marked row arrives to push it. So give <em>every</em> section one marked
-          leading row (its header) and leave the body rows unmarked — otherwise a header you forgot to mark scrolls away, or a
+          leading row (its header) and leave the body rows unmarked - otherwise a header you forgot to mark scrolls away, or a
           marked row in the middle of a section sticks at the edge mid-section. Two practical points follow from marked rows being
           in-flow content:
         </p>
@@ -292,7 +292,7 @@ const stickyIndices = computed(() => {
         <p>
           Uniform-height sections make the header indices a simple arithmetic stride, as above. If sections vary in height you can
           still use this feature: keep <code>item-size</code> as a function or switch to dynamic measurement, and mark each
-          section's leading index the same way — only the index derivation changes, not the sticking behavior.
+          section's leading index the same way - only the index derivation changes, not the sticking behavior.
         </p>
       </ImplementationGuide>
     </template>

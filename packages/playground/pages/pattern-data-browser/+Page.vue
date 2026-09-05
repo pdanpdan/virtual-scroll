@@ -82,7 +82,7 @@ const WIKI_TEXTS = [
 /**
  * Deterministic PRNG (mulberry32). The dataset generator is seeded per
  * (dataset, size) so the server-rendered HTML and the client hydration
- * produce identical data — no hydration mismatches, and the demo shows
+ * produce identical data - no hydration mismatches, and the demo shows
  * the same records on every load.
  */
 function createRandom(seed: number): () => number {
@@ -407,7 +407,7 @@ onUnmounted(() => clearTimeout(toastTimer));
     </template>
 
     <template #description>
-      A grouped directory browser combining <strong>sticky section headers</strong> (the next header pushes the stuck one out of view), <strong>instant search</strong> that rebuilds the section index, and <strong>jump-to navigation</strong> with configurable alignment. Switch between {{ DATASETS.length }} datasets and sizes up to {{ SIZES.at(-1)?.toLocaleString() }} records — the telemetry strip shows the rendered window stays constant no matter the dataset size. Toggle <strong>dynamic sizing</strong> to reveal each record's full description and let ResizeObserver measure the variable row heights (the Knowledge Base dataset has the widest variance).
+      A grouped directory browser combining <strong>sticky section headers</strong> (the next header pushes the stuck one out of view), <strong>instant search</strong> that rebuilds the section index, and <strong>jump-to navigation</strong> with configurable alignment. Switch between {{ DATASETS.length }} datasets and sizes up to {{ SIZES.at(-1)?.toLocaleString() }} records - the telemetry strip shows the rendered window stays constant no matter the dataset size. Toggle <strong>dynamic sizing</strong> to reveal each record's full description and let ResizeObserver measure the variable row heights (the Knowledge Base dataset has the widest variance).
     </template>
 
     <template #icon>
@@ -605,7 +605,7 @@ onUnmounted(() => clearTimeout(toastTimer));
           holds rows, and turning some of them into section headers is a data-modeling decision rather than a library
           mode. Each header is an ordinary row object flagged as such, and its index is listed in
           <code>sticky-indices</code>; the engine then pins that row to the top edge while you scroll and lets the next
-          pinned row push the current one out of view — the familiar iOS-style section effect. Because filtering and
+          pinned row push the current one out of view - the familiar iOS-style section effect. Because filtering and
           section jumps only ever reshape the row array and call <code>scrollToIndex()</code>, the hard part of this UI
           is data shaping, and the virtualizer&apos;s job stays constant: render the visible rows of whatever array it is
           given.
@@ -668,7 +668,7 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
       &lt;div v-if=&quot;item.kind === 'header'&quot; class=&quot;section-header&quot; :class=&quot;{ 'section-header--pinned': isStickyActive }&quot;>
         {{ item.title }} · {{ item.count }} records
       &lt;/div>
-      &lt;div v-else class=&quot;record&quot;>#{{ item.id }} — {{ item.name }}&lt;/div>
+      &lt;div v-else class=&quot;record&quot;>#{{ item.id }} - {{ item.name }}&lt;/div>
     &lt;/template>
   &lt;/VirtualScroll>
 &lt;/template>
@@ -700,11 +700,11 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
         <h3>2. Model every section as rows in one flat array</h3>
         <p>
           Flatten the grouped data so each section is a header row followed by its record rows; the same <code>#item</code>
-          slot renders both, branching on a type flag on the row object. Headers stay ordinary items — they occupy their
+          slot renders both, branching on a type flag on the row object. Headers stay ordinary items - they occupy their
           own index, scroll with the list, and can be addressed by <code>scrollToIndex()</code>. Build the
           <code>sticky-indices</code> list from the header positions: rows at those indices pin to the viewport top, and
           when several sticky rows are consecutive an approaching header pushes the previous one out of view. While a row
-          is actually pinned the slot reports <code>isStickyActive</code> — the hook for the elevated &quot;stuck&quot;
+          is actually pinned the slot reports <code>isStickyActive</code> - the hook for the elevated &quot;stuck&quot;
           look. Keep the data nested and derive the flat array with a <code>computed</code> when your source is grouped by
           a field or folder tree.
         </p>
@@ -718,7 +718,7 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
           where each mounted row is measured with a ResizeObserver and the layout follows the real content. With known
           sizes the returned value is a contract: the engine sizes each row wrapper to it, so the slot root must fill the
           wrapper (<code>height: 100%</code>, borders inside via <code>box-sizing: border-box</code>). With dynamic sizing
-          the contract is inverted — let the content decide the height and do not force one on the slot root. Dynamic
+          the contract is inverted - let the content decide the height and do not force one on the slot root. Dynamic
           measurement costs per mounted row and corrects as you scroll; pass <code>default-item-size</code> so the first
           frame and the scrollbar are not empty. <code>gap</code> adds spacing between rows in the scroll math, and
           <code>buffer-before</code>/<code>buffer-after</code> (default <code>5</code>) keep extra rows mounted around the
@@ -726,7 +726,7 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
         </p><CodeBlock
           class="guide-code-block"
           lang="vue"
-          code="// Content-driven heights: pass null (or 0 / undefined) as :item-size — every
+          code="// Content-driven heights: pass null (or 0 / undefined) as :item-size - every
 // mounted row is then measured with a ResizeObserver and the layout follows
 // the actual content (wrapped text, expandable rows, ...). Give the engine a
 // fallback estimate so the first frame and scrollbar are not empty.
@@ -751,11 +751,11 @@ const dynamicSizing = ref(false);
         <h3>4. Filter by deriving new arrays</h3>
         <p>
           Search is not a library feature: on every query, compute a new <code>items</code> array plus a matching
-          <code>sticky-indices</code> list and pass them down — the component re-ranges automatically when the props
+          <code>sticky-indices</code> list and pass them down - the component re-ranges automatically when the props
           change. Re-emit a header (cloned, with its count rebuilt from matches) only when its section keeps at least one
           matching record, because the sticky list must refer to the filtered array&apos;s indices; keep the unfiltered
-          arrays as the fallback for an empty query. Then bind the derived arrays —
-          <code>:items="display.rows"</code> with <code>:sticky-indices="display.sticky"</code> —
+          arrays as the fallback for an empty query. Then bind the derived arrays -
+          <code>:items="display.rows"</code> with <code>:sticky-indices="display.sticky"</code> -
           instead of the originals.
         </p>
 
@@ -813,7 +813,7 @@ function jumpToRow(rowIndex: number, align: ScrollAlignment) {
 
         <h3>5. Jump to a section or a row</h3>
         <p>
-          The component instance (template ref) exposes <code>scrollToIndex(rowIndex, colIndex, options)</code> — for a
+          The component instance (template ref) exposes <code>scrollToIndex(rowIndex, colIndex, options)</code> - for a
           vertical list pass <code>null</code> for the column. Alignment options make jumps land predictably:
           <code>start</code> puts the row at the top edge, <code>center</code> centers it, <code>end</code> pins it to the
           bottom, and <code>auto</code> (the default) scrolls only when the row is not already fully visible. Jumping to

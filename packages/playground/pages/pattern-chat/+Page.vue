@@ -33,7 +33,7 @@ const isLoading = ref(false);
 const isAtBottom = ref(true);
 const hasNewMessages = ref(false);
 // History is finite: past this limit there is nothing to load, so the
-// loading indicator must not appear. Counts only the prepended history —
+// loading indicator must not appear. Counts only the prepended history -
 // items.length also grows from new messages at the bottom.
 const HISTORY_LIMIT = 500;
 const historyLoaded = ref(0);
@@ -295,7 +295,7 @@ function scrollToBottom() {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A chat is a vertical list that grows at the bottom with rows of uneven height — one of the harder cases for a
+          A chat is a vertical list that grows at the bottom with rows of uneven height - one of the harder cases for a
           virtualized list to auto-scroll well. Two behaviors matter: a newly appended message scrolls into view so
           the list &quot;sticks&quot; to the newest message, and when the user has scrolled up to read history the viewport is
           never yanked away from them. The mechanism is a single <code>@scroll</code> handler that derives &quot;am I at the
@@ -316,7 +316,7 @@ function scrollToBottom() {
           <code>item-size</code> and the engine derives the whole layout arithmetically with no DOM measurement. Chat bubbles wrap
           to different heights, so instead leave <code>item-size</code> unset: that puts the list in dynamic mode, where each
           mounted row is measured with a <code>ResizeObserver</code> and its measured size drives layout. Dynamic rows need
-          <strong>real data</strong> — <code>items</code> is an array of message objects read from the <code>#item</code> slot's
+          <strong>real data</strong> - <code>items</code> is an array of message objects read from the <code>#item</code> slot's
           <code>item</code> prop, because there is no height oracle an index-only array could fall back on. While a row is
           unmeasured the engine lays it out at <code>default-item-size</code> (default <code>40</code>); set it near the average
           rendered row so the scrollbar, total height, and far <code>scrollToIndex</code> targets stay accurate until the
@@ -391,18 +391,18 @@ const messages = ref([{ id: 1, text: 'Hello', isMe: true }]);
         <p>
           The geometry is plain arithmetic over <code>ScrollDetails</code>: <code>totalSize.height</code> is the full content
           height, <code>scrollOffset.y</code> is where the viewport top sits, and adding <code>viewportSize.height</code> locates
-          the viewport bottom — so <code>totalSize.height − (scrollOffset.y + viewportSize.height)</code> is the distance
+          the viewport bottom - so <code>totalSize.height − (scrollOffset.y + viewportSize.height)</code> is the distance
           remaining to the content end (virtual units, which equal rendered pixels once rows are measured). Compare it to a
           small threshold of a few tens of pixels that absorbs rounding and the scrollbar, so &quot;at the bottom&quot; is
           forgiving.
         </p>
         <p>
-          Read that flag <em>before</em> mutating <code>items</code>. If the user was at the bottom — or the append is their own
-          action, which should always be revealed — scroll after the new row mounts: call <code>scrollToIndex(items.length − 1,
+          Read that flag <em>before</em> mutating <code>items</code>. If the user was at the bottom - or the append is their own
+          action, which should always be revealed - scroll after the new row mounts: call <code>scrollToIndex(items.length − 1,
             0, { align: 'end', behavior: 'smooth' })</code> inside <code>nextTick</code>. End alignment is the right target even
           though the new row's height is not measured yet, because an end-anchored scroll keeps re-clamping until the settling
           measurements define the true end. If the user was <em>not</em> at the bottom and the row is incoming, leave the
-          viewport untouched and surface a &quot;jump to newest&quot; affordance instead — never steal the reader's position.
+          viewport untouched and surface a &quot;jump to newest&quot; affordance instead - never steal the reader's position.
         </p>
         <p>
           Choose the scroll <code>behavior</code> to match the traffic: <code>'smooth'</code> animates a gentle follow but can
@@ -456,7 +456,7 @@ function append(msg: { id: number; text: string; isMe: boolean }) {
         <p>
           Loading older messages prepends to the top of the list, which otherwise lets the browser's scroll anchor drift and
           yanks the user away from the line they were reading. The <code>restore-scroll-on-prepend</code> prop (default
-          <code>false</code>) makes the engine hold the first visible row at the same screen offset across the prepend — add it
+          <code>false</code>) makes the engine hold the first visible row at the same screen offset across the prepend - add it
           whenever your list can grow at the start (paged-up history, infinite scroll upward).
         </p>
         <p>

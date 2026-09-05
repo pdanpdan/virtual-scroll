@@ -991,8 +991,8 @@ export interface VirtualScrollMasonryProps<T = unknown> {
   /**
    * Canonical height oracle: the height in px of the card for `index` at the
    * resolved `columnWidth`.
-   * The oracle MUST be deterministic — the same `(index, columnWidth)` pair
-   * must always produce the same height — because masonry placements are
+   * The oracle MUST be deterministic - the same `(index, columnWidth)` pair
+   * must always produce the same height - because masonry placements are
    * committed to a column-frontier chain and replayed from stored snapshots.
    * Pure functions of the item model are the intended use (a seeded
    * pseudo-random height, an `aspect-ratio`-derived height, a model field).
@@ -1040,7 +1040,7 @@ export interface VirtualScrollMasonryProps<T = unknown> {
   measuredHeights?: boolean | undefined;
 
   /**
-   * Items per layout segment — the cadence at which the real column frontier
+   * Items per layout segment - the cadence at which the real column frontier
    * is snapshotted. Larger segments store less frontier state but make each
    * layout step cross more items.
    * @default 500

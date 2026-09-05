@@ -15,7 +15,7 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 
 interface GalleryItem {
   id: number;
-  /** Natural aspect ratio width/height — the canonical height oracle is width / aspect. */
+  /** Natural aspect ratio width/height - the canonical height oracle is width / aspect. */
   aspect: number;
   hue: number;
 }
@@ -96,7 +96,7 @@ let prefetchTimer: ReturnType<typeof setTimeout> | undefined;
 
 /**
  * Warms the images just beyond the rendered window at low priority, bounded
- * to a small batch per scroll settle — visible cards always load first.
+ * to a small batch per scroll settle - visible cards always load first.
  */
 function schedulePrefetch() {
   if (!prefetchEnabled.value) {
@@ -141,7 +141,7 @@ function schedulePrefetch() {
     <template #description>
       The masonry engine at work on remote imagery: every card reserves its picture's exact
       <code>aspect-ratio</code> space through the canonical height oracle, the DOM window stays bounded while
-      scrolling, and only a small low-priority batch beyond the window is prefetched per scroll settle — visible
+      scrolling, and only a small low-priority batch beyond the window is prefetched per scroll settle - visible
       images always load first, and per-card state stays model-side.
     </template>
 
@@ -271,21 +271,21 @@ function schedulePrefetch() {
         <p>
           A masonry gallery streams a long feed of remote images through one scroll container. The masonry engine
           derives the column count from the container width, greedy-places each card on the shortest column, and
-          mounts only the window around the scroll position — so the DOM stays bounded no matter how long the feed.
+          mounts only the window around the scroll position - so the DOM stays bounded no matter how long the feed.
           The key decision for images is the <strong>canonical height oracle</strong>: every height is a pure function
           of the item and the resolved column width, which makes the layout exact without ever measuring the DOM. When
           the card is a picture whose aspect ratio is known, the oracle reserves precisely the space the image will
-          occupy, so the load — which is deferred until the card is actually in the window — cannot shift the layout.
+          occupy, so the load - which is deferred until the card is actually in the window - cannot shift the layout.
         </p>
 
         <h3>1. Choose the layout mode, then feed geometry props</h3>
         <p>
           <code>&lt;VirtualScrollMasonry&gt;</code> renders its own scrollable host (vertical axis only) and needs a
           definite height, exactly like <code>&lt;VirtualScroll&gt;</code>. The column layout is responsive by
-          construction: the engine picks the largest column count whose <code>target-column-width</code> + gap cadence fits the container width — resolved columns come out at least the target width — clamped by <code>min-columns</code> / <code>max-columns</code>, with
+          construction: the engine picks the largest column count whose <code>target-column-width</code> + gap cadence fits the container width - resolved columns come out at least the target width - clamped by <code>min-columns</code> / <code>max-columns</code>, with
           <code>gap</code> between cards. Two layout modes exist: the default canonical mode (heights from the oracle,
-          nothing measured) for cards whose size is knowable ahead of time — images with an aspect ratio, fixed-size
-          media — and <code>measured-heights</code> for cards that must size to their own content (wrapping text,
+          nothing measured) for cards whose size is knowable ahead of time - images with an aspect ratio, fixed-size
+          media - and <code>measured-heights</code> for cards that must size to their own content (wrapping text,
           user-generated posts), where mounted cards are measured with a <code>ResizeObserver</code> and the oracle
           height only serves as the pre-measure minimum.
         </p>
@@ -345,7 +345,7 @@ const imageUrl = (item: GalleryItem, width: number) =>
           The engine sizes each card's box (column width × oracle height) before your slot runs, so the slot root must
           fill it one-to-one (<code>width/height: 100%</code>). Put the picture inside as an absolutely positioned,
           <code>object-fit: cover</code> image with explicit <code>width</code>/<code>height</code> attributes matching
-          the oracle, and keep it hidden until its bytes arrive. Load state belongs model-side — recycled rows unmount
+          the oracle, and keep it hidden until its bytes arrive. Load state belongs model-side - recycled rows unmount
           and remount, so per-card flags stored in the DOM would be lost; push ids into reactive arrays from
           <code>@load</code>/<code>@error</code> and derive visibility from them. Never use native
           <code>loading="lazy"</code>: the window is already the only mounted content, and browser lazy-load heuristics
@@ -425,7 +425,7 @@ const imageUrl = (item: GalleryItem, width: number) =>
         <h3>4. Prefetch the next images after a scroll settle</h3>
         <p>
           Visible cards load eagerly at mount, so revealed cards are already filled. To make the <em>next</em>
-          screen ready too, warm a small batch of images beyond the rendered window — but only after the scroll
+          screen ready too, warm a small batch of images beyond the rendered window - but only after the scroll
           settles, and only up to a bounded count, or a fast fling fires dozens of request batches. The
           <code>@scroll</code> event hands you a <code>MasonryScrollDetails</code> payload whose <code>range</code>
           tells you the rendered window; the instance (<code>ref</code>) exposes the current <code>columnWidth</code>.
@@ -481,7 +481,7 @@ function schedulePrefetch() {
         <p>
           One scale caveat: the masonry component is vertical-only and does not apply coordinate scaling, so the total
           content height must stay below the browser's ~10M px scroll limit. For image galleries that is rarely a
-          constraint — thousands of aspect-reserved cards fit in that budget — but beyond it, a scaled
+          constraint - thousands of aspect-reserved cards fit in that budget - but beyond it, a scaled
           <code>VirtualScroll</code> layout is the tool.
         </p>
       </ImplementationGuide>

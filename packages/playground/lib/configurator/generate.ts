@@ -3,9 +3,9 @@
  * Generates complete, runnable code from a ConfiguratorState.
  *
  * Three outputs, all self-contained:
- * - `generateSfc(state, 'component')` — SFC using the `VirtualScroll` component.
- * - `generateSfc(state, 'composable')` — SFC using `useVirtualScroll` (+ extensions).
- * - `generateStandaloneHtml` / `generateCodePenForState` — no-build UMD page, saveable as a
+ * - `generateSfc(state, 'component')` - SFC using the `VirtualScroll` component.
+ * - `generateSfc(state, 'composable')` - SFC using `useVirtualScroll` (+ extensions).
+ * - `generateStandaloneHtml` / `generateCodePenForState` - no-build UMD page, saveable as a
  *   file or pushable to CodePen via the prefill API.
  *
  * All modes share the same data layer (Lorem API or local generation), item template and styles.
@@ -25,7 +25,7 @@ const CDN_VUE = 'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js';
  *
  * MUST be pinned to the latest npm release: the unversioned jsdelivr URL is cached
  * by browsers for 7 days (and by CDN edges for 12 h), so right after a publish it
- * can keep serving the previous dist — one that lacks components exported since
+ * can keep serving the previous dist - one that lacks components exported since
  * (VirtualScrollTable, VirtualScrollMasonry), which breaks the generated pens with
  * `Cannot read properties of undefined (reading 'mount')`.
  *
@@ -490,7 +490,7 @@ function statusExpression(state: ConfiguratorState): string {
   } else {
     offsets.push('offset ${Math.round(scrollDetails.scrollOffset.x)},${Math.round(scrollDetails.scrollOffset.y)}px');
   }
-  return `\`range \${scrollDetails.range.start}–\${scrollDetails.range.end} · ${ offsets.join(' · ') }\``;
+  return `\`range \${scrollDetails.range.start}-\${scrollDetails.range.end} · ${ offsets.join(' · ') }\``;
 }
 
 /**
@@ -1808,7 +1808,7 @@ function penJs(state: ConfiguratorState, derived: ReturnType<typeof getDerived>,
 function penBasePayload(state: ConfiguratorState, js: string, jsPreProcessor: CodePenPayload[ 'jsPreProcessor' ]): CodePenPayload {
   const derived = getDerived(state);
   return {
-    title: 'Virtual Scroll — Configurator Demo',
+    title: 'Virtual Scroll - Configurator Demo',
     html: penTemplate(state, derived),
     css: stylesBlock(state, derived, false, false),
     js,
@@ -2068,7 +2068,7 @@ function generatePenIndependent(state: ConfiguratorState): CodePenPayload {
   ].join('\n');
 
   return {
-    title: 'Virtual Scroll — Independent Scrollbars',
+    title: 'Virtual Scroll - Independent Scrollbars',
     html,
     css,
     js,
@@ -2287,7 +2287,7 @@ function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayloa
     '  <header class="vs-toolbar">',
     '    <h1 class="vs-title">Virtual Scroll Table Demo</h1>',
     '    <div v-if="scrollDetails" class="vs-status">',
-    '      <span>range {{ scrollDetails.range.start }}–{{ scrollDetails.range.end }}</span>',
+    '      <span>range {{ scrollDetails.range.start }}-{{ scrollDetails.range.end }}</span>',
     '    </div>',
     '    <div class="vs-actions">',
     '      <button type="button" class="vs-btn" @click="vs?.refresh()">Refresh</button>',
@@ -2344,7 +2344,7 @@ function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayloa
   ]);
 
   return {
-    title: 'Virtual Scroll — Configurator Demo (Table)',
+    title: 'Virtual Scroll - Configurator Demo (Table)',
     html,
     css: TABLE_PEN_CSS,
     js,
@@ -2434,7 +2434,7 @@ function generateMasonrySfc(state: ConfiguratorState, composableTab: boolean): s
   lines.push('    <header class="vs-toolbar">');
   lines.push('      <h1 class="vs-title">Virtual Scroll Masonry Demo</h1>');
   lines.push('      <div v-if="scrollDetails" class="vs-status">');
-  lines.push('        <span>cards {{ scrollDetails.range.start }}–{{ scrollDetails.range.end }} · {{ scrollDetails.items.length }} mounted</span>');
+  lines.push('        <span>cards {{ scrollDetails.range.start }}-{{ scrollDetails.range.end }} · {{ scrollDetails.items.length }} mounted</span>');
   lines.push('      </div>');
   lines.push('      <div class="vs-actions">');
   lines.push('        <button type="button" class="vs-btn" @click="masonryRef?.scrollToIndex(ITEM_COUNT - 1, { align: \'end\' })">Jump to end</button>');
@@ -2473,7 +2473,7 @@ function generateMasonryPen(state: ConfiguratorState, isTs = false): CodePenPayl
     '  <header class="vs-toolbar">',
     '    <h1 class="vs-title">Virtual Scroll Masonry Demo</h1>',
     '    <div v-if="scrollDetails" class="vs-status">',
-    '      <span>cards {{ scrollDetails.range.start }}–{{ scrollDetails.range.end }} · {{ scrollDetails.items.length }} mounted</span>',
+    '      <span>cards {{ scrollDetails.range.start }}-{{ scrollDetails.range.end }} · {{ scrollDetails.items.length }} mounted</span>',
     '    </div>',
     '    <div class="vs-actions">',
     '      <button type="button" class="vs-btn" @click="vs?.scrollToIndex(ITEMS.length - 1, { align: \'end\' })">Jump to end</button>',
@@ -2527,7 +2527,7 @@ function generateMasonryPen(state: ConfiguratorState, isTs = false): CodePenPayl
   ]);
 
   return {
-    title: 'Virtual Scroll — Configurator Demo (Masonry)',
+    title: 'Virtual Scroll - Configurator Demo (Masonry)',
     html,
     css: MASONRY_DEMO_CSS,
     js,

@@ -19,7 +19,7 @@ const PAGES_DIR = path.join(ROOT_DIR, 'pages');
 const SERVER_PROBLEM_RE = /\b(?:error|warn(?:ing)?|exception|fail(?:ed|ure)?)\b/i;
 
 // Chrome fires this when a ResizeObserver callback causes layout changes while
-// dynamic item sizes settle — transient and harmless, not a code error.
+// dynamic item sizes settle - transient and harmless, not a code error.
 const KNOWN_BENIGN_PROBLEM = 'ResizeObserver loop completed with undelivered notifications';
 
 let serverProcess: ChildProcess | undefined;
@@ -31,14 +31,14 @@ function assertPortFree(port: number): Promise<void> {
   const socket = net.connect(port, '127.0.0.1');
   socket.once('connect', () => {
     socket.destroy();
-    reject(new Error(`port ${ port } is already in use — stop the other server or set PLAYGROUND_E2E_PORT to a free port`));
+    reject(new Error(`port ${ port } is already in use - stop the other server or set PLAYGROUND_E2E_PORT to a free port`));
   });
   socket.once('error', () => resolve());
   return promise;
 }
 
 function generateChangelogData(): void {
-  // changelog-data.ts is generated from CHANGELOG.md and gitignored — absent in fresh checkouts
+  // changelog-data.ts is generated from CHANGELOG.md and gitignored - absent in fresh checkouts
   const result = spawnSync(process.execPath, [ 'scripts/sync-changelog.js' ], {
     cwd: ROOT_DIR,
     encoding: 'utf8',
@@ -82,7 +82,7 @@ function startDevServer(): Promise<void> {
         return;
       }
     } catch {
-      // not up yet — keep polling
+      // not up yet - keep polling
     }
     if (Date.now() > deadline) {
       reject(new Error(`dev server did not become ready in time:\n${ serverOutput.join('\n') }`));
@@ -119,7 +119,7 @@ function resolveRoute(route: string): string {
 }
 
 // The playground is served under its GitHub Pages base (e.g. /virtual-scroll/),
-// even in dev — the root request redirects there.
+// even in dev - the root request redirects there.
 async function discoverAppBase(): Promise<void> {
   const response = await fetch(`${ BASE_URL }/`, { redirect: 'manual' });
   const location = response.headers.get('location');

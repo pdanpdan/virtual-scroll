@@ -4,8 +4,8 @@
  * Masonry is path-dependent: the column an item lands in depends on the
  * column frontier left by every item before it. Storing that per item is O(n)
  * memory; storing it per *segment* is not. This module keeps the real column
- * frontier at every `segmentSize` boundary as a flat prefix table —
- * `columns` floats per snapshot — and resumes any later run from the nearest
+ * frontier at every `segmentSize` boundary as a flat prefix table -
+ * `columns` floats per snapshot - and resumes any later run from the nearest
  * stored frontier, so every layout is bit-identical to one greedy pass from
  * item 0.
  *
