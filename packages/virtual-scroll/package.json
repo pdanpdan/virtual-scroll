@@ -2,7 +2,7 @@
   "name": "@pdanpdan/virtual-scroll",
   "type": "module",
   "version": "0.13.2",
-  "description": "A high-performance virtual scroll component for Vue 3",
+  "description": "Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM.",
   "author": "",
   "license": "MIT",
   "homepage": "https://pdanpdan.github.io/virtual-scroll",
