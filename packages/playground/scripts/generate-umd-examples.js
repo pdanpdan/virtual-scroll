@@ -7,13 +7,20 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Configuration and Paths
+ *
+ * Resolved from this file, so the script runs from the playground package or
+ * the repository root (the build calls it from the package).
  */
-const PAGES_DIR = 'packages/playground/pages';
-const OUTPUT_DIR = 'packages/playground/public/umd';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PLAYGROUND_DIR = resolve(__dirname, '..');
+const PAGES_DIR = join(PLAYGROUND_DIR, 'pages');
+const OUTPUT_DIR = join(PLAYGROUND_DIR, 'public', 'umd');
+const LIBRARY_PACKAGE_JSON = resolve(PLAYGROUND_DIR, '../../packages/virtual-scroll/package.json');
 
 const reReplaceEmptyLines = /\n{3,}/g;
 const reReplaceTitle = /\{\{TITLE\}\}/g;
@@ -30,7 +37,7 @@ const reMatchDescription = /description: ['"](.*?)['"]/;
  * `packages/virtual-scroll/package.json` (auto-resolved when regenerating).
  */
 const vsVersion = JSON.parse(
-  readFileSync('packages/virtual-scroll/package.json', 'utf8'),
+  readFileSync(LIBRARY_PACKAGE_JSON, 'utf8'),
 ).version;
 
 /**

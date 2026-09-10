@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/sync-changelog.js && vike dev --host",
-    "build": "node scripts/sync-changelog.js && node scripts/generate-sitemap.js && vike build",
+    "build": "node scripts/sync-changelog.js && node scripts/generate-sitemap.js && node scripts/generate-umd-examples.js && vike build",
     "preview": "vike build && vike preview",
     "pretest:e2e": "playwright install chromium",
     "test:e2e": "playwright test",
