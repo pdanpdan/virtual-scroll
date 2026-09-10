@@ -3,7 +3,7 @@ import type { MasonryScrollDetails, VirtualScrollMasonryInstance } from '@pdanpd
 import type { Ref } from 'vue';
 
 import { VirtualScrollMasonry } from '@pdanpdan/virtual-scroll';
-import { inject, ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 
 import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
@@ -38,6 +38,10 @@ const items = ref<GalleryItem[]>(makeItems(600));
 const count = ref(600);
 const targetWidth = ref(260);
 const prefetchEnabled = ref(true);
+
+watch(count, (value) => {
+  items.value = makeItems(value);
+});
 
 function itemHeight(item: GalleryItem | undefined, _index: number, width: number): number {
   // Canonical oracle: reserve the exact aspect-ratio space of the picture.

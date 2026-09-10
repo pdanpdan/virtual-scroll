@@ -1,7 +1,7 @@
 import type { MasonryRenderedItem, MasonryScrollDetails, ScrollAlignment, ScrollAlignmentOptions, ScrollToIndexOptions, ScrollToIndexResult, VirtualScrollMasonryProps } from '../types';
 import type { ComputedRef, Ref } from 'vue';
 
-import { computed, ref, shallowRef, toValue, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, toValue, watch } from 'vue';
 
 import { DEFAULT_ITEM_SIZE, DEFAULT_MASONRY_GAP, DEFAULT_MASONRY_MAX_COLUMNS, DEFAULT_MASONRY_SEGMENT_SIZE, DEFAULT_MASONRY_TARGET_COLUMN_WIDTH } from '../types';
 import { MasonryLayout } from '../utils/masonry-layout';
@@ -38,6 +38,26 @@ function resolveScrollOptions(options?: ScrollAlignment | ScrollAlignmentOptions
     return { align: typeof requested.y === 'string' ? requested.y : 'auto', behavior, dryRun };
   }
   return { align: opts.y ?? 'auto', behavior, dryRun };
+}
+
+/**
+ * Repair the browser's silent clamping of a scroll write made this tick.
+ *
+ * A layout mutation re-anchors the content and writes the new position before
+ * the flush patches the wrapper's new height, so the browser clamps the write to
+ * the *old* content end: the engine would keep a position the scrollport never
+ * reached and render its window outside the viewport until the next user scroll.
+ * Re-issue the same write once the wrapper has been patched - a write to a
+ * scrollport the engine has since dropped is inert.
+ */
+function repairClampedScroll(el: HTMLElement, y: number, behavior: 'auto' | 'smooth'): void {
+  // Without a layout box to measure (jsdom, SSR) there is nothing to clamp.
+  if (!(el.scrollHeight > el.clientHeight) || y <= el.scrollHeight - el.clientHeight + CLAMP_TOLERANCE) {
+    return;
+  }
+  nextTick(() => {
+    el.scrollTo({ top: y, behavior });
+  });
 }
 
 /** An anchored content position captured before a layout mutation. */
@@ -220,6 +240,7 @@ export function useVirtualScrollMasonry<T>(
     const el = props.value.hostRef;
     if (el && Math.abs(el.scrollTop - clamped) > 0.5) {
       el.scrollTop = clamped;
+      repairClampedScroll(el, clamped, 'auto');
     }
   }
 
@@ -264,7 +285,9 @@ export function useVirtualScrollMasonry<T>(
     }, behavior === 'smooth' ? PROGRAMMATIC_SMOOTH_DELAY : SCROLL_END_DELAY);
     // behavior 'auto' fires a scroll event right away; 'smooth' streams events
     // while animating - both keep scrollY in sync through handleScroll.
-    el.scrollTo({ top: Math.max(0, y), behavior });
+    const target = Math.max(0, y);
+    el.scrollTo({ top: target, behavior });
+    repairClampedScroll(el, target, behavior);
   }
 
   function scheduleScrollEnd(): void {

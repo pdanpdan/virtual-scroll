@@ -316,6 +316,50 @@ describe('virtualScrollMasonry', () => {
     wrapper.unmount();
   });
 
+  it('re-applies a reflow anchor the browser clamped to the stale content height', async () => {
+    const { wrapper } = mountMasonry({
+      items: makeItems(2000),
+    });
+    await nextTick();
+    await nextTick();
+
+    const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+    const wrapperEl = wrapper.find('.virtual-scroll-wrapper').element as HTMLElement;
+    const renderedHeight = () => Number.parseFloat(/block-size: ([\d.]+)px/.exec(wrapperEl.getAttribute('style') ?? '')?.[ 1 ] ?? '0');
+    // Model a real scrollport: it cannot scroll past the content height the DOM
+    // renders right now, and the wrapper's new height only lands a flush after
+    // the engine's relayout.
+    let top = 0;
+    Object.defineProperty(container, 'scrollHeight', { configurable: true, get: renderedHeight });
+    Object.defineProperty(container, 'scrollTop', {
+      configurable: true,
+      get: () => top,
+      set: (value: number) => {
+        top = Math.max(0, Math.min(value, container.scrollHeight - container.clientHeight));
+      },
+    });
+
+    scrollTo(wrapper, renderedHeight());
+    await nextTick();
+    await nextTick();
+    const staleMax = top;
+    expect(staleMax).toBeGreaterThan(0);
+
+    // Wider columns shrink the column count and push the anchor far past the
+    // height the DOM currently holds: the write is clamped unless it is retried.
+    await wrapper.setProps({ targetColumnWidth: 480 });
+    await nextTick();
+    await nextTick();
+
+    expect(top).toBeGreaterThan(staleMax);
+    const cards = wrapper.findAll('.virtual-scroll-item').map((item) => {
+      const style = item.attributes('style') ?? '';
+      return { y: parseTranslate(item.element).y, height: Number(/height: ([\d.]+)px/.exec(style)?.[ 1 ] ?? '0') };
+    });
+    expect(cards.some((card) => card.y <= top && card.y + card.height > top)).toBe(true);
+    wrapper.unmount();
+  });
+
   it('exposes instance state and programmatic scroll controls', async () => {
     const { wrapper, vm } = mountMasonry();
     await nextTick();
