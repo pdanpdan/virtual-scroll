@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.2](https://github.com/pdanpdan/virtual-scroll/compare/v0.13.1...v0.13.2) (2026-09-10)
+
+### Bug Fixes
+
+* **playground:** install the Playwright browser before e2e runs ([7c5f7c1](https://github.com/pdanpdan/virtual-scroll/commit/7c5f7c19466585d7057b85fbbd51675d6a8fadab))
+* **VirtualScrollMasonry:** re-apply re-layout scroll writes the browser clamps ([53fe5ad](https://github.com/pdanpdan/virtual-scroll/commit/53fe5ad907a99c86c010f9f4c8358d81fe17a44b))
+
 ## [0.13.1](https://github.com/pdanpdan/virtual-scroll/compare/v0.13.0...v0.13.1) (2026-09-04)
 
 ### Bug Fixes
