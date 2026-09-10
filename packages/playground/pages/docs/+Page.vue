@@ -477,6 +477,26 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
           </div>
         </div>
 
+        <div class="docs-usage-card docs-usage-card--secondary">
+          <div class="docs-usage-card-body">
+            <h3 class="docs-usage-card-title docs-usage-card-title--secondary">Headless Composable</h3>
+            <p class="docs-usage-card-description">You render the markup: the composable hands back the window to mount and the scroll state.</p>
+            <CodeBlock
+              class="docs-code-block"
+              lang="ts"
+              code="import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const props = computed(() => ({ items: items.value, itemSize: 50, hostRef: scrollEl.value }));
+const { renderedItems, scrollDetails } = useVirtualScroll(props);"
+            />
+            <p />
+            <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80">
+              <li>Render <code>renderedItems</code> yourself, at the offsets it returns.</li>
+              <li>Extensions go in the second argument - see <a href="#composables" class="link link-secondary">Composables</a>.</li>
+            </ul>
+          </div>
+        </div>
+
         <div class="docs-usage-card docs-usage-card--accent">
           <div class="docs-usage-card-body">
             <h3 class="docs-usage-card-title docs-usage-card-title--accent">CDN Usage</h3>
@@ -2548,7 +2568,11 @@ const { setItemRef } = useVirtualScrollObservers({
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { useRtlExtension } from '@pdanpdan/virtual-scroll';"
+          code="import { useRtlExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const vs = useVirtualScroll(props, [
+  useRtlExtension(),
+]);"
         />
 
         <h4 id="parameters-7" class="docs-prop-subheader">
@@ -2590,7 +2614,11 @@ const { setItemRef } = useVirtualScrollObservers({
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { useSnappingExtension } from '@pdanpdan/virtual-scroll';"
+          code="import { useSnappingExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const vs = useVirtualScroll(props, [
+  useSnappingExtension(),
+]);"
         />
 
         <h4 id="parameters-8" class="docs-prop-subheader">
@@ -2633,7 +2661,11 @@ const { setItemRef } = useVirtualScrollObservers({
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { useStickyExtension } from '@pdanpdan/virtual-scroll';"
+          code="import { useStickyExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const vs = useVirtualScroll(props, [
+  useStickyExtension(),
+]);"
         />
 
         <h4 id="parameters-9" class="docs-prop-subheader">
@@ -2674,13 +2706,15 @@ const { setItemRef } = useVirtualScrollObservers({
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { useInfiniteLoadingExtension } from '@pdanpdan/virtual-scroll';
+          code="import { useInfiniteLoadingExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
 
-const ext = useInfiniteLoadingExtension({
-  onLoad: (axis) => {
-    console.log(`Load more items on ${axis} axis`);
-  }
-});"
+const vs = useVirtualScroll(props, [
+  useInfiniteLoadingExtension({
+    onLoad: (axis) => {
+      console.log(`Load more items on ${axis} axis`);
+    },
+  }),
+]);"
         />
 
         <h4 id="parameters-10" class="docs-prop-subheader">
@@ -2734,7 +2768,11 @@ const ext = useInfiniteLoadingExtension({
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { usePrependRestorationExtension } from '@pdanpdan/virtual-scroll';"
+          code="import { usePrependRestorationExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const vs = useVirtualScroll(props, [
+  usePrependRestorationExtension(),
+]);"
         />
 
         <h4 id="parameters-11" class="docs-prop-subheader">
@@ -2776,7 +2814,11 @@ const ext = useInfiniteLoadingExtension({
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { useCoordinateScalingExtension } from '@pdanpdan/virtual-scroll';"
+          code="import { useCoordinateScalingExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const vs = useVirtualScroll(props, [
+  useCoordinateScalingExtension(),
+]);"
         />
 
         <h4 id="parameters-12" class="docs-prop-subheader">

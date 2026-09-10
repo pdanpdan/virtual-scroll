@@ -83,7 +83,41 @@ import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 </script>
 ```
 
-### 3. CDN Usage
+### 3. Headless Composable
+
+`useVirtualScroll` returns the window to mount and the scroll state; you render and position the rows, and pass extensions as the second argument. Pass the scroll element as `hostRef` (or `container`), and give it a definite height.
+
+```vue
+<script setup>
+import { useVirtualScroll } from '@pdanpdan/virtual-scroll';
+import { computed, ref } from 'vue';
+
+const scrollEl = ref(null);
+const items = ref(Array.from({ length: 10_000 }, (_, i) => ({ id: i })));
+const props = computed(() => ({ items: items.value, itemSize: 50, hostRef: scrollEl.value }));
+const { renderedItems, scrollDetails } = useVirtualScroll(props);
+</script>
+
+<template>
+  <div ref="scrollEl" class="viewport">
+    <div :style="{ height: `${ scrollDetails.totalSize.height }px` }">
+      <div
+        v-for="row in renderedItems"
+        :key="row.index"
+        :style="{ transform: `translateY(${ row.offset.y }px)` }"
+      >
+        {{ row.item.id }}
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.viewport { height: 500px; overflow: auto; }
+</style>
+```
+
+### 4. CDN Usage
 
 ```html
 <!-- Import Vue 3 first -->
