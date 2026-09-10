@@ -492,10 +492,10 @@
   <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
     <ul class="space-y-4">
       <li>
-        <strong>@pdanpdan/virtual-scroll</strong> &mdash; the only option that covers grid + window scrolling +
-        RTL + sticky + keyboard navigation out of the box, the only one that virtualizes past the browser's
+        <strong>@pdanpdan/virtual-scroll</strong> &mdash; the only option that covers grid, window scrolling,
+        RTL, sticky and keyboard navigation on its own, the only one that virtualizes past the browser's
         max element height, and the only Vue library that ships masonry and real table-flow layouts as
-        first-class modes (canonical oracle or measured heights, single scroll container) on top of a native
+        first-class modes (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also the second-largest
         bundle here, and at 12 stars it has no community to fall back on.

@@ -35,7 +35,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Grid Dynamic</h2>
-              <p class="text-xs opacity-60">Simultaneously virtualizes rows and columns with dynamic detection of widths from any slot structure.</p>
+              <p class="text-xs opacity-60">Rows and columns virtualized at once, with column widths read from the DOM.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -48,7 +48,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Grid Fixed</h2>
-              <p class="text-xs opacity-60">Simultaneously virtualizes rows and columns using fixed itemSize and alternating columnWidth values.</p>
+              <p class="text-xs opacity-60">Rows and columns virtualized at once with a fixed itemSize and alternating columnWidth values.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -61,7 +61,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Horizontal Dynamic</h2>
-              <p class="text-xs opacity-60">Horizontal scrolling with items with different widths measured via ResizeObserver.</p>
+              <p class="text-xs opacity-60">Horizontal list of items whose widths are measured with ResizeObserver.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -74,7 +74,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Horizontal Fixed</h2>
-              <p class="text-xs opacity-60">Optimized for items where every item has the same width and row height is filled automatically.</p>
+              <p class="text-xs opacity-60">Horizontal list of uniform-width items, with the row height filled automatically.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -87,7 +87,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Vertical Dynamic</h2>
-              <p class="text-xs opacity-60">Vertical scrolling with variable item heights automatically measured using ResizeObserver.</p>
+              <p class="text-xs opacity-60">Vertical list of variable-height rows, measured with ResizeObserver.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -100,7 +100,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Vertical Fixed</h2>
-              <p class="text-xs opacity-60">Optimized for lists where every item has the same height and items are only rendered when they enter the visible viewport.</p>
+              <p class="text-xs opacity-60">Vertical list of uniform-height rows; only the rows in the viewport are rendered.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -113,7 +113,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Custom Scrollbar</h2>
-              <p class="text-xs opacity-60">Demonstrates the virtual scrollbar implementation that allows the scrollbar to be designed and styled by the user.</p>
+              <p class="text-xs opacity-60">Virtual scrollbars drawn inside the container, styled with CSS variables or your own markup.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -126,7 +126,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Infinite Scroll</h2>
-              <p class="text-xs opacity-60">Demonstrates the load event and loading prop/slot for automatic pagination.</p>
+              <p class="text-xs opacity-60">Automatic pagination with the load event and the loading slot.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -139,7 +139,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Sticky Sections</h2>
-              <p class="text-xs opacity-60">Demonstrates iOS-style sticky headers where new headers push previous ones out of view.</p>
+              <p class="text-xs opacity-60">Section headers that stick to the top and get pushed out by the next one.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -152,7 +152,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Chat Interface</h2>
-              <p class="text-xs opacity-60">Chat demonstration with dynamic heights, initial scroll to bottom, and history scroll restoration.</p>
+              <p class="text-xs opacity-60">Chat with bubble heights measured from the DOM, opening at the bottom, and history loading without moving the view.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -165,7 +165,7 @@
           <div class="card-body p-4 flex-row items-center justify-between">
             <div>
               <h2 class="card-title text-base font-bold group-hover:text-primary transition-colors">Table</h2>
-              <p class="text-xs opacity-60">Semantic HTML table virtualization for semantically correct and accessible tabular data grids.</p>
+              <p class="text-xs opacity-60">Virtualized rows in real table markup, for accessible tabular data.</p>
             </div>
 
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 opacity-20 group-hover:opacity-100 transition-opacity">

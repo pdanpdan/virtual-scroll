@@ -2,5 +2,5 @@ import type { Config } from 'vike/types';
 
 export default {
   title: 'Masonry Grid | Virtual Scroll',
-  description: 'Real masonry in one VirtualScrollMasonry container: responsive columns from the container width, canonical oracle-driven heights, anchored reflow.',
+  description: 'Masonry grid in one scroll container: columns from the container width, heights from the model or measured from the DOM.',
 } satisfies Config;

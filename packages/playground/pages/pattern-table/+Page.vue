@@ -49,7 +49,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Demonstrates usage of custom tags (<strong>table</strong>, <strong>tbody</strong>, <strong>tr</strong>) for semantically correct and accessible tabular data virtualization with {{ itemCount.toLocaleString() }} items. Row height is fixed at {{ itemSize }}px.
+      Virtualized rows built from real table markup (<strong>table</strong>, <strong>tbody</strong>, <strong>tr</strong>), so what ends up in the DOM is an ordinary accessible table. {{ itemCount.toLocaleString() }} rows of {{ itemSize }}px.
     </template>
 
     <template #icon>

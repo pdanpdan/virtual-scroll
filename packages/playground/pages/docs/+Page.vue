@@ -83,9 +83,11 @@ onUnmounted(() => {
       </h2>
       <div class="prose prose-sm @4xl:prose-lg max-w-none">
         <p>
-          <code>@pdanpdan/virtual-scroll</code> is a high-performance Vue 3 virtual scroll library designed to handle massive lists with ease.
-          It supports vertical, horizontal, and bidirectional (grid) scrolling, dynamic item sizes using <code>ResizeObserver</code>,
-          and full support for Right-to-Left (RTL) layouts.
+          <code>@pdanpdan/virtual-scroll</code> renders only the rows near the viewport, so a list stays fast no matter
+          how many items it holds. It scrolls vertically, horizontally, or on both axes at once (grids), handles fixed,
+          computed and measured item sizes, and works with RTL layouts, the browser window as the scroll container,
+          and lists that overflow the browser's own size limit. The live examples on this site are the fastest way in;
+          this page is the full reference.
         </p>
       </div>
     </section>
@@ -99,8 +101,9 @@ onUnmounted(() => {
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          Virtualization keeps the DOM small by rendering only the items in the viewport (plus a configurable buffer), so scrolling stays responsive regardless of dataset size.
-          Scroll handling and range calculations are optimized for every sizing mode; the biggest wins come from the configuration choices below.
+          Virtualization keeps the DOM small by rendering only the items in the viewport (plus a configurable buffer),
+          so scrolling stays responsive however large the dataset. Scroll handling is tuned per sizing mode, but the
+          configuration choices below matter most.
         </p>
       </div>
 
@@ -111,7 +114,7 @@ onUnmounted(() => {
           Wheel, touch, and keyboard scrolling are not affected.
         </p>
         <p class="opacity-90 mt-2">
-          To keep scrollbar dragging instant and 1:1 with the pointer, it is <strong>strongly suggested</strong> to use the built-in virtual scrollbars:
+          To keep scrollbar dragging instant and 1:1 with the pointer, use the built-in virtual scrollbars:
         </p>
         <ol class="list-decimal ps-5 space-y-1 opacity-90 mt-2">
           <li>
@@ -154,7 +157,7 @@ onUnmounted(() => {
           <strong>Use <code>ssrRange</code></strong> to pre-render the initial viewport and skip the first measure/scroll pass on slow devices.
         </li>
         <li>
-          <strong>Massive lists are handled automatically.</strong> Beyond the browser's ~10,000,000&nbsp;px limit the library switches to coordinate scaling - virtual content units (VU) are mapped onto the browser's display units (DU) - so no extra configuration is needed, except with window/body containers, where coordinate scaling and virtual scrollbars are disabled.
+          <strong>Massive lists need no configuration.</strong> Past the browser's ~10,000,000&nbsp;px limit the engine switches to coordinate scaling (virtual units mapped onto the display units the browser accepts) - except with window/body containers, where coordinate scaling and virtual scrollbars are unavailable.
         </li>
       </ul>
 
@@ -208,9 +211,8 @@ onUnmounted(() => {
             </li>
             <li>
               <strong>Avoid content that mounts asynchronously and changes row height late.</strong> Dynamic heights are
-              fully supported (<code>ResizeObserver</code> measures and the layout self-corrects), but the smoothest
-              experience comes from content whose size is stable or reserved up front - especially in lists that also use
-              snapping or sticky items.
+              supported (<code>ResizeObserver</code> measures and the layout corrects itself), but content whose size is
+              stable or reserved up front scrolls smoother - especially in lists that also use snapping or sticky items.
             </li>
           </ul>
           <p>
@@ -231,7 +233,8 @@ onUnmounted(() => {
         </h2>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
           <p>
-            The library offers flexible ways to define item and column sizes. Calculations are optimized based on the type of sizing used.
+            Sizes can be a single number, a repeating pattern, a value computed per item, or measured from the DOM.
+            Cheaper sizes mean less work per scroll, so pick the first one that fits your data.
           </p>
           <div class="docs-table-container mt-4">
             <table class="docs-table">
@@ -288,7 +291,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Bidirectional Scrolling</h4>
-              <p class="docs-feature-card-description">Virtualize both rows and columns for massive data grids.</p>
+              <p class="docs-feature-card-description">Virtualize rows and columns together, for grids that scroll both ways.</p>
             </div>
           </div>
         </div>
@@ -297,7 +300,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Dynamic Item Sizes</h4>
-              <p class="docs-feature-card-description">Automatic measurement via ResizeObserver for precise scrolling.</p>
+              <p class="docs-feature-card-description">Rows measure themselves with ResizeObserver when their content changes.</p>
             </div>
           </div>
         </div>
@@ -306,7 +309,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">RTL Support</h4>
-              <p class="docs-feature-card-description">Automatic direction detection and correct coordinate mapping for RTL layouts.</p>
+              <p class="docs-feature-card-description">Detects RTL from the container and keeps horizontal positions correct.</p>
             </div>
           </div>
         </div>
@@ -324,7 +327,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Sticky Headers/Footers</h4>
-              <p class="docs-feature-card-description">iOS-style pushing headers for segmented lists and groups.</p>
+              <p class="docs-feature-card-description">Headers and footers that stick and push each other, for grouped and sectioned lists.</p>
             </div>
           </div>
         </div>
@@ -333,7 +336,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Scroll Restoration</h4>
-              <p class="docs-feature-card-description">Maintains position when prepending items (perfect for chat).</p>
+              <p class="docs-feature-card-description">Keeps the view in place when items are prepended - chat and live logs.</p>
             </div>
           </div>
         </div>
@@ -342,7 +345,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">SSR & Hydration</h4>
-              <p class="docs-feature-card-description">Full support for server-side rendering and client hydration.</p>
+              <p class="docs-feature-card-description">Pre-renders a range on the server and hydrates it in place.</p>
             </div>
           </div>
         </div>
@@ -351,7 +354,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Massive List Support</h4>
-              <p class="docs-feature-card-description">Handles 10M+ items via automatic coordinate scaling (except for window/body containers).</p>
+              <p class="docs-feature-card-description">Goes past the browser's ~10M px size limit, except with window/body containers.</p>
             </div>
           </div>
         </div>
@@ -360,7 +363,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Virtual Scrollbars</h4>
-              <p class="docs-feature-card-description">Fully customizable virtual scrollbars that replace native ones.</p>
+              <p class="docs-feature-card-description">Overlay scrollbars that stay 1:1 on huge lists; style them with CSS variables or your own markup.</p>
             </div>
           </div>
         </div>
@@ -369,7 +372,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Scroll Snapping</h4>
-              <p class="docs-feature-card-description">Auto-align items to viewport edges or center (start, center, end, auto).</p>
+              <p class="docs-feature-card-description">Aligns to the start, center or end of an item when scrolling stops.</p>
             </div>
           </div>
         </div>
@@ -387,7 +390,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Masonry Layout</h4>
-              <p class="docs-feature-card-description">Real masonry in one scroll container: responsive columns, canonical oracle heights, anchored reflow, bounded DOM at any scale.</p>
+              <p class="docs-feature-card-description">Masonry columns in a single scroll container: heights from your model, only the visible cards mounted.</p>
             </div>
           </div>
         </div>
@@ -402,7 +405,7 @@ onUnmounted(() => {
         </a>
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none">
-        <p>Install the package using your favorite package manager:</p>
+        <p>Install the package:</p>
       </div>
       <CodeBlock class="docs-code-block" code="pnpm add @pdanpdan/virtual-scroll" lang="bash" />
       <div class="prose prose-sm @4xl:prose-md max-w-none mt-4 @4xl:mt-6">
@@ -452,7 +455,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <p />
             <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80">
               <li>Compatible with all modern bundlers.</li>
-              <li><strong>Note:</strong> Manual CSS import is required.</li>
+              <li><strong>Note:</strong> import the CSS yourself.</li>
             </ul>
           </div>
         </div>
@@ -460,7 +463,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <div class="docs-usage-card docs-usage-card--secondary">
           <div class="docs-usage-card-body">
             <h3 class="docs-usage-card-title docs-usage-card-title--secondary">Original Vue SFC</h3>
-            <p class="docs-usage-card-description">Import raw source for custom compilation.</p>
+            <p class="docs-usage-card-description">Import the source and compile it with your own toolchain.</p>
             <CodeBlock
               class="docs-code-block"
               lang="ts"
@@ -496,7 +499,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <div class="docs-usage-card docs-usage-card--accent">
           <div class="docs-usage-card-body">
             <h3 class="docs-usage-card-title docs-usage-card-title--accent">CDN Stand-alone Examples</h3>
-            <p class="docs-usage-card-description text-xs">Full-page HTML examples loading all dependencies from CDN.</p>
+            <p class="docs-usage-card-description text-xs">Stand-alone HTML pages that load Vue and the library from a CDN.</p>
             <div class="flex-1 overflow-auto mt-2">
               <ul class="grid grid-cols-1 @3xl:grid-cols-2 gap-x-4 gap-y-1 text-sm @4xl:text-base">
                 <li><a href="/virtual-scroll/umd/index.html" target="_blank" data-vike="false" class="link link-primary font-bold">Main Index</a></li>
@@ -527,8 +530,9 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          The library uses a highly modular architecture powered by extensions. Extensions can tap into the core lifecycle
-          to add features like RTL support, snapping, or custom loading logic without bloating the core engine.
+          RTL, snapping, sticky items, infinite loading and coordinate scaling are extensions: each one hooks into the
+          scroll lifecycle, so a plain list only carries what it needs and you opt into the rest. You can write your own
+          against the same interface.
         </p>
       </div>
 
@@ -536,12 +540,12 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
         <div class="card bg-base-200 p-4 border border-base-content/5">
           <h4 class="font-bold text-primary mb-2">Built-in Extensions</h4>
           <ul class="list-disc ps-5 text-sm space-y-1 opacity-80 text-base-content">
-            <li><a href="#use-rtl-extension" class="link"><code>useRtlExtension()</code></a>: Automatic RTL support.</li>
-            <li><a href="#use-snapping-extension" class="link"><code>useSnappingExtension()</code></a>: Scroll snapping.</li>
-            <li><a href="#use-sticky-extension" class="link"><code>useStickyExtension()</code></a>: Sticky elements.</li>
-            <li><a href="#use-infinite-loading-extension" class="link"><code>useInfiniteLoadingExtension()</code></a>: Data loading.</li>
-            <li><a href="#use-prepend-restoration-extension" class="link"><code>usePrependRestorationExtension()</code></a>: Position maintenance.</li>
-            <li><a href="#use-coordinate-scaling-extension" class="link"><code>useCoordinateScalingExtension()</code></a>: Massive lists.</li>
+            <li><a href="#use-rtl-extension" class="link"><code>useRtlExtension()</code></a>: RTL layout detection.</li>
+            <li><a href="#use-snapping-extension" class="link"><code>useSnappingExtension()</code></a>: Snapping to item edges.</li>
+            <li><a href="#use-sticky-extension" class="link"><code>useStickyExtension()</code></a>: Sticky headers, footers and indices.</li>
+            <li><a href="#use-infinite-loading-extension" class="link"><code>useInfiniteLoadingExtension()</code></a>: Loads more data near the end.</li>
+            <li><a href="#use-prepend-restoration-extension" class="link"><code>usePrependRestorationExtension()</code></a>: Keeps the position when items are prepended.</li>
+            <li><a href="#use-coordinate-scaling-extension" class="link"><code>useCoordinateScalingExtension()</code></a>: Lists past the browser size limit.</li>
           </ul>
         </div>
 
@@ -577,8 +581,9 @@ const vs = useVirtualScroll(props, [
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          The <code>VirtualScroll</code> component is the primary way to use this library. It provides a declarative Vue interface
-          for virtualizing large lists and grids, handling all rendering, recycling, and scroll logic automatically.
+          The component most projects use: pass your items and an <code>item</code> slot, and it mounts the rows around
+          the scroll position, recycles them as you scroll, and keeps the scroll state in step - vertical, horizontal
+          or grid, with the props and slots below.
         </p>
       </div>
 
@@ -898,7 +903,7 @@ const vs = useVirtualScroll(props, [
         </a>
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
-        <p>The component automatically manages ARIA roles and attributes to ensure screen readers can navigate virtualized content. Common roles like <code>tree</code>, <code>listbox</code>, and <code>menu</code> are also supported.</p>
+        <p>Roles and attributes are set for you, so screen readers can follow the virtualized content: lists, grids, and also <code>tree</code>, <code>listbox</code> and <code>menu</code> roles.</p>
         <div class="docs-table-container">
           <table class="docs-table">
             <thead><tr><th>Role Prop</th><th>Default Item Role</th><th>Behavior</th></tr></thead>
@@ -1203,8 +1208,7 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm max-w-none mb-6 opacity-80">
         <p>
-          The <code>VirtualScroll</code> component exposes several reactive properties and methods from the underlying logic.
-          You can access these via a template <code>ref</code>.
+          The reactive state and methods available through a template <code>ref</code>.
         </p>
       </div>
 
@@ -1352,12 +1356,11 @@ const vs = useVirtualScroll(props, [
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          For tabular data use the dedicated <code>VirtualScrollTable</code> component: it renders semantic
-          <code>&lt;table&gt;</code>/<code>&lt;tbody&gt;</code>/<code>&lt;tr&gt;</code> structure, keeps the
-          virtual offsets with spacer rows in real table flow (<code>flowTable</code>) or with absolute rows
-          (fallback), measures dynamic row heights, and exposes the <code>header</code>, <code>footer</code>
-          and <code>item</code> slots. When the table is wider than its container it gets its own horizontal
-          virtual scrollbar.
+          For tabular data, use the dedicated <code>VirtualScrollTable</code> component: it renders real
+          <code>&lt;table&gt;</code>/<code>&lt;tbody&gt;</code>/<code>&lt;tr&gt;</code> markup, keeps the virtual offsets
+          with spacer rows in table flow (<code>flowTable</code>) or with absolutely positioned rows, measures dynamic
+          row heights, and provides the <code>header</code>, <code>footer</code> and <code>item</code> slots. A table
+          wider than its container gets its own horizontal virtual scrollbar.
           See the <a href="/virtual-scroll/essential-flow-table" class="link link-primary font-bold">Flow Table example</a>
           and the <a href="/virtual-scroll/pattern-table" class="link link-primary font-bold">Table example</a>.
           Scroll snapping is supported in table mode: flow rows and absolute rows snap to the same row offsets
@@ -1422,8 +1425,8 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          <code>VirtualScrollTable</code> is the same virtualization component with table semantics - almost
-          everything on the <code>VirtualScroll</code> component still applies:
+          <code>VirtualScrollTable</code> is the same component with table markup - everything on
+          <code>VirtualScroll</code> still applies unless noted here:
         </p>
         <ul class="list-disc ps-5 space-y-2">
           <li>
@@ -1479,20 +1482,17 @@ const vs = useVirtualScroll(props, [
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          <code>VirtualScrollMasonry</code> renders a real masonry grid inside a <strong>single</strong> native
-          scroll container: the column count and a fractional column width are derived from the container width,
-          cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only
-          the window around the scroll position is mounted (plus one segment of overscan) - the DOM stays bounded
-          no matter the dataset size or how far the user jumps.
+          <code>VirtualScrollMasonry</code> lays out a masonry grid inside a <strong>single</strong> native scroll
+          container: columns are sized from the container width, each card goes to the shortest column, and only the
+          cards around the scroll position are mounted - the DOM stays bounded however large the dataset, and a far
+          <code>scrollToIndex</code> never mounts the cards it jumps over.
         </p>
         <p>
-          Heights come from the deterministic <code>itemHeight</code> oracle by default (canonical layout: far
-          <code>scrollToIndex</code> calls land on the exact greedy position without ever mounting the path,
-          unvisited segments are priced arithmetically, and the total is exact once the frontier chain reaches the
-          end). With <code>measuredHeights</code>, mounted cards are measured instead and the measured boxes drive
-          the layout (local determinism: reproducible per measurement history). Container reflows (resize,
-          column-geometry changes, dataset replacement) re-anchor the topmost visible card at its screen offset
-          instead of holding a raw pixel position.
+          Heights come from the deterministic <code>itemHeight</code> oracle by default, so the layout is exact without
+          measuring anything: jumps land on the real position and the total height is known as soon as the layout
+          reaches the end of the list. With <code>measuredHeights</code>, mounted cards are measured instead and their
+          real boxes drive the layout. When the container reflows (resize, different column geometry, a new dataset)
+          the topmost visible card keeps its place on screen instead of the view jumping.
           See the <a href="/virtual-scroll/essential-masonry" class="link link-primary font-bold">Masonry example</a>.
         </p>
       </div>
@@ -1694,8 +1694,10 @@ const vs = useVirtualScroll(props, [
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <p>
-          The <code>VirtualScrollbar</code> component provides a cross-browser consistent scrollbar that can be used independently or within the <code>VirtualScroll</code> component.
-          Check out the <a href="/feature-independent-scrollbars" class="link link-primary font-bold">Independent Scrollbars example</a> to see it in action without virtualization.
+          An overlay scrollbar that looks and behaves the same in every browser, usable on its own or inside
+          <code>VirtualScroll</code>. See the
+          <a href="/feature-independent-scrollbars" class="link link-primary font-bold">Independent Scrollbars example</a>
+          for it working without any virtualization.
         </p>
       </div>
 
@@ -1846,7 +1848,7 @@ const scrollY = ref(0);
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Provides the core virtualization logic. Recommended for advanced use cases or when building custom wrappers.
+            The engine behind the component, for when you want to drive the markup yourself or build your own wrapper.
           </p>
         </div>
 
@@ -2044,12 +2046,11 @@ scrollToIndex
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Masonry virtualization driver for a single native scroll container - the engine behind
+            The engine behind
             <a href="#virtual-scroll-masonry" class="link link-primary font-semibold">VirtualScrollMasonry</a>.
-            Owns one <code>MasonryLayout</code> frontier chain, renders only the cards intersecting the viewport
-            (plus one segment of overscan per side), derives responsive column geometry from the container width
-            and re-anchors the topmost visible card in content space on every relayout. Headless composable users
-            provide their scrollable element via the <code>hostRef</code> prop.
+            It derives the column geometry from the container width, places each card on the shortest column, mounts
+            only the cards near the scroll position, and keeps the topmost visible card in place across relayouts.
+            Headless users provide their own scrollable element through the <code>hostRef</code> prop.
           </p>
         </div>
 
@@ -2101,7 +2102,7 @@ const {
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Manages the underlying sizing logic using Fenwick Trees. This composable handles prefix sum calculations, size updates, and scroll correction adjustments.
+            Keeps track of item sizes: prefix sums, size updates and the scroll corrections that follow a measurement.
           </p>
         </div>
 
@@ -2218,7 +2219,7 @@ const {
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Provides the logic for virtual scrollbar interactions. It handles track clicks, thumb dragging, and coordinate mapping (including RTL).
+            Scrollbar interactions: track clicks, thumb dragging and mapping between scrollbar and scroll positions (including RTL).
           </p>
         </div>
 
@@ -2317,7 +2318,7 @@ const {
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Handles pointer-based scrolling, inertia animation, and mouse wheel events for cases where native scrolling is not available (e.g., massive lists or custom scrollbars).
+            Pointer dragging, inertia and wheel handling for the cases where native scrolling is not available (scaled lists, custom scrollbars).
           </p>
         </div>
 
@@ -2398,7 +2399,7 @@ const {
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Provides keyboard navigation support for the virtual scroll container, allowing users to navigate using Arrows, Home, End, PageUp, and PageDown keys.
+            Keyboard navigation for the container: Arrows, Home, End, PageUp and PageDown, with optional alignment.
           </p>
         </div>
 
@@ -2465,7 +2466,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Manages <code>ResizeObserver</code> instances to support fully dynamic item and container sizes.
+            Creates and manages the <code>ResizeObserver</code>s behind dynamic item and container sizes.
           </p>
         </div>
 
@@ -2540,7 +2541,7 @@ const { setItemRef } = useVirtualScrollObservers({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Automatically detects the text direction (LTR or RTL) of the scroll container and adjusts the coordinate system accordingly. It ensures that horizontal scroll offsets and item positioning are correct in RTL mode.
+            Detects the text direction of the scroll container (LTR or RTL) and flips horizontal offsets so items land in the right place.
           </p>
         </div>
 
@@ -2582,7 +2583,7 @@ const { setItemRef } = useVirtualScrollObservers({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Adds scroll snapping behavior to the virtualizer. When user scrolling stops, the extension automatically aligns the viewport to the nearest item based on the <code>snap</code> prop configuration.
+            Aligns the viewport to an item when scrolling stops, following the <code>snap</code> prop.
           </p>
         </div>
 
@@ -2625,7 +2626,7 @@ const { setItemRef } = useVirtualScrollObservers({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Sticky rows and columns. <code>VirtualScroll</code> registers this extension automatically; the sticky behavior itself lives in the core engine, keyed on the <code>stickyIndices</code>, <code>stickyHeader</code> and <code>stickyFooter</code> props - the extension is a pass-through kept for the composable wiring contract.
+            Sticky rows and columns. The behavior lives in the engine and is driven by the <code>stickyIndices</code>, <code>stickyHeader</code> and <code>stickyFooter</code> props; this extension exists so the composable wires it the same way the component does.
           </p>
         </div>
 
@@ -2666,7 +2667,7 @@ const { setItemRef } = useVirtualScrollObservers({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Simple extension to facilitate infinite scrolling. It monitors the scroll position and triggers a callback when the user reaches a specific distance from the end of the content.
+            Calls back once the scroll position comes within the configured distance of the end, so you can append the next page of items.
           </p>
         </div>
 
@@ -2726,7 +2727,7 @@ const ext = useInfiniteLoadingExtension({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Essential for chat-like interfaces. When items are prepended to the beginning of the <code>items</code> array, this extension calculates the added size and applies a scroll correction to maintain the user's perceived position.
+            Keeps the visible position when items are prepended to the front of <code>items</code> - what chat and log views need, so the reader stays where they were while older entries load above.
           </p>
         </div>
 
@@ -2768,7 +2769,7 @@ const ext = useInfiniteLoadingExtension({
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Enables support for virtually unlimited content sizes. Since browsers have a hard limit on the physical height/width of elements (usually around 10M to 30M pixels), this extension scales the display coordinates so the virtual list can represent billions of pixels.
+            Lets a list scroll far past the browser's element size limit (roughly 10M to 30M px) by scaling the display coordinates, so virtual content can span billions of pixels.
           </p>
         </div>
 
@@ -3183,7 +3184,7 @@ const ext = useInfiniteLoadingExtension({
           </a>
         </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
-          <p>A highly optimized data structure for <em>O(log n)</em> prefix sum calculations and point updates.</p>
+          <p>A Fenwick tree (binary indexed tree): <em>O(log n)</em> prefix sums and point updates.</p>
         </div>
         <div class="docs-table-container text-base-content/80">
           <table class="table table-sm @4xl:table-md table-zebra w-full">

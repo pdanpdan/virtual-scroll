@@ -11,7 +11,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
       <div>
         <h1 class="text-primary">Virtual Scroll</h1>
         <p class="text-base @4xl:text-xl opacity-60 font-medium mt-1">
-          A high-performance virtualization library for Vue 3.
+          Only the rows near the viewport are in the DOM, so lists, grids, tables and masonry layouts stay fast however long they get.
         </p>
       </div>
     </div>
@@ -35,8 +35,8 @@ import ExampleCard from '#/components/ExampleCard.vue';
           Documentation
         </h2>
         <p class="text-base @4xl:text-lg opacity-80 max-w-4xl">
-          Everything you need to know about integrating <code>@pdanpdan/virtual-scroll</code> into your Vue 3 applications.
-          From basic list virtualization to advanced grid and SSR setups.
+          Props, slots, composables and types, plus the parts that need more than a table: sizing, performance,
+          authoring recycled rows, SSR, tables and masonry.
         </p>
         <div class="card-actions mt-8">
           <AppLink v-slot="{ href }" href="/docs">
@@ -121,7 +121,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Vertical Fixed"
-      description="Optimized for lists where every item has the same height."
+      description="Rows of one height; only the visible ones are rendered."
       href="/essential-vertical-fixed"
       group="1"
     />
@@ -129,7 +129,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Vertical Dynamic"
-      description="Handles variable item heights automatically using ResizeObserver."
+      description="Variable row heights, measured with ResizeObserver."
       href="/essential-vertical-dynamic"
       group="1"
     />
@@ -137,7 +137,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Vertical Fixed Body"
-      description="Use the browser window as the primary scroll container."
+      description="The browser window as the scroll container, with fixed rows."
       href="/essential-vertical-fixed-body"
       group="2"
     />
@@ -153,7 +153,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Horizontal Fixed"
-      description="Full support for horizontal-only virtualization with fixed widths."
+      description="A horizontal strip of fixed-width items."
       href="/essential-horizontal-fixed"
       group="3"
     />
@@ -169,7 +169,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Grid Fixed"
-      description="Scroll simultaneously in both X and Y axes with virtualized columns."
+      description="Rows and columns virtualized at once, with fixed sizes."
       href="/essential-grid-fixed"
       group="4"
     />
@@ -177,7 +177,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Grid Dynamic"
-      description="Bidirectional scroll with programmatic column widths using a function."
+      description="Rows and columns virtualized at once, with column widths from a function."
       href="/essential-grid-dynamic"
       group="4"
     />
@@ -192,7 +192,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Essential"
       title="Masonry Grid"
-      description="Real masonry in one VirtualScrollMasonry container: responsive columns, canonical oracle heights and anchored reflow."
+      description="Masonry columns in one scroll container, from the model's heights or from the DOM."
       href="/essential-masonry"
       group="6"
     />
@@ -204,7 +204,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Feature"
       title="Infinite Scroll"
-      description="Automatic pagination and loading states when reaching end of content."
+      description="Loads the next page as you approach the end, with a loading row."
       href="/feature-infinite-scroll"
       group="1"
     />
@@ -212,7 +212,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Feature"
       title="Scroll Restoration"
-      description="Maintain scroll position seamlessly when items are prepended."
+      description="Keeps the view in place when items are prepended."
       href="/feature-scroll-restoration"
       group="2"
     />
@@ -220,7 +220,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Feature"
       title="Sticky Sections"
-      description="iOS-style pushing headers for segmented lists and grouped items."
+      description="Section headers that stick and get pushed out by the next one."
       href="/feature-sticky-sections"
       group="3"
     />
@@ -228,7 +228,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Feature"
       title="SSR Support"
-      description="Demonstrates pre-rendering and auto-scrolling to a specific range for SSR."
+      description="Pre-renders a range on the server and scrolls to it on the client."
       href="/feature-ssr"
       group="4"
       rel="external"
@@ -237,7 +237,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Feature"
       title="Custom Scrollbar"
-      description="Replace native scrollbars with highly customizable virtual ones."
+      description="Overlay scrollbars you can style, or replace with your own markup."
       href="/feature-custom-scrollbar"
       group="5"
     />
@@ -297,7 +297,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Pattern"
       title="Table"
-      description="Semantic HTML table virtualization for accessible tabular data grids."
+      description="Virtualized rows in real table markup."
       href="/pattern-table"
       group="5"
     />
@@ -313,7 +313,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Pattern"
       title="Data Browser"
-      description="Grouped directory pattern with iOS-style sticky section headers, instant search over a rebuilt section index and jump-to navigation."
+      description="Grouped directory with sticky section headers, instant search and jump-to navigation."
       href="/pattern-data-browser"
       group="7"
     />
@@ -353,7 +353,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Pattern"
       title="Collapsible Tree"
-      description="Hierarchical list where items can be expanded or collapsed while maintaining smooth performance."
+      description="Expand and collapse nodes in a long hierarchical list."
       href="/pattern-tree"
       group="5"
     />
@@ -361,7 +361,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Pattern"
       title="Draggable List"
-      description="Reorder virtualized items using native drag and drop while maintaining high performance."
+      description="Reorder rows with native drag and drop."
       href="/pattern-draggable"
       group="6"
     />
@@ -369,7 +369,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Pattern"
       title="Photo Gallery"
-      description="High-performance grid photo gallery with loading placeholders for images as rows stream in."
+      description="Virtualized photo grid whose placeholders hold each image's space until it loads."
       href="/pattern-gallery"
       group="7"
     />

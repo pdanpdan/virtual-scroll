@@ -83,8 +83,8 @@ onUnmounted(() => {
     </template>
 
     <template #description>
-      This example shows how to use <code>VirtualScrollbar</code> components independently from <code>VirtualScroll</code>.
-      They control a standard <code>div</code> with <code>overflow: auto</code> and hidden scrollbars, providing a custom scroll interface.
+      <code>VirtualScrollbar</code> on its own, without virtualization: the two bars drive a plain <code>div</code>
+      with <code>overflow: auto</code> and its native scrollbars hidden.
     </template>
 
     <template #icon>
@@ -215,7 +215,7 @@ onUnmounted(() => {
           <li><code>is-rtl</code> - set for a right-to-left layout (default <code>false</code>) so the horizontal thumb offset mirrors correctly; <code>aria-label</code> (and an optional <code>container-id</code>) wire up the accessibility attributes.</li>
         </ul>
         <p>
-          Because <code>position</code> and <code>viewport-size</code> are ordinary reactive numbers, this also composes with non-DOM sources - e.g. a translated/scaled coordinate space or a model-driven offset - not just a native scroller.
+          Because <code>position</code> and <code>viewport-size</code> are ordinary reactive numbers, any source works - a translated or scaled coordinate space, a model-driven offset, not only a native scroller.
         </p>
         <CodeBlock
           class="guide-code-block"

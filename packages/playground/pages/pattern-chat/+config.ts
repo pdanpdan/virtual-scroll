@@ -2,5 +2,5 @@ import type { Config } from 'vike/types';
 
 export default {
   title: 'Chat Interface | Virtual Scroll',
-  description: 'Chat demonstration with dynamic heights, initial scroll to bottom, and history scroll restoration.',
+  description: 'Chat with bubble heights measured from the DOM, opening at the bottom, and history loading without moving the view.',
 } satisfies Config;

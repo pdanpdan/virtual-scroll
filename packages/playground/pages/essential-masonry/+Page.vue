@@ -181,10 +181,10 @@ function handleJump() {
     </template>
 
     <template #description>
-      Real masonry in a single scroll container: responsive columns derived from the container width and a bounded
-      DOM window no matter the dataset size. Card heights come from a deterministic oracle (canonical layout) - or
-      flip <em>Measure card heights</em> on: mounted cards are measured and every few ticks two visible cards grow
-      a note row, so you can watch the measured layout track the real DOM with the viewport pinned.
+      Masonry in a single scroll container: the column count follows the container width and only the visible
+      cards are mounted, however many there are. Heights come from the model - or flip
+      <em>Measure card heights</em> on: mounted cards are measured and every few ticks two visible cards grow
+      a row, so you can watch the measured layout track the real DOM with the viewport pinned.
     </template>
 
     <template #icon>
@@ -201,7 +201,7 @@ function handleJump() {
     </template>
 
     <template #subtitle>
-      Single scroll container: canonical oracle heights or measured card heights
+      One scroll container: heights from the model, or measured from the DOM
     </template>
 
     <template #controls>

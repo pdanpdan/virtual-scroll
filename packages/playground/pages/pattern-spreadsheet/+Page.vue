@@ -135,9 +135,7 @@ function stopResizing() {
     </template>
 
     <template #description>
-      A bidirectional grid demonstrating spreadsheet-like functionality with {{ rowCount.toLocaleString() }} rows and {{ colCount.toLocaleString() }} columns.
-      Features include <strong>sticky column headers</strong> (A, B, C...) and <strong>sticky row headers</strong> (1, 2, 3...).
-      <strong>New:</strong> Drag the edges of headers to resize rows and columns.
+      A spreadsheet-like grid with {{ rowCount.toLocaleString() }} rows and {{ colCount.toLocaleString() }} columns: sticky column headers (A, B, C...), sticky row headers (1, 2, 3...), and header edges you can drag to resize rows and columns.
     </template>
 
     <template #icon>

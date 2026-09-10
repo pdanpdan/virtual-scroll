@@ -215,7 +215,7 @@ onUnmounted(() => {
     </template>
 
     <template #description>
-      Generic way to provide native search in virtualized content using data-layer searching and CSS Custom Highlight API.
+      Search runs over the data, not the DOM, so it covers every item and not just the mounted rows; matches are highlighted in place with the browser's CSS Custom Highlight API.
       Triggered by (<kbd class="kbd">⌘</kbd>+<kbd class="kbd">K</kbd>).
     </template>
 
@@ -233,7 +233,7 @@ onUnmounted(() => {
     </template>
 
     <template #subtitle>
-      High-performance search using CSS Custom Highlight API
+      Search the whole dataset, highlight what is mounted
     </template>
 
     <template #controls>

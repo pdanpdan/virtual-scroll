@@ -51,7 +51,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Vertical scrolling with variable item heights for {{ itemCount.toLocaleString() }} items. Automatically measures item sizes using <strong>ResizeObserver</strong>. Even items are {{ itemSize }}px, odd items are {{ itemSize * 2 }}px.
+      {{ itemCount.toLocaleString() }} items of varying height, each measured with <strong>ResizeObserver</strong> as it mounts. Even items are {{ itemSize }}px, odd items {{ itemSize * 2 }}px.
     </template>
 
     <template #icon>

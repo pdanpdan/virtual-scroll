@@ -49,7 +49,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Horizontal scrolling with {{ itemCount.toLocaleString() }} items with different widths measured via <strong>ResizeObserver</strong>. Even items are {{ baseItemSize }}px, odd items are {{ baseItemSize * 2 }}px. Try resizing the container!
+      {{ itemCount.toLocaleString() }} items in one row, each width measured with <strong>ResizeObserver</strong>: even items are {{ baseItemSize }}px, odd items {{ baseItemSize * 2 }}px. Resize the container and watch the window re-measure.
     </template>
 
     <template #icon>

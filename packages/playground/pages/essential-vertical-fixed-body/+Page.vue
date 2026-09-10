@@ -47,7 +47,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      This example uses the main browser window for scrolling {{ itemCount.toLocaleString() }} items instead of a nested container. Item height is fixed at {{ itemSize }}px.
+      The browser window scrolls instead of a nested container: {{ itemCount.toLocaleString() }} rows, each {{ itemSize }}px tall.
     </template>
 
     <template #icon>

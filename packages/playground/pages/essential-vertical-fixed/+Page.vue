@@ -44,7 +44,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Optimized for {{ itemCount.toLocaleString() }} items where every item has the same height. Items are only rendered when they enter the visible viewport. Row height is fixed at {{ itemSize }}px.
+      {{ itemCount.toLocaleString() }} rows of one height ({{ itemSize }}px). Only the rows inside the viewport are mounted, so this is the shortest path to a very long list.
     </template>
 
     <template #icon>

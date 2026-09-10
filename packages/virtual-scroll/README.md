@@ -1,27 +1,60 @@
 # @pdanpdan/virtual-scroll
 
-A high-performance, flexible virtual scrolling component for Vue 3.
+Virtual scrolling for Vue 3: only the rows that are on screen are in the DOM, whether the list holds a hundred items or ten million.
 
-## What is it?
+[![NPM Version](https://img.shields.io/npm/v/@pdanpdan/virtual-scroll.svg)](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
+[![License](https://img.shields.io/npm/l/@pdanpdan/virtual-scroll.svg)](../../LICENSE)
 
-`@pdanpdan/virtual-scroll` is a Vue 3 library designed to handle massive datasets with ease. Whether you have thousands or billions of items, it ensures smooth scrolling and minimal memory usage by only rendering what's visible on the screen.
+**Documentation and live examples: [pdanpdan.github.io/virtual-scroll](https://pdanpdan.github.io/virtual-scroll/)** - that site is the manual: every feature is a running example with the code next to it.
 
-### The Problem it Solves
+## What it does
 
-1.  **Performance with Large Lists:** Rendering thousands of DOM elements simultaneously can slow down the browser, lead to high memory consumption, and cause "janky" scrolling.
-2.  **Browser Scroll Limits:** Most browsers have a maximum limit for the height/width of a scrollable element (typically around 10 to 30 million pixels). If your content exceeds this, it simply stops working or becomes buggy.
+Give it an array and a template for one row. It keeps the rows around the viewport in the DOM and positions them itself while the browser scrolls normally, so showing twenty rows out of a million costs about the same as showing twenty rows out of twenty.
 
-### Our Solution
+Rows can be a vertical list, a horizontal strip, or a grid on both axes, and the scroll container can be the component, an element around it, or the page itself. Row sizes are a single number, a value per row, or left to be measured from the DOM as they change. The rows do not have to exist as objects either: a sparse `new Array(10_000_000)` with content derived from `index` gives ten million rows without allocating ten million items.
 
-- **Virtualization:** We only render the items currently in the viewport (plus a small buffer), keeping the DOM light and the UI responsive.
-- **Coordinate Scaling:** To bypass browser scroll limits, we use a dual-coordinate system. We can virtually scroll through billions of pixels by scaling internal "Virtual Units" to "Display Units" within the browser's supported range.
-- **1:1 Movement:** Unlike many other scaled virtual scroll implementations, we ensure that 1 pixel of movement on the wheel or touch results in exactly 1 pixel of movement in the viewport, maintaining a natural feel regardless of the scale.
+The awkward part of virtual scrolling is the end of a long list. Browsers refuse to scroll content past roughly 10 million pixels, so many implementations scale the content up and make it move faster than your finger. Here the list is mapped onto the pixels the browser accepts in a way that a wheel notch or a swipe moves the content exactly as far as you moved the pointer, whatever the size of the list. The visible range, the scrollbar and `scrollToIndex` keep agreeing with each other.
 
-## Installation
+Everything else is opt-in, so a plain list stays a plain list: sticky headers and sections, snapping, infinite loading, prepend restoration, RTL, keyboard navigation, ARIA roles, SSR, virtual scrollbars, TypeScript types, plus dedicated components for [table](https://pdanpdan.github.io/virtual-scroll/essential-flow-table/) and [masonry](https://pdanpdan.github.io/virtual-scroll/essential-masonry/) layouts. No dependencies besides Vue.
+
+## Quick start
 
 ```bash
 pnpm add @pdanpdan/virtual-scroll
 ```
+
+```vue
+<script setup>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+
+import '@pdanpdan/virtual-scroll/style.css';
+
+const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ i }` }));
+</script>
+
+<template>
+  <VirtualScroll :items="items" :item-size="50" class="my-container">
+    <template #item="{ item, index }">
+      <div class="my-item">{{ index }}: {{ item.label }}</div>
+    </template>
+  </VirtualScroll>
+</template>
+
+<style scoped>
+.my-container { height: 500px; }
+.my-item { height: 50px; }
+</style>
+```
+
+Ten thousand rows, about twenty of them in the DOM at any moment. Replace `:item-size="50"` with a function to size rows individually, or drop it altogether and rows get measured as they mount - the rest of the code stays as it is.
+
+## Links
+
+- **Configurator / code generator:** [pdanpdan.github.io/virtual-scroll/configurator](https://pdanpdan.github.io/virtual-scroll/configurator/)
+- **Comparison with other Vue 3 libraries:** [pdanpdan.github.io/virtual-scroll/compare](https://pdanpdan.github.io/virtual-scroll/compare/)
+- **Documentation for LLMs:** [llms.txt](https://pdanpdan.github.io/virtual-scroll/llms.txt) ([in the repository](../playground/public/llms.txt))
+- **npm:** [npmjs.com/package/@pdanpdan/virtual-scroll](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
+- **Repository:** [github.com/pdanpdan/virtual-scroll](https://github.com/pdanpdan/virtual-scroll)
 
 ## Usage Modes
 
@@ -60,32 +93,6 @@ import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 <!-- Import VirtualScroll JavaScript -->
 <script src="https://unpkg.com/@pdanpdan/virtual-scroll"></script>
 ```
-
-## Basic Usage
-
-```vue
-<script setup>
-import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-
-import '@pdanpdan/virtual-scroll/style.css';
-
-const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ i }` }));
-</script>
-
-<template>
-  <VirtualScroll :items="items" :item-size="50" class="my-container">
-    <template #item="{ item, index }">
-      <div class="my-item">{{ index }}: {{ item.label }}</div>
-    </template>
-  </VirtualScroll>
-</template>
-
-<style>
-.my-container { height: 500px; }
-.my-item { height: 50px; }
-</style>
-```
-
 
 ## Data-less Lists (Index-only Rows)
 

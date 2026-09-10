@@ -133,8 +133,7 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
     </template>
 
     <template #description>
-      Showcases <strong>virtual-scroll</strong> with a side-by-side git diff view.
-      It handles thousands of lines efficiently, including context-based collapsing.
+      A side-by-side git diff of a real file: rows stay aligned by index, unchanged stretches collapse, and only the visible lines are mounted.
     </template>
 
     <template #icon>

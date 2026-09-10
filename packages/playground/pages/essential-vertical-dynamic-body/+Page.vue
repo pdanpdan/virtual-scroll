@@ -54,7 +54,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      This example uses the main browser window for scrolling {{ itemCount.toLocaleString() }} dynamic items. Sizes are automatically detected via <strong>ResizeObserver</strong>.
+      The same dynamic rows, scrolled by the browser window instead of a nested container: {{ itemCount.toLocaleString() }} items, heights detected with <strong>ResizeObserver</strong>.
     </template>
 
     <template #icon>

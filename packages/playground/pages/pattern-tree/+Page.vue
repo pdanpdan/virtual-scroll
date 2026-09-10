@@ -107,7 +107,7 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
     </template>
 
     <template #description>
-      A hierarchical list where items can be expanded or collapsed. Virtualization ensures smooth scrolling even with thousands of nodes.
+      Expand and collapse nodes in a hierarchical list. Only the visible rows are mounted, so the tree can hold thousands of nodes.
     </template>
 
     <template #icon>

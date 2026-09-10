@@ -43,8 +43,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Demonstrates the virtual scrollbar implementation in a grid layout. The scrollbars are rendered as children of the virtual scroll container and are fully customizable.
-      Virtual scrollbars are automatically used for massive content, but can also be forced for smaller lists to maintain consistent cross-browser styling.
+      Overlay scrollbars in a grid layout, drawn inside the scroll container rather than by the browser, so they can be styled freely.
+      They appear on their own past the browser's size limit, and the toggle here forces them for a small list.
     </template>
 
     <template #icon>

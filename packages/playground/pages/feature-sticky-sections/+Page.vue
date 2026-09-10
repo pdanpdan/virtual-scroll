@@ -61,7 +61,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Demonstrates iOS-style sticky headers using the <strong>stickyIndices</strong> prop for {{ sectionCount }} sections with {{ itemsPerSection }} items each. When a new header scrolls up, it 'pushes' the previous sticky header out of the view.
+      <strong>stickyIndices</strong> marks the section headers: each sticks to the top of the viewport and is pushed out by the next one. {{ sectionCount }} sections of {{ itemsPerSection }} items each.
     </template>
 
     <template #icon>

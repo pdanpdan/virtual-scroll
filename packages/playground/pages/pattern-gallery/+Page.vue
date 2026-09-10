@@ -50,7 +50,7 @@ const {
     </template>
 
     <template #description>
-      A high-performance grid gallery displaying {{ itemCount.toLocaleString() }} photos. Placeholders show while images load as their rows enter the viewport.
+      A grid of {{ itemCount.toLocaleString() }} photos. Placeholders hold each image's space until the bytes arrive, so the grid never shifts as rows stream in.
     </template>
 
     <template #icon>
@@ -224,8 +224,8 @@ const rows = computed(() => {
         <h3>3. Size the rows: measured, or arithmetic</h3>
         <p>
           With every row the same height you have two valid sizing routes. Leave <code>item-size</code> unset (or set it to
-          <code>0</code>/<code>null</code>) and each mounted row is measured with <code>ResizeObserver</code> - robust when the
-          container is responsive or the column count can change at runtime, because a re-measured row re-flows only its local
+          <code>0</code>/<code>null</code>) and each mounted row is measured with <code>ResizeObserver</code> - the safer choice when the
+          container is responsive or the column count can change at runtime, because re-measuring one row re-flows only its local
           range. Alternatively, if the container width is known and stable, derive the row height yourself (cell width = grid
           width ÷ columns, which equals row height for <code>aspect-ratio: 1</code>) and pass it as a numeric
           <code>item-size</code> for <em>O(1)</em> arithmetic sizing - with the caveat that you must keep that number in sync

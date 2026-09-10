@@ -1,25 +1,25 @@
 # @pdanpdan/virtual-scroll Documentation for LLMs
 
-A high-performance, flexible virtual scrolling component for Vue 3 that supports massive datasets (up to billions of pixels) through coordinate scaling.
+Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM, so a list can hold any number of items. Full documentation and live examples: https://pdanpdan.github.io/virtual-scroll/
 
 ## Core Features
-- **Virtualization**: Only renders items in the viewport (plus buffer).
-- **Coordinate Scaling**: Bypasses browser scroll limits (typically 10-30M pixels) by scaling "Virtual Units" (VU) to "Display Units" (DU).
-- **1:1 Movement**: Ensures 1px of wheel/touch movement equals 1px of viewport movement, regardless of scale.
-- **Multi-Directional**: Supports `vertical`, `horizontal`, and `both` (grid) directions.
-- **Dynamic Sizing**: Supports uniform sizes, per-item sizes via function, repeating circular patterns via array (e.g. `[50, 100]`), and fully dynamic sizes measured via `ResizeObserver` (pass `null`/`0`).
-- **Data-less (index-only) rows**: `items` may be a sparse array (`new Array(n)`); holes render by index and only the visible window is accessed - uniform-size lists scale to 10M+ rows with constant memory and no per-row data objects.
-- **Sticky Elements**: iOS-style pushing section headers via `stickyIndices`, plus sticky `header`/`footer` slots.
-- **Scroll Snapping**: `snap` prop (`'auto' | 'start' | 'center' | 'end' | 'next'`) for automatic alignment after scrolling stops.
-- **Any Scroll Container**: Virtualizes inside its own element or the browser `window`/`body` (`container` prop).
-- **Virtual Scrollbars**: `virtualScrollbar` prop to force custom-drawn scrollbars (built-in or via the `scrollbar` slot / `VirtualScrollbar` component).
-- **Table Mode**: dedicated `VirtualScrollTable` component renders semantic `<table>` rows in real flow between engine-sized spacers (`flowTable`) with dynamic measured row heights, column pinning (`autoSizeColumns`/`columnWidths`), sticky header/footer slots and a horizontal scrollbar when the table overflows its container.
-- **Masonry Mode**: dedicated `VirtualScrollMasonry` component renders a true masonry grid in ONE scroll container - responsive column count and fractional column width derived from the container width (`targetColumnWidth`/`minColumns`/`maxColumns`/`gap`), canonical deterministic card heights from an `itemHeight` oracle (far `scrollToIndex` lands exactly without mounting the path; optional `measuredHeights` measures mounted cards for local-determinism layout instead), segment-snapshotted column frontiers (bounded memory at any scale), content-space anchoring on reflow/resize, exposed live column count/width and estimated-total reporting until the chain is exact.
+- **Virtualization**: Only the items in the viewport (plus a configurable buffer) are rendered.
+- **Coordinate Scaling**: Content past the browser's scroll limit (typically 10-30M px) is mapped onto a smaller display range - virtual units (VU, the real content size) to display units (DU, what the browser can render); the threshold is `BROWSER_MAX_SIZE` (10,000,000).
+- **1:1 Movement**: 1px of wheel or touch movement moves the content 1px, whatever the scale.
+- **Multi-Directional**: `direction` is `vertical`, `horizontal` or `both` (grid).
+- **Sizing**: one number for every item, a per-item function, a repeating array pattern (e.g. `[50, 100]`), or measured from the DOM with `ResizeObserver` (pass `null`/`0`).
+- **Data-less (index-only) rows**: `items` may be a sparse array (`new Array(n)`); holes render from `index` and only the visible window is read - uniform-size lists reach 10M+ rows with flat memory and no per-row data objects.
+- **Sticky Elements**: `stickyIndices` headers that stick and get pushed out by the next one, plus sticky `header`/`footer` slots.
+- **Scroll Snapping**: `snap` prop (`'auto' | 'start' | 'center' | 'end' | 'next'`) aligns the view after scrolling stops.
+- **Scroll Container**: its own element, or the browser `window`/`body` (`container` prop).
+- **Virtual Scrollbars**: `virtualScrollbar` prop for the built-in bars, or your own through the `scrollbar` slot / `VirtualScrollbar` component.
+- **Table Mode**: `VirtualScrollTable` renders `<table>` rows in real flow between engine-sized spacers (`flowTable`) with measured row heights, column pinning (`autoSizeColumns`/`columnWidths`), sticky header/footer slots and a horizontal scrollbar when the table overflows its container.
+- **Masonry Mode**: `VirtualScrollMasonry` renders a masonry grid in ONE scroll container - column count and fractional column width from the container width (`targetColumnWidth`/`minColumns`/`maxColumns`/`gap`), heights from the deterministic `itemHeight` oracle (far `scrollToIndex` lands exactly without mounting the path) or from mounted cards with `measuredHeights`, segment snapshots for bounded memory, and the topmost visible card kept in place across reflows.
 - **Infinite Loading**: `loading` + `loadDistance` props, `load` event and `loading` slot for pagination.
-- **SSR**: `ssrRange` prop pre-renders a static in-flow block server-side for SEO.
-- **Accessibility**: Automatic ARIA roles (list, grid, tree, listbox, menu), keyboard navigation.
-- **Authoring guidance for recycled rows**: row components are reused as items scroll in/out - keep row state in the model, render idempotently, reserve media space (`aspect-ratio`), avoid native `loading="lazy"`, and bound/deprioritise offscreen prefetch.
-- **Performance**: Fenwick Tree for $O(\log N)$ prefix sum/point updates for efficient offset calculations.
+- **SSR**: `ssrRange` prop pre-renders a static in-flow block server-side for SEO, then hydrates in place.
+- **Accessibility**: ARIA roles are applied for you (list, grid, tree, listbox, menu), plus keyboard navigation.
+- **Authoring guidance for recycled rows**: row components are reused as items scroll in and out - keep row state in the model, render idempotently, reserve media space (`aspect-ratio`), avoid native `loading="lazy"`, and bound/deprioritise offscreen prefetch.
+- **Performance**: Fenwick tree for $O(\log N)$ prefix sum and point updates.
 
 ## Installation
 ```bash
@@ -110,9 +110,9 @@ Uses custom tags for correct `<table>` semantics.
 </VirtualScroll>
 ```
 
-### 6. Sticky Sections (iOS-style)
+### 6. Sticky Sections
 [Live Example](https://pdanpdan.github.io/virtual-scroll/feature-sticky-sections)
-Headers that "push" each other as you scroll.
+Section headers that stick and get pushed out by the next one.
 ```vue
 <VirtualScroll :items="items" :sticky-indices="[0, 20, 40]">
   <template #item="{ item, isStickyActive }">
@@ -152,7 +152,7 @@ Note: with sparse/holey `items` the `item` slot prop is `undefined` - derive con
 
 ### 9. Masonry Grid (single scroll container)
 [Live Example](https://pdanpdan.github.io/virtual-scroll/essential-masonry)
-`VirtualScrollMasonry` virtualizes cards of a real masonry layout inside one scroll container. The column count re-flows from the container width and the layout re-anchors the topmost visible card on reflow. Heights come from a deterministic `itemHeight` oracle - reserve media space so content matches the oracle and the layout stays canonical.
+`VirtualScrollMasonry` virtualizes cards of a masonry layout inside one scroll container. The column count re-flows from the container width, and a reflow keeps the topmost visible card in place. Heights come from a deterministic `itemHeight` oracle - reserve media space so the rendered card matches the oracle height.
 ```vue
 const items = ref(cards); // model holds id, aspectRatio (or height), color
 
@@ -177,7 +177,7 @@ function itemHeight(item, _index, width) {
   </template>
 </VirtualScrollMasonry>
 ```
-The instance (via `ref`) exposes `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })` and `scrollToOffset(offset)`. Default (canonical) mode requires cards sized exactly to the oracle height; set `measuredHeights` to let mounted cards size to their content and drive the layout from measured boxes instead.
+The instance (via `ref`) exposes `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })` and `scrollToOffset(offset)`. By default cards must render at exactly the oracle height; with `measuredHeights` mounted cards size to their own content and drive the layout instead.
 
 ### More Example Pages
 - [Masonry Grid (Essential)](https://pdanpdan.github.io/virtual-scroll/essential-masonry): masonry in one `VirtualScrollMasonry` container - responsive column count/width, deterministic oracle heights (canonical layout), anchored reflow on resize, jump-to-card, live DOM count + column/width readouts.
@@ -226,11 +226,11 @@ The browser's native scrollbar moves through `DU` (Display Units), while items a
 Positioning formula: `translateY(VU_offset - (DU_scroll * scale))`
 
 ### Performance Optimization
-- **Fenwick Tree**: Used to store and update item sizes. Prefix sums (finding the offset of the N-th item) and point updates (updating the size of an item) both take $O(\log N)$ time.
+- **Fenwick Tree**: Stores and updates item sizes. Prefix sums (the offset of the Nth item) and point updates (a size change) are both $O(\log N)$.
 - **Incremental growth**: Appending items resizes the tree incrementally (no full rebuild per batch), and initialization only revisits regions that actually changed.
-- **Uniform sizes need no storage**: A numeric `itemSize` / `columnWidth` resolves positions arithmetically (O(1)) - no per-row arrays are allocated, so fixed-size lists run at 10M+ rows with constant memory.
-- **Index-only lists**: Sparse `items` render every index in range; only the visible window is accessed, so rows can be rendered from `index` without data objects.
-- **ResizeObserver**: Automatically tracks size changes of rendered items and updates the Fenwick Tree, triggering a layout adjustment only when necessary.
+- **Uniform sizes need no storage**: A numeric `itemSize` / `columnWidth` resolves positions arithmetically (O(1)) - no per-row arrays are allocated, so fixed-size lists run at 10M+ rows with flat memory.
+- **Index-only lists**: Sparse `items` render every index in range; only the visible window is read, so rows can render from `index` alone.
+- **ResizeObserver**: Tracks size changes of mounted items, updates the Fenwick tree, and adjusts the layout only when something actually moved.
 
 ## CSS Variables for Styling
 Customize the default virtual scrollbar:
@@ -246,14 +246,14 @@ Customize the default virtual scrollbar:
 - [NPM Package](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
 
 ## UMD Stand-alone Examples
-- [Grid Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-grid-dynamic.html): Simultaneously virtualizes rows and columns with dynamic detection of widths from any slot structure.
-- [Grid Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-grid-fixed.html): Simultaneously virtualizes rows and columns using fixed itemSize and alternating columnWidth values.
-- [Horizontal Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-horizontal-dynamic.html): Horizontal scrolling with items with different widths measured via ResizeObserver.
-- [Horizontal Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-horizontal-fixed.html): Optimized for items where every item has the same width and row height is filled automatically.
-- [Vertical Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-dynamic.html): Vertical scrolling with variable item heights automatically measured using ResizeObserver.
-- [Vertical Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-fixed.html): Optimized for lists where every item has the same height and items are only rendered when they enter the visible viewport.
-- [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/umd/feature-custom-scrollbar.html): Demonstrates the virtual scrollbar implementation that allows the scrollbar to be designed and styled by the user.
-- [Infinite Scroll](https://pdanpdan.github.io/virtual-scroll/umd/feature-infinite-scroll.html): Demonstrates the load event and loading prop/slot for automatic pagination.
-- [Sticky Sections](https://pdanpdan.github.io/virtual-scroll/umd/feature-sticky-sections.html): Demonstrates iOS-style sticky headers where new headers push previous ones out of view.
-- [Chat Interface](https://pdanpdan.github.io/virtual-scroll/umd/pattern-chat.html): Chat demonstration with dynamic heights, initial scroll to bottom, and history scroll restoration.
-- [Table](https://pdanpdan.github.io/virtual-scroll/umd/pattern-table.html): Semantic HTML table virtualization for semantically correct and accessible tabular data grids.
+- [Grid Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-grid-dynamic.html): Rows and columns virtualized at once, with column widths read from the DOM.
+- [Grid Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-grid-fixed.html): Rows and columns virtualized at once with a fixed itemSize and alternating columnWidth values.
+- [Horizontal Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-horizontal-dynamic.html): Horizontal list of items whose widths are measured with ResizeObserver.
+- [Horizontal Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-horizontal-fixed.html): Horizontal list of uniform-width items, with the row height filled automatically.
+- [Vertical Dynamic](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-dynamic.html): Vertical list of variable-height rows, measured with ResizeObserver.
+- [Vertical Fixed](https://pdanpdan.github.io/virtual-scroll/umd/essential-vertical-fixed.html): Vertical list of uniform-height rows; only the rows in the viewport are rendered.
+- [Custom Scrollbar](https://pdanpdan.github.io/virtual-scroll/umd/feature-custom-scrollbar.html): Virtual scrollbars drawn inside the container, styled with CSS variables or your own markup.
+- [Infinite Scroll](https://pdanpdan.github.io/virtual-scroll/umd/feature-infinite-scroll.html): Automatic pagination with the load event and the loading slot.
+- [Sticky Sections](https://pdanpdan.github.io/virtual-scroll/umd/feature-sticky-sections.html): Section headers that stick to the top and get pushed out by the next one.
+- [Chat Interface](https://pdanpdan.github.io/virtual-scroll/umd/pattern-chat.html): Chat with bubble heights measured from the DOM, opening at the bottom, and history loading without moving the view.
+- [Table](https://pdanpdan.github.io/virtual-scroll/umd/pattern-table.html): Virtualized rows in real table markup, for accessible tabular data.

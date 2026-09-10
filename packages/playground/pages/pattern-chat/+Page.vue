@@ -189,7 +189,7 @@ function scrollToBottom() {
     </template>
 
     <template #description>
-      A chat interface demonstration with {{ items.length.toLocaleString() }} messages. Features <strong>dynamic item heights</strong>, <strong>initial scroll to bottom</strong>, <strong>scroll restoration</strong> when loading history (scrolling up), <strong>smooth scrolling</strong> for new messages, and <strong>sticky footer</strong> for the input block.
+      A chat with {{ items.length.toLocaleString() }} messages: bubbles of any height, opening at the bottom, older history loading above without moving what you are reading, and an input that sticks to the bottom.
     </template>
 
     <template #icon>

@@ -237,7 +237,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           A feed of long-form posts shapes the design around two facts: each post's rendered height is unknowable before its
           content renders (text wraps at the container width and a cover image has its own ratio), and such a list is usually
-          your page's own content rather than a small fixed box. VirtualScroll lets you pick each axis independently: which
+          your page's own content rather than a small fixed box. VirtualScroll takes the two axes separately: which
           element scrolls (<code>:container</code> - a bounded box, or the browser window), and how row sizes are known
           (arithmetic <code>item-size</code> for uniform rows, or per-row <code>ResizeObserver</code> measurement for variable
           ones). For posts, variable-height measured rows are the right model; a <code>default-item-size</code> estimate keeps

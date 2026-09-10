@@ -8,7 +8,7 @@ export default {
   trailingSlash: true,
 
   title: 'Virtual Scroll',
-  description: 'A high-performance virtualization library for Vue 3.',
+  description: 'Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM.',
 
   extends: [ vikeVue ],
 } as Config;

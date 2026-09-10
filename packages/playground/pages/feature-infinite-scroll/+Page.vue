@@ -65,7 +65,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
     </template>
 
     <template #description>
-      Demonstrates the <strong>load</strong> event and <strong>loading</strong> prop/slot. Currently showing {{ items.length.toLocaleString() }} items. When you reach the end of the list, more items are automatically fetched and appended. The demo source is capped at {{ TOTAL_LIMIT.toLocaleString() }} items - the loading slot only appears while auto-loading is on and there is still data to fetch.
+      Pagination with the <strong>load</strong> event and the <strong>loading</strong> slot. Currently showing {{ items.length.toLocaleString() }} items: scroll to the end and the next page is appended. The demo source stops at {{ TOTAL_LIMIT.toLocaleString() }} items, and the loading row only appears while auto-loading is on and data is left.
     </template>
 
     <template #icon>

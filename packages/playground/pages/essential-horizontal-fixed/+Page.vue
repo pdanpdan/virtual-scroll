@@ -42,7 +42,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Optimized for {{ itemCount.toLocaleString() }} items where every item has the same width ({{ itemSize }}px). Row height is filled automatically. Default buffers are set to {{ bufferBefore }} for smoother horizontal panning.
+      {{ itemCount.toLocaleString() }} items of one width ({{ itemSize }}px); the row fills the container's height automatically. The buffers start at {{ bufferBefore }} so fast panning does not flash empty space.
     </template>
 
     <template #icon>

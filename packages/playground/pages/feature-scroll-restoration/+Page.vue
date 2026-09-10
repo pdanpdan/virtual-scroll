@@ -55,7 +55,7 @@ function appendItems() {
     </template>
 
     <template #description>
-      Demonstrates the <strong>restoreScrollOnPrepend</strong> prop. Currently showing {{ items.length.toLocaleString() }} items. When items are added to the beginning of the list, the scroll position is adjusted to keep the current view stable.
+      Prepending items does not move the view: <strong>restoreScrollOnPrepend</strong> adds the height of the new items to the scroll position. Currently showing {{ items.length.toLocaleString() }} items - add some to the front and watch what you are reading stay put.
     </template>
 
     <template #icon>

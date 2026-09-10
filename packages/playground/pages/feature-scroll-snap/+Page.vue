@@ -50,9 +50,9 @@ const isItemTooLarge = computed(() => {
     </template>
 
     <template #description>
-      Demonstrates the built-in <strong>snap</strong> feature. When scrolling stops, the view automatically smooth-scrolls to align with the nearest item. Useful for carousels, page-by-page navigation, or pickers.
+      <strong>snap</strong> lines the view up once scrolling stops - to the nearest edge, the center, or the next item, depending on the mode. Handy for carousels and pickers.
       <br />
-      <strong>Note:</strong> Snapping is disabled if the item is larger than the viewport.
+      <strong>Note:</strong> items taller than the viewport are left alone, so snapping cannot loop.
     </template>
 
     <template #icon>

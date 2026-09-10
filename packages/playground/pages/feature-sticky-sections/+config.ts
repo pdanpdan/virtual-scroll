@@ -2,5 +2,5 @@ import type { Config } from 'vike/types';
 
 export default {
   title: 'Sticky Sections | Virtual Scroll',
-  description: 'Demonstrates iOS-style sticky headers where new headers push previous ones out of view.',
+  description: 'Section headers that stick to the top and get pushed out by the next one.',
 } satisfies Config;

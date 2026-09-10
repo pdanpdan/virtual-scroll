@@ -144,7 +144,7 @@ function handleDragEnd() {
     </template>
 
     <template #description>
-      Reorder items using native drag and drop. Virtualization maintains performance even during complex list mutations.
+      Reorder rows with native drag and drop. The list stays virtualized while the order changes underneath the drag.
     </template>
 
     <template #icon>

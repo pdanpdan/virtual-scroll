@@ -72,7 +72,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Simultaneously virtualizes {{ itemCount.toLocaleString() }} rows and {{ columnCount.toLocaleString() }} columns. Uses <strong>querySelectorAll('[data-col-index]')</strong> to robustly detect column widths from any slot structure. Toggling buffers or resizing will re-measure automatically.
+      {{ itemCount.toLocaleString() }} rows and {{ columnCount.toLocaleString() }} columns at once. Column widths are read from the DOM with <strong>querySelectorAll('[data-col-index]')</strong>, so any slot structure works; resizing or changing the buffers re-measures.
     </template>
 
     <template #icon>

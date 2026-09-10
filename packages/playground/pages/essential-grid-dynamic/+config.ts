@@ -2,5 +2,5 @@ import type { Config } from 'vike/types';
 
 export default {
   title: 'Grid Dynamic | Virtual Scroll',
-  description: 'Simultaneously virtualizes rows and columns with dynamic detection of widths from any slot structure.',
+  description: 'Rows and columns virtualized at once, with column widths read from the DOM.',
 } satisfies Config;

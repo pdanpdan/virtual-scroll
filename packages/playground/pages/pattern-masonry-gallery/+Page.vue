@@ -143,10 +143,9 @@ function schedulePrefetch() {
     </template>
 
     <template #description>
-      The masonry engine at work on remote imagery: every card reserves its picture's exact
-      <code>aspect-ratio</code> space through the canonical height oracle, the DOM window stays bounded while
-      scrolling, and only a small low-priority batch beyond the window is prefetched per scroll settle - visible
-      images always load first, and per-card state stays model-side.
+      Remote imagery in a masonry grid: every card reserves its picture's exact <code>aspect-ratio</code> space
+      through the height oracle, only the cards around the scroll position are mounted, and after each scroll
+      settles a small low-priority batch beyond the window is prefetched - images on screen always come first.
     </template>
 
     <template #icon>

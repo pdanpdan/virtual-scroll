@@ -1,9 +1,38 @@
 # @pdanpdan/virtual-scroll
 
-A high-performance, flexible virtual scrolling component for Vue 3 that supports massive datasets (up to billions of pixels) through coordinate scaling.
+A virtual scrolling component for Vue 3: only the rows near the viewport are in the DOM, so lists, grids, tables and masonry layouts stay fast however long they get.
 
 [![NPM Version](https://img.shields.io/npm/v/@pdanpdan/virtual-scroll.svg)](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
 [![License](https://img.shields.io/npm/l/@pdanpdan/virtual-scroll.svg)](./LICENSE)
+
+**Documentation and live examples: [pdanpdan.github.io/virtual-scroll](https://pdanpdan.github.io/virtual-scroll/)** - every feature there is a running example with its code next to it, and the [configurator](https://pdanpdan.github.io/virtual-scroll/configurator/) writes the component for the options you pick.
+
+Rows can be a plain vertical list, a horizontal strip, or a grid on both axes, in its own scroll container or in the page itself. Sizes can be one number, a value per row, or measured from the DOM as rows change. Sticky headers, snapping, infinite loading, RTL, keyboard navigation, ARIA roles, SSR and virtual scrollbars are opt-in, and there are dedicated components for table and masonry layouts. No dependencies besides Vue.
+
+```vue
+<script setup>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll';
+
+import '@pdanpdan/virtual-scroll/style.css';
+
+const items = Array.from({ length: 10_000 }, (_, i) => ({ id: i, label: `Item ${ i }` }));
+</script>
+
+<template>
+  <VirtualScroll :items="items" :item-size="50" class="list">
+    <template #item="{ item }">
+      <div class="row">{{ item.label }}</div>
+    </template>
+  </VirtualScroll>
+</template>
+
+<style scoped>
+.list { height: 500px; }
+.row { height: 50px; }
+</style>
+```
+
+Ten thousand rows, about twenty of them in the DOM. The usage documentation - props, slots, events, composables and the rest - is in [`packages/virtual-scroll/README.md`](./packages/virtual-scroll/README.md) and on the site above. What follows here is about working on this repository.
 
 ## Links
 

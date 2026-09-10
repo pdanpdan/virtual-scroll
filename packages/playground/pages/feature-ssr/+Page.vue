@@ -59,7 +59,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Demonstrates the <strong>ssrRange</strong> prop. The grid is configured to start pre-rendered at <strong>Row {{ ssrRange.start }}, Column {{ ssrRange.colStart }}</strong>. On the client, it automatically scrolls to match this range on mount.
+      <strong>ssrRange</strong> pre-renders a block of rows on the server; here the grid starts at <strong>Row {{ ssrRange.start }}, Column {{ ssrRange.colStart }}</strong>, and the client scrolls to it on mount.
       <div class="alert alert-info -mb-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
