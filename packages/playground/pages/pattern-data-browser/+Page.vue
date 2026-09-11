@@ -71,7 +71,16 @@ const COUNTRIES = [ 'United States', 'Canada', 'United Kingdom', 'Germany', 'Fra
 const CITIES = [ 'Metropolis', 'Valoria', 'Oakhaven', 'Riverbend', 'Nova Crest', 'Beacon Hills', 'Sunnydale', 'Emerald Gates' ];
 const MONTHS = [ 'January 2026', 'February 2026', 'March 2026', 'April 2026', 'May 2026', 'June 2026' ];
 const MERCHANTS = [ 'AWS Cloud Billing', 'Vercel Enterprise', 'Google APIs', 'Stripe Gateway', 'Figma Pro Suite', 'Auth0 Auth Server', 'Slack Comms Hub', 'MongoDB Shard Pool' ];
-const CONCEPTS = [ 'Neural Networks', 'Quantum Mechanics', 'Consensus Protocol', 'Distributed Virtualization', 'Bio-Synthetic CRISPR', 'Superconducting Fields' ];
+const CONCEPTS = [ 'Neural Networks', 'Quantum Mechanics', 'Consensus Protocol', 'Distributed Virtualization', 'Bio-Synthetic CRISPR', 'Superconducting Fields' ] as const;
+const WIKI_ENTRIES: Record<typeof CONCEPTS[ number ], readonly string[]> = {
+  'Neural Networks': [ 'Backpropagation', 'Activation Functions', 'Gradient Descent', 'Convolutional Layers', 'Attention Mechanisms', 'Embedding Spaces', 'Regularization', 'Transformer Stacks' ],
+  'Quantum Mechanics': [ 'Wave Function Collapse', 'Superposition', 'Entanglement', 'Uncertainty Principle', 'Quantum Tunneling', 'Spin States', 'Interference Patterns', 'Measurement Operators' ],
+  'Consensus Protocol': [ 'Byzantine Fault Tolerance', 'Leader Election', 'Proof of Stake', 'Quorum Sizing', 'Finality Gadgets', 'Fork Choice Rules', 'Gossip Propagation', 'State Machine Replication' ],
+  'Distributed Virtualization': [ 'Fenwick Tree Indexing', 'Coordinate Scaling', 'Viewport Recycling', 'Sticky Section Pinning', 'Range Recalculation', 'Buffer Windows', 'Incremental Measurement', 'Scroll Restoration' ],
+  'Bio-Synthetic CRISPR': [ 'Guide RNA Design', 'Cas9 Cleavage', 'Off-Target Scoring', 'Homology-Directed Repair', 'Base Editing', 'Prime Editing', 'Delivery Vectors', 'Gene Drive Containment' ],
+  'Superconducting Fields': [ 'Meissner Effect', 'Flux Pinning', 'Josephson Junctions', 'Critical Temperature', 'Cooper Pairs', 'Type-II Vortices', 'Magnetic Levitation', 'Cryogenic Cooling' ],
+};
+const WIKI_KINDS = [ 'Definition', 'Theorem', 'Proof', 'Lemma', 'Corollary', 'Postulate', 'Conjecture' ] as const;
 const WIKI_TEXTS = [
   'A brief introductory text node providing a simple overview of this dynamic topic to verify ResizeObserver is watching.',
   'Medium detailed research node explaining key historical milestones, current production viability, structural challenges, and real-time computation metrics. Provides an intermediate element height variance to test virtual calculations.',
@@ -203,12 +212,15 @@ function generateDataset(dataset: DatasetId, count: number): { items: DataItem[]
       items.push(header);
       sticky.push(headerIndex);
       const n = sectionSize(count, CONCEPTS.length, random);
+      const entries = WIKI_ENTRIES[ concept ];
       for (let j = 0; j < n; j++) {
         const text = WIKI_TEXTS[ j % WIKI_TEXTS.length ];
+        const entry = entries[ j % entries.length ]!;
+        const kind = pick(WIKI_KINDS, random);
         items.push({
           id: `wiki-${ s }-${ j }`,
-          name: `Theorem Definition Ref #${ j + 1 }`,
-          sub: concept,
+          name: `${ concept }: ${ entry }`,
+          sub: `${ kind } · Rev ${ Math.floor(random() * 40) + 1 }.${ j % 10 }`,
           meta: `Delta ${ (random() * 100).toFixed(1) }%`,
           rowExtra: text,
           extra: text,
