@@ -26,6 +26,19 @@ Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM, so 
 pnpm add @pdanpdan/virtual-scroll
 ```
 
+Import the stylesheet once in your app entry - the component renders without it, but the virtual
+scrollbar and container rules live there:
+```ts
+import '@pdanpdan/virtual-scroll/style.css';
+```
+
+Import from the package root: components, composables, extension factories and the public types.
+`@pdanpdan/virtual-scroll/VirtualScroll.vue` (and `VirtualScrollTable.vue`,
+`VirtualScrollMasonry.vue`, `VirtualScrollbar.vue`) expose the raw SFCs for bundlers that compile Vue
+files themselves. The engine internals (pure `calculate*` helpers, DOM scroll utilities, the masonry
+layout engine and their parameter bags) are importable from `@pdanpdan/virtual-scroll/internal` but
+are **not** covered by semver - prefer the root entry in generated code.
+
 ## Common Patterns & Examples
 
 ### 1. Basic Vertical List
@@ -177,7 +190,7 @@ function itemHeight(item, _index, width) {
   </template>
 </VirtualScrollMasonry>
 ```
-The instance (via `ref`) exposes `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })` and `scrollToOffset(offset)`. By default cards must render at exactly the oracle height; with `measuredHeights` mounted cards size to their own content and drive the layout instead.
+The instance (via `ref`) exposes `scrollDetails`, `columns`, `columnWidth`, `totalHeight`, `totalHeightExact`, `scrollToIndex(index, { align, behavior })`, `scrollToOffset(offset)` and `refresh()`. By default cards must render at exactly the oracle height; with `measuredHeights` mounted cards size to their own content and drive the layout instead.
 
 ### More Example Pages
 - [Masonry Grid (Essential)](https://pdanpdan.github.io/virtual-scroll/essential-masonry): masonry in one `VirtualScrollMasonry` container - responsive column count/width, deterministic oracle heights (canonical layout), anchored reflow on resize, jump-to-card, live DOM count + column/width readouts.
@@ -201,7 +214,7 @@ The instance (via `ref`) exposes `columns`, `columnWidth`, `totalHeight`, `total
 
 ### Props
 - `items`: `T[]` (Required) - Data to virtualize; may be sparse (`undefined` entries) for index-only lists - holes render and the slot `item` is `undefined` for them.
-- `itemSize`: `number | number[] | ((item, index) => number) | null` (Default: `40`) - Pass `null`/`0` for dynamic sizing; arrays define repeating circular patterns.
+- `itemSize`: `number | (number | null | undefined)[] | ((item, index) => number) | null` (Omitted/`null`/`0` = rows measured via `ResizeObserver`; `40` is only the pre-measure estimate) - arrays define repeating circular patterns; `null`/holes in the array mean "measure this index".
 - `direction`: `'vertical' | 'horizontal' | 'both'`.
 - `columnCount` / `columnWidth`: Grid mode columns (also accepts arrays/functions/`null` for dynamic).
 - `container`: `HTMLElement | Window` - Scroll container; pass the `window` object for window/body scrolling.
@@ -214,7 +227,7 @@ The instance (via `ref`) exposes `columns`, `columnWidth`, `totalHeight`, `total
 
 ### Exposed Methods (via Ref)
 - `scrollToIndex(row, col?, options?)`: Options include `align: 'start' | 'center' | 'end' | 'auto'` and `behavior: 'auto' | 'smooth'`.
-- `scrollToOffset(x, y, options?)`: Programmatic pixel-based scroll.
+- `scrollToOffset(x, y, options?)`: Programmatic pixel-based scroll. Options: `behavior`, plus `endExtraX`/`endExtraY` (VU) to extend the scroll clamp past the content end for a block rendered after the items (e.g. an always-rendered loading slot).
 - `refresh()`: Resets all internal measurements (useful if items change size externally).
 
 ## Technical Implementation Details
