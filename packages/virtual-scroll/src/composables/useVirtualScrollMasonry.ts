@@ -1,5 +1,5 @@
 import type { MasonryRenderedItem, MasonryScrollDetails, ScrollAlignment, ScrollAlignmentOptions, ScrollToIndexOptions, ScrollToIndexResult, VirtualScrollMasonryProps } from '../types';
-import type { ComputedRef, Ref } from 'vue';
+import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue';
 
 import { computed, nextTick, ref, shallowRef, toValue, watch } from 'vue';
 
@@ -77,7 +77,11 @@ interface ResolvedScrollOptions {
   dryRun: boolean;
 }
 
-/** Internal reactive state shared with the consuming component. */
+/**
+ * Internal reactive state shared with the consuming component.
+ *
+ * @internal
+ */
 export interface UseVirtualScrollMasonryInternalState {
   /** Current display scroll position (px). */
   scrollY: Ref<number>;
@@ -116,7 +120,10 @@ export interface UseVirtualScrollMasonryReturn<T = unknown> {
    * @internal
    */
   applyMeasurements: (entries: Array<{ index: number; height: number; }>) => void;
-  /** Internal reactive state (consumed by the component wrapper). */
+  /**
+   * Internal reactive state (consumed by the component wrapper).
+   * @internal
+   */
   internalState: UseVirtualScrollMasonryInternalState;
 }
 
@@ -146,7 +153,7 @@ export interface UseVirtualScrollMasonryReturn<T = unknown> {
  * @returns Masonry state and controls (see {@link UseVirtualScrollMasonryReturn}).
  */
 export function useVirtualScrollMasonry<T>(
-  propsInput: Ref<VirtualScrollMasonryProps<T>> | (() => VirtualScrollMasonryProps<T>),
+  propsInput: MaybeRefOrGetter<VirtualScrollMasonryProps<T>>,
 ): UseVirtualScrollMasonryReturn<T> {
   const props = computed(() => toValue(propsInput));
 

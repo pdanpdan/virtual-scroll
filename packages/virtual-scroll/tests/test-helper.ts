@@ -1,3 +1,4 @@
+import type { UseVirtualScrollReturn } from '../src/composables/useVirtualScroll';
 import type { VirtualScrollExtension } from '../src/extensions';
 import type { ScrollDirection, VirtualScrollProps } from '../src/types';
 import type { Ref } from 'vue';
@@ -137,8 +138,19 @@ export interface InternalState {
 
 // Helper to test composable
 export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: VirtualScrollExtension<T>[]) {
-  let result: ReturnType<typeof useVirtualScroll<T>>;
+  let result: UseVirtualScrollReturn<T>;
   let internalState: InternalState;
+
+  /**
+   * The engine's internal refs are reached through the documented extension
+   * contract (`ExtensionContext.internalState`), not through a public return key.
+   */
+  const probe: VirtualScrollExtension<T> = {
+    name: 'internal-state-probe',
+    onInit: (context) => {
+      internalState = context.internalState as unknown as InternalState;
+    },
+  };
 
   const extensions = customExtensions !== undefined
     ? customExtensions
@@ -153,14 +165,14 @@ export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: V
       useCoordinateScalingExtension<T>(),
     ] as VirtualScrollExtension<T>[];
 
+  extensions.push(probe);
+
   const propsRef = ref(propsValue) as Ref<VirtualScrollProps<T>>;
 
   const TestComponent = defineComponent({
     setup(_, { expose }) {
       const vs = useVirtualScroll(propsRef, extensions);
       result = vs;
-      // @ts-expect-error - accessing internal state for testing
-      internalState = vs.__internalState;
       expose({ vs });
       return () => null;
     },

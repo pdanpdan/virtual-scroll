@@ -1,5 +1,7 @@
 import type { ExtensionContext, VirtualScrollExtension } from '../extensions';
 import type {
+  ColumnRange,
+  Point,
   RenderedItem,
   ScrollAlignment,
   ScrollAlignmentOptions,
@@ -7,10 +9,11 @@ import type {
   ScrollDirection,
   ScrollToIndexOptions,
   ScrollToIndexResult,
+  ScrollToOffsetOptions,
   VirtualScrollProps,
 } from '../types';
 /* global ScrollToOptions */
-import type { Ref } from 'vue';
+import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue';
 
 import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive, ref, toValue, watch } from 'vue';
 
@@ -39,17 +42,92 @@ import {
 import { useVirtualScrollSizes } from './useVirtualScrollSizes';
 
 /**
+ * Value returned by {@link useVirtualScroll}: the render window, the derived
+ * geometry, the programmatic scroll API and the internal state the component
+ * wrapper reads.
+ */
+export interface UseVirtualScrollReturn<T = unknown> {
+  /** Reactive list of items to render in the current viewport. */
+  renderedItems: ComputedRef<RenderedItem<T>[]>;
+  /** Total calculated width of the scrollable content area (VU). */
+  totalWidth: ComputedRef<number>;
+  /** Total calculated height of the scrollable content area (VU). */
+  totalHeight: ComputedRef<number>;
+  /** Physical width of the content in the DOM (clamped to browser limits, DU). */
+  renderedWidth: ComputedRef<number>;
+  /** Physical height of the content in the DOM (clamped to browser limits, DU). */
+  renderedHeight: ComputedRef<number>;
+  /** Physical width of the virtualized content area, before clamping (DU). */
+  renderedVirtualWidth: ComputedRef<number>;
+  /** Physical height of the virtualized content area, before clamping (DU). */
+  renderedVirtualHeight: ComputedRef<number>;
+  /** Detailed information about the current scroll state. */
+  scrollDetails: ComputedRef<ScrollDetails<T>>;
+  /** Information about the currently visible range of columns. */
+  columnRange: ComputedRef<ColumnRange>;
+  /** Helper to get the height of a specific row (VU). */
+  getRowHeight: (index: number) => number;
+  /** Helper to get the width of a specific column (VU). */
+  getColumnWidth: (index: number) => number;
+  /** Helper to get the virtual offset of a specific row (VU). */
+  getRowOffset: (index: number) => number;
+  /** Helper to get the virtual offset of a specific column (VU). */
+  getColumnOffset: (index: number) => number;
+  /** Helper to get the virtual offset of a specific item (VU). */
+  getItemOffset: (index: number) => number;
+  /** Helper to get the size of a specific item along the scroll axis (VU). */
+  getItemSize: (index: number) => number;
+  /** Helper to get the row (or item) index at a specific virtual offset (VU). */
+  getRowIndexAt: (offset: number) => number;
+  /** Helper to get the column index at a specific virtual offset (VU). */
+  getColIndexAt: (offset: number) => number;
+  /** Programmatically scroll to a specific row and/or column. */
+  scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
+  /** Programmatically scroll to a specific virtual pixel offset (VU). */
+  scrollToOffset: (x?: number | null, y?: number | null, options?: ScrollToOffsetOptions) => void;
+  /** Immediately stops any currently active smooth scroll animation and clears pending corrections. */
+  stopProgrammaticScroll: () => void;
+  /** Adjusts the scroll position to compensate for measurement changes. */
+  handleScrollCorrection: (addedX: number, addedY: number) => void;
+  /** Updates the size of a single item from measurements. */
+  updateItemSize: (index: number, inlineSize: number, blockSize: number, element?: HTMLElement | undefined) => void;
+  /** Updates the size of multiple items from measurements. */
+  updateItemSizes: (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => void;
+  /** Updates the physical offset of the component relative to its scroll container. */
+  updateHostOffset: () => void;
+  /** Detects the current direction (LTR/RTL) of the scroll container. */
+  updateDirection: () => void;
+  /** Resets all dynamic measurements and re-initializes from current props. */
+  refresh: () => void;
+  /** Whether the component has finished its first client-side mount and hydration. */
+  isHydrated: Ref<boolean>;
+  /** Whether the scroll container is the window object. */
+  isWindowContainer: ComputedRef<boolean>;
+  /** Whether the scroll container is in Right-to-Left (RTL) mode. */
+  isRtl: Ref<boolean>;
+  /** Coordinate scaling factor for X axis. */
+  scaleX: Ref<number>;
+  /** Coordinate scaling factor for Y axis. */
+  scaleY: Ref<number>;
+  /** Absolute offset of the component within its container (DU). */
+  componentOffset: Point;
+  /** Inline-start/block-start padding of the scroll container, used to align the virtual scrollbar overlay (DU). */
+  scrollbarOffset: Point;
+}
+
+/**
  * Composable for virtual scrolling logic.
  * Handles calculation of visible items, scroll events, dynamic item sizes, and programmatic scrolling.
  *
- * @param propsInput - The configuration properties. Can be a plain object, a Ref, or a getter function.
+ * @param propsInput - The configuration properties: a reactive object, a Ref or a getter. A plain
+ * non-reactive object is read as-is and never re-read.
  * @param extensions - Optional list of extensions to enhance functionality (RTL, Snapping, Sticky, etc.).
  * @see VirtualScrollProps
  */
 export function useVirtualScroll<T = unknown>(
-  propsInput: Ref<VirtualScrollProps<T>> | (() => VirtualScrollProps<T>),
+  propsInput: MaybeRefOrGetter<VirtualScrollProps<T>>,
   extensions: VirtualScrollExtension<T>[] = [],
-) {
+): UseVirtualScrollReturn<T> {
   const props = computed(() => toValue(propsInput));
 
   // --- State ---
@@ -1395,7 +1473,5 @@ export function useVirtualScroll<T = unknown>(
     getRowIndexAt,
     /** Helper to get the column index at a specific virtual offset (VU). */
     getColIndexAt,
-    /** @internal */
-    __internalState: ctx.internalState,
   };
 }
