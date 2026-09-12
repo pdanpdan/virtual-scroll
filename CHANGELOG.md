@@ -1,5 +1,55 @@
 # Changelog
 
+# [1.0.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.13.2...v1.0.0) (2026-09-12)
+
+* refactor(virtual-scroll)!: rename getColIndexAt to getColumnIndexAt ([f16ec72](https://github.com/pdanpdan/virtual-scroll/commit/f16ec72bf0a72a405eac5204f3a85d4ab2af05ab))
+* build(virtual-scroll)!: publish the internal entry and the 1.0 metadata ([d91add3](https://github.com/pdanpdan/virtual-scroll/commit/d91add38151bbebc3eedc2ae6ce322dc934e9dc7))
+* refactor(virtual-scroll)!: curate the package entry and add the ./internal subpath ([a39fe3a](https://github.com/pdanpdan/virtual-scroll/commit/a39fe3a7708fddcbfa0b4ec82562218f61cc9c33))
+* feat(virtual-scroll)!: declare the engine return type and accept reactive props ([cda484f](https://github.com/pdanpdan/virtual-scroll/commit/cda484fa00a901b8b7b72fb43b50e77b6eab0520))
+* fix(virtual-scroll)!: align the table's public types with its runtime API ([284c52b](https://github.com/pdanpdan/virtual-scroll/commit/284c52bcd0588427957df7f3bf3276450ec9e66a))
+
+### Bug Fixes
+
+* **playground:** generate the UMD examples during the build ([f10a081](https://github.com/pdanpdan/virtual-scroll/commit/f10a0813ee2d943605d209b9702073058b49f7fa))
+* **virtual-scroll:** render valid ARIA roles and scrollbar labels ([0ed0321](https://github.com/pdanpdan/virtual-scroll/commit/0ed0321a6311b4f688613185b8277e7b6c20bade))
+* **VirtualScrollMasonry:** resolve the instance id during setup ([b4a70d5](https://github.com/pdanpdan/virtual-scroll/commit/b4a70d50a09fe6a0cacb9bd66697644dfdf9192d))
+
+### Features
+
+* **virtual-scroll:** add ScrollToOffsetOptions for programmatic scrolls ([3504b39](https://github.com/pdanpdan/virtual-scroll/commit/3504b39de676fe149d7d2d273f93b593ef355081))
+* **virtual-scroll:** describe the full exposed instance in VirtualScrollInstance ([1287ece](https://github.com/pdanpdan/virtual-scroll/commit/1287ece64aa0543032b51b5b3bfa8c7c4c132dd2))
+
+### BREAKING CHANGES
+
+* `getColIndexAt` is renamed to `getColumnIndexAt` on the engine return,
+  `VirtualScrollInstance`, `ExtensionContext.methods` and the keyboard composable
+  options.
+* `useVirtualScroll` no longer returns `__internalState`. Read the engine refs from
+  `ExtensionContext.internalState` in an extension, or type the result as
+  `UseVirtualScrollReturn<T>` and use the documented members.
+* `VirtualScrollTableComponentProps` no longer declares `containerTag`, `wrapperTag`,
+  `itemTag`, `headerTag` or `footerTag` (they never had an effect on the table - use
+  `VirtualScroll` when you need custom tags), and `VirtualScrollTableInstance` no
+  longer declares `headerTag`/`footerTag`.
+* the root entry no longer re-exports the engine internals:
+
+  - the `calculate*` layer (`calculateRange`, `calculateTotalSize`, ...) plus
+    `SnapResult`, `displayToVirtual`, `virtualToDisplay`, `isItemVisible`,
+    `findPrevStickyIndex` and `resolveSnap`;
+  - the DOM scroll helpers (`isWindow`, `isBody`, `isWindowLike`, `isElement`,
+    `isScrollableElement`, `scrollTo`, `isScrollToIndexOptions`, `getPaddingX`,
+    `getPaddingY`);
+  - the sizing layer (`useVirtualScrollSizes`, `UseVirtualScrollSizesProps`);
+  - the parameter bags (`RangeParams`, `ColumnRangeParams`, `StickyParams`,
+    `ItemPositionParams`, `ItemStyleParams`, `ScrollTargetParams`, `ScrollTargetResult`,
+    `TotalSizeParams`).
+
+  Import them from `@pdanpdan/virtual-scroll/internal`, which carries no compatibility
+  guarantee. `FenwickTree`, `BROWSER_MAX_SIZE`, the components, the composables, the
+  extension contract and the types stay on the root entry.
+* Vue `^3.5.0` is now required (`useId` provides the generated container ids);
+  installing with 3.0-3.4 fails the peer check.
+
 ## [0.13.2](https://github.com/pdanpdan/virtual-scroll/compare/v0.13.1...v0.13.2) (2026-09-10)
 
 ### Bug Fixes
