@@ -577,7 +577,7 @@ const effectiveRole = computed(() => {
 
 const isGrid = computed(() => effectiveRole.value === 'grid');
 
-const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : 'none');
+const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : undefined);
 const wrapperRole = computed(() => effectiveRole.value);
 const internalItemRole = computed(() => {
   if (isGrid.value) {

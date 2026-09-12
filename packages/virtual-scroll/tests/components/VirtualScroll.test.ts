@@ -406,6 +406,21 @@ describe('virtualScroll', () => {
       expect(vs.getCellAriaProps(0)).toEqual({});
     });
 
+    it('does not advertise an unlabelled focusable container as a region', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { items: mockItems },
+      });
+
+      await nextTick();
+      const container = wrapper.find('.virtual-scroll-container');
+      expect(container.attributes('tabindex')).toBe('0');
+      // `role="none"` is ignored on a focusable element; the container carries no role at all
+      // until it is given an accessible name.
+      expect(container.attributes('role')).toBeUndefined();
+
+      wrapper.unmount();
+    });
+
     it('renders debug info when debug prop is true', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {
@@ -2360,6 +2375,21 @@ describe('virtualScroll', () => {
       await nextTick();
 
       expect((verticalThumb.element as HTMLElement).style.blockSize).toBe('6.4%');
+    });
+
+    it('labels the built-in scrollbar for assistive technology', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: Array.from({ length: 20 }, (_, i) => ({ id: i })),
+          virtualScrollbar: true,
+        },
+      });
+
+      await nextTick();
+      await nextTick();
+
+      expect(wrapper.find('.virtual-scrollbar-track--vertical').attributes('aria-label')).toBe('Vertical scroll');
     });
 
     it('scrolls when clicking on vertical scrollbar track', async () => {

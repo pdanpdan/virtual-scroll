@@ -73,7 +73,7 @@ watch(scrollDetails, (details) => {
   emit('scroll', details);
 });
 
-const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : 'none');
+const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : undefined);
 const rootAriaProps = computed(() => ({
   'aria-label': props.ariaLabel,
   'aria-labelledby': props.ariaLabelledby,

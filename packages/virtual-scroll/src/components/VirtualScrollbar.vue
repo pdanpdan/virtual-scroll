@@ -26,6 +26,7 @@ const { trackProps, thumbProps } = useVirtualScrollbar(() => ({
   viewportSize: props.viewportSize,
   containerId: props.containerId,
   isRtl: props.isRtl,
+  ariaLabel: props.ariaLabel,
   scrollToOffset: (offset: number) => {
     props.scrollToOffset?.(offset);
     emit('scrollToOffset', offset);

@@ -519,6 +519,7 @@ describe('virtualScrollMasonry', () => {
     });
     await nextTick();
     await nextTick();
+    expect(none.find('.virtual-scroll-container').attributes('role')).toBeUndefined();
     expect(none.find('.virtual-scroll-item').attributes('role')).toBe('none');
     none.unmount();
   });

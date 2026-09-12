@@ -28,6 +28,21 @@ describe('virtualScrollbar', () => {
       expect((thumb.element as HTMLElement).style.blockSize).toBe('20%');
     });
 
+    it('exposes the ariaLabel prop as the accessible name', () => {
+      const wrapper = mount(VirtualScrollbar, {
+        props: {
+          axis: 'vertical',
+          totalSize: 1000,
+          position: 0,
+          viewportSize: 200,
+          ariaLabel: 'Item list',
+          scrollToOffset: vi.fn(),
+        },
+      });
+
+      expect(wrapper.find('.virtual-scrollbar-track').attributes('aria-label')).toBe('Item list');
+    });
+
     it('renders correctly for horizontal axis', () => {
       const wrapper = mount(VirtualScrollbar, {
         props: {
