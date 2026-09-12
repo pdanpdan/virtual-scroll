@@ -663,10 +663,14 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   getCellAriaProps: (colIndex: number) => Record<string, string | number | undefined>;
   /** Helper to get ARIA attributes for an item. */
   getItemAriaProps: (index: number) => Record<string, string | number | undefined>;
-  /** The ARIA role of the items wrapper. */
+  /** The ARIA role of the items wrapper, or `null` when the wrapper renders no role (`VirtualScrollTable`). */
   wrapperRole: string | null;
   /** The ARIA role of each cell. */
   cellRole: string | null;
+  /** Helper to get the row (or item) index at a specific virtual offset (VU). */
+  getRowIndexAt: (offset: number) => number;
+  /** Helper to get the column index at a specific virtual offset (VU). */
+  getColIndexAt: (offset: number) => number;
   /** Helper to get the virtual offset of a specific row. */
   getRowOffset: (index: number) => number;
   /** Helper to get the virtual offset of a specific column. */
@@ -678,11 +682,15 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   /** Programmatically scroll to a specific row and/or column. */
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
   /** Programmatically scroll to a specific pixel offset. */
-  scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
+  scrollToOffset: (x?: number | null, y?: number | null, options?: ScrollToOffsetOptions) => void;
   /** Resets all dynamic measurements and re-initializes from props. */
   refresh: () => void;
+  /** Updates the size of a single item from measurements. */
+  updateItemSize: (index: number, inlineSize: number, blockSize: number, element?: HTMLElement | undefined) => void;
   /** Batch-updates sizes for multiple items from measurements. */
   updateItemSizes: (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => void;
+  /** Updates the physical offset of the component relative to its scroll container. */
+  updateHostOffset: () => void;
   /** Immediately stops any currently active smooth scroll animation and clears pending corrections. */
   stopProgrammaticScroll: () => void;
   /** Detects the current direction (LTR/RTL) of the scroll container. */
