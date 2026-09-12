@@ -1,6 +1,16 @@
+import type { ScrollAxis } from '../types';
 import type { ExtensionContext, VirtualScrollExtension } from './index';
 
 import { watch } from 'vue';
+
+/** Options for {@link useInfiniteLoadingExtension}. */
+export interface InfiniteLoadingExtensionOptions {
+  /**
+   * Callback triggered when the scroll position reaches the `loadDistance` threshold.
+   * @param axis - The axis that reached the threshold.
+   */
+  onLoad: (axis: ScrollAxis) => void;
+}
 
 /**
  * Extension for Infinite Loading logic.
@@ -9,13 +19,7 @@ import { watch } from 'vue';
  * @param options - Extension options.
  * @param options.onLoad - Callback triggered when more data should be loaded.
  */
-export function useInfiniteLoadingExtension<T = unknown>(options: {
-  /**
-   * Callback triggered when the scroll position reaches the `loadDistance` threshold.
-   * @param axis - The axis that reached the threshold.
-   */
-  onLoad: (axis: 'vertical' | 'horizontal') => void;
-}): VirtualScrollExtension<T> {
+export function useInfiniteLoadingExtension<T = unknown>(options: InfiniteLoadingExtensionOptions): VirtualScrollExtension<T> {
   return {
     name: 'infinite-loading',
     onInit(ctx: ExtensionContext<T>) {

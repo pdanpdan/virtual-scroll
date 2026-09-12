@@ -23,10 +23,18 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(import.meta.dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(import.meta.dirname, 'src/index.ts'),
+        internal: resolve(import.meta.dirname, 'src/internal.ts'),
+      },
       name: 'VirtualScroll',
-      fileName: (format) => `index.${ format === 'es' ? 'mjs' : format === 'cjs' ? 'cjs' : 'js' }`,
-      formats: [ 'es', 'cjs', 'umd' ],
+      // UMD cannot be built from multiple entries: `vite.config.umd.ts` builds
+      // the CDN bundle from the public entry alone.
+      formats: [ 'es', 'cjs' ],
+      fileName: (format, entryName) => `${ entryName }.${ format === 'es' ? 'mjs' : 'cjs' }`,
+      // Pinned so the emitted stylesheet does not depend on Vite's lib-mode
+      // heuristics (the exports map points `./style.css` at this file).
+      cssFileName: 'virtual-scroll',
     },
     rollupOptions: {
       external: [ 'vue' ],

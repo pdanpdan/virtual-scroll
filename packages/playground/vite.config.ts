@@ -20,6 +20,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '#': `${ resolve(import.meta.dirname) }/`,
+      // specific subpaths first: string aliases also match `key/...` prefixes
+      '@pdanpdan/virtual-scroll/internal': resolve(import.meta.dirname, '../virtual-scroll/src/internal.ts'),
       '@pdanpdan/virtual-scroll': resolve(import.meta.dirname, '../virtual-scroll/src/index.ts'),
     },
   },
