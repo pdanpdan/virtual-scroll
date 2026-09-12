@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.13.2",
   "description": "Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM.",
-  "author": "",
+  "author": "Dan Popescu <pdan.popescu@gmail.com>",
   "license": "MIT",
   "homepage": "https://pdanpdan.github.io/virtual-scroll",
   "repository": {
@@ -16,7 +16,18 @@
   },
   "keywords": [
     "vue",
+    "vue3",
     "virtual-scroll",
+    "virtual-list",
+    "virtualization",
+    "windowing",
+    "infinite-scroll",
+    "dynamic-size",
+    "grid",
+    "table",
+    "masonry",
+    "ssr",
+    "performance",
     "typescript"
   ],
   "sideEffects": [
@@ -28,9 +39,17 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.mjs",
+      "require": "./dist/internal.cjs"
+    },
     "./VirtualScroll.vue": "./src/components/VirtualScroll.vue",
+    "./VirtualScrollTable.vue": "./src/components/VirtualScrollTable.vue",
+    "./VirtualScrollMasonry.vue": "./src/components/VirtualScrollMasonry.vue",
     "./VirtualScrollbar.vue": "./src/components/VirtualScrollbar.vue",
-    "./style.css": "./dist/virtual-scroll.css"
+    "./style.css": "./dist/virtual-scroll.css",
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -43,7 +62,7 @@
     "src"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vite build --config vite.config.umd.ts",
     "prepublishOnly": "pnpm build",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix",
@@ -55,7 +74,7 @@
     "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage"
   },
   "peerDependencies": {
-    "vue": "^3.0.0"
+    "vue": "^3.5.0"
   },
   "publishConfig": {
     "access": "public",
