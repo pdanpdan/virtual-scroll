@@ -74,7 +74,7 @@ import '@pdanpdan/virtual-scroll/style.css';
 
 ### 2. Original Vue SFC
 
-Import the raw `.vue` file if you want to use your own Vue compiler configuration.
+Import the raw `.vue` file if you want to use your own Vue compiler configuration. All four components are exported this way: `VirtualScroll.vue`, `VirtualScrollTable.vue`, `VirtualScrollMasonry.vue` and `VirtualScrollbar.vue`.
 
 ```vue
 <script setup>
@@ -123,7 +123,7 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props);
 <!-- Import Vue 3 first -->
 <script src="https://unpkg.com/vue@3"></script>
 <!-- Import VirtualScroll CSS -->
-<link rel="stylesheet" href="https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css">
 <!-- Import VirtualScroll JavaScript -->
 <script src="https://unpkg.com/@pdanpdan/virtual-scroll"></script>
 ```
@@ -205,6 +205,16 @@ Rows are recycled: they mount as they enter the viewport and unmount when they l
 
 The library uses a modular extension system. You can use the built-in extensions or create your own.
 
+An extension is a plain object implementing `VirtualScrollExtension<T>`: a unique `name` plus the
+optional hooks `onInit(ctx)`, `onScroll(ctx, event)`, `onScrollEnd(ctx)` and
+`transformRenderedItems(items, ctx)` (post-processes the rendered window and must return the items to
+render). Every hook receives an `ExtensionContext<T>` with the reactive `props`, `scrollDetails`,
+`totalSize`, `range` and `currentIndex`, the engine state refs (`internalState`) and the engine
+methods (`scrollToIndex`, `scrollToOffset`, `updateDirection`, `getRowIndexAt`, `getColIndexAt`,
+`getItemSize`, `getItemBaseSize`, `getItemOffset`, `handleScrollCorrection`). `name` is only a
+label: hooks are called in the order the extensions are passed to `useVirtualScroll`, and extensions
+may wrap engine methods (RTL wraps `updateDirection`).
+
 ### Built-in Extensions
 
 - `useRtlExtension()`: Automatic Right-to-Left layout support.
@@ -236,32 +246,24 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props, [
 
 The library exposes its internal logic via reactive composables for advanced use cases.
 
+Everything on this page imports from the package root. The engine layer the components are built on -
+the pure calculation helpers (`calculate*`), the DOM scroll helpers, the sizing layer
+(`useVirtualScrollSizes`) and the parameter bags they take - is published from
+`@pdanpdan/virtual-scroll/internal`; that entry also carries the masonry layout engine and its types,
+which the root entry never exported. Nothing there is covered by semver: shapes and signatures may
+change in any release, including a patch, and the source is the documentation. (`FenwickTree`, the structure the sizing layer builds on,
+is exported from the root; its methods are listed in the [API reference](https://pdanpdan.github.io/virtual-scroll/docs/#fenwick-tree).)
+
 ### `useVirtualScroll(props, extensions?)`
 
 The core logic for virtualization.
 
 **Parameters:**
-- `props`: Reactive reference or getter for [VirtualScrollProps](#props).
+- `props`: Reactive object, `Ref` or getter for [VirtualScrollProps](#props).
 - `extensions`: Optional array of [VirtualScrollExtension](#extensions) objects.
 
 **Returns:**
-See the [Exposed Members](#exposed-members) section for the full list of returned properties and methods.
-
-### `useVirtualScrollSizes(config)`
-
-Manages item and column measurements using optimized Fenwick Trees for *O(log N)* performance.
-
-**Config:**
-- `props`: Full component props.
-- `isDynamicItemSize`: Boolean.
-- `isDynamicColumnWidth`: Boolean.
-- `defaultSize`: Fallback measurement.
-- `direction`: Scroll axis.
-
-**Returns:**
-- `itemSizesX` / `itemSizesY`: Internal Fenwick Trees.
-- `updateItemSizes(updates, ...)`: Method to register new measurements.
-- `refresh()`: Reset all measurements.
+The [Exposed Members](#exposed-members) list covers the properties and methods the component puts on its instance; the composable returns those plus `totalWidth` / `totalHeight`, `renderedVirtualWidth` / `renderedVirtualHeight`, `isWindowContainer`, `scrollbarOffset` and `handleScrollCorrection` (see [Type Definitions](#type-definitions) for their shapes).
 
 ### `useVirtualScrollbar(props)`
 
@@ -273,11 +275,14 @@ Logic for custom virtual scrollbar interactions (dragging, clicking).
 - `viewportSize`: Viewport size (DU).
 - `position`: Current scroll (DU).
 - `scrollToOffset`: Callback to update scroll.
+- `containerId` (optional): id of the controlled container, exposed as `aria-controls`.
+- `isRtl` (optional): Map the thumb for RTL layouts.
+- `ariaLabel` (optional): Accessible label for the track.
 
 **Returns:**
-- `trackProps`: Attributes/listeners for the track.
-- `thumbProps`: Attributes/listeners for the thumb.
-- `thumbStyle`: Calculated reactive styles.
+- `trackProps` / `thumbProps`: Attributes/listeners to bind on the track and thumb (`role`, ARIA values, styles, pointer handlers).
+- `trackStyle` / `thumbStyle`: Calculated reactive styles.
+- `positionPercent` / `viewportPercent` (0-1), `thumbSizePercent` / `thumbPositionPercent` (0-100): Raw geometry for custom interfaces.
 - `isDragging`: Drag state.
 
 ### `useVirtualScrollInertia(config)`
@@ -331,11 +336,27 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 **Returns:**
 - `setItemRef(el, index)`: Callback ref for individual items.
 
+### `useVirtualScrollMasonry(props)`
+
+The engine behind `VirtualScrollMasonry`: derives the column geometry from the container width, places each card on the shortest column through segment-snapshotted frontier chains, mounts only the window around the scroll position and re-anchors the topmost visible card across relayouts.
+
+**Parameters:**
+- `props`: Reactive object, `Ref` or getter for the [masonry props](#virtualscrollmasonry) plus `hostRef` (the scroll container element).
+
+**Returns:**
+- `renderedCards`: Cards to mount in the current window.
+- `scrollDetails`: Reactive `MasonryScrollDetails` (`currentIndex`/`currentEndIndex`, `range`, `scrollOffset.y`, `viewportSize`, `totalSize`, `isScrolling`, …).
+- `columns` / `columnWidth` / `totalHeight` / `totalHeightExact`: reactive column geometry and content height.
+- `scrollToIndex(index, options)` / `scrollToOffset(offset, options)` / `refresh()`: programmatic API.
+- `internalState` / `applyMeasurements(...)`: consumed by the component wrapper and tagged `@internal` - not part of the supported surface.
+
 ## Component Reference: VirtualScroll
 
 ### VirtualScrollTable
 
 For tabular data use the dedicated `VirtualScrollTable` component instead: it renders a real `<table>` structure with optional real-table-flow rows (`flowTable`, supporting measured dynamic row heights), sticky header/footer slots, and three column-width strategies - browser auto layout, first-window auto-sizing (`autoSizeColumns`), or explicit `columnWidths`; overflowing tables get a horizontal scrollbar. See the [Flow Table example](https://pdanpdan.github.io/virtual-scroll/essential-flow-table).
+
+The table fixes its own semantic tags (`table` > `tbody` > `tr`, with `thead`/`tfoot` for the slots), so the `containerTag`/`wrapperTag`/`itemTag`/`headerTag`/`footerTag` props do not apply to it - they are typed on `VirtualScroll`, which is the component to use when you need `ul`/`ol` > `li` markup.
 
 ### VirtualScrollMasonry
 
@@ -387,10 +408,10 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `items` | `T[]` | Required | Array of items to be virtualized. May contain `undefined` entries (e.g. `new Array(n)` for data-less lists): every index in range renders and `item` is `undefined` for holes; only the visible window is accessed. |
-| `itemSize` | `number \| number[] \| fn \| null` | `40` | Fixed size, repeating array pattern, or function. Pass `0`/`null` for dynamic. |
+| `itemSize` | `number \| (number \| null \| undefined)[] \| fn \| null` | `undefined` | Fixed size, repeating array pattern (holes and `null` mean "measure this index"), or function. Omit it (or pass `0`/`null`) and rows are **measured** with a `ResizeObserver`, using `defaultItemSize` (`40`) as the pre-measure estimate. |
 | `direction` | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | Scroll direction. |
 | `columnCount` | `number` | `0` | Number of columns for grid mode. |
-| `columnWidth` | `num \| num[] \| fn \| null` | `100` | Width for columns in grid mode. |
+| `columnWidth` | `num \| (num \| null \| undefined)[] \| fn \| null` | `undefined` | Column sizing for grid mode (same forms as `itemSize`). Omit it (or pass `0`/`null`) and columns are measured, using `defaultColumnWidth` (`100`) as the pre-measure estimate. |
 | `gap` / `columnGap` | `number` | `0` | Spacing between items/columns. |
 | `snap` | `SnapMode` | `false` | Enable scroll snapping. See [SnapMode](#snapmode). |
 | `stickyIndices` | `number[]` | `[]` | Indices of items that should remain sticky. When `stickyHeader`/`stickyFooter` are enabled, they stick below/above them. |
@@ -413,7 +434,7 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 | `defaultItemSize` / `defaultColumnWidth` | `number` | `40 / 100` | Estimate for dynamic items/columns. |
 | `debug` | `boolean` | `false` | Enable debug visualization. |
 | `role` | `string` | - | ARIA role for the container. Defaults based on direction. |
-| `ariaLabel` / `Labelledby` | `string` | - | Accessibility labels for the container. |
+| `ariaLabel` / `ariaLabelledby` | `string` | - | Accessibility labels for the container (the container role becomes `region` when either is set). |
 | `itemRole` | `string` | - | ARIA role for items. Defaults based on `role`. |
 
 ### SnapMode
@@ -445,9 +466,19 @@ Allows axis-specific alignment in `scrollToIndex`.
 - `x`: `ScrollAlignment` for the horizontal axis.
 - `y`: `ScrollAlignment` for the vertical axis.
 
+### Events
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `scroll` | `ScrollDetails<T>` | Emitted on every scroll-details change once hydrated. See [ScrollDetails](#scrolldetails). |
+| `visibleRangeChange` | `{ start, end, colStart, colEnd }` | Emitted when the rendered range changes, and once on hydration. `start`/`colStart` are inclusive and `end`/`colEnd` exclusive, matching [ScrollDetails](#scrolldetails) `range`/`columnRange`. |
+| `load` | `'vertical' \| 'horizontal'` | Emitted when the scroll position comes within `loadDistance` (DU) of the end on that axis; suppressed while `loading` is `true`. |
+
+`VirtualScrollTable` emits the same three events. `VirtualScrollMasonry` emits `scroll` with `MasonryScrollDetails` (single vertical axis).
+
 ### Slots
 
-- `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets), `index`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
+- `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets - type the array as `(T | undefined)[]` to model that), `index`, `getItemAriaProps`, `getCellAriaProps`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
 - `loading`: Content rendered at the end while loading. The slot is always rendered when provided - it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false - so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is actually expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
 - `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.
@@ -479,7 +510,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 
 #### Methods
 - `scrollToIndex(row, col, options)`: Programmatic scroll to index. An end-anchored scroll (last row or content end) keeps re-clamping while settling measurements move the real end, so the first jump to the end lands flush even on dynamic lists. See [ScrollToIndexOptions](#scrolltoindexoptions).
-- `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling.
+- `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling. See [ScrollToOffsetOptions](#scrolltooffsetoptions).
 - `refresh()`: Resets all measurements and state.
 - `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
 - `updateDirection()`: Manually trigger direction detection.
@@ -548,6 +579,14 @@ The component automatically manages ARIA roles and attributes to ensure screen r
 | `align` | `ScrollAlignment \| ScrollAlignmentOptions` | `'auto'` | Alignment logic. |
 | `behavior` | `'auto' \| 'smooth'` | `'smooth'` | Scroll animation. |
 
+### ScrollToOffsetOptions
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `behavior` | `'auto' \| 'smooth'` | `'auto'` | Scroll animation. |
+| `endExtraX` | `number` | `0` | Extra scrollable range (VU) after the content end on the X axis, so a block rendered after the items (e.g. an always-rendered loading slot) stays reachable. |
+| `endExtraY` | `number` | `0` | Same as `endExtraX` on the Y axis. |
+
 ## Sizing Guide
 
 | Option Type | `itemSize` / `columnWidth` | Performance | Description |
@@ -566,6 +605,19 @@ Virtual scrollbars are automatically enabled when content size exceeds browser l
 ### Using the `VirtualScrollbar` Component
 
 You can use the built-in `VirtualScrollbar` independently if needed.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `axis` | `'vertical' \| 'horizontal'` | `'vertical'` | Axis this scrollbar drives. |
+| `totalSize` | `number` | Required | Content size (DU). |
+| `position` | `number` | Required | Current scroll position (DU). |
+| `viewportSize` | `number` | Required | Viewport size (DU). |
+| `scrollToOffset` | `(offset: number) => void` | - | Called with the requested offset while dragging or clicking the track. The same value is emitted as `scrollToOffset`, so either channel works. |
+| `containerId` | `string` | - | id of the controlled container, exposed as `aria-controls`. |
+| `isRtl` | `boolean` | `false` | Map the thumb for RTL layouts. |
+| `ariaLabel` | `string` | - | Accessible label for the track. The component renders none by default; `VirtualScroll` passes `"Vertical scroll"` / `"Horizontal scroll"`. |
+
+The component itself exposes nothing through a template ref; use the `useVirtualScrollbar` composable when you need the geometry.
 
 ```vue
 <script setup>

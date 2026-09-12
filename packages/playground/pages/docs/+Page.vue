@@ -638,8 +638,8 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code class="docs-prop-name">itemSize</code></td>
               <td><code>num | arr | fn | null</code></td>
-              <td><code>{{ DEFAULT_ITEM_SIZE }}</code></td>
-              <td>Fixed size, circular array pattern, or function. See the <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
+              <td><code>{{ DEFAULT_ITEM_SIZE }}</code> (estimate)</td>
+              <td>Fixed size, circular array pattern, or function. Omit it (or pass <code>0</code>/<code>null</code>) to measure rows with a <code>ResizeObserver</code>; <code>defaultItemSize</code> is only the pre-measure estimate. See the <a href="#sizing-guide" class="link">Sizing Guide</a>.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">direction</code></td>
@@ -682,8 +682,8 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code class="docs-prop-name">columnWidth</code></td>
               <td><code>num | arr | fn | null</code></td>
-              <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code></td>
-              <td>Width for columns in grid mode (supports fixed, array pattern, or function).</td>
+              <td><code>{{ DEFAULT_COLUMN_WIDTH }}</code> (estimate)</td>
+              <td>Width for columns in grid mode (fixed, array pattern, or function). Omit it (or pass <code>0</code>/<code>null</code>) to measure columns; <code>defaultColumnWidth</code> is only the pre-measure estimate.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">columnGap</code></td>
@@ -1228,7 +1228,8 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm max-w-none mb-6 opacity-80">
         <p>
-          The reactive state and methods available through a template <code>ref</code>.
+          The reactive state and methods available through a template <code>ref</code>; the instance type is
+          <code>VirtualScrollInstance&lt;T&gt;</code>.
         </p>
       </div>
 
@@ -1467,7 +1468,9 @@ const vs = useVirtualScroll(props, [
             <code>stopProgrammaticScroll</code>, <code>scrollDetails</code>, <code>isHydrated</code>,
             <code>getItemOffset</code>/<code>getItemSize</code> and the rest - plus table constants
             (<code>isTable: true</code>, <code>itemTag: 'tr'</code>, <code>containerTag: 'table'</code>,
-            <code>wrapperTag: 'tbody'</code>). See
+            <code>wrapperTag: 'tbody'</code>) and the table-only props it exposes
+            (<code>flowTable</code>, <code>autoSizeColumns</code>, <code>columnWidths</code>) - not the tag props.
+            The instance type is <code>VirtualScrollTableInstance&lt;T&gt;</code>. See
             <a href="#methods" class="link link-primary font-bold">Methods</a>.
           </li>
           <li>
@@ -1647,6 +1650,12 @@ const vs = useVirtualScroll(props, [
           Exposed Members &amp; Events
         </a>
       </h3>
+      <div class="prose prose-sm max-w-none mb-4 opacity-80">
+        <p>
+          Available through a template <code>ref</code>; the instance type is
+          <code>VirtualScrollMasonryInstance&lt;T&gt;</code>.
+        </p>
+      </div>
       <div class="docs-table-container mb-8 text-base-content/80">
         <table class="docs-table">
           <thead>
@@ -1858,6 +1867,18 @@ const scrollY = ref(0);
           Composables
         </a>
       </h2>
+
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
+        <p>
+          Everything below is imported from the package root, with one exception:
+          <code>useVirtualScrollSizes</code> is the sizing layer the engine builds on and lives in
+          <code>@pdanpdan/virtual-scroll/internal</code>. The pure calculation layer (<code>calculate*</code>),
+          the DOM scroll helpers, the masonry layout engine and their parameter bags live in that same entry:
+          they are what the components are built on and they carry <strong>no compatibility guarantee</strong> -
+          shapes and signatures may change in any release, including a patch.
+          <code>FenwickTree</code>, the structure the sizing layer builds on, is exported from the root.
+        </p>
+      </div>
 
       <!-- useVirtualScroll -->
       <section id="use-virtual-scroll" class="mb-16">
@@ -2124,12 +2145,16 @@ const {
           <p>
             Keeps track of item sizes: prefix sums, size updates and the scroll corrections that follow a measurement.
           </p>
+          <p class="italic opacity-70">
+            Part of the engine layer: import it from <code>@pdanpdan/virtual-scroll/internal</code>. It is not
+            covered by semver - shapes and signatures may change in any release.
+          </p>
         </div>
 
         <CodeBlock
           class="docs-code-block mb-8 font-mono"
           lang="ts"
-          code="import { useVirtualScrollSizes } from '@pdanpdan/virtual-scroll';
+          code="import { useVirtualScrollSizes } from '@pdanpdan/virtual-scroll/internal';
 import { computed } from 'vue';
 
 const {
@@ -2551,6 +2576,50 @@ const { setItemRef } = useVirtualScrollObservers({
           Extension Reference
         </a>
       </h2>
+
+      <!-- VirtualScrollExtension contract -->
+      <section id="extension-contract" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#extension-contract" aria-label="Link to VirtualScrollExtension section">
+            VirtualScrollExtension
+          </a>
+        </h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            An extension is a plain object: a unique <code>name</code> plus the optional lifecycle hooks below.
+            Pass them as the second argument of <code>useVirtualScroll(props, extensions)</code>; the components wire
+            the built-ins in this order: <code>rtl</code>, <code>snapping</code>, <code>sticky</code>,
+            <code>infinite-loading</code>, <code>prepend-restoration</code>, <code>coordinate-scaling</code>.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="interface VirtualScrollExtension<T> {
+  name: string;
+  onInit?(ctx: ExtensionContext<T>): void;
+  onScroll?(ctx: ExtensionContext<T>, event: Event): void;
+  onScrollEnd?(ctx: ExtensionContext<T>): void;
+  // Post-processes the rendered window; must return the items to render.
+  transformRenderedItems?(items: RenderedItem<T>[], ctx: ExtensionContext<T>): RenderedItem<T>[];
+}"
+        />
+
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Every hook receives an <code>ExtensionContext&lt;T&gt;</code>: the reactive <code>props</code>,
+            <code>scrollDetails</code>, <code>totalSize</code>, <code>range</code> and <code>currentIndex</code>; the
+            engine state refs in <code>internalState</code> (<code>scrollX</code>/<code>scrollY</code>,
+            <code>internalScrollX</code>/<code>internalScrollY</code>, <code>isRtl</code>, <code>isScrolling</code>,
+            <code>isProgrammaticScroll</code>, viewport size, <code>scaleX</code>/<code>scaleY</code>, scroll
+            directions, relative scroll); and the engine methods in <code>methods</code>
+            (<code>scrollToIndex</code>, <code>scrollToOffset</code>, <code>updateDirection</code>,
+            <code>getRowIndexAt</code>, <code>getColIndexAt</code>, <code>getItemSize</code>,
+            <code>getItemBaseSize</code>, <code>getItemOffset</code>, <code>handleScrollCorrection</code>).
+          </p>
+        </div>
+      </section>
 
       <!-- useRtlExtension -->
       <section id="use-rtl-extension" class="mb-16">
@@ -2980,14 +3049,14 @@ const vs = useVirtualScroll(props, [
             </thead>
             <tbody class="text-xs opacity-90">
               <tr><td><code>items</code></td><td><code>T[]</code></td><td>Data source. Required.</td></tr>
-              <tr><td><code>itemSize</code></td><td><code>num | arr | fn | null</code></td><td>Sizing logic (fixed, circular array pattern, or function). Default: {{ DEFAULT_ITEM_SIZE }}px.</td></tr>
+              <tr><td><code>itemSize</code></td><td><code>num | arr | fn | null</code></td><td>Sizing logic (fixed, circular array pattern, or function). Omitted/<code>null</code> measures rows; the estimate before measurement is <code>{{ DEFAULT_ITEM_SIZE }}</code>px.</td></tr>
               <tr><td><code>direction</code></td><td><code><a href="#scroll-direction" class="link link-primary">ScrollDirection</a></code></td><td><code>'vertical' | 'horizontal' | 'both'</code>.</td></tr>
               <tr><td><code>bufferBefore</code> / <code>bufferAfter</code></td><td><code>number</code></td><td>Items outside viewport. Default: {{ DEFAULT_BUFFER }}.</td></tr>
               <tr><td><code>container</code></td><td><code>HTMLElement | Window</code></td><td>Scroll container. Defaults to component root.</td></tr>
               <tr><td><code>hostElement</code></td><td><code>HTMLElement</code></td><td>Reference for offset calculation (DU).</td></tr>
               <tr><td><code>ssrRange</code></td><td><code><a href="#ssr-support" class="link link-primary">SSRRange</a></code></td><td>Pre-rendered range for SSR.</td></tr>
               <tr><td><code>columnCount</code></td><td><code>number</code></td><td>Total columns for grid mode.</td></tr>
-              <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Default: {{ DEFAULT_COLUMN_WIDTH }}px.</td></tr>
+              <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Omitted/<code>null</code> measures columns; the estimate before measurement is <code>{{ DEFAULT_COLUMN_WIDTH }}</code>px.</td></tr>
               <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
               <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
               <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
@@ -3010,7 +3079,11 @@ const vs = useVirtualScroll(props, [
           </a>
         </h4>
         <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
-          <p>Parameters for calculating sticky item offsets (core engine's <code>calculateStickyItem</code>).</p>
+          <p>
+            Parameters for calculating sticky item offsets (core engine's <code>calculateStickyItem</code>).
+            Part of the engine layer: import it from <code>@pdanpdan/virtual-scroll/internal</code>; no
+            compatibility guarantee.
+          </p>
         </div>
         <div class="docs-table-container overflow-x-auto text-base-content/80">
           <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
@@ -3201,6 +3274,12 @@ const vs = useVirtualScroll(props, [
             UseVirtualScrollSizesProps
           </a>
         </h4>
+        <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+          <p>
+            Config of the internal sizing composable - import it from
+            <code>@pdanpdan/virtual-scroll/internal</code>; no compatibility guarantee.
+          </p>
+        </div>
         <div class="docs-table-container overflow-x-auto text-base-content/80">
           <table class="table table-xs @4xl:table-sm table-zebra w-full min-w-150">
             <thead class="bg-base-300 text-base-content">
@@ -3256,7 +3335,7 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          Detailed reference for the methods exposed on the <code>VirtualScroll</code> component instance (via a template <code>ref</code>) and for the helpers returned by the composables - the badge names the owning API. Methods on the instance are also returned by <code>useVirtualScroll</code>.
+          Detailed reference for the methods exposed on the <code>VirtualScroll</code> component instance (via a template <code>ref</code>) and for the helpers returned by the composables - the badge names the owning API. Methods on the instance are also returned by <code>useVirtualScroll</code>; helpers badged <code>useVirtualScrollSizes</code> belong to the internal sizing layer (<code>@pdanpdan/virtual-scroll/internal</code>, no compatibility guarantee).
         </p>
       </div>
 
@@ -3301,11 +3380,12 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
             code="scrollToOffset(
 x?: number | null,
 y?: number | null,
-options?: { behavior?: 'auto' | 'smooth' } // behavior default: 'auto'
+options?: ScrollToOffsetOptions // { behavior?: 'auto' | 'smooth', endExtraX?: number, endExtraY?: number }, behavior default: 'auto'
 ): void"
           />
           <div class="prose prose-sm max-w-none opacity-90">
             <p>Scrolls the container to an absolute pixel position. Clamped between <code>0</code> and the calculated total size; the target is re-clamped when measurements settle (dynamic items).</p>
+            <p><code>endExtraX</code> / <code>endExtraY</code> append extra scrollable range (VU) after the content end on that axis, so a block rendered below the items - e.g. an always-rendered loading slot - stays reachable.</p>
           </div>
         </div>
 
@@ -3648,6 +3728,14 @@ element?: HTMLElement
           Utility Functions
         </a>
       </h2>
+      <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+        <p>
+          The helpers below are the engine layer the components are built on. They are imported from
+          <code>@pdanpdan/virtual-scroll/internal</code> - not from the package root - and carry
+          <strong>no compatibility guarantee</strong>: shapes and signatures may change in any release,
+          including a patch.
+        </p>
+      </div>
       <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-6">
         <div class="docs-card docs-card--accent-thin text-base-content/80">
           <h4 class="font-bold text-accent mb-2 flex items-center gap-2">
@@ -3716,9 +3804,15 @@ element?: HTMLElement
               <code class="text-primary">BROWSER_MAX_SIZE</code>
               <code class="opacity-60">10,000,000px</code>
             </div>
+            <div class="flex items-center justify-between text-xs @4xl:text-sm">
+              <code class="text-primary">EMPTY_SCROLL_DETAILS</code>
+              <code class="opacity-60">zeroed ScrollDetails</code>
+            </div>
           </div>
           <p class="text-[10px] opacity-60 mt-4 italic">
             Values applied when props are omitted or dynamic estimates are needed. <code>BROWSER_MAX_SIZE</code> defines the scaling threshold.
+            <code>EMPTY_SCROLL_DETAILS</code> is a zeroed <a href="#scroll-details" class="link link-primary">ScrollDetails</a> object for placeholder state - spread it
+            (<code>{ ...EMPTY_SCROLL_DETAILS }</code>) and override the fields you have.
           </p>
         </div>
       </div>

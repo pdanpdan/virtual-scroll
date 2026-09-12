@@ -5,7 +5,7 @@
 
 ## What it is
 
-`@pdanpdan/virtual-scroll` is a dependency-free Vue 3 (peer `vue ^3`) virtualization component and composable. It renders only the items near the viewport and supports **unbounded content**: when the total content size would exceed the browser scroll limit (~10M px), it transparently scales coordinates ("virtual units" vs "display units") so lists of millions/billions of px still scroll 1:1 with the wheel. Dynamic item sizes are measured live via `ResizeObserver`. No runtime dependencies, ESM+CJS+UMD, SSR-safe.
+`@pdanpdan/virtual-scroll` is a dependency-free Vue 3 (peer `vue ^3.5`) virtualization component and composable. It renders only the items near the viewport and supports **unbounded content**: when the total content size would exceed the browser scroll limit (~10M px), it transparently scales coordinates ("virtual units" vs "display units") so lists of millions/billions of px still scroll 1:1 with the wheel. Dynamic item sizes are measured live via `ResizeObserver`. No runtime dependencies, ESM+CJS+UMD, SSR-safe.
 
 ## Installation & import modes
 
@@ -25,25 +25,33 @@ import '@pdanpdan/virtual-scroll/style.css';
 ```js
 import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 ```
-3. **CDN (UMD)** - `https://unpkg.com/@pdanpdan/virtual-scroll` after the Vue global, plus `https://unpkg.com/@pdanpdan/virtual-scroll/dist/style.css`.
+3. **CDN (UMD)** - `https://unpkg.com/@pdanpdan/virtual-scroll` after the Vue global, plus `https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css`.
 
 Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - read it before guessing option shapes.
 
 ## Public exports (from the package entry)
 
-**Components**: `VirtualScroll` (named export), `VirtualScrollbar` (standalone scrollbar component).
+**Components**: `VirtualScroll`, `VirtualScrollTable`, `VirtualScrollMasonry`, `VirtualScrollbar` (all also available as raw `.vue` passthroughs).
 
-**Composables**: `useVirtualScroll(propsInput, extensions?)`, `useVirtualScrollSizes(config)`, `useVirtualScrollbar(props)`.
+**Composables**: `useVirtualScroll(propsInput, extensions?)`, `useVirtualScrollbar(props)`, `useVirtualScrollInertia(config)`, `useVirtualScrollKeyboard(config)`, `useVirtualScrollMasonry(propsInput)`, `useVirtualScrollObservers(config)`.
 
 **Extension factories** (2nd arg of `useVirtualScroll`; the component wires all six already):
 `useRtlExtension()`, `useSnappingExtension()`, `useStickyExtension()`, `useInfiniteLoadingExtension({ onLoad: (axis) => void })`, `usePrependRestorationExtension()`, `useCoordinateScalingExtension()`.
 
-**Key types**: `VirtualScrollProps`, `VirtualScrollInstance`, `ScrollDetails`, `RenderedItem`, `ItemSlotProps`, `ScrollbarSlotProps`, `SSRRange`, `SnapMode`, `ScrollDirection`, `ScrollAlignment`, `PaddingValue`. All pure geometry/utils are re-exported too.
+**Key types**: `VirtualScrollProps`, `VirtualScrollInstance`, `VirtualScrollTableInstance`, `VirtualScrollMasonryInstance`, `UseVirtualScrollReturn`, `ScrollDetails`, `RenderedItem`, `ItemSlotProps`, `ScrollbarSlotProps`, `SSRRange`, `SnapMode`, `ScrollDirection`, `ScrollAlignment`, `ScrollToIndexOptions`, `ScrollToOffsetOptions`, `PaddingValue`, plus the `DEFAULT_*` constants and `EMPTY_SCROLL_DETAILS`.
+
+**Engine internals are NOT on the root entry.** The pure `calculate*` layer, the DOM scroll helpers
+(`isWindow`, `scrollTo`, `getPaddingX`, …), `MasonryLayout`, the sizing layer the engine builds on
+(`useVirtualScrollSizes` + `UseVirtualScrollSizesProps`) and the parameter bags those functions take
+(`RangeParams`, `StickyParams`, …) are importable from `@pdanpdan/virtual-scroll/internal` with no
+compatibility guarantee. Do not import them from the root; if you need them, import the subpath
+explicitly and expect breaking changes in any release. `FenwickTree` is the exception: the structure
+`useVirtualScrollSizes` returns is exported from the root.
 
 ## Core props (exact names)
 
 - `items: T[]` - required, reactive data source.
-- `itemSize`: `number | number[] | ((item, index) => number) | null` (default `40`) - number = fixed; array = repeating circular pattern (`[50, 100]`); function = per-item; `null`/`0`/`undefined` = **dynamic**, measured via `ResizeObserver`.
+- `itemSize`: `number | number[] | ((item, index) => number) | null` (no default: omitted/`null`/`0` means **dynamic**, measured via `ResizeObserver`, with `defaultItemSize` `40` used only until the first measurement) - number = fixed; array = repeating circular pattern (`[50, 100]`); function = per-item.
 - `direction`: `'vertical' | 'horizontal' | 'both'` (default `'vertical'`). `'both'` = grid.
 - `columnCount` / `columnWidth` - grid columns; `columnWidth` accepts number/array/function/`null` (dynamic) like `itemSize`.
 - `gap`, `columnGap` - spacing in virtual units.
@@ -56,9 +64,9 @@ Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - rea
 - `initialScrollIndex: number`, `initialScrollAlign: 'start' | 'center' | 'end' | 'auto'` - initial jump.
 - `ssrRange: { start, end, colStart?, colEnd? }` - pre-render static items server-side for SEO.
 - `bufferBefore` / `bufferAfter` (default `5`), `defaultItemSize` (40), `defaultColumnWidth` (100).
-- Tag overrides: `containerTag`, `wrapperTag`, `itemTag` (e.g. `'table'`/`'tbody'`/`'tr'`).
+- Tag overrides: `containerTag`, `wrapperTag`, `itemTag` (e.g. `'ul'`/`'li'`) - `VirtualScroll` only; `VirtualScrollTable` fixes `table`/`tbody`/`tr`, `VirtualScrollMasonry` fixes its own markup.
 - A11y: `role`, `ariaLabel`, `ariaLabelledby`, `itemRole` (auto roles for list/grid/tree/listbox/menu).
-- Advanced geometry: `scrollPaddingStart`/`scrollPaddingEnd`, `stickyStart`/`stickyEnd`, `flowPaddingStart`/`flowPaddingEnd`, `debug`, `hostRef`, `hostElement`.
+- Advanced geometry: `scrollPaddingStart`/`scrollPaddingEnd`, `debug`. The engine-only fields (`stickyStart`/`stickyEnd`, `flowPaddingStart`/`flowPaddingEnd`, `hostRef`, `hostElement`) are `VirtualScrollProps` members the component computes and forwards - they are not component props, so setting them on the component does nothing.
 
 In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-on-prepend`); in the composable / `defineProps` types use camelCase.
 
@@ -77,7 +85,7 @@ In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-
 
 ## Exposed (template ref) methods
 
-`scrollToIndex(rowIndex?, colIndex?, { align?, behavior? })`, `scrollToOffset(x?, y?, { behavior? })`, `refresh()` (re-measure everything), `updateItemSizes(updates)`, `stopProgrammaticScroll()`, `updateDirection()`, plus getters: `getRowHeight(i)`, `getColumnWidth(i)`, `getRowOffset(i)`, `getColumnOffset(i)`, `getItemOffset(i)`, `getItemSize(i)`, `getRowIndexAt(offset)`, `getColIndexAt(offset)`, `getItemAriaProps(i)`, `getCellAriaProps(colIndex)`.
+`scrollToIndex(rowIndex?, colIndex?, { align?, behavior? })`, `scrollToOffset(x?, y?, { behavior?, endExtraX?, endExtraY? })` (`endExtraX`/`endExtraY` extend the scroll clamp past the content end for a block rendered after the items, e.g. an always-rendered loading slot), `refresh()` (re-measure everything), `updateItemSize(index, inlineSize, blockSize, el?)`, `updateItemSizes(updates)`, `stopProgrammaticScroll()`, `updateDirection()`, `updateHostOffset()`, plus getters: `getRowHeight(i)`, `getColumnWidth(i)`, `getRowOffset(i)`, `getColumnOffset(i)`, `getItemOffset(i)`, `getItemSize(i)`, `getRowIndexAt(offset)`, `getColIndexAt(offset)`, `getItemAriaProps(i)`, `getCellAriaProps(colIndex)`.
 
 ## Numbered patterns
 
