@@ -620,8 +620,15 @@ export interface VirtualScrollComponentProps<T = unknown> extends VirtualScrollB
   virtualScrollbar?: boolean;
 }
 
-/** Configuration properties for the `VirtualScrollTable` component. */
-export interface VirtualScrollTableComponentProps<T = unknown> extends VirtualScrollComponentProps<T> {
+/**
+ * Configuration properties for the `VirtualScrollTable` component.
+ *
+ * The tag props of {@link VirtualScrollComponentProps} are omitted: the table
+ * fixes its own semantic tags (`table`/`tbody`/`tr`, `thead`/`tfoot`) and row
+ * cells come from the `item` slot, so there is nothing to customize. Use
+ * `VirtualScroll` when you need to choose the container/wrapper/item tags.
+ */
+export interface VirtualScrollTableComponentProps<T = unknown> extends Omit<VirtualScrollComponentProps<T>, 'containerTag' | 'footerTag' | 'headerTag' | 'itemTag' | 'wrapperTag'> {
   /**
    * Renders table rows in real table flow (leading/trailing spacer rows keep
    * the virtual offsets) so the browser's table layout engine sizes and
@@ -715,17 +722,26 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   scrollbarPropsHorizontal: ScrollbarSlotProps | null;
 }
 
-/** Exposed methods and properties of the `VirtualScrollTable` component instance. */
-export interface VirtualScrollTableInstance<T = unknown> extends VirtualScrollInstance<T> {
-  /** Whether the component is in table mode. */
-  isTable: true;
-  /** The tag used for rendering rows. */
-  itemTag: 'tr';
-  /** The tag used for the root container element. */
-  containerTag: 'table';
-  /** The tag used for the items wrapper. */
-  wrapperTag: 'tbody';
-}
+/**
+ * Exposed methods and properties of the `VirtualScrollTable` component instance.
+ *
+ * Mirrors what the component puts on the instance: the tag props are gone (the
+ * table fixes its own `table`/`tbody`/`tr`/`thead`/`tfoot`), and the table-only
+ * props it exposes instead are added.
+ */
+export type VirtualScrollTableInstance<T = unknown>
+  = Omit<VirtualScrollInstance<T>, 'containerTag' | 'footerTag' | 'headerTag' | 'itemTag' | 'wrapperTag'>
+    & Pick<VirtualScrollTableComponentProps<T>, 'autoSizeColumns' | 'columnWidths' | 'flowTable'>
+    & {
+      /** Whether the component is in table mode. */
+      isTable: true;
+      /** The tag used for rendering rows. */
+      itemTag: 'tr';
+      /** The tag used for the root container element. */
+      containerTag: 'table';
+      /** The tag used for the items wrapper. */
+      wrapperTag: 'tbody';
+    };
 
 /** Parameters for calculating the scroll target position. */
 export interface ScrollTargetParams {

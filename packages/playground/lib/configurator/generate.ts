@@ -2105,7 +2105,7 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
     lines.push('// Table output uses the VirtualScrollTable component: the composable (engine) API has no table mode.');
   }
   lines.push(
-    "import type { ScrollDetails, VirtualScrollTableInstance, VirtualScrollTableProps } from '@pdanpdan/virtual-scroll';",
+    "import type { ScrollDetails, VirtualScrollTableInstance, VirtualScrollTableComponentProps } from '@pdanpdan/virtual-scroll';",
     "import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';",
     '',
     "import '@pdanpdan/virtual-scroll/style.css';",
@@ -2136,8 +2136,8 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
     lines.push(`const columnWidths = [ ${ widths.join(', ') } ];`);
     lines.push('');
   }
-  lines.push('// --- Configuration (typed against VirtualScrollTableProps) ---');
-  lines.push('const config = computed<VirtualScrollTableProps<Item>>(() => ({');
+  lines.push('// --- Configuration (typed against VirtualScrollTableComponentProps) ---');
+  lines.push('const config = computed<VirtualScrollTableComponentProps<Item>>(() => ({');
   lines.push('  items: items.value,');
   lines.push("  direction: 'vertical',");
   lines.push('  flowTable: true,');
