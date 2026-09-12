@@ -38,7 +38,8 @@ const emit = defineEmits<{
   (e: 'scroll', details: MasonryScrollDetails<T>): void;
 }>();
 
-const containerId = computed(() => `vs-masonry-${ useId() }`);
+const instanceId = useId();
+const containerId = computed(() => `vs-masonry-${ instanceId }`);
 
 const hostRef = ref<HTMLElement | null>(null);
 
