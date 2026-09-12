@@ -62,7 +62,7 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
           colCount,
           (i) => ctx.methods.getItemSize(i),
           (i) => ctx.methods.getItemOffset(i),
-          ctx.methods.getColIndexAt,
+          ctx.methods.getColumnIndexAt,
         );
         if (res) {
           targetCol = res.index;
@@ -80,7 +80,7 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
         const currentX = ctx.internalState.internalScrollX.value;
         const currentY = ctx.internalState.internalScrollY.value;
 
-        // v8 ignore start -- getRowIndexAt/getColIndexAt return numbers, so targets are never null here
+        // v8 ignore start -- getRowIndexAt/getColumnIndexAt return numbers, so targets are never null here
         const diffX = (targetCol !== null) ? Math.abs(targetX - currentX) : 0;
         const diffY = (targetRow !== null) ? Math.abs(targetY - currentY) : 0;
         // v8 ignore stop

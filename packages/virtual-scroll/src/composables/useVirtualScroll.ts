@@ -80,7 +80,7 @@ export interface UseVirtualScrollReturn<T = unknown> {
   /** Helper to get the row (or item) index at a specific virtual offset (VU). */
   getRowIndexAt: (offset: number) => number;
   /** Helper to get the column index at a specific virtual offset (VU). */
-  getColIndexAt: (offset: number) => number;
+  getColumnIndexAt: (offset: number) => number;
   /** Programmatically scroll to a specific row and/or column. */
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions) => ScrollToIndexResult;
   /** Programmatically scroll to a specific virtual pixel offset (VU). */
@@ -385,7 +385,7 @@ export function useVirtualScroll<T = unknown>(
    * Helper to get the column index at a specific horizontal virtual offset (VU).
    * @param offset - The virtual pixel offset.
    */
-  const getColIndexAt = (offset: number) => {
+  const getColumnIndexAt = (offset: number) => {
     if (direction.value === 'both') {
       return calculateIndexAt(
         offset,
@@ -774,7 +774,7 @@ export function useVirtualScroll<T = unknown>(
       scrollToOffset,
       updateDirection,
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       getItemSize,
       getItemBaseSize,
       getItemOffset,
@@ -889,10 +889,10 @@ export function useVirtualScroll<T = unknown>(
     const currentScrollY = relativeScrollY.value + stickyStartY.value;
     const currentEndScrollX = relativeScrollX.value + (viewportWidth.value - stickyEndX.value) - 1;
     const currentEndScrollY = relativeScrollY.value + (viewportHeight.value - stickyEndY.value) - 1;
-    const currentColIndex = getColIndexAt(currentScrollX);
+    const currentColIndex = getColumnIndexAt(currentScrollX);
     const currentRowIndex = getRowIndexAt(currentScrollY);
     const currentEndIndex = getRowIndexAt(direction.value === 'horizontal' ? currentEndScrollX : currentEndScrollY);
-    const currentEndColIndex = getColIndexAt(currentEndScrollX);
+    const currentEndColIndex = getColumnIndexAt(currentEndScrollX);
     return {
       items: renderedItems.value,
       currentIndex: currentRowIndex,
@@ -996,7 +996,7 @@ export function useVirtualScroll<T = unknown>(
   };
 
   const updateItemSizes = (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => {
-    coreUpdateItemSizes(updates, getRowIndexAt, getColIndexAt, relativeScrollX.value, relativeScrollY.value, (dx, dy) => {
+    coreUpdateItemSizes(updates, getRowIndexAt, getColumnIndexAt, relativeScrollX.value, relativeScrollY.value, (dx, dy) => {
       // While a load is in flight the appended content is still settling
       // (estimates -> measurements): do not move the container.
       if (!props.value.loading && !pendingScroll.value && !isProgrammaticScroll.value) {
@@ -1472,6 +1472,6 @@ export function useVirtualScroll<T = unknown>(
     /** Helper to get the row (or item) index at a specific virtual offset (VU). */
     getRowIndexAt,
     /** Helper to get the column index at a specific virtual offset (VU). */
-    getColIndexAt,
+    getColumnIndexAt,
   };
 }

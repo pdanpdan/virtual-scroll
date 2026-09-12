@@ -48,7 +48,7 @@ describe('useVirtualScrollKeyboard', () => {
       getItemOffset?: (i: number) => number;
       getItemSize?: (i: number) => number;
       getRowIndexAt?: (o: number) => number;
-      getColIndexAt?: (o: number) => number;
+      getColumnIndexAt?: (o: number) => number;
     } = {},
   ) => useVirtualScrollKeyboard({
     props,
@@ -65,7 +65,7 @@ describe('useVirtualScrollKeyboard', () => {
     getItemOffset: overrides.getItemOffset ?? ((idx) => idx * 50),
     getItemSize: overrides.getItemSize ?? (() => 50),
     getRowIndexAt: overrides.getRowIndexAt ?? ((o) => Math.floor(o / 50)),
-    getColIndexAt: overrides.getColIndexAt ?? ((o) => Math.floor(o / 50)),
+    getColumnIndexAt: overrides.getColumnIndexAt ?? ((o) => Math.floor(o / 50)),
     ...(overrides.getLoadingSlotSize ? { getLoadingSlotSize: overrides.getLoadingSlotSize } : {}),
   });
 
@@ -339,7 +339,7 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal', snap: 'center' }),
-      { scrollToIndex, getColIndexAt: (o) => Math.floor(o / 50) },
+      { scrollToIndex, getColumnIndexAt: (o) => Math.floor(o / 50) },
     );
 
     handleKeyDown(pressKey('ArrowRight'));
@@ -518,7 +518,7 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal', snap: 'center', columnCount: 5 }),
-      { scrollToIndex, getColIndexAt: (o) => Math.floor(o / 50) },
+      { scrollToIndex, getColumnIndexAt: (o) => Math.floor(o / 50) },
     );
 
     handleKeyDown(pressKey('ArrowRight'));

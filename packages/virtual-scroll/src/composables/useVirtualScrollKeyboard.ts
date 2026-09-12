@@ -16,7 +16,7 @@ export interface UseVirtualScrollKeyboardOptions<T> {
   getItemOffset: (index: number) => number;
   getItemSize: (index: number) => number;
   getRowIndexAt: (offset: number) => number;
-  getColIndexAt: (offset: number) => number;
+  getColumnIndexAt: (offset: number) => number;
   /** Height of the loading slot (when always rendered), so End can include it. */
   getLoadingSlotSize?: () => number;
 }
@@ -36,7 +36,7 @@ export function useVirtualScrollKeyboard<T>({
   getItemOffset,
   getItemSize,
   getRowIndexAt,
-  getColIndexAt,
+  getColumnIndexAt,
   getLoadingSlotSize,
 }: UseVirtualScrollKeyboardOptions<T>) {
   /**
@@ -64,7 +64,7 @@ export function useVirtualScrollKeyboard<T>({
 
     const getCenterIndex = (isX: boolean) => {
       const centerPos = (isX ? scrollOffset.x : scrollOffset.y) + (isX ? viewportSize.width : viewportSize.height) / 2;
-      return isX ? getColIndexAt(centerPos) : getRowIndexAt(centerPos);
+      return isX ? getColumnIndexAt(centerPos) : getRowIndexAt(centerPos);
     };
 
     const navigateVerticalForward = () => {

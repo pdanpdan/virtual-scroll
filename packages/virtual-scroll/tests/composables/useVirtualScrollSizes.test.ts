@@ -171,16 +171,16 @@ describe('useVirtualScrollSizes', () => {
     result.initializeSizes();
     await nextTick();
 
-    // Mock getRowIndexAt/getColIndexAt
+    // Mock getRowIndexAt/getColumnIndexAt
     const getRowIndexAt = (offset: number) => Math.floor(offset / 40);
-    const getColIndexAt = () => 0;
+    const getColumnIndexAt = () => 0;
 
     // Simulate update. Changing item 0 from 40 to 100.
     // relativeScrollY is 100. item 0 is at 0. So item 0 is BEFORE viewport.
     result.updateItemSizes(
       [ { index: 0, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       0,
       100, // relativeScrollY
       onScrollCorrection,
@@ -206,13 +206,13 @@ describe('useVirtualScrollSizes', () => {
     await nextTick();
 
     const getRowIndexAt = () => 0; // Viewport at top
-    const getColIndexAt = () => 0;
+    const getColumnIndexAt = () => 0;
 
     // Update item 10. Viewport at 0. Item 10 is AFTER viewport.
     result.updateItemSizes(
       [ { index: 10, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       0,
       0,
       onScrollCorrection,
@@ -270,7 +270,7 @@ describe('useVirtualScrollSizes', () => {
 
     const onScrollCorrection = vi.fn();
     const getRowIndexAt = () => 0;
-    const getColIndexAt = () => 1; // Viewport starts at column 1 (100px)
+    const getColumnIndexAt = () => 1; // Viewport starts at column 1 (100px)
 
     // Update column 0 (before viewport)
     const rowEl = document.createElement('div');
@@ -282,7 +282,7 @@ describe('useVirtualScrollSizes', () => {
     result.updateItemSizes(
       [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       100, // relativeScrollX
       0,
       onScrollCorrection,
@@ -313,15 +313,15 @@ describe('useVirtualScrollSizes', () => {
     result.itemSizesY.set(0, 0);
     result.itemSizesY.rebuild();
 
-    // Mock getRowIndexAt/getColIndexAt
+    // Mock getRowIndexAt/getColumnIndexAt
     const getRowIndexAt = () => 5; // Viewport starts at index 5
-    const getColIndexAt = () => 0;
+    const getColumnIndexAt = () => 0;
 
     // Item 0 is 0 size in tree initially.
     result.updateItemSizes(
       [ { index: 0, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       200, // scrollY
       200,
       onScrollCorrection,
@@ -765,12 +765,12 @@ describe('useVirtualScrollSizes', () => {
     await nextTick();
 
     const getRowIndexAt = () => 0;
-    const getColIndexAt = () => 0;
+    const getColumnIndexAt = () => 0;
 
     result.updateItemSizes(
       [ { index: 0, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       0,
       0,
       onScrollCorrection,
@@ -782,7 +782,7 @@ describe('useVirtualScrollSizes', () => {
     result.updateItemSizes(
       [ { index: 0, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       0,
       0,
       onScrollCorrection,
@@ -803,12 +803,12 @@ describe('useVirtualScrollSizes', () => {
     await nextTick();
 
     const getRowIndexAt = () => 0;
-    const getColIndexAt = () => 0;
+    const getColumnIndexAt = () => 0;
 
     result.updateItemSizes(
       [ { index: 0, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       0,
       0,
       onScrollCorrection,
@@ -819,7 +819,7 @@ describe('useVirtualScrollSizes', () => {
     result.updateItemSizes(
       [ { index: 0, inlineSize: 100, blockSize: 100 } ],
       getRowIndexAt,
-      getColIndexAt,
+      getColumnIndexAt,
       0,
       0,
       onScrollCorrection,

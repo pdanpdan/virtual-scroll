@@ -85,7 +85,7 @@ In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-
 
 ## Exposed (template ref) methods
 
-`scrollToIndex(rowIndex?, colIndex?, { align?, behavior? })`, `scrollToOffset(x?, y?, { behavior?, endExtraX?, endExtraY? })` (`endExtraX`/`endExtraY` extend the scroll clamp past the content end for a block rendered after the items, e.g. an always-rendered loading slot), `refresh()` (re-measure everything), `updateItemSize(index, inlineSize, blockSize, el?)`, `updateItemSizes(updates)`, `stopProgrammaticScroll()`, `updateDirection()`, `updateHostOffset()`, plus getters: `getRowHeight(i)`, `getColumnWidth(i)`, `getRowOffset(i)`, `getColumnOffset(i)`, `getItemOffset(i)`, `getItemSize(i)`, `getRowIndexAt(offset)`, `getColIndexAt(offset)`, `getItemAriaProps(i)`, `getCellAriaProps(colIndex)`.
+`scrollToIndex(rowIndex?, colIndex?, { align?, behavior? })`, `scrollToOffset(x?, y?, { behavior?, endExtraX?, endExtraY? })` (`endExtraX`/`endExtraY` extend the scroll clamp past the content end for a block rendered after the items, e.g. an always-rendered loading slot), `refresh()` (re-measure everything), `updateItemSize(index, inlineSize, blockSize, el?)`, `updateItemSizes(updates)`, `stopProgrammaticScroll()`, `updateDirection()`, `updateHostOffset()`, plus getters: `getRowHeight(i)`, `getColumnWidth(i)`, `getRowOffset(i)`, `getColumnOffset(i)`, `getItemOffset(i)`, `getItemSize(i)`, `getRowIndexAt(offset)`, `getColumnIndexAt(offset)`, `getItemAriaProps(i)`, `getCellAriaProps(colIndex)`.
 
 ## Numbered patterns
 

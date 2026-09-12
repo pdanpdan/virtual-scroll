@@ -210,7 +210,7 @@ optional hooks `onInit(ctx)`, `onScroll(ctx, event)`, `onScrollEnd(ctx)` and
 `transformRenderedItems(items, ctx)` (post-processes the rendered window and must return the items to
 render). Every hook receives an `ExtensionContext<T>` with the reactive `props`, `scrollDetails`,
 `totalSize`, `range` and `currentIndex`, the engine state refs (`internalState`) and the engine
-methods (`scrollToIndex`, `scrollToOffset`, `updateDirection`, `getRowIndexAt`, `getColIndexAt`,
+methods (`scrollToIndex`, `scrollToOffset`, `updateDirection`, `getRowIndexAt`, `getColumnIndexAt`,
 `getItemSize`, `getItemBaseSize`, `getItemOffset`, `handleScrollCorrection`). `name` is only a
 label: hooks are called in the order the extensions are passed to `useVirtualScroll`, and extensions
 may wrap engine methods (RTL wraps `updateDirection`).
@@ -524,7 +524,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `getItemOffset(index)`: Returns the virtual offset of an item.
 - `getItemSize(index)`: Returns the size of an item along the scroll axis.
 - `getRowIndexAt(offset)`: Returns the row index at a virtual offset.
-- `getColIndexAt(offset)`: Returns the column index at a virtual offset.
+- `getColumnIndexAt(offset)`: Returns the column index at a virtual offset.
 - `getCellAriaProps(colIndex)`: Returns ARIA attributes for a grid cell.
 - `getItemAriaProps(index)`: Returns ARIA attributes for a row/item.
 

@@ -226,7 +226,7 @@ const {
   renderedVirtualWidth,
   renderedVirtualHeight,
   getRowIndexAt,
-  getColIndexAt,
+  getColumnIndexAt,
 } = useVirtualScroll(virtualScrollProps, extensions);
 
 const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
@@ -401,7 +401,7 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
   getItemOffset,
   getItemSize,
   getRowIndexAt,
-  getColIndexAt,
+  getColumnIndexAt,
   getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
 });
 
@@ -767,7 +767,7 @@ defineExpose({
    * @param offset - The virtual pixel offset.
    * @see useVirtualScroll
    */
-  getColIndexAt,
+  getColumnIndexAt,
 
   /**
    * Programmatically scroll to a specific row and/or column.

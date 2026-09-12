@@ -369,7 +369,7 @@ export function useVirtualScrollSizes<T>(
    *
    * @param updates - Array of updates.
    * @param getRowIndexAt - Helper to get row index at offset (for scroll correction check).
-   * @param getColIndexAt - Helper to get col index at offset.
+   * @param getColumnIndexAt - Helper to get col index at offset.
    * @param relativeScrollX - Current relative scroll X.
    * @param relativeScrollY - Current relative scroll Y.
    * @param onScrollCorrection - Callback to adjust scroll position.
@@ -377,7 +377,7 @@ export function useVirtualScrollSizes<T>(
   const updateItemSizes = (
     updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>,
     getRowIndexAt: (offset: number) => number,
-    getColIndexAt: (offset: number) => number,
+    getColumnIndexAt: (offset: number) => number,
     relativeScrollX: number,
     relativeScrollY: number,
     onScrollCorrection: (deltaX: number, deltaY: number) => void,
@@ -390,7 +390,7 @@ export function useVirtualScrollSizes<T>(
     const columnGap = propsVal.columnGap || 0;
 
     const firstRowIndex = getRowIndexAt(props.value.direction === 'horizontal' ? relativeScrollX : relativeScrollY);
-    const firstColIndex = getColIndexAt(relativeScrollX);
+    const firstColIndex = getColumnIndexAt(relativeScrollX);
 
     const isHorizontalMode = props.value.direction === 'horizontal';
     const isBothMode = props.value.direction === 'both';

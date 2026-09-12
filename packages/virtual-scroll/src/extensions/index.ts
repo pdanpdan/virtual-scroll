@@ -59,7 +59,7 @@ export interface ExtensionContext<T = unknown> {
     /** Get row index at virtual offset. */
     getRowIndexAt: (offset: number) => number;
     /** Get column index at virtual offset. */
-    getColIndexAt: (offset: number) => number;
+    getColumnIndexAt: (offset: number) => number;
     /** Get actual size of item (measured or estimated). */
     getItemSize: (index: number) => number;
     /** Get base configuration size of item. */

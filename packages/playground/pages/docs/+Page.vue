@@ -1332,7 +1332,7 @@ const vs = useVirtualScroll(props, [
           <p class="docs-link-description">Get row index at virtual offset.</p>
         </a>
         <a href="#method-getcolindexat" class="docs-link-card">
-          <code class="docs-prop-name--secondary text-xs">getColIndexAt()</code>
+          <code class="docs-prop-name--secondary text-xs">getColumnIndexAt()</code>
           <p class="docs-link-description">Get column index at virtual offset.</p>
         </a>
         <a href="#method-getitemariaprops" class="docs-link-card">
@@ -2069,7 +2069,7 @@ scrollToIndex
                 <td>Helper to get the row (or item) index at a vertical virtual offset (VU).</td>
               </tr>
               <tr>
-                <td><a href="#method-getcolindexat" class="link font-bold text-secondary">getColIndexAt</a></td>
+                <td><a href="#method-getcolindexat" class="link font-bold text-secondary">getColumnIndexAt</a></td>
                 <td><code>Function</code></td>
                 <td>Helper to get the column index at a horizontal virtual offset (VU).</td>
               </tr>
@@ -2615,7 +2615,7 @@ const { setItemRef } = useVirtualScrollObservers({
             <code>isProgrammaticScroll</code>, viewport size, <code>scaleX</code>/<code>scaleY</code>, scroll
             directions, relative scroll); and the engine methods in <code>methods</code>
             (<code>scrollToIndex</code>, <code>scrollToOffset</code>, <code>updateDirection</code>,
-            <code>getRowIndexAt</code>, <code>getColIndexAt</code>, <code>getItemSize</code>,
+            <code>getRowIndexAt</code>, <code>getColumnIndexAt</code>, <code>getItemSize</code>,
             <code>getItemBaseSize</code>, <code>getItemOffset</code>, <code>handleScrollCorrection</code>).
           </p>
         </div>
@@ -3531,12 +3531,12 @@ element?: HTMLElement
           </div>
         </div>
 
-        <!-- Method: getColIndexAt -->
+        <!-- Method: getColumnIndexAt -->
         <div id="method-getcolindexat" class="docs-method-card docs-method-card--secondary">
           <h4 class="docs-method-title docs-method-title--secondary">
-            <span class="badge badge-secondary">Method</span> getColIndexAt()
+            <span class="badge badge-secondary">Method</span> getColumnIndexAt()
           </h4>
-          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColIndexAt(offset: number): number" />
+          <CodeBlock class="docs-code-block mb-4 font-mono text-xs" lang="ts" code="getColumnIndexAt(offset: number): number" />
           <div class="prose prose-sm max-w-none opacity-90">
             <p>Returns the column index at a specific horizontal virtual offset (VU).</p>
           </div>

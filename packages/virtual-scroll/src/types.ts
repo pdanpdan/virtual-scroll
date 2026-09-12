@@ -677,7 +677,7 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   /** Helper to get the row (or item) index at a specific virtual offset (VU). */
   getRowIndexAt: (offset: number) => number;
   /** Helper to get the column index at a specific virtual offset (VU). */
-  getColIndexAt: (offset: number) => number;
+  getColumnIndexAt: (offset: number) => number;
   /** Helper to get the virtual offset of a specific row. */
   getRowOffset: (index: number) => number;
   /** Helper to get the virtual offset of a specific column. */
