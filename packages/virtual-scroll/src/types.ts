@@ -96,6 +96,34 @@ export interface ScrollToIndexOptions {
   dryRun?: boolean;
 }
 
+/** Options for the `scrollToOffset` method. */
+export interface ScrollToOffsetOptions {
+  /**
+   * Scroll behavior.
+   * - 'auto': Instant jump.
+   * - 'smooth': Animated transition.
+   * @default 'auto'
+   */
+  behavior?: 'auto' | 'smooth';
+
+  /**
+   * Extra scrollable range in virtual units (VU) appended after the content end
+   * on the X axis. Set it to the size of a block rendered after the items (e.g.
+   * an always-rendered loading slot) so the end of that block stays reachable.
+   * @default 0
+   */
+  endExtraX?: number;
+
+  /**
+   * Extra scrollable range in virtual units (VU) appended after the content end
+   * on the Y axis. Set it to the height of a block rendered after the items
+   * (e.g. an always-rendered loading slot) so the end of that block stays
+   * reachable.
+   * @default 0
+   */
+  endExtraY?: number;
+}
+
 /** Result of the `scrollToIndex` method. */
 export interface ScrollToIndexResult {
   /** Target relative horizontal position in virtual units (VU). */

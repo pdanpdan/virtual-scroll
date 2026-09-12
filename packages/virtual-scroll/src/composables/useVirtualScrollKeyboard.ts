@@ -1,4 +1,4 @@
-import type { ScrollAlignment, ScrollDetails, VirtualScrollProps } from '../types';
+import type { ScrollAlignment, ScrollDetails, ScrollToOffsetOptions, VirtualScrollProps } from '../types';
 import type { Ref } from 'vue';
 
 export interface UseVirtualScrollKeyboardOptions<T> {
@@ -7,7 +7,7 @@ export interface UseVirtualScrollKeyboardOptions<T> {
   scrollDetails: Ref<ScrollDetails<T>>;
   isRtl: Ref<boolean>;
   scrollToIndex: (rowIndex?: number | null, colIndex?: number | null, options?: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; }) => void;
-  scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; endExtraX?: number; endExtraY?: number; }) => void;
+  scrollToOffset: (x?: number | null, y?: number | null, options?: ScrollToOffsetOptions) => void;
   stopProgrammaticScroll: () => void;
   getRowHeight: (index: number) => number;
   getColumnWidth: (index: number) => number;

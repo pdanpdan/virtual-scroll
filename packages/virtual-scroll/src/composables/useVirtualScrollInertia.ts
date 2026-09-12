@@ -1,4 +1,4 @@
-import type { ScrollDetails } from '../types';
+import type { ScrollDetails, ScrollToOffsetOptions } from '../types';
 import type { Ref } from 'vue';
 
 import { ref } from 'vue';
@@ -8,7 +8,7 @@ import { calculateInertiaStep, calculateInstantaneousVelocity } from '../utils/v
 export interface UseVirtualScrollInertiaOptions<T> {
   useVirtualScrolling: Ref<boolean>;
   scrollDetails: Ref<ScrollDetails<T>>;
-  scrollToOffset: (x?: number | null, y?: number | null, options?: { behavior?: 'auto' | 'smooth'; }) => void;
+  scrollToOffset: (x?: number | null, y?: number | null, options?: ScrollToOffsetOptions) => void;
   stopProgrammaticScroll: () => void;
 }
 
