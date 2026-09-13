@@ -95,16 +95,16 @@ const filteredIndices = ref<number[] | null>(null);
 
 const LEVEL_ORDER: LogLevel[] = [ 'INFO', 'DEBUG', 'WARN', 'ERROR' ];
 
-const levelSolid: Record<LogLevel, string> = {
+const levelSelected: Record<LogLevel, string> = {
   INFO: 'btn-info',
-  DEBUG: 'btn-neutral',
+  DEBUG: 'btn-secondary',
   WARN: 'btn-warning',
   ERROR: 'btn-error',
 };
 
-const levelSoft: Record<LogLevel, string> = {
+const levelUnselected: Record<LogLevel, string> = {
   INFO: 'btn-soft btn-info',
-  DEBUG: 'btn-soft btn-neutral',
+  DEBUG: 'btn-soft btn-secondary',
   WARN: 'btn-soft btn-warning',
   ERROR: 'btn-soft btn-error',
 };
@@ -158,7 +158,7 @@ function rebuildFiltered() {
 
 const levelBadge: Record<LogLevel, string> = {
   INFO: 'badge-soft badge-info',
-  DEBUG: 'badge-soft badge-neutral',
+  DEBUG: 'badge-soft badge-secondary',
   WARN: 'badge-soft badge-warning',
   ERROR: 'badge-soft badge-error',
 };
@@ -240,7 +240,7 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
             v-for="level in LEVEL_ORDER"
             :key="level"
             class="btn btn-sm join-item"
-            :class="activeLevels.includes(level) ? levelSolid[ level ] : levelSoft[ level ]"
+            :class="activeLevels.includes(level) ? levelSelected[ level ] : levelUnselected[ level ]"
             :aria-pressed="activeLevels.includes(level)"
             @click="toggleLevel(level)"
           >

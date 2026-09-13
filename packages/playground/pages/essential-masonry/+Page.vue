@@ -261,8 +261,8 @@ function handleJump() {
 
         <div class="hidden xl:flex items-center gap-2 font-mono text-xs">
           <span class="badge badge-secondary">cols {{ stats.columns }}</span>
-          <span class="badge badge-neutral badge-outline">{{ Math.round(stats.columnWidth) }}px</span>
-          <span class="badge badge-neutral badge-outline">{{ Math.round(stats.totalHeight).toLocaleString() }}px</span>
+          <span class="badge badge-outline">{{ Math.round(stats.columnWidth) }}px</span>
+          <span class="badge badge-outline">{{ Math.round(stats.totalHeight).toLocaleString() }}px</span>
           <span class="badge badge-success badge-outline">{{ stats.exact ? 'exact total' : 'estimating…' }}</span>
           <span v-if="measuredHeights" class="badge badge-info">measured</span>
         </div>

@@ -268,7 +268,7 @@ onUnmounted(() => {
                 <tr>
                   <td><strong>Dynamic</strong></td>
                   <td><code>0</code>, <code>null</code>, <code>undefined</code></td>
-                  <td><span class="badge badge-neutral badge-soft badge-xs">Fair</span></td>
+                  <td><span class="badge badge-soft badge-xs">Fair</span></td>
                   <td>Sizes measured via <strong>ResizeObserver</strong> after rendering.</td>
                 </tr>
               </tbody>

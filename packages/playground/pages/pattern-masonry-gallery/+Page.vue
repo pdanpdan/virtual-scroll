@@ -207,8 +207,8 @@ function schedulePrefetch() {
 
         <div class="hidden xl:flex items-center gap-2 font-mono text-xs">
           <span class="badge badge-secondary">cols {{ stats.columns }}</span>
-          <span class="badge badge-neutral badge-outline">{{ Math.round(stats.columnWidth) }}px</span>
-          <span class="badge badge-neutral badge-outline">{{ Math.round(stats.totalHeight).toLocaleString() }}px</span>
+          <span class="badge badge-outline">{{ Math.round(stats.columnWidth) }}px</span>
+          <span class="badge badge-outline">{{ Math.round(stats.totalHeight).toLocaleString() }}px</span>
           <span class="badge badge-info badge-outline">{{ stateTick ? `loaded ${ loadedIds.length }` : 'loading…' }}</span>
           <span v-if="prefetchEnabled" class="badge badge-success badge-outline">prefetched {{ prefetchedIds.length }}</span>
           <span v-if="failedIds.length" class="badge badge-warning badge-outline">{{ failedIds.length }} failed</span>
