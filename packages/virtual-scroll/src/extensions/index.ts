@@ -17,6 +17,8 @@ export interface ExtensionContext<T = unknown> {
   currentIndex: Ref<number>;
   /** Reactive references to internal component state variables. */
   internalState: {
+    /** Whether the component has finished its first client-side mount and hydration. */
+    isHydrated: Ref<boolean>;
     /** Horizontal display scroll position (DU). */
     scrollX: Ref<number>;
     /** Vertical display scroll position (DU). */
@@ -66,6 +68,14 @@ export interface ExtensionContext<T = unknown> {
     getItemBaseSize: (item: T, index: number) => number;
     /** Get virtual offset of item. */
     getItemOffset: (index: number) => number;
+    /**
+     * Get the raw virtual offset (VU) of an item along an axis.
+     *
+     * Excludes the flow, sticky and scroll padding offsets that {@link ExtensionContext.methods.getItemOffset}
+     * includes, so it can be compared against `RenderedItem.originalX`/`originalY`. Correct for both fixed
+     * and measured sizes.
+     */
+    getItemRawOffset: (axis: 'x' | 'y', index: number) => number;
     /** Adjust scroll position for measurement changes. */
     handleScrollCorrection: (addedX: number, addedY: number) => void;
   };
@@ -79,6 +89,14 @@ export interface VirtualScrollExtension<T = unknown> {
   name: string;
   /** Called when the component is initialized. */
   onInit?: (ctx: ExtensionContext<T>) => void;
+  /**
+   * Extra item indices that must stay in the rendered window even when they are
+   * outside the visible range (e.g. a sticky item scrolled past the top).
+   *
+   * Called before the window is built; the results are merged, de-duplicated and
+   * sorted with the visible range.
+   */
+  includeIndices?: (ctx: ExtensionContext<T>) => readonly number[];
   /** Called on every scroll event. */
   onScroll?: (ctx: ExtensionContext<T>, event: Event) => void;
   /** Called when scrolling activity stops. */

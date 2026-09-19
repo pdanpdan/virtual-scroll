@@ -33,10 +33,8 @@ import {
   calculateRenderedSize,
   calculateScrollTarget,
   calculateSSROffsets,
-  calculateStickyItem,
   calculateTotalSize,
   displayToVirtual,
-  findPrevStickyIndex,
   virtualToDisplay,
 } from '../utils/virtual-scroll-logic';
 import { useVirtualScrollSizes } from './useVirtualScrollSizes';
@@ -753,6 +751,7 @@ export function useVirtualScroll<T = unknown>(
     range,
     currentIndex,
     internalState: {
+      isHydrated,
       scrollX,
       scrollY,
       internalScrollX,
@@ -778,6 +777,11 @@ export function useVirtualScroll<T = unknown>(
       getItemSize,
       getItemBaseSize,
       getItemOffset,
+      // Fixed-size lists keep their sizes out of the Fenwick trees (the fixed
+      // math replaces them), so the offset must go through the same helper.
+      getItemRawOffset: (axis: 'x' | 'y', index: number) => (axis === 'x'
+        ? calculateOffsetAt(index, fixedColumnWidth.value, props.value.columnGap || 0, (idx) => itemSizesX.query(idx))
+        : calculateOffsetAt(index, fixedItemSize.value, props.value.gap || 0, (idx) => itemSizesY.query(idx))),
       handleScrollCorrection,
     },
   };
@@ -788,18 +792,41 @@ export function useVirtualScroll<T = unknown>(
     treeUpdateFlag.value;
     const { start, end } = range.value;
     const items: RenderedItem<T>[] = [];
-    const stickyIndices = (props.value.stickyIndices || []).toSorted((a, b) => a - b);
-    const stickySet = new Set(stickyIndices);
     const sortedIndices: number[] = [];
+    // Extensions may pin indices outside the visible range (sticky items, ...).
+    // Collected before the entries are built, then merged in ascending order
+    // because the offset caches below assume forward traversal.
+    const pinned: number[] = [];
     if (isHydrated.value || !props.value.ssrRange) {
-      const activeIdx = currentIndex.value;
-      const prevStickyIdx = findPrevStickyIndex(stickyIndices, activeIdx);
-      if (prevStickyIdx !== undefined && prevStickyIdx < start) {
-        sortedIndices.push(prevStickyIdx);
-      }
+      extensions.forEach((ext) => {
+        if (ext.includeIndices) {
+          for (const index of ext.includeIndices(ctx)) {
+            if (index >= 0 && index < (end)) {
+              pinned.push(index);
+            }
+          }
+        }
+      });
     }
-    for (let i = start; i < end; i++) {
-      sortedIndices.push(i);
+    if (pinned.length > 0) {
+      pinned.sort((a, b) => a - b);
+      let pinPtr = 0;
+      for (let i = start; i < end; i++) {
+        // Pinned indices below the window are emitted first (ascending overall).
+        while (pinPtr < pinned.length && pinned[ pinPtr ]! < i) {
+          sortedIndices.push(pinned[ pinPtr ]!);
+          pinPtr++;
+        }
+        if (pinPtr < pinned.length && pinned[ pinPtr ] === i) {
+          // Emitted once by this loop position, not twice.
+          pinPtr++;
+        }
+        sortedIndices.push(i);
+      }
+    } else {
+      for (let i = start; i < end; i++) {
+        sortedIndices.push(i);
+      }
     }
     const { x: ssrOffsetX, y: ssrOffsetY } = (!isHydrated.value && props.value.ssrRange)
       ? calculateSSROffsets(direction.value, props.value.ssrRange, fixedItemSize.value, fixedColumnWidth.value, props.value.gap || 0, props.value.columnGap || 0, (idx) => itemSizesY.query(idx), (idx) => itemSizesX.query(idx), (idx) => columnSizes.query(idx))
@@ -837,24 +864,17 @@ export function useVirtualScroll<T = unknown>(
     const wrapperStartDU_X = flowStartX.value + stickyStartX.value;
     const wrapperStartDU_Y = flowStartY.value + stickyStartY.value;
     const colRange = columnRange.value;
-    let currentStickyIndexPtr = 0;
     for (const i of sortedIndices) {
       // Hole-y datasets (e.g. `new Array(n)` for index-only rows) render every
       // index in range; the item slot prop is `undefined` for holes.
       const item = props.value.items[ i ] as T;
       const { x, y, width, height } = calculateItemPosition({ index: i, direction: direction.value, fixedSize: fixedItemSize.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, usableWidth: usableWidth.value, usableHeight: usableHeight.value, totalWidth: totalSize.value.width, queryY: queryYCached, queryX: queryXCached, getSizeY: (idx) => itemSizesY.get(idx), getSizeX: (idx) => itemSizesX.get(idx), columnRange: colRange });
-      const isSticky = stickySet.has(i);
       const originalX = x;
       const originalY = y;
-      while (currentStickyIndexPtr < stickyIndices.length && stickyIndices[ currentStickyIndexPtr ]! <= i) {
-        currentStickyIndexPtr++;
-      }
-      const nextStickyIndex = currentStickyIndexPtr < stickyIndices.length ? stickyIndices[ currentStickyIndexPtr ] : undefined;
-      const { isStickyActive, isStickyActiveX, isStickyActiveY, stickyOffset } = calculateStickyItem({ index: i, isSticky, direction: direction.value, relativeScrollX: relativeScrollX.value, relativeScrollY: relativeScrollY.value, originalX, originalY, width, height, stickyIndices, fixedSize: fixedItemSize.value, fixedWidth: fixedColumnWidth.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, getItemQueryY: (idx) => itemSizesY.query(idx), getItemQueryX: (idx) => itemSizesX.query(idx), nextStickyIndex, stickyStartX: stickyStartX.value, stickyStartY: stickyStartY.value });
       const offsetX = isHydrated.value ? (internalScrollX.value / scaleX.value + (x + itemsStartVU_X - internalScrollX.value)) - wrapperStartDU_X : (x - ssrOffsetX);
       const offsetY = isHydrated.value ? (internalScrollY.value / scaleY.value + (y + itemsStartVU_Y - internalScrollY.value)) - wrapperStartDU_Y : (y - ssrOffsetY);
       const last = lastItemsMap.get(i);
-      if (last && last.item === item && last.offset.x === offsetX && last.offset.y === offsetY && last.size.width === width && last.size.height === height && last.isSticky === isSticky && last.isStickyActive === isStickyActive && last.isStickyActiveX === isStickyActiveX && last.isStickyActiveY === isStickyActiveY && last.stickyOffset.x === stickyOffset.x && last.stickyOffset.y === stickyOffset.y) {
+      if (last && last.item === item && last.offset.x === offsetX && last.offset.y === offsetY && last.size.width === width && last.size.height === height) {
         items.push(last);
       } else {
         items.push({
@@ -864,11 +884,11 @@ export function useVirtualScroll<T = unknown>(
           size: { width, height },
           originalX,
           originalY,
-          isSticky,
-          isStickyActive,
-          isStickyActiveX,
-          isStickyActiveY,
-          stickyOffset,
+          isSticky: false,
+          isStickyActive: false,
+          isStickyActiveX: false,
+          isStickyActiveY: false,
+          stickyOffset: { x: 0, y: 0 },
         });
       }
     }

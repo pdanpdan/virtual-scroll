@@ -1,4 +1,5 @@
 /* global ScrollToOptions */
+import type { VirtualScrollExtension } from '../../src/extensions';
 import type { VirtualScrollProps } from '../../src/types';
 import type { MockItem } from '../test-helper';
 
@@ -1049,6 +1050,41 @@ describe('useVirtualScroll', () => {
 
       expect(result.renderedItems.value.length).toBeGreaterThan(0);
       wrapper.unmount();
+    });
+
+    it('renders an index pinned by an extension once, in ascending order', async () => {
+      const pin: VirtualScrollExtension = {
+        name: 'pin',
+        includeIndices: () => [ 3, 1 ],
+      };
+      const { result, wrapper } = setup({ items: mockItems, itemSize: 50, bufferBefore: 0, bufferAfter: 0 }, [ pin ]);
+      await nextTick();
+      await nextTick();
+
+      const indices = result.renderedItems.value.map((item) => item.index);
+      expect(indices).toEqual([ ...indices ].sort((a, b) => a - b));
+      expect(indices.filter((index) => index === 1)).toHaveLength(1);
+      expect(indices.filter((index) => index === 3)).toHaveLength(1);
+      wrapper.unmount();
+    });
+
+    it('ignores pinned indices outside the item range', async () => {
+      const props = { items: mockItems, itemSize: 50, bufferBefore: 0, bufferAfter: 0 };
+      const pin: VirtualScrollExtension = {
+        name: 'pin',
+        includeIndices: () => [ -1, mockItems.length + 10 ],
+      };
+
+      const plain = setup(props);
+      const pinned = setup(props, [ pin ]);
+      await nextTick();
+      await nextTick();
+
+      // A pin that cannot be rendered must not leak an extra entry.
+      expect(pinned.result.renderedItems.value.map((item) => item.index))
+        .toEqual(plain.result.renderedItems.value.map((item) => item.index));
+      pinned.wrapper.unmount();
+      plain.wrapper.unmount();
     });
   });
 

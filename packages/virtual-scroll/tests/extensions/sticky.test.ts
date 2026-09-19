@@ -131,24 +131,48 @@ describe('sticky elements', () => {
     wrapper.unmount();
   });
 
-  it('passes items through unchanged when the previous sticky item is missing from the list', () => {
+  it('pins the previous sticky index only after hydration', () => {
     const extension = useStickyExtension<{ id: number; }>();
-    const range = ref({ start: 10, end: 20, padStart: 0, padEnd: 0 });
+    const range = ref({ start: 30, end: 40, padStart: 0, padEnd: 0 });
     const currentIndex = ref(25);
+    const isHydrated = ref(false);
     const ctx = {
-      props: ref({ stickyIndices: [ 5 ] }),
+      props: ref({ stickyIndices: [ 5, 20 ], direction: 'vertical' as const }),
       range,
       currentIndex,
+      internalState: { isHydrated },
+      methods: { getItemRawOffset: () => 0 },
     } as unknown as ExtensionContext<{ id: number; }>;
+
+    extension.onInit?.(ctx);
+
+    // Pre-hydration the window must stay identical on server and client.
+    expect(extension.includeIndices!(ctx)).toEqual([]);
+
+    isHydrated.value = true;
+    // 20 is the closest sticky index above the first visible item (25).
+    expect(extension.includeIndices!(ctx)).toEqual([ 20 ]);
+
+    // Nothing to pin while the previous sticky index is still inside the range.
+    range.value = { start: 10, end: 20, padStart: 0, padEnd: 0 };
+    expect(extension.includeIndices!(ctx)).toEqual([]);
+  });
+
+  it('returns the items untouched when no sticky index is configured', () => {
+    const extension = useStickyExtension<{ id: number; }>();
+    const ctx = {
+      props: ref({ stickyIndices: [], direction: 'vertical' as const }),
+      internalState: { isHydrated: ref(true) },
+      methods: { getItemRawOffset: () => 0 },
+    } as unknown as ExtensionContext<{ id: number; }>;
+
+    extension.onInit?.(ctx);
 
     const items: RenderedItem<{ id: number; }>[] = [
       { item: { id: 10 }, index: 10, offset: { x: 0, y: 0 }, size: { width: 100, height: 100 }, originalX: 0, originalY: 0, isSticky: false, isStickyActive: false, isStickyActiveX: false, isStickyActiveY: false, stickyOffset: { x: 0, y: 0 } },
     ];
 
-    // prevStickyIdx (5) < start (10) and the sticky item is NOT in the list:
-    // the transform must not crash and must not alter the items.
-    const result = extension.transformRenderedItems!(items, ctx);
-    expect(result).toEqual(items);
+    expect(extension.transformRenderedItems!(items, ctx)).toBe(items);
   });
 
   it('queries dynamic sizes for sticky items', async () => {
