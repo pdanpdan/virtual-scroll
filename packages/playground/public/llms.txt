@@ -232,6 +232,7 @@ The instance (via `ref`) exposes `scrollDetails`, `columns`, `columnWidth`, `tot
 - `loading` / `loadDistance`: Infinite-loading threshold and state.
 - `virtualScrollbar`: `boolean` - Force virtual scrollbars even when browser limits aren't hit.
 - `restoreScrollOnPrepend`: `boolean` - Prevents "jumping" when adding items to the top.
+- `keyboardActivation`: `'auto' | 'item' | 'viewport'` (Default: `'auto'`) - `'auto'` tracks a roving active item for `listbox`/`menu`/`tree` and scrolls the viewport otherwise.
 - `ssrRange`: `{ start: number, end: number, colStart?: number, colEnd?: number }` - Pre-render specific items for SEO/SSR.
 
 ### Exposed Methods (via Ref)
