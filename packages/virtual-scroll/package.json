@@ -70,6 +70,7 @@
   ],
   "scripts": {
     "build": "vite build && vite build --config vite.config.core.ts && vite build --config vite.config.umd.ts",
+    "size": "node scripts/size.ts",
     "prepublishOnly": "pnpm build",
     "lint": "pnpm --dir ../.. lint",
     "lint:fix": "pnpm --dir ../.. lint:fix",
@@ -78,7 +79,7 @@
     "test:watch": "vitest",
     "test:types": "vue-tsc -p tsconfig.app.json --noEmit && vue-tsc -p tsconfig.vitest.json --noEmit",
     "test:coverage": "vitest run --coverage",
-    "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage"
+    "test:all": "pnpm run lint && pnpm run test:types && pnpm run test:coverage && pnpm run size"
   },
   "peerDependencies": {
     "vue": "^3.5.0"

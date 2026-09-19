@@ -21,6 +21,8 @@ jobs:
           runtime: node@24
           cache: true
       - run: pnpm test:all
+      - name: Bundle size and tree-shaking gate
+        run: pnpm --filter @pdanpdan/virtual-scroll size
       - name: Vitest Coverage Report
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
