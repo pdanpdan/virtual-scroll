@@ -142,7 +142,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 
 *   **Not included:** custom scrollbars (the `virtualScrollbar` prop and the `#scrollbar` slot), keyboard navigation, scroll snapping, sticky items, infinite loading and prepend restoration.
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
-*   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance`, `loading` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. Import from the package root when you need them.
+*   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` — only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
 A tree-shaken `<VirtualScroll>` drops from 22.9 KB to 17.0 KB gzipped, and `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
 

@@ -26,7 +26,7 @@ import '@pdanpdan/virtual-scroll/style.css';
 import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 ```
 3. **CDN (UMD)** - `https://unpkg.com/@pdanpdan/virtual-scroll` after the Vue global, plus `https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css`.
-4. **Lean entry** - `import { VirtualScroll } from '@pdanpdan/virtual-scroll/core'` with `@pdanpdan/virtual-scroll/core/style.css`: the same API built without the optional wiring (no keyboard navigation, custom scrollbars, snapping, sticky items, infinite loading or prepend restoration; ~5 KB gzipped smaller for a tree-shaken `<VirtualScroll>`). In that build `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance`, `loading` and `restoreScrollOnPrepend` are accepted for API compatibility but do nothing - never mix the entry with code that relies on them, and keep the composable path if you need granular control.
+4. **Lean entry** - `import { VirtualScroll } from '@pdanpdan/virtual-scroll/core'` with `@pdanpdan/virtual-scroll/core/style.css`: the same API built without the optional wiring (no keyboard navigation, custom scrollbars, snapping, sticky items, infinite loading or prepend restoration; ~5 KB gzipped smaller for a tree-shaken `<VirtualScroll>`). In that build `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are accepted for API compatibility but do nothing (`loading` still drives the loading slot and `aria-busy`; only the automatic `load` trigger is gone) - never mix the entry with code that relies on them, and keep the composable path if you need granular control.
 
 Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - read it before guessing option shapes.
 

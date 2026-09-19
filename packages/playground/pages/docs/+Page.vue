@@ -550,9 +550,9 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props);"
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          RTL, snapping, sticky items, infinite loading and coordinate scaling are extensions: each one hooks into the
-          scroll lifecycle, so a plain list only carries what it needs and you opt into the rest. You can write your own
-          against the same interface.
+          RTL, snapping, sticky items, infinite loading, scroll snapshots and coordinate scaling are extensions: each one
+          hooks into the scroll lifecycle, so a plain list only carries what it needs and you opt into the rest. You can
+          write your own against the same interface.
         </p>
       </div>
 
@@ -565,6 +565,7 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props);"
             <li><a href="#use-sticky-extension" class="link"><code>useStickyExtension()</code></a>: Sticky headers, footers and indices.</li>
             <li><a href="#use-infinite-loading-extension" class="link"><code>useInfiniteLoadingExtension()</code></a>: Loads more data near the end.</li>
             <li><a href="#use-prepend-restoration-extension" class="link"><code>usePrependRestorationExtension()</code></a>: Keeps the position when items are prepended.</li>
+            <li><a href="#use-snapshots-extension" class="link"><code>useSnapshotsExtension()</code></a>: Saves and restores the visible position.</li>
             <li><a href="#use-coordinate-scaling-extension" class="link"><code>useCoordinateScalingExtension()</code></a>: Lists past the browser size limit.</li>
           </ul>
         </div>
@@ -804,6 +805,12 @@ const vs = useVirtualScroll(props, [
               <td>ARIA role for the container. Automatically detected based on direction.</td>
             </tr>
             <tr>
+              <td><code class="docs-prop-name">keyboardActivation</code></td>
+              <td><code>'auto' | 'item' | 'viewport'</code></td>
+              <td><code>'auto'</code></td>
+              <td>How the keyboard interacts with the content. <code>'auto'</code> uses the roving item model for the roles that publish an active descendant (<code>listbox</code>, <code>menu</code>, <code>tree</code>) and viewport scrolling for everything else - including the <code>grid</code> role a two-axis list defaults to - because flipping a plain list to the item model would change how every arrow already behaves. <code>'item'</code> always tracks an active item, <code>'viewport'</code> never does. See <a href="#keyboard-navigation" class="link link-primary">Keyboard Navigation</a>.</td>
+            </tr>
+            <tr>
               <td><code class="docs-prop-name">ariaLabel</code></td>
               <td><code>string</code></td>
               <td>-</td>
@@ -953,6 +960,7 @@ const vs = useVirtualScroll(props, [
             <li><code>isSticky: boolean</code>: <code>true</code> if the item is configured to be sticky via <code>stickyIndices</code>.</li>
             <li><code>isStickyActive: boolean</code>: <code>true</code> if the item is currently stuck at the threshold.</li>
             <li><code>isStickyActiveX / Y: boolean</code>: <code>true</code> if the item is stuck at the horizontal or vertical threshold.</li>
+            <li><code>isActive: boolean</code>: <code>true</code> for the item the keyboard navigation currently tracks as active (see <a href="#keyboard-navigation" class="link link-accent">Keyboard Navigation</a>). Nothing is active until the item model activates an item - the first arrow press does that - or <code>setActiveIndex</code> / <code>handleItemActivate</code> select one explicitly.</li>
             <li><code>offset: { x, y }</code>: Calculated physical position in display units (DU).</li>
             <li><code>columnRange: <a href="#column-range" class="link link-accent">ColumnRange</a></code>: Precise indices and paddings for visible columns.</li>
             <li><code>getColumnWidth: (index: number) => number</code>: Helper to get the calculated width of any column.</li>
@@ -1071,8 +1079,13 @@ const vs = useVirtualScroll(props, [
             </tr>
             <tr>
               <td><code>load</code></td>
-              <td><code>'vertical' | 'horizontal'</code></td>
-              <td>Triggered when the user scrolls within <code>loadDistance</code> of the end.</td>
+              <td><code>'vertical' | 'horizontal'</code>, <code><a href="#load-details" class="link link-primary">LoadDetails</a></code></td>
+              <td>Emitted when the scroll position comes within <code>loadDistance</code> of the end on that axis; suppressed while <code>loading</code> is <code>true</code> and while the axis is still flinging faster than <code>flingVelocity</code>. The second argument carries <code>{ velocity, direction }</code> - the scroll velocity in VU/ms and the travel direction (<code>'start' | 'end' | null</code>).</td>
+            </tr>
+            <tr>
+              <td><code>itemActivate</code></td>
+              <td><code>index: number</code>, <code>item: T | undefined</code></td>
+              <td>Emitted when the active item is activated with <code>Enter</code>/<code>Space</code>, or from an explicit <a href="#method-handleitemactivate" class="link link-primary font-semibold">handleItemActivate(index)</a> call (e.g. a click in the item slot). Only emitted in the item activation model.</td>
             </tr>
             <tr>
               <td><code>visibleRangeChange</code></td>
@@ -1089,7 +1102,16 @@ const vs = useVirtualScroll(props, [
         </a>
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
-        <p>The container is keyboard-accessible when focused (<code>tabindex="0"</code>). It supports standard navigation keys:</p>
+        <p>
+          The container is keyboard-accessible when focused (<code>tabindex="0"</code>). What the keys do depends on the
+          activation model chosen by the <code>keyboardActivation</code> prop: with <code>'viewport'</code> they move the
+          scroll position only and no item is tracked, while with <code>'item'</code> they move a roving active item,
+          keep it in view and announce it through a polite live region (for example <code>Item 21 of 100</code>). The
+          <code>'auto'</code> default picks the item model for the roles that publish an active descendant
+          (<code>listbox</code>, <code>menu</code>, <code>tree</code>) and viewport scrolling for everything else. See
+          <a href="#props" class="link link-primary">Props</a>.
+        </p>
+        <p class="mt-6"><strong>Viewport scrolling</strong> (<code>'viewport'</code>):</p>
         <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 not-prose mt-4">
           <div class="docs-kbd-item">
             <kbd class="docs-kbd">Home</kbd>
@@ -1116,6 +1138,30 @@ const vs = useVirtualScroll(props, [
               <kbd class="docs-kbd">→</kbd>
             </span>
             <span class="docs-kbd-description">Scroll horizontally by column width (respects <code>snap</code> mode).</span>
+          </div>
+        </div>
+        <p class="mt-6"><strong>Roving active item</strong> (<code>'item'</code>):</p>
+        <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 not-prose mt-4">
+          <div class="docs-kbd-item">
+            <span class="flex gap-1">
+              <kbd class="docs-kbd">↑</kbd>
+              <kbd class="docs-kbd">↓</kbd>
+              <kbd class="docs-kbd">←</kbd>
+              <kbd class="docs-kbd">→</kbd>
+            </span>
+            <span class="docs-kbd-description">Move the active item by one along the scroll axis and scroll it back into view only when it left the viewport. The first press activates the first visible item without scrolling. In grid mode the active item is a row, so the inline arrows keep panning columns.</span>
+          </div>
+          <div class="docs-kbd-item">
+            <kbd class="docs-kbd">Home</kbd> / <kbd class="docs-kbd">End</kbd>
+            <span class="docs-kbd-description">Move the active item to the first or last item and keep it visible; the other axis is left untouched, so a multi-column list keeps its current column.</span>
+          </div>
+          <div class="docs-kbd-item">
+            <kbd class="docs-kbd">PgUp</kbd> / <kbd class="docs-kbd">PgDn</kbd>
+            <span class="docs-kbd-description">Move the active item one viewport up or down and keep it visible.</span>
+          </div>
+          <div class="docs-kbd-item">
+            <kbd class="docs-kbd">Enter</kbd> / <kbd class="docs-kbd">Space</kbd>
+            <span class="docs-kbd-description">Activate the active item, emitting <a href="#events" class="link link-primary">itemActivate</a>. The same happens when you call <a href="#method-handleitemactivate" class="link link-primary">handleItemActivate(index)</a>, e.g. from a click in the item slot.</span>
           </div>
         </div>
       </div>
@@ -1247,6 +1293,10 @@ const vs = useVirtualScroll(props, [
           <code class="docs-link-title docs-link-title--primary">scrollDetails</code>
           <p class="docs-link-description">Full reactive state of the virtualizer.</p>
         </a>
+        <a href="#keyboard-navigation" class="docs-link-card">
+          <code class="docs-link-title docs-link-title--primary">activeIndex</code>
+          <p class="docs-link-description">Index of the item tracked by keyboard navigation, <code>-1</code> when none.</p>
+        </a>
         <a href="#column-range" class="docs-link-card">
           <code class="docs-link-title docs-link-title--primary">columnRange</code>
           <p class="docs-link-description">Visible column indices and paddings.</p>
@@ -1302,6 +1352,14 @@ const vs = useVirtualScroll(props, [
         <a href="#method-stopprogrammaticscroll" class="docs-link-card">
           <code class="docs-prop-name--secondary text-xs">stopProgrammaticScroll()</code>
           <p class="docs-link-description">Halt smooth scroll animations.</p>
+        </a>
+        <a href="#method-setactiveindex" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">setActiveIndex()</code>
+          <p class="docs-link-description">Set (<code>null</code> clears) the active item without scrolling.</p>
+        </a>
+        <a href="#method-handleitemactivate" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">handleItemActivate()</code>
+          <p class="docs-link-description">Mark an item active and emit <code>itemActivate</code>.</p>
         </a>
         <a href="#method-getcolumnwidth" class="docs-link-card">
           <code class="docs-prop-name--secondary text-xs">getColumnWidth()</code>
@@ -1459,8 +1517,9 @@ const vs = useVirtualScroll(props, [
             <a href="#slots" class="link link-primary font-bold">Slots</a>.
           </li>
           <li>
-            <strong>Events</strong>: identical <code>scroll</code>, <code>visibleRangeChange</code> and
-            <code>load</code> events. See <a href="#events" class="link link-primary font-bold">Events</a>.
+            <strong>Events</strong>: identical <code>scroll</code>, <code>visibleRangeChange</code>, <code>load</code>
+            and <code>itemActivate</code> events (a table tracks an active row only with
+            <code>keyboardActivation: 'item'</code>). See <a href="#events" class="link link-primary font-bold">Events</a>.
           </li>
           <li>
             <strong>Exposed instance (via ref)</strong>: the same methods and state - <code>scrollToIndex</code>,
@@ -1989,6 +2048,21 @@ scrollToIndex
                 <td>Inline-start/block-start padding of the scroll container (DU), used to align the virtual scrollbar overlay with the scrollport.</td>
               </tr>
               <tr>
+                <td><code class="docs-prop-name">activeIndex</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td>Index of the item tracked by keyboard navigation, <code>-1</code> when none.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-setactiveindex" class="link font-bold text-secondary">setActiveIndex</a></td>
+                <td><code>Function</code></td>
+                <td>Sets (<code>null</code> clears) the active item without scrolling, so a click or an external selection can be synced in.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-handleitemactivate" class="link font-bold text-secondary">handleItemActivate</a></td>
+                <td><code>Function</code></td>
+                <td>Marks an item active and calls <code>onActivate</code> (emits <code>itemActivate</code> on the component).</td>
+              </tr>
+              <tr>
                 <td><a href="#method-scrolltoindex" class="link font-bold text-secondary">scrollToIndex</a></td>
                 <td><code>Function</code></td>
                 <td>Programmatic scroll to a specific index. End-anchored scrolls re-clamp while settling measurements move the real end, so a first jump to the end lands flush on dynamic lists.</td>
@@ -2444,7 +2518,8 @@ const {
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Keyboard navigation for the container: Arrows, Home, End, PageUp and PageDown, with optional alignment.
+            Keyboard navigation for the container: Arrows, Home, End, PageUp and PageDown - either scrolling the viewport
+            or moving a roving active item, depending on the <code>activationMode</code> option.
           </p>
         </div>
 
@@ -2453,13 +2528,21 @@ const {
           lang="ts"
           code="import { useVirtualScrollKeyboard } from '@pdanpdan/virtual-scroll';
 
-const { handleKeyDown } = useVirtualScrollKeyboard({
+const {
+  handleKeyDown,
+  activeIndex,
+  liveMessage,
+  setActiveIndex,
+  handleItemActivate
+} = useVirtualScrollKeyboard({
   props,
   scrollDetails,
   scrollToIndex: (row, col, opt) => { /* ... */ },
   scrollToOffset: (x, y, opt) => { /* ... */ },
   stopProgrammaticScroll: () => { /* ... */ },
   getLoadingSlotSize: () => loadingEl?.offsetHeight ?? 0, // optional
+  activationMode: 'viewport', // 'viewport' (default) | 'item' - a ref or getter is accepted
+  onActivate: (index) => { /* ... */ }, // Enter/Space, or handleItemActivate
   // ... resolvers
 });"
         />
@@ -2474,6 +2557,29 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
           <ul class="list-disc ps-5 space-y-1">
             <li><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a>: Scrolls to a pixel position. For the <code>End</code> key the composable requests extra range (<code>endExtraX</code> / <code>endExtraY</code> options) so the scroll clamp extends past the virtual content (the loading slot below the items).</li>
             <li><code>getLoadingSlotSize</code> (optional): Height of the loading slot. When provided, <code>End</code> includes it in the target so the last item plus the slot fit in the viewport.</li>
+            <li><code>activationMode</code> (optional, accepts a ref or getter): <code>'viewport'</code> (default) scrolls the viewport only and tracks no active item; <code>'item'</code> moves a roving active item and exposes it through <code>activeIndex</code>/<code>isActive</code>/<code>aria-activedescendant</code>. The component picks it per role - see <a href="#props" class="link link-primary">keyboardActivation</a> - because flipping a plain list to the item model would change how every arrow already behaves.</li>
+            <li><code>onActivate</code> (optional): Called with the item index when the active item is activated - <code>Enter</code>/<code>Space</code> on the container, or an explicit <code>handleItemActivate</code> call. Never called in <code>'viewport'</code> mode.</li>
+            <li>The engine handles it drives - <code>props</code>, <code>scrollDetails</code>, <code>scrollToIndex</code>, <code>stopProgrammaticScroll</code> and the index/offset resolvers (<code>getRowHeight</code>, <code>getRowOffset</code>, <code>getItemOffset</code>, <code>getItemSize</code>, <code>getRowIndexAt</code>, <code>getColumnIndexAt</code>, etc.) - are the ones documented under <a href="#use-virtual-scroll" class="link link-primary">useVirtualScroll</a>.</li>
+          </ul>
+        </div>
+
+        <h4 id="keyboard-activation-models" class="docs-prop-subheader">
+          <a href="#keyboard-activation-models" aria-label="Link to Activation Models section">
+            Activation Models
+          </a>
+        </h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <p><strong><code>'viewport'</code> mode</strong> (the default) never tracks an item:</p>
+          <ul class="list-disc ps-5 space-y-1">
+            <li><code>Home</code>/<code>End</code> scroll to the start or end of the content. <code>End</code> targets <code>totalSize - viewportSize</code> (plus the loading slot size when <code>getLoadingSlotSize</code> is provided), the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically. Because the slot lives in the DOM <em>after</em> the virtual wrapper, the requested range also extends the engine's scroll clamp, so the slot is actually reachable.</li>
+            <li><code>PageUp</code>/<code>PageDown</code> scroll by one full page: the target is the first visible item minus one (<code>startIdx - 1</code>) or the last visible item plus one (<code>endIdx + 1</code>), so each press advances exactly one viewport.</li>
+            <li>Arrows move one item in the scroll direction (one column in grid mode). <code>Enter</code>/<code>Space</code> do nothing.</li>
+          </ul>
+          <p class="mt-4"><strong><code>'item'</code> mode</strong> moves a roving active item, announced through <code>liveMessage</code>:</p>
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Arrows move the active item by one along the scroll axis (<code>ArrowLeft</code>/<code>ArrowRight</code> on horizontal lists, honouring RTL; in grid mode the active item is a row, so the inline arrows keep panning columns) and scroll it back into view only when it left the viewport. The first arrow press activates the first visible item without scrolling.</li>
+            <li><code>PageUp</code>/<code>PageDown</code>/<code>Home</code>/<code>End</code> move the active item one viewport up/down, or to the first/last item, and keep it visible. The other axis is left untouched, so a multi-column list keeps its current column.</li>
+            <li><code>Enter</code>/<code>Space</code> activate the active item through <code>onActivate</code>.</li>
           </ul>
         </div>
 
@@ -2496,6 +2602,26 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
                 <td><a href="#method-handlekeydown" class="link font-bold text-secondary">handleKeyDown</a></td>
                 <td><code>Function</code></td>
                 <td>Keyboard event handler to be bound to the focusable scroll container.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">activeIndex</code></td>
+                <td><code>Ref&lt;number&gt;</code></td>
+                <td><code>Ref</code> with the roving active item index, <code>-1</code> when none.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">liveMessage</code></td>
+                <td><code>Ref&lt;string&gt;</code></td>
+                <td>Polite announcement for the active item, e.g. <code>Item 21 of 100</code>; empty when nothing is active.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-setactiveindex" class="link font-bold text-secondary">setActiveIndex</a></td>
+                <td><code>(index: number | null) =&gt; void</code></td>
+                <td>Sets (<code>null</code> clears) the active item without scrolling, so a click or an external selection can be synced in.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-handleitemactivate" class="link font-bold text-secondary">handleItemActivate</a></td>
+                <td><code>(index: number) =&gt; void</code></td>
+                <td>Marks an item active and calls <code>onActivate</code> (e.g. from a click handler in the item slot). No-op in <code>'viewport'</code> mode.</td>
               </tr>
             </tbody>
           </table>
@@ -2779,9 +2905,12 @@ const vs = useVirtualScroll(props, [
 
 const vs = useVirtualScroll(props, [
   useInfiniteLoadingExtension({
-    onLoad: (axis) => {
-      console.log(`Load more items on ${axis} axis`);
+    onLoad: (axis, { velocity, direction }) => {
+      // velocity: VU per millisecond along the axis; direction: 'start' | 'end' | null
+      void loadNextPage(axis, direction);
     },
+    flingVelocity: 2, // skip while the axis is still flinging faster than this
+    preload: 0, // VU added to the threshold while scrolling towards the end
   }),
 ]);"
         />
@@ -2799,8 +2928,18 @@ const vs = useVirtualScroll(props, [
             <tbody>
               <tr>
                 <td><code>onLoad</code></td>
-                <td><code>(axis: 'vertical' | 'horizontal') => void</code></td>
-                <td>Callback triggered when a threshold is met.</td>
+                <td><code>(axis: 'vertical' | 'horizontal', details: <a href="#load-details" class="link link-primary">LoadDetails</a>) =&gt; void</code></td>
+                <td>Callback triggered when a threshold is met. <code>details.velocity</code> is the scroll velocity along the axis in VU per millisecond and <code>details.direction</code> the travel direction (<code>'start' | 'end' | null</code>).</td>
+              </tr>
+              <tr>
+                <td><code>flingVelocity</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default <code>2</code></span></td>
+                <td><code>number</code></td>
+                <td>While the axis moves faster than this (VU/ms) the callback is skipped and fires once the scroll slows below it, so a fling cannot load several pages in one gesture.</td>
+              </tr>
+              <tr>
+                <td><code>preload</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default <code>0</code></span></td>
+                <td><code>number</code></td>
+                <td>Extra distance in VU added to the <code>loadDistance</code> threshold, but only while the travel direction points at the end being checked - scrolling back towards the start does not load the next page earlier.</td>
               </tr>
             </tbody>
           </table>
@@ -2813,9 +2952,11 @@ const vs = useVirtualScroll(props, [
         </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
-            <li>Watches <code>scrollDetails</code> reactively.</li>
+            <li>Watches <code>scrollDetails</code> reactively and reports the velocity and travel direction it observed to <code>onLoad</code>.</li>
             <li>Respects the <code>loadDistance</code> and <code>loading</code> props from the component.</li>
             <li>Prevents duplicate triggers while <code>loading</code> is true.</li>
+            <li>Skips the callback while the axis is flinging faster than <code>flingVelocity</code> (default <code>2</code> VU/ms) and fires once it slows down.</li>
+            <li>Extends the threshold by <code>preload</code> (VU, default <code>0</code>) only while the travel direction points at the end being checked.</li>
             <li>Fires as soon as the threshold is reached - including while a programmatic scroll (scrollbar drag, PageDown/End) is still settling - so the loading indicator appears promptly and is not skipped.</li>
           </ul>
         </div>
@@ -2863,6 +3004,130 @@ const vs = useVirtualScroll(props, [
             <li>Compares new items with previous items to detect prepended count.</li>
             <li>Calculates the height (or width) of prepended items.</li>
             <li>Uses <code>handleScrollCorrection</code> to silently adjust the scroll position before the next frame.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- useSnapshotsExtension -->
+      <section id="use-snapshots-extension" class="mb-16">
+        <h3 class="docs-prop-header text-secondary">
+          <a href="#use-snapshots-extension" aria-label="Link to useSnapshotsExtension section">
+            useSnapshotsExtension
+          </a>
+        </h3>
+        <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
+          <p>
+            Remembers where the reader was. <code>save()</code> captures the visible position, <code>restore()</code>
+            brings it back - immediately, or on a later visit when a persistent storage is configured - and
+            <code>clear()</code> drops both the in-memory snapshot and the stored entry. A snapshot only records the
+            first visible index, the offset inside that item (VU) and the item count it was taken with, so it stays
+            small and portable.
+          </p>
+        </div>
+
+        <CodeBlock
+          class="docs-code-block mb-8 font-mono"
+          lang="ts"
+          code="import { useSnapshotsExtension, useVirtualScroll } from '@pdanpdan/virtual-scroll';
+
+const snapshots = useSnapshotsExtension({
+  storage: 'session', // 'memory' (default) | 'session' | 'local' | a Storage object
+  key: 'virtual-scroll:snapshot', // storage key for the persistent modes
+  autoSave: false, // save on every scroll end
+});
+
+const vs = useVirtualScroll(props, [
+  snapshots,
+]);
+
+// When the list is left / unmounted:
+snapshots.save();
+
+// On a later visit, once the same items are in place again:
+snapshots.restore();
+
+// Forget the position for good:
+snapshots.clear();"
+        />
+
+        <h4 id="parameters-13" class="docs-prop-subheader">
+          <a href="#parameters-13" aria-label="Link to Parameters section">
+            Parameters
+          </a>
+        </h4>
+        <div class="docs-table-container mb-8 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>storage</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default <code>'memory'</code></span></td>
+                <td><code>'memory' | 'session' | 'local' | Storage</code></td>
+                <td>Where snapshots are persisted. <code>'memory'</code> keeps them inside the extension for the lifetime of the page; <code>'session'</code> / <code>'local'</code> use <code>sessionStorage</code> / <code>localStorage</code>; any other value must implement the <code>Storage</code> interface. A storage that is unavailable (SSR, privacy mode, quota exceeded) falls back to memory without throwing.</td>
+              </tr>
+              <tr>
+                <td><code>key</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default <code>'virtual-scroll:snapshot'</code></span></td>
+                <td><code>string</code></td>
+                <td>Storage key used by <code>'session'</code>, <code>'local'</code> and a custom <code>Storage</code>. Ignored in <code>'memory'</code> mode.</td>
+              </tr>
+              <tr>
+                <td><code>autoSave</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default <code>false</code></span></td>
+                <td><code>boolean</code></td>
+                <td>Save on every scroll end (keeping the snapshot in memory too), so you do not have to call <code>save()</code> yourself.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 id="return-value-13" class="docs-prop-subheader">
+          <a href="#return-value-13" aria-label="Link to Return Value section">
+            Return Value
+          </a>
+        </h4>
+        <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
+          <p>
+            On top of the <a href="#extension-contract" class="link link-primary">extension contract</a> (its
+            <code>name</code> is <code>'snapshots'</code>) the extension adds:
+          </p>
+        </div>
+        <div class="docs-table-container mb-8 text-base-content/80 text-xs @4xl:text-sm">
+          <table class="docs-table">
+            <thead>
+              <tr><th class="w-1/4">Member</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="docs-prop-name">save</code></td>
+                <td><code>() =&gt; <a href="#scroll-snapshot" class="link link-primary">ScrollSnapshot</a></code></td>
+                <td>Capture the current scroll position, keep it in memory and persist it when a storage is configured; returns the captured snapshot.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">restore</code></td>
+                <td><code>(snapshot?: ScrollSnapshot | null) =&gt; boolean</code></td>
+                <td>Scroll back to the given snapshot, or to the last saved one when omitted. Returns <code>false</code> without scrolling when the snapshot is missing or invalid, or when its <code>total</code> no longer matches the item count.</td>
+              </tr>
+              <tr>
+                <td><code class="docs-prop-name">clear</code></td>
+                <td><code>() =&gt; void</code></td>
+                <td>Drop the in-memory snapshot and the stored entry.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 id="behavior-7" class="docs-prop-subheader">
+          <a href="#behavior-7" aria-label="Link to Behavior section">
+            Behavior
+          </a>
+        </h4>
+        <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
+          <ul class="list-disc ps-5 space-y-1">
+            <li>Scrolls back through the engine's scroll API, so the restored position is expressed in the same first-visible-index plus in-item offset terms that were captured.</li>
+            <li>Refuses a snapshot whose <code>total</code> no longer matches the item count: a list that changed shape falls back to its normal start position instead of jumping to an unrelated index.</li>
+            <li>Ignores anything that is not a usable snapshot (missing or non-numeric <code>index</code>/<code>offset</code>/<code>total</code>), including a corrupted stored entry.</li>
+            <li>Restore after the items are back: the count check runs against the current list, so a snapshot taken with 100 items is refused while the list is still loading (or has grown or shrunk) and accepted once it holds 100 items again.</li>
+            <li>A blocked or full storage is not fatal - the extension keeps working from memory.</li>
           </ul>
         </div>
       </section>
@@ -3032,6 +3297,56 @@ const vs = useVirtualScroll(props, [
         </div>
       </section>
 
+      <!-- LoadDetails -->
+      <section id="load-details" class="mb-12">
+        <h4 class="docs-prop-subheader">
+          <a href="#load-details" aria-label="Link to LoadDetails section">
+            LoadDetails
+          </a>
+        </h4>
+        <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+          <p>Second argument of the <code>load</code> event and of the infinite loading <code>onLoad</code> callback.</p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>velocity</code></td><td><code>number</code></td><td>Scroll velocity on the axis in virtual units (VU) per millisecond; <code>0</code> when it cannot be measured.</td></tr>
+              <tr><td><code>direction</code></td><td><code>'start' | 'end' | null</code></td><td>Direction of the scroll on the axis, or <code>null</code> when no direction has been observed yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ScrollSnapshot -->
+      <section id="scroll-snapshot" class="mb-12">
+        <h4 class="docs-prop-subheader">
+          <a href="#scroll-snapshot" aria-label="Link to ScrollSnapshot section">
+            ScrollSnapshot
+          </a>
+        </h4>
+        <div class="prose prose-sm max-w-none mb-4 opacity-80 italic text-base-content/70">
+          <p>
+            A saved position, returned by <code>save()</code> and accepted by <code>restore()</code> on the
+            <a href="#use-snapshots-extension" class="link link-primary">snapshots extension</a>.
+          </p>
+        </div>
+        <div class="docs-table-container text-base-content/80">
+          <table class="table table-sm @4xl:table-md table-zebra w-full">
+            <thead class="bg-base-300 text-base-content">
+              <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody class="text-xs @4xl:text-sm">
+              <tr><td><code>index</code></td><td><code>number</code></td><td>Index of the first visible item at the saved position.</td></tr>
+              <tr><td><code>offset</code></td><td><code>number</code></td><td>Offset (VU) inside that item, measured from its start.</td></tr>
+              <tr><td><code>total</code></td><td><code>number</code></td><td>Number of items the snapshot was taken with; <code>restore()</code> refuses it when the current count differs.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- VirtualScrollProps -->
       <section id="virtual-scroll-props" class="mb-12">
         <h4 class="docs-prop-subheader">
@@ -3060,6 +3375,7 @@ const vs = useVirtualScroll(props, [
               <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
               <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
               <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
+              <tr><td><code>keyboardActivation</code></td><td><code>'auto' | 'item' | 'viewport'</code></td><td>Keyboard model. <code>'auto'</code> (default) tracks a roving active item only for roles with an active descendant (<code>listbox</code>, <code>menu</code>, <code>tree</code>), and scrolls the viewport for every other role.</td></tr>
               <tr><td><code>snap</code></td><td><code><a href="#snap-modes" class="link link-primary">SnapMode</a></code></td><td>Auto-alignment after scroll stop.</td></tr>
               <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>
               <tr><td><code>initialScrollAlign</code></td><td><code><a href="#alignments" class="link link-primary">ScrollAlignment</a> | <a href="#scroll-alignment-options" class="link link-primary">Options</a></code></td><td>Alignment for initial jump.</td></tr>
@@ -3571,6 +3887,43 @@ element?: HTMLElement
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
             <p>Immediately halts any active smooth scroll animation and clears pending scroll requests.</p>
+          </div>
+        </div>
+        <!-- Method: setActiveIndex -->
+        <div id="method-setactiveindex" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> setActiveIndex()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="setActiveIndex(index: number | null): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>
+              Sets the item keyboard navigation tracks as active without scrolling it into view, so a click or an
+              external selection can be synced in. Pass <code>null</code> (or a negative index) to clear the selection;
+              an index past the end clamps to the last item. The active item is exposed through <code>activeIndex</code>
+              and the <code>isActive</code> item slot prop.
+            </p>
+          </div>
+        </div>
+        <!-- Method: handleItemActivate -->
+        <div id="method-handleitemactivate" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> handleItemActivate()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="handleItemActivate(index: number): void"
+          />
+          <div class="prose prose-sm max-w-none opacity-90 space-y-4">
+            <p>
+              Marks an item as the active one and emits <code>itemActivate</code> with the index and the item - wire it
+              to a click handler in the item slot. No-op in the viewport activation model, where nothing is ever
+              activated (see <a href="#keyboard-navigation" class="link link-secondary">Keyboard Navigation</a>).
+            </p>
           </div>
         </div>
         <div id="method-handlescrollcorrection" class="docs-method-card docs-method-card--secondary">
