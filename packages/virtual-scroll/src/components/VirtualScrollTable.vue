@@ -19,6 +19,7 @@ import type { VNodeChild } from 'vue';
 
 import { computed, nextTick, onBeforeUnmount, ref, toRefs, useId, watch } from 'vue';
 
+import { useLiveRegion } from '../composables/useLiveRegion';
 import {
   useVirtualScroll,
 } from '../composables/useVirtualScroll';
@@ -872,6 +873,8 @@ const rootAriaProps = computed(() => ({
 /** `aria-activedescendant` target while a row is active. */
 const activeDescendant = computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
 
+useLiveRegion(hostRef, liveMessage);
+
 const wrapperAriaProps = computed(() => {
   const aria: Record<string, string | number | undefined> = {
     'aria-rowcount': props.items.length,
@@ -1397,8 +1400,6 @@ defineExpose({
         <slot name="footer" />
       </component>
     </template>
-
-    <div class="virtual-scroll-live-region" role="status" aria-live="polite" aria-atomic="true">{{ liveMessage }}</div>
   </component>
 </template>
 
@@ -1407,18 +1408,6 @@ defineExpose({
   .virtual-scroll--active {
     outline: 2px solid currentColor;
     outline-offset: -2px;
-  }
-
-  .virtual-scroll-live-region {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
   }
 
   .virtual-scroll-container {

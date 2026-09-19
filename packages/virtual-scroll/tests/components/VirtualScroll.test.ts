@@ -720,6 +720,8 @@ describe('virtualScroll', () => {
       await nextTick();
 
       expect(vm.activeIndex).toBe(0);
+      // The announcement element is created on demand and lives in the container.
+      expect(container.find('.virtual-scroll-live-region').text()).toBe(`Item 1 of ${ mockItems.length }`);
       const containerId = container.attributes('id');
       expect(wrapperEl.attributes('aria-activedescendant')).toBe(`${ containerId }-item-0`);
 
