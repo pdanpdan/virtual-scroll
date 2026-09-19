@@ -198,6 +198,7 @@ const patternLinks: Link[] = [
   { href: '/pattern-draggable', label: 'Draggable List' },
   { href: '/pattern-gallery', label: 'Photo Gallery' },
   { href: '/pattern-masonry-gallery', label: 'Masonry Gallery' },
+  { href: '/pattern-layout-switcher', label: 'Layout Switcher' },
 ];
 
 const isExamplePage = computed(() => {

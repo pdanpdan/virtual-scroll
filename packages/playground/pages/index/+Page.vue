@@ -381,5 +381,13 @@ import ExampleCard from '#/components/ExampleCard.vue';
       href="/pattern-masonry-gallery"
       group="1"
     />
+
+    <ExampleCard
+      type="Pattern"
+      title="Layout Switcher"
+      description="One dataset shown as a virtualized list, grid or data table - only the virtualization unit changes."
+      href="/pattern-layout-switcher"
+      group="2"
+    />
   </div>
 </template>
