@@ -37,7 +37,7 @@ Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - rea
 **Composables**: `useVirtualScroll(propsInput, extensions?)`, `useVirtualScrollbar(props)`, `useVirtualScrollInertia(config)`, `useVirtualScrollKeyboard(config)`, `useVirtualScrollMasonry(propsInput)`, `useVirtualScrollObservers(config)`.
 
 **Extension factories** (2nd arg of `useVirtualScroll`; the component wires all six already):
-`useRtlExtension()`, `useSnappingExtension()`, `useStickyExtension()`, `useInfiniteLoadingExtension({ onLoad: (axis) => void })`, `usePrependRestorationExtension()`, `useCoordinateScalingExtension()`.
+`useRtlExtension()`, `useSnappingExtension()`, `useStickyExtension()`, `useInfiniteLoadingExtension({ onLoad: (axis, details) => void })`, `useSnapshotsExtension({ storage?, key?, autoSave? })`, `usePrependRestorationExtension()`, `useCoordinateScalingExtension()`.
 
 `useStickyExtension()` owns sticky *behaviour*: it pins the nearest sticky item above the window (through the `includeIndices` hook) and computes `isStickyActive`/`stickyOffset`. `stickyIndices` without the extension keeps the layout offsets but does not pin anything. Extension authors get three additions for this kind of work: `includeIndices?(ctx)` (merge indices into the rendered window), `ctx.methods.getItemRawOffset(axis, index)` (raw virtual offset, correct for fixed and measured sizes) and `ctx.internalState.isHydrated`.
 
@@ -60,6 +60,7 @@ explicitly and expect breaking changes in any release. `FenwickTree` is the exce
 - `gap`, `columnGap` - spacing in virtual units.
 - `stickyIndices: number[]` - iOS-style pushing section headers; plus `stickyHeader` / `stickyFooter` booleans for the `header`/`footer` slots.
 - `snap`: `boolean | 'auto' | 'start' | 'center' | 'end' | 'next'` (default `false`).
+- `keyboardActivation`: `'auto' | 'item' | 'viewport'` (default `'auto'`). `'auto'` tracks a roving active item (`isActive` slot prop, `aria-activedescendant`, `itemActivate` event, `activeIndex`/`setActiveIndex`/`handleItemActivate` on the instance) for `listbox`/`menu`/`tree` roles and scrolls the viewport for the rest, including `grid`; `'item'`/`'viewport'` force one model.
 - `container?: HTMLElement | Window` - omit for self-contained scroll; pass the `window` object to virtualize the page scroll.
 - `virtualScrollbar: boolean` - force custom scrollbars even under the browser limit.
 - `loading: boolean`, `loadDistance: number` (default `200`) - infinite loading; while `loading` is true the `#loading` slot shows and `load` events are suppressed.
@@ -83,7 +84,8 @@ In templates use **kebab-case** (`:item-size`, `sticky-header`, `restore-scroll-
 ## Events
 
 - `@scroll="(details: ScrollDetails)"` - full state (offsets, range, viewport, totalSize…).
-- `@load="(axis: 'vertical' | 'horizontal')"` - infinite-loading trigger.
+- `@load="(axis: 'vertical' | 'horizontal', details: { velocity, direction })"` - infinite-loading trigger; `velocity` is in VU/ms and `direction` is `'start' | 'end' | null` (suppressed while the axis flings faster than `flingVelocity`).
+- `@itemActivate="(index: number, item: T | undefined)"` - the active item was activated with `Enter`/`Space` or through the exposed `handleItemActivate(index)`.
 - `@visible-range-change="{ start, end, colStart, colEnd }"`.
 
 ## Exposed (template ref) methods

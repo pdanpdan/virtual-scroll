@@ -144,7 +144,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
 *   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance`, `loading` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. Import from the package root when you need them.
 
-A tree-shaken `<VirtualScroll>` drops from 22.4 KB to 16.7 KB gzipped, and `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
+A tree-shaken `<VirtualScroll>` drops from 22.9 KB to 17.0 KB gzipped, and `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
 
 ## Data-less Lists (Index-only Rows)
 
@@ -195,7 +195,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
-- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 22.4 KB, `./core` 16.7 KB, headless `useVirtualScroll` 11.3 KB, `VirtualScrollTable` 23.5 KB, `VirtualScrollMasonry` 7.6 KB).
+- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 22.9 KB, `./core` 17.0 KB, headless `useVirtualScroll` 11.3 KB, `VirtualScrollTable` 23.9 KB, `VirtualScrollMasonry` 7.6 KB).
 
 ## Key Features
 
@@ -225,12 +225,15 @@ Rows are recycled: they mount as they enter the viewport and unmount when they l
 The library uses a modular extension system. You can use the built-in extensions or create your own.
 
 An extension is a plain object implementing `VirtualScrollExtension<T>`: a unique `name` plus the
-optional hooks `onInit(ctx)`, `onScroll(ctx, event)`, `onScrollEnd(ctx)` and
+optional hooks `onInit(ctx)`, `includeIndices(ctx)`, `onScroll(ctx, event)`, `onScrollEnd(ctx)` and
 `transformRenderedItems(items, ctx)` (post-processes the rendered window and must return the items to
-render). Every hook receives an `ExtensionContext<T>` with the reactive `props`, `scrollDetails`,
-`totalSize`, `range` and `currentIndex`, the engine state refs (`internalState`) and the engine
-methods (`scrollToIndex`, `scrollToOffset`, `updateDirection`, `getRowIndexAt`, `getColumnIndexAt`,
-`getItemSize`, `getItemBaseSize`, `getItemOffset`, `handleScrollCorrection`). `name` is only a
+render). `includeIndices` returns extra item indices that must stay in the rendered window even when
+they are outside the visible range (the sticky extension pins the previous sticky item that way); the
+engine merges, de-duplicates and sorts them. Every hook receives an `ExtensionContext<T>` with the
+reactive `props`, `scrollDetails`, `totalSize`, `range` and `currentIndex`, the engine state refs
+(`internalState`, including `isHydrated`) and the engine methods (`scrollToIndex`, `scrollToOffset`,
+`updateDirection`, `getRowIndexAt`, `getColumnIndexAt`, `getItemSize`, `getItemBaseSize`,
+`getItemOffset`, `getItemRawOffset`, `handleScrollCorrection`). `name` is only a
 label: hooks are called in the order the extensions are passed to `useVirtualScroll`, and extensions
 may wrap engine methods (RTL wraps `updateDirection`).
 
@@ -238,8 +241,9 @@ may wrap engine methods (RTL wraps `updateDirection`).
 
 - `useRtlExtension()`: Automatic Right-to-Left layout support.
 - `useSnappingExtension()`: Item snapping after scroll stops.
-- `useStickyExtension()`: Sticky header/footer and index support.
-- `useInfiniteLoadingExtension({ onLoad })`: Trigger loading when reaching thresholds.
+- `useStickyExtension()`: Sticky header/footer and index support. It owns the pinning itself: the previous sticky item stays rendered while it is scrolled past, and `isStickyActive`/`stickyOffset` are computed here. `stickyIndices` without this extension keeps the layout offsets but pins nothing.
+- `useInfiniteLoadingExtension({ onLoad, flingVelocity, preload })`: Trigger loading when reaching thresholds. `onLoad(axis, { velocity, direction })` receives the scroll velocity (VU/ms) and travel direction; `flingVelocity` (default `2`) skips the callback while the axis is still flinging, and `preload` (VU, default `0`) extends the threshold only while scrolling towards the end.
+- `useSnapshotsExtension({ storage, key, autoSave })`: Save and restore the visible position (`save()`, `restore()`, `clear()`), optionally persisted through `sessionStorage`/`localStorage` or a custom `Storage`.
 - `usePrependRestorationExtension()`: Maintain scroll position when items are prepended.
 - `useCoordinateScalingExtension()`: Support for massive lists (billions of pixels).
 
@@ -332,7 +336,7 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `stopProgrammaticScroll`: Method to halt animations.
 - `getLoadingSlotSize` (optional): Height of the loading slot. When provided, `End` includes it in the target so the last item plus the slot fit in the viewport.
 - `...resolvers`: Various helper functions for index/offset mapping.
-- `activationMode` (optional): `'item'` (default) moves a roving active item; `'viewport'` scrolls the viewport only, with no active item (the pre-`'item'` behaviour).
+- `activationMode` (optional, accepts a ref or getter): `'viewport'` (default) scrolls the viewport only, with no active item; `'item'` moves a roving active item and exposes it through `activeIndex`/`isActive`/`aria-activedescendant`. The component picks it per role - see [`keyboardActivation`](#props) - because flipping a plain list to the item model would change how every arrow already behaves.
 - `onActivate` (optional): Called with the item index when the active item is activated - `Enter`/`Space` on the container, or an explicit `handleItemActivate` call. Never called in `'viewport'` mode.
 
 **Key behavior (`'item'` mode):**
@@ -464,6 +468,7 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 | `defaultItemSize` / `defaultColumnWidth` | `number` | `40 / 100` | Estimate for dynamic items/columns. |
 | `debug` | `boolean` | `false` | Enable debug visualization. |
 | `role` | `string` | - | ARIA role for the container. Defaults based on direction. |
+| `keyboardActivation` | `'auto' \| 'item' \| 'viewport'` | `'auto'` | How the keyboard interacts with the content. `'auto'` uses the roving item model for the roles that publish an active descendant (`listbox`, `menu`, `tree`) and viewport scrolling for everything else, including the default `grid` role of a two-axis list. `'item'` always tracks an active item; `'viewport'` never does. |
 | `ariaLabel` / `ariaLabelledby` | `string` | - | Accessibility labels for the container (the container role becomes `region` when either is set). |
 | `itemRole` | `string` | - | ARIA role for items. Defaults based on `role`. |
 
@@ -502,13 +507,14 @@ Allows axis-specific alignment in `scrollToIndex`.
 |-------|---------|-------------|
 | `scroll` | `ScrollDetails<T>` | Emitted on every scroll-details change once hydrated. See [ScrollDetails](#scrolldetails). |
 | `visibleRangeChange` | `{ start, end, colStart, colEnd }` | Emitted when the rendered range changes, and once on hydration. `start`/`colStart` are inclusive and `end`/`colEnd` exclusive, matching [ScrollDetails](#scrolldetails) `range`/`columnRange`. |
-| `load` | `'vertical' \| 'horizontal'` | Emitted when the scroll position comes within `loadDistance` (DU) of the end on that axis; suppressed while `loading` is `true`. |
+| `load` | `'vertical' \| 'horizontal'`, `LoadDetails` | Emitted when the scroll position comes within `loadDistance` (DU) of the end on that axis; suppressed while `loading` is `true` and while the axis is flinging faster than `flingVelocity`. The second argument carries `{ velocity, direction }` (`velocity` in VU/ms, `direction` `'start' \| 'end' \| null`). |
+| `itemActivate` | `index: number`, `item: T \| undefined` | Emitted when the active item is activated with `Enter`/`Space`, or from an explicit `handleItemActivate(index)` call (e.g. a click in the item slot). Only emitted in the item activation model. |
 
 `VirtualScrollTable` emits the same three events. `VirtualScrollMasonry` emits `scroll` with `MasonryScrollDetails` (single vertical axis).
 
 ### Slots
 
-- `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets - type the array as `(T | undefined)[]` to model that), `index`, `getItemAriaProps`, `getCellAriaProps`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `offset`.
+- `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets - type the array as `(T | undefined)[]` to model that), `index`, `getItemAriaProps`, `getCellAriaProps`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `isActive`, `offset`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
 - `loading`: Content rendered at the end while loading. The slot is always rendered when provided - it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false - so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is actually expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
 - `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.
@@ -529,6 +535,9 @@ The following properties and methods are available on the `VirtualScroll` compon
 #### Properties
 - **All Props**: All properties defined in [Props](#props) are available on the instance.
 - `scrollDetails`: Full reactive state of the virtual scroll system. See [ScrollDetails](#scrolldetails).
+- `activeIndex`: Index of the item tracked by keyboard navigation, `-1` when none.
+- `setActiveIndex(index)`: Sets (`null` clears) the active item without scrolling, so a click or an external selection can be synced in.
+- `handleItemActivate(index)`: Marks an item active and emits `itemActivate` - wire it to your click handler.
 - `columnRange`: Information about the current visible range of columns. See [ColumnRange](#columnrange).
 - `wrapperRole` / `cellRole`: The ARIA roles currently applied to the items wrapper and its cells.
 - `isHydrated`: `true` when the component is mounted and hydrated.
