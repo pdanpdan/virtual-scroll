@@ -1,5 +1,36 @@
 # Changelog
 
+# [2.0.0](https://github.com/pdanpdan/virtual-scroll/compare/v1.0.0...v2.0.0) (2026-09-19)
+
+* refactor(virtual-scroll)!: move sticky pinning into useStickyExtension ([b3b1217](https://github.com/pdanpdan/virtual-scroll/commit/b3b1217b71453a1d7ee4b0be0e4fb2084bcf2353))
+
+### Bug Fixes
+
+* **playground:** insert a dragged row where the marker is ([93a0ba2](https://github.com/pdanpdan/virtual-scroll/commit/93a0ba288b3b8088b5d1305b029a2b9e18651241))
+* **playground:** keep highlighted code from becoming markup ([999d000](https://github.com/pdanpdan/virtual-scroll/commit/999d00010d878ab61e95ff187da4c7269719e330)), closes [#x3C](https://github.com/pdanpdan/virtual-scroll/issues/x3C) [#x3C](https://github.com/pdanpdan/virtual-scroll/issues/x3C)
+* **playground:** stop shadowing the built-in Record type ([8bf0bb8](https://github.com/pdanpdan/virtual-scroll/commit/8bf0bb83ed875a629104ed7c4766c90d49a6ed7f))
+* **playground:** tile the layout switcher's grid cells ([5c35446](https://github.com/pdanpdan/virtual-scroll/commit/5c354465494007ec1328cb0b242eec0267d183ae))
+* **virtual-scroll:** create the live region outside the template ([d209307](https://github.com/pdanpdan/virtual-scroll/commit/d2093074ade8df8601902f438081b4b40c13a159))
+* **virtual-scroll:** keep measured content under the pointer during a drag ([3856039](https://github.com/pdanpdan/virtual-scroll/commit/3856039df399a2f6d9030c6a100dcbe96db7bd07))
+* **virtual-scroll:** type the exposed active-item members on the instance ([07f6aa6](https://github.com/pdanpdan/virtual-scroll/commit/07f6aa67c8a7afe6b4f4da127753defda3faaf12))
+
+### Features
+
+* **playground:** add a layout switcher example ([5325d37](https://github.com/pdanpdan/virtual-scroll/commit/5325d37ec149ea57cf8878e118e322225f96992d))
+* **playground:** generate the active item, load payload and snapshots ([225a4b8](https://github.com/pdanpdan/virtual-scroll/commit/225a4b8737e9bf8ebc12f481e8aa083cb98fa110))
+* **virtual-scroll:** accept reactive props in the keyboard composable ([42198c3](https://github.com/pdanpdan/virtual-scroll/commit/42198c32c98b4066c629961c14fbf55c0b556fa1))
+* **virtual-scroll:** add the lean ./core entry ([a2036e2](https://github.com/pdanpdan/virtual-scroll/commit/a2036e285a7a70e8cfd954719b722cb5efa966b2))
+* **virtual-scroll:** load in the scroll direction and add scroll snapshots ([57b53b3](https://github.com/pdanpdan/virtual-scroll/commit/57b53b3b2c2c2fcf0e7f16419ecf556750a5f38e))
+* **virtual-scroll:** track an active item for keyboard navigation ([9a08d0a](https://github.com/pdanpdan/virtual-scroll/commit/9a08d0a0d00b503bf8c44e6e2b0fe9c8a499ec3d))
+
+### BREAKING CHANGES
+
+* sticky pinning now requires `useStickyExtension()`. A
+  `useVirtualScroll` consumer that sets `stickyIndices` without the extension keeps
+  the layout offsets but no longer keeps the previous sticky item rendered or marks
+  items active. `VirtualScroll`, `VirtualScrollTable` and the masonry component
+  already wire the extension, so their behaviour is unchanged.
+
 # [1.0.0](https://github.com/pdanpdan/virtual-scroll/compare/v0.13.2...v1.0.0) (2026-09-12)
 
 * refactor(virtual-scroll)!: rename getColIndexAt to getColumnIndexAt ([f16ec72](https://github.com/pdanpdan/virtual-scroll/commit/f16ec72bf0a72a405eac5204f3a85d4ab2af05ab))
