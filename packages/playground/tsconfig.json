@@ -28,19 +28,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "references": [
-    {
-      "path": "../virtual-scroll"
-    }
-  ],
   "include": [
     "**/*.ts",
     "**/*.vue",
     "**/*.json",
     "env.d.ts",
     "../virtual-scroll/src/**/*.ts",
-    "../virtual-scroll/src/**/*.vue",
-    "../virtual-scroll/tests/**/*.test.ts"
+    "../virtual-scroll/src/**/*.vue"
   ],
   "exclude": [
     "node_modules",
