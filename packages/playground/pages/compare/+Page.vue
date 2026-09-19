@@ -46,11 +46,11 @@
       <tbody>
         <tr>
           <td class="font-bold whitespace-nowrap">@pdanpdan/virtual-scroll</td>
-          <td><code>1.0.0</code></td>
-          <td>2026-09-12</td>
+          <td><code>2.0.0</code></td>
+          <td>2026-09-19</td>
           <td>12</td>
-          <td>58.8 / 18.3 kB</td>
-          <td>Component + composables + extensions</td>
+          <td>64.1 / 20.2 kB</td>
+          <td>Component + composables + extensions, plus a lean <code>/core</code> entry</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">vue-virtual-scroller</td>
@@ -122,8 +122,9 @@
     <code>@tanstack/virtual-core</code> it depends on, and for <code>vlist</code> it is
     <code>vlist-vue</code>'s <code>useVList</code>, which through <code>vlist/config</code> pulls in every one
     of its seventeen plugins &mdash; importing the core and plugins by hand instead is 10.2&nbsp;kB gzip for
-    the base and 12.2&nbsp;kB with the scrollbar. Ours covers all six built-in extensions; the
-    <code>useVirtualScroll</code> engine alone, for writing your own markup, is 10.5&nbsp;kB gzip.
+    the base and 12.2&nbsp;kB with the scrollbar. Ours covers all six built-in extensions; the lean
+    <code>/core</code> entry is 15.2&nbsp;kB gzip, and the <code>useVirtualScroll</code> engine alone, for
+    writing your own markup, is 10.2&nbsp;kB.
     <code>vue-cerious-scroll</code> bundles its runtime dependency
     (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
   </p>
@@ -560,9 +561,9 @@
         first-class modes (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also one of the larger
-        bundles here &mdash; 18.3&nbsp;kB gzip for the component, behind only the two APIs that ship their
-        whole plugin set, and the engine on its own is 10.5&nbsp;kB &mdash; and at 12 stars it has no
-        community to fall back on.
+        bundles here &mdash; 20.2&nbsp;kB gzip for the component, behind only the two APIs that ship their
+        whole plugin set, though its lean <code>/core</code> entry drops that to 15.2&nbsp;kB and the engine
+        alone is 10.2&nbsp;kB &mdash; and at 12 stars it has no community to fall back on.
       </li>
       <li>
         <strong>@ceriousdevtech/vue-cerious-scroll</strong> &mdash; the only other Vue entry that ships real
