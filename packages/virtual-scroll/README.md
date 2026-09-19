@@ -330,7 +330,7 @@ Handles pointer-based scrolling, inertia animation, and mouse wheel events for c
 Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtual scroll container, either by scrolling the viewport or by moving a roving active item.
 
 **Config:**
-- `props`: Full component props.
+- `props`: Props of the list being navigated - a plain object, a `Ref` or a getter, so bounds, axis and column count stay live when the configuration is derived.
 - `scrollDetails`: Reactive [ScrollDetails](#scrolldetails).
 - `scrollToIndex`: Method to scroll to a specific index.
 - `scrollToOffset`: Method to scroll to a pixel position. For the `End` key the composable requests extra range beyond the virtual content end (engine `endExtraX` / `endExtraY` options), so an always-rendered loading slot below the items stays reachable.

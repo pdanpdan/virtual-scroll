@@ -3632,7 +3632,7 @@ const vs = useVirtualScroll(props, [
               <tr><th class="w-1/4">Property</th><th class="w-1/4">Type</th><th>Description</th></tr>
             </thead>
             <tbody class="text-xs opacity-90">
-              <tr><td><code>props</code></td><td><code><a href="#virtual-scroll-props" class="link link-primary">VirtualScrollProps</a></code></td><td>Virtual scroll configuration.</td></tr>
+              <tr><td><code>props</code></td><td><code><a href="#virtual-scroll-props" class="link link-primary">VirtualScrollProps</a></code> or a ref/getter</td><td>Virtual scroll configuration; pass a ref or getter when it is derived, so bounds, axis and column count stay live.</td></tr>
               <tr><td><code>isDynamicItemSize</code></td><td><code>boolean</code></td><td>Whether items have dynamic heights/widths.</td></tr>
               <tr><td><code>isDynamicColumnWidth</code></td><td><code>boolean</code></td><td>Whether columns have dynamic widths.</td></tr>
               <tr><td><code>defaultSize</code></td><td><code>number</code></td><td>Fallback size for items before they are measured.</td></tr>
