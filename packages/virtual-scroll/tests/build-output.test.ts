@@ -2,8 +2,12 @@ import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import { mount } from '@vue/test-utils';
 import { build } from 'vite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { nextTick } from 'vue';
+
+import { setupMocks } from './test-helper';
 
 const pkgRoot = resolve(__dirname, '..');
 const distDir = resolve(pkgRoot, 'dist');
@@ -84,6 +88,39 @@ describe('build output layout', () => {
     expect(typeof internals.displayToVirtual).toBe('function');
     expect(typeof internals.MasonryLayout).toBe('function');
     expect(typeof internals.useVirtualScrollSizes).toBe('function');
+  });
+
+  it('builds the lean entry without the optional wiring', async () => {
+    setupMocks();
+
+    const props = {
+      items: Array.from({ length: 100 }, (_, id) => ({ id })),
+      itemSize: 50,
+      // Accepted but not implemented by the lean entry.
+      virtualScrollbar: true,
+      snap: 'start' as const,
+      stickyIndices: [ 0 ],
+    };
+
+    const full = await import(pathToFileURL(resolve(distDir, 'index.mjs')).href) as { VirtualScroll: never; };
+    const core = await import(pathToFileURL(resolve(distDir, 'core.mjs')).href) as { VirtualScroll: never; };
+
+    const fullWrapper = mount(full.VirtualScroll, { props, slots: { item: '<div class="row" />' } });
+    const coreWrapper = mount(core.VirtualScroll, { props, slots: { item: '<div class="row" />' } });
+    await nextTick();
+    await nextTick();
+
+    // Both virtualize the same window.
+    expect(fullWrapper.findAll('.virtual-scroll-item').length).toBeGreaterThan(0);
+    expect(coreWrapper.findAll('.virtual-scroll-item').length).toBe(fullWrapper.findAll('.virtual-scroll-item').length);
+    expect(coreWrapper.find('.virtual-scroll-item').attributes('style')).toBe(fullWrapper.find('.virtual-scroll-item').attributes('style'));
+
+    // ...but only the full entry renders the custom scrollbars.
+    expect(fullWrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(true);
+    expect(coreWrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(false);
+
+    fullWrapper.unmount();
+    coreWrapper.unmount();
   });
 
   it('keeps every dist path declared in the manifest present in the build output', () => {
