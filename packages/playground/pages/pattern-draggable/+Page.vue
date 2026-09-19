@@ -38,7 +38,13 @@ const {
   onScroll,
 } = useExampleScroll();
 
+/** Distance from an edge of the list that starts auto-scrolling, in px. */
+const AUTO_SCROLL_EDGE = 60;
+
 let scrollInterval: ReturnType<typeof setInterval> | null = null;
+/** Last pointer position of the drag - the rows under it move while the list auto-scrolls. */
+let dragPointer: { x: number; y: number; } | null = null;
+let dragContainer: HTMLElement | null = null;
 
 function stopAutoScroll() {
   if (scrollInterval !== null) {
@@ -47,17 +53,67 @@ function stopAutoScroll() {
   }
 }
 
+/**
+ * Resolves the row under a viewport point.
+ *
+ * Rows unmount as they leave the window and the content shifts under a stationary
+ * pointer while auto-scrolling, so the pointer - not the last event target - is the
+ * only reliable way to tell which row is being pointed at.
+ *
+ * @param clientX - Pointer x in viewport coordinates.
+ * @param clientY - Pointer y in viewport coordinates.
+ * @returns The row index under the pointer, or `null` when it is not over a row.
+ */
+function rowIndexAt(clientX: number, clientY: number): number | null {
+  const row = document.elementFromPoint(clientX, clientY)?.closest<HTMLElement>('[data-row-index]');
+  const raw = row?.dataset.rowIndex;
+  return raw === undefined ? null : Number(raw);
+}
+
+/**
+ * Marks the row under the pointer as the drop target and keeps the auto-scroll
+ * band up to date.
+ *
+ * @param clientX - Pointer x in viewport coordinates.
+ * @param clientY - Pointer y in viewport coordinates.
+ */
+function updateDragTarget(clientX: number, clientY: number) {
+  dragPointer = { x: clientX, y: clientY };
+  dropTargetIndex.value = rowIndexAt(clientX, clientY);
+
+  if (!dragContainer) {
+    return;
+  }
+  const rect = dragContainer.getBoundingClientRect();
+  if (clientY < rect.top + AUTO_SCROLL_EDGE) {
+    startAutoScroll('up');
+  } else if (clientY > rect.bottom - AUTO_SCROLL_EDGE) {
+    startAutoScroll('down');
+  } else {
+    stopAutoScroll();
+  }
+}
+
 function startAutoScroll(direction: 'up' | 'down') {
   if (scrollInterval !== null) {
     return;
   }
   scrollInterval = setInterval(() => {
-    if (!virtualScrollRef.value) {
+    const point = dragPointer;
+    if (!point) {
+      stopAutoScroll();
       return;
     }
-    const { scrollOffset } = virtualScrollRef.value.scrollDetails;
+    // The rows move under a still pointer, so the target is re-resolved every step.
+    updateDragTarget(point.x, point.y);
+
+    const list = virtualScrollRef.value;
+    if (!list) {
+      return;
+    }
+    const { scrollOffset } = list.scrollDetails;
     const delta = direction === 'up' ? -10 : 10;
-    virtualScrollRef.value.scrollToOffset(null, scrollOffset.y + delta, { behavior: 'auto' });
+    list.scrollToOffset(null, scrollOffset.y + delta, { behavior: 'auto' });
   }, 16);
 }
 
@@ -91,40 +147,36 @@ function handleDragStart(index: number, event: DragEvent) {
 
 /**
  * Handles an item being dragged over another item.
- *
- * @param index - The index of the item being dragged over.
  */
-function handleDragOver(index: number, event: DragEvent) {
-  dropTargetIndex.value = index;
-
-  // Auto-scroll logic
-  const container = (event.currentTarget as HTMLElement).closest('.virtual-scroll-container');
-  if (container) {
-    const rect = container.getBoundingClientRect();
-    const threshold = 60;
-    if (event.clientY < rect.top + threshold) {
-      startAutoScroll('up');
-    } else if (event.clientY > rect.bottom - threshold) {
-      startAutoScroll('down');
-    } else {
-      stopAutoScroll();
-    }
-  }
+function handleDragOver(event: DragEvent) {
+  dragContainer = (event.currentTarget as HTMLElement).closest('.virtual-scroll-container');
+  updateDragTarget(event.clientX, event.clientY);
 }
 
 /**
  * Handles the drop event to reorder the list.
+ *
+ * The row the marker sits on ends up one place lower in the array, because removing
+ * the dragged row shifts every row after it - so the insertion index has to move with it.
+ *
+ * @param event - The native drop event.
  */
-function handleDrop() {
+function handleDrop(event: DragEvent) {
   stopAutoScroll();
-  if (draggedIndex.value !== null && dropTargetIndex.value !== null) {
+  const from = draggedIndex.value;
+  const to = rowIndexAt(event.clientX, event.clientY) ?? dropTargetIndex.value;
+
+  if (from !== null && to !== null && from !== to) {
     const list = [ ...items.value ];
-    const [ draggedItem ] = list.splice(draggedIndex.value, 1);
-    list.splice(dropTargetIndex.value, 0, draggedItem);
+    const [ draggedItem ] = list.splice(from, 1);
+    list.splice(to > from ? to - 1 : to, 0, draggedItem);
     items.value = list;
   }
+
   draggedIndex.value = null;
   dropTargetIndex.value = null;
+  dragPointer = null;
+  dragContainer = null;
 }
 
 /**
@@ -133,6 +185,8 @@ function handleDrop() {
 function handleDragEnd() {
   draggedIndex.value = null;
   dropTargetIndex.value = null;
+  dragPointer = null;
+  dragContainer = null;
   stopAutoScroll();
 }
 </script>
@@ -190,18 +244,22 @@ function handleDragEnd() {
         <div
           role="button"
           tabindex="0"
-          class="example-vertical-item py-2 outline-none bg-base-100 focus-visible:bg-base-300"
-          :class="{
-            'opacity-30': draggedIndex === index,
-            'border-t-4 border-t-primary': dropTargetIndex === index && draggedIndex !== index,
-          }"
+          class="example-vertical-item relative py-2 outline-none bg-base-100 focus-visible:bg-base-300"
+          :class="{ 'opacity-30': draggedIndex === index }"
+          :data-row-index="index"
           @dragstart="handleDragStart(index, $event)"
-          @dragover.prevent="handleDragOver(index, $event)"
+          @dragover.prevent="handleDragOver($event)"
           @drop="handleDrop"
           @dragend="handleDragEnd"
           @keydown.enter.prevent
           @keydown.space.prevent
         >
+          <!-- An overlay, so marking a row never changes its measured height mid-drag. -->
+          <span
+            v-if="dropTargetIndex === index && draggedIndex !== index"
+            class="absolute inset-x-0 -top-px h-0.5 bg-primary"
+            aria-hidden="true"
+          />
           <div
             class="size-10 rounded-lg me-4 flex items-center justify-center text-white font-bold shadow-sm"
             :style="{ backgroundColor: item.color }"
@@ -235,12 +293,12 @@ function handleDragEnd() {
       <ImplementationGuide>
         <p>
           Reordering a list whose rows are virtualized means only a handful of rows are ever in the DOM, so a drag can neither
-          start from nor drop onto an element that is not currently mounted. The reliable approach is to keep the whole
-          operation in <em>data</em>, not in the DOM: each mounted row reports its own <code>index</code> from the slot, that
-          index is the drop target whenever the pointer is over the row, auto-scrolling mounts the rows in between, and the
-          reorder itself is a single array splice performed on <code>drop</code>. Because rows recycle as you scroll, the two
-          pieces of state that matter - which row is being dragged and which row is the current target - are plain refs that
-          survive every unmount, and the virtualization engine re-ranges around the mutated array for you.
+          start from nor drop onto an element that is not currently mounted. Keep the operation in <em>data</em>: the drag
+          carries an index, the <em>pointer</em> decides which row it is over, auto-scrolling mounts the rows in between, and the
+          reorder is a single array splice on <code>drop</code>. Rows recycle and the content shifts under a stationary pointer
+          while auto-scrolling, so the target is resolved from the pointer position instead of being remembered from the last
+          event - and the two refs that hold the drag (which row is carried, which row is marked) survive every unmount while
+          the engine re-ranges around the mutated array.
         </p>
 
         <h3>1. Make a row (or its handle) a drag source and record the origin</h3>
@@ -286,18 +344,29 @@ function onDragStart(index: number, e: DragEvent) {
   }
 }
 
-function onDragOver(index: number, e: DragEvent) {
+// The pointer decides the target, not the event target: rows unmount, and the
+// content moves under a still pointer while auto-scrolling.
+function rowIndexAt(x: number, y: number) {
+  const row = document.elementFromPoint(x, y)?.closest&lt;HTMLElement>(&#x27;[data-row-index]&#x27;);
+  return row ? Number((row as HTMLElement).dataset.rowIndex) : null;
+}
+
+function onDragOver(e: DragEvent) {
   e.preventDefault(); // required or the drop is rejected
-  dropTargetIndex.value = index; // the row under the cursor becomes the target
+  dropTargetIndex.value = rowIndexAt(e.clientX, e.clientY); // the row under the cursor
   edgeAutoScroll(e);
 }
 
-function onDrop() {
+function onDrop(e: DragEvent) {
   stopAutoScroll();
-  if (draggedIndex.value !== null &amp;&amp; dropTargetIndex.value !== null) {
+  const from = draggedIndex.value;
+  const to = rowIndexAt(e.clientX, e.clientY) ?? dropTargetIndex.value;
+  if (from !== null &amp;&amp; to !== null &amp;&amp; from !== to) {
     const next = [ ...list.value ];
-    const [ moved ] = next.splice(draggedIndex.value, 1);
-    next.splice(dropTargetIndex.value, 0, moved);
+    const [ moved ] = next.splice(from, 1);
+    // The marker sits above its row, and removing the carried row shifts every
+    // row below it up by one, so a downward move inserts one index earlier.
+    next.splice(to > from ? to - 1 : to, 0, moved);
     list.value = next; // fresh array identity -> reactive re-range by engine
   }
   draggedIndex.value = dropTargetIndex.value = null;
@@ -313,13 +382,13 @@ function onDragEnd() {
         <h3>2. Make the drop target an index, not a DOM element</h3>
         <p>
           An unmounted row can never receive <code>dragover</code>, so the only rows you can drop onto are the ones currently in
-          the window - and their identity can change under your cursor as the list scrolls. Because every mounted row already
-          knows its position from the slot, the simplest correct target is that <code>index</code>: on <code>dragover.prevent</code>
-          (the <code>.prevent</code> is required or the browser rejects the drop) set <code>dropTargetIndex</code> to the row's
-          index. There is no offset arithmetic because the library hands each row its own index. An alternative when you want a
-          whole-list drop zone is to compute the target from the pointer instead: the instance exposes
-          <code>getRowIndexAt(offset)</code>/<code>scrollToOffset</code> helpers - useful with pointer events, but unnecessary
-          when each row can report its index directly.
+          the window - and which row sits under the pointer changes as the list scrolls, even while the pointer is still. Have
+          every mounted row publish its index (<code>data-row-index="index"</code>), then resolve the target from the pointer
+          with <code>document.elementFromPoint</code>: the row under the cursor is the one the user means, whether or not it was
+          mounted when the drag started. On <code>dragover.prevent</code> (the <code>.prevent</code> is required or the browser
+          rejects the drop) refresh that resolution - and re-run it from the auto-scroll tick too, otherwise the marker, and the
+          drop that follows it, lag behind the rows moving underneath. The instance's <code>getRowIndexAt(offset)</code> is the
+          arithmetic equivalent when every row is the same height; the DOM lookup needs no size assumptions at all.
         </p>
 
         <CodeBlock
@@ -336,15 +405,15 @@ function onDragEnd() {
     &lt;template #item=&quot;{ item, index }&quot;>
       &lt;div
         class=&quot;row&quot;
-        :class=&quot;{
-          'is-dragging': draggedIndex === index,
-          'is-target': dropTargetIndex === index &amp;&amp; draggedIndex !== index,
-        }&quot;
+        :class=&quot;{ 'is-dragging': draggedIndex === index }&quot;
+        :data-row-index=&quot;index&quot;
         @dragstart=&quot;onDragStart(index, $event)&quot;
-        @dragover.prevent=&quot;onDragOver(index, $event)&quot;
+        @dragover.prevent=&quot;onDragOver($event)&quot;
         @drop=&quot;onDrop&quot;
         @dragend=&quot;onDragEnd&quot;
       >
+        &lt;!-- Overlay marker: a border would change the row's measured height mid-drag. -->
+        &lt;span v-if=&quot;dropTargetIndex === index &amp;&amp; draggedIndex !== index&quot; class=&quot;row-marker&quot; aria-hidden=&quot;true&quot; />
         &amp;lt;!-- Only the handle is draggable; the row's handlers fire via bubbling.
              Keep selectable text/images out of the drag surface. -->
         &lt;span class=&quot;handle&quot; draggable=&quot;true&quot; aria-hidden=&quot;true&quot;>⠿&lt;/span>
@@ -371,41 +440,47 @@ function onDragEnd() {
           code="// Auto-scroll while the pointer rests in the top/bottom edge zone. Unmounted
 // rows can't be drop targets, so we scroll (which mounts more rows) until the
 // wanted index comes under the cursor. `virtualScrollRef` is the component ref.
-let raf = 0;
+let timer: ReturnType&lt;typeof setInterval&gt; | null = null;
+let pointer = { x: 0, y: 0 };
 
 function edgeAutoScroll(e: DragEvent) {
+  pointer = { x: e.clientX, y: e.clientY };
   const host = (e.currentTarget as HTMLElement).closest('.virtual-scroll-container');
   const rect = host?.getBoundingClientRect();
-  if (!rect) return;
+  if (!rect || timer) return;
   const zone = 60;
-  const delta = e.clientY &lt; rect.top + zone ? -12 : e.clientY > rect.bottom - zone ? 12 : 0;
-  cancelAnimationFrame(raf);
+  const delta = pointer.y &lt; rect.top + zone ? -10 : pointer.y > rect.bottom - zone ? 10 : 0;
   if (delta === 0) return;
-  raf = requestAnimationFrame(() => {
+  timer = setInterval(() => {
+    // Rows move under a still pointer, so the target is re-resolved on every step -
+    // requestAnimationFrame is throttled in background tabs, an interval is not.
+    dropTargetIndex.value = rowIndexAt(pointer.x, pointer.y);
     const vs = virtualScrollRef.value;
     if (!vs) return;
     const y = vs.scrollDetails.scrollOffset.y; // current virtual offset
     vs.scrollToOffset(null, y + delta, { behavior: 'auto' }); // nudge the axis
-  });
+  }, 16);
 }
 
 function stopAutoScroll() {
-  cancelAnimationFrame(raf);
-  raf = 0;
+  if (timer) clearInterval(timer);
+  timer = null;
 }"
         />
 
         <h3>4. Commit one splice on drop, then clean up</h3>
         <p>
           Reorder only on <code>drop</code>, never live while hovering: if you mutated the array on every <code>dragover</code>,
-          the indices you are comparing would drift mid-drag. On drop, remove the item at <code>draggedIndex</code> and insert it
-          at <code>dropTargetIndex</code>, assigning a fresh array so the change is reactive; the engine re-ranges around the
-          current scroll and re-measures, so the visual position is preserved. Because a <code>drop</code> can be cancelled (Esc,
-          leaving the window), also reset both refs and stop any auto-scroll in <code>dragend</code>. Add lightweight feedback
-          from the same state: dim the carried row (<code>draggedIndex</code>) and show an insertion marker on the target row
-          (<code>dropTargetIndex</code>). If your rows are all the same height, sizing them arithmetically with a numeric
-          <code>item-size</code> makes offsets deterministic and the offset-based drop-zone alternative exact - but drag reorder
-          itself is agnostic to measured vs. fixed rows.
+          the indices you are comparing would drift mid-drag. On drop, remove the carried item and insert it at the marked row -
+          remembering that the removal shifts every later row up by one, so a downward move inserts at
+          <code>target - 1</code> and an upward move at <code>target</code>. Assign a fresh array so the change is reactive; the
+          engine re-ranges around the current scroll and re-measures, so the visual position is preserved. Because a
+          <code>drop</code> can be cancelled (Esc, leaving the window), also reset both refs and stop any auto-scroll in
+          <code>dragend</code>. Add lightweight feedback from the same state: dim the carried row
+          (<code>draggedIndex</code>) and mark the target row (<code>dropTargetIndex</code>) with an absolutely positioned
+          overlay - a border would change a measured row's height and re-run the layout you are dragging inside. If your rows are
+          all the same height, sizing them arithmetically with a numeric <code>item-size</code> makes offsets deterministic and
+          <code>getRowIndexAt</code> exact - but drag reorder itself is agnostic to measured vs. fixed rows.
         </p>
 
         <CodeBlock
@@ -426,9 +501,13 @@ function stopAutoScroll() {
 .row.is-dragging {
   opacity: 0.3;
 } /* the row being carried */
-.row.is-target {
-  border-top: 3px solid oklch(55% 0.2 260);
-} /* drop marker */"
+.row-marker {
+  position: absolute;
+  inset-inline: 0;
+  top: -1px;
+  height: 3px;
+  background: oklch(55% 0.2 260);
+} /* drop marker: an overlay, never a border */"
         />
       </ImplementationGuide>
     </template>
