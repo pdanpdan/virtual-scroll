@@ -27,6 +27,7 @@ beforeAll(async () => {
   rmSync(distDir, { recursive: true, force: true });
   // pin root: vitest workers run from the repo root, and vite derives root from cwd
   await build({ configFile: resolve(pkgRoot, 'vite.config.ts'), root: pkgRoot, logLevel: 'silent' });
+  await build({ configFile: resolve(pkgRoot, 'vite.config.core.ts'), root: pkgRoot, logLevel: 'silent' });
   await build({ configFile: resolve(pkgRoot, 'vite.config.umd.ts'), root: pkgRoot, logLevel: 'silent' });
 }, 120_000);
 

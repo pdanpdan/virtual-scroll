@@ -14,7 +14,7 @@ import type {
   VirtualScrollComponentProps,
   VirtualScrollProps,
 } from '../types';
-import type { VNodeChild } from 'vue';
+import type { Component, VNodeChild } from 'vue';
 
 import { computed, nextTick, ref, toRefs, useId, watch } from 'vue';
 
@@ -38,7 +38,7 @@ import {
   calculateItemStyle,
   displayToVirtual,
 } from '../utils/virtual-scroll-logic';
-import VirtualScrollbar from './VirtualScrollbar.vue';
+import VirtualScrollbars from './VirtualScrollbars.vue';
 
 export interface Props<T = unknown> extends VirtualScrollComponentProps<T> {}
 
@@ -119,15 +119,32 @@ const instanceId = useId();
  */
 const containerId = computed(() => `vs-container-${ instanceId }`);
 
+/**
+ * `true` in the lean `./core` entry, where the optional wiring (keyboard,
+ * custom scrollbars, snapping, sticky items, infinite loading and prepend
+ * restoration) is compiled out. Replaced by the bundler; `false` in the full
+ * build, in tests and in dev.
+ */
+// eslint-disable-next-line no-undef -- injected by the bundler (see src/globals.d.ts)
+const IS_CORE_BUILD = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD__;
+
+/**
+ * Extensions wired by the component: the two the engine relies on for correct
+ * behaviour (RTL detection and coordinate scaling), plus the optional ones.
+ */
 const extensions = [
   useRtlExtension<T>(),
-  useSnappingExtension<T>(),
-  useStickyExtension<T>(),
-  useInfiniteLoadingExtension<T>({
-    onLoad: (dir) => emit('load', dir),
-  }),
-  usePrependRestorationExtension<T>(),
   useCoordinateScalingExtension<T>(),
+  ...(IS_CORE_BUILD
+    ? []
+    : [
+      useSnappingExtension<T>(),
+      useStickyExtension<T>(),
+      useInfiniteLoadingExtension<T>({
+        onLoad: (dir) => emit('load', dir),
+      }),
+      usePrependRestorationExtension<T>(),
+    ]),
 ];
 
 const measuredPaddingStart = ref(0);
@@ -231,12 +248,15 @@ const {
 
 const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
 
-const showVirtualScrollbars = computed(() => {
-  if (isWindowContainer.value) {
-    return false;
-  }
-  return props.virtualScrollbar === true || scaleX.value !== 1 || scaleY.value !== 1;
-});
+/** The scrollbar overlay, or `null` in the lean build. */
+const ScrollbarOverlay: Component | null = IS_CORE_BUILD ? null : VirtualScrollbars;
+
+/** Whether the custom scrollbars are shown instead of the native one. */
+let showVirtualScrollbars = computed(() => false);
+/** Slot props of the vertical scrollbar, or `null` when it is not shown. */
+let verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
+/** Slot props of the horizontal scrollbar, or `null` when it is not shown. */
+let horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
 
 function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: number) {
   const { displayViewportSize } = scrollDetails.value;
@@ -254,25 +274,14 @@ function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: 
   }
 }
 
-const verticalScrollbar = useVirtualScrollbar(computed(() => ({
-  axis: 'vertical' as const,
-  totalSize: renderedHeight.value,
-  position: scrollDetails.value.displayScrollOffset.y,
-  viewportSize: scrollDetails.value.displayViewportSize.height,
-  scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
-  containerId: containerId.value,
-  isRtl: isRtl.value,
-})));
-
-const horizontalScrollbar = useVirtualScrollbar(computed(() => ({
-  axis: 'horizontal' as const,
-  totalSize: renderedWidth.value,
-  position: scrollDetails.value.displayScrollOffset.x,
-  viewportSize: scrollDetails.value.displayViewportSize.width,
-  scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
-  containerId: containerId.value,
-  isRtl: isRtl.value,
-})));
+if (!IS_CORE_BUILD) {
+  showVirtualScrollbars = computed(() => {
+    if (isWindowContainer.value) {
+      return false;
+    }
+    return props.virtualScrollbar === true || scaleX.value !== 1 || scaleY.value !== 1;
+  });
+}
 
 const slotColumnRange = computed(() => {
   if (props.direction !== 'both') {
@@ -386,24 +395,29 @@ watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtua
   }
 }, { immediate: true });
 
-const { handleKeyDown } = useVirtualScrollKeyboard({
-  props,
-  virtualScrollProps,
-  scrollDetails,
-  isRtl,
-  scrollToIndex,
-  scrollToOffset,
-  stopProgrammaticScroll,
-  getRowHeight,
-  getColumnWidth,
-  getRowOffset,
-  getColumnOffset,
-  getItemOffset,
-  getItemSize,
-  getRowIndexAt,
-  getColumnIndexAt,
-  getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
-});
+/** Keydown handler installed in the full build; `undefined` in the lean build. */
+let handleKeyDown: ((event: KeyboardEvent) => void) | undefined;
+
+if (!IS_CORE_BUILD) {
+  ({ handleKeyDown } = useVirtualScrollKeyboard({
+    props,
+    virtualScrollProps,
+    scrollDetails,
+    isRtl,
+    scrollToIndex,
+    scrollToOffset,
+    stopProgrammaticScroll,
+    getRowHeight,
+    getColumnWidth,
+    getRowOffset,
+    getColumnOffset,
+    getItemOffset,
+    getItemSize,
+    getRowIndexAt,
+    getColumnIndexAt,
+    getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
+  }));
+}
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
@@ -436,69 +450,91 @@ const containerStyle = computed(() => {
  * @param scrollbar - Scrollbar state from useVirtualScrollbar.
  * @returns Props for the scrollbar slot or null if content fits.
  */
-function getScrollbarSlotProps(
-  axis: 'vertical' | 'horizontal',
-  totalSize: number,
-  position: number,
-  viewportSize: number,
-  scrollToOffsetCallback: (offset: number) => void,
-  scrollbar: ReturnType<typeof useVirtualScrollbar>,
-): ScrollbarSlotProps | null {
-  if (totalSize <= viewportSize) {
-    return null;
-  }
+if (!IS_CORE_BUILD) {
+  const verticalScrollbar = useVirtualScrollbar(computed(() => ({
+    axis: 'vertical' as const,
+    totalSize: renderedHeight.value,
+    position: scrollDetails.value.displayScrollOffset.y,
+    viewportSize: scrollDetails.value.displayViewportSize.height,
+    scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
+    containerId: containerId.value,
+    isRtl: isRtl.value,
+  })));
 
-  return {
-    axis,
-    positionPercent: scrollbar.positionPercent.value,
-    viewportPercent: scrollbar.viewportPercent.value,
-    thumbSizePercent: scrollbar.thumbSizePercent.value,
-    thumbPositionPercent: scrollbar.thumbPositionPercent.value,
-    trackProps: scrollbar.trackProps.value,
-    thumbProps: scrollbar.thumbProps.value,
-    scrollbarProps: {
+  const horizontalScrollbar = useVirtualScrollbar(computed(() => ({
+    axis: 'horizontal' as const,
+    totalSize: renderedWidth.value,
+    position: scrollDetails.value.displayScrollOffset.x,
+    viewportSize: scrollDetails.value.displayViewportSize.width,
+    scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
+    containerId: containerId.value,
+    isRtl: isRtl.value,
+  })));
+
+  function getScrollbarSlotProps(
+    axis: 'vertical' | 'horizontal',
+    totalSize: number,
+    position: number,
+    viewportSize: number,
+    scrollToOffsetCallback: (offset: number) => void,
+    scrollbar: ReturnType<typeof useVirtualScrollbar>,
+  ): ScrollbarSlotProps | null {
+    if (totalSize <= viewportSize) {
+      return null;
+    }
+
+    return {
       axis,
-      totalSize,
-      position,
-      viewportSize,
-      scrollToOffset: scrollToOffsetCallback,
-      containerId: containerId.value,
-      isRtl: isRtl.value,
-      ariaLabel: `${ axis === 'vertical' ? 'Vertical' : 'Horizontal' } scroll`,
-    },
-    isDragging: scrollbar.isDragging.value,
-  };
+      positionPercent: scrollbar.positionPercent.value,
+      viewportPercent: scrollbar.viewportPercent.value,
+      thumbSizePercent: scrollbar.thumbSizePercent.value,
+      thumbPositionPercent: scrollbar.thumbPositionPercent.value,
+      trackProps: scrollbar.trackProps.value,
+      thumbProps: scrollbar.thumbProps.value,
+      scrollbarProps: {
+        axis,
+        totalSize,
+        position,
+        viewportSize,
+        scrollToOffset: scrollToOffsetCallback,
+        containerId: containerId.value,
+        isRtl: isRtl.value,
+        ariaLabel: `${ axis === 'vertical' ? 'Vertical' : 'Horizontal' } scroll`,
+      },
+      isDragging: scrollbar.isDragging.value,
+    };
+  }
+
+  verticalScrollbarProps = computed(() => {
+    if (props.direction === 'horizontal') {
+      return null;
+    }
+    const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
+    return getScrollbarSlotProps(
+      'vertical',
+      renderedHeight.value,
+      displayScrollOffset.y,
+      displayViewportSize.height,
+      (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
+      verticalScrollbar,
+    );
+  });
+
+  horizontalScrollbarProps = computed(() => {
+    if (props.direction === 'vertical') {
+      return null;
+    }
+    const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
+    return getScrollbarSlotProps(
+      'horizontal',
+      renderedWidth.value,
+      displayScrollOffset.x,
+      displayViewportSize.width,
+      (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
+      horizontalScrollbar,
+    );
+  });
 }
-
-const verticalScrollbarProps = computed(() => {
-  if (props.direction === 'horizontal') {
-    return null;
-  }
-  const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
-  return getScrollbarSlotProps(
-    'vertical',
-    renderedHeight.value,
-    displayScrollOffset.y,
-    displayViewportSize.height,
-    (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
-    verticalScrollbar,
-  );
-});
-
-const horizontalScrollbarProps = computed(() => {
-  if (props.direction === 'vertical') {
-    return null;
-  }
-  const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
-  return getScrollbarSlotProps(
-    'horizontal',
-    renderedWidth.value,
-    displayScrollOffset.x,
-    displayViewportSize.width,
-    (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
-    horizontalScrollbar,
-  );
-});
 
 const wrapperStyle = computed(() => {
   const isHorizontal = props.direction === 'horizontal';
@@ -902,34 +938,27 @@ defineExpose({
     tabindex="0"
     :role="containerRole"
     v-bind="rootAriaProps"
-    @keydown="handleKeyDown"
+    @keydown="handleKeyDown?.($event)"
     @pointerdown="handlePointerDown"
     @pointermove="handlePointerMove"
     @pointerup="handlePointerUp"
     @pointercancel="handlePointerUp"
   >
-    <div
-      v-if="showVirtualScrollbars"
-      class="virtual-scroll-scrollbar-container"
-      aria-hidden="true"
+    <component
+      :is="ScrollbarOverlay"
+      v-if="ScrollbarOverlay && showVirtualScrollbars"
+      :vertical="verticalScrollbarProps"
+      :horizontal="horizontalScrollbarProps"
+      :viewport-width="scrollDetails.displayViewportSize.width"
+      :viewport-height="scrollDetails.displayViewportSize.height"
+      :offset-x="scrollbarOffset.x"
+      :offset-y="scrollbarOffset.y"
+      :both="direction === 'both'"
     >
-      <div
-        class="virtual-scroll-scrollbar-viewport"
-        :style="{
-          'inlineSize': `${ scrollDetails.displayViewportSize.width }px`,
-          'blockSize': `${ scrollDetails.displayViewportSize.height }px`,
-          'insetInlineStart': `${ -scrollbarOffset.x }px`,
-          'insetBlockStart': `${ -scrollbarOffset.y }px`,
-          '--vsi-scrollbar-has-cross-gap': direction === 'both' ? 1 : 0,
-        }"
-      >
-        <slot v-if="slots.scrollbar && verticalScrollbarProps" name="scrollbar" v-bind="verticalScrollbarProps" />
-        <VirtualScrollbar v-else-if="verticalScrollbarProps" v-bind="verticalScrollbarProps.scrollbarProps" />
-
-        <slot v-if="slots.scrollbar && horizontalScrollbarProps" name="scrollbar" v-bind="horizontalScrollbarProps" />
-        <VirtualScrollbar v-else-if="horizontalScrollbarProps" v-bind="horizontalScrollbarProps.scrollbarProps" />
-      </div>
-    </div>
+      <template v-if="slots.scrollbar" #scrollbar="slotProps">
+        <slot name="scrollbar" v-bind="slotProps" />
+      </template>
+    </component>
 
     <component
       :is="headerTag"
@@ -1037,24 +1066,6 @@ defineExpose({
     &.virtual-scroll--both {
       white-space: nowrap;
     }
-  }
-
-  .virtual-scroll-scrollbar-container {
-    position: sticky;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    inline-size: 100%;
-    block-size: 0;
-    z-index: 30;
-    pointer-events: none;
-    overflow: visible;
-  }
-
-  .virtual-scroll-scrollbar-viewport {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    pointer-events: none;
   }
 
   .virtual-scroll-wrapper {
