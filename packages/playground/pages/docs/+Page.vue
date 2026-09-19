@@ -409,6 +409,24 @@ onUnmounted(() => {
       </div>
       <CodeBlock class="docs-code-block" code="pnpm add @pdanpdan/virtual-scroll" lang="bash" />
       <div class="prose prose-sm @4xl:prose-md max-w-none mt-4 @4xl:mt-6">
+        <p>
+          A lean entry is available for apps that only need virtualization. <code>@pdanpdan/virtual-scroll/core</code> ships the
+          same API with the optional wiring compiled out - no keyboard navigation, custom scrollbars, snapping, sticky items,
+          infinite loading or prepend restoration - together with its own smaller stylesheet:
+        </p>
+      </div>
+      <CodeBlock
+        class="docs-code-block"
+        lang="ts"
+        code="import { VirtualScroll } from &quot;@pdanpdan/virtual-scroll/core&quot;;
+import &quot;@pdanpdan/virtual-scroll/core/style.css&quot;;"
+      />
+      <div class="prose prose-sm @4xl:prose-md max-w-none mt-4 @4xl:mt-6">
+        <p>
+          In that build <code>virtualScrollbar</code>, <code>snap</code>, <code>stickyIndices</code>, <code>loadDistance</code> and
+          <code>restoreScrollOnPrepend</code> are accepted but have no effect; <code>loading</code> still drives the loading slot
+          and <code>aria-busy</code>. Use the package root when you need any of them.
+        </p>
         <p>Basic usage in a Vue component:</p>
       </div>
       <CodeBlock
@@ -931,6 +949,7 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>Roles and attributes are set for you, so screen readers can follow the virtualized content: lists, grids, and also <code>tree</code>, <code>listbox</code> and <code>menu</code> roles.</p>
+        <p>With <a href="#props" class="link link-primary">keyboardActivation</a> in the item model - <code>'auto'</code> selects it for <code>listbox</code>, <code>menu</code> and <code>tree</code> - the container publishes <code>aria-activedescendant</code> pointing at the active item, and a polite live region announces the active position (<code>Item 21 of 100</code>) as it moves. <code>Enter</code>/<code>Space</code> and <code>handleItemActivate(index)</code> emit <code>itemActivate</code>.</p>
         <div class="docs-table-container">
           <table class="docs-table">
             <thead><tr><th>Role Prop</th><th>Default Item Role</th><th>Behavior</th></tr></thead>
@@ -2083,6 +2102,11 @@ scrollToIndex
                 <td>Adjust scroll position to compensate for measurement changes.</td>
               </tr>
               <tr>
+                <td><code class="docs-prop-name">scrollCorrection</code></td>
+                <td><code>Ref&lt;Point&gt;</code></td>
+                <td>Correction the engine applied to the scroll position when sizes above the window changed; extensions and drag emulation use it to keep their own origin in sync.</td>
+              </tr>
+              <tr>
                 <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
                 <td><code>Function</code></td>
                 <td>Resets all measurements and state.</td>
@@ -2500,6 +2524,11 @@ const {
                 <td>Wheel event handler to be bound to the scroll container.</td>
               </tr>
               <tr>
+                <td><code class="docs-prop-name">shiftOrigin</code></td>
+                <td><code>Function</code></td>
+                <td>Moves the origin a drag measures from, so a measurement correction that shifted the content is not undone by the next pointer move. No-op while no drag is in progress.</td>
+              </tr>
+              <tr>
                 <td><a href="#method-stopinertia" class="link font-bold text-secondary">stopInertia</a></td>
                 <td><code>Function</code></td>
                 <td>Immediately stops any active momentum animation.</td>
@@ -2557,7 +2586,7 @@ const {
           <ul class="list-disc ps-5 space-y-1">
             <li><a href="#method-scrolltooffset" class="link font-bold text-secondary">scrollToOffset</a>: Scrolls to a pixel position. For the <code>End</code> key the composable requests extra range (<code>endExtraX</code> / <code>endExtraY</code> options) so the scroll clamp extends past the virtual content (the loading slot below the items).</li>
             <li><code>getLoadingSlotSize</code> (optional): Height of the loading slot. When provided, <code>End</code> includes it in the target so the last item plus the slot fit in the viewport.</li>
-            <li><code>activationMode</code> (optional, accepts a ref or getter): <code>'viewport'</code> (default) scrolls the viewport only and tracks no active item; <code>'item'</code> moves a roving active item and exposes it through <code>activeIndex</code>/<code>isActive</code>/<code>aria-activedescendant</code>. The component picks it per role - see <a href="#props" class="link link-primary">keyboardActivation</a> - because flipping a plain list to the item model would change how every arrow already behaves.</li>
+            <li><code>activationMode</code> (optional, accepts a ref or getter): <code>'viewport'</code> (default) scrolls the viewport only and tracks no active item; <code>'item'</code> moves a roving active item and exposes it through <code>activeIndex</code>/<code>isActive</code>/<code>aria-activedescendant</code>. The component derives it from the container role - see <a href="#props" class="link link-primary">keyboardActivation</a>.</li>
             <li><code>onActivate</code> (optional): Called with the item index when the active item is activated - <code>Enter</code>/<code>Space</code> on the container, or an explicit <code>handleItemActivate</code> call. Never called in <code>'viewport'</code> mode.</li>
             <li>The engine handles it drives - <code>props</code>, <code>scrollDetails</code>, <code>scrollToIndex</code>, <code>stopProgrammaticScroll</code> and the index/offset resolvers (<code>getRowHeight</code>, <code>getRowOffset</code>, <code>getItemOffset</code>, <code>getItemSize</code>, <code>getRowIndexAt</code>, <code>getColumnIndexAt</code>, etc.) - are the ones documented under <a href="#use-virtual-scroll" class="link link-primary">useVirtualScroll</a>.</li>
           </ul>
@@ -2739,10 +2768,11 @@ const { setItemRef } = useVirtualScrollObservers({
             engine state refs in <code>internalState</code> (<code>scrollX</code>/<code>scrollY</code>,
             <code>internalScrollX</code>/<code>internalScrollY</code>, <code>isRtl</code>, <code>isScrolling</code>,
             <code>isProgrammaticScroll</code>, viewport size, <code>scaleX</code>/<code>scaleY</code>, scroll
-            directions, relative scroll); and the engine methods in <code>methods</code>
-            (<code>scrollToIndex</code>, <code>scrollToOffset</code>, <code>updateDirection</code>,
-            <code>getRowIndexAt</code>, <code>getColumnIndexAt</code>, <code>getItemSize</code>,
-            <code>getItemBaseSize</code>, <code>getItemOffset</code>, <code>handleScrollCorrection</code>).
+            directions, relative scroll, and <code>isHydrated</code>); and the engine methods in
+            <code>methods</code> (<code>scrollToIndex</code>, <code>scrollToOffset</code>,
+            <code>updateDirection</code>, <code>getRowIndexAt</code>, <code>getColumnIndexAt</code>,
+            <code>getItemSize</code>, <code>getItemBaseSize</code>, <code>getItemOffset</code>,
+            <code>getItemRawOffset</code>, <code>handleScrollCorrection</code>).
           </p>
         </div>
       </section>
@@ -2849,7 +2879,7 @@ const vs = useVirtualScroll(props, [
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Sticky rows and columns. The behavior lives in the engine and is driven by the <code>stickyIndices</code>, <code>stickyHeader</code> and <code>stickyFooter</code> props; this extension exists so the composable wires it the same way the component does.
+            Sticky rows and columns, driven by the <code>stickyIndices</code>, <code>stickyHeader</code> and <code>stickyFooter</code> props. The extension owns the pinning: it keeps the nearest sticky item above the window rendered through <code>includeIndices</code> and computes <code>isStickyActive</code>/<code>stickyOffset</code> for the items in view. Without it, <code>stickyIndices</code> still reserves the layout offsets but nothing pins.
           </p>
         </div>
 

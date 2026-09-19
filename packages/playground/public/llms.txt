@@ -9,7 +9,7 @@ Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM, so 
 - **Multi-Directional**: `direction` is `vertical`, `horizontal` or `both` (grid).
 - **Sizing**: one number for every item, a per-item function, a repeating array pattern (e.g. `[50, 100]`), or measured from the DOM with `ResizeObserver` (pass `null`/`0`).
 - **Data-less (index-only) rows**: `items` may be a sparse array (`new Array(n)`); holes render from `index` and only the visible window is read - uniform-size lists reach 10M+ rows with flat memory and no per-row data objects.
-- **Sticky Elements**: `stickyIndices` headers that stick and get pushed out by the next one, plus sticky `header`/`footer` slots.
+- **Sticky Elements**: `stickyIndices` headers that stick and get pushed out by the next one, plus sticky `header`/`footer` slots. The pinning is provided by `useStickyExtension()`: with the composable, add it explicitly or `stickyIndices` only reserves the layout offsets.
 - **Scroll Snapping**: `snap` prop (`'auto' | 'start' | 'center' | 'end' | 'next'`) aligns the view after scrolling stops.
 - **Scroll Container**: its own element, or the browser `window`/`body` (`container` prop).
 - **Virtual Scrollbars**: `virtualScrollbar` prop for the built-in bars, or your own through the `scrollbar` slot / `VirtualScrollbar` component.
@@ -31,6 +31,12 @@ scrollbar and container rules live there:
 ```ts
 import '@pdanpdan/virtual-scroll/style.css';
 ```
+
+`@pdanpdan/virtual-scroll/core` is the lean entry for apps that only need virtualization: the same
+API compiled without the optional wiring (keyboard navigation, custom scrollbars, snapping, sticky
+items, infinite loading, prepend restoration), with `@pdanpdan/virtual-scroll/core/style.css`. There
+`virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are accepted
+but inert, and `loading` still drives the loading slot and `aria-busy`.
 
 Import from the package root: components, composables, extension factories and the public types.
 `@pdanpdan/virtual-scroll/VirtualScroll.vue` (and `VirtualScrollTable.vue`,

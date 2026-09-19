@@ -255,18 +255,16 @@ const {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A layout switcher looks like three examples, but it is one: the records, the scroll events and the controls stay
-          identical, and only the <em>virtualization unit</em> changes. The list virtualizes records, the grid virtualizes
-          cells on both axes, and the table virtualizes table rows - which is why the same dataset can be shown three ways
-          without reshaping it.
+          One dataset, three layouts. The records, the scroll event and the controls are shared; only the
+          <em>virtualization unit</em> changes. The list virtualizes records, the grid virtualizes rows of records on both
+          axes, and the table virtualizes table rows.
         </p>
 
         <h3>1. Keep the data in one shape</h3>
         <p>
-          Every view reads the same <code>records</code> array; nothing is pre-grouped into rows or columns. Row grouping is
-          what would otherwise force you to rebuild the data on every switch, and it is exactly the part the library already
-          does: with <code>direction="both"</code> plus <code>column-count</code> the engine derives the cross axis from the
-          item list, and <code>flow-table</code> renders real <code>&lt;tr&gt;</code> elements between spacer rows.
+          Every view reads the same <code>records</code> array. Pre-grouping it into rows would tie the data to one layout;
+          the engine derives rows itself: <code>direction="both"</code> with <code>column-count</code> maps the item list onto
+          a cross axis, and <code>flow-table</code> renders real <code>&lt;tr&gt;</code> elements between spacer rows.
         </p>
 
         <h3>2. Switch the component, keep the contract</h3>
@@ -274,9 +272,8 @@ const {
           The three views share the props that describe the data (<code>items</code>, <code>virtual-scrollbar</code>) and the
           event that reports position (<code>@scroll</code>). Only the geometry props differ: <code>item-size</code> for the
           list, <code>item-size</code>/<code>column-count</code>/<code>column-width</code> for the grid, and the same
-          <code>item-size</code> for the table rows. Because they are swapped with <code>v-if</code>/<code>v-else-if</code>,
-          each switch remounts the view; keep one <code>ref</code> per layout if you want every layout to remember its own
-          position.
+          <code>item-size</code> for the table rows. A switch with <code>v-if</code>/<code>v-else-if</code> remounts the
+          view, so keep one <code>ref</code> per layout if each layout should remember its own position.
         </p>
 
         <CodeBlock
@@ -309,12 +306,11 @@ const {
 /&gt;"
         />
 
-        <h3>3. Let each layout keep its own density</h3>
+        <h3>3. Sizes are inputs, not measurements</h3>
         <p>
-          Heights are inputs, not measurements: the density toggle swaps the numbers the engine positions from
-          (<code>item-size</code> for list rows, grid rows and table rows) and everything else - scroll math, buffers, the
-          scrollbar thumb - follows. Measure instead of estimating only where the content is genuinely
-          variable, for example rows whose text wraps.
+          The density toggle swaps the numbers the engine positions from (<code>item-size</code> for list rows, grid rows and
+          table rows); the scroll math, the render buffers and the scrollbar thumb follow. Measure rows instead of sizing
+          them where the content is genuinely variable - for example rows whose text wraps.
         </p>
       </ImplementationGuide>
     </template>

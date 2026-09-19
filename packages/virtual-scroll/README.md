@@ -144,7 +144,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
 *   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` — only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
-A tree-shaken `<VirtualScroll>` drops from 23.2 KB to 17.3 KB gzipped, and `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
+A tree-shaken `<VirtualScroll>` is 17.3 KB gzipped from `./core` and 23.2 KB from the package root; `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
 
 ## Data-less Lists (Index-only Rows)
 
@@ -286,7 +286,7 @@ The core logic for virtualization.
 - `extensions`: Optional array of [VirtualScrollExtension](#extensions) objects.
 
 **Returns:**
-The [Exposed Members](#exposed-members) list covers the properties and methods the component puts on its instance; the composable returns those plus `totalWidth` / `totalHeight`, `renderedVirtualWidth` / `renderedVirtualHeight`, `isWindowContainer`, `scrollbarOffset` and `handleScrollCorrection` (see [Type Definitions](#type-definitions) for their shapes).
+The [Exposed Members](#exposed-members) list covers the properties and methods the component puts on its instance; the composable returns those plus `totalWidth` / `totalHeight`, `renderedVirtualWidth` / `renderedVirtualHeight`, `isWindowContainer`, `scrollbarOffset`, `handleScrollCorrection` and `scrollCorrection` - a `Ref<Point>` holding the correction the engine applied to the scroll position when sizes above the window changed, which extensions and drag emulation use to keep their own origin in sync (see [Type Definitions](#type-definitions) for the shapes).
 
 ### `useVirtualScrollbar(props)`
 
@@ -323,6 +323,7 @@ Handles pointer-based scrolling, inertia animation, and mouse wheel events for c
 - `handlePointerDown` / `Move` / `Up`: Event handlers for pointer interaction.
 - `handleWheel`: Event handler for mouse wheel.
 - `stopInertia()`: Method to cancel ongoing momentum.
+- `shiftOrigin(deltaX, deltaY)`: Moves the origin a drag measures from, so a measurement correction that shifted the content does not get undone by the next pointer move. No-op when no drag is in progress.
 
 ### `useVirtualScrollKeyboard(config)`
 
@@ -336,7 +337,7 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `stopProgrammaticScroll`: Method to halt animations.
 - `getLoadingSlotSize` (optional): Height of the loading slot. When provided, `End` includes it in the target so the last item plus the slot fit in the viewport.
 - `...resolvers`: Various helper functions for index/offset mapping.
-- `activationMode` (optional, accepts a ref or getter): `'viewport'` (default) scrolls the viewport only, with no active item; `'item'` moves a roving active item and exposes it through `activeIndex`/`isActive`/`aria-activedescendant`. The component picks it per role - see [`keyboardActivation`](#props) - because flipping a plain list to the item model would change how every arrow already behaves.
+- `activationMode` (optional, accepts a ref or getter): `'viewport'` (default) scrolls the viewport only, with no active item; `'item'` moves a roving active item and exposes it through `activeIndex`/`isActive`/`aria-activedescendant`. The component derives it from the container role - see [`keyboardActivation`](#props).
 - `onActivate` (optional): Called with the item index when the active item is activated - `Enter`/`Space` on the container, or an explicit `handleItemActivate` call. Never called in `'viewport'` mode.
 
 **Key behavior (`'item'` mode):**
@@ -345,7 +346,7 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `Enter` / `Space`: Activate the active item through `onActivate`.
 
 **Key behavior (`'viewport'` mode):**
-- `Home` / `End`: Scroll to the start / end of the content. `End` scrolls to `totalSize - viewportSize` (plus the loading slot size when `getLoadingSlotSize` is provided); the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically. Because the slot lives in the DOM *after* the virtual wrapper, the requested range also extends the engine's scroll clamp, so the slot is actually reachable.
+- `Home` / `End`: Scroll to the start / end of the content. `End` scrolls to `totalSize - viewportSize` (plus the loading slot size when `getLoadingSlotSize` is provided); the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically. Because the slot lives in the DOM *after* the virtual wrapper, the requested range also extends the engine's scroll clamp, so the slot stays reachable.
 - `PageUp` / `PageDown`: Scroll by one full page. The target is the first visible item minus one (`startIdx - 1`) / the last visible item plus one (`endIdx + 1`), so each press advances exactly one viewport.
 - Arrows: Move one item in the scroll direction (one column in grid mode). `Enter`/`Space` do nothing.
 
@@ -353,7 +354,6 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `handleKeyDown`: Keyboard event handler.
 - `activeIndex`: `Ref<number>` with the roving active item index, `-1` when none.
 - `liveMessage`: `Ref<string>` with the polite announcement for the active item, e.g. `Item 21 of 100` (empty when nothing is active).
-- `setActiveIndex(index)`: Sets (`null` clears) the active item without scrolling, so a click or an external selection can be synced in.
 - `handleItemActivate(index)`: Marks an item active and calls `onActivate` (e.g. from a click handler in the item slot). No-op in `'viewport'` mode.
 
 ### `useVirtualScrollObservers(config)`
@@ -510,7 +510,7 @@ Allows axis-specific alignment in `scrollToIndex`.
 | `load` | `'vertical' \| 'horizontal'`, `LoadDetails` | Emitted when the scroll position comes within `loadDistance` (DU) of the end on that axis; suppressed while `loading` is `true` and while the axis is flinging faster than `flingVelocity`. The second argument carries `{ velocity, direction }` (`velocity` in VU/ms, `direction` `'start' \| 'end' \| null`). |
 | `itemActivate` | `index: number`, `item: T \| undefined` | Emitted when the active item is activated with `Enter`/`Space`, or from an explicit `handleItemActivate(index)` call (e.g. a click in the item slot). Only emitted in the item activation model. |
 
-`VirtualScrollTable` emits the same three events. `VirtualScrollMasonry` emits `scroll` with `MasonryScrollDetails` (single vertical axis).
+`VirtualScrollTable` emits the same events. `VirtualScrollMasonry` emits `scroll` with `MasonryScrollDetails` (single vertical axis).
 
 ### Slots
 
@@ -537,7 +537,6 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `scrollDetails`: Full reactive state of the virtual scroll system. See [ScrollDetails](#scrolldetails).
 - `activeIndex`: Index of the item tracked by keyboard navigation, `-1` when none.
 - `setActiveIndex(index)`: Sets (`null` clears) the active item without scrolling, so a click or an external selection can be synced in.
-- `handleItemActivate(index)`: Marks an item active and emits `itemActivate` - wire it to your click handler.
 - `columnRange`: Information about the current visible range of columns. See [ColumnRange](#columnrange).
 - `wrapperRole` / `cellRole`: The ARIA roles currently applied to the items wrapper and its cells.
 - `isHydrated`: `true` when the component is mounted and hydrated.
@@ -548,6 +547,8 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `componentOffset`: Absolute offset of the component within its container (DU).
 
 #### Methods
+- `setActiveIndex(index)`: Sets the active item without scrolling (`null` clears it), for syncing a click or an external selection.
+- `handleItemActivate(index)`: Marks an item active and emits `itemActivate`.
 - `scrollToIndex(row, col, options)`: Programmatic scroll to index. An end-anchored scroll (last row or content end) keeps re-clamping while settling measurements move the real end, so the first jump to the end lands flush even on dynamic lists. See [ScrollToIndexOptions](#scrolltoindexoptions).
 - `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling. See [ScrollToOffsetOptions](#scrolltooffsetoptions).
 - `refresh()`: Resets all measurements and state.
@@ -580,6 +581,8 @@ The component automatically manages ARIA roles and attributes to ensure screen r
 | `menu` | `menuitem` | Navigational menus. |
 
 `aria-rowcount`, `aria-colcount`, `aria-rowindex`, and `aria-colindex` are automatically calculated and applied based on the current scroll state.
+
+With [`keyboardActivation`](#props) set to the item model - `'auto'` selects it for `listbox`, `menu` and `tree` - the container also publishes `aria-activedescendant` pointing at the active item's `id`, and a polite live region announces the active position (`Item 21 of 100`) as it moves. `Enter`/`Space` emit `itemActivate`; a click routed through `handleItemActivate(index)` does the same.
 
 ## Type Definitions
 
