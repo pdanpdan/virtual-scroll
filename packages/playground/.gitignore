@@ -146,6 +146,7 @@ dist
 
 # Generated files
 pages/changelog/changelog-data.ts
+public/umd/
 
 # aws-cdk
 .cdk.staging
