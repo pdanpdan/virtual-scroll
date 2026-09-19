@@ -244,6 +244,7 @@ const {
   renderedVirtualHeight,
   getRowIndexAt,
   getColumnIndexAt,
+  scrollCorrection,
 } = useVirtualScroll(virtualScrollProps, extensions);
 
 const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
@@ -378,11 +379,18 @@ const {
   handlePointerUp,
   handleWheel,
   stopInertia,
+  shiftOrigin,
 } = useVirtualScrollInertia({
   useVirtualScrolling,
   scrollDetails,
   scrollToOffset,
   stopProgrammaticScroll,
+});
+
+// Measurement corrections move the content under a drag: follow them instead of
+// letting the next pointer move undo them.
+watch(scrollCorrection, ({ x, y }) => {
+  shiftOrigin(x, y);
 });
 
 watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtual ]) => {

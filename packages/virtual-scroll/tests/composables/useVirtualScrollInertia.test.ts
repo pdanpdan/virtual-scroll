@@ -85,6 +85,64 @@ describe('useVirtualScrollInertia', () => {
     expect(isPointerScrolling.value).toBe(false);
   });
 
+  it('follows a content correction while dragging', () => {
+    const useVirtualScrolling = ref(true);
+    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollToOffset = vi.fn();
+    const stopProgrammaticScroll = vi.fn();
+    const frames: Array<() => void> = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback as () => void);
+      return frames.length;
+    });
+
+    const { handlePointerDown, handlePointerMove, shiftOrigin } = useVirtualScrollInertia({
+      useVirtualScrolling,
+      scrollDetails,
+      scrollToOffset,
+      stopProgrammaticScroll,
+    });
+
+    handlePointerDown({
+      pointerType: 'mouse',
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      currentTarget: { setPointerCapture: vi.fn() },
+    } as unknown as PointerEvent);
+
+    // Content above the viewport grew by 40 VU and the engine compensated.
+    shiftOrigin(0, 40);
+
+    handlePointerMove({
+      clientX: 100,
+      clientY: 80,
+    } as unknown as PointerEvent);
+    frames.forEach((frame) => frame());
+
+    // 40 (correction) + 20 (drag) - the drag must not drop the correction.
+    expect(scrollToOffset).toHaveBeenCalledWith(0, 60, { behavior: 'auto' });
+    vi.restoreAllMocks();
+  });
+
+  it('ignores a content correction when no drag is in progress', () => {
+    const useVirtualScrolling = ref(true);
+    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollToOffset = vi.fn();
+    const stopProgrammaticScroll = vi.fn();
+
+    const { shiftOrigin } = useVirtualScrollInertia({
+      useVirtualScrolling,
+      scrollDetails,
+      scrollToOffset,
+      stopProgrammaticScroll,
+    });
+
+    shiftOrigin(0, 40);
+
+    expect(scrollToOffset).not.toHaveBeenCalled();
+  });
+
   it('handles wheel correctly', () => {
     const useVirtualScrolling = ref(true);
     const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);

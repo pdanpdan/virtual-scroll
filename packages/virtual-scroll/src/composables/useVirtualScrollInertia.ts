@@ -192,6 +192,28 @@ export function useVirtualScrollInertia<T>({
     }
   };
 
+  /**
+   * Follows a content-size correction while a drag is in progress.
+   *
+   * Drag targets are measured from the offset captured on pointer down, so a
+   * measurement that shifts the content would otherwise be undone by the next
+   * pointer move. Moving the captured origin by the same delta keeps the content
+   * under the pointer. The inertia loop reads the live offset, so it needs no
+   * adjustment.
+   *
+   * @param deltaX - Correction along the horizontal axis (VU).
+   * @param deltaY - Correction along the vertical axis (VU).
+   */
+  function shiftOrigin(deltaX: number, deltaY: number) {
+    if (!isPointerScrolling.value) {
+      return;
+    }
+    startScrollOffset = {
+      x: startScrollOffset.x + deltaX,
+      y: startScrollOffset.y + deltaY,
+    };
+  }
+
   return {
     isPointerScrolling,
     handlePointerDown,
@@ -199,5 +221,6 @@ export function useVirtualScrollInertia<T>({
     handlePointerUp,
     handleWheel,
     stopInertia,
+    shiftOrigin,
   };
 }

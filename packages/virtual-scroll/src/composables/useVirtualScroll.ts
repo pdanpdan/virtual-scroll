@@ -87,6 +87,8 @@ export interface UseVirtualScrollReturn<T = unknown> {
   stopProgrammaticScroll: () => void;
   /** Adjusts the scroll position to compensate for measurement changes. */
   handleScrollCorrection: (addedX: number, addedY: number) => void;
+  /** Content-size correction applied to the scroll position (VU). */
+  scrollCorrection: Ref<Point>;
   /** Updates the size of a single item from measurements. */
   updateItemSize: (index: number, inlineSize: number, blockSize: number, element?: HTMLElement | undefined) => void;
   /** Updates the size of multiple items from measurements. */
@@ -465,7 +467,13 @@ export function useVirtualScroll<T = unknown>(
     }
   };
 
+  /** Content-size correction applied to the scroll position (VU), or `{x: 0, y: 0}` when none. */
+  const scrollCorrection = ref<Point>({ x: 0, y: 0 });
+
   const handleScrollCorrection = (addedX: number, addedY: number) => {
+    // Published before the scroll is applied so motion that holds its own origin
+    // (drag emulation) can follow the content instead of fighting the correction.
+    scrollCorrection.value = { x: addedX, y: addedY };
     nextTick(() => {
       scrollToOffset(
         addedX > 0 ? relativeScrollX.value + addedX : null,
@@ -1459,6 +1467,8 @@ export function useVirtualScroll<T = unknown>(
     stopProgrammaticScroll,
     /** Adjusts the scroll position to compensate for measurement changes. */
     handleScrollCorrection,
+    /** Content-size correction applied to the scroll position (VU). */
+    scrollCorrection,
     /** Updates the size of a single item from measurements. */
     updateItemSize,
     /** Updates the size of multiple items from measurements. */

@@ -112,6 +112,28 @@ describe('useVirtualScroll', () => {
   });
 
   describe('scroll management', () => {
+    it('publishes a measurement correction and applies it to the scroll position', async () => {
+      const container = document.createElement('div');
+      const { result, wrapper } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items: mockItems,
+      });
+      await nextTick();
+
+      expect(result.scrollCorrection.value).toEqual({ x: 0, y: 0 });
+
+      result.handleScrollCorrection(0, 120);
+      expect(result.scrollCorrection.value).toEqual({ x: 0, y: 120 });
+
+      await nextTick();
+      await nextTick();
+
+      expect(container.scrollTop).toBe(120);
+      wrapper.unmount();
+    });
+
     it('updates scroll position on scroll event', async () => {
       const container = document.createElement('div');
       const { result, wrapper } = setup({
