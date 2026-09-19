@@ -826,7 +826,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">keyboardActivation</code></td>
               <td><code>'auto' | 'item' | 'viewport'</code></td>
               <td><code>'auto'</code></td>
-              <td>How the keyboard interacts with the content. <code>'auto'</code> uses the roving item model for the roles that publish an active descendant (<code>listbox</code>, <code>menu</code>, <code>tree</code>) and viewport scrolling for everything else - including the <code>grid</code> role a two-axis list defaults to - because flipping a plain list to the item model would change how every arrow already behaves. <code>'item'</code> always tracks an active item, <code>'viewport'</code> never does. See <a href="#keyboard-navigation" class="link link-primary">Keyboard Navigation</a>.</td>
+              <td>How the keyboard interacts with the content. <code>'auto'</code> uses the roving item model for the roles that publish an active descendant (<code>listbox</code>, <code>menu</code>, <code>tree</code>) and viewport scrolling for everything else, including the <code>grid</code> role a two-axis list defaults to. <code>'item'</code> always tracks an active item, <code>'viewport'</code> never does. See <a href="#keyboard-navigation" class="link link-primary">Keyboard Navigation</a>.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">ariaLabel</code></td>
