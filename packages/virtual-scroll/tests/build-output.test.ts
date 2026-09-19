@@ -105,8 +105,9 @@ describe('build output layout', () => {
     const full = await import(pathToFileURL(resolve(distDir, 'index.mjs')).href) as { VirtualScroll: never; };
     const core = await import(pathToFileURL(resolve(distDir, 'core.mjs')).href) as { VirtualScroll: never; };
 
-    const fullWrapper = mount(full.VirtualScroll, { props, slots: { item: '<div class="row" />' } });
-    const coreWrapper = mount(core.VirtualScroll, { props, slots: { item: '<div class="row" />' } });
+    // The built modules carry no types: the same props object drives both entries.
+    const fullWrapper = mount(full.VirtualScroll, { props: props as never, slots: { item: '<div class="row" />' } });
+    const coreWrapper = mount(core.VirtualScroll, { props: props as never, slots: { item: '<div class="row" />' } });
     await nextTick();
     await nextTick();
 
