@@ -128,6 +128,24 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props);
 <script src="https://unpkg.com/@pdanpdan/virtual-scroll"></script>
 ```
 
+### 5. Lean Build (`./core`)
+
+`@pdanpdan/virtual-scroll/core` publishes the same API with the optional wiring compiled out, for apps that only need virtualization:
+
+```vue
+<script setup>
+import { VirtualScroll } from '@pdanpdan/virtual-scroll/core';
+
+import '@pdanpdan/virtual-scroll/core/style.css';
+</script>
+```
+
+*   **Not included:** custom scrollbars (the `virtualScrollbar` prop and the `#scrollbar` slot), keyboard navigation, scroll snapping, sticky items, infinite loading and prepend restoration.
+*   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
+*   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance`, `loading` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. Import from the package root when you need them.
+
+A tree-shaken `<VirtualScroll>` drops from 22.4 KB to 16.7 KB gzipped, and `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
+
 ## Data-less Lists (Index-only Rows)
 
 Rows can be rendered purely from their `index` without storing any per-row data. Pass a sparse array - only its `length` is used - and derive the content from the slot's `index`:
@@ -177,6 +195,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
+- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 22.4 KB, `./core` 16.7 KB, headless `useVirtualScroll` 11.3 KB, `VirtualScrollTable` 23.5 KB, `VirtualScrollMasonry` 7.6 KB).
 
 ## Key Features
 
@@ -303,7 +322,7 @@ Handles pointer-based scrolling, inertia animation, and mouse wheel events for c
 
 ### `useVirtualScrollKeyboard(config)`
 
-Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtual scroll container.
+Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtual scroll container, either by scrolling the viewport or by moving a roving active item.
 
 **Config:**
 - `props`: Full component props.
@@ -313,14 +332,25 @@ Provides keyboard navigation (Arrows, Home, End, PageUp, PageDown) for the virtu
 - `stopProgrammaticScroll`: Method to halt animations.
 - `getLoadingSlotSize` (optional): Height of the loading slot. When provided, `End` includes it in the target so the last item plus the slot fit in the viewport.
 - `...resolvers`: Various helper functions for index/offset mapping.
+- `activationMode` (optional): `'item'` (default) moves a roving active item; `'viewport'` scrolls the viewport only, with no active item (the pre-`'item'` behaviour).
+- `onActivate` (optional): Called with the item index when the active item is activated - `Enter`/`Space` on the container, or an explicit `handleItemActivate` call. Never called in `'viewport'` mode.
 
-**Key behavior:**
+**Key behavior (`'item'` mode):**
+- Arrows: Move the active item by one along the scroll axis (`ArrowLeft`/`ArrowRight` on horizontal lists, honouring RTL; in grid mode the active item is a row, so the inline arrows keep panning columns) and scroll it back into view only when it left the viewport. The first arrow press activates the first visible item without scrolling.
+- `PageUp` / `PageDown` / `Home` / `End`: Move the active item one viewport up/down, or to the first/last item, and keep it visible. The other axis is left untouched, so a multi-column list keeps its current column.
+- `Enter` / `Space`: Activate the active item through `onActivate`.
+
+**Key behavior (`'viewport'` mode):**
 - `Home` / `End`: Scroll to the start / end of the content. `End` scrolls to `totalSize - viewportSize` (plus the loading slot size when `getLoadingSlotSize` is provided); the target is re-clamped when measurements settle, and new content appended by a load is not chased automatically. Because the slot lives in the DOM *after* the virtual wrapper, the requested range also extends the engine's scroll clamp, so the slot is actually reachable.
 - `PageUp` / `PageDown`: Scroll by one full page. The target is the first visible item minus one (`startIdx - 1`) / the last visible item plus one (`endIdx + 1`), so each press advances exactly one viewport.
-- Arrows: Move one item in the scroll direction (one column in grid mode).
+- Arrows: Move one item in the scroll direction (one column in grid mode). `Enter`/`Space` do nothing.
 
 **Returns:**
 - `handleKeyDown`: Keyboard event handler.
+- `activeIndex`: `Ref<number>` with the roving active item index, `-1` when none.
+- `liveMessage`: `Ref<string>` with the polite announcement for the active item, e.g. `Item 21 of 100` (empty when nothing is active).
+- `setActiveIndex(index)`: Sets (`null` clears) the active item without scrolling, so a click or an external selection can be synced in.
+- `handleItemActivate(index)`: Marks an item active and calls `onActivate` (e.g. from a click handler in the item slot). No-op in `'viewport'` mode.
 
 ### `useVirtualScrollObservers(config)`
 
