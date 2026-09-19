@@ -13,6 +13,8 @@ export type DataSource = 'lorem' | 'local';
 export type ContainerMode = 'element' | 'window';
 export type AriaRole = 'auto' | 'list' | 'grid' | 'tree' | 'listbox' | 'menu';
 export type SnapMode = 'auto' | 'next' | 'start' | 'center' | 'end';
+export type KeyboardActivation = 'auto' | 'item' | 'viewport';
+export type SnapshotStorage = 'session' | 'local';
 export type AlignMode = 'auto' | 'start' | 'center' | 'end';
 
 export interface ConfiguratorState {
@@ -71,6 +73,11 @@ export interface ConfiguratorState {
   loadDistance: number;
   loadChunk: number;
   restoreOnPrepend: boolean;
+  keyboardActivation: KeyboardActivation;
+  infiniteFlingVelocity: number;
+  infinitePreload: number;
+  snapshots: boolean;
+  snapshotStorage: SnapshotStorage;
   initialScroll: boolean;
   initialScrollIndex: number;
   initialScrollAlign: AlignMode;
@@ -131,6 +138,11 @@ export const defaultState: ConfiguratorState = {
   loadDistance: 300,
   loadChunk: 20,
   restoreOnPrepend: false,
+  keyboardActivation: 'auto',
+  infiniteFlingVelocity: 2,
+  infinitePreload: 0,
+  snapshots: false,
+  snapshotStorage: 'session',
   initialScroll: false,
   initialScrollIndex: 100,
   initialScrollAlign: 'auto',
@@ -145,6 +157,12 @@ export const defaultState: ConfiguratorState = {
 /** Derived helpers used by both the form and the generators. */
 export interface ConfiguratorDerived {
   isGrid: boolean;
+  /** The generated code announces the roving active item. */
+  usesItemModel: boolean;
+  /** `keyboardActivation` exists on the list and table components, not masonry. */
+  supportsKeyboardActivation: boolean;
+  /** Scroll position save/restore is generated for the list and table renderers. */
+  supportsSnapshots: boolean;
   hasSections: boolean;
   isIndependent: boolean;
   usesVirtualScroll: boolean;
@@ -158,8 +176,17 @@ export function getDerived(state: ConfiguratorState): ConfiguratorDerived {
   const isTable = state.renderer === 'table';
   const isMasonry = state.renderer === 'masonry';
   const isIndependent = state.scrollbarStyle === 'independent' && !isTable && !isMasonry;
+  const supportsKeyboardActivation = !isMasonry;
+  // `'auto'` selects the item model for the roles that publish an active
+  // descendant on the list; a table only tracks an active row when asked to.
+  const itemModelAuto = state.keyboardActivation === 'auto'
+    && !isTable
+    && [ 'listbox', 'menu', 'tree' ].includes(state.ariaRole);
   return {
     isGrid,
+    usesItemModel: supportsKeyboardActivation && (state.keyboardActivation === 'item' || itemModelAuto),
+    supportsKeyboardActivation,
+    supportsSnapshots: !isMasonry,
     hasSections,
     isIndependent,
     usesVirtualScroll: !isIndependent,
@@ -183,6 +210,17 @@ export const snapOptions: Array<{ value: SnapMode; label: string; description: s
   { value: 'start', label: 'start', description: 'align first visible item to start' },
   { value: 'center', label: 'center', description: 'align intersecting item to center' },
   { value: 'end', label: 'end', description: 'align last visible item to end' },
+];
+
+export const keyboardOptions: Array<{ value: KeyboardActivation; label: string; description: string; }> = [
+  { value: 'auto', label: 'auto', description: 'item model for listbox/menu/tree, viewport scrolling otherwise' },
+  { value: 'item', label: 'item', description: 'track an active item, announced through aria-activedescendant' },
+  { value: 'viewport', label: 'viewport', description: 'scroll only, no active item' },
+];
+
+export const snapshotStorageOptions: Array<{ value: SnapshotStorage; label: string; description: string; }> = [
+  { value: 'session', label: 'session', description: 'survives a reload in the same tab' },
+  { value: 'local', label: 'local', description: 'survives a browser restart' },
 ];
 
 export const alignOptions: Array<{ value: AlignMode; label: string; description: string; }> = [

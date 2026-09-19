@@ -16,8 +16,10 @@ import {
   alignOptions,
   defaultState,
   getDerived,
+  keyboardOptions,
   roleOptions,
   snapOptions,
+  snapshotStorageOptions,
 } from '#/lib/configurator/state';
 
 const state = reactive<ConfiguratorState>(structuredClone(defaultState));
@@ -176,6 +178,15 @@ function openInCodePen() {
             <select v-model="state.ariaRole" class="select select-bordered select-sm w-full">
               <option v-for="role in roleOptions" :key="role.value" :value="role.value">
                 {{ role.label }} - {{ role.description }}
+              </option>
+            </select>
+          </label>
+
+          <label v-if="derived.supportsKeyboardActivation" class="floating-label p-0 grow basis-36">
+            <span class="text-xs font-bold small-caps text-base-content/50">Keyboard</span>
+            <select v-model="state.keyboardActivation" class="select select-bordered select-sm w-full">
+              <option v-for="option in keyboardOptions" :key="option.value" :value="option.value">
+                {{ option.label }} - {{ option.description }}
               </option>
             </select>
           </label>
@@ -771,13 +782,55 @@ function openInCodePen() {
                   class="input input-bordered input-sm w-full font-mono"
                 />
               </label>
+              <label class="floating-label p-0 grow basis-36">
+                <span class="text-xs font-bold small-caps text-base-content/50">Skip flings over (VU/ms)</span>
+                <input
+                  v-model.number="state.infiniteFlingVelocity"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+              <label class="floating-label p-0 grow basis-28">
+                <span class="text-xs font-bold small-caps text-base-content/50">Preload (VU)</span>
+                <input
+                  v-model.number="state.infinitePreload"
+                  type="number"
+                  min="0"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
             </div>
+            <p v-if="state.infiniteScroll" class="ps-7 -mt-1 text-[11px] opacity-60">
+              Skipping and preloading are extension options: they appear in the composable output. The component always
+              reports the gesture in the <code>load</code> payload.
+            </p>
 
             <FeatureToggle
               v-model="state.restoreOnPrepend"
               label="Prepend restoration"
               description="Keep scroll position when items are inserted at the top."
             />
+
+            <FeatureToggle
+              v-if="derived.supportsSnapshots"
+              v-model="state.snapshots"
+              label="Scroll position across visits"
+              description="Save the first visible item when leaving and restore it on the next visit."
+            />
+            <div v-if="derived.supportsSnapshots && state.snapshots" class="ps-7">
+              <label class="floating-label p-0">
+                <span class="text-xs font-bold small-caps text-base-content/50">Storage</span>
+                <select v-model="state.snapshotStorage" class="select select-bordered select-sm w-full">
+                  <option v-for="option in snapshotStorageOptions" :key="option.value" :value="option.value">
+                    {{ option.label }} - {{ option.description }}
+                  </option>
+                </select>
+              </label>
+            </div>
 
             <FeatureToggle
               v-model="state.initialScroll"
