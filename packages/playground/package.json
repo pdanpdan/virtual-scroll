@@ -6,7 +6,7 @@
     "dev": "node scripts/sync-changelog.js && vike dev --host",
     "build": "node scripts/sync-changelog.js && node scripts/generate-sitemap.js && node scripts/generate-umd-examples.js && vike build",
     "preview": "vike build && vike preview",
-    "test:types": "vue-tsc --noEmit",
+    "test:types": "node scripts/sync-changelog.js && vue-tsc --noEmit",
     "test:generated": "node scripts/check-generated.mjs && vue-tsc --noEmit -p tsconfig.generated.json",
     "pretest:e2e": "playwright install chromium",
     "test:e2e": "playwright test",
