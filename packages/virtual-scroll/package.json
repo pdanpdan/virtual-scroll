@@ -51,7 +51,6 @@
       "require": "./dist/internal.cjs"
     },
     "./VirtualScroll.vue": "./src/components/VirtualScroll.vue",
-    "./VirtualScrollbars.vue": "./src/components/VirtualScrollbars.vue",
     "./VirtualScrollTable.vue": "./src/components/VirtualScrollTable.vue",
     "./VirtualScrollMasonry.vue": "./src/components/VirtualScrollMasonry.vue",
     "./VirtualScrollbar.vue": "./src/components/VirtualScrollbar.vue",
