@@ -3,7 +3,7 @@ import type { Mock } from 'vitest';
 import type { MaybeRefOrGetter, Ref } from 'vue';
 
 import { describe, expect, it, vi } from 'vitest';
-import { reactive, ref } from 'vue';
+import { computed, nextTick, reactive, ref, toValue } from 'vue';
 
 import { useVirtualScrollKeyboard } from '../../src/composables/useVirtualScrollKeyboard';
 
@@ -34,7 +34,7 @@ describe('useVirtualScrollKeyboard', () => {
 
   const makeKeyboard = (
     scrollDetails: Ref<ScrollDetails<unknown>>,
-    props: VirtualScrollProps<unknown>,
+    props: MaybeRefOrGetter<VirtualScrollProps<unknown>>,
     overrides: {
       isRtl?: boolean;
       /** Passed only when given: without it the composable default (`'viewport'`) applies. */
@@ -55,7 +55,7 @@ describe('useVirtualScrollKeyboard', () => {
     } = {},
   ) => useVirtualScrollKeyboard({
     props,
-    virtualScrollProps: ref(props),
+    virtualScrollProps: computed(() => toValue(props)),
     scrollDetails,
     isRtl: ref(overrides.isRtl ?? false),
     scrollToIndex: overrides.scrollToIndex ?? (vi.fn() as unknown as Mock<(rowIndex?: number | null, colIndex?: number | null, options?: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; }) => void>),
@@ -700,6 +700,28 @@ describe('useVirtualScrollKeyboard', () => {
 
     expect(activeIndex.value).toBe(0);
     expect(scrollToIndex).not.toHaveBeenCalled();
+  });
+
+  it('re-reads a getter props input so bounds stay live', async () => {
+    const items = ref(Array.from({ length: 5 }, (_, id) => ({ id })));
+    const scrollDetails = ref(makeScrollDetails({ currentIndex: 0 }));
+    const { activeIndex, liveMessage, setActiveIndex } = makeKeyboard(
+      scrollDetails,
+      () => makeProps({ items: items.value }),
+      { activationMode: 'item' },
+    );
+
+    setActiveIndex(4);
+    expect(activeIndex.value).toBe(4);
+    expect(liveMessage.value).toBe('Item 5 of 5');
+
+    // More items arrive: the same handle clamps against the new length.
+    items.value = Array.from({ length: 10 }, (_, id) => ({ id }));
+    await nextTick();
+
+    expect(liveMessage.value).toBe('Item 5 of 10');
+    setActiveIndex(9);
+    expect(activeIndex.value).toBe(9);
   });
 
   it('moves the active item with the vertical arrows and keeps it visible', () => {

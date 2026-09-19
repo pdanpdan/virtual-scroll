@@ -4,7 +4,13 @@ import type { MaybeRefOrGetter, Ref } from 'vue';
 import { computed, ref, toValue } from 'vue';
 
 export interface UseVirtualScrollKeyboardOptions<T> {
-  props: VirtualScrollProps<T>;
+  /**
+   * Props of the list being navigated: a plain object, a ref or a getter. A ref
+   * or getter keeps bounds (`items.length`), the axis and the column count live
+   * when the surrounding configuration is itself derived - for example a
+   * `computed` config built by a composable consumer.
+   */
+  props: MaybeRefOrGetter<VirtualScrollProps<T>>;
   virtualScrollProps: Ref<VirtualScrollProps<T>>;
   scrollDetails: Ref<ScrollDetails<T>>;
   isRtl: Ref<boolean>;
@@ -41,7 +47,7 @@ export interface UseVirtualScrollKeyboardOptions<T> {
 }
 
 export function useVirtualScrollKeyboard<T>({
-  props,
+  props: propsInput,
   virtualScrollProps,
   scrollDetails,
   isRtl,
@@ -60,6 +66,9 @@ export function useVirtualScrollKeyboard<T>({
   activationMode = 'viewport',
   onActivate,
 }: UseVirtualScrollKeyboardOptions<T>) {
+  /** Props of the list, re-read on every access so a ref or getter stays live. */
+  const props = computed(() => toValue(propsInput));
+
   /** Resolved activation mode, re-read whenever the source value changes. */
   const resolvedActivationMode = computed(() => toValue(activationMode));
 
@@ -75,7 +84,7 @@ export function useVirtualScrollKeyboard<T>({
    */
   const liveMessage = computed(() => {
     const index = activeIndex.value;
-    return index < 0 || index >= props.items.length ? '' : `Item ${ index + 1 } of ${ props.items.length }`;
+    return index < 0 || index >= props.value.items.length ? '' : `Item ${ index + 1 } of ${ props.value.items.length }`;
   });
 
   /**
@@ -89,11 +98,11 @@ export function useVirtualScrollKeyboard<T>({
    * @param index - The item index to activate, or `null` to clear the selection.
    */
   const setActiveIndex = (index: number | null) => {
-    if (index === null || !Number.isFinite(index) || index < 0 || props.items.length === 0) {
+    if (index === null || !Number.isFinite(index) || index < 0 || props.value.items.length === 0) {
       activeIndex.value = -1;
       return;
     }
-    activeIndex.value = Math.min(Math.trunc(index), props.items.length - 1);
+    activeIndex.value = Math.min(Math.trunc(index), props.value.items.length - 1);
   };
 
   /**
@@ -118,7 +127,7 @@ export function useVirtualScrollKeyboard<T>({
    * @param isVerticalAxis - `true` for the block axis, `false` for the inline axis.
    */
   const moveActiveItem = (step: number, isVerticalAxis: boolean) => {
-    const count = props.items.length;
+    const count = props.value.items.length;
     if (count === 0) {
       return;
     }
@@ -141,8 +150,8 @@ export function useVirtualScrollKeyboard<T>({
    *   where the active item is a row and the arrows pan the columns.
    */
   const handleItemKeyDown = (event: KeyboardEvent): boolean => {
-    const count = props.items.length;
-    const direction = props.direction;
+    const count = props.value.items.length;
+    const direction = props.value.direction;
     const isVerticalAxis = direction !== 'horizontal';
 
     switch (event.key) {
@@ -218,7 +227,7 @@ export function useVirtualScrollKeyboard<T>({
    * @param index - The item index to activate.
    */
   const handleItemActivate = (index: number) => {
-    if (resolvedActivationMode.value === 'viewport' || !Number.isFinite(index) || index < 0 || index >= props.items.length) {
+    if (resolvedActivationMode.value === 'viewport' || !Number.isFinite(index) || index < 0 || index >= props.value.items.length) {
       return;
     }
     setActiveIndex(index);
@@ -237,8 +246,8 @@ export function useVirtualScrollKeyboard<T>({
     }
 
     const { viewportSize, scrollOffset } = scrollDetails.value;
-    const isHorizontal = props.direction !== 'vertical';
-    const isVertical = props.direction !== 'horizontal';
+    const isHorizontal = props.value.direction !== 'vertical';
+    const isVertical = props.value.direction !== 'horizontal';
 
     const vProps = virtualScrollProps.value;
     const sStart = (vProps.stickyStart || { x: 0, y: 0 }) as { x: number; y: number; };
@@ -246,7 +255,7 @@ export function useVirtualScrollKeyboard<T>({
     const pStart = (vProps.scrollPaddingStart || { x: 0, y: 0 }) as { x: number; y: number; };
     const pEnd = (vProps.scrollPaddingEnd || { x: 0, y: 0 }) as { x: number; y: number; };
 
-    const snapModeProp = props.snap === true ? 'auto' : props.snap;
+    const snapModeProp = props.value.snap === true ? 'auto' : props.value.snap;
     const snapMode = (snapModeProp && snapModeProp !== 'auto')
       ? snapModeProp as 'start' | 'center' | 'end'
       : null;
@@ -260,7 +269,7 @@ export function useVirtualScrollKeyboard<T>({
 
     const navigateVerticalForward = () => {
       if (snapMode === 'start') {
-        scrollToIndex(Math.min(props.items.length - 1, currentIndex + 1), null, { align: 'start' });
+        scrollToIndex(Math.min(props.value.items.length - 1, currentIndex + 1), null, { align: 'start' });
         return;
       }
       const align = snapMode || 'end';
@@ -268,7 +277,7 @@ export function useVirtualScrollKeyboard<T>({
       const itemBottom = getRowOffset(currentEndIndex) + getRowHeight(currentEndIndex);
       if (itemBottom > viewportBottom + 1) {
         scrollToIndex(currentEndIndex, null, { align });
-      } else if (currentEndIndex < props.items.length - 1) {
+      } else if (currentEndIndex < props.value.items.length - 1) {
         scrollToIndex(currentEndIndex + 1, null, { align });
       }
     };
@@ -289,14 +298,14 @@ export function useVirtualScrollKeyboard<T>({
     };
 
     const navigateHorizontalForward = () => {
-      const maxColIdx = props.columnCount ? props.columnCount - 1 : props.items.length - 1;
+      const maxColIdx = props.value.columnCount ? props.value.columnCount - 1 : props.value.items.length - 1;
       if (snapMode === 'start') {
         scrollToIndex(null, Math.min(maxColIdx, currentColIndex + 1), { align: 'start' });
         return;
       }
       const align = snapMode || 'end';
       const viewportRight = scrollOffset.x + viewportSize.width - (sEnd.x + pEnd.x);
-      const colEndPos = props.columnCount
+      const colEndPos = props.value.columnCount
         ? getColumnOffset(currentEndColIndex) + getColumnWidth(currentEndColIndex)
         : getItemOffset(currentEndColIndex) + getItemSize(currentEndColIndex);
       if (colEndPos > viewportRight + 1) {
@@ -313,7 +322,7 @@ export function useVirtualScrollKeyboard<T>({
       }
       const align = snapMode || 'start';
       const viewportLeft = scrollOffset.x + sStart.x + pStart.x;
-      const colStartPos = props.columnCount
+      const colStartPos = props.value.columnCount
         ? getColumnOffset(currentColIndex)
         : getItemOffset(currentColIndex);
       if (colStartPos < viewportLeft - 1) {
@@ -343,8 +352,8 @@ export function useVirtualScrollKeyboard<T>({
       const isHorizontalAxis = !isVerticalAxis;
       const centerIdx = getCenterIndex(isHorizontalAxis);
       const maxIdx = isHorizontalAxis
-        ? (props.columnCount ? props.columnCount - 1 : props.items.length - 1)
-        : props.items.length - 1;
+        ? (props.value.columnCount ? props.value.columnCount - 1 : props.value.items.length - 1)
+        : props.value.items.length - 1;
       const targetIdx = isForward ? Math.min(maxIdx, centerIdx + 1) : Math.max(0, centerIdx - 1);
       scrollToIndex(isVerticalAxis ? targetIdx : null, isHorizontalAxis ? targetIdx : null, { align: 'center' });
     };
@@ -368,8 +377,8 @@ export function useVirtualScrollKeyboard<T>({
       const endIdx = isVerticalAxis ? currentEndIndex : currentEndColIndex;
       const pageSize = Math.max(1, endIdx - startIdx);
       const maxIdx = isVerticalAxis
-        ? props.items.length - 1
-        : (props.columnCount ? props.columnCount - 1 : props.items.length - 1);
+        ? props.value.items.length - 1
+        : (props.value.columnCount ? props.value.columnCount - 1 : props.value.items.length - 1);
 
       if (isForward) {
         if (snapMode === 'center') {
@@ -397,7 +406,7 @@ export function useVirtualScrollKeyboard<T>({
         event.preventDefault();
         stopProgrammaticScroll();
         const distance = Math.max(scrollOffset.x, scrollOffset.y);
-        const viewport = props.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
+        const viewport = props.value.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
         const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
 
         scrollToIndex(0, 0, { behavior, align: 'start' });
@@ -412,7 +421,7 @@ export function useVirtualScrollKeyboard<T>({
           totalSize.width - scrollOffset.x - viewportSize.width,
           totalSize.height - scrollOffset.y - viewportSize.height,
         );
-        const viewport = props.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
+        const viewport = props.value.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
         const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
         // The loading slot is always rendered (hidden when idle): include its
         // height so the last item plus the slot fit in the viewport. The extra
@@ -420,13 +429,13 @@ export function useVirtualScrollKeyboard<T>({
         // virtual content end and would hide the slot below it.
         const extra = getLoadingSlotSize ? getLoadingSlotSize() : 0;
 
-        if (props.direction === 'both') {
+        if (props.value.direction === 'both') {
           scrollToOffset(
             totalSize.width - viewportSize.width,
             totalSize.height - viewportSize.height + extra,
             { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
           );
-        } else if (props.direction === 'horizontal') {
+        } else if (props.value.direction === 'horizontal') {
           scrollToOffset(
             totalSize.width - viewportSize.width + extra,
             null,
@@ -472,7 +481,7 @@ export function useVirtualScrollKeyboard<T>({
       case 'PageUp':
         event.preventDefault();
         stopProgrammaticScroll();
-        if (props.direction === 'horizontal') {
+        if (props.value.direction === 'horizontal') {
           scrollToIndex(null, getPageTarget(false, false), { align: snapMode || 'end' });
         } else {
           scrollToIndex(getPageTarget(true, false), null, { align: snapMode || 'end' });
@@ -481,7 +490,7 @@ export function useVirtualScrollKeyboard<T>({
       case 'PageDown':
         event.preventDefault();
         stopProgrammaticScroll();
-        if (props.direction === 'horizontal') {
+        if (props.value.direction === 'horizontal') {
           scrollToIndex(null, getPageTarget(false, true), { align: snapMode || 'start' });
         } else {
           scrollToIndex(getPageTarget(true, true), null, { align: snapMode || 'start' });
