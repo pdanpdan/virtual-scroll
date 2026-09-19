@@ -689,6 +689,12 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   wrapperRole: string | null;
   /** The ARIA role of each cell. */
   cellRole: string | null;
+  /** Index of the item tracked by keyboard navigation, `-1` when none. */
+  activeIndex: number;
+  /** Sets the active item index without scrolling (`null` clears it). */
+  setActiveIndex: (index: number | null) => void;
+  /** Marks an item active and emits `itemActivate`. */
+  handleItemActivate: (index: number) => void;
   /** Helper to get the row (or item) index at a specific virtual offset (VU). */
   getRowIndexAt: (offset: number) => number;
   /** Helper to get the column index at a specific virtual offset (VU). */
