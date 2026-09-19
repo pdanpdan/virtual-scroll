@@ -43,9 +43,10 @@ export {
   usePrependRestorationExtension,
   useRtlExtension,
   useSnappingExtension,
+  useSnapshotsExtension,
   useStickyExtension,
 } from './extensions/all';
-export type { InfiniteLoadingExtensionOptions } from './extensions/all';
+export type { InfiniteLoadingExtensionOptions, LoadDetails, ScrollSnapshot, SnapshotsExtension, SnapshotsExtensionOptions } from './extensions/all';
 export type { ExtensionContext, VirtualScrollExtension } from './extensions/index';
 
 /* ------------------------------- Types & constants ------------------------------ */
