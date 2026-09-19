@@ -4,6 +4,7 @@
  * Supports large lists and grids by only rendering visible items and using coordinate scaling.
  * Features include sticky headers/footers, RTL support, custom scrollbars, and scroll restoration.
  */
+import type { LoadDetails } from '../extensions/all';
 import type {
   ItemSlotProps,
   RenderedItem,
@@ -66,7 +67,8 @@ const props = withDefaults(defineProps<Props<T>>(), {
 
 const emit = defineEmits<{
   (e: 'scroll', details: ScrollDetails<T>): void;
-  (e: 'load', direction: 'vertical' | 'horizontal'): void;
+  (e: 'load', direction: 'vertical' | 'horizontal', details: LoadDetails): void;
+  (e: 'itemActivate', index: number, item: T | undefined): void;
   (e: 'visibleRangeChange', range: { start: number; end: number; colStart: number; colEnd: number; }): void;
 }>();
 
@@ -121,7 +123,7 @@ const extensions = [
   useSnappingExtension<T>(),
   useStickyExtension<T>(),
   useInfiniteLoadingExtension<T>({
-    onLoad: (dir) => emit('load', dir),
+    onLoad: (dir, details) => emit('load', dir, details),
   }),
   usePrependRestorationExtension<T>(),
   useCoordinateScalingExtension<T>(),
@@ -384,7 +386,13 @@ watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtua
   }
 }, { immediate: true });
 
-const { handleKeyDown } = useVirtualScrollKeyboard({
+const {
+  handleKeyDown,
+  activeIndex,
+  liveMessage,
+  setActiveIndex,
+  handleItemActivate,
+} = useVirtualScrollKeyboard({
   props,
   virtualScrollProps,
   scrollDetails,
@@ -401,6 +409,9 @@ const { handleKeyDown } = useVirtualScrollKeyboard({
   getRowIndexAt,
   getColumnIndexAt,
   getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
+  /** A table only tracks an active row when asked to (`keyboardActivation`). */
+  activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item' ? 'item' : 'viewport')),
+  onActivate: (index: number) => emit('itemActivate', index, props.items[ index ]),
 });
 
 const containerStyle = computed(() => {
@@ -858,9 +869,13 @@ const rootAriaProps = computed(() => ({
   'aria-busy': props.loading ? 'true' : undefined,
 }));
 
+/** `aria-activedescendant` target while a row is active. */
+const activeDescendant = computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
+
 const wrapperAriaProps = computed(() => {
   const aria: Record<string, string | number | undefined> = {
     'aria-rowcount': props.items.length,
+    'aria-activedescendant': activeDescendant.value,
   };
   if (props.columnCount > 0) {
     aria[ 'aria-colcount' ] = props.columnCount;
@@ -893,6 +908,24 @@ function getCellAriaProps(colIndex: number) {
 
 defineExpose({
   ...toRefs(props),
+
+  /**
+   * Index of the row tracked by keyboard navigation, `-1` when no row is active.
+   * @see useVirtualScrollKeyboard
+   */
+  activeIndex,
+
+  /**
+   * Sets the active row index without scrolling. Pass `null` to clear it.
+   * @param index - The row index, or `null`.
+   */
+  setActiveIndex,
+
+  /**
+   * Marks a row active and emits `itemActivate` — wire it to your click handler.
+   * @param index - The row index.
+   */
+  handleItemActivate,
 
   /**
    * Detailed information about the current scroll state.
@@ -1207,12 +1240,14 @@ defineExpose({
         <component
           :is="itemTag"
           v-for="renderedItem in renderedItems"
+          :id="`${ containerId }-item-${ renderedItem.index }`"
           :key="renderedItem.index"
           :ref="(el: unknown) => setItemRef(el, renderedItem.index)"
           :data-index="renderedItem.index"
           class="virtual-scroll-item"
           :class="{
             'virtual-scroll--sticky': renderedItem.isStickyActive,
+            'virtual-scroll--active': renderedItem.index === activeIndex,
             'virtual-scroll--debug': isDebug,
           }"
           :style="renderedItemStyle(renderedItem)"
@@ -1232,6 +1267,7 @@ defineExpose({
             :is-sticky-active="renderedItem.isStickyActive"
             :is-sticky-active-x="renderedItem.isStickyActiveX"
             :is-sticky-active-y="renderedItem.isStickyActiveY"
+            :is-active="renderedItem.index === activeIndex"
             :offset="renderedItem.offset"
           />
 
@@ -1302,12 +1338,14 @@ defineExpose({
         <component
           :is="itemTag"
           v-for="renderedItem in renderedItems"
+          :id="`${ containerId }-item-${ renderedItem.index }`"
           :key="renderedItem.index"
           :ref="(el: unknown) => setItemRef(el, renderedItem.index)"
           :data-index="renderedItem.index"
           class="virtual-scroll-item"
           :class="{
             'virtual-scroll--sticky': renderedItem.isStickyActive,
+            'virtual-scroll--active': renderedItem.index === activeIndex,
             'virtual-scroll--debug': isDebug,
           }"
           :style="renderedItemStyle(renderedItem)"
@@ -1327,6 +1365,7 @@ defineExpose({
             :is-sticky-active="renderedItem.isStickyActive"
             :is-sticky-active-x="renderedItem.isStickyActiveX"
             :is-sticky-active-y="renderedItem.isStickyActiveY"
+            :is-active="renderedItem.index === activeIndex"
             :offset="renderedItem.offset"
           />
 
@@ -1358,11 +1397,30 @@ defineExpose({
         <slot name="footer" />
       </component>
     </template>
+
+    <div class="virtual-scroll-live-region" role="status" aria-live="polite" aria-atomic="true">{{ liveMessage }}</div>
   </component>
 </template>
 
 <style scoped>
 @layer components {
+  .virtual-scroll--active {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+
+  .virtual-scroll-live-region {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .virtual-scroll-container {
     position: relative;
     block-size: 100%;

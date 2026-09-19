@@ -379,6 +379,19 @@ export interface VirtualScrollBaseProps<T = unknown> {
   role?: string | undefined;
 
   /**
+   * How the keyboard interacts with the content.
+   *
+   * `'auto'` (default): a roving active item for the roles that publish an
+   *   active descendant (`listbox`, `menu`, `tree`), viewport scrolling for
+   *   everything else — including the default `grid` role of a two-axis list.
+   * `'item'`: always move a roving active item, exposed as the `isActive` item
+   *   slot prop and driven by `activeIndex`/`setActiveIndex`/`handleItemActivate`.
+   * `'viewport'`: always scroll the viewport, without tracking an active item.
+   * @default 'auto'
+   */
+  keyboardActivation?: 'auto' | 'item' | 'viewport' | undefined;
+
+  /**
    * ARIA label for the scroll container.
    */
   ariaLabel?: string | undefined;
@@ -552,6 +565,8 @@ export interface ItemSlotProps<T = unknown> {
   isStickyActiveX?: boolean | undefined;
   /** Whether this item is currently in a sticky state at the vertical edge. */
   isStickyActiveY?: boolean | undefined;
+  /** Whether this item is the active item tracked by keyboard navigation. */
+  isActive?: boolean | undefined;
   /** The calculated pixel offset relative to the items wrapper in display pixels (DU). */
   offset: {
     /** Horizontal offset (left) in DU. */

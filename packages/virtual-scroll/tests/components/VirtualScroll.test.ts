@@ -696,6 +696,80 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.y).toBe(0);
     });
 
+    it('tracks an active item for roles that publish an active descendant', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          role: 'listbox',
+          ariaLabel: 'Options',
+        },
+        slots: { item: '<div class="row">row</div>' },
+      });
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      const wrapperEl = wrapper.find('.virtual-scroll-wrapper');
+      const vm = wrapper.vm as unknown as { activeIndex: number; scrollDetails: { scrollOffset: { y: number; }; }; };
+
+      // Nothing is active until the keyboard is used.
+      expect(wrapperEl.attributes('aria-activedescendant')).toBeUndefined();
+
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+
+      expect(vm.activeIndex).toBe(0);
+      const containerId = container.attributes('id');
+      expect(wrapperEl.attributes('aria-activedescendant')).toBe(`${ containerId }-item-0`);
+
+      // The first arrow only activates the visible item: nothing scrolls.
+      expect(vm.scrollDetails.scrollOffset.y).toBe(0);
+      const activeItem = wrapper.find('.virtual-scroll--active');
+      expect(activeItem.attributes('id')).toBe(`${ containerId }-item-0`);
+
+      await container.trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+      expect(vm.activeIndex).toBe(1);
+
+      await container.trigger('keydown', { key: 'Enter' });
+      expect(wrapper.emitted('itemActivate')).toEqual([ [ 1, mockItems[ 1 ] ] ]);
+
+      // Clicking into the content can move the active item without scrolling.
+      (wrapper.vm as unknown as { setActiveIndex: (index: number | null) => void; }).setActiveIndex(4);
+      await nextTick();
+      expect(vm.activeIndex).toBe(4);
+
+      wrapper.unmount();
+    });
+
+    it('tracks an active item when asked for the item model on a plain list', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems, keyboardActivation: 'item' },
+      });
+      await nextTick();
+
+      await wrapper.find('.virtual-scroll-container').trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+
+      expect((wrapper.vm as unknown as { activeIndex: number; }).activeIndex).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('keeps the item model off when the viewport model is requested', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems, role: 'listbox', keyboardActivation: 'viewport' },
+      });
+      await nextTick();
+
+      await wrapper.find('.virtual-scroll-container').trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+
+      expect((wrapper.vm as unknown as { activeIndex: number; }).activeIndex).toBe(-1);
+      expect(wrapper.find('.virtual-scroll-wrapper').attributes('aria-activedescendant')).toBeUndefined();
+      wrapper.unmount();
+    });
+
     it('end key lands past the virtual end when a loading slot is rendered', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems },

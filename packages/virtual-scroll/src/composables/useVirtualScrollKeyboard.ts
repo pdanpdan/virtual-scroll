@@ -1,5 +1,7 @@
 import type { ScrollAlignment, ScrollDetails, ScrollToOffsetOptions, VirtualScrollProps } from '../types';
-import type { Ref } from 'vue';
+import type { MaybeRefOrGetter, Ref } from 'vue';
+
+import { computed, ref, toValue } from 'vue';
 
 export interface UseVirtualScrollKeyboardOptions<T> {
   props: VirtualScrollProps<T>;
@@ -19,6 +21,23 @@ export interface UseVirtualScrollKeyboardOptions<T> {
   getColumnIndexAt: (offset: number) => number;
   /** Height of the loading slot (when always rendered), so End can include it. */
   getLoadingSlotSize?: () => number;
+  /**
+   * How the keyboard interacts with the content.
+   * - `'viewport'` (default): scrolls the viewport only, without tracking an
+   *   active item.
+   * - `'item'`: moves a roving active item (`activeIndex`), keeping it in view.
+   *
+   * A ref or getter is re-read on every key press, so a host can pick the mode
+   * per ARIA role and react to a role change.
+   * @default 'viewport'
+   */
+  activationMode?: MaybeRefOrGetter<'item' | 'viewport'>;
+  /**
+   * Called with the item index when the active item is activated: `Enter`/`Space`
+   * on the container, or an explicit `handleItemActivate` call (e.g. a click in
+   * the item slot). Never called in `'viewport'` activation mode.
+   */
+  onActivate?: (index: number) => void;
 }
 
 export function useVirtualScrollKeyboard<T>({
@@ -38,13 +57,185 @@ export function useVirtualScrollKeyboard<T>({
   getRowIndexAt,
   getColumnIndexAt,
   getLoadingSlotSize,
+  activationMode = 'viewport',
+  onActivate,
 }: UseVirtualScrollKeyboardOptions<T>) {
+  /** Resolved activation mode, re-read whenever the source value changes. */
+  const resolvedActivationMode = computed(() => toValue(activationMode));
+
+  /**
+   * Index of the roving active item, `-1` when no item is active.
+   * @default -1
+   */
+  const activeIndex = ref(-1);
+
+  /**
+   * Polite announcement for the active item, e.g. `Item 21 of 100`; empty when
+   * no item is active (or the list is shorter than the active index).
+   */
+  const liveMessage = computed(() => {
+    const index = activeIndex.value;
+    return index < 0 || index >= props.items.length ? '' : `Item ${ index + 1 } of ${ props.items.length }`;
+  });
+
+  /**
+   * Sets the roving active item without scrolling it into view, so a component
+   * can sync it from a click or an external selection.
+   *
+   * Indices are `items` indices: in grid mode the active item is the row that
+   * renders item `index`. `null`, a negative or a non-finite index clears the
+   * selection (`-1`); an index past the end clamps to the last item.
+   *
+   * @param index - The item index to activate, or `null` to clear the selection.
+   */
+  const setActiveIndex = (index: number | null) => {
+    if (index === null || !Number.isFinite(index) || index < 0 || props.items.length === 0) {
+      activeIndex.value = -1;
+      return;
+    }
+    activeIndex.value = Math.min(Math.trunc(index), props.items.length - 1);
+  };
+
+  /**
+   * Scrolls an item into view with the smallest movement that reveals it,
+   * leaving the position on the other axis untouched (so a multi-column list
+   * keeps its current column).
+   *
+   * @param index - The item index to reveal.
+   * @param isVerticalAxis - `true` for the block axis, `false` for the inline axis.
+   */
+  const scrollItemIntoView = (index: number, isVerticalAxis: boolean) => {
+    scrollToIndex(isVerticalAxis ? index : null, isVerticalAxis ? null : index, { align: 'auto' });
+  };
+
+  /**
+   * Moves the active item by `step` items along one axis and keeps it visible.
+   *
+   * With no active item yet, the first press activates the first currently
+   * visible item and does not scroll.
+   *
+   * @param step - Signed number of items to move (`1` or `-1`).
+   * @param isVerticalAxis - `true` for the block axis, `false` for the inline axis.
+   */
+  const moveActiveItem = (step: number, isVerticalAxis: boolean) => {
+    const count = props.items.length;
+    if (count === 0) {
+      return;
+    }
+    if (activeIndex.value < 0) {
+      setActiveIndex(isVerticalAxis ? scrollDetails.value.currentIndex : scrollDetails.value.currentColIndex);
+      return;
+    }
+    const target = Math.max(0, Math.min(count - 1, activeIndex.value + step));
+    setActiveIndex(target);
+    scrollItemIntoView(target, isVerticalAxis);
+  };
+
+  /**
+   * Handles a key press in `'item'` activation mode: the roving active item
+   * moves (and is kept visible) instead of the viewport.
+   *
+   * @param event - The keyboard event.
+   * @returns `true` when the key was consumed. `false` lets the viewport handler
+   *   process it: unrelated keys, and `ArrowLeft`/`ArrowRight` in grid mode,
+   *   where the active item is a row and the arrows pan the columns.
+   */
+  const handleItemKeyDown = (event: KeyboardEvent): boolean => {
+    const count = props.items.length;
+    const direction = props.direction;
+    const isVerticalAxis = direction !== 'horizontal';
+
+    switch (event.key) {
+      case 'Enter':
+      case ' ': {
+        if (activeIndex.value < 0) {
+          return false;
+        }
+        event.preventDefault();
+        onActivate?.(activeIndex.value);
+        return true;
+      }
+      case 'ArrowDown':
+      case 'ArrowUp': {
+        if (direction === 'horizontal') {
+          return false;
+        }
+        event.preventDefault();
+        stopProgrammaticScroll();
+        moveActiveItem(event.key === 'ArrowDown' ? 1 : -1, true);
+        return true;
+      }
+      case 'ArrowRight':
+      case 'ArrowLeft': {
+        if (direction !== 'horizontal') {
+          return false;
+        }
+        event.preventDefault();
+        stopProgrammaticScroll();
+        const isForward = event.key === 'ArrowRight';
+        moveActiveItem((isRtl.value ? !isForward : isForward) ? 1 : -1, false);
+        return true;
+      }
+      case 'Home':
+      case 'End': {
+        event.preventDefault();
+        stopProgrammaticScroll();
+        if (count > 0) {
+          const target = event.key === 'Home' ? 0 : count - 1;
+          setActiveIndex(target);
+          scrollItemIntoView(target, isVerticalAxis);
+        }
+        return true;
+      }
+      case 'PageUp':
+      case 'PageDown': {
+        event.preventDefault();
+        stopProgrammaticScroll();
+        if (count > 0) {
+          const { currentIndex, currentEndIndex, currentColIndex, currentEndColIndex } = scrollDetails.value;
+          const start = isVerticalAxis ? currentIndex : currentColIndex;
+          const end = isVerticalAxis ? currentEndIndex : currentEndColIndex;
+          const pageSize = Math.max(1, end - start + 1);
+          const base = activeIndex.value < 0 ? start : activeIndex.value;
+          const target = Math.max(0, Math.min(count - 1, base + (event.key === 'PageDown' ? pageSize : -pageSize)));
+          setActiveIndex(target);
+          scrollItemIntoView(target, isVerticalAxis);
+        }
+        return true;
+      }
+      default:
+        return false;
+    }
+  };
+
+  /**
+   * Activates an item explicitly (e.g. from a click handler in the item slot):
+   * marks it as the active item and calls `onActivate`. The item is not scrolled
+   * into view, since a pointer activation is already on screen.
+   *
+   * No-op in `'viewport'` activation mode, where no item is ever activated.
+   *
+   * @param index - The item index to activate.
+   */
+  const handleItemActivate = (index: number) => {
+    if (resolvedActivationMode.value === 'viewport' || !Number.isFinite(index) || index < 0 || index >= props.items.length) {
+      return;
+    }
+    setActiveIndex(index);
+    // `onActivate` always receives the effective active index.
+    onActivate?.(activeIndex.value);
+  };
+
   /**
    * Handles keyboard events for navigation (Home, End, Arrows, PageUp/Down).
    *
    * @param event - The keyboard event.
    */
   const handleKeyDown = (event: KeyboardEvent) => {
+    if (resolvedActivationMode.value === 'item' && handleItemKeyDown(event)) {
+      return;
+    }
+
     const { viewportSize, scrollOffset } = scrollDetails.value;
     const isHorizontal = props.direction !== 'vertical';
     const isVertical = props.direction !== 'horizontal';
@@ -300,6 +491,10 @@ export function useVirtualScrollKeyboard<T>({
   };
 
   return {
+    activeIndex,
+    liveMessage,
+    setActiveIndex,
+    handleItemActivate,
     handleKeyDown,
   };
 }

@@ -4,6 +4,7 @@
  * Supports large lists and grids by only rendering visible items and using coordinate scaling.
  * Features include sticky headers/footers, RTL support, custom scrollbars, and scroll restoration.
  */
+import type { LoadDetails } from '../extensions/all';
 import type {
   ItemSlotProps,
   RenderedItem,
@@ -69,7 +70,8 @@ const props = withDefaults(defineProps<Props<T>>(), {
 
 const emit = defineEmits<{
   (e: 'scroll', details: ScrollDetails<T>): void;
-  (e: 'load', direction: 'vertical' | 'horizontal'): void;
+  (e: 'load', direction: 'vertical' | 'horizontal', details: LoadDetails): void;
+  (e: 'itemActivate', index: number, item: T | undefined): void;
   (e: 'visibleRangeChange', range: { start: number; end: number; colStart: number; colEnd: number; }): void;
 }>();
 
@@ -125,8 +127,10 @@ const containerId = computed(() => `vs-container-${ instanceId }`);
  * restoration) is compiled out. Replaced by the bundler; `false` in the full
  * build, in tests and in dev.
  */
-// eslint-disable-next-line no-undef -- injected by the bundler (see src/globals.d.ts)
-const IS_CORE_BUILD = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD__;
+/* v8 ignore next 2 -- the flag is undefined outside the two builds (vite.config.core.ts) */
+const IS_CORE_BUILD
+  /* eslint-disable-next-line no-undef -- injected by the bundler (see src/globals.d.ts) */
+  = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD__;
 
 /**
  * Extensions wired by the component: the two the engine relies on for correct
@@ -135,16 +139,20 @@ const IS_CORE_BUILD = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD_
 const extensions = [
   useRtlExtension<T>(),
   useCoordinateScalingExtension<T>(),
+  /* The optional half of this list is compiled out of the lean build; both
+     builds are asserted by tests/bundle-size and tests/build-output. */
+  /* v8 ignore start -- only the full build's branch runs in these suites */
   ...(IS_CORE_BUILD
     ? []
     : [
       useSnappingExtension<T>(),
       useStickyExtension<T>(),
       useInfiniteLoadingExtension<T>({
-        onLoad: (dir) => emit('load', dir),
+        onLoad: (dir, details) => emit('load', dir, details),
       }),
       usePrependRestorationExtension<T>(),
     ]),
+  /* v8 ignore stop */
 ];
 
 const measuredPaddingStart = ref(0);
@@ -250,14 +258,19 @@ const {
 const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
 
 /** The scrollbar overlay, or `null` in the lean build. */
+/* v8 ignore next -- the lean build is asserted by tests/build-output.test.ts */
 const ScrollbarOverlay: Component | null = IS_CORE_BUILD ? null : VirtualScrollbars;
 
+/* The three defaults below only survive in the lean build; both builds are
+   asserted by tests/build-output.test.ts. */
+/* v8 ignore start -- lean build only */
 /** Whether the custom scrollbars are shown instead of the native one. */
 let showVirtualScrollbars = computed(() => false);
 /** Slot props of the vertical scrollbar, or `null` when it is not shown. */
 let verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
 /** Slot props of the horizontal scrollbar, or `null` when it is not shown. */
 let horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
+/* v8 ignore stop */
 
 function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: number) {
   const { displayViewportSize } = scrollDetails.value;
@@ -275,6 +288,7 @@ function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: 
   }
 }
 
+/* v8 ignore next -- the `if` is always taken outside the lean build */
 if (!IS_CORE_BUILD) {
   showVirtualScrollbars = computed(() => {
     if (isWindowContainer.value) {
@@ -403,11 +417,45 @@ watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtua
   }
 }, { immediate: true });
 
+/**
+ * Roles that publish an active descendant. A `grid` is deliberately not one of
+ * them: a two-axis list defaults to that role, and flipping its keyboard model
+ * is opt-in through `keyboardActivation`.
+ */
+const ACTIVE_DESCENDANT_ROLES = new Set([ 'listbox', 'menu', 'tree' ]);
+
+/** ARIA role of the component, from the `role` prop or the direction. */
+const effectiveRole = computed((): string => {
+  if (props.role) {
+    return props.role;
+  }
+  return props.direction === 'both' ? 'grid' : 'list';
+});
+
 /** Keydown handler installed in the full build; `undefined` in the lean build. */
 let handleKeyDown: ((event: KeyboardEvent) => void) | undefined;
+/** Index of the item tracked by keyboard navigation, `-1` when none. */
+let activeIndex = ref(-1);
+/* The four defaults below only survive in the lean build, where the composable
+   that overwrites them is compiled out. */
+/* v8 ignore start -- lean build only */
+/** Polite announcement for the active item. */
+let liveMessage = computed(() => '');
+/** Sets the active item index without scrolling. */
+let setActiveIndex: (index: number | null) => void = () => {};
+/** Marks an item active and emits `itemActivate` (e.g. from a click handler). */
+let handleItemActivate: (index: number) => void = () => {};
+/* v8 ignore stop */
 
+/* v8 ignore next -- the `if` is always taken outside the lean build */
 if (!IS_CORE_BUILD) {
-  ({ handleKeyDown } = useVirtualScrollKeyboard({
+  ({
+    handleKeyDown,
+    activeIndex,
+    liveMessage,
+    setActiveIndex,
+    handleItemActivate,
+  } = useVirtualScrollKeyboard({
     props,
     virtualScrollProps,
     scrollDetails,
@@ -424,8 +472,23 @@ if (!IS_CORE_BUILD) {
     getRowIndexAt,
     getColumnIndexAt,
     getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
+    /**
+     * Roles with an active descendant read the active item, so they get the
+     * roving model; a plain list keeps scrolling the viewport.
+     */
+    activationMode: computed<'item' | 'viewport'>(() => {
+      const requested = props.keyboardActivation ?? 'auto';
+      if (requested !== 'auto') {
+        return requested;
+      }
+      return ACTIVE_DESCENDANT_ROLES.has(effectiveRole.value) ? 'item' : 'viewport';
+    }),
+    onActivate: (index: number) => emit('itemActivate', index, props.items[ index ]),
   }));
 }
+
+/** `aria-activedescendant` target while an item is active. */
+const activeDescendant = computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
@@ -458,6 +521,7 @@ const containerStyle = computed(() => {
  * @param scrollbar - Scrollbar state from useVirtualScrollbar.
  * @returns Props for the scrollbar slot or null if content fits.
  */
+/* v8 ignore next -- the `if` is always taken outside the lean build */
 if (!IS_CORE_BUILD) {
   const verticalScrollbar = useVirtualScrollbar(computed(() => ({
     axis: 'vertical' as const,
@@ -612,13 +676,6 @@ function getItemStyle(item: RenderedItem<T>) {
 
 const isDebug = computed(() => props.debug);
 
-const effectiveRole = computed(() => {
-  if (props.role) {
-    return props.role;
-  }
-  return props.direction === 'both' ? 'grid' : 'list';
-});
-
 const isGrid = computed(() => effectiveRole.value === 'grid');
 
 const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : undefined);
@@ -734,6 +791,24 @@ defineExpose({
    * @see useVirtualScroll
    */
   columnRange,
+
+  /**
+   * Index of the item tracked by keyboard navigation, `-1` when no item is active.
+   * @see useVirtualScrollKeyboard
+   */
+  activeIndex,
+
+  /**
+   * Sets the active item index without scrolling. Pass `null` to clear it.
+   * @param index - The item index, or `null`.
+   */
+  setActiveIndex,
+
+  /**
+   * Marks an item active and emits `itemActivate` — wire it to your click handler.
+   * @param index - The item index.
+   */
+  handleItemActivate,
 
   /**
    * Helper to get the width of a specific column.
@@ -984,17 +1059,20 @@ defineExpose({
       class="virtual-scroll-wrapper"
       :style="wrapperStyle"
       :role="wrapperRole"
+      :aria-activedescendant="activeDescendant"
       v-bind="wrapperAriaProps"
     >
       <component
         :is="itemTag"
         v-for="renderedItem in renderedItems"
+        :id="`${ containerId }-item-${ renderedItem.index }`"
         :key="renderedItem.index"
         :ref="(el: unknown) => setItemRef(el, renderedItem.index)"
         :data-index="renderedItem.index"
         class="virtual-scroll-item"
         :class="{
           'virtual-scroll--sticky': renderedItem.isStickyActive,
+          'virtual-scroll--active': renderedItem.index === activeIndex,
           'virtual-scroll--debug': isDebug,
         }"
         :style="getItemStyle(renderedItem)"
@@ -1014,6 +1092,7 @@ defineExpose({
           :is-sticky-active="renderedItem.isStickyActive"
           :is-sticky-active-x="renderedItem.isStickyActiveX"
           :is-sticky-active-y="renderedItem.isStickyActiveY"
+          :is-active="renderedItem.index === activeIndex"
           :offset="renderedItem.offset"
         />
 
@@ -1044,6 +1123,8 @@ defineExpose({
     >
       <slot name="footer" />
     </component>
+
+    <div class="virtual-scroll-live-region" role="status" aria-live="polite" aria-atomic="true">{{ liveMessage }}</div>
   </component>
 </template>
 
@@ -1074,6 +1155,23 @@ defineExpose({
     &.virtual-scroll--both {
       white-space: nowrap;
     }
+  }
+
+  .virtual-scroll--active {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+
+  .virtual-scroll-live-region {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   .virtual-scroll-wrapper {

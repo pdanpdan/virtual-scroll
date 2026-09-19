@@ -126,6 +126,26 @@ describe('virtualScrollTable', () => {
   });
 
   describe('table virtualization', () => {
+    it('tracks an active row when asked for the item model', async () => {
+      const wrapper = mount(VirtualScrollTable, {
+        props: { items: mockItems, itemSize: 40, keyboardActivation: 'item' },
+      });
+      await nextTick();
+
+      await wrapper.find('.virtual-scroll-container').trigger('keydown', { key: 'ArrowDown' });
+      await nextTick();
+
+      const vm = wrapper.vm as unknown as { activeIndex: number; };
+      expect(vm.activeIndex).toBe(0);
+      const container = wrapper.find('.virtual-scroll-container');
+      // The table publishes the row semantics (rowcount, active row) on the container.
+      expect(container.attributes('aria-activedescendant')).toBe(`${ container.attributes('id') }-item-0`);
+
+      await container.trigger('keydown', { key: 'Enter' });
+      expect(wrapper.emitted('itemActivate')).toEqual([ [ 0, mockItems[ 0 ] ] ]);
+      wrapper.unmount();
+    });
+
     it('renders table rows in real flow with spacer rows when flowTable is enabled', async () => {
       const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
       const wrapper = mount(VirtualScrollTable, {
