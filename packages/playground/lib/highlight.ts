@@ -102,7 +102,14 @@ export function highlightPlugin() {
         let newCode = code;
         for (const r of replacements.reverse()) {
           const highlightedHtml = await highlight(r.raw, r.lang);
-          const safeValue = JSON.stringify(highlightedHtml.replaceAll('&#x3C;/</', '&amp;lt;/</')).replace(reReplaceQuote, '&quot;');
+          // The value below is read back by the template compiler, which entity-decodes
+          // attribute values once: every `&` in the highlighted markup has to survive that
+          // pass as `&amp;`. Without it shiki's `&#x3C;` escapes decode into live `<`
+          // characters, so a line starting with `<Tag` (shiki emits it as one token)
+          // becomes a real element and swallows the rows after it.
+          const safeValue = JSON.stringify(highlightedHtml)
+            .replaceAll('&', '&amp;')
+            .replace(reReplaceQuote, '&quot;');
           const newAttr = `:code="${ safeValue }"`;
           newCode = newCode.slice(0, r.start) + newAttr + newCode.slice(r.end);
         }
