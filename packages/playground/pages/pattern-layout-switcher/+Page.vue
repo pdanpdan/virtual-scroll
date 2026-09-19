@@ -14,7 +14,7 @@ import { html as highlightedCode } from './+Page.vue?highlight';
 
 type Layout = 'list' | 'grid' | 'table';
 
-interface Record {
+interface Item {
   id: number;
   name: string;
   team: string;
@@ -23,8 +23,8 @@ interface Record {
 }
 
 const TEAMS = [ 'Atlas', 'Beacon', 'Cobalt', 'Delta', 'Ember' ];
-const STATUSES: Record[ 'status' ][] = [ 'active', 'idle', 'blocked' ];
-const STATUS_BADGE: Record<Record[ 'status' ], string> = {
+const STATUSES: Item[ 'status' ][] = [ 'active', 'idle', 'blocked' ];
+const STATUS_BADGE: Record<Item[ 'status' ], string> = {
   active: 'badge-success',
   idle: 'badge-ghost',
   blocked: 'badge-error',
@@ -44,7 +44,7 @@ const dense = ref(false);
 const virtualScrollbar = ref(true);
 
 /** One dataset, three virtualization units - the records never change with the layout. */
-const records = computed<Record[]>(() => Array.from({ length: itemCount.value }, (_, id) => ({
+const records = computed<Item[]>(() => Array.from({ length: itemCount.value }, (_, id) => ({
   id,
   name: `Record ${ id + 1 }`,
   team: TEAMS[ id % TEAMS.length ]!,
@@ -59,7 +59,7 @@ const gridRowHeight = computed(() => (dense.value ? 96 : 132));
 
 /** The grid virtualizes rows of records, so the cross axis can be derived. */
 const gridRows = computed(() => {
-  const rows: Record[][] = [];
+  const rows: Item[][] = [];
   for (let start = 0; start < records.value.length; start += GRID_COLUMNS) {
     rows.push(records.value.slice(start, start + GRID_COLUMNS));
   }
