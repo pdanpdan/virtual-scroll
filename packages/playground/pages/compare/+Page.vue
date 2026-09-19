@@ -7,7 +7,7 @@
     <h1 class="text-2xl @4xl:text-4xl font-bold text-primary">Virtual Scroll Comparison</h1>
     <p class="text-sm @4xl:text-base opacity-70 mt-2 max-w-4xl">
       <code>@pdanpdan/virtual-scroll</code> vs. other main Vue 3 virtualization libraries.
-      Versions, publish dates and bundle sizes were checked on September 3, 2026.
+      Versions, publish dates and bundle sizes were checked on September 20, 2026.
     </p>
   </div>
 
@@ -19,12 +19,13 @@
       ships today, not what its README promised three years ago.
     </p>
     <p>
-      Seven framework libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
+      Eight framework libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
       <code>@tanstack/vue-virtual</code>, the small and fast <code>virtua</code>, <code>vueuc</code> (a utility
       collection that happens to include a virtual list), <code>vue-virtual-scroll-list</code>, which is
-      here mostly to show what an unmaintained package looks like, and
+      here mostly to show what an unmaintained package looks like,
       <code>@ceriousdevtech/vue-cerious-scroll</code>, the component + composable newcomer with measured
-      sizes.
+      sizes, and <code>vlist</code>, a framework-agnostic core with official adapters and a plugin for
+      everything.
     </p>
   </div>
 
@@ -45,10 +46,10 @@
       <tbody>
         <tr>
           <td class="font-bold whitespace-nowrap">@pdanpdan/virtual-scroll</td>
-          <td><code>0.12.0</code></td>
-          <td>2026-09-02</td>
+          <td><code>1.0.0</code></td>
+          <td>2026-09-12</td>
           <td>12</td>
-          <td>59.9 / 18.4 kB</td>
+          <td>58.8 / 18.3 kB</td>
           <td>Component + composables + extensions</td>
         </tr>
         <tr>
@@ -56,31 +57,31 @@
           <td><code>3.0.5</code></td>
           <td>2026-08-12</td>
           <td>10,800</td>
-          <td>55.4 / 16.6 kB</td>
+          <td>27.1 / 10.0 kB</td>
           <td>Components (Scroller, RecycleScroller, DynamicScroller, TableScroller)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">@tanstack/vue-virtual</td>
-          <td><code>3.13.36</code></td>
-          <td>2026-08-18</td>
+          <td><code>3.13.39</code></td>
+          <td>2026-09-14</td>
           <td>7,100 (monorepo)</td>
-          <td>23.0 / 7.0 kB</td>
+          <td>24.1 / 7.3 kB</td>
           <td>Headless composable (<code>useVirtualizer</code>)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">virtua</td>
-          <td><code>0.51.0</code></td>
-          <td>2026-08-31</td>
+          <td><code>0.52.0</code></td>
+          <td>2026-09-19</td>
           <td>3,700</td>
-          <td>14.3 / 6.1 kB</td>
+          <td>9.5 / 4.6 kB</td>
           <td>Components (VList, VGrid) + handle</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">vueuc</td>
           <td><code>0.4.66</code></td>
           <td>2026-08-19</td>
-          <td>312</td>
-          <td>n/a (utility collection)</td>
+          <td>310</td>
+          <td>23.8 / 9.0 kB</td>
           <td>Component (VVirtualList)</td>
         </tr>
         <tr>
@@ -88,15 +89,23 @@
           <td><code>2.3.5</code></td>
           <td>2023-05-29</td>
           <td>4,500</td>
-          <td>14.3 / 4.6 kB</td>
+          <td>14.9 / 4.8 kB</td>
           <td>Component</td>
         </tr>
         <tr>
+          <td class="font-bold whitespace-nowrap">vlist <span class="opacity-50">(+ vlist-vue)</span></td>
+          <td><code>2.8.1</code></td>
+          <td>2026-09-15</td>
+          <td>17</td>
+          <td>101.1 / 34.7 kB</td>
+          <td>Plugin core (<code>createVList</code>) + Vue adapter (<code>useVList</code>)</td>
+        </tr>
+        <tr>
           <td class="font-bold whitespace-nowrap">@ceriousdevtech/vue-cerious-scroll</td>
-          <td><code>1.1.3</code></td>
-          <td>2026-08-26</td>
-          <td>9</td>
-          <td>91.5 / 23.8 kB</td>
+          <td><code>1.1.5</code></td>
+          <td>2026-09-16</td>
+          <td>11</td>
+          <td>93.2 / 24.5 kB</td>
           <td>Component + composable</td>
         </tr>
       </tbody>
@@ -104,14 +113,19 @@
   </div>
 
   <p class="text-sm opacity-60 mb-12 -mt-6">
-    Bundle sizes: min+gzip of the package's own code (regular dependencies bundled, Vue external), measured
-    from the npm tarballs with esbuild; <code>vue-virtual-scroller</code> via bundlephobia.
-    <code>@tanstack/vue-virtual</code> is split into two packages, so the number covers both: the Vue adapter
-    is ~0.5&nbsp;kB gzip, <code>@tanstack/virtual-core</code> (3.17.8, the version it depends on) is
-    ~6.7&nbsp;kB gzip &mdash; together 7.0&nbsp;kB, which is what lands in your bundle. The whole
-    <code>virtua</code> package covers React, Vue, Solid, Svelte and Angular &mdash; the Vue entry alone is
-    roughly 3&nbsp;kB, per its README. The <code>vue-cerious-scroll</code> number bundles its runtime
-    dependency (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
+    Bundle sizes: the smallest import that renders a list from each package's Vue entry, tree-shaken,
+    dependencies bundled and Vue external &mdash; installed from npm, bundled with esbuild
+    (<code>--minify</code>), gzipped at level 9. For the component libraries that is one component
+    (<code>VirtualScroll</code>, <code>RecycleScroller</code>, <code>VList</code>,
+    <code>VVirtualList</code>, <code>VirtualList</code>, <code>CeriousScroll</code>); for
+    <code>@tanstack/vue-virtual</code> it is <code>useVirtualizer</code> including the
+    <code>@tanstack/virtual-core</code> it depends on, and for <code>vlist</code> it is
+    <code>vlist-vue</code>'s <code>useVList</code>, which through <code>vlist/config</code> pulls in every one
+    of its seventeen plugins &mdash; importing the core and plugins by hand instead is 10.2&nbsp;kB gzip for
+    the base and 12.2&nbsp;kB with the scrollbar. Ours covers all six built-in extensions; the
+    <code>useVirtualScroll</code> engine alone, for writing your own markup, is 10.5&nbsp;kB gzip.
+    <code>vue-cerious-scroll</code> bundles its runtime dependency
+    (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
   </p>
 
   <h2 class="docs-prop-header text-secondary">Feature Matrix</h2>
@@ -127,12 +141,14 @@
           <td role="columnheader" class="text-center">virtua</td>
           <td role="columnheader" class="text-center">vueuc</td>
           <td role="columnheader" class="text-center">vue-virtual-<br />scroll-list</td>
+          <td role="columnheader" class="text-center">vlist</td>
           <td role="columnheader" class="text-center">@ceriousdevtech/<br />vue-cerious-scroll</td>
         </tr>
       </thead>
       <tbody>
         <tr>
           <th scope="row" class="font-medium">Vertical list</th>
+          <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -149,6 +165,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -159,6 +176,7 @@
           <td class="text-center">🟠</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">🟠</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -169,10 +187,12 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Native scroll container (browser wheel/touch physics)</th>
+          <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
@@ -190,6 +210,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Measured dynamic item sizes</th>
@@ -200,9 +221,11 @@
           <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Measured rows without size estimates (no default-size first paint)</th>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -220,6 +243,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">❌</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Sticky elements / headers</th>
@@ -229,6 +253,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -240,6 +265,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Scroll snapping</th>
@@ -249,6 +275,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">🟠</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -259,6 +286,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -269,6 +297,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
           <td class="text-center">🟠</td>
+          <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
         </tr>
         <tr>
@@ -279,6 +308,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">🟠</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -289,6 +319,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -297,6 +328,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -309,6 +341,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -320,6 +353,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Masonry layout (one scroll container)</th>
@@ -330,11 +364,13 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">Real table rows in flow + auto-size columns</th>
           <td class="text-center">✅</td>
           <td class="text-center">🟠</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -349,6 +385,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">🟠</td>
           <td class="text-center">✅</td>
         </tr>
         <tr>
@@ -357,6 +394,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
+          <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
@@ -369,6 +407,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
           <td class="text-center">❌</td>
         </tr>
         <tr>
@@ -380,6 +419,7 @@
           <td class="text-center">❌</td>
           <td class="text-center">❌</td>
           <td class="text-center">✅</td>
+          <td class="text-center">✅</td>
         </tr>
         <tr>
           <th scope="row" class="font-medium">TypeScript</th>
@@ -389,6 +429,7 @@
           <td class="text-center">✅</td>
           <td class="text-center">✅</td>
           <td class="text-center">❌</td>
+          <td class="text-center">✅</td>
           <td class="text-center">✅</td>
         </tr>
       </tbody>
@@ -485,6 +526,27 @@
         </div>
       </div>
     </div>
+    <div class="docs-feature-card">
+      <div class="docs-feature-card-body">
+        <div class="docs-feature-card-icon">🟠</div>
+        <div>
+          <div class="docs-feature-card-title text-base">vlist</div>
+          <p class="docs-feature-card-description text-sm">
+            The grid is a single-axis layout &mdash; <code>columns</code> and a gap over a vertically
+            virtualized list, with no horizontal window, the same shape as <code>virtua</code>'s grid. Snapping
+            lives inside the carousel plugin, so a plain list has none. RTL is not implemented: the only RTL
+            code in the package throws for horizontal lists in synthetic mode. Prepending data shifts what you
+            are looking at &mdash; scroll snapshots and the rebuild utility preserve positions across
+            navigation and list recreation, not across an insert above the viewport. The table renders div rows
+            with resizable columns, not real table rows with content-sized columns. Rows have to exist as an
+            array (the examples build <code>Array.from({ length: n })</code>), though the instance exposes
+            <code>setGetItemFn</code> for index-driven rows. Its 34.7&nbsp;kB here is the adapter import:
+            <code>vlist/config</code> pulls in all seventeen plugins, so the smaller numbers in its docs assume
+            importing plugins by hand.
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <h2 class="docs-prop-header text-secondary">Where Each One Wins</h2>
@@ -497,16 +559,30 @@
         max element height, and the only Vue library that ships masonry and real table-flow layouts as
         first-class modes (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
-        a headless composable + extensions surface round out the picture. It is also the second-largest
-        bundle here, and at 12 stars it has no community to fall back on.
+        a headless composable + extensions surface round out the picture. It is also one of the larger
+        bundles here &mdash; 18.3&nbsp;kB gzip for the component, behind only the two APIs that ship their
+        whole plugin set, and the engine on its own is 10.5&nbsp;kB &mdash; and at 12 stars it has no
+        community to fall back on.
       </li>
       <li>
         <strong>@ceriousdevtech/vue-cerious-scroll</strong> &mdash; the only other Vue entry that ships real
         table rows and masonry layouts (canonical or DOM-measured), with built-in keyboard navigation. It is
         vertical-only &mdash; no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
         beyond-browser-max support &mdash; and it scrolls on its own hidden-overflow host instead of the
-        browser's scrollport. Newest and heaviest entry here (23.8&nbsp;kB gzip, dependencies bundled) and at
-        9 stars it has no community either.
+        browser's scrollport. The heaviest per-view code here after <code>vlist</code>
+        (24.5&nbsp;kB gzip, its runtime dependency bundled) and at 11 stars it has no community either.
+      </li>
+      <li>
+        <strong>vlist</strong> &mdash; the other batteries-included entry, and the closest in scope: a
+        framework-agnostic core with official Vue, React, Svelte and Solid adapters, plus plugins for grid,
+        masonry, table, tree, groups, selection, search, sortable, snapshots, transition, carousel and async
+        data. Its core is the smallest serious one when you import plugins by hand (10.2&nbsp;kB, plus
+        1&ndash;6&nbsp;kB per plugin), the default
+        scrollbar is already an overlay, document scrolling is a plugin, and 1M+ items work through its
+        bounded and synthetic scroll modes (the older <code>scale()</code> plugin is now a deprecation stub).
+        What it does not have is a second axis, RTL, snapping outside the carousel, real table rows, or
+        prepend anchoring &mdash; and the adapter path bundles every plugin. As young as this project: first
+        release this year, 17 stars.
       </li>
       <li>
         <strong>vue-virtual-scroller</strong> &mdash; the safe, boring choice. Ten years of production use,
@@ -543,16 +619,17 @@
           limit. That is exactly where <code>@pdanpdan/virtual-scroll</code> is positioned, and the trade-off is
           a bigger bundle and a young project. The demos on this site &mdash; grid, blog, spreadsheet, tree,
           table flow, masonry &mdash; are each a feature the mainstream competitors cannot do without custom
-          code; only <code>vue-cerious-scroll</code> also ships masonry and real table rows, and it stops
-          there (vertical only, no native scrollport, no grid, window, RTL or beyond-max support). So this
-          page doubles as the pitch.
+          code. <code>vue-cerious-scroll</code> also ships masonry and real table rows, but stops there
+          (vertical only, no native scrollport, no grid, window, RTL or beyond-max support);
+          <code>vlist</code> matches the layout plugin list but virtualizes one axis at a time and has no
+          RTL. So this page doubles as the pitch.
         </p>
       </div>
     </div>
   </div>
 
   <p class="text-xs opacity-50">
-    Sources: npm registry, GitHub API and project READMEs, checked on 2026-09-03.
+    Sources: npm registry, GitHub API and project docs, checked on 2026-09-20.
     <a href="https://www.npmjs.com/package/vue-virtual-scroller" target="_blank" rel="noopener" class="link">vue-virtual-scroller</a>
     &nbsp;•&nbsp;
     <a href="https://www.npmjs.com/package/@tanstack/vue-virtual" target="_blank" rel="noopener" class="link">@tanstack/vue-virtual</a>
@@ -564,5 +641,8 @@
     <a href="https://www.npmjs.com/package/vue-virtual-scroll-list" target="_blank" rel="noopener" class="link">vue-virtual-scroll-list</a>
     &nbsp;•&nbsp;
     <a href="https://www.npmjs.com/package/@ceriousdevtech/vue-cerious-scroll" target="_blank" rel="noopener" class="link">@ceriousdevtech/vue-cerious-scroll</a>
+    &nbsp;•&nbsp;
+    <a href="https://www.npmjs.com/package/vlist" target="_blank" rel="noopener" class="link">vlist</a>
+    (<a href="https://vlist.io/docs/adapters#vue" target="_blank" rel="noopener" class="link">Vue adapter</a>)
   </p>
 </template>
