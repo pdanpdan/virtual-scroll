@@ -26,6 +26,7 @@ import '@pdanpdan/virtual-scroll/style.css';
 import VirtualScroll from '@pdanpdan/virtual-scroll/VirtualScroll.vue';
 ```
 3. **CDN (UMD)** - `https://unpkg.com/@pdanpdan/virtual-scroll` after the Vue global, plus `https://unpkg.com/@pdanpdan/virtual-scroll/dist/virtual-scroll.css`.
+4. **Lean entry** - `import { VirtualScroll } from '@pdanpdan/virtual-scroll/core'` with `@pdanpdan/virtual-scroll/core/style.css`: the same API built without the optional wiring (no keyboard navigation, custom scrollbars, snapping, sticky items, infinite loading or prepend restoration; ~5 KB gzipped smaller for a tree-shaken `<VirtualScroll>`). In that build `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance`, `loading` and `restoreScrollOnPrepend` are accepted for API compatibility but do nothing - never mix the entry with code that relies on them, and keep the composable path if you need granular control.
 
 Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - read it before guessing option shapes.
 
@@ -37,6 +38,8 @@ Exact TypeScript signatures for everything below ship in `dist/index.d.ts` - rea
 
 **Extension factories** (2nd arg of `useVirtualScroll`; the component wires all six already):
 `useRtlExtension()`, `useSnappingExtension()`, `useStickyExtension()`, `useInfiniteLoadingExtension({ onLoad: (axis) => void })`, `usePrependRestorationExtension()`, `useCoordinateScalingExtension()`.
+
+`useStickyExtension()` owns sticky *behaviour*: it pins the nearest sticky item above the window (through the `includeIndices` hook) and computes `isStickyActive`/`stickyOffset`. `stickyIndices` without the extension keeps the layout offsets but does not pin anything. Extension authors get three additions for this kind of work: `includeIndices?(ctx)` (merge indices into the rendered window), `ctx.methods.getItemRawOffset(axis, index)` (raw virtual offset, correct for fixed and measured sizes) and `ctx.internalState.isHydrated`.
 
 **Key types**: `VirtualScrollProps`, `VirtualScrollInstance`, `VirtualScrollTableInstance`, `VirtualScrollMasonryInstance`, `UseVirtualScrollReturn`, `ScrollDetails`, `RenderedItem`, `ItemSlotProps`, `ScrollbarSlotProps`, `SSRRange`, `SnapMode`, `ScrollDirection`, `ScrollAlignment`, `ScrollToIndexOptions`, `ScrollToOffsetOptions`, `PaddingValue`, plus the `DEFAULT_*` constants and `EMPTY_SCROLL_DETAILS`.
 
