@@ -53,9 +53,11 @@ const records = computed<Item[]>(() => Array.from({ length: itemCount.value }, (
 })));
 
 const GRID_COLUMNS = 4;
+/** One gap for both axes - the engine prices it into the column offsets, the row applies it in CSS. */
+const GRID_GAP = 8;
 
 const rowHeight = computed(() => (dense.value ? 32 : 56));
-const gridRowHeight = computed(() => (dense.value ? 96 : 132));
+const gridRowHeight = computed(() => (dense.value ? 112 : 136));
 
 /** The grid virtualizes rows of records, so the cross axis can be derived. */
 const gridRows = computed(() => {
@@ -177,7 +179,7 @@ const {
           <span class="font-bold text-sm truncate">{{ item.name }}</span>
           <span class="badge badge-xs badge-ghost ms-auto">{{ item.team }}</span>
           <span class="font-mono text-xs tabular-nums w-10 text-end">{{ item.score }}</span>
-          <span class="badge badge-xs" :class="[STATUS_BADGE[ item.status ]]">{{ item.status }}</span>
+          <span class="min-w-20 badge badge-xs" :class="[STATUS_BADGE[ item.status ]]">{{ item.status }}</span>
         </div>
       </template>
     </VirtualScroll>
@@ -192,27 +194,32 @@ const {
       :items="gridRows"
       :item-size="gridRowHeight"
       :column-count="GRID_COLUMNS"
-      :column-width="220"
-      :gap="8"
-      :column-gap="8"
+      :column-width="240"
+      :gap="GRID_GAP"
+      :column-gap="GRID_GAP"
       :virtual-scrollbar="virtualScrollbar"
       aria-label="Records as a grid"
       @scroll="onScroll"
     >
-      <template #item="{ item: row, columnRange, getColumnWidth, getCellAriaProps }">
-        <div
-          v-for="offset in (columnRange.end - columnRange.start)"
-          :key="columnRange.start + offset - 1"
-          class="rounded-box border border-base-content/10 bg-base-200/60 p-3 flex flex-col gap-1"
-          :style="{ inlineSize: `${ getColumnWidth(columnRange.start + offset - 1) - 8 }px` }"
-          v-bind="getCellAriaProps(columnRange.start + offset - 1)"
-        >
-          <template v-if="row[ columnRange.start + offset - 1 ]">
-            <span class="font-mono text-[10px] opacity-40">{{ row[ columnRange.start + offset - 1 ]!.id + 1 }}</span>
-            <span class="font-bold text-sm truncate">{{ row[ columnRange.start + offset - 1 ]!.name }}</span>
-            <span class="badge badge-xs badge-ghost self-start">{{ row[ columnRange.start + offset - 1 ]!.team }}</span>
-            <span class="font-mono text-xs tabular-nums mt-auto">{{ row[ columnRange.start + offset - 1 ]!.score }}</span>
-          </template>
+      <template #item="{ item: row, index, columnRange, getColumnWidth, getCellAriaProps }">
+        <!-- The item element is a grid: the row owns the cells' flow, so they tile instead of stacking. -->
+        <div class="flex min-h-full items-stretch" :style="{ gap: `${ GRID_GAP }px` }">
+          <div
+            v-for="c in (columnRange.end - columnRange.start)"
+            :key="`r_${ index }_c_${ columnRange.start + c - 1 }`"
+            class="box-border flex shrink-0 flex-col gap-1 rounded-box border border-base-content/10 bg-base-200/60 p-3 overflow-hidden"
+            :style="{ inlineSize: `${ getColumnWidth(columnRange.start + c - 1) }px` }"
+            v-bind="getCellAriaProps(columnRange.start + c - 1)"
+          >
+            <template v-if="row[ columnRange.start + c - 1 ]">
+              <span class="font-mono text-[10px] opacity-40">{{ row[ columnRange.start + c - 1 ]!.id + 1 }}</span>
+              <span class="font-bold text-sm truncate">{{ row[ columnRange.start + c - 1 ]!.name }}</span>
+              <span class="badge badge-xs badge-ghost self-start">{{ row[ columnRange.start + c - 1 ]!.team }}</span>
+              <span class="mt-auto flex justify-between border-t border-base-content/5 pt-2 font-mono text-xs tabular-nums">
+                <span class="opacity-40">score</span>{{ row[ columnRange.start + c - 1 ]!.score }}
+              </span>
+            </template>
+          </div>
         </div>
       </template>
     </VirtualScroll>
@@ -262,9 +269,11 @@ const {
 
         <h3>1. Keep the data in one shape</h3>
         <p>
-          Every view reads the same <code>records</code> array. Pre-grouping it into rows would tie the data to one layout;
-          the engine derives rows itself: <code>direction="both"</code> with <code>column-count</code> maps the item list onto
-          a cross axis, and <code>flow-table</code> renders real <code>&lt;tr&gt;</code> elements between spacer rows.
+          Every view reads the same <code>records</code> array and hands the engine the unit it virtualizes. The list and the
+          table take the records as they are; the grid takes <code>gridRows</code> - the same records grouped four per row -
+          because in grid mode an <em>item is a row</em> and <code>column-count</code> spans the cross axis inside it. The
+          grouping is a <code>computed</code> over <code>records</code>, so the data itself never changes shape, and the
+          table renders real <code>&lt;tr&gt;</code> elements between spacer rows through <code>flow-table</code>.
         </p>
 
         <h3>2. Switch the component, keep the contract</h3>
@@ -289,10 +298,10 @@ const {
 &lt;VirtualScroll
   v-else-if=&quot;layout === 'grid'&quot;
   direction=&quot;both&quot;
-  :items=&quot;records&quot;
+  :items=&quot;gridRows&quot;
   :item-size=&quot;gridRowHeight&quot;
   :column-count=&quot;4&quot;
-  :column-width=&quot;220&quot;
+  :column-width=&quot;240&quot;
   @scroll=&quot;onScroll&quot;
 /&gt;
 
@@ -305,6 +314,14 @@ const {
   @scroll=&quot;onScroll&quot;
 /&gt;"
         />
+
+        <p>
+          The grid's <code>#item</code> slot is called once per row with that row's visible
+          <code>columnRange</code>, and its <code>getColumnWidth(index)</code> returns the gap-exclusive column width, so
+          the row has to own the cells' flow: wrap them in a flex row carrying <code>column-gap</code> and size each cell
+          from <code>getColumnWidth</code>. The item element is a grid container, so leaves handed to it directly become
+          one cell per implicit row.
+        </p>
 
         <h3>3. Sizes are inputs, not measurements</h3>
         <p>
