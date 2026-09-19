@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import AppLogo from '#/components/AppLogo.vue';
 import { changelog } from '#/pages/changelog/changelog-data';
+
+type GroupKey = 'breaking' | 'features' | 'fixes' | 'performance';
+
+const GROUPS: { key: GroupKey; label: string; glyph: string; headingClass: string; glyphClass: string; }[] = [
+  { key: 'breaking', label: 'Breaking Changes', glyph: '!', headingClass: 'text-warning/70', glyphClass: 'text-warning' },
+  { key: 'features', label: 'Features', glyph: '✓', headingClass: 'text-primary/70', glyphClass: 'text-primary' },
+  { key: 'fixes', label: 'Bug Fixes', glyph: '⨯', headingClass: 'text-error/70', glyphClass: 'text-error' },
+  { key: 'performance', label: 'Performance', glyph: '↗', headingClass: 'text-success/70', glyphClass: 'text-success' },
+];
 </script>
 
 <template>
@@ -64,37 +73,30 @@ import { changelog } from '#/pages/changelog/changelog-data';
             index % 2 === 0 ? '@4xl:text-end' : '@4xl:text-start',
           ]"
         >
-          <!-- Features -->
-          <div v-if="version.features?.length" class="space-y-3">
-            <h3 class="text-[10px] font-black uppercase tracking-widest text-primary/70">Features</h3>
-            <ul class="space-y-2 text-base-content/80 text-sm @4xl:text-base list-none p-0 m-0">
-              <li
-                v-for="feature in version.features"
-                :key="feature"
-                class="flex gap-2 items-start"
-                :class="[index % 2 === 0 ? '@4xl:flex-row-reverse' : 'flex-row']"
+          <template v-for="group in GROUPS" :key="group.key">
+            <div v-if="version[group.key]?.length" class="space-y-3">
+              <h3
+                class="text-[10px] font-black uppercase tracking-widest"
+                :class="group.headingClass"
               >
-                <span class="text-primary font-bold shrink-0 mt-0.5 select-none leading-tight">✓</span>
-                <span class="leading-relaxed" v-html="feature" />
-              </li>
-            </ul>
-          </div>
-
-          <!-- Bug Fixes -->
-          <div v-if="version.fixes?.length" class="space-y-3">
-            <h3 class="text-[10px] font-black uppercase tracking-widest text-error/70">Bug Fixes</h3>
-            <ul class="space-y-2 text-base-content/80 text-sm @4xl:text-base list-none p-0 m-0">
-              <li
-                v-for="fix in version.fixes"
-                :key="fix"
-                class="flex gap-2 items-start"
-                :class="[index % 2 === 0 ? '@4xl:flex-row-reverse' : 'flex-row']"
-              >
-                <span class="text-error font-bold shrink-0 mt-0.5 select-none leading-tight">⨯</span>
-                <span class="leading-relaxed" v-html="fix" />
-              </li>
-            </ul>
-          </div>
+                {{ group.label }}
+              </h3>
+              <ul class="space-y-2 text-base-content/80 text-sm @4xl:text-base list-none p-0 m-0">
+                <li
+                  v-for="(item, itemIndex) in version[group.key]"
+                  :key="itemIndex"
+                  class="flex gap-2 items-start"
+                  :class="[index % 2 === 0 ? '@4xl:flex-row-reverse' : 'flex-row']"
+                >
+                  <span
+                    class="font-bold shrink-0 mt-0.5 select-none leading-tight"
+                    :class="group.glyphClass"
+                  >{{ group.glyph }}</span>
+                  <span class="leading-relaxed" v-html="item" />
+                </li>
+              </ul>
+            </div>
+          </template>
         </div>
       </div>
       <hr v-if="index < changelog.length - 1" class="bg-primary/20" />
