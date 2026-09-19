@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "tmp-generated/**/*.vue",
+    "env.d.ts",
+    "../virtual-scroll/src/**/*.ts",
+    "../virtual-scroll/src/**/*.vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

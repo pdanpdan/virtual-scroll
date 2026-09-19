@@ -19,3 +19,6 @@ test-results
 TODO__*
 /AGENTS.md
 sitemap.xml
+
+# configurator output compiled by test:types
+packages/playground/tmp-generated

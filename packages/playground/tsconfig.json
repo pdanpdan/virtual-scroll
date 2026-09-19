@@ -16,8 +16,11 @@
       "#/*": [
         "./*"
       ],
+      "@pdanpdan/virtual-scroll/internal": [
+        "../virtual-scroll/src/internal.ts"
+      ],
       "@pdanpdan/virtual-scroll": [
-        "../virtual-scroll/src"
+        "../virtual-scroll/src/index.ts"
       ]
     },
     "types": [
@@ -38,6 +41,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "tmp-generated"
   ]
 }

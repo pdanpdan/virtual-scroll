@@ -14,6 +14,9 @@ export default antfu(
       a11y: true,
     },
     typescript: true,
+    // `packages/playground/tmp-generated` holds the configurator's compiled output
+    // (see `test:generated`): user-facing demo code, not source.
+    ignores: [ '**/tmp-generated/**' ],
   },
 
   {
