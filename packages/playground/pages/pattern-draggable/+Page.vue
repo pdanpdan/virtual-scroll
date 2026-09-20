@@ -2,7 +2,7 @@
 import type { Ref } from 'vue';
 
 import { VirtualScroll } from '@pdanpdan/virtual-scroll';
-import { inject, ref } from 'vue';
+import { inject, onUnmounted, ref, watch } from 'vue';
 
 import CodeBlock from '#/components/CodeBlock.vue';
 import ExampleContainer from '#/components/ExampleContainer.vue';
@@ -189,6 +189,35 @@ function handleDragEnd() {
   dragContainer = null;
   stopAutoScroll();
 }
+
+/**
+ * Cancels a drag event the list does not use.
+ *
+ * A drag event nobody cancels is left to the browser to act on, and the payload carried
+ * here is text: Safari - on iOS in particular - searches the web for the dropped text and
+ * loads the results, so a release that misses the rows navigates away. The rows cancel
+ * the events aimed at them; this covers the rest of the page.
+ *
+ * @param event - The `dragover` or `drop` event to cancel.
+ */
+function handleBrowserDrop(event: DragEvent) {
+  event.preventDefault();
+}
+
+/** Cancels drops page-wide, but only while a row is actually being carried. */
+function setBrowserDropGuard(active: boolean) {
+  if (active) {
+    window.addEventListener('dragover', handleBrowserDrop);
+    window.addEventListener('drop', handleBrowserDrop);
+    return;
+  }
+  window.removeEventListener('dragover', handleBrowserDrop);
+  window.removeEventListener('drop', handleBrowserDrop);
+}
+
+watch(draggedIndex, (index) => setBrowserDropGuard(index !== null));
+
+onUnmounted(() => setBrowserDropGuard(false));
 </script>
 
 <template>
@@ -249,7 +278,7 @@ function handleDragEnd() {
           :data-row-index="index"
           @dragstart="handleDragStart(index, $event)"
           @dragover.prevent="handleDragOver($event)"
-          @drop="handleDrop"
+          @drop.prevent="handleDrop"
           @dragend="handleDragEnd"
           @keydown.enter.prevent
           @keydown.space.prevent
@@ -391,6 +420,14 @@ function onDragEnd() {
           arithmetic equivalent when every row is the same height; the DOM lookup needs no size assumptions at all.
         </p>
 
+        <p>
+          Cancel the <code>drop</code> event the same way (<code>@drop.prevent</code>). A drop that no handler cancels is left to
+          the browser, and the payload carried here is text: Safari - on iOS above all - searches the web for the dropped text
+          and loads the results, so a release that misses the rows navigates away. Rows only cover the pixels they occupy, so
+          while a row is carried, cancel <code>dragover</code> and <code>drop</code> at the window level as well. The rows still
+          resolve the target from the pointer, and a release over the page around the list then does nothing.
+        </p>
+
         <CodeBlock
           class="guide-code-block"
           lang="vue"
@@ -409,7 +446,7 @@ function onDragEnd() {
         :data-row-index=&quot;index&quot;
         @dragstart=&quot;onDragStart(index, $event)&quot;
         @dragover.prevent=&quot;onDragOver($event)&quot;
-        @drop=&quot;onDrop&quot;
+        @drop.prevent=&quot;onDrop&quot;
         @dragend=&quot;onDragEnd&quot;
       >
         &lt;!-- Overlay marker: a border would change the row's measured height mid-drag. -->
