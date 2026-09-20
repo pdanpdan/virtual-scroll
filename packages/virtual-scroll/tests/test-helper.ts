@@ -1,6 +1,6 @@
 import type { UseVirtualScrollReturn } from '../src/composables/useVirtualScroll';
 import type { VirtualScrollExtension } from '../src/extensions';
-import type { ScrollDirection, VirtualScrollProps } from '../src/types';
+import type { VirtualScrollProps } from '../src/types';
 import type { Ref } from 'vue';
 /* global ScrollToOptions, ResizeObserverCallback */
 
@@ -133,10 +133,8 @@ export interface InternalState {
   scaleY: { value: number; };
   relativeScrollX: { value: number; };
   relativeScrollY: { value: number; };
-  direction: { value: ScrollDirection; };
 }
 
-// Helper to test composable
 export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: VirtualScrollExtension<T>[]) {
   let result: UseVirtualScrollReturn<T>;
   let internalState: InternalState;

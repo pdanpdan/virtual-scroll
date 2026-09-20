@@ -1183,9 +1183,6 @@ export interface MasonryRenderedItem<T = unknown> {
   height: number;
 }
 
-/** Properties passed to the masonry `item` scoped slot. */
-export type MasonryItemSlotProps<T = unknown> = MasonryRenderedItem<T>;
-
 /**
  * Scroll details of the masonry scroller.
  * The `items` list contains the cards currently mounted in the DOM window;

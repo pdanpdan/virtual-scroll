@@ -68,7 +68,6 @@ export type {
   ColumnRange,
   GetItemAriaProps,
   ItemSlotProps,
-  MasonryItemSlotProps,
   MasonryRenderedItem,
   MasonryScrollDetails,
   PaddingValue,

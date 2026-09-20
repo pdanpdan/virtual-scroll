@@ -184,7 +184,7 @@ export function useVirtualScroll<T = unknown>(
   const pendingScroll = ref<{
     rowIndex: number | null | undefined;
     colIndex: number | null | undefined;
-    options: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
+    options: ScrollToIndexOptions;
     /** Offset-based target (from scrollToOffset): re-clamped when measurements settle. */
     offsetX?: number;
     /** Offset-based target (from scrollToOffset): re-clamped when measurements settle. */
@@ -1143,8 +1143,7 @@ export function useVirtualScroll<T = unknown>(
           { behavior: 'auto', isCorrection: true, endExtraX, endExtraY },
         );
       } else {
-        // v8 ignore next -- pendingScroll always stores normalized options, so the string fallback is unreachable
-        const correctionOptions: ScrollToIndexOptions = isScrollToIndexOptions(options) ? { ...options, isCorrection: true } : { align: options as ScrollAlignment | ScrollAlignmentOptions, isCorrection: true };
+        const correctionOptions: ScrollToIndexOptions = { ...options, isCorrection: true };
         scrollToIndex(rowIndex, colIndex, correctionOptions);
       }
     }

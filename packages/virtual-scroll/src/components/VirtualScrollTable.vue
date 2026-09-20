@@ -1211,7 +1211,7 @@ defineExpose({
       }"
       :style="{ width: flowTableWidth }"
     >
-      <colgroup v-if="flowColgroup" class="virtual-scroll-colgroup">
+      <colgroup v-if="flowColgroup">
         <col v-for="(width, col) in flowColgroup" :key="col" :style="{ width: `${ width }px` }" />
       </colgroup>
 
