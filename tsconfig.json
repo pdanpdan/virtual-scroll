@@ -15,7 +15,6 @@
   ],
   "include": [
     "vitest.config.ts",
-    "vite.config.ts",
     "eslint.config.js",
     "packages/*/vitest.config.ts",
     "packages/*/vite.config.ts"
