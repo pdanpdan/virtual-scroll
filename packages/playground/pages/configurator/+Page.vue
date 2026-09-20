@@ -65,17 +65,21 @@ const activeFileName = computed(() => (activeTab.value === 'codepen' ? 'virtual-
 const penLanguage = ref<'js' | 'ts'>('ts');
 
 const enabledFeatures = computed(() => {
+  const d = derived.value;
+  const list = d.isList;
+  const table = !d.isMasonry;
   const count = [
-    state.rtl,
-    state.snap,
-    state.stickyHeader,
-    state.stickyFooter,
-    state.stickySections,
-    state.infiniteScroll,
-    state.restoreOnPrepend,
-    state.initialScroll,
-    state.scrollPadding,
-    state.ssrRange,
+    table && state.rtl,
+    table && state.snap,
+    table && state.stickyHeader,
+    table && state.stickyFooter,
+    list && d.hasSections,
+    table && state.infiniteScroll,
+    table && state.restoreOnPrepend,
+    table && state.snapshots,
+    table && state.initialScroll,
+    list && state.scrollPadding,
+    list && state.ssrRange,
     state.scrollbarStyle !== 'auto',
   ].filter(Boolean).length;
   return count;
@@ -149,7 +153,7 @@ function openInCodePen() {
     <div class="space-y-4">
       <FieldSet title="Basics" description="The shape of the scrollable content.">
         <div class="flex flex-wrap gap-3">
-          <label class="floating-label p-0 grow basis-36">
+          <label v-if="derived.isList && !derived.isIndependent" class="floating-label p-0 grow basis-36">
             <span class="text-xs font-bold small-caps text-base-content/50">Direction</span>
             <select
               v-model="state.direction"
@@ -173,7 +177,7 @@ function openInCodePen() {
             />
           </label>
 
-          <label class="floating-label p-0 grow basis-36">
+          <label v-if="!derived.isIndependent" class="floating-label p-0 grow basis-36">
             <span class="text-xs font-bold small-caps text-base-content/50">ARIA role</span>
             <select v-model="state.ariaRole" class="select select-bordered select-sm w-full">
               <option v-for="role in roleOptions" :key="role.value" :value="role.value">
@@ -182,7 +186,7 @@ function openInCodePen() {
             </select>
           </label>
 
-          <label v-if="derived.supportsKeyboardActivation" class="floating-label p-0 grow basis-36">
+          <label v-if="derived.supportsKeyboardActivation && !derived.isIndependent" class="floating-label p-0 grow basis-36">
             <span class="text-xs font-bold small-caps text-base-content/50">Keyboard</span>
             <select v-model="state.keyboardActivation" class="select select-bordered select-sm w-full">
               <option v-for="option in keyboardOptions" :key="option.value" :value="option.value">
@@ -192,7 +196,7 @@ function openInCodePen() {
           </label>
         </div>
 
-        <label class="floating-label p-0">
+        <label v-if="!derived.isIndependent" class="floating-label p-0">
           <span class="text-xs font-bold small-caps text-base-content/50">ARIA label</span>
           <input
             v-model="state.ariaLabel"
@@ -203,34 +207,36 @@ function openInCodePen() {
         </label>
 
         <div class="flex flex-wrap gap-x-8 gap-y-2 items-center pt-1">
-          <label class="flex gap-2 items-center cursor-pointer select-none">
+          <label v-if="!derived.isMasonry && !derived.isIndependent" class="flex gap-2 items-center cursor-pointer select-none">
             <input v-model="state.rtl" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
             <span class="text-xs font-semibold opacity-70">Right-to-left (RTL)</span>
           </label>
 
-          <label class="flex gap-2 items-center cursor-pointer select-none">
-            <input
-              v-model="state.containerMode"
-              type="radio"
-              name="container-mode"
-              value="element"
-              class="radio radio-sm radio-primary"
-            />
-            <span class="text-xs font-semibold opacity-70">Own container</span>
-          </label>
+          <template v-if="derived.isList && !derived.isIndependent">
+            <label class="flex gap-2 items-center cursor-pointer select-none">
+              <input
+                v-model="state.containerMode"
+                type="radio"
+                name="container-mode"
+                value="element"
+                class="radio radio-sm radio-primary"
+              />
+              <span class="text-xs font-semibold opacity-70">Own container</span>
+            </label>
 
-          <label class="flex gap-2 items-center cursor-pointer select-none">
-            <input
-              v-model="state.containerMode"
-              type="radio"
-              name="container-mode"
-              value="window"
-              class="radio radio-sm radio-primary"
-            />
-            <span class="text-xs font-semibold opacity-70">Window / body</span>
-          </label>
+            <label class="flex gap-2 items-center cursor-pointer select-none">
+              <input
+                v-model="state.containerMode"
+                type="radio"
+                name="container-mode"
+                value="window"
+                class="radio radio-sm radio-primary"
+              />
+              <span class="text-xs font-semibold opacity-70">Window / body</span>
+            </label>
+          </template>
         </div>
-        <p v-if="state.containerMode === 'window'" class="text-[11px] opacity-60">
+        <p v-if="derived.isList && state.containerMode === 'window'" class="text-[11px] opacity-60">
           The page itself scrolls. Virtual scrollbars and coordinate scaling are disabled for window containers (so the content is limited to the supported browser content max size).
         </p>
 
@@ -294,8 +300,10 @@ function openInCodePen() {
           <p class="text-[11px] opacity-60 mt-1">
             Table output renders real <code>&lt;table&gt;</code> flow with dynamic measured heights and works in every
             output (component tab, composable tab via the <code>VirtualScrollTable</code> component, CodePen and
-            standalone). Table mode is vertical-only; grid, sections, gaps, scroll padding, sticky indices, window
-            containers and independent scrollbars do not apply to the generated table code.
+            standalone). Snapping, sticky header/footer, infinite loading, prepend restoration, scroll position
+            snapshots, the initial scroll target, RTL, ARIA and keyboard navigation are generated. Table mode is
+            vertical-only: the direction, item size, gap, buffer, grid, section, scroll padding, SSR and
+            window-container options do not apply to the generated table code.
           </p>
         </template>
 
@@ -342,9 +350,11 @@ function openInCodePen() {
             canonical oracle heights and works in every output (component tab, composable tab via the
             <code>VirtualScrollMasonry</code> component, CodePen and standalone). The card height oracle is
             deterministic from the generated data and the resolved column width, so every layout is reproducible.
-            Masonry mode is vertical-only and element-container-only; grid, sections, scroll padding, sticky
-            indices, window containers and independent scrollbars do not apply. With <em>Scrollbar style</em> set
-            to anything but <em>auto</em> the overlay virtual scrollbar is used.
+            Masonry takes its own column geometry, the item count, the data source, the gap and an ARIA label;
+            direction, item size, buffers, snapping, sticky items, sections, infinite loading, prepend restoration,
+            snapshots, the initial scroll target, scroll padding, SSR, RTL, window containers and independent
+            scrollbars do not apply. With <em>Scrollbar style</em> set to anything but <em>auto</em> the overlay
+            virtual scrollbar is used.
           </p>
         </template>
       </FieldSet>
@@ -398,7 +408,7 @@ function openInCodePen() {
 
       <FieldSet title="Sizing" description="How item and column sizes are known.">
         <div class="flex flex-wrap gap-3 items-start">
-          <label class="floating-label p-0 grow basis-32">
+          <label v-if="derived.isList && !derived.isIndependent" class="floating-label p-0 grow basis-32">
             <span class="text-xs font-bold small-caps text-base-content/50">Item size mode</span>
             <select
               v-model="state.itemSizeMode"
@@ -411,7 +421,20 @@ function openInCodePen() {
             </select>
           </label>
 
-          <template v-if="state.itemSizeMode === 'fixed'">
+          <template v-if="derived.isIndependent">
+            <label class="floating-label p-0 grow basis-24">
+              <span class="text-xs font-bold small-caps text-base-content/50">Row size (px)</span>
+              <input
+                v-model.number="state.itemSizeBase"
+                type="number"
+                min="8"
+                placeholder=" "
+                class="input input-bordered input-sm w-full font-mono"
+              />
+            </label>
+          </template>
+
+          <template v-else-if="derived.isList && state.itemSizeMode === 'fixed'">
             <label class="floating-label p-0 grow basis-24">
               <span class="text-xs font-bold small-caps text-base-content/50">Size (px)</span>
               <input
@@ -424,7 +447,7 @@ function openInCodePen() {
             </label>
           </template>
 
-          <template v-else-if="state.itemSizeMode === 'pattern'">
+          <template v-else-if="derived.isList && state.itemSizeMode === 'pattern'">
             <label class="floating-label p-0 grow basis-24">
               <span class="text-xs font-bold small-caps text-base-content/50">Base (px)</span>
               <input
@@ -447,7 +470,7 @@ function openInCodePen() {
             </label>
           </template>
 
-          <template v-else-if="state.itemSizeMode === 'function'">
+          <template v-else-if="derived.isList && state.itemSizeMode === 'function'">
             <label class="floating-label p-0 grow basis-24">
               <span class="text-xs font-bold small-caps text-base-content/50">Min (px)</span>
               <input
@@ -470,7 +493,7 @@ function openInCodePen() {
             </label>
           </template>
 
-          <template v-else>
+          <template v-else-if="derived.isList">
             <label class="floating-label p-0 grow basis-24">
               <span class="text-xs font-bold small-caps text-base-content/50">Default (px)</span>
               <input
@@ -483,7 +506,7 @@ function openInCodePen() {
             </label>
           </template>
 
-          <label class="floating-label p-0 grow basis-20">
+          <label v-if="!derived.isTable" class="floating-label p-0 grow basis-20">
             <span class="text-xs font-bold small-caps text-base-content/50">Gap (px)</span>
             <input
               v-model.number="state.gap"
@@ -495,7 +518,7 @@ function openInCodePen() {
             />
           </label>
 
-          <label class="floating-label p-0 grow basis-24">
+          <label v-if="derived.isList && !derived.isIndependent" class="floating-label p-0 grow basis-24">
             <span class="text-xs font-bold small-caps text-base-content/50">Buffer before</span>
             <input
               v-model.number="state.bufferBefore"
@@ -507,7 +530,7 @@ function openInCodePen() {
             />
           </label>
 
-          <label class="floating-label p-0 grow basis-24">
+          <label v-if="derived.isList && !derived.isIndependent" class="floating-label p-0 grow basis-24">
             <span class="text-xs font-bold small-caps text-base-content/50">Buffer after</span>
             <input
               v-model.number="state.bufferAfter"
@@ -520,7 +543,7 @@ function openInCodePen() {
           </label>
         </div>
 
-        <template v-if="state.direction === 'both'">
+        <template v-if="state.direction === 'both' || derived.isIndependent">
           <div class="divider my-1 opacity-60 text-[10px] font-bold small-caps tracking-widest">
             Grid columns
           </div>
@@ -538,7 +561,7 @@ function openInCodePen() {
               />
             </label>
 
-            <label class="floating-label p-0 grow basis-32">
+            <label v-if="!derived.isIndependent" class="floating-label p-0 grow basis-32">
               <span class="text-xs font-bold small-caps text-base-content/50">Column width mode</span>
               <select v-model="state.columnWidthMode" class="select select-bordered select-sm w-full">
                 <option value="fixed">Fixed</option>
@@ -548,7 +571,20 @@ function openInCodePen() {
               </select>
             </label>
 
-            <template v-if="state.columnWidthMode === 'fixed'">
+            <template v-if="derived.isIndependent">
+              <label class="floating-label p-0 grow basis-24">
+                <span class="text-xs font-bold small-caps text-base-content/50">Column size (px)</span>
+                <input
+                  v-model.number="state.columnWidthBase"
+                  type="number"
+                  min="8"
+                  placeholder=" "
+                  class="input input-bordered input-sm w-full font-mono"
+                />
+              </label>
+            </template>
+
+            <template v-else-if="state.columnWidthMode === 'fixed'">
               <label class="floating-label p-0 grow basis-24">
                 <span class="text-xs font-bold small-caps text-base-content/50">Width (px)</span>
                 <input
@@ -708,11 +744,12 @@ function openInCodePen() {
 
           <template v-if="!derived.isIndependent">
             <FeatureToggle
+              v-if="!derived.isMasonry"
               v-model="state.snap"
               label="Scroll snapping"
               description="Automatically align to items after scrolling stops."
             />
-            <div v-if="state.snap" class="ps-7">
+            <div v-if="!derived.isMasonry && state.snap" class="ps-7">
               <label class="floating-label p-0">
                 <span class="text-xs font-bold small-caps text-base-content/50">Snap mode</span>
                 <select v-model="state.snapMode" class="select select-bordered select-sm w-full">
@@ -724,23 +761,26 @@ function openInCodePen() {
             </div>
 
             <FeatureToggle
+              v-if="!derived.isMasonry"
               v-model="state.stickyHeader"
               label="Sticky header"
               description="A header slot pinned to the top of the viewport."
             />
 
             <FeatureToggle
+              v-if="!derived.isMasonry"
               v-model="state.stickyFooter"
               label="Sticky footer"
               description="A footer slot pinned to the bottom of the viewport."
             />
 
             <FeatureToggle
+              v-if="derived.isList"
               v-model="state.stickySections"
               label="Sticky sections"
               description="iOS-style section headers using stickyIndices."
             />
-            <div v-if="state.stickySections" class="ps-7">
+            <div v-if="derived.isList && state.stickySections" class="ps-7">
               <label class="floating-label p-0">
                 <span class="text-xs font-bold small-caps text-base-content/50">Items per section</span>
                 <input
@@ -755,11 +795,12 @@ function openInCodePen() {
             </div>
 
             <FeatureToggle
+              v-if="!derived.isMasonry"
               v-model="state.infiniteScroll"
               label="Infinite loading"
               description="Fetch more items when the end is near (load event + loading slot)."
             />
-            <div v-if="state.infiniteScroll" class="ps-7 flex flex-wrap gap-3">
+            <div v-if="!derived.isMasonry && state.infiniteScroll" class="ps-7 flex flex-wrap gap-3">
               <label class="floating-label p-0 grow basis-28">
                 <span class="text-xs font-bold small-caps text-base-content/50">Load distance (px)</span>
                 <input
@@ -804,12 +845,13 @@ function openInCodePen() {
                 />
               </label>
             </div>
-            <p v-if="state.infiniteScroll" class="ps-7 -mt-1 text-[11px] opacity-60">
+            <p v-if="!derived.isMasonry && state.infiniteScroll" class="ps-7 -mt-1 text-[11px] opacity-60">
               Skipping and preloading are extension options: they appear in the composable output. The component always
               reports the gesture in the <code>load</code> payload.
             </p>
 
             <FeatureToggle
+              v-if="!derived.isMasonry"
               v-model="state.restoreOnPrepend"
               label="Prepend restoration"
               description="Keep scroll position when items are inserted at the top."
@@ -833,11 +875,12 @@ function openInCodePen() {
             </div>
 
             <FeatureToggle
+              v-if="!derived.isMasonry"
               v-model="state.initialScroll"
               label="Initial scroll position"
               description="Jump to an item on mount."
             />
-            <div v-if="state.initialScroll" class="ps-7 flex flex-wrap gap-3">
+            <div v-if="!derived.isMasonry && state.initialScroll" class="ps-7 flex flex-wrap gap-3">
               <label class="floating-label p-0 grow basis-28">
                 <span class="text-xs font-bold small-caps text-base-content/50">Index</span>
                 <input
@@ -859,11 +902,12 @@ function openInCodePen() {
             </div>
 
             <FeatureToggle
+              v-if="derived.isList"
               v-model="state.scrollPadding"
               label="Scroll padding"
               description="Reserve space at the start/end of the scrollable area."
             />
-            <div v-if="state.scrollPadding" class="ps-7 flex flex-wrap gap-3">
+            <div v-if="derived.isList && state.scrollPadding" class="ps-7 flex flex-wrap gap-3">
               <label class="floating-label p-0 grow basis-28">
                 <span class="text-xs font-bold small-caps text-base-content/50">Start (px)</span>
                 <input
@@ -887,11 +931,12 @@ function openInCodePen() {
             </div>
 
             <FeatureToggle
+              v-if="derived.isList"
               v-model="state.ssrRange"
               label="SSR pre-render range"
               description="Emit an ssrRange so the server renders the first rows."
             />
-            <div v-if="state.ssrRange" class="ps-7 flex flex-wrap gap-3">
+            <div v-if="derived.isList && state.ssrRange" class="ps-7 flex flex-wrap gap-3">
               <label class="floating-label p-0 grow basis-28">
                 <span class="text-xs font-bold small-caps text-base-content/50">Start row</span>
                 <input

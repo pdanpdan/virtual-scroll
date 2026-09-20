@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string -- code generator emits template-literal syntax inside string literals */
 /**
  * Generates complete, runnable code from a ConfiguratorState.
  *
@@ -52,8 +51,12 @@ interface CodePenPayload {
 // helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Joins emitted lines; `false`/`null`/`undefined` omit the line, while an empty
+ * string emits a blank one.
+ */
 function join(lines: Array<string | false | null | undefined>): string {
-  return lines.filter((line): line is string => Boolean(line)).join('\n');
+  return lines.filter((line): line is string => typeof line === 'string').join('\n');
 }
 
 function esc(value: string): string {
@@ -110,7 +113,7 @@ function sectionHelpers(state: ConfiguratorState, derived: ConfiguratorDerived, 
     '}',
     '',
     `function sectionLabel${ l } {`,
-    '  return `Section ${ Math.floor(index / (ITEMS_PER_SECTION + 1)) + 1 }`;',
+    `  return \`Section \${ Math.floor(index / (ITEMS_PER_SECTION + 1)) + 1 }\`;`,
     '}',
     '',
     `function makeItem${ m } {`,
@@ -143,11 +146,11 @@ function dataSourceScript(state: ConfiguratorState, derived: ConfiguratorDerived
       `async function fetchLoremTexts${ fc } {`,
       '  // The API returns ~3 sentences per paragraph, so ask for half.',
       '  const paragraphs = Math.min(MAX_PARAGRAPHS_PER_REQUEST, Math.ceil((count * LOREM_SENTENCES) / 2));',
-      '  const response = await fetch(`${ LOREM_API }?paragraphs=${ paragraphs }`);',
-      '  const text = (await response.text()).trim().replace(/\\n/g, " ");',
-      '  const sentences = text.split(". ").map((sentence) => sentence.replace(/\\.$/, "")).filter(Boolean);',
+      `  const response = await fetch(\`\${ LOREM_API }?paragraphs=\${ paragraphs }\`);`,
+      `  const text = (await response.text()).trim().replace(/\\n/g, ' ');`,
+      `  const sentences = text.split('. ').map((sentence) => sentence.replace(/\\.$/, '')).filter(Boolean);`,
       '  if (sentences.length === 0) {',
-      '    return Array.from({ length: count }, (_, i) => `Item ${ i }`);',
+      `    return Array.from({ length: count }, (_, i) => \`Item \${ i }\`);`,
       '  }',
       '  // When more sentences are needed than fetched, reuse them cyclically.',
       '  return Array.from({ length: count }, (_, i) => {',
@@ -156,7 +159,7 @@ function dataSourceScript(state: ConfiguratorState, derived: ConfiguratorDerived
       '    const parts = end <= sentences.length',
       '      ? sentences.slice(start, end)',
       '      : [ ...sentences.slice(start), ...sentences.slice(0, end - sentences.length) ];',
-      '    return `${ parts.join(". ") }.`;',
+      `    return \`\${ parts.join('. ') }.\`;`,
       '  });',
       '}',
       '',
@@ -173,7 +176,7 @@ function dataSourceScript(state: ConfiguratorState, derived: ConfiguratorDerived
   } else {
     lines.push(
       `function createItems${ cc } {`,
-      `  return Promise.resolve(Array.from({ length: count }, ${ cbl }${ derived.hasSections ? 'makeItem(start + i, `Item ${ start + i }`)' : '({ id: start + i, text: `Item ${ start + i }` })' }));`,
+      `  return Promise.resolve(Array.from({ length: count }, ${ cbl }${ derived.hasSections ? `makeItem(start + i, \`Item \${ start + i }\`)` : `({ id: start + i, text: \`Item \${ start + i }\` })` }));`,
       '}',
     );
   }
@@ -205,7 +208,7 @@ function prependScript(state: ConfiguratorState, derived: ConfiguratorDerived, i
       `  const newItems = Array.from({ length: count }, ${ isTs ? '(_, i: number) => ' : '(_, i) => ' }({`,
       '    id: prependIndex - i,',
       `    type: ${ derived.hasSections ? (isTs ? "'item' as const" : "'item'") : 'undefined' },`,
-      '    text: `Prepended ${ prependCount + i }`,',
+      `    text: \`Prepended \${ prependCount + i }\`,`,
       '  }));',
       '  prependIndex -= count;',
       '  prependCount += count;',
@@ -422,11 +425,8 @@ function configScriptComposable(state: ConfiguratorState, derived: ConfiguratorD
 // composable extensions
 // ---------------------------------------------------------------------------
 
-function extensionsScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function extensionsScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   const lines: string[] = [ '// --- Extensions: one per enabled feature ---' ];
-  if (state.snapshots) {
-    lines.push(snapshotsExtensionScript(state, isTs), '');
-  }
   lines.push(isTs ? 'const extensions: VirtualScrollExtension<Item>[] = [' : 'const extensions = [');
 
   const push = (call: string, comment: string) => {
@@ -485,17 +485,15 @@ function snapshotRestoreScript(state: ConfiguratorState, composable: boolean): s
   if (composable) {
     return '  // --- Restore the position saved on the previous visit ---\n  snapshots.restore();';
   }
-  return join([
-    '  // --- Restore the position saved on the previous visit ---',
-    `  const saved = Number(sessionStorage.getItem(SNAPSHOT_KEY) ?? Number.NaN);`,
-    '  if (Number.isFinite(saved) && saved > 0) {',
-    "    virtualScrollRef.value?.scrollToIndex(saved, null, { align: 'start' });",
-    '  }',
-  ]);
+  return '  // --- Restore the position saved on the previous visit ---\n  restoreSnapshot();';
 }
 
-/** Save hook + key used by the component mode, which cannot take the extension. */
-function snapshotSaveScript(state: ConfiguratorState, composable: boolean): string {
+/**
+ * Save hook emitted after the scroll state exists. The composable mode lets the
+ * extension own the snapshot; the component modes write it themselves through
+ * the chosen `Storage`, using `refName` as the component instance.
+ */
+function snapshotSaveScript(state: ConfiguratorState, composable: boolean, refName = 'virtualScrollRef'): string {
   if (!state.snapshots) {
     return '';
   }
@@ -507,19 +505,30 @@ function snapshotSaveScript(state: ConfiguratorState, composable: boolean): stri
       '});',
     ]);
   }
+  const storage = state.snapshotStorage === 'local' ? 'localStorage' : 'sessionStorage';
   return join([
-    '// --- Save the position when the page is left ---',
+    '// --- Scroll position across visits ---',
     `const SNAPSHOT_KEY = 'virtual-scroll:position';`,
+    `const SNAPSHOT_STORAGE = ${ storage };`,
+    '',
+    'function restoreSnapshot() {',
+    '  const saved = Number(SNAPSHOT_STORAGE.getItem(SNAPSHOT_KEY) ?? Number.NaN);',
+    '  if (Number.isFinite(saved) && saved > 0) {',
+    `    ${ refName }.value?.scrollToIndex(saved, null, { align: 'start' });`,
+    '  }',
+    '}',
+    '',
+    '// --- Save the position when the page is left ---',
     'onBeforeUnmount(() => {',
     '  const index = scrollDetails.value?.currentIndex ?? 0;',
     '  if (index > 0) {',
-    '    sessionStorage.setItem(SNAPSHOT_KEY, String(index));',
+    '    SNAPSHOT_STORAGE.setItem(SNAPSHOT_KEY, String(index));',
     '  }',
     '});',
   ]);
 }
 
-function composableDestructureScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function composableDestructureScript(state: ConfiguratorState, derived: ConfiguratorDerived): string {
   const lines = [
     '// --- Virtualization core ---',
     'const {',
@@ -617,17 +626,17 @@ function composableKeyboardScript(derived: ConfiguratorDerived): string {
 
 function statusExpression(state: ConfiguratorState): string {
   const loadSuffix = state.infiniteScroll
-    ? " · load ${lastLoad ? `${lastLoad.direction ?? 'edge'} @ ${lastLoad.velocity.toFixed(1)} px/ms` : 'idle'}"
+    ? ` · load \${ lastLoad ? \`\${ lastLoad.direction ?? 'edge' } @ \${ lastLoad.velocity.toFixed(1) } px/ms\` : 'idle' }`
     : '';
   const offsets: string[] = [];
   if (state.direction === 'vertical') {
-    offsets.push('offset ${Math.round(scrollDetails.scrollOffset.y)}px');
+    offsets.push(`offset \${ Math.round(scrollDetails.scrollOffset.y) }px`);
   } else if (state.direction === 'horizontal') {
-    offsets.push('offset ${Math.round(scrollDetails.scrollOffset.x)}px');
+    offsets.push(`offset \${ Math.round(scrollDetails.scrollOffset.x) }px`);
   } else {
-    offsets.push('offset ${Math.round(scrollDetails.scrollOffset.x)},${Math.round(scrollDetails.scrollOffset.y)}px');
+    offsets.push(`offset \${ Math.round(scrollDetails.scrollOffset.x) },\${ Math.round(scrollDetails.scrollOffset.y) }px`);
   }
-  return `\`range \${scrollDetails.range.start}-\${scrollDetails.range.end} · ${ offsets.join(' · ') }${ loadSuffix }\``;
+  return `\`range \${ scrollDetails.range.start }-\${ scrollDetails.range.end } · ${ offsets.join(' · ') }${ loadSuffix }\``;
 }
 
 /**
@@ -647,18 +656,22 @@ function itemContentScript(
   const horizontalMod = state.direction === 'horizontal' ? ' vs-item--horizontal' : '';
 
   // The roving item model marks the tracked item and routes clicks through it.
+  // `role`/`tabindex` + the key handler keep the click reachable without a mouse.
   const modelAttributes = derived.usesItemModel
     ? [
+      '  role="button"',
+      '  tabindex="0"',
       composable
         ? `  :class="{ 'vs-item--active': ri.index === activeIndex, 'vs-item--selected': ri.index === selectedIndex }"`
         : `  :class="{ 'vs-item--active': isActive, 'vs-item--selected': index === selectedIndex }"`,
       composable ? '  @click="handleItemActivate(ri.index)"' : `  @click="${ refName }?.handleItemActivate(index)"`,
+      composable ? '  @keydown.enter="handleItemActivate(ri.index)"' : `  @keydown.enter="${ refName }?.handleItemActivate(index)"`,
     ]
     : [];
 
   const dataItem = [
     ...modelAttributes.length > 0
-      ? [ `<div class="vs-item${ horizontalMod }"`, ...modelAttributes, '>' ]
+      ? [ '<div', `  class="vs-item${ horizontalMod }"`, ...modelAttributes, '>' ]
       : [ `<div class="vs-item${ horizontalMod }">` ],
     `  <span class="vs-badge">#{{ ${ index } }}</span>`,
     `  <span class="vs-item-text">{{ ${ item }.text }}</span>`,
@@ -668,7 +681,7 @@ function itemContentScript(
   const cells = derived.isGrid
     ? [
       ...modelAttributes.length > 0
-        ? [ '<div class="vs-grid-row"', ...modelAttributes, '>' ]
+        ? [ '<div', '  class="vs-grid-row"', ...modelAttributes, '>' ]
         : [ '<div class="vs-grid-row">' ],
       '  <div',
       composable
@@ -756,7 +769,7 @@ function composableScrollbarTemplate(state: ConfiguratorState): string {
   if (state.scrollbarStyle !== 'virtual' && state.scrollbarStyle !== 'custom') {
     return '';
   }
-  const t = '    ';
+  const t = '';
   const lines: string[] = [ `${ t }<div v-if="showScrollbars" class="vs-scrollbars">` ];
   if (state.direction !== 'horizontal') {
     lines.push(
@@ -776,22 +789,29 @@ function composableScrollbarTemplate(state: ConfiguratorState): string {
   return join(lines);
 }
 
-function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, composable: boolean): string {
+function virtualScrollTemplate(state: ConfiguratorState, derived: ConfiguratorDerived, composable: boolean): string {
   const t = '    ';
-  const lines: string[] = [];
+  const lines: Array<string | false> = [];
 
   if (composable) {
+    // Headless mode applies the ARIA role itself; the roving item model needs a
+    // role that publishes an active descendant.
+    const containerRole = state.ariaRole !== 'auto'
+      ? state.ariaRole
+      : derived.usesItemModel ? 'listbox' : state.direction === 'both' ? 'grid' : 'list';
     const viewportAttrs = [
-      `class="vs-viewport"`,
+      state.containerMode === 'element' ? 'ref="containerRef"' : false,
+      `role="${ containerRole }"`,
+      'class="vs-viewport"',
       'tabindex="0"',
-      state.rtl ? 'dir="rtl"' : '',
-      derived.usesItemModel ? '@keydown="handleKeyDown"' : '',
-      derived.usesItemModel ? ':aria-activedescendant="activeDescendant"' : '',
-    ].filter(Boolean).join(' ');
+      state.rtl ? 'dir="rtl"' : false,
+      derived.usesItemModel ? ':aria-activedescendant="activeDescendant"' : false,
+      derived.usesItemModel ? '@keydown="handleKeyDown"' : false,
+    ].filter((attr): attr is string => typeof attr === 'string');
     lines.push(
-      state.containerMode === 'element'
-        ? `${ t }<div ref="containerRef" ${ viewportAttrs }>`
-        : `${ t }<div ${ viewportAttrs }>`,
+      `${ t }<div`,
+      ...viewportAttrs.map((attr) => `${ t }  ${ attr }`),
+      `${ t }>`,
     );
     if (state.stickyHeader) {
       lines.push(`${ t }  <div class="vs-sticky-header">Sticky header</div>`);
@@ -802,11 +822,11 @@ function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typ
         : `${ t }  <div class="vs-wrapper" :style="wrapperStyle">`,
       `${ t }    <div`,
       `${ t }      v-for="ri in renderedItems"`,
+      derived.usesItemModel ? `${ t }      :id="\`vs-item-\${ ri.index }\`"` : false,
       `${ t }      :key="ri.index"`,
+      `${ state.itemSizeMode === 'dynamic' && state.direction !== 'horizontal' ? `${ t }      :ref="(el) => setItemRef(el, ri.index)"` : '' }`,
       `${ t }      :data-index="ri.index"`,
       `${ t }      class="vs-virtual-item"`,
-      derived.usesItemModel ? `${ t }      :id="\`vs-item-\${ri.index}\`"` : '',
-      `${ state.itemSizeMode === 'dynamic' && state.direction !== 'horizontal' ? `${ t }      :ref="(el) => setItemRef(el, ri.index)"` : '' }`,
       `${ t }      :style="getItemStyle(ri)"`,
       `${ t }    >`,
     );
@@ -823,7 +843,7 @@ function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typ
     }
     const scrollbars = composableScrollbarTemplate(state);
     if (scrollbars) {
-      lines.push(indentBlock(scrollbars, t));
+      lines.push(indentBlock(scrollbars, `${ t }  `));
     }
     if (derived.usesItemModel) {
       lines.push(`${ t }  <div class="vs-live" role="status" aria-live="polite" aria-atomic="true">{{ liveMessage }}</div>`);
@@ -835,10 +855,10 @@ function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typ
       `${ t }  ref="virtualScrollRef"`,
       `${ t }  v-bind="config"`,
       `${ t }  class="vs-viewport"`,
-      state.rtl ? `${ t }  dir="rtl"` : '',
+      state.rtl ? `${ t }  dir="rtl"` : false,
       `${ t }  @scroll="onScroll"`,
-      state.infiniteScroll ? `${ t }  @load="onLoad"` : '',
-      derived.usesItemModel ? `${ t }  @item-activate="onItemActivate"` : '',
+      state.infiniteScroll ? `${ t }  @load="onLoad"` : false,
+      derived.usesItemModel ? `${ t }  @item-activate="onItemActivate"` : false,
       `${ t }>`,
     );
     if (state.stickyHeader) {
@@ -1240,21 +1260,24 @@ function stylesBlock(state: ConfiguratorState, derived: ConfiguratorDerived, com
 // script sections
 // ---------------------------------------------------------------------------
 
-function componentScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function componentScript(state: ConfiguratorState, derived: ConfiguratorDerived): string {
   const lines: string[] = [
     '<script setup lang="ts">',
     `import type { ${ state.infiniteScroll ? 'LoadDetails, ' : '' }ScrollDetails, VirtualScrollInstance, VirtualScrollProps } from '@pdanpdan/virtual-scroll';`,
+    '',
     "import { VirtualScroll } from '@pdanpdan/virtual-scroll';",
+    `import { computed, ${ state.snapshots ? 'onBeforeUnmount, ' : '' }onMounted, ref } from 'vue';`,
     '',
     "import '@pdanpdan/virtual-scroll/style.css';",
-    '',
-    `import { computed, onMounted${ state.snapshots ? ', onBeforeUnmount' : '' }, ref } from 'vue';`,
     '',
   ];
 
   lines.push(dataModelScript(state, derived, true));
   lines.push('');
-  lines.push(sectionHelpers(state, derived, true));
+  const helpers = sectionHelpers(state, derived, true);
+  if (helpers) {
+    lines.push(helpers);
+  }
   lines.push('const items = ref<Item[]>([]);');
   if (state.infiniteScroll) {
     lines.push('const loading = ref(false);');
@@ -1263,13 +1286,13 @@ function componentScript(state: ConfiguratorState, derived: ReturnType<typeof ge
   lines.push(dataSourceScript(state, derived, true));
 
   lines.push('');
-  lines.push('onMounted(async () => {');
-  lines.push('  items.value = await createItems(0, ITEM_COUNT);');
-  const restore = snapshotRestoreScript(state, false);
-  if (restore) {
-    lines.push(restore);
-  }
-  lines.push('});');
+  lines.push('// --- Scroll state ---');
+  lines.push('const scrollDetails = ref<ScrollDetails<Item> | null>(null);');
+  lines.push('const virtualScrollRef = ref<VirtualScrollInstance<Item> | null>(null);');
+  lines.push('');
+  lines.push('function onScroll(details: ScrollDetails<Item>) {');
+  lines.push('  scrollDetails.value = details;');
+  lines.push('}');
   lines.push('');
 
   const save = snapshotSaveScript(state, false);
@@ -1278,14 +1301,13 @@ function componentScript(state: ConfiguratorState, derived: ReturnType<typeof ge
     lines.push('');
   }
 
-  lines.push('// --- Scroll state ---');
-
-  lines.push('const scrollDetails = ref<ScrollDetails<Item> | null>(null);');
-  lines.push('const virtualScrollRef = ref<VirtualScrollInstance<Item> | null>(null);');
-  lines.push('');
-  lines.push('function onScroll(details: ScrollDetails<Item>) {');
-  lines.push('  scrollDetails.value = details;');
-  lines.push('}');
+  lines.push('onMounted(async () => {');
+  lines.push('  items.value = await createItems(0, ITEM_COUNT);');
+  const restore = snapshotRestoreScript(state, false);
+  if (restore) {
+    lines.push(restore);
+  }
+  lines.push('});');
   lines.push('');
 
   if (derived.usesItemModel) {
@@ -1368,16 +1390,19 @@ function composableScript(state: ConfiguratorState, derived: ConfiguratorDerived
 
   lines.push(
     "} from '@pdanpdan/virtual-scroll';",
+    "import { calculateItemStyle, getPaddingX, getPaddingY } from '@pdanpdan/virtual-scroll/internal';",
+    `import { computed, ${ state.snapshots ? 'onBeforeUnmount, ' : '' }onMounted${ state.itemSizeMode === 'dynamic' && state.direction !== 'horizontal' ? ', onUnmounted' : '' }, ref } from 'vue';`,
     '',
     "import '@pdanpdan/virtual-scroll/style.css';",
-    '',
-    `import { computed, onMounted${ state.snapshots ? ', onBeforeUnmount' : '' }${ state.itemSizeMode === 'dynamic' && state.direction !== 'horizontal' ? ', onUnmounted' : '' }, ref } from 'vue';`,
     '',
   );
 
   lines.push(dataModelScript(state, derived, true));
   lines.push('');
-  lines.push(sectionHelpers(state, derived, true));
+  const helpers = sectionHelpers(state, derived, true);
+  if (helpers) {
+    lines.push(helpers);
+  }
   lines.push('const items = ref<Item[]>([]);');
   if (state.infiniteScroll) {
     lines.push('const loading = ref(false);');
@@ -1386,6 +1411,10 @@ function composableScript(state: ConfiguratorState, derived: ConfiguratorDerived
   lines.push(dataSourceScript(state, derived, true));
 
   lines.push('');
+  if (state.snapshots) {
+    lines.push(snapshotsExtensionScript(state, true));
+    lines.push('');
+  }
   lines.push('onMounted(async () => {');
   lines.push('  items.value = await createItems(0, ITEM_COUNT);');
   const restore = snapshotRestoreScript(state, true);
@@ -1438,8 +1467,8 @@ function composableScript(state: ConfiguratorState, derived: ConfiguratorDerived
     lines.push('');
     lines.push('// --- Virtual scrollbars ---');
     lines.push('const showScrollbars = computed(() =>');
-    lines.push('  scrollDetails.value.totalSize.height > scrollDetails.value.viewportSize.height ||');
-    lines.push('  scrollDetails.value.totalSize.width > scrollDetails.value.viewportSize.width,');
+    lines.push('  scrollDetails.value.totalSize.height > scrollDetails.value.viewportSize.height');
+    lines.push('  || scrollDetails.value.totalSize.width > scrollDetails.value.viewportSize.width,');
     lines.push(');');
     if (state.direction !== 'horizontal') {
       lines.push('const verticalScrollbar = useVirtualScrollbar(computed(() => ({');
@@ -1472,8 +1501,8 @@ function composableScript(state: ConfiguratorState, derived: ConfiguratorDerived
   lines.push('');
   lines.push('// --- Wrapper sizing (clamped display size) ---');
   lines.push('const wrapperStyle = computed(() => ({');
-  lines.push(`  inlineSize: ${ state.direction === 'vertical' ? "'1px'" : '`${ renderedWidth.value }px`' },`);
-  lines.push(`  blockSize: ${ state.direction === 'horizontal' ? "'1px'" : '`${ renderedHeight.value }px`' },`);
+  lines.push(`  inlineSize: ${ state.direction === 'vertical' ? "'1px'" : `\`\${ renderedWidth.value }px\`` },`);
+  lines.push(`  blockSize: ${ state.direction === 'horizontal' ? "'1px'" : `\`\${ renderedHeight.value }px\`` },`);
   lines.push('}));');
   lines.push('');
   lines.push('function getItemStyle(item: RenderedItem<Item>) {');
@@ -1602,9 +1631,8 @@ function generateSfcIndependent(state: ConfiguratorState): string {
   const colGap = state.columnGap;
 
   return `<script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-
 import { VirtualScrollbar } from '@pdanpdan/virtual-scroll';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import '@pdanpdan/virtual-scroll/style.css';
 
@@ -1620,9 +1648,7 @@ const totalWidth = COLS * (COL_SIZE + COL_GAP) - COL_GAP;
 const totalHeight = ROWS * (ROW_SIZE + GAP) - GAP;
 
 const cells = computed(() =>
-  Array.from({ length: ROWS }, (_, row) =>
-    Array.from({ length: COLS }, (_, col) => ({ row, col })),
-  ).flat(),
+  Array.from({ length: ROWS }, (_, row) => Array.from({ length: COLS }, (_, col) => ({ row, col }))).flat(),
 );
 
 // --- Scroll state (native scrolling, independent virtual scrollbars) ---
@@ -1825,6 +1851,10 @@ function penStateScript(state: ConfiguratorState, derived: ConfiguratorDerived, 
   lines.push('');
   lines.push('onMounted(async () => {');
   lines.push('  items.value = await createItems(0, ITEM_COUNT);');
+  const penRestore = snapshotRestoreScript(state, false);
+  if (penRestore) {
+    lines.push(penRestore);
+  }
   lines.push('});');
   lines.push('');
 
@@ -1849,6 +1879,7 @@ function penStateScript(state: ConfiguratorState, derived: ConfiguratorDerived, 
       '// Minimal shapes used by the pen (the full types come from the package).',
       'interface ScrollDetails {',
       '  range: { start: number; end: number };',
+      ...(state.snapshots ? [ '  currentIndex: number;' ] : []),
       '  scrollOffset: { x: number; y: number };',
       '}',
       ...(state.infiniteScroll
@@ -1882,6 +1913,11 @@ function penStateScript(state: ConfiguratorState, derived: ConfiguratorDerived, 
   lines.push('  scrollDetails.value = details;');
   lines.push('}');
   lines.push('');
+  const snapshotSave = snapshotSaveScript(state, false, 'vs');
+  if (snapshotSave) {
+    lines.push(snapshotSave);
+    lines.push('');
+  }
 
   if (state.containerMode === 'window') {
     lines.push('// --- Window container: the page scrolls natively ---');
@@ -1939,9 +1975,9 @@ function penSetupReturn(state: ConfiguratorState): string {
   return join(names.map((name) => `      ${ name },`));
 }
 
-function penTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function penTemplate(state: ConfiguratorState, derived: ConfiguratorDerived): string {
   const t = '  ';
-  const lines: string[] = [
+  const lines: Array<string | false> = [
     '<div id="app" v-cloak class="vs-app">',
     `${ t }<header class="vs-toolbar">`,
     `${ t }  <h1 class="vs-title">Virtual Scroll Demo</h1>`,
@@ -1971,10 +2007,10 @@ function penTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDer
     `${ t }  ref="vs"`,
     `${ t }  v-bind="config"`,
     `${ t }  class="vs-viewport"`,
-    state.rtl ? `${ t }  dir="rtl"` : '',
+    state.rtl ? `${ t }  dir="rtl"` : false,
     `${ t }  @scroll="onScroll"`,
-    state.infiniteScroll ? `${ t }  @load="onLoad"` : '',
-    derived.usesItemModel ? `${ t }  @item-activate="onItemActivate"` : '',
+    state.infiniteScroll ? `${ t }  @load="onLoad"` : false,
+    derived.usesItemModel ? `${ t }  @item-activate="onItemActivate"` : false,
     `${ t }>`,
   );
 
@@ -2028,20 +2064,24 @@ function penTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDer
   return join(lines);
 }
 
-function penJs(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+/**
+ * Ambient `Vue` global for the TypeScript pens (CodePen compiles the JS pane
+ * with its `typescript` preprocessor; the UMD build provides the real object).
+ */
+const PEN_VUE_DECLARE = 'declare const Vue: { createApp: (options: object) => { mount(el: string): unknown; component(name: string, comp: unknown): { mount(el: string): unknown; component(name: string, comp: unknown): unknown; }; }; ref: <T>(value: T) => { value: T }; computed: <T>(fn: () => T) => { value: T }; onMounted: (fn: () => void | Promise<void>) => void; onBeforeUnmount: (fn: () => void) => void; };';
+
+function penJs(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   return join([
-    isTs
-      ? 'declare const Vue: { createApp: (options: object) => { mount(el: string): unknown; component(name: string, comp: unknown): { mount(el: string): unknown; component(name: string, comp: unknown): unknown; }; }; ref: <T>(value: T) => { value: T }; computed: <T>(fn: () => T) => { value: T }; onMounted: (fn: () => void | Promise<void>) => void; };'
-      : '',
+    isTs ? PEN_VUE_DECLARE : false,
     isTs
       ? 'const VirtualScroll = (window as unknown as { VirtualScroll: { VirtualScroll: unknown } }).VirtualScroll.VirtualScroll;'
       : 'const { VirtualScroll } = window.VirtualScroll;',
-    'const { createApp, ref, computed, onMounted } = Vue;',
+    `const { createApp, ref, computed, onMounted${ state.snapshots ? ', onBeforeUnmount' : '' } } = Vue;`,
     '',
     'createApp({',
     '  setup() {',
     isTs
-      ? '    const vs = ref<{ scrollToIndex: (row: number | null, col: number | null, options?: { behavior?: \'auto\' | \'smooth\' }) => void; refresh: () => void; } | null>(null);'
+      ? '    const vs = ref<{ scrollToIndex: (row: number | null, col: number | null, options?: { align?: \'start\' | \'center\' | \'end\' | \'auto\'; behavior?: \'auto\' | \'smooth\' }) => void; refresh: () => void; } | null>(null);'
       : '    const vs = ref(null);',
     '    ',
     indentBlock(penStateScript(state, derived, isTs), '    '),
@@ -2347,6 +2387,7 @@ function tableColumnWidths(state: ConfiguratorState): number[] {
 /** Table SFC used by both the component and composable tabs. */
 function generateTableSfc(state: ConfiguratorState, composableTab: boolean): string {
   const lines: string[] = [];
+  const derived = getDerived(state);
   const virtual = state.scrollbarStyle === 'virtual' || state.scrollbarStyle === 'custom';
   const firstWindow = state.tableColumnMode === 'first';
   const custom = state.tableColumnMode === 'custom';
@@ -2357,22 +2398,29 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
     lines.push('// Table output uses the VirtualScrollTable component: the composable (engine) API has no table mode.');
   }
   lines.push(
-    "import type { ScrollDetails, VirtualScrollTableInstance, VirtualScrollTableComponentProps } from '@pdanpdan/virtual-scroll';",
+    `import type { ${ state.infiniteScroll ? 'LoadDetails, ' : '' }ScrollDetails, VirtualScrollTableComponentProps, VirtualScrollTableInstance } from '@pdanpdan/virtual-scroll';`,
+    '',
     "import { VirtualScrollTable } from '@pdanpdan/virtual-scroll';",
+    `import { computed, ${ state.snapshots ? 'onBeforeUnmount, ' : '' }onMounted, ref } from 'vue';`,
     '',
     "import '@pdanpdan/virtual-scroll/style.css';",
     '',
-    "import { computed, onMounted, ref } from 'vue';",
-    '',
   );
-  lines.push(dataModelScript(state, getDerived(state), true));
+  lines.push(dataModelScript(state, derived, true));
   lines.push('');
-  lines.push(dataSourceScript(state, getDerived(state), true));
+  lines.push(dataSourceScript(state, derived, true));
   lines.push('');
   lines.push('const items = ref<Item[]>([]);');
+  if (state.infiniteScroll) {
+    lines.push('const loading = ref(false);');
+  }
   lines.push('');
   lines.push('onMounted(async () => {');
   lines.push('  items.value = await createItems(0, ITEM_COUNT);');
+  const penRestore = snapshotRestoreScript(state, false);
+  if (penRestore) {
+    lines.push(penRestore);
+  }
   lines.push('});');
   lines.push('');
   lines.push('// --- Scroll state ---');
@@ -2383,6 +2431,21 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   lines.push('  scrollDetails.value = details;');
   lines.push('}');
   lines.push('');
+  const snapshotSave = snapshotSaveScript(state, false);
+  if (snapshotSave) {
+    lines.push(snapshotSave);
+    lines.push('');
+  }
+  const infinite = infiniteScript(state, derived, true);
+  if (infinite) {
+    lines.push(infinite);
+    lines.push('');
+  }
+  const prepend = prependScript(state, derived, true);
+  if (prepend) {
+    lines.push(prepend);
+    lines.push('');
+  }
   if (custom) {
     lines.push('// --- Pinned column widths (px) ---');
     lines.push(`const columnWidths = [ ${ widths.join(', ') } ];`);
@@ -2402,6 +2465,27 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   lines.push(`  virtualScrollbar: ${ virtual },`);
   lines.push(`  stickyHeader: ${ state.stickyHeader },`);
   lines.push(`  stickyFooter: ${ state.stickyFooter },`);
+  if (state.snap) {
+    lines.push(`  snap: '${ state.snapMode }',`);
+  }
+  if (state.infiniteScroll) {
+    lines.push(`  loadDistance: ${ state.loadDistance },`);
+    lines.push('  loading: loading.value,');
+  }
+  if (state.restoreOnPrepend) {
+    lines.push('  restoreScrollOnPrepend: true,');
+  }
+  if (state.initialScroll) {
+    lines.push(`  initialScrollIndex: ${ state.initialScrollIndex },`);
+    lines.push(`  initialScrollAlign: '${ state.initialScrollAlign }',`);
+  }
+  if (derived.supportsKeyboardActivation && state.keyboardActivation !== 'auto') {
+    lines.push(`  keyboardActivation: '${ state.keyboardActivation }',`);
+  }
+  if (state.ariaRole !== 'auto') {
+    lines.push(`  role: '${ state.ariaRole }',`);
+  }
+  lines.push(`  ariaLabel: '${ esc(state.ariaLabel || 'Virtual scroll demo') }',`);
   lines.push('}));');
   lines.push('</script>');
   lines.push('');
@@ -2410,15 +2494,29 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   lines.push('    <header class="vs-toolbar">');
   lines.push('      <h1 class="vs-title">Virtual Scroll Table Demo</h1>');
   lines.push('      <div v-if="scrollDetails" class="vs-status">');
-  lines.push(`        <span>${ statusExpression({ ...state, direction: 'vertical' }) }</span>`);
+  lines.push(`        <span>{{ ${ statusExpression({ ...state, direction: 'vertical' }) } }}</span>`);
   lines.push('      </div>');
   lines.push('      <div class="vs-actions">');
+  if (state.restoreOnPrepend) {
+    lines.push('        <button type="button" class="vs-btn" @click="prependItems">Prepend 5</button>');
+  }
   lines.push('        <button type="button" class="vs-btn" @click="virtualScrollRef?.refresh()">Refresh</button>');
   lines.push(`        <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`);
   lines.push('      </div>');
   lines.push('    </header>');
   lines.push('');
-  lines.push('    <VirtualScrollTable ref="virtualScrollRef" v-bind="config" class="vs-table" @scroll="onScroll">');
+  lines.push('    <VirtualScrollTable');
+  lines.push('      ref="virtualScrollRef"');
+  lines.push('      v-bind="config"');
+  lines.push('      class="vs-table"');
+  if (state.rtl) {
+    lines.push('      dir="rtl"');
+  }
+  lines.push('      @scroll="onScroll"');
+  if (state.infiniteScroll) {
+    lines.push('      @load="onLoad"');
+  }
+  lines.push('    >');
   lines.push('      <template #header>');
   lines.push('        <tr>');
   TABLE_HEADERS.forEach((label, col) => {
@@ -2433,6 +2531,11 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   lines.push('        <td class="vs-td">{{ item?.text }}</td>');
   lines.push('        <td class="vs-td vs-mono vs-num">{{ (index * 37) % 100 }}</td>');
   lines.push('      </template>');
+  if (state.infiniteScroll) {
+    lines.push('      <template v-if="hasMore" #loading>');
+    lines.push(`        <tr><td class="vs-td vs-loading" colspan="${ TABLE_HEADERS.length }">Loading more…</td></tr>`);
+    lines.push('      </template>');
+  }
   if (state.stickyFooter) {
     lines.push('      <template #footer>');
     lines.push('        <tr>');
@@ -2496,6 +2599,7 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   lines.push('.vs-mono { font-family: ui-monospace, monospace; }');
   lines.push('.vs-num { text-align: right; }');
   lines.push('.vs-footer { font-weight: 700; text-align: center; background: #f4f4f5; }');
+  lines.push('.vs-loading { text-align: center; font-style: italic; opacity: 0.6; }');
   lines.push('</style>');
   lines.push('');
   return join(lines);
@@ -2518,6 +2622,7 @@ const TABLE_PEN_CSS = [
   '.vs-mono { font-family: ui-monospace, monospace; }',
   '.vs-num { text-align: right; }',
   '.vs-footer { font-weight: 700; text-align: center; background: #f4f4f5; }',
+  '.vs-loading { text-align: center; font-style: italic; opacity: 0.6; }',
 ].join('\n');
 
 /** Self-contained CodePen/standalone table demo (no lorem API needed). */
@@ -2539,15 +2644,16 @@ function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayloa
     '  <header class="vs-toolbar">',
     '    <h1 class="vs-title">Virtual Scroll Table Demo</h1>',
     '    <div v-if="scrollDetails" class="vs-status">',
-    '      <span>range {{ scrollDetails.range.start }}-{{ scrollDetails.range.end }}</span>',
+    `      <span>{{ ${ statusExpression({ ...state, direction: 'vertical' }) } }}</span>`,
     '    </div>',
     '    <div class="vs-actions">',
+    state.restoreOnPrepend ? '      <button type="button" class="vs-btn" @click="prependItems">Prepend 5</button>' : '',
     '      <button type="button" class="vs-btn" @click="vs?.refresh()">Refresh</button>',
     `      <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`,
     '    </div>',
     '  </header>',
     '',
-    '  <virtual-scroll-table ref="vs" v-bind="config" class="vs-table" @scroll="onScroll">',
+    `  <virtual-scroll-table ref="vs" v-bind="config" class="vs-table"${ state.rtl ? ' dir="rtl"' : '' }${ state.infiniteScroll ? ' @load="onLoad"' : '' } @scroll="onScroll">`,
     '    <template #header>',
     '      <tr>',
     th,
@@ -2559,17 +2665,19 @@ function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayloa
     '      <td class="vs-td">{{ item.text }}</td>',
     '      <td class="vs-td vs-mono vs-num">{{ (index * 37) % 100 }}</td>',
     '    </template>',
+    state.infiniteScroll ? '    <template v-if="hasMore" #loading><tr><td class="vs-td vs-loading" colspan="4">Loading more…</td></tr></template>' : '',
     state.stickyFooter ? '    <template #footer><tr><td class="vs-td vs-footer" colspan="4">End of {{ items.length }} rows</td></tr></template>' : '',
     '  </virtual-scroll-table>',
     '</div>',
   ].join('\n');
 
   const js = join([
-    'const { createApp, ref, computed } = Vue;',
+    isTs ? PEN_VUE_DECLARE : false,
+    `const { createApp, ref, computed${ state.snapshots ? ', onMounted, onBeforeUnmount' : '' } } = Vue;`,
     vsName,
     '',
     'const words = ["alpha", "beta", "gamma", "delta", "epsilon"];',
-    'const ITEMS = Array.from({ length: 200 }, (_, i) => ({ id: i, text: "Row " + i + " \u2014 " + words[i % words.length] }));',
+    'const ITEMS = Array.from({ length: 200 }, (_, i) => ({ id: i, text: "Row " + i + " - " + words[i % words.length] }));',
     '',
     'createApp({',
     '  setup() {',
@@ -2577,18 +2685,80 @@ function generateTablePen(state: ConfiguratorState, isTs = false): CodePenPayloa
     '    const vs = ref(null);',
     '    const scrollDetails = ref(null);',
     '    function onScroll(details) { scrollDetails.value = details; }',
-    custom ? `    const columnWidths = [ ${ widths.join(', ') } ];` : '',
+    custom ? `    const columnWidths = [ ${ widths.join(', ') } ];` : false,
+    state.snapshots ? snapshotSaveScript(state, false, 'vs') : false,
+    state.restoreOnPrepend
+      ? [
+        '    // --- Prepend restoration ---',
+        '    let prependIndex = -1;',
+        '    function prependItems() {',
+        '      const chunk = Array.from({ length: 5 }, () => ({ id: prependIndex--, text: "Prepended row" }));',
+        '      items.value = [ ...chunk, ...items.value ];',
+        '    }',
+      ].join('\n')
+      : false,
+    state.infiniteScroll
+      ? [
+        '    // --- Infinite loading ---',
+        `    const LOAD_CHUNK = ${ state.loadChunk };`,
+        '    const TOTAL_ITEMS = ITEMS.length + 800;',
+        '    const loading = ref(false);',
+        '    const hasMore = ref(true);',
+        '    const lastLoad = ref(null);',
+        '    let nextId = ITEMS.length;',
+        '    function loadMore() {',
+        '      if (loading.value || !hasMore.value) {',
+        '        return;',
+        '      }',
+        '      loading.value = true;',
+        '      if (nextId >= TOTAL_ITEMS) {',
+        '        hasMore.value = false;',
+        '        loading.value = false;',
+        '        return;',
+        '      }',
+        '      const chunk = Array.from({ length: Math.min(LOAD_CHUNK, TOTAL_ITEMS - nextId) }, () => {',
+        '        const id = nextId++;',
+        '        return { id, text: "Row " + id + " - " + words[id % words.length] };',
+        '      });',
+        '      items.value = [ ...items.value, ...chunk ];',
+        '      loading.value = false;',
+        '    }',
+        '    function onLoad(direction, details) {',
+        '      lastLoad.value = { direction, velocity: details.velocity };',
+        '      loadMore();',
+        '    }',
+      ].join('\n')
+      : false,
+    state.snapshots
+      ? [
+        '    onMounted(() => {',
+        '      restoreSnapshot();',
+        '    });',
+      ].join('\n')
+      : false,
     '    const config = computed(() => ({',
     '      items: items.value,',
     "      direction: 'vertical',",
     '      flowTable: true,',
-    firstWindow ? '      autoSizeColumns: true,' : '',
-    custom ? '      columnWidths,' : '',
+    firstWindow ? '      autoSizeColumns: true,' : false,
+    custom ? '      columnWidths,' : false,
     '      virtualScrollbar: true,',
     `      stickyHeader: ${ state.stickyHeader },`,
     `      stickyFooter: ${ state.stickyFooter },`,
+    state.snap ? `      snap: '${ state.snapMode }',` : false,
+    state.infiniteScroll ? `      loadDistance: ${ state.loadDistance },` : false,
+    state.infiniteScroll ? '      loading: loading.value,' : false,
+    state.restoreOnPrepend ? '      restoreScrollOnPrepend: true,' : false,
+    state.initialScroll ? `      initialScrollIndex: ${ state.initialScrollIndex },` : false,
+    state.initialScroll ? `      initialScrollAlign: '${ state.initialScrollAlign }',` : false,
+    state.keyboardActivation !== 'auto' ? `      keyboardActivation: '${ state.keyboardActivation }',` : false,
+    state.ariaRole !== 'auto' ? `      role: '${ state.ariaRole }',` : false,
+    `      ariaLabel: '${ esc(state.ariaLabel || 'Virtual scroll demo') }',`,
     '    }));',
-    '    return { items, vs, scrollDetails, config, onScroll };',
+    '    const exposed = { items, vs, scrollDetails, config, onScroll };',
+    state.infiniteScroll ? '    Object.assign(exposed, { loading, hasMore, lastLoad, onLoad });' : false,
+    state.restoreOnPrepend ? '    Object.assign(exposed, { prependItems });' : false,
+    '    return exposed;',
     '  },',
     '})',
     "  .component('virtual-scroll-table', VirtualScrollTable)",
@@ -2638,11 +2808,11 @@ function generateMasonrySfc(state: ConfiguratorState, composableTab: boolean): s
   }
   lines.push(
     "import type { MasonryScrollDetails, VirtualScrollMasonryInstance, VirtualScrollMasonryProps } from '@pdanpdan/virtual-scroll';",
+    '',
     "import { VirtualScrollMasonry } from '@pdanpdan/virtual-scroll';",
+    "import { computed, onMounted, ref } from 'vue';",
     '',
     "import '@pdanpdan/virtual-scroll/style.css';",
-    '',
-    "import { computed, onMounted, ref } from 'vue';",
     '',
   );
   lines.push(dataModelScript(state, getDerived(state), true));
@@ -2678,6 +2848,10 @@ function generateMasonrySfc(state: ConfiguratorState, composableTab: boolean): s
   lines.push(`  maxColumns: ${ state.masonryMaxColumns },`);
   lines.push(`  gap: ${ state.gap },`);
   lines.push(`  virtualScrollbar: ${ virtual },`);
+  if (state.ariaRole !== 'auto') {
+    lines.push(`  role: '${ state.ariaRole }',`);
+  }
+  lines.push(`  ariaLabel: '${ esc(state.ariaLabel || 'Virtual scroll demo') }',`);
   lines.push('}));');
   lines.push('</script>');
   lines.push('');
@@ -2696,7 +2870,7 @@ function generateMasonrySfc(state: ConfiguratorState, composableTab: boolean): s
   lines.push('');
   lines.push('    <VirtualScrollMasonry ref="masonryRef" v-bind="config" class="vs-masonry" @scroll="onScroll">');
   lines.push('      <template #item="{ item, index, height }">');
-  lines.push('        <div class="vs-card" :style="{ backgroundColor: `hsl(${ (index * 137.5) % 360 }, 60%, 78%)` }">');
+  lines.push(`        <div class="vs-card" :style="{ backgroundColor: \`hsl(\${ (index * 137.5) % 360 }, 60%, 78%)\` }">`);
   lines.push('          <span class="vs-card-badge">#{{ index }}</span>');
   lines.push('          <p class="vs-card-text">{{ item?.text }}</p>');
   lines.push('          <span class="vs-card-meta">{{ Math.round(height) }}px</span>');
@@ -2735,7 +2909,7 @@ function generateMasonryPen(state: ConfiguratorState, isTs = false): CodePenPayl
     '',
     '  <virtual-scroll-masonry ref="vs" v-bind="config" class="vs-masonry" @scroll="onScroll">',
     '    <template #item="{ item, index, height }">',
-    '      <div class="vs-card" :style="{ backgroundColor: `hsl(${ (index * 137.5) % 360 }, 60%, 78%)` }">',
+    `      <div class="vs-card" :style="{ backgroundColor: \`hsl(\${ (index * 137.5) % 360 }, 60%, 78%)\` }">`,
     '        <span class="vs-card-badge">#{{ index }}</span>',
     '        <p class="vs-card-text">{{ item.text }}</p>',
     '        <span class="vs-card-meta">{{ Math.round(height) }}px</span>',
@@ -2746,11 +2920,12 @@ function generateMasonryPen(state: ConfiguratorState, isTs = false): CodePenPayl
   ].join('\n');
 
   const js = join([
+    isTs ? PEN_VUE_DECLARE : false,
     'const { createApp, ref, computed } = Vue;',
     vsName,
     '',
     'const words = ["alpha", "beta", "gamma", "delta", "epsilon"];',
-    `const ITEMS = Array.from({ length: ${ state.itemCount } }, (_, i) => ({ id: i, text: "Card " + i + " \\u2014 " + words[i % words.length] }));`,
+    `const ITEMS = Array.from({ length: ${ state.itemCount } }, (_, i) => ({ id: i, text: "Card " + i + " - " + words[i % words.length] }));`,
     '',
     'function cardHeight(item, index, width) {',
     '  const base = 104 + (index % 5) * 34 + ((item ? item.id : index) % 3) * 14;',
@@ -2770,6 +2945,8 @@ function generateMasonryPen(state: ConfiguratorState, isTs = false): CodePenPayl
     `      maxColumns: ${ state.masonryMaxColumns },`,
     `      gap: ${ state.gap },`,
     `      virtualScrollbar: ${ virtual },`,
+    state.ariaRole !== 'auto' ? `      role: '${ state.ariaRole }',` : false,
+    `      ariaLabel: '${ esc(state.ariaLabel || 'Virtual scroll demo') }',`,
     '    }));',
     '    return { vs, scrollDetails, config, onScroll };',
     '  },',

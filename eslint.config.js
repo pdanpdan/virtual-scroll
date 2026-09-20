@@ -14,9 +14,6 @@ export default antfu(
       a11y: true,
     },
     typescript: true,
-    // `packages/playground/tmp-generated` holds the configurator's compiled output
-    // (see `test:generated`): user-facing demo code, not source.
-    ignores: [ '**/tmp-generated/**' ],
   },
 
   {
@@ -186,7 +183,7 @@ export default antfu(
         },
       ],
       'vue/singleline-html-element-content-newline': 'off',
-      'vue/no-unused-refs': 'off', // TODO: remove when fixed for useTemplateRef
+      'vue/no-unused-refs': [ 'error' ],
       'vue/template-curly-spacing': [ 'error', 'always' ],
       'vue-a11y/label-has-for': [ 'error', {
         components: [ 'label' ],

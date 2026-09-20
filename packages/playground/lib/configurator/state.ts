@@ -161,7 +161,7 @@ export interface ConfiguratorDerived {
   supportsSnapshots: boolean;
   hasSections: boolean;
   isIndependent: boolean;
-  usesVirtualScroll: boolean;
+  isList: boolean;
   isTable: boolean;
   isMasonry: boolean;
 }
@@ -185,7 +185,7 @@ export function getDerived(state: ConfiguratorState): ConfiguratorDerived {
     supportsSnapshots: !isMasonry,
     hasSections,
     isIndependent,
-    usesVirtualScroll: !isIndependent,
+    isList: !isTable && !isMasonry,
     isTable,
     isMasonry,
   };
