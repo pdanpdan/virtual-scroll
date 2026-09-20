@@ -422,6 +422,60 @@ describe('virtualScrollTable', () => {
       wrapper.unmount();
     });
 
+    it('re-measures the auto-sized columns once item rows render', async () => {
+      const originalRect = HTMLElement.prototype.getBoundingClientRect;
+      const cellWidths: Record<string, number> = { h1: 10, h2: 11, c1: 100, c2: 20 };
+      const rectSpy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+        const known = Object.keys(cellWidths).find((name) => this.classList?.contains(name));
+        if (!known) {
+          return originalRect.call(this);
+        }
+        const width = cellWidths[ known ]!;
+        return { width, height: 10, top: 0, bottom: 10, left: 0, right: width, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+      });
+      const wrapper = mount(VirtualScrollTable, {
+        props: {
+          flowTable: true,
+          autoSizeColumns: true,
+          items: [] as MockItem[],
+          itemSize: 50,
+        },
+        slots: {
+          header: '<tr><th class="h1">H1</th><th class="h2">H2</th></tr>',
+          item: '<td class="c1">{{ index }}</td><td class="c2">x</td>',
+        },
+      });
+      await nextTick();
+      await nextTick();
+      const el = wrapper.element as HTMLElement;
+      Object.defineProperty(el, 'clientHeight', { value: 500, configurable: true });
+      Object.defineProperty(el, 'clientWidth', { value: 800, configurable: true });
+      const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
+      vs.refresh();
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      const columns = () => wrapper.findAll('colgroup col').map((col) => Number.parseFloat(/width:\s*([\d.]+)px/.exec(col.attributes('style') ?? '')?.[ 1 ] ?? 'NaN'));
+
+      // No item row existed yet, so the header alone pinned the columns.
+      const headerOnly = columns();
+      expect(headerOnly).toHaveLength(2);
+
+      await wrapper.setProps({ items: mockItems });
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      // The first window with real rows replaces that provisional pin.
+      const withItems = columns();
+      expect(withItems[ 0 ]! - headerOnly[ 0 ]!).toBe(90);
+      expect(withItems[ 1 ]! - headerOnly[ 1 ]!).toBe(9);
+
+      rectSpy.mockRestore();
+      wrapper.unmount();
+    });
+
     it('keeps auto layout when flow rows expose inconsistent cell counts', async () => {
       const items = Array.from({ length: 5 }, (_, i) => ({ id: i }));
       const wrapper = mount(VirtualScrollTable, {

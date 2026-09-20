@@ -660,6 +660,15 @@ function renderedItemStyle(item: RenderedItem<T>) {
 /** Pinned column widths (px) for `autoSizeColumns` flow tables. */
 const flowColgroup = ref<number[] | null>(null);
 
+/** Whether the current `flowColgroup` came from the explicit `columnWidths`
+ * prop (as opposed to an auto-size measurement). */
+let flowColgroupExplicit = false;
+
+/** Whether the current auto-size pin was measured before any item row existed,
+ * i.e. from the header row alone. Such a pin is replaced by the first
+ * measurement that includes item rows. */
+let flowColgroupProvisional = false;
+
 /** Definite table width (px) when columns are pinned: fixed layout then
  * ignores window content, keeping columns at their pinned sizes. */
 const flowTableWidth = computed(() => {
@@ -669,13 +678,13 @@ const flowTableWidth = computed(() => {
 
 async function measureFlowColumns() {
   await nextTick();
-  const rows: HTMLTableRowElement[] = [];
-  if (headerRef.value) {
-    rows.push(...Array.from(headerRef.value.querySelectorAll('tr')) as HTMLTableRowElement[]);
-  }
-  if (wrapperRef.value) {
-    rows.push(...Array.from(wrapperRef.value.querySelectorAll('tr.virtual-scroll-item')) as HTMLTableRowElement[]);
-  }
+  const headerRows: HTMLTableRowElement[] = headerRef.value
+    ? [ ...headerRef.value.querySelectorAll('tr') ] as HTMLTableRowElement[]
+    : [];
+  const itemRows: HTMLTableRowElement[] = wrapperRef.value
+    ? [ ...wrapperRef.value.querySelectorAll('tr.virtual-scroll-item') ] as HTMLTableRowElement[]
+    : [];
+  const rows = [ ...headerRows, ...itemRows ];
   if (rows.length === 0) {
     return;
   }
@@ -709,11 +718,10 @@ async function measureFlowColumns() {
     }
   }
   flowColgroup.value = widths;
+  // A measurement that saw only the header row pins header-sized columns. Once
+  // item rows render, the pin is replaced by one measured against their content.
+  flowColgroupProvisional = itemRows.length === 0;
 }
-
-/** Whether the current `flowColgroup` came from the explicit `columnWidths`
- * prop (as opposed to an auto-size measurement). */
-let flowColgroupExplicit = false;
 
 watch(
   [
@@ -727,6 +735,7 @@ watch(
     if (!isFlowTable.value) {
       flowColgroup.value = null;
       flowColgroupExplicit = false;
+      flowColgroupProvisional = false;
       return;
     }
     const explicit = props.columnWidths ?? [];
@@ -736,6 +745,7 @@ watch(
       if ((flowColgroup.value?.join(',') ?? '') !== explicitKey) {
         flowColgroup.value = [ ...explicit ];
         flowColgroupExplicit = true;
+        flowColgroupProvisional = false;
         updateTableHorizontalMetrics();
       }
       return;
@@ -743,13 +753,16 @@ watch(
 
     // Leaving the explicit mode clears the pin; auto mode clears it too.
     // Auto-size keeps the measured pin: later window changes must not
-    // re-measure (that would make it behave like the auto layout).
+    // re-measure (that would make it behave like the auto layout). A pin taken
+    // before any item row rendered is the exception: it only knew the header
+    // widths, so the first window with real rows re-measures it.
     const wasExplicit = flowColgroupExplicit;
     flowColgroupExplicit = false;
     if (wasExplicit || !props.autoSizeColumns) {
       flowColgroup.value = null;
+      flowColgroupProvisional = false;
     }
-    if (props.autoSizeColumns && flowColgroup.value === null) {
+    if (props.autoSizeColumns && (flowColgroup.value === null || flowColgroupProvisional)) {
       measureFlowColumns();
     }
   },
