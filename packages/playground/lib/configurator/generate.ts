@@ -2579,15 +2579,14 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   lines.push('  white-space: nowrap;');
   lines.push('}');
   lines.push('.vs-th {');
-  lines.push('  position: sticky;');
-  lines.push('  inset-block-start: 0;');
+  // No `position: sticky` here: the header row is pinned by `stickyHeader`,
+  // so styling the cell would pin it with the option off.
   lines.push('  background: #f4f4f5;');
   lines.push('  font-size: 0.6875rem;');
   lines.push('  text-transform: uppercase;');
   lines.push('  letter-spacing: 0.08em;');
   lines.push('  opacity: 0.75;');
   lines.push('}');
-  lines.push('.vs-td { overflow: hidden; text-overflow: ellipsis; max-inline-size: 24rem; }');
   lines.push('.vs-mono { font-family: ui-monospace, monospace; }');
   lines.push('.vs-num { text-align: right; }');
   lines.push('.vs-footer { font-weight: 700; text-align: center; background: #f4f4f5; }');
@@ -2609,8 +2608,7 @@ const TABLE_PEN_CSS = [
   '.vs-link { font-size: 0.75rem; font-weight: 700; color: #2563eb; text-decoration: none; }',
   '.vs-table { flex: 1; min-block-size: 0; border-collapse: separate; border-spacing: 0; background: #fff; }',
   '.vs-th, .vs-td { padding: 0.375rem 0.875rem; border-bottom: 1px solid #e4e4e7; font-size: 0.8125rem; text-align: left; vertical-align: top; white-space: nowrap; }',
-  '.vs-th { position: sticky; inset-block-start: 0; background: #f4f4f5; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }',
-  '.vs-td { overflow: hidden; text-overflow: ellipsis; max-inline-size: 24rem; }',
+  '.vs-th { background: #f4f4f5; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }',
   '.vs-mono { font-family: ui-monospace, monospace; }',
   '.vs-num { text-align: right; }',
   '.vs-footer { font-weight: 700; text-align: center; background: #f4f4f5; }',
