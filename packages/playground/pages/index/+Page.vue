@@ -67,7 +67,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
           Configurator / Code Generator
         </h2>
         <p class="text-base @4xl:text-lg opacity-80 max-w-4xl">
-          Select the features you need and generate complete typed Vue code - component, composables, or a CodePen.
+          Select the features you need and generate complete typed Vue code: a component, a composable, or a CodePen.
         </p>
         <div class="card-actions mt-8">
           <AppLink v-slot="{ href }" href="/configurator">

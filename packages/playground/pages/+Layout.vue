@@ -179,7 +179,7 @@ const featureLinks: Link[] = [
   { href: '/feature-ssr', label: 'SSR Support', props: { rel: 'external' } },
   { href: '/feature-custom-scrollbar', label: 'Custom Scrollbar' },
   { href: '/feature-independent-scrollbars', label: 'Independent Scrollbars' },
-  { href: '/feature-scroll-snap', label: 'Scroll Snap' },
+  { href: '/feature-scroll-snap', label: 'Scroll Snapping' },
 ];
 
 const patternLinks: Link[] = [

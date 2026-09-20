@@ -138,7 +138,7 @@ function openInCodePen() {
       <div>
         <h1 class="text-primary">Configurator / Code Generator</h1>
         <p class="text-base @4xl:text-xl opacity-60 font-medium mt-1">
-          Select the features you need and generate complete typed Vue code - component, composables, or a CodePen.
+          Select the features you need and generate complete typed Vue code: a component, a composable, or a CodePen.
         </p>
       </div>
     </div>
