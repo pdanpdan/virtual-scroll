@@ -571,7 +571,6 @@ function composableDestructureScript(state: ConfiguratorState, derived: Configur
     lines.push('  stopProgrammaticScroll,');
   }
   lines.push(
-    '  refresh,',
     '} = useVirtualScroll<Item>(config, extensions);',
   );
   return join(lines);
@@ -739,12 +738,6 @@ function toolbarTemplate(state: ConfiguratorState, composable: boolean): string 
   if (state.infiniteScroll) {
     lines.push(`${ t }    <button type="button" class="vs-btn" :disabled="loading" @click="loadMore">Load more</button>`);
   }
-  if (composable) {
-    lines.push(`${ t }    <button type="button" class="vs-btn" @click="refresh">Refresh</button>`);
-  } else {
-    lines.push(`${ t }    <button type="button" class="vs-btn" @click="virtualScrollRef?.refresh()">Refresh</button>`);
-  }
-
   lines.push(`${ t }  </div>`, `${ t }</header>`);
   return join(lines);
 }
@@ -1998,7 +1991,6 @@ function penTemplate(state: ConfiguratorState, derived: ConfiguratorDerived): st
   if (state.infiniteScroll) {
     lines.push(`${ t }    <button type="button" class="vs-btn" :disabled="loading" @click="loadMore">Load more</button>`);
   }
-  lines.push(`${ t }    <button type="button" class="vs-btn" @click="vs?.refresh()">Refresh</button>`);
   lines.push(`${ t }    <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`);
   lines.push(`${ t }  </div>`, `${ t }</header>`, '');
 
@@ -2081,7 +2073,7 @@ function penJs(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boo
     'createApp({',
     '  setup() {',
     isTs
-      ? '    const vs = ref<{ scrollToIndex: (row: number | null, col: number | null, options?: { align?: \'start\' | \'center\' | \'end\' | \'auto\'; behavior?: \'auto\' | \'smooth\' }) => void; refresh: () => void; } | null>(null);'
+      ? '    const vs = ref<{ scrollToIndex: (row: number | null, col: number | null, options?: { align?: \'start\' | \'center\' | \'end\' | \'auto\'; behavior?: \'auto\' | \'smooth\' }) => void; } | null>(null);'
       : '    const vs = ref(null);',
     '    ',
     indentBlock(penStateScript(state, derived, isTs), '    '),
@@ -2500,7 +2492,7 @@ function generateTableSfc(state: ConfiguratorState, composableTab: boolean): str
   if (state.restoreOnPrepend) {
     lines.push('        <button type="button" class="vs-btn" @click="prependItems">Prepend 5</button>');
   }
-  lines.push('        <button type="button" class="vs-btn" @click="virtualScrollRef?.refresh()">Refresh</button>');
+  lines.push('        <button type="button" class="vs-btn" @click="virtualScrollRef?.scrollToIndex(ITEM_COUNT - 1, null, { align: \'end\' })">Jump to end</button>');
   lines.push(`        <a href="${ GITHUB_REPO }" target="_blank" rel="noopener" class="vs-link">GitHub</a>`);
   lines.push('      </div>');
   lines.push('    </header>');
