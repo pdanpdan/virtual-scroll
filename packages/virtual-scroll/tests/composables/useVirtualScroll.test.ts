@@ -134,6 +134,29 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
 
+    it('applies a correction on top of the flow start instead of the item-flow offset', async () => {
+      const container = document.createElement('div');
+      const { result, wrapper } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items: mockItems,
+        scrollPaddingStart: 40,
+      });
+      await nextTick();
+
+      result.handleScrollCorrection(0, 120);
+      await nextTick();
+      await nextTick();
+
+      // The padding precedes the virtual content, so the anchored item keeps its
+      // place only when the scroll moves by the added size measured from the
+      // container's own position - not from the item-flow position.
+      expect(result.scrollCorrection.value).toEqual({ x: 0, y: 120 });
+      expect(container.scrollTop).toBe(120);
+      wrapper.unmount();
+    });
+
     it('updates scroll position on scroll event', async () => {
       const container = document.createElement('div');
       const { result, wrapper } = setup({

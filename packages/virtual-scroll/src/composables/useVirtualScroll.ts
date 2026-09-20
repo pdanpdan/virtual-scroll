@@ -475,9 +475,12 @@ export function useVirtualScroll<T = unknown>(
     // (drag emulation) can follow the content instead of fighting the correction.
     scrollCorrection.value = { x: addedX, y: addedY };
     nextTick(() => {
+      // `scrollToOffset` takes the container's own scroll position, not the
+      // item-flow position: the flow start (header, sticky row, scroll padding)
+      // precedes the virtual content, so it must stay part of the target.
       scrollToOffset(
-        addedX > 0 ? relativeScrollX.value + addedX : null,
-        addedY > 0 ? relativeScrollY.value + addedY : null,
+        addedX > 0 ? internalScrollX.value + addedX : null,
+        addedY > 0 ? internalScrollY.value + addedY : null,
         { behavior: 'auto' },
       );
     });
