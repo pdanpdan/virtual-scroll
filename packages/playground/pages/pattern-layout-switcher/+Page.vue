@@ -327,7 +327,7 @@ const {
         <p>
           The density toggle swaps the numbers the engine positions from (<code>item-size</code> for list rows, grid rows and
           table rows); the scroll math, the render buffers and the scrollbar thumb follow. Measure rows instead of sizing
-          them where the content is genuinely variable - for example rows whose text wraps.
+          them where the content varies - for example rows whose text wraps.
         </p>
       </ImplementationGuide>
     </template>

@@ -154,7 +154,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           With <code>direction="both"</code>, <code>&lt;VirtualScroll&gt;</code> renders a scrollable host that pans
           horizontally and vertically. Virtualization needs a known viewport, so the host must be constrained in both
           dimensions: give it an explicit height (the width fills its parent) and let <code>overflow</code> scroll the
-          content that extends past either edge. In flex/grid layouts, remember <code>min-height: 0</code> on the
+          content that extends past either edge. In flex/grid layouts, add <code>min-height: 0</code> on the
           list so it can shrink below its content instead of growing forever.
         </p>
 
@@ -318,7 +318,7 @@ const rows = new Array(10_000_000);
 &lt;/template>"
         />
 
-        <h3>5. Overscan both windows, not just one</h3>
+        <h3>5. Overscan both windows</h3>
         <p>
           <code>buffer-before</code> / <code>buffer-after</code> (default <code>5</code>) keep rows mounted past each
           viewport edge so fast panning does not flash blanks while rows mount; they count rows, not pixels. The column

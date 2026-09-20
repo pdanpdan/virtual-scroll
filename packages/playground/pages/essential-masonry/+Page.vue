@@ -388,7 +388,7 @@ function itemHeight(card: Card | undefined, _index: number, width: number): numb
           by <code>min-columns</code> / <code>max-columns</code> (defaults <code>1</code> / <code>10</code>). The
           resolved column width is fractional so the gutters (<code>gap</code>, default <code>10</code>, applied
           between columns and rows) divide the container width exactly. Because heights come from the oracle alone,
-          unvisited regions never need mounting: layout is remembered in steps of <code>segment-size</code> items (default <code>500</code>), so far <code>scrollToIndex</code> targets land on
+          unvisited regions never need mounting: layout is computed in segments of <code>segment-size</code> items (default <code>500</code>), so far <code>scrollToIndex</code> targets land on
           the exact canonical position, and the exposed <code>totalHeightExact</code> flips true once every step down to the last item has been laid out.
         </p>
 

@@ -44,7 +44,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      {{ itemCount.toLocaleString() }} rows of one height ({{ itemSize }}px). Only the rows inside the viewport are mounted, so this is the shortest path to a very long list.
+      {{ itemCount.toLocaleString() }} rows of one height ({{ itemSize }}px). Only the rows inside the viewport are mounted, so this is the shortest path to a long list.
     </template>
 
     <template #icon>

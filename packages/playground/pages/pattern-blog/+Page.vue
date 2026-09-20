@@ -249,7 +249,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <h3>1. Choose what scrolls, then give it the right data</h3>
         <p>
           By default <code>&lt;VirtualScroll&gt;</code> scrolls inside its own host element, which must then have a definite
-          height (any explicit or flex/grid-allocated height, remembering <code>min-height: 0</code> so it can shrink). When the
+          height (any explicit or flex/grid-allocated height, with <code>min-height: 0</code> so it can shrink). When the
           list <em>is</em> the page, the cleaner choice is native page scrolling: pass the window through <code>:container</code>
           and the engine sizes its viewport from the page and listens to window scroll, so no fixed-height host is needed.
           Because <code>window</code> only exists client-side, hold it in a <code>ref</code> assigned in <code>onMounted</code>
@@ -294,7 +294,7 @@ async function loadMore() {
         <h3>2. Reserve the cover-image box so late loads cannot shift layout</h3>
         <p>
           A cover image that has not loaded yet renders as zero height, so a row would first paint short and then jump when the
-          image arrives - moving the very content the reader is looking at. That is a general image-list concern, not something
+          image arrives - moving the content the reader is looking at. That is a general image-list concern, not something
           virtualization can fix for you: give the <code>&lt;img&gt;</code> its intrinsic <code>width</code> and
           <code>height</code> attributes plus <code>inline-size: 100%; block-size: auto</code>. The browser then reserves the
           aspect-ratio box up front, so the row measures the same whether the image is pending or painted. The remaining height
@@ -341,7 +341,7 @@ async function loadMore() {
           dynamic mode) and each mounted row is measured with <code>ResizeObserver</code>, updating the offset tree as rows
           settle. A measurement can only happen once a row is mounted, so pass <code>default-item-size</code> as an estimate
           (here <code>1000</code>) for the initial scroll height and for far-target navigation; measured values replace it
-          locally and only the affected range re-flows. When rows are tall, remember <code>buffer-before</code> /
+          locally and only the affected range re-flows. When rows are tall, <code>buffer-before</code> /
           <code>buffer-after</code> count <em>rows</em>, not pixels - the default <code>5</code> keeps five extra rows mounted on
           each side, which for ~1,000px posts is a lot of DOM; <code>1</code> is usually enough.
         </p>

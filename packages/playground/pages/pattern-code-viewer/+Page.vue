@@ -423,7 +423,7 @@ watch(activeFile, () => {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A code viewer is the ideal virtual-scroll workload: thousands of rows that are all exactly one text line
+          A code viewer fits virtualization closely: thousands of rows that are all exactly one text line
           tall. Treat the file as an array of strings and virtualize with a numeric <code>item-size</code>, so the engine positions rows arithmetically - no DOM measurement - and only the visible window is ever mounted. Uniformity holds because monospace text on one line cannot wrap away from the fixed
           row height, and <code>1ch</code> gives you exact, font-size-relative widths for the gutter and the longest
           line. Two further behaviors make it an editor rather than a pager: find-and-jump that scrolls
@@ -435,7 +435,7 @@ watch(activeFile, () => {
         <p>
           Split the source into an array - element <code>i</code> is line <code>i + 1</code> - and pass it as
           <code>items</code> with a numeric <code>item-size</code>. A real array is the mainstream choice: rows carry
-          the text they render. (If a view truly needs only numbering, an index-only sparse array
+          the text they render. (If a view needs only numbering, an index-only sparse array
           works too - the slot receives <code>index</code> and never reads a payload.) Give the scroll host a definite
           height, or flex-fill it with <code>min-height: 0</code> in a flex/grid parent.
         </p>

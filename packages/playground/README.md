@@ -2,7 +2,7 @@
 
 This is the development, testing, and demonstration environment for the [`@pdanpdan/virtual-scroll`](../virtual-scroll) package.
 
-It contains numerous examples showcasing various features and patterns of the library.
+It contains an example for every feature and pattern of the library.
 
 ## Explore
 

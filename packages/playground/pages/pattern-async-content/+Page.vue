@@ -62,7 +62,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Items are just ids: each visible row mounts a component that fetches simulated content. Revisiting a row reads from an in-memory cache, row heights are measured automatically as content arrives, and clearing the cache refetches what is on screen.
+      Items carry no payload: each visible row mounts a component that fetches simulated content. Revisiting a row reads from an in-memory cache, row heights are measured automatically as content arrives, and clearing the cache refetches what is on screen.
     </template>
 
     <template #icon>
@@ -149,7 +149,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           When the payloads come from per-row requests you do not have the data up front, so the main (index-only) list is the
           fit: <code>items</code> only supplies a length, the slot provides <code>index</code>, and each mounted row renders a
-          child component with that index. Fetching therefore happens only for rows that actually mount - never for the other
+          child component with that index. Fetching therefore happens only for mounted rows - never for the other
           ~99,990 - which is exactly the cost profile virtualization is meant to deliver. This is the index-only variant of the
           library's data-less rows: if you already hold full objects you would pass them and render from <code>item</code>
           instead; index-only rows defer all data work to the visible window and scale to very large counts.

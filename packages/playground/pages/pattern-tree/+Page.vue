@@ -264,7 +264,7 @@ export function createTree(depth: number, breadth: number, prefix = 'node', leve
 
         <h3>2. Virtualize the flattened array with content-sized rows</h3>
         <p>
-          Bind the <code>visibleItems</code> <code>computed</code> to <code>:items</code> and let rows size themselves: with no <code>item-size</code>, the engine measures every mounted row with a <code>ResizeObserver</code>, so a row can be exactly as tall as its label, twisty, and padding need. Rows that have not mounted yet are budgeted at <code>default-item-size</code> (default <code>40</code>) and settle to their measured height the frame they mount. If every row of your tree genuinely has one fixed height, pass it as a numeric <code>item-size</code> instead and all positions become pure arithmetic - the smoothest option, but wrapped or taller content then overflows its row box.
+          Bind the <code>visibleItems</code> <code>computed</code> to <code>:items</code> and let rows size themselves: with no <code>item-size</code>, the engine measures every mounted row with a <code>ResizeObserver</code>, so a row can be exactly as tall as its label, twisty, and padding need. Rows that have not mounted yet are budgeted at <code>default-item-size</code> (default <code>40</code>) and settle to their measured height the frame they mount. If every row of your tree has one fixed height, pass it as a numeric <code>item-size</code> instead and all positions become pure arithmetic - the smoothest option, but wrapped or taller content then overflows its row box.
         </p>
 
         <CodeBlock

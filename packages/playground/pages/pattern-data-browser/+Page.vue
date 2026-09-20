@@ -628,7 +628,7 @@ onUnmounted(() => clearTimeout(toastTimer));
           Virtualization needs a viewport of known size: when the host element is not height-constrained it grows with
           its content and never produces scroll events. Give the list an explicit height (the demo&apos;s resizable card
           sizes it with flex, <code>flex-1 min-h-0</code>); in your own layout any explicit or viewport-relative height
-          works. In flex/grid parents remember <code>min-height: 0</code> so the box may shrink below its content.
+          works. In flex/grid parents add <code>min-height: 0</code> so the box may shrink below its content.
         </p>
 
         <p>
@@ -716,7 +716,7 @@ const rowSize = (item: Row, _index: number) => (item.kind === 'header' ? 48 : 64
           own index, scroll with the list, and can be addressed by <code>scrollToIndex()</code>. Build the
           <code>sticky-indices</code> list from the header positions: rows at those indices pin to the viewport top, and
           when several sticky rows are consecutive an approaching header pushes the previous one out of view. While a row
-          is actually pinned the slot reports <code>isStickyActive</code> - the hook for the elevated &quot;stuck&quot;
+          is pinned the slot reports <code>isStickyActive</code> - the hook for the elevated &quot;stuck&quot;
           look. Keep the data nested and derive the flat array with a <code>computed</code> when your source is grouped by
           a field or folder tree.
         </p>

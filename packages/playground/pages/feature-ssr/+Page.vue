@@ -169,7 +169,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           no browser layout yet, so a plain render would emit an empty scroll box that crawlers and no-JS clients can never read.
           To virtualize for the server you instead pick which rows (and, in a grid, columns) should already exist as real static
           HTML, describe them with the <code>ssrRange</code> prop, and let the component scroll to that range once the client
-          hydrates. Because the same range drives the server output and the very first client render, Vue hydrates against an
+          hydrates. Because the same range drives the server output and the first client render, Vue hydrates against an
           identical tree; afterwards the component switches to its usual recycled, absolutely-positioned window. Two consequences
           shape the code: the pre-rendered slice must be described by deterministic numeric sizes (nothing can be measured on the
           server), and the items plus range must be identical on both sides of hydration.

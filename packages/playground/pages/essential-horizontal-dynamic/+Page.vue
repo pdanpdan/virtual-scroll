@@ -125,13 +125,13 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <h3>1. Choose the size strategy that matches your data</h3>
         <p>
           <code>item-size</code> accepts four forms, each trading speed against flexibility. A positive <code>number</code>
-          means uniform sizes and pure O(1) arithmetic - the fastest, but only valid when every item really is that size. An
+          means uniform sizes and pure O(1) arithmetic, and is valid only when every item is that size. An
           <code>array</code> describes a repeating width pattern (e.g. <code>[150, 300]</code>), and a function
           <code>(item, index) =&gt; number</code> expresses a width known up front that varies per item; both let the engine
           lay out far-off items from the declared pattern or function without mounting them - avoiding dynamic measurement, at
           the cost of per-item storage rather than a uniform number's O(1). Pass <code>0</code>, <code>null</code>, or
           <code>undefined</code> - or omit the prop entirely - to switch to <strong>dynamic</strong> mode, where sizes are
-          measured from the DOM. Use dynamic only when widths are genuinely content-driven and unknowable until rendered
+          measured from the DOM. Use dynamic only when widths are content-driven and cannot be known before render
           (wrapping text, media, responsive cells); if you can compute them, an array or function skips the measuring cost.
         </p>
 
@@ -204,8 +204,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
 
         <h3>3. Accept the estimate-then-measure pipeline</h3>
         <p>
-          Only cells that are actually mounted can be measured, so the engine cannot know the width of an item that has never
-          been in the viewport. Until a row mounts it keeps the fallback <code>default-item-size</code> (default <code>40</code>),
+          Only mounted cells can be measured, so the width of an item that has never been in the viewport is unknown. Until a row mounts it keeps the fallback <code>default-item-size</code> (default <code>40</code>),
           which drives the initial range and the total scroll width; as cells enter the window their real measurements replace the estimate, which is why a dynamic list "settles": the
           first paint (and any deep <code>scrollToIndex</code>) can be slightly off and correct itself over a couple of frames.
           Set <code>default-item-size</code> near your average width to shrink the initial error.

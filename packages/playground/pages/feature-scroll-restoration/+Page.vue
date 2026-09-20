@@ -129,7 +129,7 @@ function appendItems() {
 
         <h3>1. Constrain the scroll box and model reference-stable rows</h3>
         <p>
-          As always the list needs a definite height. More importantly, restoration is triggered by the list engine comparing
+          The list needs a definite height. Restoration is triggered by the engine comparing
           the previous and the new <code>items</code> arrays; it counts prepended rows by locating the <em>old first item</em>
           (by object reference) inside the new array's prefix. Keep each existing item object untouched across prepends and
           always assign a fresh array - the engine watches by identity (<code>deep: false</code>), so mutating the same array in

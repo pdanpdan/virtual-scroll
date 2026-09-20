@@ -313,7 +313,7 @@ const rows = Array.from({ length: 50_000 }, (_, i) => `Row ${ i }`);
           <li><code>scrollbarProps</code> - the same state regrouped so you can forward it straight into <code>&lt;VirtualScrollbar v-bind="scrollbarProps" /&gt;</code> if you would rather use the component form.</li>
         </ul>
         <p>
-          Two details are worth calling out. First, providing the slot does not itself turn the bars on: the slot is rendered only while virtual bars are active (<code>showVirtualScrollbars</code> - forced via the <code>virtual-scrollbar</code> prop, or automatic when content passes the browser limit), so pair it with <code>virtual-scrollbar</code> for ordinary content. Second, the slot replaces the default bar's markup, but the bound track/thumb classes still resolve the <code>--vs-scrollbar-*</code> variables as defaults - the bundles carry geometry, ARIA, and interaction but no separate theming API, so add your own colors/shape where you want to differ from those defaults. Binding them is what makes a custom chrome <em>functional</em>, not just decorative: style the slot elements however you like (utility classes or scoped CSS both work), and use <code>isDragging</code> to reflect the drag state in CSS or drive an <code>active</code> class.
+          Providing the slot does not itself turn the bars on: the slot is rendered only while virtual bars are active (<code>showVirtualScrollbars</code> - forced via the <code>virtual-scrollbar</code> prop, or automatic when content passes the browser limit), so pair it with <code>virtual-scrollbar</code> for ordinary content. The slot replaces the default bar's markup, but the bound track/thumb classes still resolve the <code>--vs-scrollbar-*</code> variables as defaults - the bundles carry geometry, ARIA, and interaction but no separate theming API, so add your own colors/shape where you want to differ from those defaults. Binding them is what makes a custom chrome <em>functional</em> rather than decorative: style the slot elements however you like (utility classes or scoped CSS both work), and use <code>isDragging</code> to reflect the drag state in CSS or drive an <code>active</code> class.
         </p>
         <CodeBlock
           class="guide-code-block"
@@ -331,7 +331,7 @@ const rows = Array.from({ length: 5000 }, (_, i) => `Row ${ i }`);
          trackProps / thumbProps carry the geometry (thumb size + position as
          percentages), the ARIA attributes, and the interaction listeners: a
          click on the track jumps, pointer-down on the thumb drags. Binding
-         them means your custom chrome is functional, not just decorative. -->
+         them is what makes the chrome functional rather than decorative. -->
     &lt;template #scrollbar=&quot;{ axis, trackProps, thumbProps, isDragging }&quot;>
       &lt;div
         v-if=&quot;axis === 'vertical'&quot;

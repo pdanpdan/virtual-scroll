@@ -87,7 +87,7 @@ onUnmounted(() => {
           how many items it holds. It scrolls vertically, horizontally, or on both axes at once (grids), handles fixed,
           computed and measured item sizes, and works with RTL layouts, the browser window as the scroll container,
           and lists that overflow the browser's own size limit. The live examples on this site are the fastest way in;
-          this page is the full reference.
+          the reference below covers the full API.
         </p>
       </div>
     </section>
@@ -128,7 +128,7 @@ onUnmounted(() => {
           The native scrollbar is hidden automatically (<code>.virtual-scroll--hide-scrollbar</code>) whenever virtual scrollbars are active - no extra CSS is needed.
         </p>
         <p class="opacity-90 mt-2">
-          Note: virtual scrollbars are not available when the scroll container is the window or the body - use an element container.
+          Virtual scrollbars are not available when the scroll container is the window or the body - use an element container.
         </p>
       </div>
 
@@ -201,7 +201,7 @@ onUnmounted(() => {
             <li>
               <strong>Do not combine native <code>loading="lazy"</code> with virtualization.</strong> The visible window is
               already the only mounted content; native lazy-loading adds browser heuristics on top of a scroll container
-              whose content keeps changing. This can starve or delay the very images on screen. Load visible images eagerly,
+              whose content keeps changing. This can starve or delay the images on screen. Load visible images eagerly,
               or via your own bounded, low-priority prefetch window ahead of the viewport.
             </li>
             <li>
@@ -473,7 +473,7 @@ import &quot;@pdanpdan/virtual-scroll/style.css&quot;;"
             <p />
             <ul class="list-disc ps-5 text-xs @4xl:text-sm space-y-1 opacity-80">
               <li>Compatible with all modern bundlers.</li>
-              <li><strong>Note:</strong> import the CSS yourself.</li>
+              <li><strong>Import the CSS yourself.</strong></li>
             </ul>
           </div>
         </div>
@@ -770,7 +770,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">virtualScrollbar</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
-              <td>Whether to force the use of virtual scrollbars. Automatically enabled for massive lists. <strong>Note:</strong> Disabled when using <code>window</code> or <code>body</code> as the container.</td>
+              <td>Whether to force the use of virtual scrollbars. Enabled automatically for massive lists, and disabled when <code>window</code> or <code>body</code> is the container.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">restoreScrollOnPrepend</code></td>
@@ -1134,11 +1134,11 @@ const vs = useVirtualScroll(props, [
         <div class="grid grid-cols-1 @4xl:grid-cols-2 @7xl:grid-cols-3 gap-4 not-prose mt-4">
           <div class="docs-kbd-item">
             <kbd class="docs-kbd">Home</kbd>
-            <span class="docs-kbd-description">Scroll to the very beginning (Index 0,0).</span>
+            <span class="docs-kbd-description">Scroll to the start (Index 0,0).</span>
           </div>
           <div class="docs-kbd-item">
             <kbd class="docs-kbd">End</kbd>
-            <span class="docs-kbd-description">Scroll to the very last row and column, including the loading slot size when a <code>#loading</code> slot is present.</span>
+            <span class="docs-kbd-description">Scroll to the last row and column, including the loading slot size when a <code>#loading</code> slot is present.</span>
           </div>
           <div class="docs-kbd-item">
             <kbd class="docs-kbd">PgUp</kbd> / <kbd class="docs-kbd">PgDn</kbd>
@@ -1772,7 +1772,7 @@ const vs = useVirtualScroll(props, [
             <tr>
               <td><code class="docs-prop-name">scrollToOffset</code></td>
               <td><code>fn(offset?, options?)</code></td>
-              <td>Scroll to a pixel offset (use ±Infinity for the very end/start; end intents follow the content as totals settle).</td>
+              <td>Scroll to a pixel offset (use ±Infinity for the end/start; end intents follow the content as totals settle).</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">refresh</code></td>
@@ -1787,7 +1787,7 @@ const vs = useVirtualScroll(props, [
         <h4 class="docs-prop-subheader">Sizing contract &amp; limitations</h4>
         <ul class="list-disc ps-5 space-y-2">
           <li>In canonical mode cards must render at exactly the oracle height - reserve media space (<code>aspect-ratio</code>, fixed model heights) and never rely on DOM measurement. With <code>measuredHeights</code>, cards size to their content and only mounted cards are measured (unmounted regions keep the oracle estimate).</li>
-          <li>Vertical axis only: no RTL, horizontal, or <code>both</code> mode and no coordinate scaling - very tall datasets stay below the browser's ~10M px scroll limit.</li>
+          <li>Vertical axis only: no RTL, horizontal, or <code>both</code> mode and no coordinate scaling, so datasets stay below the browser's ~10M px scroll limit.</li>
           <li>Not available for SSR pre-rendering: content mounts after the container is measured. Extensions/snap/sticky/loading of the list engine do not apply.</li>
         </ul>
       </div>
@@ -2863,7 +2863,7 @@ const vs = useVirtualScroll(props, [
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
             <li>Hooks into <code>onScrollEnd</code> lifecycle event.</li>
-            <li>Calculates the best snap target using <code>resolveSnap</code> utility.</li>
+            <li>Resolves the snap target with the <code>resolveSnap</code> utility.</li>
             <li>Uses <code>scrollToIndex</code> with <code>behavior: 'smooth'</code> to perform the snap.</li>
             <li>Automatically ignores items larger than the viewport to prevent infinite jumping.</li>
           </ul>
@@ -3047,7 +3047,7 @@ const vs = useVirtualScroll(props, [
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            Remembers where the reader was. <code>save()</code> captures the visible position, <code>restore()</code>
+            Keeps the visible position across a save/restore cycle. <code>save()</code> captures it, <code>restore()</code>
             brings it back - immediately, or on a later visit when a persistent storage is configured - and
             <code>clear()</code> drops both the in-memory snapshot and the stored entry. A snapshot only records the
             first visible index, the offset inside that item (VU) and the item count it was taken with, so it stays
@@ -3558,7 +3558,7 @@ const vs = useVirtualScroll(props, [
               </tr>
               <tr>
                 <td><code class="docs-prop-name">'auto'</code> <span class="badge badge-sm badge-outline opacity-50 ms-1">Default</span></td>
-                <td><strong>Smart:</strong> If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
+                <td>If the item is already fully visible, no scroll occurs. Otherwise, aligns to 'start' or 'end' to bring it into view.</td>
               </tr>
             </tbody>
           </table>
@@ -3573,7 +3573,7 @@ const vs = useVirtualScroll(props, [
           </a>
         </h4>
         <div class="prose prose-sm max-w-none mb-4 text-base-content/80">
-          <p>Defines how items align when user scrolling stops. <strong>Note:</strong> Snapping is disabled for items larger than the viewport.</p>
+          <p>Defines how items align when user scrolling stops. Snapping is disabled for items larger than the viewport.</p>
         </div>
         <div class="docs-table-container text-base-content/80">
           <table class="table table-sm @4xl:table-md table-zebra w-full">
@@ -3590,7 +3590,7 @@ const vs = useVirtualScroll(props, [
               </tr>
               <tr>
                 <td><code class="docs-prop-name">true</code> / <code class="docs-prop-name">'auto'</code></td>
-                <td><strong>Smart Directional:</strong> If scrolling towards start, acts as <code>'end'</code>. If scrolling towards end, acts as <code>'start'</code>.</td>
+                <td>Direction-aware: if scrolling towards start, acts as <code>'end'</code>. If scrolling towards end, acts as <code>'start'</code>.</td>
               </tr>
               <tr>
                 <td><code class="docs-prop-name">'next'</code></td>
@@ -3701,7 +3701,7 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
 ): ScrollToIndexResult"
           />
           <div class="prose prose-sm max-w-none opacity-90 space-y-4">
-            <p>Ensures a specific item is visible within the viewport. If the item's size is dynamic and not yet measured, the scroll position will be automatically corrected after rendering. Returns the computed scroll targets in virtual and display units (<code>ScrollToIndexResult</code>).</p>
+            <p>Scrolls a specific item into view. If the item's size is dynamic and not yet measured, the scroll position is corrected after rendering. Returns the computed scroll targets in virtual and display units (<code>ScrollToIndexResult</code>).</p>
             <div class="overflow-x-auto">
               <table class="table table-xs w-full bg-base-200">
                 <thead class="text-base-content"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>

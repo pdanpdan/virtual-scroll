@@ -215,7 +215,7 @@ onUnmounted(() => {
     </template>
 
     <template #description>
-      Search runs over the data, not the DOM, so it covers every item and not just the mounted rows; matches are highlighted in place with the browser's CSS Custom Highlight API.
+      Search runs over the data, not the DOM, so it covers every item, not only the mounted rows; matches are highlighted in place with the browser's CSS Custom Highlight API.
       Triggered by (<kbd class="kbd">⌘</kbd>+<kbd class="kbd">K</kbd>).
     </template>
 
@@ -476,7 +476,7 @@ function jump(step: 1 | -1) {
 &lt;/style>"
         />
 
-        <h3>3. Highlight the rows that are actually mounted</h3>
+        <h3>3. Highlight the mounted rows</h3>
         <p>
           A match becomes visible only after its row mounts, so highlight application must run against the live DOM of the mounted window. Walk the text nodes under the container root with a <code>TreeWalker</code>, turn each query occurrence into a <code>Range</code>, and register the ranges with the CSS Custom Highlight API under named highlights. Every virtualized row wrapper carries <code>data-index</code> and the class <code>.virtual-scroll-item</code>, which lets you classify a range as the current match versus the other results. Re-run the walk whenever the query or the current match changes, and whenever scrolling changes the mounted window (watch the rendered range exposed by the <code>@scroll</code> event); apply after <code>nextTick()</code>. Only mounted rows can produce ranges, so the pass is bounded by the window size, not the dataset size.
         </p>

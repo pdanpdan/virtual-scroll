@@ -14,9 +14,8 @@
   <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
     <p>
       Virtual scrolling looks like a solved problem until you need grid mode, window scrolling, or keyboard
-      navigation and find out the library you picked only does one axis with fixed heights. Most comparisons
-      online are either marketing or written for React, so this page sticks to Vue 3 and to what each package
-      ships today, not what its README promised three years ago.
+      navigation and the library you picked only does one axis with fixed heights. This comparison covers
+      Vue 3 packages and what each one ships today.
     </p>
     <p>
       Eight framework libraries made the cut: this one, the veteran <code>vue-virtual-scroller</code>, the headless
@@ -114,14 +113,14 @@
 
   <p class="text-sm opacity-60 mb-12 -mt-6">
     Bundle sizes: the smallest import that renders a list from each package's Vue entry, tree-shaken,
-    dependencies bundled and Vue external &mdash; installed from npm, bundled with esbuild
+    dependencies bundled and Vue external - installed from npm, bundled with esbuild
     (<code>--minify</code>), gzipped at level 9. For the component libraries that is one component
     (<code>VirtualScroll</code>, <code>RecycleScroller</code>, <code>VList</code>,
     <code>VVirtualList</code>, <code>VirtualList</code>, <code>CeriousScroll</code>); for
     <code>@tanstack/vue-virtual</code> it is <code>useVirtualizer</code> including the
     <code>@tanstack/virtual-core</code> it depends on, and for <code>vlist</code> it is
     <code>vlist-vue</code>'s <code>useVList</code>, which through <code>vlist/config</code> pulls in every one
-    of its seventeen plugins &mdash; importing the core and plugins by hand instead is 10.2&nbsp;kB gzip for
+    of its seventeen plugins - importing the core and plugins by hand instead is 10.2&nbsp;kB gzip for
     the base and 12.2&nbsp;kB with the scrollbar. Ours covers all six built-in extensions; the lean
     <code>/core</code> entry is 15.2&nbsp;kB gzip, and the <code>useVirtualScroll</code> engine alone, for
     writing your own markup, is 10.2&nbsp;kB.
@@ -450,7 +449,7 @@
         <div>
           <div class="docs-feature-card-title text-base">@tanstack/vue-virtual</div>
           <p class="docs-feature-card-description text-sm">
-            Headless by design &mdash; you own the markup, so everything not listed as ✅ is work you do
+            Headless by design - you own the markup, so everything not listed as ✅ is work you do
             yourself. Grid means composing two virtualizers, RTL is an <code>isRtl</code> flag that its own
             ecosystem describes as partial, and there is no scrollbar or snap logic to borrow. In exchange you
             get the smallest footprint of the serious options and total control.
@@ -464,10 +463,10 @@
         <div>
           <div class="docs-feature-card-title text-base">virtua</div>
           <p class="docs-feature-card-description text-sm">
-            The grid is literally named <code>experimental_VGrid</code>, and its own README still lists sticky
+            The grid is named <code>experimental_VGrid</code>, and its own README still lists sticky
             and keyboard navigation as things it is &ldquo;aiming&rdquo; to support. What is shipped is fast
-            and the window-scroll story is good. One codebase for five frameworks &mdash; impressive, but
-            issues get filed against the shared core.
+            and the window-scroll story is good. One codebase for five frameworks, but issues get filed
+            against the shared core.
           </p>
         </div>
       </div>
@@ -505,7 +504,7 @@
           <div class="docs-feature-card-title text-base">vueuc</div>
           <p class="docs-feature-card-description text-sm">
             VVirtualList powers Naive UI's large lists and it works, but vueuc is an internal utility
-            collection &mdash; the author's README says: &ldquo;I'm too lazy to write them since I'm the only
+            collection - the author's README says: &ldquo;I'm too lazy to write them since I'm the only
             one that uses the library.&rdquo; Adopting it means depending on Naive UI's private parts.
           </p>
         </div>
@@ -521,7 +520,7 @@
             detect the near-end condition in your own handler, append, then call <code>updateTotalElements</code>
             and re-render. It is also the only entry that does not scroll natively: wheel/touch/keyboard
             handling runs on its own hidden-overflow host instead of the browser's scrollport. The ❌s are its
-            own roadmap &mdash; horizontal virtualization, grids and sticky headers are listed there as future
+            own roadmap - horizontal virtualization, grids and sticky headers are listed there as future
             work.
           </p>
         </div>
@@ -533,11 +532,11 @@
         <div>
           <div class="docs-feature-card-title text-base">vlist</div>
           <p class="docs-feature-card-description text-sm">
-            The grid is a single-axis layout &mdash; <code>columns</code> and a gap over a vertically
+            The grid is a single-axis layout - <code>columns</code> and a gap over a vertically
             virtualized list, with no horizontal window, the same shape as <code>virtua</code>'s grid. Snapping
             lives inside the carousel plugin, so a plain list has none. RTL is not implemented: the only RTL
             code in the package throws for horizontal lists in synthetic mode. Prepending data shifts what you
-            are looking at &mdash; scroll snapshots and the rebuild utility preserve positions across
+            are looking at - scroll snapshots and the rebuild utility preserve positions across
             navigation and list recreation, not across an insert above the viewport. The table renders div rows
             with resizable columns, not real table rows with content-sized columns. Rows have to exist as an
             array (the examples build <code>Array.from({ length: n })</code>), though the instance exposes
@@ -555,55 +554,55 @@
   <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
     <ul class="space-y-4">
       <li>
-        <strong>@pdanpdan/virtual-scroll</strong> &mdash; the only option that covers grid, window scrolling,
+        <strong>@pdanpdan/virtual-scroll</strong> - the only option that covers grid, window scrolling,
         RTL, sticky and keyboard navigation on its own, the only one that virtualizes past the browser's
         max element height, and the only Vue library that ships masonry and real table-flow layouts as
         first-class modes (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also one of the larger
-        bundles here &mdash; 20.2&nbsp;kB gzip for the component, behind only the two APIs that ship their
+        bundles here - 20.2&nbsp;kB gzip for the component, behind only the two APIs that ship their
         whole plugin set, though its lean <code>/core</code> entry drops that to 15.2&nbsp;kB and the engine
-        alone is 10.2&nbsp;kB &mdash; and at 12 stars it has no community to fall back on.
+        alone is 10.2&nbsp;kB - and at 12 stars it has no community to fall back on.
       </li>
       <li>
-        <strong>@ceriousdevtech/vue-cerious-scroll</strong> &mdash; the only other Vue entry that ships real
+        <strong>@ceriousdevtech/vue-cerious-scroll</strong> - the only other Vue entry that ships real
         table rows and masonry layouts (canonical or DOM-measured), with built-in keyboard navigation. It is
-        vertical-only &mdash; no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
-        beyond-browser-max support &mdash; and it scrolls on its own hidden-overflow host instead of the
+        vertical-only - no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
+        beyond-browser-max support - and it scrolls on its own hidden-overflow host instead of the
         browser's scrollport. The heaviest per-view code here after <code>vlist</code>
         (24.5&nbsp;kB gzip, its runtime dependency bundled) and at 11 stars it has no community either.
       </li>
       <li>
-        <strong>vlist</strong> &mdash; the other batteries-included entry, and the closest in scope: a
+        <strong>vlist</strong> - the other batteries-included entry, and the closest in scope: a
         framework-agnostic core with official Vue, React, Svelte and Solid adapters, plus plugins for grid,
         masonry, table, tree, groups, selection, search, sortable, snapshots, transition, carousel and async
         data. Its core is the smallest serious one when you import plugins by hand (10.2&nbsp;kB, plus
-        1&ndash;6&nbsp;kB per plugin), the default
+        1-6&nbsp;kB per plugin), the default
         scrollbar is already an overlay, document scrolling is a plugin, and 1M+ items work through its
         bounded and synthetic scroll modes (the older <code>scale()</code> plugin is now a deprecation stub).
         What it does not have is a second axis, RTL, snapping outside the carousel, real table rows, or
-        prepend anchoring &mdash; and the adapter path bundles every plugin. As young as this project: first
+        prepend anchoring - and the adapter path bundles every plugin. As young as this project: first
         release this year, 17 stars.
       </li>
       <li>
-        <strong>vue-virtual-scroller</strong> &mdash; the safe, boring choice. Ten years of production use,
+        <strong>vue-virtual-scroller</strong> - the safe, boring choice. Ten years of production use,
         active releases, every layout problem already answered on GitHub. You give up window scrolling, RTL and
         anything 2D.
       </li>
       <li>
-        <strong>@tanstack/vue-virtual</strong> &mdash; when the list is just a list and you want the smallest
+        <strong>@tanstack/vue-virtual</strong> - when the list is a plain list and you want the smallest
         dependency with the most control. You will write the rest yourself, which is fine for one axis of fixed
         or measured items.
       </li>
       <li>
-        <strong>virtua</strong> &mdash; the current speed champion with the best cross-framework story. Window
-        scrolling and measured sizes just work; everything beyond a plain list is still maturing.
+        <strong>virtua</strong> - the current speed champion with the best cross-framework story. Window
+        scrolling and measured sizes work; everything beyond a plain list is still maturing.
       </li>
       <li>
-        <strong>vueuc</strong> &mdash; only makes sense if you are already on Naive UI.
+        <strong>vueuc</strong> - only makes sense if you are already on Naive UI.
       </li>
       <li>
-        <strong>vue-virtual-scroll-list</strong> &mdash; don't start new projects with it.
+        <strong>vue-virtual-scroll-list</strong> - don't start new projects with it.
       </li>
     </ul>
   </div>
@@ -614,16 +613,16 @@
     <div class="docs-feature-card-body">
       <div>
         <p class="docs-feature-card-description text-sm">
-          If your list is vertical and your items have known sizes, every current library works &mdash; pick by
+          If your list is vertical and your items have known sizes, every current library works - pick by
           bundle size or familiarity. The differences only show up when you need the second axis, the page as
           the scroll container, sticky headers, keyboard support, or lists that outgrow the browser's height
           limit. That is exactly where <code>@pdanpdan/virtual-scroll</code> is positioned, and the trade-off is
-          a bigger bundle and a young project. The demos on this site &mdash; grid, blog, spreadsheet, tree,
-          table flow, masonry &mdash; are each a feature the mainstream competitors cannot do without custom
+          a bigger bundle and a young project. The demos on this site - grid, blog, spreadsheet, tree,
+          table flow, masonry - are each a feature the mainstream competitors cannot do without custom
           code. <code>vue-cerious-scroll</code> also ships masonry and real table rows, but stops there
           (vertical only, no native scrollport, no grid, window, RTL or beyond-max support);
           <code>vlist</code> matches the layout plugin list but virtualizes one axis at a time and has no
-          RTL. So this page doubles as the pitch.
+          RTL.
         </p>
       </div>
     </div>

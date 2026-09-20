@@ -472,7 +472,7 @@ function stopAutoScroll() {
         <p>
           Reorder only on <code>drop</code>, never live while hovering: if you mutated the array on every <code>dragover</code>,
           the indices you are comparing would drift mid-drag. On drop, remove the carried item and insert it at the marked row -
-          remembering that the removal shifts every later row up by one, so a downward move inserts at
+          the removal shifts every later row up by one, so a downward move inserts at
           <code>target - 1</code> and an upward move at <code>target</code>. Assign a fresh array so the change is reactive; the
           engine re-ranges around the current scroll and re-measures, so the visual position is preserved. Because a
           <code>drop</code> can be cancelled (Esc, leaving the window), also reset both refs and stop any auto-scroll in

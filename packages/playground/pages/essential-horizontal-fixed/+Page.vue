@@ -107,10 +107,10 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       <ImplementationGuide>
         <p>
           To virtualize a horizontal strip in which every item has the same width, switch the axis to horizontal and give the
-          engine a numeric <code>item-size</code>. Uniform sizes are the best case for virtualization: the visible window, each
-          item's position, and the total scroll width are all derived arithmetically (<code>index × itemSize</code>), so range math stays arithmetic and scrolling a very long dataset stays smooth. That speed is the
-          reward for a promise you make to the engine - that every item is exactly the declared width - so this mode is the
-          right choice only while that promise holds.
+          engine a numeric <code>item-size</code>. Uniform sizes are the cheapest case for virtualization: the visible window,
+          each item's position, and the total scroll width are all derived arithmetically (<code>index × itemSize</code>), so
+          range math stays arithmetic and long datasets scroll without extra work. That speed depends on every item being
+          exactly the declared width, so this mode fits only while that holds.
         </p>
 
         <h3>1. Put the list on the horizontal axis and size it</h3>
@@ -118,7 +118,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           <code>direction</code> defaults to <code>'vertical'</code>; pass <code>direction="horizontal"</code> to scroll along
           the inline (width) axis. The component renders its own scrollable host, which needs a <em>definite block size</em> so
           rows have a height to span (rows stretch to the viewport height automatically) and a constrained inline size so content
-          overflows sideways rather than wrapping. In a flex/grid parent, remember <code>min-height: 0</code> /
+          overflows sideways rather than wrapping. In a flex/grid parent, add <code>min-height: 0</code> /
           <code>min-width: 0</code> so the box is allowed to shrink below its content. The <code>buffer-before</code> /
           <code>buffer-after</code> props (default <code>5</code>) keep a few extra items mounted past each edge so fast panning
           does not flash blank cells; they count items, so widen them if cells are wide or travel is quick.
@@ -234,7 +234,7 @@ const items = new Array(1_000_000);
           any scrollbar geometry. Each rendered row is mounted into a cell exactly that wide and as tall as the viewport, so the
           row root should fill the box (<code>inline-size: 100%; block-size: 100%</code>, borders included via
           <code>box-sizing: border-box</code>). Content wider than the declared size clips or overlaps; narrower content leaves
-          gaps. When widths genuinely vary, move off uniform mode to an array, a function, or dynamic measurement (see the
+          gaps. When widths vary, move off uniform mode to an array, a function, or dynamic measurement (see the
           dynamic-width example) rather than fighting a fixed number.
         </p>
       </ImplementationGuide>

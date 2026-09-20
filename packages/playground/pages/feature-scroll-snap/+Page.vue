@@ -52,7 +52,7 @@ const isItemTooLarge = computed(() => {
     <template #description>
       <strong>snap</strong> lines the view up once scrolling stops - to the nearest edge, the center, or the next item, depending on the mode. Handy for carousels and pickers.
       <br />
-      <strong>Note:</strong> items taller than the viewport are left alone, so snapping cannot loop.
+      <strong>Items taller than the viewport are skipped</strong>, so snapping cannot loop.
     </template>
 
     <template #icon>
@@ -235,7 +235,7 @@ const pages = Array.from({ length: 60 }, (_, i) => ({
           <li><code>'auto'</code> - direction-aware: behaves like <code>'end'</code> while scrolling back toward the start and like <code>'start'</code> while scrolling toward the end, so large free-scroll content still lands aligned.</li>
         </ul>
         <p>
-          Because <code>snap</code> is just a prop, switching between these (or to <code>false</code>) at runtime reconfigures the behaviour with no other change.
+          Because <code>snap</code> is a prop, switching between these (or to <code>false</code>) at runtime reconfigures the behaviour with no other change.
         </p>
         <h3>3. Keep items smaller than the viewport</h3>
         <p>
