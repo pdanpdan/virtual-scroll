@@ -4,18 +4,18 @@
  * code fragment (component mode, composable mode, or standalone CodePen pen).
  */
 
-export type Direction = 'vertical' | 'horizontal' | 'both';
-export type RendererMode = 'list' | 'table' | 'masonry';
-export type TableColumnMode = 'auto' | 'first' | 'custom';
+type Direction = 'vertical' | 'horizontal' | 'both';
+type RendererMode = 'list' | 'table' | 'masonry';
+type TableColumnMode = 'auto' | 'first' | 'custom';
 export type SizeMode = 'fixed' | 'pattern' | 'function' | 'dynamic';
-export type ScrollbarStyle = 'auto' | 'virtual' | 'custom' | 'independent';
-export type DataSource = 'lorem' | 'local';
-export type ContainerMode = 'element' | 'window';
-export type AriaRole = 'auto' | 'list' | 'grid' | 'tree' | 'listbox' | 'menu';
-export type SnapMode = 'auto' | 'next' | 'start' | 'center' | 'end';
-export type KeyboardActivation = 'auto' | 'item' | 'viewport';
-export type SnapshotStorage = 'session' | 'local';
-export type AlignMode = 'auto' | 'start' | 'center' | 'end';
+type ScrollbarStyle = 'auto' | 'virtual' | 'custom' | 'independent';
+type DataSource = 'lorem' | 'local';
+type ContainerMode = 'element' | 'window';
+type AriaRole = 'auto' | 'list' | 'grid' | 'tree' | 'listbox' | 'menu';
+type SnapMode = 'auto' | 'next' | 'start' | 'center' | 'end';
+type KeyboardActivation = 'auto' | 'item' | 'viewport';
+type SnapshotStorage = 'session' | 'local';
+type AlignMode = 'auto' | 'start' | 'center' | 'end';
 
 export interface ConfiguratorState {
   // --- Basics ---
@@ -40,7 +40,6 @@ export interface ConfiguratorState {
 
   // --- Sizing ---
   itemSizeMode: SizeMode;
-  itemSize: number;
   itemSizeBase: number;
   itemSizeAlt: number;
   itemSizeMin: number;
@@ -53,7 +52,6 @@ export interface ConfiguratorState {
   // --- Grid (direction 'both') ---
   columnCount: number;
   columnWidthMode: SizeMode;
-  columnWidth: number;
   columnWidthBase: number;
   columnWidthAlt: number;
   columnWidthMin: number;
@@ -107,7 +105,6 @@ export const defaultState: ConfiguratorState = {
   loremSentences: 1,
 
   itemSizeMode: 'fixed',
-  itemSize: 48,
   itemSizeBase: 48,
   itemSizeAlt: 96,
   itemSizeMin: 32,
@@ -119,7 +116,6 @@ export const defaultState: ConfiguratorState = {
 
   columnCount: 20,
   columnWidthMode: 'fixed',
-  columnWidth: 120,
   columnWidthBase: 120,
   columnWidthAlt: 180,
   columnWidthMin: 80,

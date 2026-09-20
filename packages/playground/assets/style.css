@@ -307,10 +307,6 @@ body {
   @apply box-border flex shrink-0 flex-col items-center justify-center border-e border-b border-base-content/5 text-xs transition-colors hover:bg-base-300 @4xl:text-xs;
 }
 
-@utility example-spreadsheet {
-  @apply bg-base-100;
-}
-
 @utility example-spreadsheet-row {
   @apply flex flex-nowrap bg-base-100 whitespace-nowrap;
 
@@ -455,9 +451,6 @@ body {
     }
   }
 }
-@utility docs-prop-header--primary {
-  @apply border-primary/30 text-primary;
-}
 @utility docs-prop-header--accent {
   @apply border-accent/30 text-accent;
 }
@@ -483,10 +476,6 @@ body {
 @utility docs-prop-subheader--secondary {
   @apply text-secondary opacity-100;
 }
-@utility docs-prop-subheader--accent {
-  @apply text-accent opacity-100;
-}
-
 @utility docs-prop-name {
   @apply font-bold text-primary;
 }
@@ -614,18 +603,12 @@ body {
 @utility docs-method-card {
   @apply app-card border-t-2 p-6 text-base-content/80;
 }
-@utility docs-method-card--primary {
-  @apply border-primary;
-}
 @utility docs-method-card--secondary {
   @apply border-secondary;
 }
 
 @utility docs-method-title {
   @apply mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-lg font-bold;
-}
-@utility docs-method-title--primary {
-  @apply text-primary;
 }
 @utility docs-method-title--secondary {
   @apply text-secondary;
@@ -645,13 +628,6 @@ body {
 @utility docs-link-title--primary {
   @apply text-primary;
 }
-@utility docs-link-title--secondary {
-  @apply text-secondary;
-}
-@utility docs-link-title--accent {
-  @apply text-accent;
-}
-
 @utility docs-link-description {
   @apply mt-1 text-[10px] opacity-60;
 }
@@ -662,10 +638,6 @@ body {
 @utility docs-alert--warning {
   @apply border-warning;
 }
-@utility docs-alert--info {
-  @apply border-info;
-}
-
 @utility docs-card {
   @apply card shadow-soft bg-base-300 p-4 @4xl:p-6;
 }
@@ -709,28 +681,6 @@ body {
   }
 }
 
-@utility sheet-backdrop {
-  @layer daisyui.l1.l2.l3 {
-    @apply pointer-events-none invisible absolute inset-0 opacity-0;
-
-    transition: opacity var(--sheet-tr);
-
-    input:checked ~ &,
-    :popover-open > & {
-      @apply pointer-events-auto visible opacity-100;
-
-      :root:has(&) {
-        --page-has-backdrop: 1;
-        --page-scroll-bg: var(--page-scroll-bg-on);
-        --page-overflow: hidden;
-        --page-scroll-gutter: stable;
-        animation: set-page-has-scroll forwards;
-        animation-timeline: scroll();
-      }
-    }
-  }
-}
-
 @utility sheet-content {
   @layer daisyui.l1.l2.l3 {
     @apply fixed flex translate-0 flex-col overflow-clip;
@@ -767,28 +717,6 @@ body {
   }
 }
 
-@utility sheet-content-top {
-  @layer daisyui.l1.l2 {
-    @apply top-0 max-h-[98svh] w-full rounded-b-box;
-
-    --tw-translate-y: calc(var(--sheet-peek, 0px) + env(safe-area-inset-top, 0px) - 100%);
-
-    input:checked ~ &,
-    :popover-open > & {
-      @apply translate-y-0;
-      padding-block-start: env(safe-area-inset-top, 0px);
-    }
-
-    &:has(.sheet-handle) {
-      @apply pb-(--sheet-peek);
-    }
-
-    .sheet-handle {
-      @apply bottom-0 left-[50%] h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
-    }
-  }
-}
-
 @utility sheet-content-bottom {
   @layer daisyui.l1.l2 {
     @apply bottom-0 max-h-[98svh] w-full rounded-t-box;
@@ -807,36 +735,6 @@ body {
 
     .sheet-handle {
       @apply top-0 left-[50%] h-(--sheet-peek) w-20 max-w-full -translate-x-[50%];
-    }
-  }
-}
-
-@utility sheet-content-start {
-  @layer daisyui.l1.l2 {
-    @apply start-0 h-full max-w-[98vw] rounded-e-box;
-
-    --tw-translate-x: calc(var(--sheet-peek, 0px) + env(safe-area-inset-left, 0px) - 100%);
-
-    &:dir(rtl) {
-      --tw-translate-x: calc(100% - var(--sheet-peek, 0px) - env(safe-area-inset-right, 0px));
-    }
-
-    input:checked ~ &,
-    :popover-open > & {
-      @apply translate-x-0;
-      padding-inline-start: env(safe-area-inset-left, 0px);
-
-      &:dir(rtl) {
-        padding-inline-start: env(safe-area-inset-right, 0px);
-      }
-    }
-
-    &:has(.sheet-handle) {
-      @apply pe-(--sheet-peek);
-    }
-
-    .sheet-handle {
-      @apply end-0 top-[50%] h-20 max-h-full w-(--sheet-peek) -translate-y-[50%];
     }
   }
 }

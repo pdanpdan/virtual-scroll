@@ -11,11 +11,11 @@
  * All modes share the same data layer (Lorem API or local generation), item template and styles.
  */
 
-import type { ConfiguratorState, SizeMode } from './state';
+import type { ConfiguratorDerived, ConfiguratorState, SizeMode } from './state';
 
 import { getDerived } from './state';
 
-export type GenerateMode = 'component' | 'composable';
+type GenerateMode = 'component' | 'composable';
 
 const LOREM_API = 'https://lorem-api.com/api/lorem';
 const GITHUB_REPO = 'https://github.com/pdanpdan/virtual-scroll';
@@ -35,7 +35,7 @@ const CDN_VS_VERSION = '0.13.0';
 const CDN_VS_JS = `https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ CDN_VS_VERSION }/dist/index.js`;
 const CDN_VS_CSS = `https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ CDN_VS_VERSION }/dist/virtual-scroll.css`;
 
-export interface CodePenPayload {
+interface CodePenPayload {
   title: string;
   html: string;
   css: string;
@@ -75,7 +75,7 @@ function indentBlock(fragment: string, indent: string): string {
 // data model + data source fragments (shared by all outputs)
 // ---------------------------------------------------------------------------
 
-function dataModelScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function dataModelScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   const lines: string[] = [];
 
   if (isTs) {
@@ -97,7 +97,7 @@ function dataModelScript(state: ConfiguratorState, derived: ReturnType<typeof ge
   return join(lines);
 }
 
-function sectionHelpers(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function sectionHelpers(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   if (!derived.hasSections) {
     return '';
   }
@@ -122,7 +122,7 @@ function sectionHelpers(state: ConfiguratorState, derived: ReturnType<typeof get
   ]);
 }
 
-function dataSourceScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function dataSourceScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   const lines: string[] = [];
   const fc = isTs ? '(count: number): Promise<string[]>' : '(count)';
   const cc = isTs ? '(start: number, count: number): Promise<Item[]>' : '(start, count)';
@@ -181,7 +181,7 @@ function dataSourceScript(state: ConfiguratorState, derived: ReturnType<typeof g
   return join(lines);
 }
 
-function prependScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function prependScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   if (!state.restoreOnPrepend) {
     return '';
   }
@@ -220,7 +220,7 @@ function prependScript(state: ConfiguratorState, derived: ReturnType<typeof getD
   return join(lines);
 }
 
-function stickyIndicesScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function stickyIndicesScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   if (!derived.hasSections) {
     return '';
   }
@@ -236,7 +236,7 @@ function stickyIndicesScript(state: ConfiguratorState, derived: ReturnType<typeo
   ]);
 }
 
-function infiniteScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function infiniteScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   if (!state.infiniteScroll) {
     return '';
   }
@@ -302,7 +302,7 @@ function sizeExpression(sizeMode: SizeMode, base: number, alt: number, min: numb
   }
 }
 
-function configPropsScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean, indent: string, composable: boolean): string {
+function configPropsScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean, indent: string, composable: boolean): string {
   const lines: string[] = [];
   const push = (key: string, value: string, comment?: string) => {
     lines.push(`${ indent }${ key }: ${ value },${ comment ? ` // ${ comment }` : '' }`);
@@ -374,7 +374,7 @@ function configPropsScript(state: ConfiguratorState, derived: ReturnType<typeof 
   return join(lines);
 }
 
-function configScriptComponent(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function configScriptComponent(state: ConfiguratorState, derived: ConfiguratorDerived): string {
   const lines: string[] = [
     '// --- Configuration (typed against VirtualScrollProps) ---',
     'const config = computed<VirtualScrollProps<Item>>(() => ({',
@@ -390,7 +390,7 @@ function configScriptComponent(state: ConfiguratorState, derived: ReturnType<typ
   return join(lines);
 }
 
-function configScriptComposable(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function configScriptComposable(state: ConfiguratorState, derived: ConfiguratorDerived): string {
   const lines: string[] = [
     '// --- Configuration (typed against VirtualScrollProps) ---',
     'const config = computed<VirtualScrollProps<Item>>(() => ({',
@@ -572,7 +572,7 @@ function composableDestructureScript(state: ConfiguratorState, derived: ReturnTy
  * Keyboard navigation for the composable output. The component wires it itself;
  * a composable consumer calls it and joins the DOM up.
  */
-function composableKeyboardScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function composableKeyboardScript(derived: ConfiguratorDerived): string {
   if (!derived.usesItemModel) {
     return '';
   }
@@ -600,14 +600,14 @@ function composableKeyboardScript(state: ConfiguratorState, derived: ReturnType<
     '  getItemSize,',
     '  getRowIndexAt,',
     '  getColumnIndexAt,',
-    `  activationMode: '${ derived.usesItemModel ? 'item' : 'viewport' }',`,
+    `  activationMode: 'item',`,
     '  onActivate: (index: number) => {',
     '    selectedIndex.value = index;',
     '  },',
     '});',
     '',
     '/** id of the item `aria-activedescendant` points at. */',
-    'const activeDescendant = computed(() => (activeIndex.value >= 0 ? `vs-item-${ activeIndex.value }` : undefined));',
+    `const activeDescendant = computed(() => (activeIndex.value >= 0 ? \`vs-item-\${ activeIndex.value }\` : undefined));`,
   ]);
 }
 
@@ -636,7 +636,7 @@ function statusExpression(state: ConfiguratorState): string {
  */
 function itemContentScript(
   state: ConfiguratorState,
-  derived: ReturnType<typeof getDerived>,
+  derived: ConfiguratorDerived,
   composable: boolean,
   /** Instance ref used by the generated click handler (component mode only). */
   refName = 'virtualScrollRef',
@@ -886,7 +886,7 @@ function virtualScrollTemplate(state: ConfiguratorState, derived: ReturnType<typ
 // styles (shared)
 // ---------------------------------------------------------------------------
 
-function stylesBlock(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, composable: boolean, includeControls = true): string {
+function stylesBlock(state: ConfiguratorState, derived: ConfiguratorDerived, composable: boolean, includeControls = true): string {
   const windowMode = state.containerMode === 'window';
   const lines: string[] = [];
 
@@ -1340,11 +1340,11 @@ function componentScript(state: ConfiguratorState, derived: ReturnType<typeof ge
   return join(lines);
 }
 
-function composableScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>): string {
+function composableScript(state: ConfiguratorState, derived: ConfiguratorDerived): string {
   const lines: string[] = [
     '<script setup lang="ts">',
     `import type { ${ state.infiniteScroll ? 'LoadDetails, ' : '' }RenderedItem, VirtualScrollExtension, VirtualScrollProps } from '@pdanpdan/virtual-scroll';`,
-    "import { calculateItemStyle, getPaddingX, getPaddingY } from '@pdanpdan/virtual-scroll/internal';",
+    '',
     'import {',
     '',
   ];
@@ -1428,7 +1428,7 @@ function composableScript(state: ConfiguratorState, derived: ReturnType<typeof g
   lines.push(extensionsScript(state, derived, true));
   lines.push('');
   lines.push(composableDestructureScript(state, derived));
-  const keyboard = composableKeyboardScript(state, derived);
+  const keyboard = composableKeyboardScript(derived);
   if (keyboard) {
     lines.push('');
     lines.push(keyboard);
@@ -1547,7 +1547,7 @@ function composableScript(state: ConfiguratorState, derived: ReturnType<typeof g
   return join(lines);
 }
 
-function sfcTemplate(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, composable: boolean): string {
+function sfcTemplate(state: ConfiguratorState, derived: ConfiguratorDerived, composable: boolean): string {
   const lines: string[] = [
     '<template>',
     '  <div class="vs-app">',
@@ -1797,7 +1797,7 @@ body {
 // CodePen / standalone HTML (UMD builds, no build step)
 // ---------------------------------------------------------------------------
 
-function penStateScript(state: ConfiguratorState, derived: ReturnType<typeof getDerived>, isTs: boolean): string {
+function penStateScript(state: ConfiguratorState, derived: ConfiguratorDerived, isTs: boolean): string {
   const lines: string[] = [];
 
   if (isTs) {

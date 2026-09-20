@@ -14,7 +14,3 @@ export function matchHref(href: string, urlPathname: string) {
     || urlPathname === normalizedHref
     || (normalizedHref !== '/' && typeof urlPathname === 'string' && urlPathname.startsWith(normalizedHref) && reMatchHref.test(urlPathname[ normalizedHref.length ]));
 }
-
-export function extractUrlPathname(href: string) {
-  return normalizeHref(href.startsWith(BASE_URL) ? href.slice(BASE_URL.length) : href, false);
-}

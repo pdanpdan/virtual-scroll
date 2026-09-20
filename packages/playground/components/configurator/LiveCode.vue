@@ -4,10 +4,8 @@ import { onMounted, ref, watch } from 'vue';
 const props = withDefaults(defineProps<{
   source: string;
   lang?: string;
-  lineNumbers?: boolean;
 }>(), {
   lang: 'vue',
-  lineNumbers: false,
 });
 
 const html = ref('');
@@ -54,7 +52,6 @@ watch(() => props.source, update);
 <template>
   <div
     class="code-block text-sm overflow-auto"
-    :class="{ 'has-line-numbers': lineNumbers }"
     data-theme="dark"
   >
     <div v-if="html" class="shiki-container" v-html="html" />
@@ -75,7 +72,6 @@ watch(() => props.source, update);
 
     code {
       display: block;
-      counter-reset: line;
       padding: 0;
     }
 
@@ -89,22 +85,11 @@ watch(() => props.source, update);
     }
   }
 
-  /* Empty source lines (no line-number gutter) collapse to zero height
-     because .line is a flex container with no flex items. Give them an nbsp
-     placeholder so blank lines keep their full line height. */
-  &:not(.has-line-numbers) :deep(pre.shiki) .line:empty::before {
+  /* Empty source lines collapse to zero height because .line is a flex
+     container with no flex items. Give them an nbsp placeholder so blank
+     lines keep their full line height. */
+  :deep(pre.shiki) .line:empty::before {
     content: '\00a0';
-  }
-
-  &.has-line-numbers :deep(pre.shiki) .line::before {
-    counter-increment: line;
-    content: counter(line);
-    width: 1rem;
-    flex-shrink: 0;
-    margin-inline-end: 1rem;
-    opacity: 0.3;
-    text-align: end;
-    user-select: none;
   }
 
   .plain-code {
