@@ -23,6 +23,7 @@
         "../virtual-scroll/src/index.ts"
       ]
     },
+    "resolveJsonModule": true,
     "types": [
       "vite/client",
       "vue"

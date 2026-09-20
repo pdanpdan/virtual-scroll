@@ -12,6 +12,7 @@
 
 import type { ConfiguratorDerived, ConfiguratorState, SizeMode } from './state';
 
+import virtualScrollPackage from '../../../virtual-scroll/package.json';
 import { getDerived } from './state';
 
 type GenerateMode = 'component' | 'composable';
@@ -22,15 +23,14 @@ const CDN_VUE = 'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js';
 /**
  * Library version used in generated standalone/CodePen outputs.
  *
- * MUST be pinned to the latest npm release: the unversioned jsdelivr URL is cached
- * by browsers for 7 days (and by CDN edges for 12 h), so right after a publish it
- * can keep serving the previous dist - one that lacks components exported since
- * (VirtualScrollTable, VirtualScrollMasonry), which breaks the generated pens with
- * `Cannot read properties of undefined (reading 'mount')`.
- *
- * Bump this constant to the new version on every release.
+ * Read from the library manifest instead of a hand-maintained constant: the
+ * unversioned jsdelivr URL is cached by browsers for 7 days (and by CDN edges for
+ * 12 h), so right after a publish it can keep serving the previous dist - one that
+ * lacks components exported since (VirtualScrollTable, VirtualScrollMasonry),
+ * which breaks the generated pens with `Cannot read properties of undefined
+ * (reading 'mount')`. The UMD examples resolve the same value the same way.
  */
-const CDN_VS_VERSION = '0.13.0';
+const CDN_VS_VERSION = virtualScrollPackage.version;
 const CDN_VS_JS = `https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ CDN_VS_VERSION }/dist/index.js`;
 const CDN_VS_CSS = `https://cdn.jsdelivr.net/npm/@pdanpdan/virtual-scroll@${ CDN_VS_VERSION }/dist/virtual-scroll.css`;
 
