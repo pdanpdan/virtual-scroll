@@ -1,5 +1,22 @@
 # Changelog
 
+# [2.1.0](https://github.com/pdanpdan/virtual-scroll/compare/v2.0.0...v2.1.0) (2026-09-20)
+
+### Bug Fixes
+
+* **playground:** drop the generated buttons that cannot do anything ([2a32684](https://github.com/pdanpdan/virtual-scroll/commit/2a3268429c3a074ac51859a72b425f129ae0fb1f))
+* **playground:** generate the changelog data before type-checking ([ccce5da](https://github.com/pdanpdan/virtual-scroll/commit/ccce5da00f67f8a34a336c80a77c1357f91fe712))
+* **playground:** let the generated pens call the controls they show ([c7255cc](https://github.com/pdanpdan/virtual-scroll/commit/c7255cc70e4db2ed59f8811b5909430ff2dba413))
+* **playground:** pin the generated pens to the library's current version ([cb47962](https://github.com/pdanpdan/virtual-scroll/commit/cb47962d170e614695d4b0c089983587d87ad09d))
+* **playground:** route changelog entries into the right groups ([41669d8](https://github.com/pdanpdan/virtual-scroll/commit/41669d8946a5c9b709296d10f73557088a84296b))
+* **playground:** size the generated table columns from their content ([f4d3618](https://github.com/pdanpdan/virtual-scroll/commit/f4d36185b9d6e0bcde1bbddf69b4790724b63d20))
+* **virtual-scroll:** keep measurement corrections in the container's scroll space ([7de0dfc](https://github.com/pdanpdan/virtual-scroll/commit/7de0dfcbe319184bb3a41048663e057789f3322d))
+* **virtual-scroll:** re-measure auto-sized flow columns once item rows render ([d30ac17](https://github.com/pdanpdan/virtual-scroll/commit/d30ac173ead5203337219f998840ceb12448abc4))
+
+### Features
+
+* **playground:** generate the configurator options it advertises ([d74733b](https://github.com/pdanpdan/virtual-scroll/commit/d74733b24d373902011ddd0df944afc8cee20e52))
+
 # [2.0.0](https://github.com/pdanpdan/virtual-scroll/compare/v1.0.0...v2.0.0) (2026-09-19)
 
 * refactor(virtual-scroll)!: move sticky pinning into useStickyExtension ([b3b1217](https://github.com/pdanpdan/virtual-scroll/commit/b3b1217b71453a1d7ee4b0be0e4fb2084bcf2353))
