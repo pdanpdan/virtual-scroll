@@ -7,8 +7,8 @@ import VirtualScrollbar from './VirtualScrollbar.vue';
 /**
  * Scrollbar overlay of {@link VirtualScroll}.
  *
- * Kept in its own component so the whole overlay — the two custom scrollbars and
- * their styles — is only reachable from a build that renders it.
+ * Kept in its own component so the whole overlay (the two custom scrollbars and
+ * their styles) is only reachable from a build that renders it.
  */
 const props = defineProps<{
   /** Slot props of the vertical scrollbar, or `null` when it is not shown. */

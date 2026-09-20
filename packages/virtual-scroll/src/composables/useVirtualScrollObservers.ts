@@ -48,14 +48,14 @@ export function useVirtualScrollObservers({
           inlineSize = entry.borderBoxSize[ 0 ]!.inlineSize;
           blockSize = entry.borderBoxSize[ 0 ]!.blockSize;
         } else {
-          // Fallback for older browsers or if borderBoxSize is missing
+          // No borderBoxSize: fall back to the border box read directly.
           inlineSize = target.offsetWidth;
           blockSize = target.offsetHeight;
         }
 
         if (colIndex !== undefined) {
-          // It's a cell measurement. row index is not strictly needed for column width.
-          // We use -1 as a placeholder for row index if it's a cell measurement.
+          // Cell measurement: -1 marks an update that carries no row index, so it
+          // only feeds the column tree.
           updates.push({ index: -1, inlineSize, blockSize, element: target });
         } else if (!Number.isNaN(index)) {
           updates.push({ index, inlineSize, blockSize, element: target });
@@ -91,9 +91,6 @@ export function useVirtualScrollObservers({
   watchExtraRef(headerRef, measuredPaddingStart);
   watchExtraRef(footerRef, measuredPaddingEnd);
 
-  /**
-   * Helper to manage ResizeObserver for an item and its optional cells.
-   */
   const observeItem = (el: HTMLElement, isObserve: boolean) => {
     const method = isObserve ? 'observe' : 'unobserve';
     itemResizeObserver?.[ method ](el);

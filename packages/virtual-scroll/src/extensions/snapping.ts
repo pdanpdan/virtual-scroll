@@ -27,7 +27,6 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
       let alignX: ScrollAlignment = 'start';
       let shouldSnap = false;
 
-      // Handle Y Axis (Vertical)
       if (direction !== 'horizontal') {
         const res = resolveSnap(
           snapMode,
@@ -48,7 +47,6 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
         }
       }
 
-      // Handle X Axis (Horizontal)
       if (direction !== 'vertical') {
         const isGrid = direction === 'both';
         const colCount = isGrid ? (ctx.props.value.columnCount || 0) : itemsLen;

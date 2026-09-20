@@ -161,14 +161,11 @@ describe('virtualScrollbar', () => {
 
       const thumb = wrapper.find('.virtual-scrollbar-thumb');
 
-      // mock setPointerCapture and releasePointerCapture
       thumb.element.setPointerCapture = vi.fn();
       thumb.element.releasePointerCapture = vi.fn();
 
-      // check initial state
       expect(thumb.classes()).not.toContain('virtual-scrollbar-thumb--active');
 
-      // start dragging
       await thumb.element.dispatchEvent(new PointerEvent('pointerdown', {
         clientY: 0,
         pointerId: 1,
@@ -177,7 +174,6 @@ describe('virtualScrollbar', () => {
       }));
       expect(thumb.classes()).toContain('virtual-scrollbar-thumb--active');
 
-      // stop dragging
       await thumb.element.dispatchEvent(new PointerEvent('pointerup', {
         pointerId: 1,
         bubbles: true,

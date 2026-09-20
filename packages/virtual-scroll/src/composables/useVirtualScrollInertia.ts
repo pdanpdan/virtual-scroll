@@ -31,7 +31,6 @@ export function useVirtualScrollInertia<T>({
 
   // Friction constant (0.9 to 0.98 is usually best)
   const FRICTION = 0.95;
-  // Minimum velocity to continue the animation
   const MIN_VELOCITY = 0.1;
 
   /**
@@ -43,17 +42,14 @@ export function useVirtualScrollInertia<T>({
       velocity.x = nextVelocity.x;
       velocity.y = nextVelocity.y;
 
-      // Calculate the new scroll offset
       const { x: currentX, y: currentY } = scrollDetails.value.scrollOffset;
 
-      // Move the scroll position by the current velocity
       scrollToOffset(
         currentX + delta.x,
         currentY + delta.y,
         { behavior: 'auto' },
       );
 
-      // Continue animation if we haven't slowed down to a halt
       if (Math.abs(velocity.x) > MIN_VELOCITY || Math.abs(velocity.y) > MIN_VELOCITY) {
         inertiaAnimationFrame = requestAnimationFrame(step);
       } else {
@@ -82,7 +78,7 @@ export function useVirtualScrollInertia<T>({
    */
   const handlePointerDown = (event: PointerEvent) => {
     stopProgrammaticScroll();
-    stopInertia(); // Stop any existing momentum
+    stopInertia();
 
     if (!useVirtualScrolling.value) {
       return;
@@ -119,7 +115,6 @@ export function useVirtualScrollInertia<T>({
     const dt = now - lastPointerTime;
 
     if (dt > 0) {
-      // Calculate instantaneous velocity (pixels per millisecond)
       const instantVelocity = calculateInstantaneousVelocity(lastPointerPos, { x: event.clientX, y: event.clientY }, dt);
 
       // Use a moving average for smoother velocity tracking
@@ -177,10 +172,8 @@ export function useVirtualScrollInertia<T>({
     stopProgrammaticScroll();
 
     if (useVirtualScrolling.value) {
-      // Prevent default browser scroll as we are handling it manually
       event.preventDefault();
 
-      // For large content we manually scroll to keep precision/control
       let { deltaX, deltaY } = event;
 
       if (event.shiftKey && deltaX === 0) {

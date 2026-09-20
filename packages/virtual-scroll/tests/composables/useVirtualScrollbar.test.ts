@@ -7,7 +7,6 @@ import { computed, defineComponent, h, nextTick, ref } from 'vue';
 
 import { useVirtualScrollbar } from '../../src/composables/useVirtualScrollbar';
 
-// Helper to test composable
 function setup(propsValue: MaybeRefOrGetter<UseVirtualScrollbarProps>) {
   let result: ReturnType<typeof useVirtualScrollbar>;
 

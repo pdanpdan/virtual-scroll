@@ -131,7 +131,6 @@ export function useVirtualScroll<T = unknown>(
   const props = computed(() => toValue(propsInput));
 
   // --- State ---
-  /** Current horizontal display scroll position (DU). */
   /**
    * Resolves the effective scroll container.
    * Falls back to the host element (not straight to `window`) so a self-scrolling
@@ -140,6 +139,7 @@ export function useVirtualScroll<T = unknown>(
    */
   const getContainer = () => props.value.container || props.value.hostRef || window;
 
+  /** Current horizontal display scroll position (DU). */
   const scrollX = ref(0);
   /** Current vertical display scroll position (DU). */
   const scrollY = ref(0);
@@ -1430,9 +1430,9 @@ export function useVirtualScroll<T = unknown>(
   return {
     /** Reactive list of items to render in the current viewport. */
     renderedItems,
-    /** Total calculated width of the scrollable content area (DU). */
+    /** Total calculated width of the scrollable content area (VU). */
     totalWidth,
-    /** Total calculated height of the scrollable content area (DU). */
+    /** Total calculated height of the scrollable content area (VU). */
     totalHeight,
     /** Physical width of the content in the DOM (clamped to browser limits). */
     renderedWidth,

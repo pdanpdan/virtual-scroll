@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * A cross-browser consistent virtual scrollbar component.
- * Can be used independently or as part of the VirtualScroll component.
- * Supports both vertical and horizontal axes and RTL layouts.
+ * Scrollbar for one axis, rendered as a track and a draggable thumb so it keeps the
+ * same appearance across browsers. Used by {@link VirtualScroll} (or the `#scrollbar`
+ * slot) and usable on its own; the thumb maps for RTL layouts.
  */
 import type { VirtualScrollbarProps } from '../types';
 

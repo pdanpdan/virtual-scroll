@@ -482,12 +482,10 @@ describe('virtualScrollTable', () => {
       });
 
       await nextTick();
-      // Since it's mounted in JSDOM, we need to mock clientHeight/clientWidth if they are 0
       const el = wrapper.element as HTMLElement;
       Object.defineProperty(el, 'clientHeight', { value: 400, configurable: true });
       Object.defineProperty(el, 'clientWidth', { value: 800, configurable: true });
 
-      // Trigger resize observation
       const vs = wrapper.vm as unknown as VirtualScrollInstance<MockItem>;
       vs.refresh();
       await nextTick();

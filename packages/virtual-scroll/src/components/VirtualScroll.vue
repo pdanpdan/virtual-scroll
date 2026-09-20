@@ -1,8 +1,10 @@
 <script setup lang="ts" generic="T">
 /**
- * A high-performance virtual scrolling component for Vue 3.
- * Supports large lists and grids by only rendering visible items and using coordinate scaling.
- * Features include sticky headers/footers, RTL support, custom scrollbars, and scroll restoration.
+ * Virtual scrolling component for Vue 3: renders only the items near the viewport
+ * and switches to coordinate scaling when the content passes the browser's scroll
+ * limit. Sticky items, RTL, snapping, infinite loading, prepend restoration and
+ * custom scrollbars are wired in as extensions; the `./core` entry builds the same
+ * component without them.
  */
 import type { LoadDetails } from '../extensions/all';
 import type {
@@ -513,17 +515,6 @@ const containerStyle = computed(() => {
   return base;
 });
 
-/**
- * Internal helper to generate consistent ScrollbarSlotProps.
- *
- * @param axis - The scroll axis.
- * @param totalSize - Total scrollable size (DU).
- * @param position - Current scroll position (DU).
- * @param viewportSize - Current viewport size (DU).
- * @param scrollToOffsetCallback - Callback to perform scroll.
- * @param scrollbar - Scrollbar state from useVirtualScrollbar.
- * @returns Props for the scrollbar slot or null if content fits.
- */
 /* v8 ignore next -- the `if` is always taken outside the lean build */
 if (!IS_CORE_BUILD) {
   const verticalScrollbar = useVirtualScrollbar(computed(() => ({
@@ -546,6 +537,9 @@ if (!IS_CORE_BUILD) {
     isRtl: isRtl.value,
   })));
 
+  /**
+   * Internal helper to generate consistent ScrollbarSlotProps.
+   */
   function getScrollbarSlotProps(
     axis: 'vertical' | 'horizontal',
     totalSize: number,
@@ -808,7 +802,7 @@ defineExpose({
   setActiveIndex,
 
   /**
-   * Marks an item active and emits `itemActivate` — wire it to your click handler.
+   * Marks an item active and emits `itemActivate` - wire it to your click handler.
    * @param index - The item index.
    */
   handleItemActivate,

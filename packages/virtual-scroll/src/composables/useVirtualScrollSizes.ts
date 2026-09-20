@@ -298,15 +298,8 @@ export function useVirtualScrollSizes<T>(
   };
 
   /**
-   * Helper to update a single size in the tree.
-   * @param index - Index to update.
-   * @param newSize - Measured size (without gap).
-   * @param tree - Target Fenwick tree.
-   * @param measured - Tracking array for measurements.
-   * @param gap - Gap size.
-   * @param firstIndex - Current first visible index (for delta calculation).
-   * @param accumulatedDelta - Object to collect scroll correction delta.
-   * @param accumulatedDelta.val - The current accumulated delta value.
+   * Updates one size in the tree and adds the resulting shift of the content above
+   * `firstIndex` to `accumulatedDelta`.
    */
   const updateAxis = (index: number, newSize: number, tree: FenwickTree, measured: Uint8Array, gap: number, firstIndex: number, accumulatedDelta: { val: number; }) => {
     const oldSize = tree.get(index);

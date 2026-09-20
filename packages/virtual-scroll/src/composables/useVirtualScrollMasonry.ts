@@ -475,7 +475,7 @@ export function useVirtualScrollMasonry<T>(
     const vw = viewportWidth.value;
     const vh = viewportHeight.value;
     // Every rendered card intersects the viewport window by construction, so
-    // the visible span is simply the first and last rendered index.
+    // the visible span is the first and last rendered index.
     const currentIndex = cards.length > 0 ? cards[ 0 ]!.index : 0;
     const currentEndIndex = cards.length > 0 ? cards[ cards.length - 1 ]!.index : 0;
     return {

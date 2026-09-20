@@ -269,7 +269,6 @@ describe('useVirtualScroll', () => {
         items: mockItems, // 100 items * 50 = 5000px total height
         initialScrollIndex: 99,
         initialScrollAlign: 'end',
-        // We need to mock stickyEnd for the sticky footer
         stickyEnd: { x: 0, y: footerHeight },
       });
 

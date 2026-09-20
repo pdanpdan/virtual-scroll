@@ -63,16 +63,8 @@ describe('useVirtualScrollSizes', () => {
     result.initializeSizes();
     await nextTick();
 
-    // Fixed size doesn't populate Fenwick tree values for item sizes if dynamic is false,
-    // but initializeMeasurements logic differs.
-    // If fixedItemSize is present, isDynamicItemSize is false.
-    // initializeMeasurements iterates items. currentY = itemSizesY.get(i).
-    // if currentY !== 0, it resets to 0.
-    // So for fixed size, the trees should be empty/zero basically?
-    // Wait, useVirtualScroll uses the trees even for fixed size?
-    // No, useVirtualScroll checks `fixedSize !== null` and uses math instead of tree query.
-    // But `initializeMeasurements` might still run.
-
+    // Uniform sizes fill the measured flags instead of the trees: positions come
+    // from arithmetic, so no per-item tree entry is created.
     expect(result.sizesInitialized.value).toBe(true);
     wrapper.unmount();
   });

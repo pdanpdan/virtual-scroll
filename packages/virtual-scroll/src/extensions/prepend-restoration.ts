@@ -14,7 +14,8 @@ export function usePrependRestorationExtension<T = unknown>(): VirtualScrollExte
   return {
     name: 'prepend-restoration',
     onInit(ctx: ExtensionContext<T>) {
-      // Use a local copy to avoid mutation issues
+      // Snapshot the array: the watcher compares the incoming array against this
+      // copy, so later in-place mutation of the live array cannot corrupt it.
       lastItems = [ ...ctx.props.value.items ];
 
       watch(() => ctx.props.value.items, (newItems) => {

@@ -130,7 +130,6 @@ export function useInfiniteLoadingExtension<T = unknown>(options: InfiniteLoadin
         const direction = ctx.props.value.direction || 'vertical';
         const loadDistance = ctx.props.value.loadDistance ?? 200;
 
-        // vertical or both
         if (direction !== 'horizontal') {
           checkAxis(
             'vertical',
@@ -140,7 +139,6 @@ export function useInfiniteLoadingExtension<T = unknown>(options: InfiniteLoadin
             loadDistance,
           );
         }
-        // horizontal or both
         if (direction !== 'vertical') {
           checkAxis(
             'horizontal',

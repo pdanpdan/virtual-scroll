@@ -174,7 +174,7 @@ export interface ColumnRange {
   padEnd: number;
 }
 
-/** Comprehensive state of the virtual scroll system. */
+/** Reactive state of the virtual scroll system. */
 export interface ScrollDetails<T = unknown> {
   /** List of items currently rendered in the DOM buffer. */
   items: RenderedItem<T>[];
@@ -383,7 +383,7 @@ export interface VirtualScrollBaseProps<T = unknown> {
    *
    * `'auto'` (default): a roving active item for the roles that publish an
    *   active descendant (`listbox`, `menu`, `tree`), viewport scrolling for
-   *   everything else — including the default `grid` role of a two-axis list.
+   *   everything else, including the default `grid` role of a two-axis list.
    * `'item'`: always move a roving active item, exposed as the `isActive` item
    *   slot prop and driven by `activeIndex`/`setActiveIndex`/`handleItemActivate`.
    * `'viewport'`: always scroll the viewport, without tracking an active item.
@@ -725,7 +725,7 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   updateDirection: () => void;
   /** Whether the scroll container is in Right-to-Left (RTL) mode. */
   isRtl: boolean;
-  /** Whether the component has finished its first client - side mount and hydration. */
+  /** Whether the component has finished its first client-side mount and hydration. */
   isHydrated: boolean;
   /** Coordinate scaling factor for X axis. */
   scaleX: number;

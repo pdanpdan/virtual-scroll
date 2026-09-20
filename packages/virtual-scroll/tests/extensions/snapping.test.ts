@@ -423,7 +423,7 @@ describe('snap', () => {
     // 1. Initially at index 1 (bottom aligned at 600)
     // viewSize=500, items=100.
     // Index 1 bottom is at 200. Viewport bottom at 600 means items are way above.
-    // Let's use index 5. top=500, bottom=600.
+    // index 5: top=500, bottom=600.
     setScrollTop(100); // Items 1-5 visible (100-600)
     container.dispatchEvent(new Event('scroll'));
     await nextTick();

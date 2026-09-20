@@ -22,7 +22,7 @@ const NO_INDICES: number[] = [];
  */
 export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
   /*
-    Both computeds are created once — `transformRenderedItems` and
+    Both computeds are created once: `transformRenderedItems` and
     `includeIndices` run on every rendered-items recomputation, so building them
     there allocated a fresh `ComputedRefImpl` per scroll frame.
   */

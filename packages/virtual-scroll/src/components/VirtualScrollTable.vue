@@ -1,8 +1,10 @@
 <script setup lang="ts" generic="T">
 /**
- * A high-performance virtual scrolling component for Vue 3.
- * Supports large lists and grids by only rendering visible items and using coordinate scaling.
- * Features include sticky headers/footers, RTL support, custom scrollbars, and scroll restoration.
+ * Virtual scrolling table built on the same engine as {@link VirtualScroll}: items
+ * are `<tr>` rows inside a `<tbody>` wrapper, with `<thead>`/`<tfoot>` for the header
+ * and footer slots. Sizes come per column (`columnCount` / `columnWidth`). With
+ * `flowTable` the rows stay in real table flow between spacer rows, so the browser
+ * lays out the columns; otherwise rows are absolutely positioned.
  */
 import type { LoadDetails } from '../extensions/all';
 import type {
@@ -925,7 +927,7 @@ defineExpose({
   setActiveIndex,
 
   /**
-   * Marks a row active and emits `itemActivate` — wire it to your click handler.
+   * Marks a row active and emits `itemActivate` - wire it to your click handler.
    * @param index - The row index.
    */
   handleItemActivate,
