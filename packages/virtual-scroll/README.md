@@ -142,7 +142,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 
 *   **Not included:** custom scrollbars (the `virtualScrollbar` prop and the `#scrollbar` slot), keyboard navigation, scroll snapping, sticky items, infinite loading and prepend restoration.
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
-*   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` — only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
+*   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` - only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
 A tree-shaken `<VirtualScroll>` is 17.3 KB gzipped from `./core` and 23.2 KB from the package root; `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
 
@@ -191,7 +191,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 
 ### Performance
 
-- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, allowing for extremely fast calculation of item offsets even in dynamic lists with millions of items. Appends resize the tree incrementally - no full rebuild per batch - and re-initialization only revisits regions that actually changed.
+- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, keeping item-offset lookup logarithmic even in dynamic lists with millions of items. Appends resize the tree incrementally - no full rebuild per batch - and re-initialization only revisits the regions that changed.
 - **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
@@ -203,7 +203,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **Circular Patterns**: Pass an array to `itemSize` or `columnWidth` to define a repeating size pattern (e.g., `[50, 100]` will repeat for all items).
 - **Multi-Directional**: Works in `vertical`, `horizontal`, or `both` (grid) directions.
 - **Virtual Scrollbars**: Optimized virtual scrollbars that handle massive scales and provide consistent cross-browser styling.
-- **Extensions Architecture**: Highly modular system via extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration, Coordinate Scaling).
+- **Extensions Architecture**: Optional extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration, Coordinate Scaling).
 - **Container Flexibility**: Can use a custom element or the browser `window`/`body` as the scroll container.
 - **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
 - **Accessibility**: Automatic ARIA role mapping for lists, grids, trees, listboxes, and menus.
@@ -222,7 +222,7 @@ Rows are recycled: they mount as they enter the viewport and unmount when they l
 
 ## Extensions
 
-The library uses a modular extension system. You can use the built-in extensions or create your own.
+The library uses a modular extension system: the built-in extensions below, or extensions you write against the same contract.
 
 An extension is a plain object implementing `VirtualScrollExtension<T>`: a unique `name` plus the
 optional hooks `onInit(ctx)`, `includeIndices(ctx)`, `onScroll(ctx, event)`, `onScrollEnd(ctx)` and
@@ -477,13 +477,13 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 Controls the automatic alignment after scrolling stops.
 
 - `false` (default): No snapping.
-- `true` / `'auto'`: Intelligent snapping based on scroll direction. Acts as `'end'` when scrolling towards start, and `'start'` when scrolling towards end.
+- `true` / `'auto'`: Snapping follows the scroll direction: acts as `'end'` when scrolling towards start, and `'start'` when scrolling towards end.
 - `'next'`: Snaps to the next (closest) snap position in the direction of the scroll.
 - `'start'`: Aligns the first visible item to the viewport start if at least 50% visible, otherwise aligns the next item.
 - `'center'`: Aligns the item that intersects the viewport center to the center.
 - `'end'`: Aligns the last visible item to the viewport end if at least 50% visible, otherwise aligns the previous item.
 
-**Note:** Snapping is automatically disabled if the target item's size is larger than the viewport dimension.
+Snapping is disabled if the target item's size is larger than the viewport dimension.
 
 ### ScrollAlignment
 
@@ -492,7 +492,7 @@ Controls the item's final position in the viewport during `scrollToIndex`.
 - `'start'`: Aligns to top (vertical) or left (horizontal) edge.
 - `'center'`: Aligns to viewport center.
 - `'end'`: Aligns to bottom (vertical) or right (horizontal) edge.
-- `'auto'` (default): **Smart:** If the item is already fully visible, no scroll occurs. Otherwise, aligns to `'start'` or `'end'` to bring it into view.
+- `'auto'` (default): No scroll if the item is already fully visible; otherwise aligns to `'start'` or `'end'` to bring it into view.
 
 ### ScrollAlignmentOptions
 
@@ -516,7 +516,7 @@ Allows axis-specific alignment in `scrollToIndex`.
 
 - `item`: Scoped slot for individual items. Provides `item` (may be `undefined` for holes in sparse/index-only datasets - type the array as `(T | undefined)[]` to model that), `index`, `getItemAriaProps`, `getCellAriaProps`, `columnRange`, `getColumnWidth`, `gap`, `columnGap`, `isSticky`, `isStickyActive`, `isStickyActiveX`, `isStickyActiveY`, `isActive`, `offset`.
 - `header` / `footer`: Content rendered at the top/bottom of the scrollable area.
-- `loading`: Content rendered at the end while loading. The slot is always rendered when provided - it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false - so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is actually expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
+- `loading`: Content rendered at the end while loading. The slot is always rendered when provided - it is hidden via the `virtual-scroll-loading--hidden` class (`visibility: hidden`) while `loading` is false - so it reserves its space and `End` can include its size in the scroll target. Only provide the slot while a load is expected: once there is no more data (or loading is disabled), stop passing it (e.g. `v-if="hasMore"` on `<template #loading>`) and the reserved space disappears.
 - `scrollbar`: Scoped slot for custom scrollbar. Called once for each active axis.
     - `axis`: `'vertical' | 'horizontal'`
     - `positionPercent`: current position (0-1).
@@ -642,7 +642,7 @@ With [`keyboardActivation`](#props) set to the item model - `'auto'` selects it 
 
 Virtual scrollbars are automatically enabled when content size exceeds browser limits, but can be forced via the `virtualScrollbar` prop.
 
-**Note:** Virtual scrollbars and coordinate scaling are automatically disabled when the `container` is the browser `window` or `body`. In these cases, native scrolling behavior is used.
+Virtual scrollbars and coordinate scaling are disabled when the `container` is the browser `window` or `body`; native scrolling is used instead.
 
 ### Using the `VirtualScrollbar` Component
 
