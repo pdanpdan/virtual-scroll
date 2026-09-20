@@ -774,67 +774,67 @@ export interface ScrollTargetParams {
   options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions | undefined;
   /** Current scroll direction. */
   direction: ScrollDirection;
-  /** Current viewport width. */
+  /** Current viewport width (DU). */
   viewportWidth: number;
-  /** Current viewport height. */
+  /** Current viewport height (DU). */
   viewportHeight: number;
-  /** Current total estimated width. */
+  /** Current total estimated width (VU). */
   totalWidth: number;
-  /** Current total estimated height. */
+  /** Current total estimated height (VU). */
   totalHeight: number;
-  /** Item gap. */
+  /** Item gap (VU). */
   gap: number;
-  /** Column gap. */
+  /** Column gap (VU). */
   columnGap: number;
-  /** Fixed item size. */
+  /** Fixed item size (VU). */
   fixedSize: number | null;
-  /** Fixed column width. */
+  /** Fixed column width (VU). */
   fixedWidth: number | null;
-  /** Current relative X scroll. */
+  /** Current relative X scroll (VU). */
   relativeScrollX: number;
-  /** Current relative Y scroll. */
+  /** Current relative Y scroll (VU). */
   relativeScrollY: number;
-  /** Resolver for item height. */
+  /** Resolver for item height (VU). */
   getItemSizeY: (index: number) => number;
-  /** Resolver for item width. */
+  /** Resolver for item width (VU). */
   getItemSizeX: (index: number) => number;
-  /** Prefix sum resolver for item height. */
+  /** Prefix sum resolver for item height (VU). */
   getItemQueryY: (index: number) => number;
-  /** Prefix sum resolver for item width. */
+  /** Prefix sum resolver for item width (VU). */
   getItemQueryX: (index: number) => number;
-  /** Resolver for column size. */
+  /** Resolver for column size (VU). */
   getColumnSize: (index: number) => number;
-  /** Prefix sum resolver for column width. */
+  /** Prefix sum resolver for column width (VU). */
   getColumnQuery: (index: number) => number;
   /** Coordinate scaling factor for X axis. */
   scaleX: number;
   /** Coordinate scaling factor for Y axis. */
   scaleY: number;
-  /** Host offset on X axis in display pixels. */
+  /** Host offset on X axis in display pixels (DU). */
   hostOffsetX: number;
-  /** Host offset on Y axis in display pixels. */
+  /** Host offset on Y axis in display pixels (DU). */
   hostOffsetY: number;
   /** List of sticky indices. */
   stickyIndices?: number[] | undefined;
-  /** Sticky start offset on X axis. */
+  /** Sticky start offset on X axis (DU). */
   stickyStartX?: number | undefined;
-  /** Sticky start offset on Y axis. */
+  /** Sticky start offset on Y axis (DU). */
   stickyStartY?: number | undefined;
-  /** Sticky end offset on X axis. */
+  /** Sticky end offset on X axis (DU). */
   stickyEndX?: number | undefined;
-  /** Sticky end offset on Y axis. */
+  /** Sticky end offset on Y axis (DU). */
   stickyEndY?: number | undefined;
-  /** Flow padding start on X axis. */
+  /** Flow padding start on X axis (DU). */
   flowPaddingStartX?: number | undefined;
-  /** Flow padding start on Y axis. */
+  /** Flow padding start on Y axis (DU). */
   flowPaddingStartY?: number | undefined;
-  /** Scroll padding start on X axis. */
+  /** Scroll padding start on X axis (DU). */
   paddingStartX?: number | undefined;
-  /** Scroll padding start on Y axis. */
+  /** Scroll padding start on Y axis (DU). */
   paddingStartY?: number | undefined;
-  /** Scroll padding end on X axis. */
+  /** Scroll padding end on X axis (DU). */
   paddingEndX?: number | undefined;
-  /** Scroll padding end on Y axis. */
+  /** Scroll padding end on Y axis (DU). */
   paddingEndY?: number | undefined;
 }
 
@@ -858,13 +858,13 @@ export interface ScrollTargetResult {
 export interface RangeParams {
   /** Scroll direction. */
   direction: ScrollDirection;
-  /** Relative horizontal scroll position. */
+  /** Relative horizontal scroll position (VU). */
   relativeScrollX: number;
-  /** Relative vertical scroll position. */
+  /** Relative vertical scroll position (VU). */
   relativeScrollY: number;
-  /** Usable viewport width. */
+  /** Usable viewport width (VU). */
   usableWidth: number;
-  /** Usable viewport height. */
+  /** Usable viewport height (VU). */
   usableHeight: number;
   /** Total item count. */
   itemsLength: number;
@@ -874,19 +874,19 @@ export interface RangeParams {
   bufferBefore: number;
   /** Buffer items after. */
   bufferAfter: number;
-  /** Item gap. */
+  /** Item gap (VU). */
   gap: number;
-  /** Column gap. */
+  /** Column gap (VU). */
   columnGap: number;
-  /** Fixed item size. */
+  /** Fixed item size (VU). */
   fixedSize: number | null;
   /** Binary search for row index. */
   findLowerBoundY: (offset: number) => number;
   /** Binary search for row index (horizontal). */
   findLowerBoundX: (offset: number) => number;
-  /** Prefix sum for row height. */
+  /** Prefix sum for row height (VU). */
   queryY: (index: number) => number;
-  /** Prefix sum for row width. */
+  /** Prefix sum for row width (VU). */
   queryX: (index: number) => number;
 }
 
@@ -894,21 +894,21 @@ export interface RangeParams {
 export interface ColumnRangeParams {
   /** Column count. */
   columnCount: number;
-  /** Relative horizontal scroll position. */
+  /** Relative horizontal scroll position (VU). */
   relativeScrollX: number;
-  /** Usable viewport width. */
+  /** Usable viewport width (VU). */
   usableWidth: number;
   /** Column buffer count. */
   colBuffer: number;
-  /** Fixed column width. */
+  /** Fixed column width (VU). */
   fixedWidth: number | null;
-  /** Column gap. */
+  /** Column gap (VU). */
   columnGap: number;
   /** Binary search for column index. */
   findLowerBound: (offset: number) => number;
-  /** Prefix sum for column width. */
+  /** Prefix sum for column width (VU). */
   query: (index: number) => number;
-  /** Resolver for total column width. */
+  /** Resolver for total column width (VU). */
   totalColsQuery: () => number;
 }
 
@@ -920,35 +920,35 @@ export interface StickyParams {
   isSticky: boolean;
   /** Scroll direction. */
   direction: ScrollDirection;
-  /** Relative horizontal scroll. */
+  /** Relative horizontal scroll (VU). */
   relativeScrollX: number;
-  /** Relative vertical scroll. */
+  /** Relative vertical scroll (VU). */
   relativeScrollY: number;
-  /** Original X offset. */
+  /** Original X offset (VU). */
   originalX: number;
-  /** Original Y offset. */
+  /** Original Y offset (VU). */
   originalY: number;
-  /** Current width. */
+  /** Current width (VU). */
   width: number;
-  /** Current height. */
+  /** Current height (VU). */
   height: number;
   /** All sticky indices. */
   stickyIndices: number[];
-  /** Fixed item size. */
+  /** Fixed item size (VU). */
   fixedSize: number | null;
   /** Fixed column width. */
   fixedWidth: number | null;
-  /** Item gap. */
+  /** Item gap (VU). */
   gap: number;
-  /** Column gap. */
+  /** Column gap (VU). */
   columnGap: number;
-  /** Prefix sum resolver for rows. */
+  /** Prefix sum resolver for rows (VU). */
   getItemQueryY: (index: number) => number;
-  /** Prefix sum resolver for rows (horizontal). */
+  /** Prefix sum resolver for columns (VU). */
   getItemQueryX: (index: number) => number;
-  /** Sticky elements size at the start (top/left) in DU: sticky items stick below them. */
+  /** Sticky elements size at the start (left) in DU: sticky items stick after them. */
   stickyStartX?: number;
-  /** Sticky elements size at the start (top/left) in DU: sticky items stick below them. */
+  /** Sticky elements size at the start (top) in DU: sticky items stick after them. */
   stickyStartY?: number;
 }
 
@@ -958,25 +958,25 @@ export interface ItemPositionParams {
   index: number;
   /** Scroll direction. */
   direction: ScrollDirection;
-  /** Fixed item size. */
+  /** Fixed item size (VU). */
   fixedSize: number | null;
-  /** Item gap. */
+  /** Item gap (VU). */
   gap: number;
-  /** Column gap. */
+  /** Column gap (VU). */
   columnGap: number;
-  /** Usable viewport width. */
+  /** Usable viewport width (VU). */
   usableWidth: number;
-  /** Usable viewport height. */
+  /** Usable viewport height (VU). */
   usableHeight: number;
-  /** Total estimated width. */
+  /** Total estimated width (VU). */
   totalWidth: number;
-  /** Prefix sum for row height. */
+  /** Prefix sum for row height (VU). */
   queryY: (idx: number) => number;
-  /** Prefix sum for row width. */
+  /** Prefix sum for row width (VU). */
   queryX: (idx: number) => number;
-  /** Height resolver. */
+  /** Height resolver (VU). */
   getSizeY: (idx: number) => number;
-  /** Width resolver. */
+  /** Width resolver (VU). */
   getSizeX: (idx: number) => number;
   /** Current column range (for grid mode). */
   columnRange?: ColumnRange | undefined;
@@ -988,13 +988,13 @@ export interface ItemStyleParams<T = unknown> {
   item: RenderedItem<T>;
   /** Scroll direction. */
   direction: ScrollDirection;
-  /** Configured item size logic. */
+  /** Configured item size (VU). */
   itemSize: number | (number | null | undefined)[] | ((item: T, index: number) => number) | null | undefined;
   /** Parent container tag. */
   containerTag: string;
-  /** Padding start on X axis. */
+  /** Padding start on X axis (DU). */
   paddingStartX: number;
-  /** Padding start on Y axis. */
+  /** Padding start on Y axis (DU). */
   paddingStartY: number;
   /** Hydration state. */
   isHydrated: boolean;
@@ -1010,23 +1010,23 @@ export interface TotalSizeParams {
   itemsLength: number;
   /** The number of columns (for grid mode). */
   columnCount: number;
-  /** The fixed size of items, if applicable. */
+  /** The fixed size of items, if applicable (VU). */
   fixedSize: number | null;
-  /** The fixed width of columns, if applicable. */
+  /** The fixed width of columns, if applicable (VU). */
   fixedWidth: number | null;
-  /** The gap between items. */
+  /** The gap between items (VU). */
   gap: number;
-  /** The gap between columns. */
+  /** The gap between columns (VU). */
   columnGap: number;
-  /** Usable viewport width. */
+  /** Usable viewport width (VU). */
   usableWidth: number;
-  /** Usable viewport height. */
+  /** Usable viewport height (VU). */
   usableHeight: number;
-  /** Function to query the prefix sum of item heights. */
+  /** Function to query the prefix sum of item heights (VU). */
   queryY: (index: number) => number;
-  /** Function to query the prefix sum of item widths. */
+  /** Function to query the prefix sum of item widths (VU). */
   queryX: (index: number) => number;
-  /** Function to query the prefix sum of column widths. */
+  /** Function to query the prefix sum of column widths (VU). */
   queryColumn: (index: number) => number;
 }
 

@@ -20,24 +20,65 @@ import { BROWSER_MAX_SIZE, isScrollToIndexOptions } from './scroll';
 // --- Internal Helper Types ---
 
 interface GenericRangeParams {
+  /** Virtual scroll position. */
   scrollPos: number;
+  /** Usable viewport size. */
   containerSize: number;
+  /** Total item count. */
   count: number;
+  /** Buffer items before. */
   bufferBefore: number;
+  /** Buffer items after. */
   bufferAfter: number;
+  /** Item gap. */
   gap: number;
+  /** Fixed item size. */
   fixedSize: number | null;
+  /** Binary search for index. */
   findLowerBound: (offset: number) => number;
+  /** Prefix sum for index. */
   query: (index: number) => number;
 }
 
-interface AxisAlignmentParams {
+interface AxisTargetParams {
+  /** Row/column index. */
+  index: number;
+  /** Desired alignment. */
   align: ScrollAlignment;
-  targetPos: number;
-  itemSize: number;
-  scrollPos: number;
+  /** Full viewport size. */
   viewSize: number;
+  /** Virtual scroll position. */
+  scrollPos: number;
+  /** Fixed item size. */
+  fixedSize: number | null;
+  /** Item gap. */
+  gap: number;
+  /** Prefix sum resolver. */
+  query: (index: number) => number;
+  /** Item size resolver. */
+  getSize: (index: number) => number;
+  /** Sticky indices. */
+  stickyIndices?: number[] | undefined;
+  /** Sticky start element size. */
+  stickyStart: number;
+  /** Sticky end element size. */
+  stickyEnd?: number | undefined;
+}
+
+interface AxisAlignmentParams {
+  /** Desired alignment. */
+  align: ScrollAlignment;
+  /** Virtual item position. */
+  targetPos: number;
+  /** Virtual item size. */
+  itemSize: number;
+  /** Virtual scroll position. */
+  scrollPos: number;
+  /** Full viewport size. */
+  viewSize: number;
+  /** Dynamic sticky offset at start. */
   stickyOffsetStart: number;
+  /** Sticky offset at end. */
   stickyOffsetEnd: number;
 }
 
@@ -54,16 +95,6 @@ export interface SnapResult {
 /**
  * Generic range calculation for a single axis (row or column).
  *
- * @param params - Range parameters.
- * @param params.scrollPos - Virtual scroll position.
- * @param params.containerSize - Usable viewport size.
- * @param params.count - Total item count.
- * @param params.bufferBefore - Buffer items before.
- * @param params.bufferAfter - Buffer items after.
- * @param params.gap - Item gap.
- * @param params.fixedSize - Fixed item size.
- * @param params.findLowerBound - Binary search for index.
- * @param params.query - Prefix sum for index.
  * @returns Start and end indices.
  */
 function calculateGenericRange({
@@ -150,14 +181,6 @@ export function findPrevStickyIndex(stickyIndices: number[], index: number): num
 /**
  * Generic alignment calculation for a single axis.
  *
- * @param params - Alignment parameters.
- * @param params.align - Desired alignment.
- * @param params.targetPos - Virtual item position.
- * @param params.itemSize - Virtual item size.
- * @param params.scrollPos - Virtual scroll position.
- * @param params.viewSize - Full viewport size.
- * @param params.stickyOffsetStart - Dynamic sticky offset at start.
- * @param params.stickyOffsetEnd - Sticky offset at end.
  * @returns Target scroll position and effective alignment.
  */
 function calculateAxisAlignment({
@@ -289,18 +312,6 @@ export function calculateOffsetAt(
 /**
  * Helper to calculate target scroll position for a single axis.
  *
- * @param params - Axis target parameters.
- * @param params.index - Row/column index.
- * @param params.align - Desired alignment.
- * @param params.viewSize - Full viewport size.
- * @param params.scrollPos - Virtual scroll position.
- * @param params.fixedSize - Fixed item size.
- * @param params.gap - Item gap.
- * @param params.query - Prefix sum resolver.
- * @param params.getSize - Item size resolver.
- * @param params.stickyIndices - Sticky indices.
- * @param params.stickyStart - Sticky start element size.
- * @param params.stickyEnd - Sticky end element size.
  * @returns Target position, item size and effective alignment.
  */
 function calculateAxisTarget({
@@ -315,19 +326,7 @@ function calculateAxisTarget({
   stickyIndices,
   stickyStart,
   stickyEnd = 0,
-}: {
-  index: number;
-  align: ScrollAlignment;
-  viewSize: number;
-  scrollPos: number;
-  fixedSize: number | null;
-  gap: number;
-  query: (idx: number) => number;
-  getSize: (idx: number) => number;
-  stickyIndices?: number[] | undefined;
-  stickyStart: number;
-  stickyEnd?: number;
-}) {
+}: AxisTargetParams) {
   let stickyOffsetStart = stickyStart;
   if (stickyIndices && stickyIndices.length > 0) {
     // When the target itself is sticky it occupies the sticky line and pushes
@@ -491,42 +490,6 @@ export function virtualToDisplay(virtualPos: number, hostOffset: number, scale: 
 /**
  * Calculates the target scroll position (relative to content) for a given row/column index and alignment.
  *
- * @param params - Scroll target parameters.
- * @param params.rowIndex - Row index to target.
- * @param params.colIndex - Column index to target.
- * @param params.options - Scroll options including alignment.
- * @param params.direction - Current scroll direction.
- * @param params.viewportWidth - Full viewport width (DU).
- * @param params.viewportHeight - Full viewport height (DU).
- * @param params.totalWidth - Total estimated width (VU).
- * @param params.totalHeight - Total estimated height (VU).
- * @param params.gap - Item gap (VU).
- * @param params.columnGap - Column gap (VU).
- * @param params.fixedSize - Fixed item size (VU).
- * @param params.fixedWidth - Fixed column width (VU).
- * @param params.relativeScrollX - Current relative X scroll (VU).
- * @param params.relativeScrollY - Current relative Y scroll (VU).
- * @param params.getItemSizeY - Resolver for item height (VU).
- * @param params.getItemSizeX - Resolver for item width (VU).
- * @param params.getItemQueryY - Prefix sum resolver for item height (VU).
- * @param params.getItemQueryX - Prefix sum resolver for item width (VU).
- * @param params.getColumnSize - Resolver for column size (VU).
- * @param params.getColumnQuery - Prefix sum resolver for column width (VU).
- * @param params.scaleX - Coordinate scaling factor for X axis.
- * @param params.scaleY - Coordinate scaling factor for Y axis.
- * @param params.hostOffsetX - Display pixels offset of items wrapper on X axis (DU).
- * @param params.hostOffsetY - Display pixels offset of items wrapper on Y axis (DU).
- * @param params.flowPaddingStartX - Display pixels padding at flow start on X axis (DU).
- * @param params.flowPaddingStartY - Display pixels padding at flow start on Y axis (DU).
- * @param params.paddingStartX - Display pixels padding at scroll start on X axis (DU).
- * @param params.paddingStartY - Display pixels padding at scroll start on Y axis (DU).
- * @param params.paddingEndX - Display pixels padding at scroll end on X axis (DU).
- * @param params.paddingEndY - Display pixels padding at scroll end on Y axis (DU).
- * @param params.stickyIndices - List of sticky indices.
- * @param params.stickyStartX - Sticky start offset on X axis (DU).
- * @param params.stickyStartY - Sticky start offset on Y axis (DU).
- * @param params.stickyEndX - Sticky end offset on X axis (DU).
- * @param params.stickyEndY - Sticky end offset on Y axis (DU).
  * @returns The target X and Y positions (VU) and item dimensions (VU).
  * @see ScrollTargetParams
  * @see ScrollTargetResult
@@ -651,22 +614,6 @@ export function calculateScrollTarget({
 /**
  * Calculates the range of items to render based on scroll position and viewport size.
  *
- * @param params - Range parameters.
- * @param params.direction - Scroll direction.
- * @param params.relativeScrollX - Virtual horizontal position (VU).
- * @param params.relativeScrollY - Virtual vertical position (VU).
- * @param params.usableWidth - Usable viewport width (VU).
- * @param params.usableHeight - Usable viewport height (VU).
- * @param params.itemsLength - Total item count.
- * @param params.bufferBefore - Buffer items before.
- * @param params.bufferAfter - Buffer items after.
- * @param params.gap - Item gap (VU).
- * @param params.columnGap - Column gap (VU).
- * @param params.fixedSize - Fixed item size (VU).
- * @param params.findLowerBoundY - Resolver for vertical index.
- * @param params.findLowerBoundX - Resolver for horizontal index.
- * @param params.queryY - Resolver for vertical offset (VU).
- * @param params.queryX - Resolver for horizontal offset (VU).
  * @returns The start and end indices of the items to render.
  * @see RangeParams
  */
@@ -705,16 +652,6 @@ export function calculateRange({
 /**
  * Calculates the range of columns to render for bidirectional scroll.
  *
- * @param params - Column range parameters.
- * @param params.columnCount - Total column count.
- * @param params.relativeScrollX - Virtual horizontal position (VU).
- * @param params.usableWidth - Usable viewport width (VU).
- * @param params.colBuffer - Column buffer size.
- * @param params.fixedWidth - Fixed column width (VU).
- * @param params.columnGap - Column gap (VU).
- * @param params.findLowerBound - Resolver for column index.
- * @param params.query - Resolver for column offset (VU).
- * @param params.totalColsQuery - Resolver for total width (VU).
  * @returns The start and end indices and paddings for columns (VU).
  * @see ColumnRangeParams
  * @see ColumnRange
@@ -767,25 +704,6 @@ export function calculateColumnRange({
 /**
  * Calculates the sticky state and offset for a single item.
  *
- * @param params - Sticky item parameters.
- * @param params.index - Item index.
- * @param params.isSticky - If configured as sticky.
- * @param params.direction - Scroll direction.
- * @param params.relativeScrollX - Virtual horizontal position (VU).
- * @param params.relativeScrollY - Virtual vertical position (VU).
- * @param params.originalX - Virtual original X position (VU).
- * @param params.originalY - Virtual original Y position (VU).
- * @param params.width - Virtual item width (VU).
- * @param params.height - Virtual item height (VU).
- * @param params.stickyIndices - All sticky indices.
- * @param params.fixedSize - Fixed item size (VU).
- * @param params.gap - Item gap (VU).
- * @param params.columnGap - Column gap (VU).
- * @param params.getItemQueryY - Resolver for vertical offset (VU).
- * @param params.getItemQueryX - Resolver for horizontal offset (VU).
- * @param params.nextStickyIndex - Optional pre-calculated next sticky index.
- * @param params.stickyStartX - Sticky elements size at the start (left) in DU.
- * @param params.stickyStartY - Sticky elements size at the start (top) in DU.
  * @returns Sticky state and offset (VU).
  * @see StickyParams
  */
@@ -808,7 +726,13 @@ export function calculateStickyItem({
   nextStickyIndex,
   stickyStartX = 0,
   stickyStartY = 0,
-}: StickyParams & { nextStickyIndex?: number | undefined; }) {
+}: StickyParams & {
+  /**
+   * Pre-calculated next sticky index; when set, `findNextStickyIndex` is not
+   * called (the sticky extension already tracks that pointer).
+   */
+  nextStickyIndex?: number | undefined;
+}) {
   let isStickyActiveX = false;
   let isStickyActiveY = false;
   const stickyOffset = { x: 0, y: 0 };
@@ -863,20 +787,6 @@ export function calculateStickyItem({
 /**
  * Calculates the position and size of a single item.
  *
- * @param params - Item position parameters.
- * @param params.index - Item index.
- * @param params.direction - Scroll direction.
- * @param params.fixedSize - Fixed item size (VU).
- * @param params.gap - Item gap (VU).
- * @param params.columnGap - Column gap (VU).
- * @param params.usableWidth - Usable viewport width (VU).
- * @param params.usableHeight - Usable viewport height (VU).
- * @param params.totalWidth - Total estimated width (VU).
- * @param params.queryY - Resolver for vertical offset (VU).
- * @param params.queryX - Resolver for horizontal offset (VU).
- * @param params.getSizeY - Resolver for height (VU).
- * @param params.getSizeX - Resolver for width (VU).
- * @param params.columnRange - Current column range (for grid mode).
  * @returns Item position and size (VU).
  * @see ItemPositionParams
  */
@@ -921,15 +831,6 @@ export function calculateItemPosition({
 /**
  * Calculates the style object for a rendered item.
  *
- * @param params - Item style parameters.
- * @param params.item - Rendered item state.
- * @param params.direction - Scroll direction.
- * @param params.itemSize - Virtual item size (VU).
- * @param params.containerTag - Container HTML tag.
- * @param params.paddingStartX - Horizontal virtual padding (DU).
- * @param params.paddingStartY - Vertical virtual padding (DU).
- * @param params.isHydrated - If mounted and hydrated.
- * @param params.isRtl - If in RTL mode.
  * @returns Style object.
  * @see ItemStyleParams
  */
@@ -1057,19 +958,6 @@ export function calculatePrependCount<T>(oldItems: T[], newItems: T[]): number {
 /**
  * Calculates the total width and height of the virtualized content.
  *
- * @param params - Total size parameters.
- * @param params.direction - Scroll direction.
- * @param params.itemsLength - Total item count.
- * @param params.columnCount - Column count.
- * @param params.fixedSize - Fixed item size (VU).
- * @param params.fixedWidth - Fixed column width (VU).
- * @param params.gap - Item gap (VU).
- * @param params.columnGap - Column gap (VU).
- * @param params.usableWidth - Usable viewport width (VU).
- * @param params.usableHeight - Usable viewport height (VU).
- * @param params.queryY - Resolver for vertical offset (VU).
- * @param params.queryX - Resolver for horizontal offset (VU).
- * @param params.queryColumn - Resolver for column offset (VU).
  * @returns Total width and height (VU).
  * @see TotalSizeParams
  */
