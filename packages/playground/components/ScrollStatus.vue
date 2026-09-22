@@ -34,7 +34,18 @@ onMounted(() => {
   isMounted.value = true;
   syncDomCount();
 });
-watch(() => props.scrollDetails, syncDomCount);
+
+/**
+ * The mounted-window readout only changes when a range changes, so the
+ * document-wide count does not run on every scroll frame.
+ */
+const rangesKey = computed(() => [
+  itemsRange.value.start,
+  itemsRange.value.end,
+  props.columnRange?.start ?? 0,
+  props.columnRange?.end ?? 0,
+].join(':'));
+watch(rangesKey, syncDomCount);
 
 const fpsClass = computed(() => {
   const val = efficiency.value;
