@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // Static comparison page - no virtual scroll involved.
+import { CONTENDERS_MEASURED_ON, OURS_RELEASED, OURS_VERSION, SIZES } from '#/lib/compare-sizes';
 
 type ContenderKey = 'ours' | 'vvs' | 'tanstack' | 'virtua' | 'vueuc' | 'vvsl' | 'vlist' | 'cerious';
 
@@ -139,6 +140,15 @@ const ENTRY_SCORES = {
   /** The engine with every exported observer, extension and composable wired in by hand. */
   wired: entryScore(COMPONENT_GAPS),
 };
+
+/** A size in kB, always with one decimal. */
+const kB = (value: number) => value.toFixed(1);
+
+/** A size as the table prints it. */
+const sizeCell = (size: { min: number; gz: number; }) => `${ kB(size.min) } / ${ kB(size.gz) } kB`;
+
+/** Points, or points bought by a size gap, per kB gzip. */
+const perKb = (points: number, kb: number) => (points / kb).toFixed(1);
 </script>
 
 <template>
@@ -146,7 +156,9 @@ const ENTRY_SCORES = {
     <h1 class="text-2xl @4xl:text-4xl font-bold text-primary">Virtual Scroll Comparison</h1>
     <p class="text-sm @4xl:text-base opacity-70 mt-2 max-w-4xl">
       <code>@pdanpdan/virtual-scroll</code> vs. other main Vue 3 virtualization libraries.
-      Versions, publish dates and bundle sizes were checked on September 22, 2026.
+      Contender versions, publish dates, star counts and bundle sizes were checked on
+      {{ CONTENDERS_MEASURED_ON }}. This package's row is rebuilt on every docs build, so its
+      version and sizes always match its current source.
     </p>
   </div>
 
@@ -185,10 +197,10 @@ const ENTRY_SCORES = {
       <tbody>
         <tr>
           <td class="font-bold whitespace-nowrap">@pdanpdan/virtual-scroll</td>
-          <td class="whitespace-nowrap"><code>2.1.1</code></td>
-          <td class="whitespace-nowrap">2026-09-22</td>
+          <td class="whitespace-nowrap"><code>{{ OURS_VERSION }}</code></td>
+          <td class="whitespace-nowrap">{{ OURS_RELEASED }}</td>
           <td class="whitespace-nowrap">12</td>
-          <td class="whitespace-nowrap">78.8 / 22.8 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.oursFull) }}</td>
           <td class="whitespace-nowrap">
             {{ ENTRY_SCORES.full }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.full) }})</span>
           </td>
@@ -199,7 +211,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap" />
           <td class="whitespace-nowrap" />
           <td class="whitespace-nowrap" />
-          <td class="whitespace-nowrap">60.0 / 17.3 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.oursCore) }}</td>
           <td class="whitespace-nowrap">
             {{ ENTRY_SCORES.core }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.core) }})</span>
           </td>
@@ -210,7 +222,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap" />
           <td class="whitespace-nowrap" />
           <td class="whitespace-nowrap" />
-          <td class="whitespace-nowrap">32.5 / 10.2 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.oursComposable) }}</td>
           <td class="whitespace-nowrap">
             {{ ENTRY_SCORES.composable }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.composable) }})</span>
           </td>
@@ -221,7 +233,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap" />
           <td class="whitespace-nowrap" />
           <td class="whitespace-nowrap" />
-          <td class="whitespace-nowrap">41.2 / 13.2 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.oursHeadlessWired) }}</td>
           <td class="whitespace-nowrap">
             {{ ENTRY_SCORES.headlessWired }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.headlessWired) }})</span>
           </td>
@@ -232,7 +244,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>3.0.5</code></td>
           <td class="whitespace-nowrap">2026-08-12</td>
           <td class="whitespace-nowrap">10,797</td>
-          <td class="whitespace-nowrap">29.3 / 10.7 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.vvs) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('vvs') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vvs') }})</span></td>
           <td>Components (Scroller, RecycleScroller, DynamicScroller, TableScroller)</td>
         </tr>
@@ -241,7 +253,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>3.13.39</code></td>
           <td class="whitespace-nowrap">2026-09-14</td>
           <td class="whitespace-nowrap">7,119 <span class="opacity-60 block">(monorepo)</span></td>
-          <td class="whitespace-nowrap">24.7 / 7.5 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.tanstack) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('tanstack') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('tanstack') }})</span></td>
           <td>Headless composable (<code>useVirtualizer</code>)</td>
         </tr>
@@ -250,7 +262,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>0.52.7</code></td>
           <td class="whitespace-nowrap">2026-09-22</td>
           <td class="whitespace-nowrap">3,748</td>
-          <td class="whitespace-nowrap">9.8 / 4.7 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.virtua) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('virtua') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('virtua') }})</span></td>
           <td>Components (VList, VGrid) + handle</td>
         </tr>
@@ -259,7 +271,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>0.4.66</code></td>
           <td class="whitespace-nowrap">2026-08-19</td>
           <td class="whitespace-nowrap">310</td>
-          <td class="whitespace-nowrap">24.4 / 9.2 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.vueuc) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('vueuc') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vueuc') }})</span></td>
           <td>Component (VVirtualList)</td>
         </tr>
@@ -268,7 +280,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>2.3.5</code></td>
           <td class="whitespace-nowrap">2023-05-29</td>
           <td class="whitespace-nowrap">4,505</td>
-          <td class="whitespace-nowrap">15.3 / 4.9 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.vvsl) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('vvsl') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vvsl') }})</span></td>
           <td>Component</td>
         </tr>
@@ -277,7 +289,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>2.8.1</code></td>
           <td class="whitespace-nowrap">2026-09-15</td>
           <td class="whitespace-nowrap">17</td>
-          <td class="whitespace-nowrap">113.1 / 37.2 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.vlistAdapter) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('vlist') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vlist') }})</span></td>
           <td>Plugin core (<code>createVList</code>) + Vue adapter (<code>useVList</code>)</td>
         </tr>
@@ -286,7 +298,7 @@ const ENTRY_SCORES = {
           <td class="whitespace-nowrap"><code>1.2.0</code></td>
           <td class="whitespace-nowrap">2026-09-21</td>
           <td class="whitespace-nowrap">16</td>
-          <td class="whitespace-nowrap">101.4 / 27.0 kB</td>
+          <td class="whitespace-nowrap">{{ sizeCell(SIZES.cerious) }}</td>
           <td class="whitespace-nowrap">{{ scoreFor('cerious') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('cerious') }})</span></td>
           <td>Component + composable</td>
         </tr>
@@ -296,22 +308,30 @@ const ENTRY_SCORES = {
 
   <p class="text-sm opacity-60 mb-12 -mt-6">
     Bundle sizes: each library's entry for rendering a list, tree-shaken,
-    dependencies bundled and Vue external - installed from npm, bundled with esbuild
-    (<code>--minify</code>), minified and gzipped at level 9, reported in kB (1000 bytes). Each number
-    includes the stylesheet that entry needs: ours and <code>vue-virtual-scroller</code> ship theirs as a
-    separate import, while <code>vueuc</code>, <code>vlist</code> and <code>vue-cerious-scroll</code> inject
+    dependencies bundled and Vue external - installed from npm at the version listed above and bundled with
+    <code>esbuild --bundle --minify --format=esm --external:vue</code>, gzipped at level 9 and reported in
+    kB (1000 bytes). The gzip figure covers the JavaScript and the stylesheet concatenated, so a row is what
+    a page using that entry downloads. Each number includes the stylesheet that entry needs: ours,
+    <code>vue-virtual-scroller</code> and <code>vlist</code> (<code>vlist/styles</code>) ship theirs as a
+    separate import, while <code>vueuc</code> and <code>vue-cerious-scroll</code> inject
     theirs from JavaScript. For the component libraries that is one component
     (<code>RecycleScroller</code>, <code>VList</code>, <code>VVirtualList</code>, <code>VirtualList</code>,
     <code>CeriousScroll</code>); for
     <code>@tanstack/vue-virtual</code> it is <code>useVirtualizer</code> including the
     <code>@tanstack/virtual-core</code> it depends on, and for <code>vlist</code> it is
     <code>vlist-vue</code>'s <code>useVList</code> (2.6.0 over the 2.8.1 core), which through
-    <code>vlist/config</code> pulls in every one of its seventeen plugins - building the same list by hand
-    from <code>createVList</code> and the plugins is 12.3&nbsp;kB gzip, 14.3&nbsp;kB once the scrollbar plugin
-    is added. Ours is listed entry by entry - the package root with all six built-in extensions, the lean
+    <code>vlist/config</code> pulls in most of the plugin set (<code>a11y</code>, <code>search</code>,
+    <code>sortable</code>, <code>transition</code> and <code>tree</code> are not among them) - the smaller
+    numbers in its docs assume importing plugins by hand: its bare core with the stylesheet is
+    {{ kB(SIZES.vlistBase.gz) }}&nbsp;kB gzip, {{ kB(SIZES.vlistBaseScrollbar.gz) }}&nbsp;kB once the scrollbar plugin
+    is added. <code>virtua</code> is measured from its <code>virtua/vue</code> entry, since the package root
+    is the React build. Ours is listed entry by entry - the package root with all six built-in extensions,
+    the lean
     <code>/core</code> component, the headless <code>useVirtualScroll</code> composable, and that
     composable with the observer, keyboard and scrollbar ones - and each row's
-    score counts only the features that entry ships. Every row is the published version listed.
+    score counts only the features that entry ships, and it is measured from this package's built
+    entry files on every docs build. Every other row is the published version listed, in the snapshot
+    from {{ CONTENDERS_MEASURED_ON }}.
     <code>vue-cerious-scroll</code> bundles its runtime dependency
     (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
   </p>
@@ -458,9 +478,9 @@ const ENTRY_SCORES = {
             navigation and list recreation, not across an insert above the viewport. The table renders div rows
             with resizable columns, not real table rows with content-sized columns. Rows have to exist as an
             array (the examples build <code>Array.from({ length: n })</code>), though the instance exposes
-            <code>setGetItemFn</code> for index-driven rows. Its 37.2&nbsp;kB here is the adapter import:
-            <code>vlist/config</code> pulls in all seventeen plugins, so the smaller numbers in its docs assume
-            importing plugins by hand.
+            <code>setGetItemFn</code> for index-driven rows. Its {{ kB(SIZES.vlistAdapter.gz) }}&nbsp;kB here is the adapter import:
+            <code>vlist/config</code> pulls in most of the plugin set, so the smaller numbers in its docs
+            assume importing plugins by hand.
           </p>
         </div>
       </div>
@@ -478,16 +498,25 @@ const ENTRY_SCORES = {
         dedicated components (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also one of the larger
-        bundles here - 22.8&nbsp;kB gzip for the package root and 17.3&nbsp;kB for the lean
+        bundles here - {{ kB(SIZES.oursFull.gz) }}&nbsp;kB gzip for the package root and
+        {{ kB(SIZES.oursCore.gz) }}&nbsp;kB for the lean
         <code>/core</code> component, behind only <code>vlist</code> and <code>vue-cerious-scroll</code>.
-        The headless engine is 10.2&nbsp;kB at {{ ENTRY_SCORES.composable }} of {{ MAX_SCORE }} points,
-        13.2&nbsp;kB at {{ ENTRY_SCORES.headlessWired }} with the observer, keyboard and scrollbar
-        composables wired in, and 16.0&nbsp;kB at {{ ENTRY_SCORES.wired }} with every exported extension
-        too - 1.9, 1.9 and 2.2 points per kB gzip. Marginal bytes buy the most from the extensions (5.1
-        points per kB) and the least from keyboard navigation (1.3), which is why the component entries
+        The headless engine is {{ kB(SIZES.oursComposable.gz) }}&nbsp;kB at {{ ENTRY_SCORES.composable }} of
+        {{ MAX_SCORE }} points,
+        {{ kB(SIZES.oursHeadlessWired.gz) }}&nbsp;kB at {{ ENTRY_SCORES.headlessWired }} with the observer,
+        keyboard and scrollbar composables wired in, and {{ kB(SIZES.oursWired.gz) }}&nbsp;kB at
+        {{ ENTRY_SCORES.wired }} with every exported extension too -
+        {{ perKb(ENTRY_SCORES.composable, SIZES.oursComposable.gz) }},
+        {{ perKb(ENTRY_SCORES.headlessWired, SIZES.oursHeadlessWired.gz) }} and
+        {{ perKb(ENTRY_SCORES.wired, SIZES.oursWired.gz) }} points per kB gzip. Marginal bytes buy the most
+        from the extensions ({{ perKb(ENTRY_SCORES.wired - ENTRY_SCORES.headlessWired, SIZES.oursWired.gz - SIZES.oursHeadlessWired.gz) }}
+        points per kB) and the least from keyboard navigation
+        ({{ perKb(OUR_POINTS.get('Keyboard navigation') ?? 0, SIZES.oursEngineObserversKeyboard.gz - SIZES.oursEngineObservers.gz) }}),
+        which is why the component entries
         score better per kB than the headless ones. Per kB the small single-purpose libraries still lead
-        (<code>virtua</code> 5.3, <code>@tanstack/vue-virtual</code> 3.6) - a ratio nothing with these many
-        features can match. At 12 stars it has no community to fall back on.
+        (<code>virtua</code> {{ perKb(scoreFor('virtua'), SIZES.virtua.gz) }},
+        <code>@tanstack/vue-virtual</code> {{ perKb(scoreFor('tanstack'), SIZES.tanstack.gz) }}) - a ratio
+        nothing with these many features can match. At 12 stars it has no community to fall back on.
       </li>
       <li>
         <strong>@ceriousdevtech/vue-cerious-scroll</strong> - the only other Vue entry that ships real
@@ -495,14 +524,15 @@ const ENTRY_SCORES = {
         vertical-only - no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
         beyond-browser-max support - and it scrolls on its own hidden-overflow host instead of the
         browser's scrollport. The heaviest per-view code here after <code>vlist</code>
-        (27.0&nbsp;kB gzip, its runtime dependency bundled) and at 16 stars it has no community either.
+        ({{ kB(SIZES.cerious.gz) }}&nbsp;kB gzip, its runtime dependency bundled) and at 16 stars it has no community either.
       </li>
       <li>
         <strong>vlist</strong> - the other batteries-included entry, and the closest in scope: a
         framework-agnostic core with official Vue, React, Svelte and Solid adapters, plus plugins for grid,
         masonry, table, tree, groups, selection, search, sortable, snapshots, transition, carousel and async
-        data. Its core is the smallest serious one when you import plugins by hand (12.3&nbsp;kB with the
-        stylesheet, 14.3&nbsp;kB once the scrollbar plugin is added), the default
+        data. Its core is the smallest serious one when you import plugins by hand
+        ({{ kB(SIZES.vlistBase.gz) }}&nbsp;kB with the
+        stylesheet, {{ kB(SIZES.vlistBaseScrollbar.gz) }}&nbsp;kB once the scrollbar plugin is added), the default
         scrollbar is already an overlay, document scrolling is a plugin, and 1M+ items work through its
         bounded and synthetic scroll modes (the older <code>scale()</code> plugin is now a deprecation stub).
         What it does not have is a second axis, RTL, snapping outside the carousel, real table rows, or

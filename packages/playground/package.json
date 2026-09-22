@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/sync-changelog.js && vike dev --host",
-    "build": "node scripts/sync-changelog.js && node scripts/generate-sitemap.js && node scripts/generate-umd-examples.js && vike build",
+    "build": "node scripts/sync-changelog.js && node scripts/measure-compare-sizes.mjs --ours && node scripts/generate-sitemap.js && node scripts/generate-umd-examples.js && vike build",
     "preview": "vike build && vike preview",
+    "measure:sizes": "node scripts/measure-compare-sizes.mjs",
     "test:types": "node scripts/sync-changelog.js && vue-tsc --noEmit",
     "test:generated": "node scripts/check-generated.mjs && vue-tsc --noEmit -p tsconfig.generated.json",
     "pretest:e2e": "playwright install chromium",
