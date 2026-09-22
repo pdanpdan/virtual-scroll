@@ -130,7 +130,7 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props);
 
 ### 5. Lean Build (`./core`)
 
-`@pdanpdan/virtual-scroll/core` publishes the same API with the optional wiring compiled out, for apps that only need virtualization:
+`@pdanpdan/virtual-scroll/core` publishes the same API with the optional wiring compiled out of the components that have it (`VirtualScroll` and `VirtualScrollTable`), for apps that only need virtualization:
 
 ```vue
 <script setup>
@@ -140,11 +140,11 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 </script>
 ```
 
-*   **Not included:** custom scrollbars (the `virtualScrollbar` prop and the `#scrollbar` slot), keyboard navigation, scroll snapping, sticky items, infinite loading and prepend restoration.
+*   **Not included:** custom scrollbars (the `virtualScrollbar` prop and the `#scrollbar` slot), keyboard navigation, scroll snapping, sticky items, infinite loading and prepend restoration. `VirtualScrollMasonry` has no such wiring to remove; the flow-mode scrollbar a table always shows for its own horizontal overflow is kept.
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
 *   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` - only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
-A tree-shaken `<VirtualScroll>` is 17.3 KB gzipped from `./core` and 23.2 KB from the package root; `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
+A tree-shaken `<VirtualScroll>` is 17.0 KB gzipped from `./core` and 23.2 KB from the package root; `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
 
 ## Data-less Lists (Index-only Rows)
 
@@ -183,7 +183,7 @@ To support massive datasets (billions of pixels) while staying within browser sc
 *   **VU (Virtual Units)**: The internal coordinate system representing the actual size of your content.
 *   **DU (Display Units)**: The browser's physical coordinate system (limited to `BROWSER_MAX_SIZE`).
 
-The library automatically calculates a scaling factor and applies a specialized formula to ensure **1:1 movement** in the viewport during wheel and touch scrolling, while maintaining proportional positioning during scrollbar interaction.
+The library derives a scale factor and maps display scroll positions back onto virtual ones, so wheel and touch scrolling move the content 1:1 while scrollbar interaction positions it proportionally.
 
 ### Core Rendering Rule
 
@@ -195,14 +195,14 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
-- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 23.2 KB, `./core` 17.3 KB, headless `useVirtualScroll` 11.3 KB, `VirtualScrollTable` 24.2 KB, `VirtualScrollMasonry` 7.6 KB).
+- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 23.2 KB, `./core` 17.0 KB, headless `useVirtualScroll` 11.4 KB, `VirtualScrollTable` 24.4 KB, `./core` `VirtualScrollTable` 19.5 KB, `VirtualScrollMasonry` 7.6 KB).
 
 ## Key Features
 
 - **Dynamic & Fixed Sizes**: Supports uniform item sizes, variable sizes via function/array, or fully dynamic sizes via `ResizeObserver`.
 - **Circular Patterns**: Pass an array to `itemSize` or `columnWidth` to define a repeating size pattern (e.g., `[50, 100]` will repeat for all items).
 - **Multi-Directional**: Works in `vertical`, `horizontal`, or `both` (grid) directions.
-- **Virtual Scrollbars**: Optimized virtual scrollbars that handle massive scales and provide consistent cross-browser styling.
+- **Virtual Scrollbars**: Overlay scrollbars that stay accurate at any scale and share one style across browsers.
 - **Extensions Architecture**: Optional extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration, Coordinate Scaling).
 - **Container Flexibility**: Can use a custom element or the browser `window`/`body` as the scroll container.
 - **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
@@ -217,7 +217,7 @@ Rows are recycled: they mount as they enter the viewport and unmount when they l
 - **Make row rendering idempotent** - the `item` slot re-renders on every entry into the window; rendering the same item twice must produce the same result.
 - **Reserve space for media** - explicit `width`/`height` or `aspect-ratio` prevents post-mount row growth (which the engine measures and corrects, but which causes jumps).
 - **Avoid native `loading="lazy"` on images** - the visible window is already the only mounted content; lazy-loading adds browser heuristics on a changing scroll container and can starve on-screen images. Use eager loading or your own bounded, low-priority prefetch window.
-- **Dynamic heights are fine** - late content growth is measured via `ResizeObserver` and the layout self-corrects; stable or reserved sizes just scroll smoother (see the playground docs "Authoring Content for Virtualized Lists").
+- **Dynamic heights are fine** - late content growth is measured via `ResizeObserver` and the layout self-corrects; stable or reserved sizes scroll smoother (see the playground docs "Authoring Content for Virtualized Lists").
 
 
 ## Extensions
@@ -233,13 +233,14 @@ engine merges, de-duplicates and sorts them. Every hook receives an `ExtensionCo
 reactive `props`, `scrollDetails`, `totalSize`, `range` and `currentIndex`, the engine state refs
 (`internalState`, including `isHydrated`) and the engine methods (`scrollToIndex`, `scrollToOffset`,
 `updateDirection`, `getRowIndexAt`, `getColumnIndexAt`, `getItemSize`, `getItemBaseSize`,
-`getItemOffset`, `getItemRawOffset`, `handleScrollCorrection`). `name` is only a
-label: hooks are called in the order the extensions are passed to `useVirtualScroll`, and extensions
-may wrap engine methods (RTL wraps `updateDirection`).
+`getItemOffset`, `getColumnWidth`, `getColumnOffset`, `getItemRawOffset`,
+`handleScrollCorrection`). The axis-specific resolvers matter on a grid, where `getItemSize` and
+`getItemOffset` describe rows while `getColumnWidth` and `getColumnOffset` describe columns. `name`
+is only a label: hooks are called in the order the extensions are passed to `useVirtualScroll`.
 
 ### Built-in Extensions
 
-- `useRtlExtension()`: Automatic Right-to-Left layout support.
+- `useRtlExtension()`: Right-to-Left layout support. Direction detection belongs to the engine (it re-reads it on mount, on resize, on scroll and on `dir`/`style` changes); the extension asks for that read while initializing, so the first render already has the direction.
 - `useSnappingExtension()`: Item snapping after scroll stops.
 - `useStickyExtension()`: Sticky header/footer and index support. It owns the pinning itself: the previous sticky item stays rendered while it is scrolled past, and `isStickyActive`/`stickyOffset` are computed here. `stickyIndices` without this extension keeps the layout offsets but pins nothing.
 - `useInfiniteLoadingExtension({ onLoad, flingVelocity, preload })`: Trigger loading when reaching thresholds. `onLoad(axis, { velocity, direction })` receives the scroll velocity (VU/ms) and travel direction; `flingVelocity` (default `2`) skips the callback while the axis is still flinging, and `preload` (VU, default `0`) extends the threshold only while scrolling towards the end.
@@ -269,7 +270,7 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props, [
 
 The library exposes its internal logic via reactive composables for advanced use cases.
 
-Everything on this page imports from the package root. The engine layer the components are built on -
+Everything in this document imports from the package root. The engine layer the components are built on -
 the pure calculation helpers (`calculate*`), the DOM scroll helpers, the sizing layer
 (`useVirtualScrollSizes`) and the parameter bags they take - is published from
 `@pdanpdan/virtual-scroll/internal`; that entry also carries the masonry layout engine and its types,

@@ -268,10 +268,9 @@ const items = new Array(1_000_000);
           example pages).
         </p>
         <p>
-          The boolean <code>virtual-scrollbar</code> draws the built-in overlay bars instead of the native ones; besides
-          consistent cross-browser styling it is a performance improvement - the bars are driven by the engine's own
-          scroll math, so their rendering cost stays flat no matter how long the list grows. It is also turned on
-          automatically once content exceeds the browser's ~10M px limit.
+          The boolean <code>virtual-scrollbar</code> draws the built-in overlay bars instead of the native ones; the
+          bars are driven by the engine's own scroll math, so their rendering cost stays flat no matter how long the list
+          grows. They are also turned on automatically once content exceeds the browser's ~10M px limit.
         </p>
 
         <p>

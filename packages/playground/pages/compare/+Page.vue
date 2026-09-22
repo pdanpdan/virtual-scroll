@@ -557,7 +557,7 @@
         <strong>@pdanpdan/virtual-scroll</strong> - the only option that covers grid, window scrolling,
         RTL, sticky and keyboard navigation on its own, the only one that virtualizes past the browser's
         max element height, and the only Vue library that ships masonry and real table-flow layouts as
-        first-class modes (heights from a model or measured from the DOM, single scroll container) on top of a native
+        dedicated components (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also one of the larger
         bundles here - 20.2&nbsp;kB gzip for the component, behind only the two APIs that ship their

@@ -442,8 +442,8 @@ watch(activeFile, () => {
 
         <p>
           The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
-          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+          The overlay bar is driven by the engine's own scroll math, so its
+          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock
@@ -559,7 +559,7 @@ const codeMinStyle = computed(() => ({ minInlineSize: `${maxChars.value}ch` }));
 &lt;/style>"
         />
         <p>
-          Note why the min-width is applied to <em>every</em> row and not left to content: rows mount and unmount as
+          The min-width is applied to <em>every</em> row rather than left to content: rows mount and unmount as
           you scroll, so a scroll range derived from whatever is currently mounted would shrink and grow with each
           window. Reserving <code>maxChars × 1ch</code> on every row keeps the horizontal range - and the horizontal
           scrollbar - stable for the whole scroll.

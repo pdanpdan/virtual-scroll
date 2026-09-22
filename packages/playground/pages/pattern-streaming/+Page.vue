@@ -146,7 +146,7 @@ function jumpToRandom() {
     </template>
 
     <template #description>
-      A simulated market feed over {{ SYMBOL_COUNT.toLocaleString() }} symbols. Prices are kept only for rows that entered the viewport, and every tick mutates just the visible window - the per-tick cost stays constant however large the dataset grows. Pause, resume, or change the feed speed.
+      A simulated market feed over {{ SYMBOL_COUNT.toLocaleString() }} symbols. Prices are kept only for rows that entered the viewport, and every tick mutates only the visible window - the per-tick cost stays constant however large the dataset grows. Pause, resume, or change the feed speed.
     </template>
 
     <template #icon>
@@ -287,8 +287,8 @@ function jumpToRandom() {
 
         <p>
           The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
-          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+          The overlay bar is driven by the engine's own scroll math, so its
+          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock
@@ -358,7 +358,7 @@ const rows = reactive(
           The <code>@scroll</code> event emits a <code>ScrollDetails</code> whose <code>range</code> field
           (<code>{ start, end }</code>) is the window of mounted rows (buffers included). Cache it, and on every tick mutate only
           <code>[start − k, end + k]</code>, with a small <code>k</code> overscan so rows about to scroll into view are already
-          fresh. Mutating an existing reactive item re-renders just that mounted row, so the work per tick stays proportional to
+          fresh. Mutating an existing reactive item re-renders only that mounted row, so the work per tick stays proportional to
           what is visible - it never grows with the dataset, which is the point of pairing virtualization with a live feed.
         </p>
 
@@ -375,7 +375,7 @@ function onScroll(d: ScrollDetails) {
 
 // One feed tick updates only the rows that are (nearly) on screen, so the work
 // is O(viewport) and never grows with the dataset. Mutating an existing
-// reactive item re-renders just its mounted row.
+// reactive item re-renders only its mounted row.
 function applyTick() {
   if (!range) return;
   const from = Math.max(0, range.start - 2);

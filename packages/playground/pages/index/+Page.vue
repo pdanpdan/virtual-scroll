@@ -237,7 +237,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
     <ExampleCard
       type="Feature"
       title="Custom Scrollbar"
-      description="Overlay scrollbars you can style, or replace with your own markup."
+      description="Virtual scrollbars you can style, or replace with your own markup."
       href="/feature-custom-scrollbar"
       group="5"
     />

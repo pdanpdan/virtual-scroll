@@ -118,11 +118,10 @@ function handleScroll(details: MasonryScrollDetails<MasonryItem>) {
 }
 
 /**
- * Measured-mode showcase: while the toggle is on, note rows are added to a
- * couple of visible cards every tick. The cards grow in the DOM, the
- * ResizeObserver measurements drive the layout, and every re-layout keeps
- * the topmost visible card pinned - canonical mode cannot track content it
- * never measures.
+ * Measured mode: while the toggle is on, two visible cards gain a row every
+ * tick. Their new boxes are measured by the ResizeObserver, the measurements
+ * drive the layout, and every re-layout keeps the topmost visible card
+ * pinned - canonical mode cannot track content it never measures.
  */
 const extraLines = ref(new Map<number, number>());
 const growTick = ref(0);

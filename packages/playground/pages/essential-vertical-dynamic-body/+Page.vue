@@ -218,7 +218,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
           each measurement replaces the estimate, moving later rows and the total.
           Because the window scrolls natively, that correction surfaces as the page height changing during the first pass or
           after a deep <code>scrollToIndex</code>. Set <code>default-item-size</code> near your average row height to shorten it,
-          and keep the <code>buffer</code> (default <code>5</code>) so rows measure just off-screen, before they are needed.
+          and keep the <code>buffer-before</code>/<code>buffer-after</code> overscan (default <code>5</code>) so rows measure off-screen, before they are needed.
         </p>
 
         <h3>4. Respect the window-mode size ceiling</h3>

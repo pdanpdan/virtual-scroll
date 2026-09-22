@@ -86,8 +86,8 @@ onUnmounted(() => {
           <code>@pdanpdan/virtual-scroll</code> renders only the rows near the viewport, so a list stays fast no matter
           how many items it holds. It scrolls vertically, horizontally, or on both axes at once (grids), handles fixed,
           computed and measured item sizes, and works with RTL layouts, the browser window as the scroll container,
-          and lists that overflow the browser's own size limit. The live examples on this site are the fastest way in;
-          the reference below covers the full API.
+          and lists that overflow the browser's own size limit. The live examples cover every feature; the
+          reference below documents the full API.
         </p>
       </div>
     </section>
@@ -102,8 +102,8 @@ onUnmounted(() => {
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
           Virtualization keeps the DOM small by rendering only the items in the viewport (plus a configurable buffer),
-          so scrolling stays responsive however large the dataset. Scroll handling is tuned per sizing mode, but the
-          configuration choices below matter most.
+          so scrolling stays responsive however large the dataset. Scroll handling is tuned per sizing mode; the
+          choices below have the largest effect.
         </p>
       </div>
 
@@ -363,7 +363,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Virtual Scrollbars</h4>
-              <p class="docs-feature-card-description">Overlay scrollbars that stay 1:1 on huge lists; style them with CSS variables or your own markup.</p>
+              <p class="docs-feature-card-description">Virtual scrollbars that stay 1:1 on huge lists; style them with CSS variables or your own markup.</p>
             </div>
           </div>
         </div>
@@ -412,7 +412,8 @@ onUnmounted(() => {
         <p>
           A lean entry is available for apps that only need virtualization. <code>@pdanpdan/virtual-scroll/core</code> ships the
           same API with the optional wiring compiled out - no keyboard navigation, custom scrollbars, snapping, sticky items,
-          infinite loading or prepend restoration - together with its own smaller stylesheet:
+          infinite loading or prepend restoration in <code>VirtualScroll</code> and <code>VirtualScrollTable</code> - together
+          with its own smaller stylesheet:
         </p>
       </div>
       <CodeBlock
@@ -425,7 +426,8 @@ import &quot;@pdanpdan/virtual-scroll/core/style.css&quot;;"
         <p>
           In that build <code>virtualScrollbar</code>, <code>snap</code>, <code>stickyIndices</code>, <code>loadDistance</code> and
           <code>restoreScrollOnPrepend</code> are accepted but have no effect; <code>loading</code> still drives the loading slot
-          and <code>aria-busy</code>. Use the package root when you need any of them.
+          and <code>aria-busy</code>. The flow-mode scrollbar a table shows for its own horizontal overflow stays. Use the
+          package root when you need any of them.
         </p>
         <p>Basic usage in a Vue component:</p>
       </div>
@@ -2772,7 +2774,10 @@ const { setItemRef } = useVirtualScrollObservers({
             <code>methods</code> (<code>scrollToIndex</code>, <code>scrollToOffset</code>,
             <code>updateDirection</code>, <code>getRowIndexAt</code>, <code>getColumnIndexAt</code>,
             <code>getItemSize</code>, <code>getItemBaseSize</code>, <code>getItemOffset</code>,
-            <code>getItemRawOffset</code>, <code>handleScrollCorrection</code>).
+            <code>getColumnWidth</code>, <code>getColumnOffset</code>, <code>getItemRawOffset</code>,
+            <code>handleScrollCorrection</code>). On a grid the axis-specific resolvers differ:
+            <code>getItemSize</code>/<code>getItemOffset</code> describe rows and
+            <code>getColumnWidth</code>/<code>getColumnOffset</code> describe columns.
           </p>
         </div>
       </section>
@@ -2816,9 +2821,9 @@ const vs = useVirtualScroll(props, [
         </h4>
         <div class="prose prose-sm max-w-none mb-6 text-base-content/80">
           <ul class="list-disc ps-5 space-y-1">
-            <li>Injects detection logic into the <code>updateDirection</code> core method.</li>
-            <li>Detects direction from the container element, or falls back to the document root.</li>
-            <li>Automatically flips horizontal item offsets in RTL mode.</li>
+            <li>Asks the engine to resolve the container direction while the extensions initialize.</li>
+            <li>The engine owns the detection: it reads the container (or the document root when the container is the window) on mount, on resize, on scroll and on <code>dir</code>/<code>style</code> changes.</li>
+            <li>Horizontal item offsets are flipped while the container is in RTL mode.</li>
           </ul>
         </div>
       </section>

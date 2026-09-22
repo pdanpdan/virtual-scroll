@@ -305,8 +305,8 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
 
         <p>
           The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
-          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+          The overlay bar is driven by the engine's own scroll math, so its
+          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

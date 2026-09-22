@@ -310,7 +310,7 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
 
         <h3>1. Model rows as a function of their index</h3>
         <p>
-          If you already hold the logs as an in-memory list, just pass that array and read each row's fields from the
+          If you already hold the logs as an in-memory list, pass that array and read each row's fields from the
           <code>#item</code> slot's <code>item</code>; add a numeric <code>item-size</code> when rows share one height so layout
           is O(1) with no DOM measurement. Choose the index-only model when the dataset is very large or each line derives
           deterministically from its position: <code>items</code> is a sparse placeholder (<code>new Array(count)</code>), the
@@ -320,8 +320,8 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
 
         <p>
           The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          Besides consistent cross-browser styling it is a performance improvement: the overlay bar is driven by the
-          engine's own scroll math, so its rendering cost stays flat no matter how long the list grows.
+          The overlay bar is driven by the engine's own scroll math, so its
+          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock
@@ -340,7 +340,7 @@ const TOTAL = 200_000;
 // Index-only model: a row's text is a pure function of its index, so the
 // dataset is a sparse placeholder and every visible row derives its content on
 // demand. A numeric item-size keeps the layout O(1). (If your logs are a
-// bounded in-memory list instead, just pass that array and read item.level /
+// bounded in-memory list instead, pass that array and read item.level /
 // item.message from the #item slot - same props.)
 const base = new Array(TOTAL);
 const levelFilter = ref&lt;string[]>([]);
@@ -394,7 +394,7 @@ function globalOf(item: unknown, index: number) {
           an array that becomes the new <code>items</code>. Each slot then holds a number (the real log index) instead of a hole,
           so the row must map it back before deriving content - the snippet's <code>globalOf(item, index)</code> returns the
           stored number when present and falls back to the slot index when filtering is off. This works because row height is
-          uniform: the filtered array is just a shorter list of the same fixed-size rows.
+          uniform: the filtered array is the same fixed-size rows, only shorter.
         </p>
         <p>
           Debounce free-text input before rebuilding: testing every candidate derivation on each keystroke is real work even at

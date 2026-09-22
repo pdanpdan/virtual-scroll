@@ -43,7 +43,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      Overlay scrollbars in a grid layout, drawn inside the scroll container rather than by the browser, so they can be styled freely.
+      Virtual scrollbars in a grid layout, drawn inside the scroll container rather than by the browser, so they can be styled freely.
       They appear on their own past the browser's size limit, and the toggle here forces them for a small list.
     </template>
 
@@ -280,7 +280,7 @@ const rows = Array.from({ length: 50_000 }, (_, i) => `Row ${ i }`);
           <li><code>--vs-scrollbar-has-cross-gap</code> (0/1) and <code>--vs-scrollbar-cross-gap</code> - a corner notch for when both axes are active, so the vertical and horizontal bars do not overlap where they meet; set <code>1</code> plus a gap size only in two-axis layouts.</li>
         </ul>
         <p>
-          For a single-axis list you normally set only the first five; the cross-gap pair is meaningful only when two bars share a corner in a <code>direction="both"</code> grid. Note the scope of these variables: they theme the default bar; they also reach custom chrome built through the <code>#scrollbar</code> slot (next step), because the bound track/thumb classes resolve them as defaults - the slot's bindings carry geometry and interaction, not colors, so add your own classes where you want to override them.
+          For a single-axis list you normally set only the first five; the cross-gap pair is meaningful only when two bars share a corner in a <code>direction="both"</code> grid. These variables theme the default bar; they also reach custom chrome built through the <code>#scrollbar</code> slot (next step), because the bound track/thumb classes resolve them as defaults - the slot's bindings carry geometry and interaction, not colors, so add your own classes where you want to override them.
         </p>
         <CodeBlock
           class="guide-code-block"
