@@ -1,42 +1,19 @@
 import type { ExtensionContext, VirtualScrollExtension } from './index';
 
-import { ref } from 'vue';
-
-import { isElement } from '../utils/scroll';
-
 /**
  * Extension for Right-to-Left (RTL) support.
- * It transforms item offsets for horizontal and grid scrolling when the container is in RTL mode.
+ *
+ * Direction detection belongs to the engine, which resolves the container's
+ * computed direction and re-reads it on mount, on resize, on scroll and on
+ * `dir`/`style` attribute changes. This extension triggers that read once while
+ * the extensions initialize, so the first render already reflects the
+ * container instead of flipping on the mount refresh.
  */
 export function useRtlExtension<T = unknown>(): VirtualScrollExtension<T> {
-  const isRtl = ref(false);
-
   return {
     name: 'rtl',
     onInit(ctx: ExtensionContext<T>) {
-      const updateDirection = () => {
-        if (typeof window === 'undefined') {
-          return;
-        }
-        const container = ctx.props.value.container || ctx.props.value.hostRef || window;
-        const el = isElement(container) ? container : document.documentElement;
-
-        const computedStyle = window.getComputedStyle(el);
-
-        const newRtl = computedStyle.direction === 'rtl';
-        if (isRtl.value !== newRtl) {
-          isRtl.value = newRtl;
-          ctx.internalState.isRtl.value = newRtl;
-        }
-      };
-
-      const originalUpdateDirection = ctx.methods.updateDirection;
-      ctx.methods.updateDirection = () => {
-        updateDirection();
-        originalUpdateDirection();
-      };
-
-      updateDirection();
+      ctx.methods.updateDirection();
     },
   };
 }

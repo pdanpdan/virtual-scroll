@@ -124,6 +124,62 @@ describe('build output layout', () => {
     coreWrapper.unmount();
   });
 
+  it('builds the lean table without the optional wiring', async () => {
+    setupMocks();
+
+    const props = {
+      items: Array.from({ length: 100 }, (_, id) => ({ id })),
+      itemSize: 50,
+      columnCount: 2,
+      // Accepted but not implemented by the lean entry.
+      virtualScrollbar: true,
+      snap: 'start' as const,
+      stickyIndices: [ 0 ],
+    };
+    const slots = { item: '<tr class="row"><td /><td /></tr>' };
+
+    // Dynamic on purpose, like the entry check above: the bundles are generated
+    // by beforeAll, so they cannot be static imports.
+    const full = await import(pathToFileURL(resolve(distDir, 'index.mjs')).href) as { VirtualScrollTable: never; };
+    const core = await import(pathToFileURL(resolve(distDir, 'core.mjs')).href) as { VirtualScrollTable: never; };
+
+    const fullWrapper = mount(full.VirtualScrollTable, { props: props as never, slots });
+    const coreWrapper = mount(core.VirtualScrollTable, { props: props as never, slots });
+    await nextTick();
+    await nextTick();
+
+    // Both virtualize the same window.
+    expect(fullWrapper.findAll('.virtual-scroll-item').length).toBeGreaterThan(0);
+    expect(coreWrapper.findAll('.virtual-scroll-item').length).toBe(fullWrapper.findAll('.virtual-scroll-item').length);
+
+    // ...but only the full entry renders the custom scrollbar overlay.
+    expect(fullWrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(true);
+    expect(coreWrapper.find('.virtual-scroll-scrollbar-container').exists()).toBe(false);
+
+    // ...and only the full entry pins a sticky row: the lean table drops row 0
+    // from the DOM once it scrolls out of the window.
+    /** The built modules carry no types, so the exposed instance is read structurally. */
+    const scrollToRow = (wrapper: typeof fullWrapper, index: number) => {
+      (wrapper.vm as unknown as { scrollToIndex: (row: number, col: number | null, options: { behavior: 'auto'; }) => void; })
+        .scrollToIndex(index, null, { behavior: 'auto' });
+    };
+    const rowIndices = (wrapper: typeof fullWrapper) => wrapper.findAll('.virtual-scroll-item').map((row) => Number(row.attributes('data-index')));
+    scrollToRow(fullWrapper, 80);
+    scrollToRow(coreWrapper, 80);
+    await nextTick();
+    await nextTick();
+
+    expect(rowIndices(fullWrapper)).toContain(0);
+    expect(rowIndices(coreWrapper)).not.toContain(0);
+    // Both entries did scroll to the target row, so the missing pin is the only
+    // difference between them.
+    expect(rowIndices(fullWrapper)).toContain(80);
+    expect(rowIndices(coreWrapper)).toContain(80);
+
+    fullWrapper.unmount();
+    coreWrapper.unmount();
+  });
+
   it('keeps every dist path declared in the manifest present in the build output', () => {
     const manifest = JSON.parse(readFileSync(resolve(pkgRoot, 'package.json'), 'utf8')) as Manifest;
     const entries: Array<ManifestExport | string | undefined> = [

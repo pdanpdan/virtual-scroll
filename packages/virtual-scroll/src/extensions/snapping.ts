@@ -58,8 +58,10 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
           ctx.internalState.relativeScrollX.value,
           ctx.internalState.viewportWidth.value,
           colCount,
-          (i) => ctx.methods.getItemSize(i),
-          (i) => ctx.methods.getItemOffset(i),
+          // Along x the unit is a column, not a row: on a grid the column width
+          // and the column offset are what the horizontal snap measures against.
+          (i) => ctx.methods.getColumnWidth(i),
+          (i) => ctx.methods.getColumnOffset(i),
           ctx.methods.getColumnIndexAt,
         );
         if (res) {

@@ -4,6 +4,8 @@ export const DEFAULT_ITEM_SIZE = 40;
 export const DEFAULT_COLUMN_WIDTH = 100;
 /** Default number of items to render outside the viewport. */
 export const DEFAULT_BUFFER = 5;
+/** Default distance from the content end, in DU, at which the `load` event fires. */
+export const DEFAULT_LOAD_DISTANCE = 200;
 
 /** Represents a point in 2D space. */
 export interface Point {
@@ -1000,6 +1002,13 @@ export interface ItemStyleParams<T = unknown> {
   isHydrated: boolean;
   /** Whether the container is in Right-to-Left (RTL) mode. */
   isRtl: boolean;
+  /**
+   * Whether to leave out the absolute `transform`.
+   *
+   * Flow layouts position their rows themselves, so the translate their parent
+   * already applied would double-shift them.
+   */
+  omitTransform?: boolean;
 }
 
 /** Parameters for calculating the total size of the scrollable area. */

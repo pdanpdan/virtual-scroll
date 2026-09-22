@@ -476,6 +476,24 @@ export function displayToVirtual(displayPos: number, hostOffset: number, scale: 
 }
 
 /**
+ * Maps a scrollbar thumb offset onto a virtual scroll offset.
+ *
+ * @param offset - Thumb offset from the start of the track (DU).
+ * @param renderedSize - Physical size of the scrollable content (DU).
+ * @param viewportSize - Size of the visible area (DU).
+ * @param hostOffset - Offset of the host element within its scroll container (DU).
+ * @param scale - Coordinate scaling factor (VU/DU).
+ * @returns The virtual offset to scroll to, or `null` when the thumb reached the
+ *   end of its travel, where the content end is the only valid target.
+ */
+export function scrollbarOffsetToVirtual(offset: number, renderedSize: number, viewportSize: number, hostOffset: number, scale: number): number | null {
+  if (offset >= renderedSize - viewportSize - 0.5) {
+    return null;
+  }
+  return displayToVirtual(offset, hostOffset, scale);
+}
+
+/**
  * Maps a virtual content position to a display scroll position.
  *
  * @param virtualPos - Virtual content position (VU).
@@ -843,6 +861,7 @@ export function calculateItemStyle<T = unknown>({
   paddingStartY,
   isHydrated,
   isRtl,
+  omitTransform = false,
 }: ItemStyleParams<T>) {
   const isVertical = direction === 'vertical';
   const isHorizontal = direction === 'horizontal';
@@ -868,7 +887,7 @@ export function calculateItemStyle<T = unknown>({
     }
   }
 
-  if (isHydrated) {
+  if (isHydrated && !omitTransform) {
     const isStickingVertically = item.isStickyActiveY ?? (item.isStickyActive && (isVertical || isBoth));
     const isStickingHorizontally = item.isStickyActiveX ?? (item.isStickyActive && isHorizontal);
 
@@ -934,21 +953,26 @@ export function calculateSSROffsets(
 /**
  * Detects how many items were prepended to the list based on item identity.
  *
- * @param oldItems - Previous items list.
+ * Only the previous first item and the previous length take part: the added
+ * prefix is searched for that reference. Keeping a full copy of the list is
+ * therefore unnecessary, and the two scalars are just as immune to later
+ * in-place mutation of the live array.
+ *
+ * @param prevFirstItem - First item of the previous list.
+ * @param prevLength - Length of the previous list.
  * @param newItems - Current items list.
  * @returns Number of prepended items.
  */
-export function calculatePrependCount<T>(oldItems: T[], newItems: T[]): number {
-  if (oldItems.length === 0 || newItems.length <= oldItems.length) {
+export function calculatePrependCount<T>(prevFirstItem: T | undefined, prevLength: number, newItems: T[]): number {
+  if (prevLength === 0 || newItems.length <= prevLength) {
     return 0;
   }
-  const oldFirstItem = oldItems[ 0 ];
-  if (oldFirstItem === undefined) {
+  if (prevFirstItem === undefined) {
     return 0;
   }
-  const limit = newItems.length - oldItems.length;
+  const limit = newItems.length - prevLength;
   for (let i = 1; i <= limit; i++) {
-    if (newItems[ i ] === oldFirstItem) {
+    if (newItems[ i ] === prevFirstItem) {
       return i;
     }
   }

@@ -5,6 +5,7 @@ import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 
 import { useVirtualScrollMasonry } from '../composables/useVirtualScrollMasonry';
 import { DEFAULT_MASONRY_GAP, DEFAULT_MASONRY_MAX_COLUMNS, DEFAULT_MASONRY_MIN_COLUMNS, DEFAULT_MASONRY_SEGMENT_SIZE, DEFAULT_MASONRY_TARGET_COLUMN_WIDTH } from '../types';
+import { scrollbarOffsetToVirtual } from '../utils/virtual-scroll-logic';
 import VirtualScrollbar from './VirtualScrollbar.vue';
 
 /**
@@ -102,7 +103,6 @@ const effectiveItemRole = computed(() => {
 
 const containerClasses = computed(() => ({
   'virtual-scroll--hide-scrollbar': props.virtualScrollbar === true,
-  'virtual-scroll--debug': props.debug,
 }));
 
 const wrapperStyle = computed(() => ({
@@ -191,12 +191,10 @@ const scrollbarViewportStyle = computed(() => ({
 }));
 
 function handleScrollbarScrollToOffset(offset: number): void {
-  const scrollableRange = totalHeight.value - internalState.viewportHeight.value;
-  if (offset >= scrollableRange - 0.5) {
-    scrollToOffset(Number.POSITIVE_INFINITY);
-  } else {
-    scrollToOffset(offset);
-  }
+  // The masonry layout has no coordinate scaling, so a thumb offset is already
+  // a virtual one.
+  const virtualOffset = scrollbarOffsetToVirtual(offset, totalHeight.value, internalState.viewportHeight.value, 0, 1);
+  scrollToOffset(virtualOffset ?? Number.POSITIVE_INFINITY);
 }
 
 const scrollbarProps = computed<VirtualScrollbarProps | null>(() => {

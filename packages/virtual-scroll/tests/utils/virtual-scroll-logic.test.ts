@@ -3124,14 +3124,14 @@ describe('virtual-scroll-logic', () => {
     });
 
     it('detects prepend count correctly', () => {
-      expect(calculatePrependCount([], [ 1, 2 ])).toBe(0);
-      const items = [ { id: 1 } ];
-      expect(calculatePrependCount(items, [ { id: 2 }, items[ 0 ] ])).toBe(1);
+      expect(calculatePrependCount(undefined, 0, [ 1, 2 ])).toBe(0);
+      const first = { id: 1 };
+      expect(calculatePrependCount(first, 1, [ { id: 2 }, first ])).toBe(1);
 
-      // Items identity check
-      const obj = { id: 1 };
-      expect(calculatePrependCount([ obj ], [ { id: 2 }, obj ])).toBe(1);
-      expect(calculatePrependCount([ obj ], [ { id: 2 }, { id: 1 } ])).toBe(0); // different object reference
+      // Item identity check
+      const added = { id: 2 };
+      expect(calculatePrependCount(first, 1, [ added, added, first ])).toBe(2);
+      expect(calculatePrependCount(first, 1, [ { id: 2 }, { id: 1 } ])).toBe(0); // different object reference
     });
 
     it('calculates scroll target with start alignment', () => {
@@ -3193,15 +3193,20 @@ describe('virtual-scroll-logic', () => {
       expect(calculateRangeSize(0, 5, 100, 10, () => 0)).toBe(5 * 110 - 10);
     });
 
-    it('handles empty oldItems in calculatePrependCount', () => {
-      expect(calculatePrependCount([], [ 1, 2 ])).toBe(0);
+    it('handles an empty previous list in calculatePrependCount', () => {
+      expect(calculatePrependCount(undefined, 0, [ 1, 2 ])).toBe(0);
     });
 
-    it('returns 0 in calculatePrependCount when first old item is undefined (sparse array)', () => {
+    it('returns 0 in calculatePrependCount when the previous first item is undefined (sparse array)', () => {
       const oldItems: (number | undefined)[] = [];
       oldItems.length = 5; // [empty x 5]
       const newItems = [ 1, ...oldItems ];
-      expect(calculatePrependCount(oldItems, newItems)).toBe(0);
+      expect(calculatePrependCount(oldItems[ 0 ], oldItems.length, newItems)).toBe(0);
+    });
+
+    it('returns 0 in calculatePrependCount when the list did not grow', () => {
+      const first = { id: 1 };
+      expect(calculatePrependCount(first, 3, [ first, { id: 2 }, { id: 3 } ])).toBe(0);
     });
   });
 

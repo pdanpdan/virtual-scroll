@@ -27,6 +27,7 @@ export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
     there allocated a fresh `ComputedRefImpl` per scroll frame.
   */
   let sortedStickyIndices: ComputedRef<number[]> | null = null;
+  let stickyIndexSet: ComputedRef<Set<number>> | null = null;
   let stickyStart: ComputedRef<Point> | null = null;
   /**
    * Entries emitted by the previous call, so unchanged items keep their identity.
@@ -39,6 +40,9 @@ export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
 
     onInit(ctx: ExtensionContext<T>) {
       sortedStickyIndices = computed(() => (ctx.props.value.stickyIndices || []).toSorted((a, b) => a - b));
+      // Derived from the sorted list, so the lookup set is rebuilt only when the
+      // prop changes rather than on every rendered-items pass.
+      stickyIndexSet = computed(() => new Set(sortedStickyIndices!.value));
       stickyStart = computed(() => {
         const direction = ctx.props.value.direction as ScrollDirection | undefined;
         return {
@@ -64,7 +68,7 @@ export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
         lastStickyItems.clear();
         return items;
       }
-      const stickySet = new Set(stickyIndices);
+      const stickySet = stickyIndexSet!.value;
       const direction = (ctx.props.value.direction || 'vertical') as ScrollDirection;
       const { x: stickyStartX, y: stickyStartY } = stickyStart!.value;
       const { relativeScrollX, relativeScrollY } = ctx.internalState;
@@ -80,6 +84,12 @@ export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
         const isSticky = stickySet.has(item.index);
         while (nextPtr < stickyIndices.length && stickyIndices[ nextPtr ]! <= item.index) {
           nextPtr++;
+        }
+        if (!isSticky) {
+          // The engine has already zeroed the sticky fields on this entry, and
+          // whether an index is sticky never changes, so the pass has nothing
+          // to compute for it.
+          return item;
         }
         const { isStickyActiveX, isStickyActiveY, stickyOffset } = calculateStickyItem({
           index: item.index,

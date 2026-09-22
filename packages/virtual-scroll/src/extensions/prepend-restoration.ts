@@ -9,22 +9,21 @@ import { calculatePrependCount } from '../utils/virtual-scroll-logic';
  * Automatically maintains the current scroll position when items are prepended to the list.
  */
 export function usePrependRestorationExtension<T = unknown>(): VirtualScrollExtension<T> {
-  let lastItems: T[] = [];
+  // Prepending is detected from the previous first item alone, so two scalars
+  // are enough: no copy of a potentially huge list is kept or rebuilt.
+  let prevFirstItem: T | undefined;
+  let prevLength = 0;
 
   return {
     name: 'prepend-restoration',
     onInit(ctx: ExtensionContext<T>) {
-      // Snapshot the array: the watcher compares the incoming array against this
-      // copy, so later in-place mutation of the live array cannot corrupt it.
-      lastItems = [ ...ctx.props.value.items ];
+      prevFirstItem = ctx.props.value.items[ 0 ];
+      prevLength = ctx.props.value.items.length;
 
       watch(() => ctx.props.value.items, (newItems) => {
-        if (!ctx.props.value.restoreScrollOnPrepend) {
-          lastItems = [ ...newItems ];
-          return;
-        }
-
-        const prependCount = calculatePrependCount(lastItems, newItems);
+        const prependCount = ctx.props.value.restoreScrollOnPrepend
+          ? calculatePrependCount(prevFirstItem, prevLength, newItems)
+          : 0;
 
         if (prependCount > 0) {
           const direction = ctx.props.value.direction || 'vertical';
@@ -43,7 +42,8 @@ export function usePrependRestorationExtension<T = unknown>(): VirtualScrollExte
           }
         }
 
-        lastItems = [ ...newItems ];
+        prevFirstItem = newItems[ 0 ];
+        prevLength = newItems.length;
       }, { deep: false }); // Identity check is enough
     },
   };

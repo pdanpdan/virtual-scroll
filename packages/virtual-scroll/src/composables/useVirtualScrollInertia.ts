@@ -26,6 +26,10 @@ export function useVirtualScrollInertia<T>({
   let startScrollOffset = { x: 0, y: 0 };
   let lastPointerPos = { x: 0, y: 0 };
   let lastPointerTime = 0;
+  /** Latest pointer position awaiting a frame, or `null` when none is queued. */
+  let pendingPointerPos: { x: number; y: number; } | null = null;
+  /** The queued frame that applies {@link pendingPointerPos}. */
+  let pointerAnimationFrame: number | null = null;
   let velocity = { x: 0, y: 0 };
   let inertiaAnimationFrame: number | null = null;
 
@@ -68,7 +72,33 @@ export function useVirtualScrollInertia<T>({
       cancelAnimationFrame(inertiaAnimationFrame);
       inertiaAnimationFrame = null;
     }
+    if (pointerAnimationFrame !== null) {
+      cancelAnimationFrame(pointerAnimationFrame);
+      pointerAnimationFrame = null;
+    }
+    pendingPointerPos = null;
     velocity = { x: 0, y: 0 };
+  }
+
+  /**
+   * Applies the latest pointer position queued by {@link handlePointerMove}.
+   *
+   * Pointer events arrive faster than frames, so the moves between two frames
+   * collapse into a single scroll write that uses the newest coordinates.
+   */
+  function applyPendingPointer() {
+    pointerAnimationFrame = null;
+    const pointer = pendingPointerPos;
+    pendingPointerPos = null;
+    // v8 ignore next 3 -- the frame is only ever queued together with a position
+    if (pointer === null) {
+      return;
+    }
+    scrollToOffset(
+      startScrollOffset.x + (startPointerPos.x - pointer.x),
+      startScrollOffset.y + (startPointerPos.y - pointer.y),
+      { behavior: 'auto' },
+    );
   }
 
   /**
@@ -125,16 +155,8 @@ export function useVirtualScrollInertia<T>({
     lastPointerPos = { x: event.clientX, y: event.clientY };
     lastPointerTime = now;
 
-    const deltaX = startPointerPos.x - event.clientX;
-    const deltaY = startPointerPos.y - event.clientY;
-
-    requestAnimationFrame(() => {
-      scrollToOffset(
-        startScrollOffset.x + deltaX,
-        startScrollOffset.y + deltaY,
-        { behavior: 'auto' },
-      );
-    });
+    pendingPointerPos = { x: event.clientX, y: event.clientY };
+    pointerAnimationFrame ??= requestAnimationFrame(applyPendingPointer);
   };
 
   /**

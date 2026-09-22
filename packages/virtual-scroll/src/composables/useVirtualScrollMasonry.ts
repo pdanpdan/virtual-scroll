@@ -3,7 +3,7 @@ import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue';
 
 import { computed, nextTick, ref, shallowRef, toValue, watch } from 'vue';
 
-import { DEFAULT_ITEM_SIZE, DEFAULT_MASONRY_GAP, DEFAULT_MASONRY_MAX_COLUMNS, DEFAULT_MASONRY_SEGMENT_SIZE, DEFAULT_MASONRY_TARGET_COLUMN_WIDTH } from '../types';
+import { DEFAULT_ITEM_SIZE, DEFAULT_MASONRY_GAP, DEFAULT_MASONRY_MAX_COLUMNS, DEFAULT_MASONRY_MIN_COLUMNS, DEFAULT_MASONRY_SEGMENT_SIZE, DEFAULT_MASONRY_TARGET_COLUMN_WIDTH } from '../types';
 import { MasonryLayout } from '../utils/masonry-layout';
 
 /** Time after the last native scroll event to consider scrolling ended. */
@@ -312,7 +312,7 @@ export function useVirtualScrollMasonry<T>(
     if (!(viewportWidth.value > 0) || p.items.length === 0) {
       return { columns: 0, columnWidth: 0 };
     }
-    const minColumns = Math.max(1, p.minColumns ?? 1);
+    const minColumns = Math.max(DEFAULT_MASONRY_MIN_COLUMNS, p.minColumns ?? DEFAULT_MASONRY_MIN_COLUMNS);
     return MasonryLayout.geometryFor(
       viewportWidth.value,
       resolvedGap.value,

@@ -1,60 +1,52 @@
 import type { ExtensionContext } from '../../src/extensions';
 
 import { describe, expect, it, vi } from 'vitest';
-import { ref } from 'vue';
 
 import { useRtlExtension } from '../../src/extensions/rtl';
 
 function makeCtx() {
-  const isRtl = ref(false);
-  const originalUpdateDirection = vi.fn();
+  const updateDirection = vi.fn();
   const ctx = {
-    props: ref({ container: document.createElement('div'), hostRef: null }),
-    internalState: { isRtl },
-    methods: { updateDirection: originalUpdateDirection },
+    props: { value: { container: document.createElement('div'), hostRef: null } },
+    methods: { updateDirection },
   } as unknown as ExtensionContext<unknown>;
-  return { ctx, isRtl, originalUpdateDirection };
+  return { ctx, updateDirection };
 }
 
 describe('useRtlExtension', () => {
-  it('reflects the container direction and chains the original updateDirection', () => {
-    const { ctx, isRtl, originalUpdateDirection } = makeCtx();
-    vi.spyOn(window, 'getComputedStyle').mockReturnValue({ direction: 'rtl' } as CSSStyleDeclaration);
+  it('asks the engine for the container direction while initializing', () => {
+    const { ctx, updateDirection } = makeCtx();
+
+    useRtlExtension().onInit!(ctx);
+
+    // Detection lives in the engine: the extension only triggers it, so the
+    // first render happens with the direction already resolved.
+    expect(updateDirection).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the engine detection as the single owner of the direction read', () => {
+    const { ctx, updateDirection } = makeCtx();
+    const getComputedStyle = vi.spyOn(window, 'getComputedStyle');
 
     const extension = useRtlExtension();
     extension.onInit!(ctx);
+    extension.onInit!(ctx);
 
-    // onInit refreshes the direction immediately
-    expect(isRtl.value).toBe(true);
-
-    // The patched method refreshes the rtl flag first, then delegates
-    ctx.methods!.updateDirection!();
-    expect(originalUpdateDirection).toHaveBeenCalledTimes(1);
+    // Only the engine reads computed styles; the extension installs no wrapper
+    // of its own, so repeated initialization stays a plain call through.
+    expect(getComputedStyle).not.toHaveBeenCalled();
+    expect(updateDirection).toHaveBeenCalledTimes(2);
 
     vi.restoreAllMocks();
   });
 
-  it('keeps the initial direction when the container is not rtl', () => {
-    const { ctx, isRtl, originalUpdateDirection } = makeCtx();
-    vi.spyOn(window, 'getComputedStyle').mockReturnValue({ direction: 'ltr' } as CSSStyleDeclaration);
-
-    const extension = useRtlExtension();
-    extension.onInit!(ctx);
-
-    expect(isRtl.value).toBe(false);
-    ctx.methods!.updateDirection!();
-    expect(originalUpdateDirection).toHaveBeenCalledTimes(1);
-
-    vi.restoreAllMocks();
-  });
-
-  it('does not touch the window when running without a window (SSR)', () => {
-    const { ctx, isRtl } = makeCtx();
+  it('does not depend on a window to run', () => {
+    const { ctx, updateDirection } = makeCtx();
 
     vi.stubGlobal('window', undefined);
     try {
       useRtlExtension().onInit!(ctx);
-      expect(isRtl.value).toBe(false);
+      expect(updateDirection).toHaveBeenCalledTimes(1);
     } finally {
       vi.unstubAllGlobals();
     }

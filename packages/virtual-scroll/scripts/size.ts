@@ -84,6 +84,16 @@ const scenarios: Scenario[] = [
     budget: [ 20, 26 ],
   },
   {
+    name: 'VirtualScrollTable (core)',
+    entry: 'core.mjs',
+    imports: [ 'VirtualScrollTable' ],
+    // The table keeps the flow-mode scrollbar it always renders, so `scrollbar`
+    // stays present while the optional wiring goes.
+    absent: [ 'masonry', 'keyboard', 'snapping', 'sticky', 'infiniteLoading', 'prependRestoration' ],
+    present: [ 'table', 'scrollbar' ],
+    budget: [ 17, 23 ],
+  },
+  {
     name: 'VirtualScrollMasonry',
     entry: 'index.mjs',
     imports: [ 'VirtualScrollMasonry' ],

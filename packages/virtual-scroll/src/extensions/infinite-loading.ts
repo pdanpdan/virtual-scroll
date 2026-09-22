@@ -3,6 +3,8 @@ import type { ExtensionContext, VirtualScrollExtension } from './index';
 
 import { watch } from 'vue';
 
+import { DEFAULT_LOAD_DISTANCE } from '../types';
+
 /**
  * Details about the scroll gesture that reached the load threshold.
  */
@@ -128,7 +130,7 @@ export function useInfiniteLoadingExtension<T = unknown>(options: InfiniteLoadin
         }
 
         const direction = ctx.props.value.direction || 'vertical';
-        const loadDistance = ctx.props.value.loadDistance ?? 200;
+        const loadDistance = ctx.props.value.loadDistance ?? DEFAULT_LOAD_DISTANCE;
 
         if (direction !== 'horizontal') {
           checkAxis(

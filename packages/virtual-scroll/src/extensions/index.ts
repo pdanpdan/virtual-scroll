@@ -62,6 +62,19 @@ export interface ExtensionContext<T = unknown> {
     getRowIndexAt: (offset: number) => number;
     /** Get column index at virtual offset. */
     getColumnIndexAt: (offset: number) => number;
+    /**
+     * Get the size of a column along the horizontal axis (measured or estimated).
+     *
+     * On a grid this is the column width, while {@link ExtensionContext.methods.getItemSize} is the row
+     * height.
+     */
+    getColumnWidth: (index: number) => number;
+    /**
+     * Get the virtual offset of a column along the horizontal axis.
+     *
+     * The horizontal counterpart of {@link ExtensionContext.methods.getItemOffset}.
+     */
+    getColumnOffset: (index: number) => number;
     /** Get actual size of item (measured or estimated). */
     getItemSize: (index: number) => number;
     /** Get base configuration size of item. */

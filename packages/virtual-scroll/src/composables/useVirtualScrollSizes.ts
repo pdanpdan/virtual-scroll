@@ -64,8 +64,10 @@ export function useVirtualScrollSizes<T>(
   /** Whether the initial sizes have been calculated. */
   const sizesInitialized = ref(false);
 
-  /** Cached list of previous items to detect prepending and shift measurements. */
-  let lastItems: T[] = [];
+  /** First item of the previous list, used to detect prepending. */
+  let prevFirstItem: T | undefined;
+  /** Length of the previous list, used to detect prepending. */
+  let prevLength = 0;
   /** Gap used when the current measurements were stored, for rebasing on gap changes. */
   let lastGap = 0;
   /** Column gap used when the current measurements were stored, for rebasing on column gap changes. */
@@ -329,7 +331,7 @@ export function useVirtualScrollSizes<T>(
     const colCount = propsVal.columnCount || 0;
 
     const prependCount = propsVal.restoreScrollOnPrepend
-      ? calculatePrependCount(lastItems, newItems)
+      ? calculatePrependCount(prevFirstItem, prevLength, newItems)
       : 0;
 
     resizeMeasurements(len, colCount);
@@ -350,9 +352,10 @@ export function useVirtualScrollSizes<T>(
 
     initializeMeasurements(prependCount > 0);
 
-    // Keep the previous items snapshot only while prepend detection is enabled;
-    // copying a very large dataset otherwise would be pure overhead.
-    lastItems = propsVal.restoreScrollOnPrepend ? [ ...newItems ] : [];
+    // Keep the previous first item and length only while prepend detection is
+    // enabled: they are all the detection reads.
+    prevFirstItem = propsVal.restoreScrollOnPrepend ? newItems[ 0 ] : undefined;
+    prevLength = propsVal.restoreScrollOnPrepend ? len : 0;
     sizesInitialized.value = true;
     treeUpdateFlag.value++;
   };
@@ -457,7 +460,7 @@ export function useVirtualScrollSizes<T>(
       }
     }
 
-    // Measurements are now stored with the current gaps; keep the baseline for rebasing.
+    // Measurements are stored with the current gaps; keep the baseline for rebasing.
     lastColumnGap = columnGap;
     lastGap = gap;
   };

@@ -39,6 +39,11 @@ import {
 } from '../utils/virtual-scroll-logic';
 import { useVirtualScrollSizes } from './useVirtualScrollSizes';
 
+/** Idle time after the last scroll event before the interaction is considered over. */
+const SCROLL_END_DELAY = 150;
+/** Accepted values of the `direction` prop, used to validate it without allocating. */
+const DIRECTION_SET: ReadonlySet<string> = new Set([ 'vertical', 'horizontal', 'both' ]);
+
 /**
  * Value returned by {@link useVirtualScroll}: the render window, the derived
  * geometry, the programmatic scroll API and the internal state the component
@@ -252,7 +257,7 @@ export function useVirtualScroll<T = unknown>(
 
   // --- Computed Config ---
   /** Validated scroll direction. */
-  const direction = computed(() => [ 'vertical', 'horizontal', 'both' ].includes(props.value.direction as string) ? props.value.direction as ScrollDirection : 'vertical' as ScrollDirection);
+  const direction = computed(() => DIRECTION_SET.has(props.value.direction as ScrollDirection) ? props.value.direction as ScrollDirection : 'vertical' as ScrollDirection);
 
   /** Whether the items have dynamic height or width. */
   const isDynamicItemSize = computed(() =>
@@ -423,6 +428,18 @@ export function useVirtualScroll<T = unknown>(
       itemSizesX,
       true,
     );
+  };
+
+  /**
+   * Helper to get the virtual offset of a specific column.
+   * @param index - The column index.
+   */
+  const getColumnOffset = (index: number) => {
+    const itemsStartVU_X = flowStartX.value + stickyStartX.value + paddingStartX.value;
+    if (direction.value === 'both') {
+      return itemsStartVU_X + calculateOffsetAt(index, fixedColumnWidth.value, props.value.columnGap || 0, (idx) => columnSizes.query(idx));
+    }
+    return itemsStartVU_X + calculateOffsetAt(index, fixedItemSize.value, props.value.columnGap || 0, (idx) => itemSizesX.query(idx));
   };
 
   /**
@@ -785,6 +802,8 @@ export function useVirtualScroll<T = unknown>(
       updateDirection,
       getRowIndexAt,
       getColumnIndexAt,
+      getColumnWidth,
+      getColumnOffset,
       getItemSize,
       getItemBaseSize,
       getItemOffset,
@@ -842,10 +861,10 @@ export function useVirtualScroll<T = unknown>(
     const { x: ssrOffsetX, y: ssrOffsetY } = (!isHydrated.value && props.value.ssrRange)
       ? calculateSSROffsets(direction.value, props.value.ssrRange, fixedItemSize.value, fixedColumnWidth.value, props.value.gap || 0, props.value.columnGap || 0, (idx) => itemSizesY.query(idx), (idx) => itemSizesX.query(idx), (idx) => columnSizes.query(idx))
       : { x: 0, y: 0 };
-    const lastItemsMap = new Map<number, RenderedItem<T>>();
-    for (const item of lastRenderedItems) {
-      lastItemsMap.set(item.index, item);
-    }
+    // Both the previous window and the indices below ascend by index, so the
+    // identity reuse walks the previous array with a cursor instead of hashing
+    // every entry again.
+    let lastPtr = 0;
     let lastIndexX = -1;
     let lastOffsetX = 0;
     let lastIndexY = -1;
@@ -875,16 +894,39 @@ export function useVirtualScroll<T = unknown>(
     const wrapperStartDU_X = flowStartX.value + stickyStartX.value;
     const wrapperStartDU_Y = flowStartY.value + stickyStartY.value;
     const colRange = columnRange.value;
+    const getSizeX = (idx: number) => itemSizesX.get(idx);
+    const getSizeY = (idx: number) => itemSizesY.get(idx);
+    // One argument bag reused across the window: the position calculation reads
+    // its inputs immediately and keeps no reference to it.
+    const positionParams = {
+      index: 0,
+      direction: direction.value,
+      fixedSize: fixedItemSize.value,
+      gap: props.value.gap || 0,
+      columnGap: props.value.columnGap || 0,
+      usableWidth: usableWidth.value,
+      usableHeight: usableHeight.value,
+      totalWidth: totalSize.value.width,
+      queryY: queryYCached,
+      queryX: queryXCached,
+      getSizeX,
+      getSizeY,
+      columnRange: colRange,
+    };
     for (const i of sortedIndices) {
       // Hole-y datasets (e.g. `new Array(n)` for index-only rows) render every
       // index in range; the item slot prop is `undefined` for holes.
       const item = props.value.items[ i ] as T;
-      const { x, y, width, height } = calculateItemPosition({ index: i, direction: direction.value, fixedSize: fixedItemSize.value, gap: props.value.gap || 0, columnGap: props.value.columnGap || 0, usableWidth: usableWidth.value, usableHeight: usableHeight.value, totalWidth: totalSize.value.width, queryY: queryYCached, queryX: queryXCached, getSizeY: (idx) => itemSizesY.get(idx), getSizeX: (idx) => itemSizesX.get(idx), columnRange: colRange });
+      positionParams.index = i;
+      const { x, y, width, height } = calculateItemPosition(positionParams);
       const originalX = x;
       const originalY = y;
       const offsetX = isHydrated.value ? (internalScrollX.value / scaleX.value + (x + itemsStartVU_X - internalScrollX.value)) - wrapperStartDU_X : (x - ssrOffsetX);
       const offsetY = isHydrated.value ? (internalScrollY.value / scaleY.value + (y + itemsStartVU_Y - internalScrollY.value)) - wrapperStartDU_Y : (y - ssrOffsetY);
-      const last = lastItemsMap.get(i);
+      while (lastPtr < lastRenderedItems.length && lastRenderedItems[ lastPtr ]!.index < i) {
+        lastPtr++;
+      }
+      const last = lastRenderedItems[ lastPtr ]?.index === i ? lastRenderedItems[ lastPtr ] : undefined;
       if (last && last.item === item && last.offset.x === offsetX && last.offset.y === offsetY && last.size.width === width && last.size.height === height) {
         items.push(last);
       } else {
@@ -1017,14 +1059,17 @@ export function useVirtualScroll<T = unknown>(
     }
     extensions.forEach((ext) => ext.onScroll?.(ctx, e));
     clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      isScrolling.value = false;
-      extensions.forEach((ext) => ext.onScrollEnd?.(ctx));
-      if (programmaticScrollTimer === undefined) {
-        isProgrammaticScroll.value = false;
-      }
-    }, 150);
+    scrollTimeout = setTimeout(onScrollEnd, SCROLL_END_DELAY);
   };
+
+  /** Settles the scroll interaction once no further scroll event arrives. */
+  function onScrollEnd() {
+    isScrolling.value = false;
+    extensions.forEach((ext) => ext.onScrollEnd?.(ctx));
+    if (programmaticScrollTimer === undefined) {
+      isProgrammaticScroll.value = false;
+    }
+  }
 
   const updateItemSizes = (updates: Array<{ index: number; inlineSize: number; blockSize: number; element?: HTMLElement | undefined; }>) => {
     coreUpdateItemSizes(updates, getRowIndexAt, getColumnIndexAt, relativeScrollX.value, relativeScrollY.value, (dx, dy) => {
@@ -1450,13 +1495,7 @@ export function useVirtualScroll<T = unknown>(
     /** Helper to get the virtual offset of a specific row. */
     getRowOffset: (index: number) => (flowStartY.value + stickyStartY.value + paddingStartY.value) + calculateOffsetAt(index, fixedItemSize.value, props.value.gap || 0, (idx) => itemSizesY.query(idx)),
     /** Helper to get the virtual offset of a specific column. */
-    getColumnOffset: (index: number) => {
-      const itemsStartVU_X = flowStartX.value + stickyStartX.value + paddingStartX.value;
-      if (direction.value === 'both') {
-        return itemsStartVU_X + calculateOffsetAt(index, fixedColumnWidth.value, props.value.columnGap || 0, (idx) => columnSizes.query(idx));
-      }
-      return itemsStartVU_X + calculateOffsetAt(index, fixedItemSize.value, props.value.columnGap || 0, (idx) => itemSizesX.query(idx));
-    },
+    getColumnOffset,
     /** Helper to get the virtual offset of a specific item. */
     getItemOffset,
     /** Helper to get the size of a specific item along the scroll axis. */

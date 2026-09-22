@@ -37,10 +37,11 @@ import {
   useSnappingExtension,
   useStickyExtension,
 } from '../extensions/all';
+import { DEFAULT_BUFFER, DEFAULT_LOAD_DISTANCE } from '../types';
 import { getPaddingX, getPaddingY, isWindowLike } from '../utils/scroll';
 import {
   calculateItemStyle,
-  displayToVirtual,
+  scrollbarOffsetToVirtual,
 } from '../utils/virtual-scroll-logic';
 import VirtualScrollbar from './VirtualScrollbar.vue';
 
@@ -48,8 +49,8 @@ export interface Props<T = unknown> extends VirtualScrollTableComponentProps<T> 
 
 const props = withDefaults(defineProps<Props<T>>(), {
   direction: 'vertical',
-  bufferBefore: 5,
-  bufferAfter: 5,
+  bufferBefore: DEFAULT_BUFFER,
+  bufferAfter: DEFAULT_BUFFER,
   columnCount: 0,
   flowTable: false,
   autoSizeColumns: false,
@@ -60,7 +61,7 @@ const props = withDefaults(defineProps<Props<T>>(), {
   gap: 0,
   columnGap: 0,
   stickyIndices: () => [],
-  loadDistance: 200,
+  loadDistance: DEFAULT_LOAD_DISTANCE,
   loading: false,
   restoreScrollOnPrepend: false,
   debug: false,
@@ -106,6 +107,19 @@ const slots = defineSlots<{
   scrollbar?: (props: ScrollbarSlotProps) => VNodeChild;
 }>();
 
+/**
+ * Whether this module is the lean (`./core`) build.
+ *
+ * The single source of truth outside these components is `vite.config.core.ts`:
+ * the flag is replaced by the bundler, so the optional wiring (keyboard
+ * navigation, custom scrollbars, snapping, sticky items, infinite loading and
+ * prepend restoration) compiles out of the lean entry entirely.
+ */
+/* v8 ignore next 2 -- the flag is undefined outside the two builds (vite.config.core.ts) */
+const IS_CORE_BUILD
+  /* eslint-disable-next-line no-undef -- injected by the bundler (see src/globals.d.ts) */
+  = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD__;
+
 const hostRef = ref<HTMLElement | null>(null);
 const wrapperRef = ref<HTMLElement | null>(null);
 const headerRef = ref<HTMLElement | null>(null);
@@ -121,14 +135,26 @@ const instanceId = useId();
  */
 const containerId = computed(() => `vs-container-${ instanceId }`);
 
+/**
+ * Extensions wired by the component: the two the engine relies on for correct
+ * behaviour (RTL detection and coordinate scaling), plus the optional ones.
+ */
 const extensions = [
   useRtlExtension<T>(),
-  useSnappingExtension<T>(),
-  useStickyExtension<T>(),
-  useInfiniteLoadingExtension<T>({
-    onLoad: (dir, details) => emit('load', dir, details),
-  }),
-  usePrependRestorationExtension<T>(),
+  /* The optional half of this list is compiled out of the lean build; both
+     builds are asserted by tests/bundle-size and tests/build-output. */
+  /* v8 ignore start -- only the full build's branch runs in these suites */
+  ...(IS_CORE_BUILD
+    ? []
+    : [
+      useSnappingExtension<T>(),
+      useStickyExtension<T>(),
+      useInfiniteLoadingExtension<T>({
+        onLoad: (dir, details) => emit('load', dir, details),
+      }),
+      usePrependRestorationExtension<T>(),
+    ]),
+  /* v8 ignore stop */
   useCoordinateScalingExtension<T>(),
 ];
 
@@ -234,48 +260,95 @@ const {
 
 const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
 
-const showVirtualScrollbars = computed(() => {
-  if (isWindowContainer.value) {
-    return false;
-  }
-  return props.virtualScrollbar === true || scaleX.value !== 1 || scaleY.value !== 1;
-});
+/* The four defaults below only survive in the lean build, where the wiring that
+   overwrites them is compiled out. */
+/* v8 ignore start -- lean build only */
+/** Whether the overlay scrollbars are shown instead of the native ones. */
+let showVirtualScrollbars = computed(() => false);
+/** Slot props of the vertical scrollbar, or `null` when it is not shown. */
+let verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
+/** Slot props of the horizontal scrollbar, or `null` when it is not shown. */
+let horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
+/** Maps a scrollbar thumb offset onto the virtual offset to scroll to. */
+let handleScrollbarScrollToOffset: (axis: 'vertical' | 'horizontal', offset: number) => void = () => {};
+/* v8 ignore stop */
 
-function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: number) {
-  const { displayViewportSize } = scrollDetails.value;
-  const isVertical = axis === 'vertical';
-  const renderedSize = isVertical ? renderedHeight.value : renderedWidth.value;
-  const viewportDim = isVertical ? displayViewportSize.height : displayViewportSize.width;
-  const componentOff = isVertical ? componentOffset.y : componentOffset.x;
-  const scale = isVertical ? scaleY.value : scaleX.value;
-  const scrollableRange = renderedSize - viewportDim;
-  if (offset >= scrollableRange - 0.5) {
-    scrollToOffset(isVertical ? null : Number.POSITIVE_INFINITY, isVertical ? Number.POSITIVE_INFINITY : null);
-  } else {
-    const virtualOffset = displayToVirtual(offset, componentOff, scale);
+/* v8 ignore next -- the `if` is always taken outside the lean build */
+if (!IS_CORE_BUILD) {
+  showVirtualScrollbars = computed(() => {
+    if (isWindowContainer.value) {
+      return false;
+    }
+    return props.virtualScrollbar === true || scaleX.value !== 1 || scaleY.value !== 1;
+  });
+
+  const verticalScrollbar = useVirtualScrollbar(computed(() => ({
+    axis: 'vertical' as const,
+    totalSize: renderedHeight.value,
+    position: scrollDetails.value.displayScrollOffset.y,
+    viewportSize: scrollDetails.value.displayViewportSize.height,
+    scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
+    containerId: containerId.value,
+    isRtl: isRtl.value,
+  })));
+
+  const horizontalScrollbar = useVirtualScrollbar(computed(() => ({
+    axis: 'horizontal' as const,
+    totalSize: renderedWidth.value,
+    position: scrollDetails.value.displayScrollOffset.x,
+    viewportSize: scrollDetails.value.displayViewportSize.width,
+    scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
+    containerId: containerId.value,
+    isRtl: isRtl.value,
+  })));
+
+  verticalScrollbarProps = computed(() => {
+    if (props.direction === 'horizontal') {
+      return null;
+    }
+    const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
+    return getScrollbarSlotProps(
+      'vertical',
+      renderedHeight.value,
+      displayScrollOffset.y,
+      displayViewportSize.height,
+      (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
+      verticalScrollbar,
+    );
+  });
+
+  horizontalScrollbarProps = computed(() => {
+    if (props.direction === 'vertical') {
+      return null;
+    }
+    const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
+    return getScrollbarSlotProps(
+      'horizontal',
+      renderedWidth.value,
+      displayScrollOffset.x,
+      displayViewportSize.width,
+      (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
+      horizontalScrollbar,
+    );
+  });
+
+  handleScrollbarScrollToOffset = (axis: 'vertical' | 'horizontal', offset: number) => {
+    const { displayViewportSize } = scrollDetails.value;
+    const isVertical = axis === 'vertical';
+    const virtualOffset = scrollbarOffsetToVirtual(
+      offset,
+      isVertical ? renderedHeight.value : renderedWidth.value,
+      isVertical ? displayViewportSize.height : displayViewportSize.width,
+      isVertical ? componentOffset.y : componentOffset.x,
+      isVertical ? scaleY.value : scaleX.value,
+    );
+    if (virtualOffset === null) {
+      scrollToOffset(isVertical ? null : Number.POSITIVE_INFINITY, isVertical ? Number.POSITIVE_INFINITY : null);
+      return;
+    }
     scrollToOffset(isVertical ? null : virtualOffset, isVertical ? virtualOffset : null);
-  }
+  };
 }
-
-const verticalScrollbar = useVirtualScrollbar(computed(() => ({
-  axis: 'vertical' as const,
-  totalSize: renderedHeight.value,
-  position: scrollDetails.value.displayScrollOffset.y,
-  viewportSize: scrollDetails.value.displayViewportSize.height,
-  scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
-  containerId: containerId.value,
-  isRtl: isRtl.value,
-})));
-
-const horizontalScrollbar = useVirtualScrollbar(computed(() => ({
-  axis: 'horizontal' as const,
-  totalSize: renderedWidth.value,
-  position: scrollDetails.value.displayScrollOffset.x,
-  viewportSize: scrollDetails.value.displayViewportSize.width,
-  scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
-  containerId: containerId.value,
-  isRtl: isRtl.value,
-})));
 
 const slotColumnRange = computed(() => {
   if (props.direction !== 'both') {
@@ -389,33 +462,51 @@ watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtua
   }
 }, { immediate: true });
 
-const {
-  handleKeyDown,
-  activeIndex,
-  liveMessage,
-  setActiveIndex,
-  handleItemActivate,
-} = useVirtualScrollKeyboard({
-  props,
-  virtualScrollProps,
-  scrollDetails,
-  isRtl,
-  scrollToIndex,
-  scrollToOffset,
-  stopProgrammaticScroll,
-  getRowHeight,
-  getColumnWidth,
-  getRowOffset,
-  getColumnOffset,
-  getItemOffset,
-  getItemSize,
-  getRowIndexAt,
-  getColumnIndexAt,
-  getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
-  /** A table only tracks an active row when asked to (`keyboardActivation`). */
-  activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item' ? 'item' : 'viewport')),
-  onActivate: (index: number) => emit('itemActivate', index, props.items[ index ]),
-});
+/** Keydown handler installed in the full build; `undefined` in the lean build. */
+let handleKeyDown: ((event: KeyboardEvent) => void) | undefined;
+/** Index of the row tracked by keyboard navigation, `-1` when none. */
+let activeIndex = ref(-1);
+/* The four defaults below only survive in the lean build, where the composable
+   that overwrites them is compiled out. */
+/* v8 ignore start -- lean build only */
+/** Polite announcement for the active row. */
+let liveMessage = computed(() => '');
+/** Sets the active row index without scrolling. */
+let setActiveIndex: (index: number | null) => void = () => {};
+/** Marks a row active and emits `itemActivate` (e.g. from a click handler). */
+let handleItemActivate: (index: number) => void = () => {};
+/* v8 ignore stop */
+
+/* v8 ignore next -- the `if` is always taken outside the lean build */
+if (!IS_CORE_BUILD) {
+  ({
+    handleKeyDown,
+    activeIndex,
+    liveMessage,
+    setActiveIndex,
+    handleItemActivate,
+  } = useVirtualScrollKeyboard({
+    props,
+    virtualScrollProps,
+    scrollDetails,
+    isRtl,
+    scrollToIndex,
+    scrollToOffset,
+    stopProgrammaticScroll,
+    getRowHeight,
+    getColumnWidth,
+    getRowOffset,
+    getColumnOffset,
+    getItemOffset,
+    getItemSize,
+    getRowIndexAt,
+    getColumnIndexAt,
+    getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
+    /** A table only tracks an active row when asked to (`keyboardActivation`). */
+    activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item' ? 'item' : 'viewport')),
+    onActivate: (index: number) => emit('itemActivate', index, props.items[ index ]),
+  }));
+}
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
@@ -489,36 +580,6 @@ function getScrollbarSlotProps(
   };
 }
 
-const verticalScrollbarProps = computed(() => {
-  if (props.direction === 'horizontal') {
-    return null;
-  }
-  const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
-  return getScrollbarSlotProps(
-    'vertical',
-    renderedHeight.value,
-    displayScrollOffset.y,
-    displayViewportSize.height,
-    (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
-    verticalScrollbar,
-  );
-});
-
-const horizontalScrollbarProps = computed(() => {
-  if (props.direction === 'vertical') {
-    return null;
-  }
-  const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
-  return getScrollbarSlotProps(
-    'horizontal',
-    renderedWidth.value,
-    displayScrollOffset.x,
-    displayViewportSize.width,
-    (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
-    horizontalScrollbar,
-  );
-});
-
 const wrapperStyle = computed(() => {
   const isHorizontal = props.direction === 'horizontal';
   const isVertical = props.direction === 'vertical';
@@ -557,20 +618,26 @@ const spacerStyle = computed(() => ({
   blockSize: props.direction === 'horizontal' ? '1px' : `${ renderedVirtualHeight.value }px`,
 }));
 
+/** A table always renders a table element, in both rendering modes. */
+const isTable = true;
+/** The tag the item rows live under; it selects the table cell sizing. */
+const containerTag = 'table';
+
 /**
  * Calculates the final style object for an item, including position and dimensions.
  *
  * @param item - The rendered item state.
  * @returns CSS style object.
  */
-function getItemStyle(item: RenderedItem<T>) {
+function getItemStyle(item: RenderedItem<T>, omitTransform = false) {
   // Sticky items stick below the sticky header/footer: the inset is the user
   // scroll padding plus the measured sticky start/end (e.g. the header slot).
   const scrollPadding = virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; };
   const sticky = virtualScrollProps.value.stickyStart as { x: number; y: number; };
 
   const style = calculateItemStyle({
-    containerTag: 'table',
+    containerTag,
+    omitTransform,
     direction: props.direction,
     isHydrated: isHydrated.value,
     item,
@@ -592,8 +659,6 @@ function getItemStyle(item: RenderedItem<T>) {
 
 const isDebug = computed(() => props.debug);
 const crossGapFlag = computed(() => (props.direction === 'both' ? 1 : 0));
-const isTable = computed(() => true);
-const containerTag = computed(() => 'table');
 const wrapperTag = computed(() => 'tbody');
 const itemTag = computed(() => 'tr');
 
@@ -647,9 +712,7 @@ const flowSpacers = computed<{ top: number; bottom: number; } | null>(() => {
 
 /** Item style without the absolute translate when rows are in flow. */
 function flowItemStyle(item: RenderedItem<T>) {
-  const style = getItemStyle(item);
-  delete style.transform;
-  return style;
+  return getItemStyle(item, true);
 }
 
 /** Item style for the currently active rendering mode (flow vs absolute). */
@@ -675,6 +738,11 @@ const flowTableWidth = computed(() => {
   const widths = flowColgroup.value;
   return widths ? `${ widths.reduce((sum, width) => sum + width, 0) }px` : undefined;
 });
+
+/** Computed length as a number; non-finite values count as zero. */
+function parsePx(value: string): number {
+  return Number.parseFloat(value) || 0;
+}
 
 async function measureFlowColumns() {
   await nextTick();
@@ -711,9 +779,8 @@ async function measureFlowColumns() {
       }
       textWidth ||= cell.getBoundingClientRect().width;
       const style = getComputedStyle(cell);
-      const padProps = [ 'paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth' ] as const;
-      // v8 ignore next -- computed px styles always parse to a finite number
-      const horizontal = padProps.reduce((sum, prop) => sum + (Number.parseFloat(style[ prop ]) || 0), 0);
+      const horizontal = parsePx(style.paddingLeft) + parsePx(style.paddingRight)
+        + parsePx(style.borderLeftWidth) + parsePx(style.borderRightWidth);
       widths[ col ] = Math.max(widths[ col ]!, textWidth + horizontal);
     }
   }
@@ -885,15 +952,26 @@ const rootAriaProps = computed(() => ({
   'aria-busy': props.loading ? 'true' : undefined,
 }));
 
-/** `aria-activedescendant` target while a row is active. */
-const activeDescendant = computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
+/**
+ * `aria-activedescendant` target while a row is active.
+ *
+ * Keyboard navigation drives the active row, so the lean build has no target to
+ * point at and skips the live region entirely.
+ */
+/* v8 ignore start -- only the full build's branch runs in these suites */
+const activeDescendant = IS_CORE_BUILD
+  ? undefined
+  : computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
 
-useLiveRegion(hostRef, liveMessage);
+if (!IS_CORE_BUILD) {
+  useLiveRegion(hostRef, liveMessage);
+}
+/* v8 ignore stop */
 
 const wrapperAriaProps = computed(() => {
   const aria: Record<string, string | number | undefined> = {
     'aria-rowcount': props.items.length,
-    'aria-activedescendant': activeDescendant.value,
+    'aria-activedescendant': activeDescendant?.value,
   };
   if (props.columnCount > 0) {
     aria[ 'aria-colcount' ] = props.columnCount;

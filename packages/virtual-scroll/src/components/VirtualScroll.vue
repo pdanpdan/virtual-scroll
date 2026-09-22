@@ -37,10 +37,11 @@ import {
   useSnappingExtension,
   useStickyExtension,
 } from '../extensions/all';
+import { DEFAULT_BUFFER, DEFAULT_LOAD_DISTANCE } from '../types';
 import { getPaddingX, getPaddingY, isWindowLike } from '../utils/scroll';
 import {
   calculateItemStyle,
-  displayToVirtual,
+  scrollbarOffsetToVirtual,
 } from '../utils/virtual-scroll-logic';
 import VirtualScrollbars from './VirtualScrollbars.vue';
 
@@ -48,8 +49,8 @@ export interface Props<T = unknown> extends VirtualScrollComponentProps<T> {}
 
 const props = withDefaults(defineProps<Props<T>>(), {
   direction: 'vertical',
-  bufferBefore: 5,
-  bufferAfter: 5,
+  bufferBefore: DEFAULT_BUFFER,
+  bufferAfter: DEFAULT_BUFFER,
   columnCount: 0,
   containerTag: 'div',
   wrapperTag: 'div',
@@ -63,7 +64,7 @@ const props = withDefaults(defineProps<Props<T>>(), {
   gap: 0,
   columnGap: 0,
   stickyIndices: () => [],
-  loadDistance: 200,
+  loadDistance: DEFAULT_LOAD_DISTANCE,
   loading: false,
   restoreScrollOnPrepend: false,
   debug: false,
@@ -275,24 +276,32 @@ let verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
 let horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
 /* v8 ignore stop */
 
-function handleScrollbarScrollToOffset(axis: 'vertical' | 'horizontal', offset: number) {
-  const { displayViewportSize } = scrollDetails.value;
-  const isVertical = axis === 'vertical';
-  const renderedSize = isVertical ? renderedHeight.value : renderedWidth.value;
-  const viewportDim = isVertical ? displayViewportSize.height : displayViewportSize.width;
-  const componentOff = isVertical ? componentOffset.y : componentOffset.x;
-  const scale = isVertical ? scaleY.value : scaleX.value;
-  const scrollableRange = renderedSize - viewportDim;
-  if (offset >= scrollableRange - 0.5) {
-    scrollToOffset(isVertical ? null : Number.POSITIVE_INFINITY, isVertical ? Number.POSITIVE_INFINITY : null);
-  } else {
-    const virtualOffset = displayToVirtual(offset, componentOff, scale);
-    scrollToOffset(isVertical ? null : virtualOffset, isVertical ? virtualOffset : null);
-  }
-}
+/* The real implementation is installed by the full build below, so the whole
+   mapping is compiled out of the lean entry. */
+/* v8 ignore start -- the no-op body only runs in the lean build */
+let handleScrollbarScrollToOffset: (axis: 'vertical' | 'horizontal', offset: number) => void = () => {};
+/* v8 ignore stop */
 
 /* v8 ignore next -- the `if` is always taken outside the lean build */
 if (!IS_CORE_BUILD) {
+  /** Maps a scrollbar thumb offset (DU) onto the virtual offset (VU) to scroll to. */
+  handleScrollbarScrollToOffset = (axis: 'vertical' | 'horizontal', offset: number) => {
+    const { displayViewportSize } = scrollDetails.value;
+    const isVertical = axis === 'vertical';
+    const virtualOffset = scrollbarOffsetToVirtual(
+      offset,
+      isVertical ? renderedHeight.value : renderedWidth.value,
+      isVertical ? displayViewportSize.height : displayViewportSize.width,
+      isVertical ? componentOffset.y : componentOffset.x,
+      isVertical ? scaleY.value : scaleX.value,
+    );
+    if (virtualOffset === null) {
+      scrollToOffset(isVertical ? null : Number.POSITIVE_INFINITY, isVertical ? Number.POSITIVE_INFINITY : null);
+      return;
+    }
+    scrollToOffset(isVertical ? null : virtualOffset, isVertical ? virtualOffset : null);
+  };
+
   showVirtualScrollbars = computed(() => {
     if (isWindowContainer.value) {
       return false;
@@ -490,10 +499,21 @@ if (!IS_CORE_BUILD) {
   }));
 }
 
-/** `aria-activedescendant` target while an item is active. */
-const activeDescendant = computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
+/**
+ * `aria-activedescendant` target while an item is active.
+ *
+ * Keyboard navigation drives the active item, so the lean build has no target
+ * to point at and skips the live region entirely.
+ */
+/* v8 ignore start -- only the full build's branch runs in these suites */
+const activeDescendant = IS_CORE_BUILD
+  ? undefined
+  : computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
 
-useLiveRegion(hostRef, liveMessage);
+if (!IS_CORE_BUILD) {
+  useLiveRegion(hostRef, liveMessage);
+}
+/* v8 ignore stop */
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
@@ -506,10 +526,6 @@ const containerStyle = computed(() => {
 
   if (useVirtualScrolling.value) {
     base.touchAction = 'none';
-  }
-
-  if (isWindowContainer.value) {
-    return base;
   }
 
   return base;
@@ -651,7 +667,7 @@ function getItemStyle(item: RenderedItem<T>) {
   const sticky = virtualScrollProps.value.stickyStart as { x: number; y: number; };
 
   const style = calculateItemStyle({
-    containerTag: 'div',
+    containerTag: props.containerTag,
     direction: props.direction,
     isHydrated: isHydrated.value,
     item,
