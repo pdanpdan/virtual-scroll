@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.1](https://github.com/pdanpdan/virtual-scroll/compare/v2.1.0...v2.1.1) (2026-09-22)
+
+### Bug Fixes
+
+* **playground:** cancel the drag events the draggable list leaves to the browser ([e16e0c8](https://github.com/pdanpdan/virtual-scroll/commit/e16e0c81f1bc5f127a198bbee0616e5b0cb59e5b))
+* **virtual-scroll:** hide the masonry native scrollbar outright ([cf673c1](https://github.com/pdanpdan/virtual-scroll/commit/cf673c15ef409eeb297491c7022c8230a13eb7b0))
+* **virtual-scroll:** repair the snapping axis, the container tag and the lean entry ([8c70380](https://github.com/pdanpdan/virtual-scroll/commit/8c703801f80c17b537863a5f20894f9e816e72a2))
+
+### Performance Improvements
+
+* **playground:** count the scroll-status DOM nodes on range changes, not every scroll frame ([3a50602](https://github.com/pdanpdan/virtual-scroll/commit/3a50602ace5f56543aedc5a6d199455d668ed6af))
+
 # [2.1.0](https://github.com/pdanpdan/virtual-scroll/compare/v2.0.0...v2.1.0) (2026-09-20)
 
 ### Bug Fixes
