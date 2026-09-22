@@ -3,8 +3,8 @@
  * Handles calculation of thumb position and size, track interactions, and dragging.
  */
 
-import type { ScrollAxis } from '../types';
-import type { MaybeRefOrGetter } from 'vue';
+import type { ScrollAxis, ScrollbarSlotProps } from '../types';
+import type { MaybeRefOrGetter, Ref } from 'vue';
 
 import { computed, getCurrentInstance, onUnmounted, ref, toValue } from 'vue';
 
@@ -254,5 +254,81 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
     thumbProps,
     /** Whether the thumb is currently being dragged. */
     isDragging,
+  };
+}
+
+/**
+ * The computed state of a scrollbar, as returned by {@link useVirtualScrollbar}
+ * and published by {@link buildScrollbarSlotProps}.
+ */
+export interface VirtualScrollbarState {
+  /** Viewport size as a percentage of total size (0 to 1). */
+  viewportPercent: Ref<number>;
+  /** Current scroll position as a percentage of the scrollable range (0 to 1). */
+  positionPercent: Ref<number>;
+  /** Calculated thumb size as a percentage of the track size (0 to 100). */
+  thumbSizePercent: Ref<number>;
+  /** Calculated thumb position as a percentage of the track size (0 to 100). */
+  thumbPositionPercent: Ref<number>;
+  /** Attributes and event listeners to be bound to the track element. */
+  trackProps: Ref<Record<string, unknown>>;
+  /** Attributes and event listeners to be bound to the thumb element. */
+  thumbProps: Ref<Record<string, unknown>>;
+  /** Whether the thumb is currently being dragged. */
+  isDragging: Ref<boolean>;
+}
+
+/** The state and connection points {@link buildScrollbarSlotProps} publishes. */
+export interface BuildScrollbarSlotPropsParams {
+  /** The axis this scrollbar scrolls. */
+  axis: ScrollAxis;
+  /** Total scrollable size (DU). */
+  totalSize: number;
+  /** Current scroll position (DU). */
+  position: number;
+  /** Viewport size (DU). */
+  viewportSize: number;
+  /** Scrolls to a thumb offset (DU). */
+  scrollToOffset: (offset: number) => void;
+  /** Id of the scroll container the scrollbar controls. */
+  containerId: string;
+  /** Whether the container is in Right-to-Left (RTL) mode. */
+  isRtl: boolean;
+  /** The scrollbar instance whose computed state is published. */
+  scrollbar: VirtualScrollbarState;
+}
+
+/**
+ * Builds the props a `#scrollbar` slot receives from a scrollbar instance.
+ *
+ * @param params - The scrollbar state and the container it drives.
+ * @returns The slot props, or `null` when the content fits the viewport and no thumb is needed.
+ */
+export function buildScrollbarSlotProps(params: BuildScrollbarSlotPropsParams): ScrollbarSlotProps | null {
+  const { axis, totalSize, position, viewportSize, scrollToOffset, containerId, isRtl, scrollbar } = params;
+
+  if (totalSize <= viewportSize) {
+    return null;
+  }
+
+  return {
+    axis,
+    positionPercent: scrollbar.positionPercent.value,
+    viewportPercent: scrollbar.viewportPercent.value,
+    thumbSizePercent: scrollbar.thumbSizePercent.value,
+    thumbPositionPercent: scrollbar.thumbPositionPercent.value,
+    trackProps: scrollbar.trackProps.value,
+    thumbProps: scrollbar.thumbProps.value,
+    scrollbarProps: {
+      axis,
+      totalSize,
+      position,
+      viewportSize,
+      scrollToOffset,
+      containerId,
+      isRtl,
+      ariaLabel: `${ axis === 'vertical' ? 'Vertical' : 'Horizontal' } scroll`,
+    },
+    isDragging: scrollbar.isDragging.value,
   };
 }

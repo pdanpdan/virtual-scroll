@@ -11,11 +11,11 @@ import { defineConfig } from 'vite';
  * (keyboard navigation, custom scrollbars, snapping, sticky items, infinite
  * loading and prepend restoration).
  *
- * The flag is read by `VirtualScroll.vue` and `VirtualScrollTable.vue`, so the
- * pruning covers both components; `VirtualScrollMasonry` has no optional wiring
- * to remove. The composables, extensions and types are shared with the full
- * entry, and both builds are asserted by `scripts/size.ts` and
- * `tests/build-output.test.ts`.
+ * The flag is read by `composables/useVirtualScrollComponent.ts`, the base
+ * `VirtualScroll.vue` and `VirtualScrollTable.vue` share, so the pruning covers
+ * both components; `VirtualScrollMasonry` has no optional wiring to remove. The
+ * composables, extensions and types are shared with the full entry, and both
+ * builds are asserted by `scripts/size.ts` and `tests/build-output.test.ts`.
  *
  * Types are shared with the full entry (`dist/index.d.ts`); only the runtime
  * differs, so declarations are generated once by `vite.config.ts`.

@@ -5,48 +5,30 @@
  * and footer slots. Sizes come per column (`columnCount` / `columnWidth`). With
  * `flowTable` the rows stay in real table flow between spacer rows, so the browser
  * lays out the columns; otherwise rows are absolutely positioned.
+ *
+ * The engine wiring and the shared accessibility helpers come from
+ * {@link useVirtualScrollComponent}; what stays here is the table markup, its flow
+ * mode and its own ARIA role model.
  */
 import type { LoadDetails } from '../extensions/all';
 import type {
   ItemSlotProps,
   RenderedItem,
-  ScrollAlignment,
   ScrollbarSlotProps,
   ScrollDetails,
-  ScrollToIndexOptions,
-  VirtualScrollProps,
   VirtualScrollTableComponentProps,
 } from '../types';
 import type { VNodeChild } from 'vue';
 
-import { computed, nextTick, onBeforeUnmount, ref, toRefs, useId, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, toRefs, watch } from 'vue';
 
-import { useLiveRegion } from '../composables/useLiveRegion';
-import {
-  useVirtualScroll,
-} from '../composables/useVirtualScroll';
-import { useVirtualScrollbar } from '../composables/useVirtualScrollbar';
-import { useVirtualScrollInertia } from '../composables/useVirtualScrollInertia';
-import { useVirtualScrollKeyboard } from '../composables/useVirtualScrollKeyboard';
-import { useVirtualScrollObservers } from '../composables/useVirtualScrollObservers';
-import {
-  useCoordinateScalingExtension,
-  useInfiniteLoadingExtension,
-  usePrependRestorationExtension,
-  useRtlExtension,
-  useSnappingExtension,
-  useStickyExtension,
-} from '../extensions/all';
+import { buildScrollbarSlotProps, useVirtualScrollbar } from '../composables/useVirtualScrollbar';
+import { useVirtualScrollComponent } from '../composables/useVirtualScrollComponent';
 import { DEFAULT_BUFFER, DEFAULT_LOAD_DISTANCE } from '../types';
-import { getPaddingX, getPaddingY, isWindowLike } from '../utils/scroll';
-import {
-  calculateItemStyle,
-  scrollbarOffsetToVirtual,
-} from '../utils/virtual-scroll-logic';
+import { getPaddingY } from '../utils/scroll';
 import VirtualScrollbar from './VirtualScrollbar.vue';
 
 export interface Props<T = unknown> extends VirtualScrollTableComponentProps<T> {}
-
 const props = withDefaults(defineProps<Props<T>>(), {
   direction: 'vertical',
   bufferBefore: DEFAULT_BUFFER,
@@ -107,134 +89,62 @@ const slots = defineSlots<{
   scrollbar?: (props: ScrollbarSlotProps) => VNodeChild;
 }>();
 
-/**
- * Whether this module is the lean (`./core`) build.
- *
- * The single source of truth outside these components is `vite.config.core.ts`:
- * the flag is replaced by the bundler, so the optional wiring (keyboard
- * navigation, custom scrollbars, snapping, sticky items, infinite loading and
- * prepend restoration) compiles out of the lean entry entirely.
- */
-/* v8 ignore next 2 -- the flag is undefined outside the two builds (vite.config.core.ts) */
-const IS_CORE_BUILD
-  /* eslint-disable-next-line no-undef -- injected by the bundler (see src/globals.d.ts) */
-  = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD__;
+const headerTag = computed(() => 'thead');
+const footerTag = computed(() => 'tfoot');
 
-const hostRef = ref<HTMLElement | null>(null);
-const wrapperRef = ref<HTMLElement | null>(null);
-const headerRef = ref<HTMLElement | null>(null);
-const footerRef = ref<HTMLElement | null>(null);
-const loadingRef = ref<HTMLElement | null>(null);
-const itemRefs = new Map<number, HTMLElement>();
-
-const instanceId = useId();
-
-/**
- * Unique ID for the scrollable container.
- * Used for accessibility (aria-controls) and to target the element in DOM.
- */
-const containerId = computed(() => `vs-container-${ instanceId }`);
-
-/**
- * Extensions wired by the component: the two the engine relies on for correct
- * behaviour (RTL detection and coordinate scaling), plus the optional ones.
- */
-const extensions = [
-  useRtlExtension<T>(),
-  /* The optional half of this list is compiled out of the lean build; both
-     builds are asserted by tests/bundle-size and tests/build-output. */
-  /* v8 ignore start -- only the full build's branch runs in these suites */
-  ...(IS_CORE_BUILD
-    ? []
-    : [
-      useSnappingExtension<T>(),
-      useStickyExtension<T>(),
-      useInfiniteLoadingExtension<T>({
-        onLoad: (dir, details) => emit('load', dir, details),
-      }),
-      usePrependRestorationExtension<T>(),
-    ]),
-  /* v8 ignore stop */
-  useCoordinateScalingExtension<T>(),
-];
-
-const measuredPaddingStart = ref(0);
-const measuredPaddingEnd = ref(0);
-
-const effectiveContainer = computed(() => (props.container === undefined ? hostRef.value : props.container));
-
-const isHeaderFooterInsideContainer = computed(() => {
-  const container = effectiveContainer.value;
-  return container === hostRef.value || isWindowLike(container);
-});
-
-const virtualScrollProps = computed(() => {
-  /* Trigger re-evaluation on items array mutations */
-  // eslint-disable-next-line ts/no-unused-expressions
-  props.items.length;
-
-  return {
-    items: props.items,
-    itemSize: props.itemSize,
-    direction: props.direction,
-    bufferBefore: props.bufferBefore,
-    bufferAfter: props.bufferAfter,
-    containerTag: 'table',
-    container: effectiveContainer.value,
-    hostElement: wrapperRef.value,
-    hostRef: hostRef.value,
-    ssrRange: props.ssrRange,
-    columnCount: props.columnCount,
-    columnWidth: props.columnWidth,
-    scrollPaddingStart: {
-      x: getPaddingX(props.scrollPaddingStart, props.direction),
-      y: getPaddingY(props.scrollPaddingStart, props.direction),
-    },
-    scrollPaddingEnd: {
-      x: getPaddingX(props.scrollPaddingEnd, props.direction),
-      y: getPaddingY(props.scrollPaddingEnd, props.direction),
-    },
-    flowPaddingStart: {
-      x: 0,
-      y: props.stickyHeader ? 0 : measuredPaddingStart.value,
-    },
-    flowPaddingEnd: {
-      x: 0,
-      y: props.stickyFooter ? 0 : measuredPaddingEnd.value,
-    },
-    stickyStart: {
-      x: 0,
-      y: props.stickyHeader && isHeaderFooterInsideContainer.value ? measuredPaddingStart.value : 0,
-    },
-    stickyEnd: {
-      x: 0,
-      y: props.stickyFooter && isHeaderFooterInsideContainer.value ? measuredPaddingEnd.value : 0,
-    },
-    gap: props.gap,
-    columnGap: props.columnGap,
-    stickyIndices: props.stickyIndices,
-    loadDistance: props.loadDistance,
-    loading: props.loading,
-    restoreScrollOnPrepend: props.restoreScrollOnPrepend,
-    initialScrollIndex: props.initialScrollIndex,
-    initialScrollAlign: props.initialScrollAlign,
-    defaultItemSize: props.defaultItemSize,
-    defaultColumnWidth: props.defaultColumnWidth,
-    debug: props.debug,
-    snap: props.snap,
-  } as VirtualScrollProps<T>;
+const wrapperRole = null;
+const itemRole = computed(() => props.itemRole ?? 'row');
+const cellRole = computed(() => {
+  if (props.role === 'grid' || (!props.role && props.direction === 'both')) {
+    return 'gridcell';
+  }
+  return 'cell';
 });
 
 const {
+  hostRef,
+  wrapperRef,
+  headerRef,
+  footerRef,
+  loadingRef,
+  containerId,
+  setItemRef,
   isHydrated,
   isRtl,
-  columnRange,
-  renderedItems,
+  isWindowContainer,
+  useVirtualScrolling,
+  scaleX,
+  scaleY,
+  componentOffset,
+  scrollbarOffset,
   scrollDetails,
-  renderedHeight,
+  renderedItems,
+  columnRange,
   renderedWidth,
-  getColumnWidth,
-  getRowHeight,
+  renderedHeight,
+  renderedVirtualWidth,
+  renderedVirtualHeight,
+  isHeaderFooterInsideContainer,
+  measuredPaddingStart,
+  measuredPaddingEnd,
+  slotColumnRange,
+  wrapperStyle,
+  loadingStyle,
+  getItemStyle,
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp,
+  handleKeyDown,
+  activeIndex,
+  setActiveIndex,
+  handleItemActivate,
+  activeDescendant,
+  showVirtualScrollbars,
+  verticalScrollbarProps,
+  horizontalScrollbarProps,
+  rootAriaProps,
+  shouldBindItemAria,
+  isDebug,
   scrollToIndex,
   scrollToOffset,
   updateHostOffset,
@@ -242,271 +152,26 @@ const {
   updateItemSizes,
   updateDirection,
   getItemOffset,
+  getItemSize,
   getRowOffset,
   getColumnOffset,
-  getItemSize,
-  refresh: coreRefresh,
-  stopProgrammaticScroll,
-  scaleX,
-  scaleY,
-  isWindowContainer,
-  componentOffset,
-  scrollbarOffset,
-  renderedVirtualWidth,
-  renderedVirtualHeight,
+  getRowHeight,
+  getColumnWidth,
   getRowIndexAt,
   getColumnIndexAt,
-} = useVirtualScroll(virtualScrollProps, extensions);
-
-const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
-
-/* The four defaults below only survive in the lean build, where the wiring that
-   overwrites them is compiled out. */
-/* v8 ignore start -- lean build only */
-/** Whether the overlay scrollbars are shown instead of the native ones. */
-let showVirtualScrollbars = computed(() => false);
-/** Slot props of the vertical scrollbar, or `null` when it is not shown. */
-let verticalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
-/** Slot props of the horizontal scrollbar, or `null` when it is not shown. */
-let horizontalScrollbarProps = computed<ScrollbarSlotProps | null>(() => null);
-/** Maps a scrollbar thumb offset onto the virtual offset to scroll to. */
-let handleScrollbarScrollToOffset: (axis: 'vertical' | 'horizontal', offset: number) => void = () => {};
-/* v8 ignore stop */
-
-/* v8 ignore next -- the `if` is always taken outside the lean build */
-if (!IS_CORE_BUILD) {
-  showVirtualScrollbars = computed(() => {
-    if (isWindowContainer.value) {
-      return false;
-    }
-    return props.virtualScrollbar === true || scaleX.value !== 1 || scaleY.value !== 1;
-  });
-
-  const verticalScrollbar = useVirtualScrollbar(computed(() => ({
-    axis: 'vertical' as const,
-    totalSize: renderedHeight.value,
-    position: scrollDetails.value.displayScrollOffset.y,
-    viewportSize: scrollDetails.value.displayViewportSize.height,
-    scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
-    containerId: containerId.value,
-    isRtl: isRtl.value,
-  })));
-
-  const horizontalScrollbar = useVirtualScrollbar(computed(() => ({
-    axis: 'horizontal' as const,
-    totalSize: renderedWidth.value,
-    position: scrollDetails.value.displayScrollOffset.x,
-    viewportSize: scrollDetails.value.displayViewportSize.width,
-    scrollToOffset: (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
-    containerId: containerId.value,
-    isRtl: isRtl.value,
-  })));
-
-  verticalScrollbarProps = computed(() => {
-    if (props.direction === 'horizontal') {
-      return null;
-    }
-    const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
-    return getScrollbarSlotProps(
-      'vertical',
-      renderedHeight.value,
-      displayScrollOffset.y,
-      displayViewportSize.height,
-      (offset: number) => handleScrollbarScrollToOffset('vertical', offset),
-      verticalScrollbar,
-    );
-  });
-
-  horizontalScrollbarProps = computed(() => {
-    if (props.direction === 'vertical') {
-      return null;
-    }
-    const { displayViewportSize, displayScrollOffset } = scrollDetails.value;
-    return getScrollbarSlotProps(
-      'horizontal',
-      renderedWidth.value,
-      displayScrollOffset.x,
-      displayViewportSize.width,
-      (offset: number) => handleScrollbarScrollToOffset('horizontal', offset),
-      horizontalScrollbar,
-    );
-  });
-
-  handleScrollbarScrollToOffset = (axis: 'vertical' | 'horizontal', offset: number) => {
-    const { displayViewportSize } = scrollDetails.value;
-    const isVertical = axis === 'vertical';
-    const virtualOffset = scrollbarOffsetToVirtual(
-      offset,
-      isVertical ? renderedHeight.value : renderedWidth.value,
-      isVertical ? displayViewportSize.height : displayViewportSize.width,
-      isVertical ? componentOffset.y : componentOffset.x,
-      isVertical ? scaleY.value : scaleX.value,
-    );
-    if (virtualOffset === null) {
-      scrollToOffset(isVertical ? null : Number.POSITIVE_INFINITY, isVertical ? Number.POSITIVE_INFINITY : null);
-      return;
-    }
-    scrollToOffset(isVertical ? null : virtualOffset, isVertical ? virtualOffset : null);
-  };
-}
-
-const slotColumnRange = computed(() => {
-  if (props.direction !== 'both') {
-    return columnRange.value;
-  }
-  return {
-    ...columnRange.value,
-    padStart: 0,
-    padEnd: 0,
-  };
-});
-
-/**
- * Resets all dynamic measurements and re-initializes from props.
- * Also triggers manual re-measurement of all currently rendered items.
- */
-function refresh() {
-  coreRefresh();
-  updateDirection();
-  nextTick(() => {
-    const updates: { index: number; inlineSize: number; blockSize: number; element?: HTMLElement; }[] = [];
-
-    for (const [ index, el ] of itemRefs.entries()) {
-      // v8 ignore next -- setItemRef deletes falsy refs, so entries never hold null
-      if (el) {
-        updates.push({
-          index,
-          inlineSize: el.offsetWidth,
-          blockSize: el.offsetHeight,
-          element: el,
-        });
-      }
-    }
-
-    if (updates.length > 0) {
-      updateItemSizes(updates);
-    }
-  });
-}
-
-// Watch for scroll details and emit event
-watch(scrollDetails, (details, oldDetails) => {
-  if (!isHydrated.value || !details) {
-    return;
-  }
-  emit('scroll', details);
-
-  if (
-    !oldDetails
-    || !oldDetails.range
-    || !oldDetails.columnRange
-    || details.range.start !== oldDetails.range.start
-    || details.range.end !== oldDetails.range.end
-    || details.columnRange.start !== oldDetails.columnRange.start
-    || details.columnRange.end !== oldDetails.columnRange.end
-  ) {
-    emit('visibleRangeChange', {
-      start: details.range.start,
-      end: details.range.end,
-      colStart: details.columnRange.start,
-      colEnd: details.columnRange.end,
-    });
-  }
-});
-
-watch(isHydrated, (hydrated) => {
-  // v8 ignore next -- fires once with hydrated=true; scrollDetails is always defined by then
-  if (hydrated && scrollDetails.value?.range && scrollDetails.value?.columnRange) {
-    emit('visibleRangeChange', {
-      start: scrollDetails.value.range.start,
-      end: scrollDetails.value.range.end,
-      colStart: scrollDetails.value.columnRange.start,
-      colEnd: scrollDetails.value.columnRange.end,
-    });
-  }
-}, { once: true });
-
-const { setItemRef } = useVirtualScrollObservers({
-  hostRef,
-  wrapperRef,
-  headerRef,
-  footerRef,
-  measuredPaddingStart,
-  measuredPaddingEnd,
-  itemRefs,
-  direction: props.direction,
-  updateHostOffset,
-  updateItemSizes,
-});
-
-const {
-  handlePointerDown,
-  handlePointerMove,
-  handlePointerUp,
-  handleWheel,
-  stopInertia,
-} = useVirtualScrollInertia({
-  useVirtualScrolling,
-  scrollDetails,
-  scrollToOffset,
+  refresh,
   stopProgrammaticScroll,
+  stopInertia,
+} = useVirtualScrollComponent<T>({
+  props,
+  containerTag: 'table',
+  itemRole,
+  activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item' ? 'item' : 'viewport')),
+  onScroll: (details) => emit('scroll', details),
+  onVisibleRangeChange: (range) => emit('visibleRangeChange', range),
+  onLoad: (direction, details) => emit('load', direction, details),
+  onItemActivate: (index, item) => emit('itemActivate', index, item),
 });
-
-watch([ hostRef, useVirtualScrolling ], ([ host, virtual ], [ oldHost, oldVirtual ]) => {
-  const needsUpdate = host !== oldHost || virtual !== oldVirtual;
-  if (oldHost && needsUpdate) {
-    oldHost.removeEventListener('wheel', handleWheel);
-  }
-  if (host && needsUpdate) {
-    host.addEventListener('wheel', handleWheel, { passive: !virtual });
-  }
-}, { immediate: true });
-
-/** Keydown handler installed in the full build; `undefined` in the lean build. */
-let handleKeyDown: ((event: KeyboardEvent) => void) | undefined;
-/** Index of the row tracked by keyboard navigation, `-1` when none. */
-let activeIndex = ref(-1);
-/* The four defaults below only survive in the lean build, where the composable
-   that overwrites them is compiled out. */
-/* v8 ignore start -- lean build only */
-/** Polite announcement for the active row. */
-let liveMessage = computed(() => '');
-/** Sets the active row index without scrolling. */
-let setActiveIndex: (index: number | null) => void = () => {};
-/** Marks a row active and emits `itemActivate` (e.g. from a click handler). */
-let handleItemActivate: (index: number) => void = () => {};
-/* v8 ignore stop */
-
-/* v8 ignore next -- the `if` is always taken outside the lean build */
-if (!IS_CORE_BUILD) {
-  ({
-    handleKeyDown,
-    activeIndex,
-    liveMessage,
-    setActiveIndex,
-    handleItemActivate,
-  } = useVirtualScrollKeyboard({
-    props,
-    virtualScrollProps,
-    scrollDetails,
-    isRtl,
-    scrollToIndex,
-    scrollToOffset,
-    stopProgrammaticScroll,
-    getRowHeight,
-    getColumnWidth,
-    getRowOffset,
-    getColumnOffset,
-    getItemOffset,
-    getItemSize,
-    getRowIndexAt,
-    getColumnIndexAt,
-    getLoadingSlotSize: () => loadingRef.value?.offsetHeight ?? 0,
-    /** A table only tracks an active row when asked to (`keyboardActivation`). */
-    activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item' ? 'item' : 'viewport')),
-    onActivate: (index: number) => emit('itemActivate', index, props.items[ index ]),
-  }));
-}
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
@@ -535,84 +200,6 @@ const containerStyle = computed(() => {
   };
 });
 
-/**
- * Internal helper to generate consistent ScrollbarSlotProps.
- *
- * @param axis - The scroll axis.
- * @param totalSize - Total scrollable size (DU).
- * @param position - Current scroll position (DU).
- * @param viewportSize - Current viewport size (DU).
- * @param scrollToOffsetCallback - Callback to perform scroll.
- * @param scrollbar - Scrollbar state from useVirtualScrollbar.
- * @returns Props for the scrollbar slot or null if content fits.
- */
-function getScrollbarSlotProps(
-  axis: 'vertical' | 'horizontal',
-  totalSize: number,
-  position: number,
-  viewportSize: number,
-  scrollToOffsetCallback: (offset: number) => void,
-  scrollbar: ReturnType<typeof useVirtualScrollbar>,
-): ScrollbarSlotProps | null {
-  if (totalSize <= viewportSize) {
-    return null;
-  }
-
-  return {
-    axis,
-    positionPercent: scrollbar.positionPercent.value,
-    viewportPercent: scrollbar.viewportPercent.value,
-    thumbSizePercent: scrollbar.thumbSizePercent.value,
-    thumbPositionPercent: scrollbar.thumbPositionPercent.value,
-    trackProps: scrollbar.trackProps.value,
-    thumbProps: scrollbar.thumbProps.value,
-    scrollbarProps: {
-      axis,
-      totalSize,
-      position,
-      viewportSize,
-      scrollToOffset: scrollToOffsetCallback,
-      containerId: containerId.value,
-      isRtl: isRtl.value,
-      ariaLabel: `${ axis === 'vertical' ? 'Vertical' : 'Horizontal' } scroll`,
-    },
-    isDragging: scrollbar.isDragging.value,
-  };
-}
-
-const wrapperStyle = computed(() => {
-  const isHorizontal = props.direction === 'horizontal';
-  const isVertical = props.direction === 'vertical';
-  const isBoth = props.direction === 'both';
-
-  const style: Record<string, string | number | undefined> = {
-    inlineSize: isVertical ? '100%' : `${ renderedVirtualWidth.value }px`,
-    blockSize: isHorizontal ? '100%' : `${ renderedVirtualHeight.value }px`,
-  };
-
-  if (!isHydrated.value) {
-    style.display = 'flex';
-    style.flexDirection = isHorizontal ? 'row' : 'column';
-    if ((isHorizontal || isBoth) && props.columnGap) {
-      style.columnGap = `${ props.columnGap }px`;
-    }
-    if ((isVertical || isBoth) && props.gap) {
-      style.rowGap = `${ props.gap }px`;
-    }
-  }
-
-  return style;
-});
-
-const loadingStyle = computed(() => {
-  const isHorizontal = props.direction === 'horizontal';
-
-  return {
-    display: isHorizontal ? 'inline-block' : 'block',
-    ...(isHorizontal ? { blockSize: '100%', verticalAlign: 'top' } : { inlineSize: '100%' }),
-  };
-});
-
 const spacerStyle = computed(() => ({
   inlineSize: props.direction === 'vertical' ? '1px' : `${ renderedVirtualWidth.value }px`,
   blockSize: props.direction === 'horizontal' ? '1px' : `${ renderedVirtualHeight.value }px`,
@@ -623,44 +210,17 @@ const isTable = true;
 /** The tag the item rows live under; it selects the table cell sizing. */
 const containerTag = 'table';
 
-/**
- * Calculates the final style object for an item, including position and dimensions.
- *
- * @param item - The rendered item state.
- * @returns CSS style object.
- */
-function getItemStyle(item: RenderedItem<T>, omitTransform = false) {
-  // Sticky items stick below the sticky header/footer: the inset is the user
-  // scroll padding plus the measured sticky start/end (e.g. the header slot).
-  const scrollPadding = virtualScrollProps.value.scrollPaddingStart as { x: number; y: number; };
-  const sticky = virtualScrollProps.value.stickyStart as { x: number; y: number; };
-
-  const style = calculateItemStyle({
-    containerTag,
-    omitTransform,
-    direction: props.direction,
-    isHydrated: isHydrated.value,
-    item,
-    itemSize: props.itemSize,
-    paddingStartX: scrollPadding.x + sticky.x,
-    paddingStartY: scrollPadding.y + sticky.y,
-    isRtl: isRtl.value,
-  });
-
-  if (!isHydrated.value && props.direction === 'both') {
-    style.display = 'flex';
-    if (props.columnGap) {
-      style.columnGap = `${ props.columnGap }px`;
-    }
-  }
-
-  return style;
-}
-
-const isDebug = computed(() => props.debug);
 const crossGapFlag = computed(() => (props.direction === 'both' ? 1 : 0));
 const wrapperTag = computed(() => 'tbody');
 const itemTag = computed(() => 'tr');
+
+/**
+ * Real table-flow rendering: rows stay in flow between spacer rows sized from
+ * the engine offsets, so the browser sizes and aligns table columns itself.
+ * Vertical lists with no scroll padding, gap, sticky indices or column grid;
+ * row heights may be uniform (numeric `itemSize`) or measured (dynamic).
+ * Unsupported configurations fall back to the absolute table mode.
+ */
 
 /**
  * Real table-flow rendering: rows stay in flow between spacer rows sized from
@@ -890,14 +450,16 @@ const tableHorizontalScrollbarProps = computed(() => {
   if (props.direction !== 'vertical' || isWindowContainer.value || tableScrollWidth.value <= tableClientWidth.value) {
     return null;
   }
-  return getScrollbarSlotProps(
-    'horizontal',
-    tableScrollWidth.value,
-    tableScrollLeft.value,
-    tableClientWidth.value,
-    handleTableScrollTo,
-    tableHorizontalScrollbar,
-  );
+  return buildScrollbarSlotProps({
+    axis: 'horizontal',
+    totalSize: tableScrollWidth.value,
+    position: tableScrollLeft.value,
+    viewportSize: tableClientWidth.value,
+    scrollToOffset: handleTableScrollTo,
+    containerId: containerId.value,
+    isRtl: isRtl.value,
+    scrollbar: tableHorizontalScrollbar,
+  });
 });
 
 watch([ () => props.direction, isFlowTable, isHydrated ], ([ direction, flow, hydrated ]) => {
@@ -924,49 +486,10 @@ onBeforeUnmount(() => {
   tableMetricsObserver?.disconnect();
 });
 
-const headerTag = computed(() => 'thead');
-const footerTag = computed(() => 'tfoot');
-
-const wrapperRole = null;
-const itemRole = computed(() => props.itemRole ?? 'row');
-const cellRole = computed(() => {
-  if (props.role === 'grid' || (!props.role && props.direction === 'both')) {
-    return 'gridcell';
-  }
-  return 'cell';
-});
-
-const shouldBindItemAria = computed(() => {
-  const role = itemRole.value;
-  return role == null || (role !== 'none' && role !== 'presentation');
-});
-
 /** ARIA binding for an item row: 'none' items still get the row role fallback. */
 function itemAriaBindings(index: number) {
   return shouldBindItemAria.value ? getItemAriaProps(index) : { role: 'none' };
 }
-
-const rootAriaProps = computed(() => ({
-  'aria-label': props.ariaLabel,
-  'aria-labelledby': props.ariaLabelledby,
-  'aria-busy': props.loading ? 'true' : undefined,
-}));
-
-/**
- * `aria-activedescendant` target while a row is active.
- *
- * Keyboard navigation drives the active row, so the lean build has no target to
- * point at and skips the live region entirely.
- */
-/* v8 ignore start -- only the full build's branch runs in these suites */
-const activeDescendant = IS_CORE_BUILD
-  ? undefined
-  : computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
-
-if (!IS_CORE_BUILD) {
-  useLiveRegion(hostRef, liveMessage);
-}
-/* v8 ignore stop */
 
 const wrapperAriaProps = computed(() => {
   const aria: Record<string, string | number | undefined> = {
