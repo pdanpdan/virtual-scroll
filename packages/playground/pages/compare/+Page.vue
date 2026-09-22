@@ -7,7 +7,7 @@
     <h1 class="text-2xl @4xl:text-4xl font-bold text-primary">Virtual Scroll Comparison</h1>
     <p class="text-sm @4xl:text-base opacity-70 mt-2 max-w-4xl">
       <code>@pdanpdan/virtual-scroll</code> vs. other main Vue 3 virtualization libraries.
-      Versions, publish dates and bundle sizes were checked on September 20, 2026.
+      Versions, publish dates and bundle sizes were checked on September 22, 2026.
     </p>
   </div>
 
@@ -45,17 +45,17 @@
       <tbody>
         <tr>
           <td class="font-bold whitespace-nowrap">@pdanpdan/virtual-scroll</td>
-          <td><code>2.0.0</code></td>
-          <td>2026-09-19</td>
+          <td><code>2.1.1</code> <span class="opacity-60">(next)</span></td>
+          <td><span class="opacity-60">unreleased</span></td>
           <td>12</td>
-          <td>64.1 / 20.2 kB</td>
+          <td>66.9 / 20.8 kB</td>
           <td>Component + composables + extensions, plus a lean <code>/core</code> entry</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">vue-virtual-scroller</td>
           <td><code>3.0.5</code></td>
           <td>2026-08-12</td>
-          <td>10,800</td>
+          <td>10,797</td>
           <td>27.1 / 10.0 kB</td>
           <td>Components (Scroller, RecycleScroller, DynamicScroller, TableScroller)</td>
         </tr>
@@ -63,15 +63,15 @@
           <td class="font-bold whitespace-nowrap">@tanstack/vue-virtual</td>
           <td><code>3.13.39</code></td>
           <td>2026-09-14</td>
-          <td>7,100 (monorepo)</td>
+          <td>7,119 (monorepo)</td>
           <td>24.1 / 7.3 kB</td>
           <td>Headless composable (<code>useVirtualizer</code>)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">virtua</td>
-          <td><code>0.52.0</code></td>
-          <td>2026-09-19</td>
-          <td>3,700</td>
+          <td><code>0.52.7</code></td>
+          <td>2026-09-22</td>
+          <td>3,748</td>
           <td>9.5 / 4.6 kB</td>
           <td>Components (VList, VGrid) + handle</td>
         </tr>
@@ -87,7 +87,7 @@
           <td class="font-bold whitespace-nowrap">vue-virtual-scroll-list</td>
           <td><code>2.3.5</code></td>
           <td>2023-05-29</td>
-          <td>4,500</td>
+          <td>4,505</td>
           <td>14.9 / 4.8 kB</td>
           <td>Component</td>
         </tr>
@@ -101,10 +101,10 @@
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">@ceriousdevtech/vue-cerious-scroll</td>
-          <td><code>1.1.5</code></td>
-          <td>2026-09-16</td>
-          <td>11</td>
-          <td>93.2 / 24.5 kB</td>
+          <td><code>1.2.0</code></td>
+          <td>2026-09-21</td>
+          <td>16</td>
+          <td>99.0 / 26.3 kB</td>
           <td>Component + composable</td>
         </tr>
       </tbody>
@@ -122,8 +122,9 @@
     <code>vlist-vue</code>'s <code>useVList</code>, which through <code>vlist/config</code> pulls in every one
     of its seventeen plugins - importing the core and plugins by hand instead is 10.2&nbsp;kB gzip for
     the base and 12.2&nbsp;kB with the scrollbar. Ours covers all six built-in extensions; the lean
-    <code>/core</code> entry is 15.2&nbsp;kB gzip, and the <code>useVirtualScroll</code> engine alone, for
-    writing your own markup, is 10.2&nbsp;kB.
+    <code>/core</code> entry is 15.4&nbsp;kB gzip, and the <code>useVirtualScroll</code> engine alone, for
+    writing your own markup, is 10.1&nbsp;kB. Our row is the upcoming release, measured from the current
+    build; every other row is the published version listed.
     <code>vue-cerious-scroll</code> bundles its runtime dependency
     (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
   </p>
@@ -560,9 +561,9 @@
         dedicated components (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also one of the larger
-        bundles here - 20.2&nbsp;kB gzip for the component, behind only the two APIs that ship their
-        whole plugin set, though its lean <code>/core</code> entry drops that to 15.2&nbsp;kB and the engine
-        alone is 10.2&nbsp;kB - and at 12 stars it has no community to fall back on.
+        bundles here - 20.8&nbsp;kB gzip for the component, behind only the two APIs that ship their
+        whole plugin set, though its lean <code>/core</code> entry drops that to 15.4&nbsp;kB and the engine
+        alone is 10.1&nbsp;kB - and at 12 stars it has no community to fall back on.
       </li>
       <li>
         <strong>@ceriousdevtech/vue-cerious-scroll</strong> - the only other Vue entry that ships real
@@ -570,7 +571,7 @@
         vertical-only - no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
         beyond-browser-max support - and it scrolls on its own hidden-overflow host instead of the
         browser's scrollport. The heaviest per-view code here after <code>vlist</code>
-        (24.5&nbsp;kB gzip, its runtime dependency bundled) and at 11 stars it has no community either.
+        (26.3&nbsp;kB gzip, its runtime dependency bundled) and at 16 stars it has no community either.
       </li>
       <li>
         <strong>vlist</strong> - the other batteries-included entry, and the closest in scope: a
