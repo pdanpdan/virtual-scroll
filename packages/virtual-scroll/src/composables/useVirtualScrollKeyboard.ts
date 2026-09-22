@@ -1,7 +1,16 @@
-import type { ScrollAlignment, ScrollDetails, ScrollToOffsetOptions, VirtualScrollProps } from '../types';
+import type { Point, ScrollAlignment, ScrollDetails, ScrollToOffsetOptions, VirtualScrollProps } from '../types';
 import type { MaybeRefOrGetter, Ref } from 'vue';
 
 import { computed, ref, toValue } from 'vue';
+
+/** Shared zero point: a missing sticky or padding value must not allocate on every key press. */
+const ZERO_POINT: Point = { x: 0, y: 0 };
+
+/** Jumps longer than this many viewports are applied without smooth scrolling. */
+const INSTANT_JUMP_VIEWPORTS = 10;
+
+/** Keys the viewport navigation handles; 'item' activation mode consumes its own first. */
+const NAVIGATION_KEYS = new Set([ 'Home', 'End', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown' ]);
 
 export interface UseVirtualScrollKeyboardOptions<T> {
   /**
@@ -104,6 +113,37 @@ export function useVirtualScrollKeyboard<T>({
     }
     activeIndex.value = Math.min(Math.trunc(index), props.value.items.length - 1);
   };
+
+  /**
+   * Explicit snap alignment in effect, or `null` when snap is off, `true` or `'auto'`.
+   *
+   * `'next'` is a stepping mode, not an alignment: it is passed through as it is, the
+   * way the previous inline narrowing did, and the engine decides what it means.
+   */
+  const getSnapAlignment = () => {
+    const snap = props.value.snap;
+    return snap && snap !== 'auto' && snap !== true ? snap as ScrollAlignment : null;
+  };
+
+  /** Index of the item at the middle of the viewport on one axis. */
+  const getCenterIndex = (isVerticalAxis: boolean) => (isVerticalAxis
+    ? getRowIndexAt(scrollDetails.value.scrollOffset.y + scrollDetails.value.viewportSize.height / 2)
+    : getColumnIndexAt(scrollDetails.value.scrollOffset.x + scrollDetails.value.viewportSize.width / 2));
+
+  /**
+   * Scrolls to an index on one axis, leaving the other axis where it is.
+   *
+   * @param index - The index to reveal.
+   * @param isVerticalAxis - `true` for the block axis, `false` for the inline axis.
+   * @param options - Scroll alignment and behavior.
+   * @param options.align - Alignment the index is scrolled to.
+   * @param options.behavior - `'smooth'` to animate the move, `'auto'` to jump.
+   */
+  const scrollToAxisIndex = (
+    index: number,
+    isVerticalAxis: boolean,
+    options: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; },
+  ) => (isVerticalAxis ? scrollToIndex(index, null, options) : scrollToIndex(null, index, options));
 
   /**
    * Scrolls an item into view with the smallest movement that reveals it,
@@ -236,6 +276,116 @@ export function useVirtualScrollKeyboard<T>({
   };
 
   /**
+   * Moves the viewport by one item on one axis: forward reveals the item after the
+   * current last visible one, backward the one before the first visible one.
+   *
+   * With `snap: 'center'` the item at the middle of the viewport moves instead, and
+   * an explicit alignment towards the direction of travel moves a single item to the
+   * viewport edge without measuring the reveal.
+   *
+   * @param isVerticalAxis - `true` for the block axis, `false` for the inline axis.
+   * @param isForward - `true` when the key points at the end of the line
+   *   (`ArrowDown`, `ArrowRight`, `PageDown`), `false` at the start.
+   */
+  const navigateAxis = (isVerticalAxis: boolean, isForward: boolean) => {
+    const { scrollOffset, viewportSize, currentIndex, currentEndIndex, currentColIndex, currentEndColIndex } = scrollDetails.value;
+    const { items, columnCount = 0 } = props.value;
+    const isColumnAxis = !isVerticalAxis && columnCount > 0;
+    const snapAlignment = getSnapAlignment();
+    const maxIndex = (isColumnAxis ? columnCount : items.length) - 1;
+    const visibleStartIndex = isVerticalAxis ? currentIndex : currentColIndex;
+    const visibleEndIndex = isVerticalAxis ? currentEndIndex : currentEndColIndex;
+
+    if (snapAlignment === 'center') {
+      const centerIndex = getCenterIndex(isVerticalAxis);
+      const target = isForward ? Math.min(maxIndex, centerIndex + 1) : Math.max(0, centerIndex - 1);
+      scrollToAxisIndex(target, isVerticalAxis, { align: 'center' });
+      return;
+    }
+
+    // The inline axis follows reading order: in RTL a press towards the end of the
+    // line moves the viewport towards the start of the data.
+    const isForwardMove = isVerticalAxis || !isRtl.value ? isForward : !isForward;
+    const align = snapAlignment ?? (isForwardMove ? 'end' : 'start');
+    if (snapAlignment === (isForwardMove ? 'start' : 'end')) {
+      const target = isForwardMove ? Math.min(maxIndex, visibleStartIndex + 1) : Math.max(0, visibleEndIndex - 1);
+      scrollToAxisIndex(target, isVerticalAxis, { align });
+      return;
+    }
+
+    const vProps = virtualScrollProps.value;
+    const stickyStart = (vProps.stickyStart || ZERO_POINT) as Point;
+    const stickyEnd = (vProps.stickyEnd || ZERO_POINT) as Point;
+    const padStart = (vProps.scrollPaddingStart || ZERO_POINT) as Point;
+    const padEnd = (vProps.scrollPaddingEnd || ZERO_POINT) as Point;
+
+    if (isForwardMove) {
+      const itemEnd = isVerticalAxis
+        ? getRowOffset(visibleEndIndex) + getRowHeight(visibleEndIndex)
+        : isColumnAxis
+          ? getColumnOffset(visibleEndIndex) + getColumnWidth(visibleEndIndex)
+          : getItemOffset(visibleEndIndex) + getItemSize(visibleEndIndex);
+      const viewportEnd = isVerticalAxis
+        ? scrollOffset.y + viewportSize.height - stickyEnd.y - padEnd.y
+        : scrollOffset.x + viewportSize.width - stickyEnd.x - padEnd.x;
+      if (itemEnd > viewportEnd + 1) {
+        scrollToAxisIndex(visibleEndIndex, isVerticalAxis, { align });
+      } else if (visibleEndIndex < maxIndex) {
+        scrollToAxisIndex(visibleEndIndex + 1, isVerticalAxis, { align });
+      }
+      return;
+    }
+
+    const itemStart = isVerticalAxis
+      ? getRowOffset(visibleStartIndex)
+      : isColumnAxis ? getColumnOffset(visibleStartIndex) : getItemOffset(visibleStartIndex);
+    const viewportStart = isVerticalAxis
+      ? scrollOffset.y + stickyStart.y + padStart.y
+      : scrollOffset.x + stickyStart.x + padStart.x;
+    if (itemStart < viewportStart - 1) {
+      scrollToAxisIndex(visibleStartIndex, isVerticalAxis, { align });
+    } else if (visibleStartIndex > 0) {
+      scrollToAxisIndex(visibleStartIndex - 1, isVerticalAxis, { align });
+    }
+  };
+
+  /**
+   * Index a page key moves to: a full page, keeping one item as the overlap, with
+   * the alignment the snap mode asks for.
+   *
+   * @param isVerticalAxis - `true` for the block axis, `false` for the inline axis.
+   * @param isForward - `true` for `PageDown`, `false` for `PageUp`.
+   */
+  const getPageTargetIndex = (isVerticalAxis: boolean, isForward: boolean) => {
+    const { currentIndex, currentEndIndex, currentColIndex, currentEndColIndex } = scrollDetails.value;
+    const { items, columnCount = 0 } = props.value;
+    const snapAlignment = getSnapAlignment();
+    const startIndex = isVerticalAxis ? currentIndex : currentColIndex;
+    const endIndex = isVerticalAxis ? currentEndIndex : currentEndColIndex;
+    const pageSize = Math.max(1, endIndex - startIndex);
+    const isColumnAxis = !isVerticalAxis && columnCount > 0;
+    const maxIndex = (isColumnAxis ? columnCount : items.length) - 1;
+
+    if (isForward) {
+      if (snapAlignment === 'center') {
+        return Math.min(maxIndex, getCenterIndex(isVerticalAxis) + pageSize);
+      }
+      return snapAlignment === 'end'
+        ? Math.min(maxIndex, endIndex + pageSize)
+        // One full page forward: the item after the current last visible one.
+        : Math.min(maxIndex, endIndex + 1);
+    }
+
+    if (snapAlignment === 'center') {
+      return Math.max(0, getCenterIndex(isVerticalAxis) - pageSize);
+    }
+    return snapAlignment === 'start'
+      ? Math.max(0, startIndex - pageSize)
+      // One full page back: the item before the current first visible one.
+      : Math.max(0, startIndex - 1);
+  };
+
+  /**
    * Handles keyboard events for navigation (Home, End, Arrows, PageUp/Down).
    *
    * @param event - The keyboard event.
@@ -244,259 +394,77 @@ export function useVirtualScrollKeyboard<T>({
     if (resolvedActivationMode.value === 'item' && handleItemKeyDown(event)) {
       return;
     }
-
-    const { viewportSize, scrollOffset } = scrollDetails.value;
-    const isHorizontal = props.value.direction !== 'vertical';
-    const isVertical = props.value.direction !== 'horizontal';
-
-    const vProps = virtualScrollProps.value;
-    const sStart = (vProps.stickyStart || { x: 0, y: 0 }) as { x: number; y: number; };
-    const sEnd = (vProps.stickyEnd || { x: 0, y: 0 }) as { x: number; y: number; };
-    const pStart = (vProps.scrollPaddingStart || { x: 0, y: 0 }) as { x: number; y: number; };
-    const pEnd = (vProps.scrollPaddingEnd || { x: 0, y: 0 }) as { x: number; y: number; };
-
-    const snapModeProp = props.value.snap === true ? 'auto' : props.value.snap;
-    const snapMode = (snapModeProp && snapModeProp !== 'auto')
-      ? snapModeProp as 'start' | 'center' | 'end'
-      : null;
-
-    const { currentIndex, currentEndIndex, currentColIndex, currentEndColIndex } = scrollDetails.value;
-
-    const getCenterIndex = (isX: boolean) => {
-      const centerPos = (isX ? scrollOffset.x : scrollOffset.y) + (isX ? viewportSize.width : viewportSize.height) / 2;
-      return isX ? getColumnIndexAt(centerPos) : getRowIndexAt(centerPos);
-    };
-
-    const navigateVerticalForward = () => {
-      if (snapMode === 'start') {
-        scrollToIndex(Math.min(props.value.items.length - 1, currentIndex + 1), null, { align: 'start' });
-        return;
-      }
-      const align = snapMode || 'end';
-      const viewportBottom = scrollOffset.y + viewportSize.height - (sEnd.y + pEnd.y);
-      const itemBottom = getRowOffset(currentEndIndex) + getRowHeight(currentEndIndex);
-      if (itemBottom > viewportBottom + 1) {
-        scrollToIndex(currentEndIndex, null, { align });
-      } else if (currentEndIndex < props.value.items.length - 1) {
-        scrollToIndex(currentEndIndex + 1, null, { align });
-      }
-    };
-
-    const navigateVerticalBackward = () => {
-      if (snapMode === 'end') {
-        scrollToIndex(Math.max(0, currentEndIndex - 1), null, { align: 'end' });
-        return;
-      }
-      const align = snapMode || 'start';
-      const viewportTop = scrollOffset.y + sStart.y + pStart.y;
-      const itemPos = getRowOffset(currentIndex);
-      if (itemPos < viewportTop - 1) {
-        scrollToIndex(currentIndex, null, { align });
-      } else if (currentIndex > 0) {
-        scrollToIndex(currentIndex - 1, null, { align });
-      }
-    };
-
-    const navigateHorizontalForward = () => {
-      const maxColIdx = props.value.columnCount ? props.value.columnCount - 1 : props.value.items.length - 1;
-      if (snapMode === 'start') {
-        scrollToIndex(null, Math.min(maxColIdx, currentColIndex + 1), { align: 'start' });
-        return;
-      }
-      const align = snapMode || 'end';
-      const viewportRight = scrollOffset.x + viewportSize.width - (sEnd.x + pEnd.x);
-      const colEndPos = props.value.columnCount
-        ? getColumnOffset(currentEndColIndex) + getColumnWidth(currentEndColIndex)
-        : getItemOffset(currentEndColIndex) + getItemSize(currentEndColIndex);
-      if (colEndPos > viewportRight + 1) {
-        scrollToIndex(null, currentEndColIndex, { align });
-      } else if (currentEndColIndex < maxColIdx) {
-        scrollToIndex(null, currentEndColIndex + 1, { align });
-      }
-    };
-
-    const navigateHorizontalBackward = () => {
-      if (snapMode === 'end') {
-        scrollToIndex(null, Math.max(0, currentEndColIndex - 1), { align: 'end' });
-        return;
-      }
-      const align = snapMode || 'start';
-      const viewportLeft = scrollOffset.x + sStart.x + pStart.x;
-      const colStartPos = props.value.columnCount
-        ? getColumnOffset(currentColIndex)
-        : getItemOffset(currentColIndex);
-      if (colStartPos < viewportLeft - 1) {
-        scrollToIndex(null, currentColIndex, { align });
-      } else if (currentColIndex > 0) {
-        scrollToIndex(null, currentColIndex - 1, { align });
-      }
-    };
-
-    const navigateVertical = (isForward: boolean) => {
-      if (isForward) {
-        navigateVerticalForward();
-      } else {
-        navigateVerticalBackward();
-      }
-    };
-
-    const navigateHorizontal = (isForward: boolean) => {
-      if (isRtl.value ? !isForward : isForward) {
-        navigateHorizontalForward();
-      } else {
-        navigateHorizontalBackward();
-      }
-    };
-
-    const navigateCenter = (isVerticalAxis: boolean, isForward: boolean) => {
-      const isHorizontalAxis = !isVerticalAxis;
-      const centerIdx = getCenterIndex(isHorizontalAxis);
-      const maxIdx = isHorizontalAxis
-        ? (props.value.columnCount ? props.value.columnCount - 1 : props.value.items.length - 1)
-        : props.value.items.length - 1;
-      const targetIdx = isForward ? Math.min(maxIdx, centerIdx + 1) : Math.max(0, centerIdx - 1);
-      scrollToIndex(isVerticalAxis ? targetIdx : null, isHorizontalAxis ? targetIdx : null, { align: 'center' });
-    };
-
-    const navigate = (isVerticalAxis: boolean, isForward: boolean) => {
-      if (snapMode === 'center') {
-        navigateCenter(isVerticalAxis, isForward);
-        return;
-      }
-
-      if (isVerticalAxis) {
-        navigateVertical(isForward);
-      } else {
-        navigateHorizontal(isForward);
-      }
-    };
-
-    const getPageTarget = (isVerticalAxis: boolean, isForward: boolean) => {
-      const isHorizontalAxis = !isVerticalAxis;
-      const startIdx = isVerticalAxis ? currentIndex : currentColIndex;
-      const endIdx = isVerticalAxis ? currentEndIndex : currentEndColIndex;
-      const pageSize = Math.max(1, endIdx - startIdx);
-      const maxIdx = isVerticalAxis
-        ? props.value.items.length - 1
-        : (props.value.columnCount ? props.value.columnCount - 1 : props.value.items.length - 1);
-
-      if (isForward) {
-        if (snapMode === 'center') {
-          return Math.min(maxIdx, getCenterIndex(isHorizontalAxis) + pageSize);
-        }
-        if (snapMode === 'end') {
-          return Math.min(maxIdx, endIdx + pageSize);
-        }
-        // One full page forward: the item after the current last visible one.
-        return Math.min(maxIdx, endIdx + 1);
-      } else {
-        if (snapMode === 'center') {
-          return Math.max(0, getCenterIndex(isHorizontalAxis) - pageSize);
-        }
-        if (snapMode === 'start') {
-          return Math.max(0, startIdx - pageSize);
-        }
-        // One full page back: the item before the current first visible one.
-        return Math.max(0, startIdx - 1);
-      }
-    };
-
-    switch (event.key) {
-      case 'Home': {
-        event.preventDefault();
-        stopProgrammaticScroll();
-        const distance = Math.max(scrollOffset.x, scrollOffset.y);
-        const viewport = props.value.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
-        const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
-
-        scrollToIndex(0, 0, { behavior, align: 'start' });
-        break;
-      }
-      case 'End': {
-        event.preventDefault();
-        stopProgrammaticScroll();
-
-        const { totalSize } = scrollDetails.value;
-        const distance = Math.max(
-          totalSize.width - scrollOffset.x - viewportSize.width,
-          totalSize.height - scrollOffset.y - viewportSize.height,
-        );
-        const viewport = props.value.direction === 'horizontal' ? viewportSize.width : viewportSize.height;
-        const behavior = distance > 10 * viewport ? 'auto' : 'smooth';
-        // The loading slot is always rendered (hidden when idle): include its
-        // height so the last item plus the slot fit in the viewport. The extra
-        // also extends scrollToOffset's clamp, which otherwise caps at the
-        // virtual content end and would hide the slot below it.
-        const extra = getLoadingSlotSize ? getLoadingSlotSize() : 0;
-
-        if (props.value.direction === 'both') {
-          scrollToOffset(
-            totalSize.width - viewportSize.width,
-            totalSize.height - viewportSize.height + extra,
-            { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
-          );
-        } else if (props.value.direction === 'horizontal') {
-          scrollToOffset(
-            totalSize.width - viewportSize.width + extra,
-            null,
-            { behavior, ...(extra > 0 ? { endExtraX: extra } : {}) },
-          );
-        } else {
-          scrollToOffset(
-            null,
-            totalSize.height - viewportSize.height + extra,
-            { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
-          );
-        }
-        break;
-      }
-      case 'ArrowUp':
-        event.preventDefault();
-        stopProgrammaticScroll();
-        if (isVertical) {
-          navigate(true, false);
-        }
-        break;
-      case 'ArrowDown':
-        event.preventDefault();
-        stopProgrammaticScroll();
-        if (isVertical) {
-          navigate(true, true);
-        }
-        break;
-      case 'ArrowLeft':
-        event.preventDefault();
-        stopProgrammaticScroll();
-        if (isHorizontal) {
-          navigate(false, false);
-        }
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        stopProgrammaticScroll();
-        if (isHorizontal) {
-          navigate(false, true);
-        }
-        break;
-      case 'PageUp':
-        event.preventDefault();
-        stopProgrammaticScroll();
-        if (props.value.direction === 'horizontal') {
-          scrollToIndex(null, getPageTarget(false, false), { align: snapMode || 'end' });
-        } else {
-          scrollToIndex(getPageTarget(true, false), null, { align: snapMode || 'end' });
-        }
-        break;
-      case 'PageDown':
-        event.preventDefault();
-        stopProgrammaticScroll();
-        if (props.value.direction === 'horizontal') {
-          scrollToIndex(null, getPageTarget(false, true), { align: snapMode || 'start' });
-        } else {
-          scrollToIndex(getPageTarget(true, true), null, { align: snapMode || 'start' });
-        }
-        break;
+    if (!NAVIGATION_KEYS.has(event.key)) {
+      return;
     }
+
+    event.preventDefault();
+    stopProgrammaticScroll();
+
+    const { direction } = props.value;
+    const { totalSize, viewportSize, scrollOffset } = scrollDetails.value;
+    const { key } = event;
+
+    if (key === 'Home') {
+      const viewport = direction === 'horizontal' ? viewportSize.width : viewportSize.height;
+      const distance = Math.max(scrollOffset.x, scrollOffset.y);
+      scrollToIndex(0, 0, { align: 'start', behavior: distance > INSTANT_JUMP_VIEWPORTS * viewport ? 'auto' : 'smooth' });
+      return;
+    }
+
+    if (key === 'End') {
+      const viewport = direction === 'horizontal' ? viewportSize.width : viewportSize.height;
+      const distance = Math.max(
+        totalSize.width - scrollOffset.x - viewportSize.width,
+        totalSize.height - scrollOffset.y - viewportSize.height,
+      );
+      const behavior = distance > INSTANT_JUMP_VIEWPORTS * viewport ? 'auto' : 'smooth';
+      // The loading slot is always rendered (hidden when idle): include its height
+      // so the last item plus the slot fit in the viewport. The extra also extends
+      // scrollToOffset's clamp, which otherwise caps at the virtual content end and
+      // would hide the slot below it.
+      const extra = getLoadingSlotSize ? getLoadingSlotSize() : 0;
+
+      if (direction === 'both') {
+        scrollToOffset(
+          totalSize.width - viewportSize.width,
+          totalSize.height - viewportSize.height + extra,
+          { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
+        );
+      } else if (direction === 'horizontal') {
+        scrollToOffset(
+          totalSize.width - viewportSize.width + extra,
+          null,
+          { behavior, ...(extra > 0 ? { endExtraX: extra } : {}) },
+        );
+      } else {
+        scrollToOffset(
+          null,
+          totalSize.height - viewportSize.height + extra,
+          { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
+        );
+      }
+      return;
+    }
+
+    const isPageKey = key === 'PageUp' || key === 'PageDown';
+    const isVerticalAxis = isPageKey ? direction !== 'horizontal' : key === 'ArrowUp' || key === 'ArrowDown';
+    // Arrows only navigate the axis the list actually scrolls on.
+    if (!isPageKey && (isVerticalAxis ? direction === 'horizontal' : direction === 'vertical')) {
+      return;
+    }
+    const isForward = key === 'ArrowDown' || key === 'ArrowRight' || key === 'PageDown';
+
+    if (isPageKey) {
+      scrollToAxisIndex(
+        getPageTargetIndex(isVerticalAxis, isForward),
+        isVerticalAxis,
+        { align: getSnapAlignment() ?? (isForward ? 'start' : 'end') },
+      );
+      return;
+    }
+
+    navigateAxis(isVerticalAxis, isForward);
   };
 
   return {
