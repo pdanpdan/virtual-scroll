@@ -1,5 +1,144 @@
 <script setup lang="ts">
 // Static comparison page - no virtual scroll involved.
+
+type ContenderKey = 'ours' | 'vvs' | 'tanstack' | 'virtua' | 'vueuc' | 'vvsl' | 'vlist' | 'cerious';
+
+/** Feature-matrix columns: the key the score uses, and the two-line header for the narrow column. */
+const CONTENDERS: { key: ContenderKey; head: [ string, string? ]; }[] = [
+  { key: 'ours', head: [ '@pdanpdan', '/virtual-scroll' ] },
+  { key: 'vvs', head: [ 'vue-virtual-', 'scroller' ] },
+  { key: 'tanstack', head: [ '@tanstack', '/vue-virtual' ] },
+  { key: 'virtua', head: [ 'virtua' ] },
+  { key: 'vueuc', head: [ 'vueuc' ] },
+  { key: 'vvsl', head: [ 'vue-virtual-', 'scroll-list' ] },
+  { key: 'vlist', head: [ 'vlist' ] },
+  { key: 'cerious', head: [ '@ceriousdevtech/', 'vue-cerious-scroll' ] },
+];
+
+/** What a support symbol is worth in the feature score. */
+const SUPPORT_POINTS: Record<string, number> = { '✅': 1, '🟠': 0.5, '❌': 0 };
+
+interface Feature {
+  label: string;
+  /** How much of a library the capability is: 3 an engine of its own, 2 a built-in subsystem, 1 table stakes. */
+  weight: number;
+  /** Trailing detail, rendered in code font. */
+  code?: string;
+  /** One support symbol per contender, in `CONTENDERS` order. */
+  cells: string;
+}
+
+/** The feature matrix, the only place a support level is stated. */
+const FEATURES: Feature[] = [
+  { label: 'Vertical list', weight: 1, cells: '✅✅✅✅✅✅✅✅' },
+  { label: 'Horizontal list', weight: 2, cells: '✅✅✅✅❌✅✅❌' },
+  { label: 'Two-dimensional grid', weight: 3, cells: '✅❌🟠🟠❌❌🟠❌' },
+  { label: 'Window (page) scrolling', weight: 2, cells: '✅❌✅✅❌✅✅❌' },
+  { label: 'Native scroll container (browser wheel/touch physics)', weight: 2, cells: '✅✅✅✅✅✅✅❌' },
+  { label: 'Fixed item sizes', weight: 1, cells: '✅✅✅✅✅✅✅✅' },
+  { label: 'Measured dynamic item sizes', weight: 2, cells: '✅✅✅✅✅🟠✅✅' },
+  { label: 'Measured rows without size estimates (no default-size first paint)', weight: 2, cells: '❌❌❌❌❌❌❌✅' },
+  { label: 'RTL', weight: 2, cells: '✅❌🟠✅❌❌❌❌' },
+  { label: 'Sticky elements / headers', weight: 2, cells: '✅❌❌❌❌❌✅❌' },
+  { label: 'Keyboard navigation', weight: 2, cells: '✅❌❌❌❌❌✅✅' },
+  { label: 'Scroll snapping', weight: 2, cells: '✅❌🟠❌❌❌🟠❌' },
+  { label: 'Custom / virtual scrollbars', weight: 2, cells: '✅❌🟠❌❌❌✅❌' },
+  { label: 'Infinite loading', weight: 2, cells: '✅🟠✅✅🟠🟠✅🟠' },
+  { label: 'Scroll restoration (prepend)', weight: 2, cells: '✅❌🟠✅❌❌🟠❌' },
+  { label: 'Smooth programmatic scroll', weight: 1, cells: '✅✅✅✅✅❌✅❌' },
+  { label: 'SSR support', weight: 2, cells: '✅❌✅✅❌❌❌❌' },
+  { label: 'Beyond browser max element height', weight: 3, cells: '✅❌❌❌❌❌✅❌' },
+  { label: 'Table virtualization', weight: 3, cells: '✅✅🟠🟠❌❌✅✅' },
+  { label: 'Masonry layout (one scroll container)', weight: 3, cells: '✅❌❌❌❌❌✅✅' },
+  { label: 'Real table rows in flow + auto-size columns', weight: 3, cells: '✅🟠❌❌❌❌❌✅' },
+  { label: 'Index-only lists (no per-row data objects)', weight: 2, cells: '✅❌✅❌❌❌🟠✅' },
+  { label: 'Custom item identity keys', weight: 1, code: 'getItemKey / getKey', cells: '❌❌✅✅❌❌❌❌' },
+  { label: 'Automatic ARIA roles & item indices', weight: 2, cells: '✅❌❌❌❌❌✅❌' },
+  { label: 'Official siblings for other frameworks (React, Solid, …)', weight: 1, cells: '❌❌✅✅❌❌✅✅' },
+  { label: 'TypeScript', weight: 1, cells: '✅✅✅✅✅❌✅✅' },
+];
+
+/** The rows with the symbols split, so the matrix can pick a column. */
+const MATRIX = FEATURES.map((feature) => ({ ...feature, cells: [ ...feature.cells ] }));
+
+/** What each weight means, for the matrix tooltips and the legend. */
+const WEIGHT_SCALE: Record<number, string> = {
+  1: 'table stakes',
+  2: 'a built-in subsystem',
+  3: 'an engine of its own',
+};
+
+/** The most a contender can score: every feature at full weight. */
+const MAX_SCORE = FEATURES.reduce((total, feature) => total + feature.weight, 0);
+
+/** A contender's score: each feature counted at its weight, half for a partial one. */
+const SCORES = CONTENDERS.map((contender, column) =>
+  MATRIX.reduce((score, feature) => score + feature.weight * (SUPPORT_POINTS[ feature.cells[ column ] ?? '' ] ?? 0), 0));
+
+const columnOf = (key: ContenderKey) => CONTENDERS.findIndex((contender) => contender.key === key);
+const scoreFor = (key: ContenderKey) => SCORES[ columnOf(key) ] ?? 0;
+const percent = (score: number) => `${ Math.round((score / MAX_SCORE) * 100) }%`;
+const percentFor = (key: ContenderKey) => percent(scoreFor(key));
+
+/** This package's points per feature, by label, so the entry gaps below can be priced. */
+const OUR_POINTS = new Map<string, number>(
+  MATRIX.map((feature) => [ feature.label, feature.weight * (SUPPORT_POINTS[ feature.cells[ columnOf('ours') ] ?? '' ] ?? 0) ] as const),
+);
+
+/** What the lean `./core` component compiles out (the README's lean build section). */
+const CORE_GAPS: string[] = [
+  'Sticky elements / headers',
+  'Keyboard navigation',
+  'Scroll snapping',
+  'Custom / virtual scrollbars',
+  'Infinite loading',
+  'Scroll restoration (prepend)',
+];
+
+/** What only the components provide, so no amount of headless wiring reaches it. */
+const COMPONENT_GAPS: string[] = [
+  'Table virtualization',
+  'Masonry layout (one scroll container)',
+  'Real table rows in flow + auto-size columns',
+  'Automatic ARIA roles & item indices',
+];
+
+/** On top of those, what the headless engine leaves to the exported composables and components. */
+const HEADLESS_GAPS: string[] = [
+  ...CORE_GAPS,
+  'Measured dynamic item sizes',
+  'Beyond browser max element height',
+  ...COMPONENT_GAPS,
+];
+
+/** The usual headless setup: the engine plus the observer, keyboard and scrollbar composables. */
+const HEADLESS_WIRED_GAPS: string[] = [
+  ...CORE_GAPS.filter((label) => label !== 'Keyboard navigation' && label !== 'Custom / virtual scrollbars'),
+  'Beyond browser max element height',
+  ...COMPONENT_GAPS,
+];
+
+/** A row's score: the package's own, less the features that entry does not ship. */
+function entryScore(gaps: string[]) {
+  return gaps.reduce((score, label) => {
+    const points = OUR_POINTS.get(label);
+    if (points === undefined) {
+      throw new Error(`Unknown feature in an entry gap list: ${ label }`);
+    }
+    return score - points;
+  }, scoreFor('ours'));
+}
+
+/** The entries of this package, in the order the table lists them. */
+const ENTRY_SCORES = {
+  full: scoreFor('ours'),
+  core: entryScore(CORE_GAPS),
+  composable: entryScore(HEADLESS_GAPS),
+  /** The engine with the measurement, keyboard and scrollbar composables a headless build adds. */
+  headlessWired: entryScore(HEADLESS_WIRED_GAPS),
+  /** The engine with every exported observer, extension and composable wired in by hand. */
+  wired: entryScore(COMPONENT_GAPS),
+};
 </script>
 
 <template>
@@ -39,72 +178,116 @@
           <th>Published</th>
           <th>GitHub stars</th>
           <th>Min / gzip</th>
+          <th title="✅ 1, 🟠 1/2, ❌ 0 over every feature below">Feature score</th>
           <th>API style</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="font-bold whitespace-nowrap">@pdanpdan/virtual-scroll</td>
-          <td><code>2.1.1</code> <span class="opacity-60">(next)</span></td>
-          <td><span class="opacity-60">unreleased</span></td>
-          <td>12</td>
-          <td>66.9 / 20.8 kB</td>
+          <td class="whitespace-nowrap"><code>2.1.1</code></td>
+          <td class="whitespace-nowrap">2026-09-22</td>
+          <td class="whitespace-nowrap">12</td>
+          <td class="whitespace-nowrap">78.8 / 22.8 kB</td>
+          <td class="whitespace-nowrap">
+            {{ ENTRY_SCORES.full }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.full) }})</span>
+          </td>
           <td>Component + composables + extensions, plus a lean <code>/core</code> entry</td>
         </tr>
         <tr>
+          <td class="font-bold whitespace-nowrap">↳ <code>/core</code> component</td>
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap">60.0 / 17.3 kB</td>
+          <td class="whitespace-nowrap">
+            {{ ENTRY_SCORES.core }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.core) }})</span>
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <td class="font-bold whitespace-nowrap">↳ headless composable</td>
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap">32.5 / 10.2 kB</td>
+          <td class="whitespace-nowrap">
+            {{ ENTRY_SCORES.composable }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.composable) }})</span>
+          </td>
+          <td>Engine only - the observers, extensions and keyboard/scrollbar composables are separate imports</td>
+        </tr>
+        <tr>
+          <td class="font-bold">↳ headless + observers, keyboard, scrollbar</td>
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap" />
+          <td class="whitespace-nowrap">41.2 / 13.2 kB</td>
+          <td class="whitespace-nowrap">
+            {{ ENTRY_SCORES.headlessWired }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percent(ENTRY_SCORES.headlessWired) }})</span>
+          </td>
+          <td>Engine + the measurement, keyboard and scrollbar composables</td>
+        </tr>
+        <tr>
           <td class="font-bold whitespace-nowrap">vue-virtual-scroller</td>
-          <td><code>3.0.5</code></td>
-          <td>2026-08-12</td>
-          <td>10,797</td>
-          <td>27.1 / 10.0 kB</td>
+          <td class="whitespace-nowrap"><code>3.0.5</code></td>
+          <td class="whitespace-nowrap">2026-08-12</td>
+          <td class="whitespace-nowrap">10,797</td>
+          <td class="whitespace-nowrap">29.3 / 10.7 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('vvs') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vvs') }})</span></td>
           <td>Components (Scroller, RecycleScroller, DynamicScroller, TableScroller)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">@tanstack/vue-virtual</td>
-          <td><code>3.13.39</code></td>
-          <td>2026-09-14</td>
-          <td>7,119 (monorepo)</td>
-          <td>24.1 / 7.3 kB</td>
+          <td class="whitespace-nowrap"><code>3.13.39</code></td>
+          <td class="whitespace-nowrap">2026-09-14</td>
+          <td class="whitespace-nowrap">7,119 <span class="opacity-60 block">(monorepo)</span></td>
+          <td class="whitespace-nowrap">24.7 / 7.5 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('tanstack') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('tanstack') }})</span></td>
           <td>Headless composable (<code>useVirtualizer</code>)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">virtua</td>
-          <td><code>0.52.7</code></td>
-          <td>2026-09-22</td>
-          <td>3,748</td>
-          <td>9.5 / 4.6 kB</td>
+          <td class="whitespace-nowrap"><code>0.52.7</code></td>
+          <td class="whitespace-nowrap">2026-09-22</td>
+          <td class="whitespace-nowrap">3,748</td>
+          <td class="whitespace-nowrap">9.8 / 4.7 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('virtua') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('virtua') }})</span></td>
           <td>Components (VList, VGrid) + handle</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">vueuc</td>
-          <td><code>0.4.66</code></td>
-          <td>2026-08-19</td>
-          <td>310</td>
-          <td>23.8 / 9.0 kB</td>
+          <td class="whitespace-nowrap"><code>0.4.66</code></td>
+          <td class="whitespace-nowrap">2026-08-19</td>
+          <td class="whitespace-nowrap">310</td>
+          <td class="whitespace-nowrap">24.4 / 9.2 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('vueuc') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vueuc') }})</span></td>
           <td>Component (VVirtualList)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">vue-virtual-scroll-list</td>
-          <td><code>2.3.5</code></td>
-          <td>2023-05-29</td>
-          <td>4,505</td>
-          <td>14.9 / 4.8 kB</td>
+          <td class="whitespace-nowrap"><code>2.3.5</code></td>
+          <td class="whitespace-nowrap">2023-05-29</td>
+          <td class="whitespace-nowrap">4,505</td>
+          <td class="whitespace-nowrap">15.3 / 4.9 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('vvsl') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vvsl') }})</span></td>
           <td>Component</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">vlist <span class="opacity-50">(+ vlist-vue)</span></td>
-          <td><code>2.8.1</code></td>
-          <td>2026-09-15</td>
-          <td>17</td>
-          <td>101.1 / 34.7 kB</td>
+          <td class="whitespace-nowrap"><code>2.8.1</code></td>
+          <td class="whitespace-nowrap">2026-09-15</td>
+          <td class="whitespace-nowrap">17</td>
+          <td class="whitespace-nowrap">113.1 / 37.2 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('vlist') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('vlist') }})</span></td>
           <td>Plugin core (<code>createVList</code>) + Vue adapter (<code>useVList</code>)</td>
         </tr>
         <tr>
           <td class="font-bold whitespace-nowrap">@ceriousdevtech/vue-cerious-scroll</td>
-          <td><code>1.2.0</code></td>
-          <td>2026-09-21</td>
-          <td>16</td>
-          <td>99.0 / 26.3 kB</td>
+          <td class="whitespace-nowrap"><code>1.2.0</code></td>
+          <td class="whitespace-nowrap">2026-09-21</td>
+          <td class="whitespace-nowrap">16</td>
+          <td class="whitespace-nowrap">101.4 / 27.0 kB</td>
+          <td class="whitespace-nowrap">{{ scoreFor('cerious') }} / {{ MAX_SCORE }} <span class="opacity-60">({{ percentFor('cerious') }})</span></td>
           <td>Component + composable</td>
         </tr>
       </tbody>
@@ -112,19 +295,23 @@
   </div>
 
   <p class="text-sm opacity-60 mb-12 -mt-6">
-    Bundle sizes: the smallest import that renders a list from each package's Vue entry, tree-shaken,
+    Bundle sizes: each library's entry for rendering a list, tree-shaken,
     dependencies bundled and Vue external - installed from npm, bundled with esbuild
-    (<code>--minify</code>), gzipped at level 9. For the component libraries that is one component
-    (<code>VirtualScroll</code>, <code>RecycleScroller</code>, <code>VList</code>,
-    <code>VVirtualList</code>, <code>VirtualList</code>, <code>CeriousScroll</code>); for
+    (<code>--minify</code>), minified and gzipped at level 9, reported in kB (1000 bytes). Each number
+    includes the stylesheet that entry needs: ours and <code>vue-virtual-scroller</code> ship theirs as a
+    separate import, while <code>vueuc</code>, <code>vlist</code> and <code>vue-cerious-scroll</code> inject
+    theirs from JavaScript. For the component libraries that is one component
+    (<code>RecycleScroller</code>, <code>VList</code>, <code>VVirtualList</code>, <code>VirtualList</code>,
+    <code>CeriousScroll</code>); for
     <code>@tanstack/vue-virtual</code> it is <code>useVirtualizer</code> including the
     <code>@tanstack/virtual-core</code> it depends on, and for <code>vlist</code> it is
-    <code>vlist-vue</code>'s <code>useVList</code>, which through <code>vlist/config</code> pulls in every one
-    of its seventeen plugins - importing the core and plugins by hand instead is 10.2&nbsp;kB gzip for
-    the base and 12.2&nbsp;kB with the scrollbar. Ours covers all six built-in extensions; the lean
-    <code>/core</code> entry is 15.4&nbsp;kB gzip, and the <code>useVirtualScroll</code> engine alone, for
-    writing your own markup, is 10.1&nbsp;kB. Our row is the upcoming release, measured from the current
-    build; every other row is the published version listed.
+    <code>vlist-vue</code>'s <code>useVList</code> (2.6.0 over the 2.8.1 core), which through
+    <code>vlist/config</code> pulls in every one of its seventeen plugins - building the same list by hand
+    from <code>createVList</code> and the plugins is 12.3&nbsp;kB gzip, 14.3&nbsp;kB once the scrollbar plugin
+    is added. Ours is listed entry by entry - the package root with all six built-in extensions, the lean
+    <code>/core</code> component, the headless <code>useVirtualScroll</code> composable, and that
+    composable with the observer, keyboard and scrollbar ones - and each row's
+    score counts only the features that entry ships. Every row is the published version listed.
     <code>vue-cerious-scroll</code> bundles its runtime dependency
     (<code>@ceriousdevtech/cerious-scroll</code>) the way a consumer would.
   </p>
@@ -136,309 +323,39 @@
       <thead>
         <tr>
           <th class="w-56 @4xl:w-64">Feature</th>
-          <td role="columnheader" class="text-center">@pdanpdan<br />/virtual-scroll</td>
-          <td role="columnheader" class="text-center">vue-virtual-<br />scroller</td>
-          <td role="columnheader" class="text-center">@tanstack<br />/vue-virtual</td>
-          <td role="columnheader" class="text-center">virtua</td>
-          <td role="columnheader" class="text-center">vueuc</td>
-          <td role="columnheader" class="text-center">vue-virtual-<br />scroll-list</td>
-          <td role="columnheader" class="text-center">vlist</td>
-          <td role="columnheader" class="text-center">@ceriousdevtech/<br />vue-cerious-scroll</td>
+          <td v-for="contender in CONTENDERS" :key="contender.key" role="columnheader" class="text-center">
+            {{ contender.head[0] }}<template v-if="contender.head[1]"><br />{{ contender.head[1] }}</template>
+          </td>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <th scope="row" class="font-medium">Vertical list</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Horizontal list</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Two-dimensional grid</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Window (page) scrolling</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Native scroll container (browser wheel/touch physics)</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Fixed item sizes</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Measured dynamic item sizes</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Measured rows without size estimates (no default-size first paint)</th>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">RTL</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Sticky elements / headers</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Keyboard navigation</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Scroll snapping</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Custom / virtual scrollbars</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Infinite loading</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">🟠</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Scroll restoration (prepend)</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Smooth programmatic scroll</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">SSR support</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Beyond browser max element height</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Table virtualization</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Masonry layout (one scroll container)</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Real table rows in flow + auto-size columns</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Index-only lists (no per-row data objects)</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">🟠</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Custom item identity keys (<code>getItemKey</code> / <code>getKey</code>)</th>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Automatic ARIA roles &amp; item indices</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">Official siblings for other frameworks (React, Solid, &hellip;)</th>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-        </tr>
-        <tr>
-          <th scope="row" class="font-medium">TypeScript</th>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">❌</td>
-          <td class="text-center">✅</td>
-          <td class="text-center">✅</td>
+        <tr v-for="feature in MATRIX" :key="feature.label">
+          <th scope="row" class="font-medium" :title="`${ feature.weight } - ${ WEIGHT_SCALE[ feature.weight ] }`">
+            {{ feature.label }}<template v-if="feature.code"> (<code>{{ feature.code }}</code>)</template>
+          </th>
+          <td v-for="(contender, column) in CONTENDERS" :key="contender.key" class="text-center">
+            {{ feature.cells[column] }}
+          </td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" class="font-medium">
+            Feature score <span class="opacity-60">of {{ MAX_SCORE }}</span>
+          </th>
+          <td v-for="contender in CONTENDERS" :key="contender.key" class="text-center font-medium">
+            {{ scoreFor(contender.key) }}
+          </td>
+        </tr>
+      </tfoot>
     </table>
   </div>
 
   <p class="text-xs opacity-70 mb-12 -mt-6">
     ✅ built-in &nbsp;•&nbsp; 🟠 partial, limited, or requires custom code &nbsp;•&nbsp; ❌ not supported
+    <br />
+    Feature score weights each feature by how much of a library it is - 3 an engine of its own, 2 a built-in
+    subsystem, 1 table stakes - with ✅ counting full weight, 🟠 half and ❌ none, out of {{ MAX_SCORE }}.
   </p>
 
   <h2 class="docs-prop-header text-secondary">Notes on the Orange Cells</h2>
@@ -541,7 +458,7 @@
             navigation and list recreation, not across an insert above the viewport. The table renders div rows
             with resizable columns, not real table rows with content-sized columns. Rows have to exist as an
             array (the examples build <code>Array.from({ length: n })</code>), though the instance exposes
-            <code>setGetItemFn</code> for index-driven rows. Its 34.7&nbsp;kB here is the adapter import:
+            <code>setGetItemFn</code> for index-driven rows. Its 37.2&nbsp;kB here is the adapter import:
             <code>vlist/config</code> pulls in all seventeen plugins, so the smaller numbers in its docs assume
             importing plugins by hand.
           </p>
@@ -561,9 +478,16 @@
         dedicated components (heights from a model or measured from the DOM, single scroll container) on top of a native
         scroll container. Index-only datasets with flat memory, automatic ARIA roles, virtual scrollbars and
         a headless composable + extensions surface round out the picture. It is also one of the larger
-        bundles here - 20.8&nbsp;kB gzip for the component, behind only the two APIs that ship their
-        whole plugin set, though its lean <code>/core</code> entry drops that to 15.4&nbsp;kB and the engine
-        alone is 10.1&nbsp;kB - and at 12 stars it has no community to fall back on.
+        bundles here - 22.8&nbsp;kB gzip for the package root and 17.3&nbsp;kB for the lean
+        <code>/core</code> component, behind only <code>vlist</code> and <code>vue-cerious-scroll</code>.
+        The headless engine is 10.2&nbsp;kB at {{ ENTRY_SCORES.composable }} of {{ MAX_SCORE }} points,
+        13.2&nbsp;kB at {{ ENTRY_SCORES.headlessWired }} with the observer, keyboard and scrollbar
+        composables wired in, and 16.0&nbsp;kB at {{ ENTRY_SCORES.wired }} with every exported extension
+        too - 1.9, 1.9 and 2.2 points per kB gzip. Marginal bytes buy the most from the extensions (5.1
+        points per kB) and the least from keyboard navigation (1.3), which is why the component entries
+        score better per kB than the headless ones. Per kB the small single-purpose libraries still lead
+        (<code>virtua</code> 5.3, <code>@tanstack/vue-virtual</code> 3.6) - a ratio nothing with these many
+        features can match. At 12 stars it has no community to fall back on.
       </li>
       <li>
         <strong>@ceriousdevtech/vue-cerious-scroll</strong> - the only other Vue entry that ships real
@@ -571,14 +495,14 @@
         vertical-only - no grid, no horizontal mode, no window scrolling, RTL, sticky, snapping, SSR or
         beyond-browser-max support - and it scrolls on its own hidden-overflow host instead of the
         browser's scrollport. The heaviest per-view code here after <code>vlist</code>
-        (26.3&nbsp;kB gzip, its runtime dependency bundled) and at 16 stars it has no community either.
+        (27.0&nbsp;kB gzip, its runtime dependency bundled) and at 16 stars it has no community either.
       </li>
       <li>
         <strong>vlist</strong> - the other batteries-included entry, and the closest in scope: a
         framework-agnostic core with official Vue, React, Svelte and Solid adapters, plus plugins for grid,
         masonry, table, tree, groups, selection, search, sortable, snapshots, transition, carousel and async
-        data. Its core is the smallest serious one when you import plugins by hand (10.2&nbsp;kB, plus
-        1-6&nbsp;kB per plugin), the default
+        data. Its core is the smallest serious one when you import plugins by hand (12.3&nbsp;kB with the
+        stylesheet, 14.3&nbsp;kB once the scrollbar plugin is added), the default
         scrollbar is already an overlay, document scrolling is a plugin, and 1M+ items work through its
         bounded and synthetic scroll modes (the older <code>scale()</code> plugin is now a deprecation stub).
         What it does not have is a second axis, RTL, snapping outside the carousel, real table rows, or
@@ -630,7 +554,7 @@
   </div>
 
   <p class="text-xs opacity-50">
-    Sources: npm registry, GitHub API and project docs, checked on 2026-09-20.
+    Sources: npm registry, GitHub API and project docs, checked on 2026-09-22.
     <a href="https://www.npmjs.com/package/vue-virtual-scroller" target="_blank" rel="noopener" class="link">vue-virtual-scroller</a>
     &nbsp;•&nbsp;
     <a href="https://www.npmjs.com/package/@tanstack/vue-virtual" target="_blank" rel="noopener" class="link">@tanstack/vue-virtual</a>
