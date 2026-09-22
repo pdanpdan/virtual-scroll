@@ -48,7 +48,6 @@ const props = withDefaults(defineProps<Props<T>>(), {
   restoreScrollOnPrepend: false,
   debug: false,
   virtualScrollbar: false,
-  itemRole: undefined,
 });
 
 const emit = defineEmits<{

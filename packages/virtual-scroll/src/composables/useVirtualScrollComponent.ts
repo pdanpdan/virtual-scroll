@@ -6,11 +6,10 @@ import type {
   VirtualScrollComponentProps,
   VirtualScrollProps,
 } from '../types';
-import type { Component, MaybeRefOrGetter } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 
 import { computed, nextTick, ref, toValue, useId, watch } from 'vue';
 
-import VirtualScrollbars from '../components/VirtualScrollbars.vue';
 import {
   useCoordinateScalingExtension,
   useInfiniteLoadingExtension,
@@ -231,10 +230,6 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
   } = useVirtualScroll(virtualScrollProps, extensions);
 
   const useVirtualScrolling = computed(() => scaleX.value !== 1 || scaleY.value !== 1);
-
-  /** The scrollbar overlay, or `null` in the lean build. */
-  /* v8 ignore next -- the lean build is asserted by tests/build-output.test.ts */
-  const ScrollbarOverlay: Component | null = IS_CORE_BUILD ? null : VirtualScrollbars;
 
   /* The three defaults below only survive in the lean build; both builds are
      asserted by tests/build-output.test.ts. */
@@ -690,8 +685,6 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
     activeDescendant,
 
     // --- Scrollbars ---
-    /** Built-in scrollbar overlay component, `null` in the lean build. */
-    ScrollbarOverlay,
     /** Whether the custom scrollbars replace the native one. */
     showVirtualScrollbars,
     /** Slot props of the vertical scrollbar. */

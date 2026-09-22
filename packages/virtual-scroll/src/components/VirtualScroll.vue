@@ -23,6 +23,7 @@ import { computed, toRefs } from 'vue';
 
 import { useVirtualScrollComponent } from '../composables/useVirtualScrollComponent';
 import { DEFAULT_BUFFER, DEFAULT_LOAD_DISTANCE } from '../types';
+import VirtualScrollbars from './VirtualScrollbars.vue';
 
 export interface Props<T = unknown> extends VirtualScrollComponentProps<T> {}
 
@@ -48,7 +49,6 @@ const props = withDefaults(defineProps<Props<T>>(), {
   restoreScrollOnPrepend: false,
   debug: false,
   virtualScrollbar: false,
-  itemRole: undefined,
 });
 
 const emit = defineEmits<{
@@ -166,7 +166,6 @@ const {
   setActiveIndex,
   handleItemActivate,
   activeDescendant,
-  ScrollbarOverlay,
   showVirtualScrollbars,
   verticalScrollbarProps,
   horizontalScrollbarProps,
@@ -206,6 +205,21 @@ const {
   onLoad: (direction, details) => emit('load', direction, details),
   onItemActivate: (index, item) => emit('itemActivate', index, item),
 });
+
+/**
+ * Whether this is the lean `./core` build, where the optional wiring (keyboard,
+ * custom scrollbars, snapping, sticky items, infinite loading and prepend
+ * restoration) is compiled out. Replaced by the bundler; `false` in the full
+ * build, in tests and in dev.
+ */
+/* v8 ignore next 2 -- the flag is undefined outside the two builds (vite.config.core.ts) */
+const IS_CORE_BUILD
+  /* eslint-disable-next-line no-undef -- injected by the bundler (see src/globals.d.ts) */
+  = typeof __VS_CORE_BUILD__ === 'boolean' && __VS_CORE_BUILD__;
+
+/** The scrollbar overlay, or `null` in the lean build. */
+/* v8 ignore next -- the lean build is asserted by tests/build-output.test.ts */
+const ScrollbarOverlay = IS_CORE_BUILD ? null : VirtualScrollbars;
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {

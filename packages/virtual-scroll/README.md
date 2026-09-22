@@ -144,7 +144,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
 *   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` - only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
-A tree-shaken `<VirtualScroll>` is 17.8 KB gzipped from `./core` and 24.0 KB from the package root (`pnpm size`, which minifies with Vite's esbuild transform; the comparison page bundles with esbuild and reports both entries including the stylesheet, 17.3 kB and 22.8 kB); `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
+A tree-shaken `<VirtualScroll>` is 17.8 KB gzipped from `./core` and 23.9 KB from the package root (`pnpm size`, which minifies with Vite's esbuild transform; the comparison page bundles with esbuild and reports both entries including the stylesheet, 17.1 kB and 22.6 kB); `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
 
 ## Data-less Lists (Index-only Rows)
 
@@ -195,7 +195,7 @@ Items are rendered at their VU size and positioned using `translateY()` (or `tra
 - **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
 - **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
 - **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
-- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 24.0 KB, `./core` 17.8 KB, headless `useVirtualScroll` 11.4 KB, `VirtualScrollTable` 25.6 KB, `./core` `VirtualScrollTable` 20.6 KB, `VirtualScrollMasonry` 7.6 KB).
+- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 23.9 KB, `./core` 17.8 KB, headless `useVirtualScroll` 11.4 KB, `VirtualScrollTable` 25.1 KB, `./core` `VirtualScrollTable` 20.5 KB, `VirtualScrollMasonry` 7.6 KB).
 
 ## Key Features
 
