@@ -1,7 +1,7 @@
 {
   "name": "@pdanpdan/virtual-scroll",
   "type": "module",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Virtual scrolling for Vue 3: only the rows near the viewport are in the DOM.",
   "author": "Dan Popescu <pdan.popescu@gmail.com>",
   "license": "MIT",

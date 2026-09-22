@@ -1,5 +1,16 @@
 # Changelog
 
+# [2.2.0](https://github.com/pdanpdan/virtual-scroll/compare/v2.1.1...v2.2.0) (2026-09-22)
+
+### Features
+
+* **playground:** measure the comparison page instead of transcribing it ([45c2a33](https://github.com/pdanpdan/virtual-scroll/commit/45c2a33345fb36690a91938e933e75f7d9c109eb))
+
+### Performance Improvements
+
+* **virtual-scroll:** cut the keyboard handler's size and per-key allocations ([138dfba](https://github.com/pdanpdan/virtual-scroll/commit/138dfba92fd20215f4763cb855f664ce307ff44b))
+* **virtual-scroll:** keep the scrollbar overlay out of the table entries ([c12d0a7](https://github.com/pdanpdan/virtual-scroll/commit/c12d0a7a611af3e9506d9d05f63e006d32e66766))
+
 ## [2.1.1](https://github.com/pdanpdan/virtual-scroll/compare/v2.1.0...v2.1.1) (2026-09-22)
 
 ### Bug Fixes
