@@ -299,17 +299,21 @@ defineExpose({
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
+    /* Keeps the column layout stable when the native scrollbar appears and
+       disappears, i.e. while `virtualScrollbar` is off. Browsers drop the
+       gutter as soon as the scrollbar is hidden below. */
     scrollbar-gutter: stable;
 
+    /* The native scrollbar is removed outright, like the other two components:
+       the content keeps the full width, no invisible scrollbar stays behind to
+       be grabbed, and the virtual bar sits flush with the container edge. The
+       columns re-flow once if the prop is toggled at runtime. */
     &.virtual-scroll--hide-scrollbar {
-      scrollbar-color: transparent transparent;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
 
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: transparent;
+      &::-webkit-scrollbar {
+        display: none;
       }
     }
   }
