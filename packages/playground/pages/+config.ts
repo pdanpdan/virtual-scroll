@@ -5,6 +5,7 @@ import vikeVue from 'vike-vue/config';
 export default {
   ssr: true,
   prerender: true,
+  precompress: true,
   trailingSlash: true,
 
   title: 'Virtual Scroll',
