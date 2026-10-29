@@ -204,12 +204,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           slot will actually render.
         </p>
 
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
-        </p>
-
         <CodeBlock
           class="guide-code-block"
           lang="ts"

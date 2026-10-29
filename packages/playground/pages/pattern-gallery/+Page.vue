@@ -151,12 +151,12 @@ const {
         <h3>1. Decide your virtualization unit: a row, not a photo</h3>
         <p>
           The scroll range counts <em>items</em>. If each photo were its own item, a wide grid would need two scroll axes and a
-          row could end up half-mounted. The simpler, common approach is to group one row's photos into a single item and
+          row could end up half-mounted. The common approach is to group one row's photos into a single item and
           virtualize over <code>ceil(photoCount / columns)</code> row items; each mounted item paints all its cells with CSS
           grid. Choose this when your grid has a fixed column count and uniform rows. If images must flow across
           both axes independently, the library offers a bidirectional <code>direction=&quot;both&quot;</code> grid with
           <code>column-count</code>/<code>column-width</code>, or the dedicated <code>VirtualScrollMasonry</code> component for a
-          real unequal-height masonry layout - reserve hand-rolled cell math for cases neither covers.
+          real unequal-height masonry layout - use hand-rolled cell math only when neither applies.
         </p>
 
         <CodeBlock

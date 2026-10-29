@@ -169,7 +169,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
       <ImplementationGuide>
         <p>
           A virtualized list normally mounts only a small, viewport-sized window - and when the page is server-rendered there is
-          no browser layout yet, so a plain render would emit an empty scroll box that crawlers and no-JS clients can never read.
+          no browser layout yet, so a plain render emits an empty scroll box: crawlers and no-JS clients get no rows.
           To virtualize for the server you instead pick which rows (and, in a grid, columns) should already exist as real static
           HTML, describe them with the <code>ssrRange</code> prop, and let the component scroll to that range once the client
           hydrates. Because the same range drives the server output and the first client render, Vue hydrates against an
@@ -189,12 +189,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           effect. The range is your chosen first paint; it does not have to begin at index <code>0</code>, because the component
           scrolls to it on hydration. Keep it small enough to be a sensible initial paint - the client virtualizes everything
           around it.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock
@@ -360,7 +354,7 @@ const ssrRange = { start: 100, end: 115, colStart: 50, colEnd: 70 };
         <p>
           The component itself is SSR-safe - scroll listeners and its <code>ResizeObserver</code> attach only inside
           <code>onMounted</code>, and it starts with <code>isHydrated = false</code>, so nothing touches <code>window</code> while
-          rendering on the server. What <em>you</em> run during that render must be careful too: loading <code>items</code>,
+          rendering on the server. Code run during that render must follow the same rule: loading <code>items</code>,
           computing <code>ssrRange</code>, or anything in the slot for the pre-rendered slice must not read
           <code>window</code>/<code>location</code>/<code>matchMedia</code>, and the first client render must be byte-identical to
           the server output. Keep range and row content deterministic - no client-only randomness, timestamps, or

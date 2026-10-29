@@ -126,9 +126,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          Usually <code>&lt;VirtualScroll&gt;</code> renders its own scrollable host and virtualizes inside it. Sometimes you
-          want the list to live directly in the page so that the browser window itself scrolls - items pass under your normal
-          page chrome, with headers and footers scrolling past naturally. The mechanism that enables this is the
+          Usually <code>&lt;VirtualScroll&gt;</code> renders its own scrollable host and virtualizes inside it. A page-level
+          list needs the browser window to scroll instead, so headers and footers move with the page. The mechanism that enables this is the
           <code>container</code> prop: it tells the engine which element actually scrolls, and it may be another
           <code>HTMLElement</code> or the browser <code>window</code>/<code>body</code>. The rows are still virtualized (only the
           visible window is mounted), and uniform heights keep their placement O(1) arithmetic.
@@ -137,10 +136,9 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <h3>1. Decide who scrolls: the host or another element</h3>
         <p>
           <code>container</code> defaults to the component's own host element, which gives you a self-contained, internal
-          scroller. Pass a different element or the <code>window</code>/<code>body</code> to virtualize against whatever actually
-          scrolls - handy when the list must flow with the page rather than sit in a fixed-height box. Because the scroller is
-          now outside the component, the component must be told about it explicitly; this is a case where the library's default
-          ("the host scrolls") is not what you want.
+          scroller. Pass a different element or the <code>window</code>/<code>body</code> to virtualize against what actually scrolls,
+          for example when the list must flow with the page rather than sit in a fixed-height box. The scroller is then outside
+          the component, so the component must be told about it explicitly.
         </p>
 
         <h3>2. Wire the window client-side and let the host grow</h3>

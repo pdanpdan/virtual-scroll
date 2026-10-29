@@ -11,7 +11,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
       <div>
         <h1 class="text-primary">Virtual Scroll</h1>
         <p class="text-base @4xl:text-xl opacity-60 font-medium mt-1">
-          Only the rows near the viewport are in the DOM, so lists, grids, tables and masonry layouts stay fast however long they get.
+          Only the rows near the viewport are in the DOM. The same library covers lists, grids, tables and masonry.
         </p>
       </div>
     </div>
@@ -35,8 +35,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
           Documentation
         </h2>
         <p class="text-base @4xl:text-lg opacity-80 max-w-4xl">
-          Props, slots, composables and types, plus the parts that need more than a table: sizing, performance,
-          authoring recycled rows, SSR, tables and masonry.
+          Props, slots, composables and types, with sections on sizing, recycled rows, SSR, tables and masonry.
         </p>
         <div class="card-actions mt-8">
           <AppLink v-slot="{ href }" href="/docs">
@@ -44,7 +43,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
               :href
               class="btn btn-accent btn-md @4xl:btn-lg px-10 shadow-lg shadow-accent/20 font-black small-caps tracking-widest"
             >
-              Get Started
+              Open Documentation
             </a>
           </AppLink>
         </div>
@@ -67,7 +66,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
           Configurator / Code Generator
         </h2>
         <p class="text-base @4xl:text-lg opacity-80 max-w-4xl">
-          Select the features you need and generate complete typed Vue code: a component, a composable, or a CodePen.
+          Select the features you need and generate a TypeScript component, a composable or a CodePen.
         </p>
         <div class="card-actions mt-8">
           <AppLink v-slot="{ href }" href="/configurator">
@@ -99,7 +98,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
           Comparison with Alternatives
         </h2>
         <p class="text-base @4xl:text-lg opacity-80 max-w-4xl">
-          How this library stacks up against other Vue 3 virtualization solutions.
+          Feature matrix and bundle sizes for other Vue 3 virtualization libraries.
         </p>
         <div class="card-actions mt-8">
           <AppLink v-slot="{ href }" href="/compare">
@@ -107,7 +106,7 @@ import ExampleCard from '#/components/ExampleCard.vue';
               :href
               class="btn btn-secondary btn-md @4xl:btn-lg px-10 shadow-lg shadow-secondary/20 font-black small-caps tracking-widest"
             >
-              Compare Solutions
+              View Comparison
             </a>
           </AppLink>
         </div>

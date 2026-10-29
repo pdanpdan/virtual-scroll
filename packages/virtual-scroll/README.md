@@ -9,13 +9,13 @@ Virtual scrolling for Vue 3: only the rows that are on screen are in the DOM, wh
 
 ## What it does
 
-Give it an array and a template for one row. It keeps the rows around the viewport in the DOM and positions them itself while the browser scrolls normally, so showing twenty rows out of a million costs about the same as showing twenty rows out of twenty.
+Give it an array and a template for one row. It keeps the rows around the viewport in the DOM and positions them while the browser scrolls normally: a list of a million rows costs the same as a list of twenty, because only the visible rows exist.
 
-Rows can be a vertical list, a horizontal strip, or a grid on both axes, and the scroll container can be the component, an element around it, or the page itself. Row sizes are a single number, a value per row, or left to be measured from the DOM as they change. The rows do not have to exist as objects either: a sparse `new Array(10_000_000)` with content derived from `index` gives ten million rows without allocating ten million items.
+Rows can be a vertical list, a horizontal strip, or a grid on both axes. The scroll container can be the component, an element around it, or the page. Row sizes can be a number, a value per row, or measured from the DOM as they change. Rows do not have to exist as objects: a sparse `new Array(10_000_000)` with content derived from `index` renders ten million rows without allocating ten million items.
 
-The awkward part of virtual scrolling is the end of a long list. Browsers refuse to scroll content past roughly 10 million pixels, so many implementations scale the content up and make it move faster than your finger. Here the list is mapped onto the pixels the browser accepts in a way that a wheel notch or a swipe moves the content exactly as far as you moved the pointer, whatever the size of the list. The visible range, the scrollbar and `scrollToIndex` keep agreeing with each other.
+Browsers refuse to scroll content past roughly 10 million pixels. The list is mapped onto the pixels the browser accepts, so a wheel notch or a swipe moves the content by the same distance as the input, regardless of the list size. The visible range, the scrollbar and `scrollToIndex` use the same coordinates.
 
-Everything else is opt-in, so a plain list stays a plain list: sticky headers and sections, snapping, infinite loading, prepend restoration, RTL, keyboard navigation, ARIA roles, SSR, virtual scrollbars, TypeScript types, plus dedicated components for [table](https://pdanpdan.github.io/virtual-scroll/essential-flow-table/) and [masonry](https://pdanpdan.github.io/virtual-scroll/essential-masonry/) layouts. No dependencies besides Vue.
+Everything else is optional: sticky headers and sections, snapping, infinite loading, prepend restoration, RTL, keyboard navigation, ARIA roles, SSR, virtual scrollbars, TypeScript types, and dedicated components for [table](https://pdanpdan.github.io/virtual-scroll/essential-flow-table/) and [masonry](https://pdanpdan.github.io/virtual-scroll/essential-masonry/) layouts. There are no dependencies besides Vue.
 
 ## Quick start
 
@@ -46,7 +46,7 @@ const items = Array.from({ length: 10000 }, (_, i) => ({ id: i, label: `Item ${ 
 </style>
 ```
 
-Ten thousand rows, about twenty of them in the DOM at any moment. Replace `:item-size="50"` with a function to size rows individually, or drop it altogether and rows get measured as they mount - the rest of the code stays as it is.
+Ten thousand rows, with about twenty in the DOM at any moment. Replace `:item-size="50"` with a function to size rows individually, or drop it altogether and rows get measured as they mount - the rest of the code stays as it is.
 
 ## Links
 
@@ -58,7 +58,7 @@ Ten thousand rows, about twenty of them in the DOM at any moment. Replace `:item
 
 ## Usage Modes
 
-The package provides several ways to integrate the component into your project.
+Five ways to use the package.
 
 ### 1. Compiled Component (Recommended)
 
@@ -144,7 +144,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
 *   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` - only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
-A tree-shaken `<VirtualScroll>` is 17.8 KB gzipped from `./core` and 23.9 KB from the package root (`pnpm size`, which minifies with Vite's esbuild transform; the comparison page bundles with esbuild and reports both entries including the stylesheet, 17.1 kB and 22.6 kB); `core/style.css` is smaller than the full stylesheet. Both entries ship the same types.
+A tree-shaken `<VirtualScroll>` is 18.4 KB gzipped from `./core` and 24.5 KB from the package root. `pnpm size` enforces those budgets; the comparison page reports both entries including the stylesheet (17.7 kB and 23.1 kB). `core/style.css` is smaller than the full stylesheet, and both entries ship the same types.
 
 ## Data-less Lists (Index-only Rows)
 
@@ -192,35 +192,35 @@ prepends as well (chat history).
 
 ### Scaled Virtual Scroll
 
-To support massive datasets (billions of pixels) while staying within browser scroll limits, the library uses a dual-unit coordinate system:
+Content larger than the browser's scroll limit uses two coordinate systems:
 
-*   **VU (Virtual Units)**: The internal coordinate system representing the actual size of your content.
-*   **DU (Display Units)**: The browser's physical coordinate system (limited to `BROWSER_MAX_SIZE`).
+*   **VU (virtual units)**: the real size of the content.
+*   **DU (display units)**: the pixels the browser can scroll, capped at `BROWSER_MAX_SIZE`.
 
-The library derives a scale factor and maps display scroll positions back onto virtual ones, so wheel and touch scrolling move the content 1:1 while scrollbar interaction positions it proportionally.
+A scale factor maps between them, so wheel and touch scrolling move the content 1:1 while the scrollbar and `scrollToIndex` use the virtual positions.
 
 ### Core Rendering Rule
 
-Items are rendered at their VU size and positioned using `translateY()` (or `translateX()` / `translate()`) based on the current display scroll position and their virtual offset. This prevents "jumping" and maintains sub-pixel precision even at extreme scales.
+Rows are positioned with `translateY()` (or `translateX()` / `translate()`) from their virtual offset and the current display scroll position. Positions keep sub-pixel precision at any scale.
 
 ### Performance
 
-- **Fenwick Tree:** Uses a Fenwick Tree (Binary Indexed Tree) for *O(log N)* prefix sum and point updates, keeping item-offset lookup logarithmic even in dynamic lists with millions of items. Appends resize the tree incrementally - no full rebuild per batch - and re-initialization only revisits the regions that changed.
-- **No per-row state for uniform sizes:** A numeric `itemSize` / `columnWidth` is resolved with pure arithmetic (O(1)), so uniform lists allocate nothing per row. Combined with data-less rows (below), memory stays flat even at 10M+ items.
-- **ResizeObserver:** Automatically handles dynamic item sizes by measuring them when they change.
-- **Style Isolation:** Uses CSS `@layer` for style isolation and `contain: layout` for improved rendering performance.
-- **Measured bundle size:** `pnpm size` builds every published entry plus one tree-shaken bundle per import scenario and fails when a feature a scenario does not use survives in its output, or when an entry leaves its gzipped budget (currently `<VirtualScroll>` 23.9 KB, `./core` 17.8 KB, headless `useVirtualScroll` 11.4 KB, `VirtualScrollTable` 25.1 KB, `./core` `VirtualScrollTable` 20.5 KB, `VirtualScrollMasonry` 7.6 KB).
+- **Dynamic sizes:** offsets are kept in a Fenwick tree, so a row measurement updates prefix sums in *O(log N)* without recomputing the list. Appends extend the tree instead of rebuilding it, and re-initialization only visits the regions that changed.
+- **Uniform sizes:** a numeric `itemSize` / `columnWidth` is resolved arithmetically, with no per-row storage. Combined with data-less rows, memory stays flat at any list size.
+- **ResizeObserver:** mounted rows are measured when their size changes.
+- **Style isolation:** styles live in CSS `@layer`, and `contain: layout` limits layout work to the container.
+- **Bundle budgets:** `pnpm size` builds every published entry and one tree-shaken bundle per import scenario, then fails when an unused feature survives or an entry exceeds its gzipped budget (currently `<VirtualScroll>` 24.5 KB, `./core` 18.4 KB, headless `useVirtualScroll` 11.9 KB, `VirtualScrollTable` 25.8 KB, `./core` `VirtualScrollTable` 21.1 KB, `VirtualScrollMasonry` 7.8 KB).
 
 ## Key Features
 
-- **Dynamic & Fixed Sizes**: Supports uniform item sizes, variable sizes via function/array, or fully dynamic sizes via `ResizeObserver`.
-- **Circular Patterns**: Pass an array to `itemSize` or `columnWidth` to define a repeating size pattern (e.g., `[50, 100]` will repeat for all items).
-- **Multi-Directional**: Works in `vertical`, `horizontal`, or `both` (grid) directions.
-- **Virtual Scrollbars**: Overlay scrollbars that stay accurate at any scale and share one style across browsers.
-- **Extensions Architecture**: Optional extensions (RTL, Snapping, Sticky, Infinite Loading, Prepend Restoration, Coordinate Scaling).
-- **Container Flexibility**: Can use a custom element or the browser `window`/`body` as the scroll container.
-- **SSR Support**: Built-in support for pre-rendering specific ranges for Server-Side Rendering.
-- **Accessibility**: Automatic ARIA role mapping for lists, grids, trees, listboxes, and menus.
+- **Sizes**: a number for every row, a function or repeating array for variable rows, or `ResizeObserver` measurement.
+- **Repeating patterns**: pass an array to `itemSize` or `columnWidth` to cycle sizes (e.g. `[50, 100]`).
+- **Directions**: `vertical`, `horizontal` or `both` (grid).
+- **Virtual scrollbars**: overlay bars that follow the pointer on lists of any size and look the same across browsers.
+- **Extensions**: RTL, snapping, sticky items, infinite loading, prepend restoration and coordinate scaling.
+- **Scroll container**: the component host, another element, or the browser `window`/`body`.
+- **SSR**: pre-render a range of rows on the server (see [SSR & Hydration](https://pdanpdan.github.io/virtual-scroll/docs/#ssr-support)).
+- **Accessibility**: ARIA roles for lists, grids, trees, listboxes and menus.
 
 
 ## Authoring Content for Virtualized Lists
@@ -231,12 +231,12 @@ Rows are recycled: they mount as they enter the viewport and unmount when they l
 - **Make row rendering idempotent** - the `item` slot re-renders on every entry into the window; rendering the same item twice must produce the same result.
 - **Reserve space for media** - explicit `width`/`height` or `aspect-ratio` prevents post-mount row growth (which the engine measures and corrects, but which causes jumps).
 - **Avoid native `loading="lazy"` on images** - the visible window is already the only mounted content; lazy-loading adds browser heuristics on a changing scroll container and can starve on-screen images. Use eager loading or your own bounded, low-priority prefetch window.
-- **Dynamic heights are fine** - late content growth is measured via `ResizeObserver` and the layout self-corrects; stable or reserved sizes scroll smoother (see the playground docs "Authoring Content for Virtualized Lists").
+- **Dynamic heights** - late content growth is measured with `ResizeObserver` and the layout corrects itself; stable or reserved sizes scroll more smoothly (see "Authoring Content for Virtualized Lists" in the docs).
 
 
 ## Extensions
 
-The library uses a modular extension system: the built-in extensions below, or extensions you write against the same contract.
+Extensions hook into the scroll lifecycle. The built-in ones are below; custom extensions implement the same contract.
 
 An extension is a plain object implementing `VirtualScrollExtension<T>`: a unique `name` plus the
 optional hooks `onInit(ctx)`, `includeIndices(ctx)`, `onScroll(ctx, event)`, `onScrollEnd(ctx)` and
@@ -260,7 +260,7 @@ is only a label: hooks are called in the order the extensions are passed to `use
 - `useInfiniteLoadingExtension({ onLoad, flingVelocity, preload })`: Trigger loading when reaching thresholds. `onLoad(axis, { velocity, direction })` receives the scroll velocity (VU/ms) and travel direction; `flingVelocity` (default `2`) skips the callback while the axis is still flinging, and `preload` (VU, default `0`) extends the threshold only while scrolling towards the end.
 - `useSnapshotsExtension({ storage, key, autoSave })`: Save and restore the visible position (`save()`, `restore()`, `clear()`), optionally persisted through `sessionStorage`/`localStorage` or a custom `Storage`.
 - `usePrependRestorationExtension()`: Maintain scroll position when items are prepended.
-- `useCoordinateScalingExtension()`: Support for massive lists (billions of pixels).
+- `useCoordinateScalingExtension()`: Supports content beyond the browser's scroll limit.
 
 ### Extension Usage Example
 
@@ -282,7 +282,7 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props, [
 
 ## Composables
 
-The library exposes its internal logic via reactive composables for advanced use cases.
+These composables expose the engine directly.
 
 Everything in this document imports from the package root. The engine layer the components are built on -
 the pure calculation helpers (`calculate*`), the DOM scroll helpers, the sizing layer
@@ -387,7 +387,7 @@ Manages `ResizeObserver` instances for the container, items, and slots (header/f
 
 ### `useVirtualScrollMasonry(props)`
 
-The engine behind `VirtualScrollMasonry`: derives the column geometry from the container width, places each card on the shortest column through segment-snapshotted frontier chains, mounts only the window around the scroll position and re-anchors the topmost visible card across relayouts.
+The engine behind `VirtualScrollMasonry`: derives the column geometry from the container width, places each card on the shortest column, mounts only the window around the scroll position and keeps the topmost visible card in place when the layout changes.
 
 **Parameters:**
 - `props`: Reactive object, `Ref` or getter for the [masonry props](#virtualscrollmasonry) plus `hostRef` (the scroll container element).
@@ -409,7 +409,7 @@ The table fixes its own semantic tags (`table` > `tbody` > `tr`, with `thead`/`t
 
 ### VirtualScrollMasonry
 
-For a real masonry grid inside a **single** scroll container use the dedicated `VirtualScrollMasonry` component: the column count and a fractional column width are derived from the container width, cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only the window around the scroll position is mounted. Heights come exclusively from the `itemHeight` oracle, so the layout is canonical: far `scrollToIndex` calls land exactly without ever mounting the path, the total is exact once the frontier chain reaches the end (`totalHeightExact`), and reflows re-anchor the topmost visible card in content space. See the [Masonry example](https://pdanpdan.github.io/virtual-scroll/essential-masonry). For server rendering, pass `ssrWidth` and `ssrCount`: the grid is laid out from that width on the server, the first client render repeats it, and the measured width takes over after mount.
+For a masonry grid inside a **single** scroll container use `VirtualScrollMasonry`: the column count and a fractional column width come from the container width, cards go to the shortest column, and only the window around the scroll position is mounted. Heights come from the `itemHeight` function: a `scrollToIndex` target is computed without mounting the cards in between, the total is exact once the layout reaches the end (`totalHeightExact`), and a reflow keeps the topmost visible card in place. See the [Masonry example](https://pdanpdan.github.io/virtual-scroll/essential-masonry). For server rendering, pass `ssrWidth` and `ssrCount`: the grid is laid out from that width on the server, the first client render repeats it, and the measured width takes over after mount.
 
 ```vue
 <VirtualScrollMasonry
@@ -650,12 +650,12 @@ With [`keyboardActivation`](#props) set to the item model - `'auto'` selects it 
 
 ## Sizing Guide
 
-| Option Type | `itemSize` / `columnWidth` | Performance | Description |
-|-------------|----------------------------|-------------|-------------|
-| **Fixed** | `number` (e.g., `50`) | **Best** | Every item has the exact same size. Calculations are *O(1)*. |
-| **Array** | `number[]` | **Great** | Repeating size pattern: entries cycle for items or columns when the array is shorter than the data. |
-| **Function** | `(item, index) => number` | **Good** | Size is known but varies per item. |
-| **Dynamic** | `0`, `null`, or `undefined` | **Fair** | Sizes are measured automatically via `ResizeObserver`. |
+| Option | `itemSize` / `columnWidth` | Cost | Description |
+|--------|----------------------------|------|-------------|
+| **Fixed** | `number` (e.g. `50`) | One multiplication per row, no per-row storage | Every item has the same size. |
+| **Array** | `number[]` | One lookup per row | Repeating pattern: entries cycle for items or columns when the array is shorter than the data. |
+| **Function** | `(item, index) => number` | One call per row | The size is known but varies per item. |
+| **Dynamic** | `0`, `null` or `undefined` | `ResizeObserver` per mounted row | Sizes are measured from the DOM. |
 
 ## Virtual Scrollbars
 

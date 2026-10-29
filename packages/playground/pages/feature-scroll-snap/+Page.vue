@@ -50,7 +50,7 @@ const isItemTooLarge = computed(() => {
     </template>
 
     <template #description>
-      <strong>snap</strong> lines the view up once scrolling stops - to the nearest edge, the center, or the next item, depending on the mode. Handy for carousels and pickers.
+      <strong>snap</strong> lines the view up once scrolling stops - to the nearest edge, the center or the next item, depending on the mode. Used for carousels and pickers.
       <br />
       <strong>Items taller than the viewport are skipped</strong>, so snapping cannot loop.
     </template>
@@ -159,12 +159,7 @@ const isItemTooLarge = computed(() => {
         </p>
         <h3>1. Enable snap on a list whose items are “pages”</h3>
         <p>
-          Start from any uniform or dynamic list and give the rows a size that suits one logical step - often one row roughly fills the viewport so each snap lands on a single page or item. Bind <code>snap</code> to a <code>SnapMode</code>; you can pass a fixed value or a reactive ref if the mode should change at runtime (for example a settings control). The simplest useful configuration snaps each row to the viewport start, but which mode fits depends on the content, so start with <code>'next'</code> for paged stepping and read on for the other alignments.
-        </p>
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
+          Start from any uniform or dynamic list and give the rows a size that suits one logical step - often one row roughly fills the viewport so each snap lands on a single page or item. Bind <code>snap</code> to a <code>SnapMode</code>; you can pass a fixed value or a reactive ref if the mode should change at runtime (for example a settings control). Snapping each row to the viewport start is the basic configuration; <code>'next'</code> steps one page at a time, and the other modes are described below.
         </p>
 
         <CodeBlock

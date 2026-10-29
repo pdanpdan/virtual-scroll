@@ -3,7 +3,7 @@ withDefaults(defineProps<{
   /** Section title, rendered as the collapsible summary header. */
   title?: string;
 }>(), {
-  title: 'How to build a feature like this',
+  title: 'How this example is built',
 });
 </script>
 

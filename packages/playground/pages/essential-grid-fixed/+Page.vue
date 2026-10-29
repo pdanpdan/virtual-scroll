@@ -163,8 +163,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
         <h3>2. Model the rows, then declare the column geometry</h3>
         <p>
-          The row axis is your data: <code>items</code> is an array with one entry per row. Columns are not data -
-          they are a declared grid: <code>column-count</code> sets how many columns exist in total (it drives the
+          The row axis is your data: <code>items</code> is an array with one entry per row. Columns come from the grid declaration, not from the data: <code>column-count</code> sets how many columns exist in total (it drives the
           horizontal scroll extent and the column-window clamp), while <code>column-width</code> provides the width in
           px for each column. You can pass one number for a uniform width, an array that cycles as a repeating pattern
           over the column indices, or a function of the column index. A numeric <code>item-size</code> declares the
@@ -184,12 +183,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           not add its own horizontal offsets - lay the cells out flush (flex row) and make the row fill its
           wrapper, which is exactly <code>item-size</code> tall. In <code>both</code> mode the row wrapper carries
           the <code>row</code> role and <code>aria-rowindex</code> automatically.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

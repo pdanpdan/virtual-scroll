@@ -144,8 +144,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
         <h3>1. Choose the size strategy that matches your data</h3>
         <p>
-          <code>item-size</code> accepts four forms. A positive <code>number</code> means uniform heights and O(1) arithmetic -
-          fastest, but only valid when every row really is that tall. An <code>array</code> describes a repeating pattern
+          <code>item-size</code> accepts four forms. A positive <code>number</code> means uniform heights and O(1) arithmetic - the fastest
+          form, valid only when every row has that height. An <code>array</code> describes a repeating pattern
           (e.g. <code>[50, 100]</code>) and a function <code>(item, index) =&gt; number</code> a height known up front that
           varies per row; both let the engine lay out far-off rows from the declared pattern or function without mounting them
           - avoiding measurement, at the cost of per-item storage rather than a uniform number's O(1). Pass
@@ -161,12 +161,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           space for media (<code>width</code>/<code>height</code> or <code>aspect-ratio</code>) so late content growth does not
           push neighbors down. The row's measured box (its border-box size, padding included) drives the layout, and a live
           resize is caught by the same observer and re-lays the list.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

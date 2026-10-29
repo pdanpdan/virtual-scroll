@@ -159,7 +159,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A data table with thousands of rows is still a table: column headers, row semantics, and CSS table styling matter as much as scroll performance. <code>VirtualScrollTable</code> virtualizes the <em>rows</em> - the same windowing math <code>VirtualScroll</code> applies to list items - while keeping the document a genuine <code>&lt;table&gt;</code>. The scrollable element is the <code>&lt;table&gt;</code> itself; your header lives in a real <code>&lt;thead&gt;</code>, every item becomes its own <code>&lt;tr&gt;</code> inside the <code>&lt;tbody&gt;</code>, and an invisible spacer row holds the total scroll height. Because only the visible window of rows is ever mounted, the browser can no longer derive column widths from the whole dataset - pinning them is the second half of the work.
+          The table stays a real table: column headers, row semantics and CSS table styling keep working. <code>VirtualScrollTable</code> virtualizes the <em>rows</em> - the same windowing math <code>VirtualScroll</code> applies to list items - while keeping the document a genuine <code>&lt;table&gt;</code>. The scrollable element is the <code>&lt;table&gt;</code> itself; your header lives in a real <code>&lt;thead&gt;</code>, every item becomes its own <code>&lt;tr&gt;</code> inside the <code>&lt;tbody&gt;</code>, and an invisible spacer row holds the total scroll height. Because only the visible window of rows is ever mounted, the browser can no longer derive column widths from the whole dataset - pinning them is the second half of the work.
         </p>
 
         <h3>1. Shape the slots like a real table</h3>

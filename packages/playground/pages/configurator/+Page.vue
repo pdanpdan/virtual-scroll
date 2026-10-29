@@ -146,7 +146,7 @@ function openInCodePen() {
       <div>
         <h1 class="text-primary">Configurator / Code Generator</h1>
         <p class="text-base @4xl:text-xl opacity-60 font-medium mt-1">
-          Select the features you need and generate complete typed Vue code: a component, a composable, or a CodePen.
+          Select the features you need and generate a TypeScript component, a composable or a CodePen.
         </p>
       </div>
     </div>
@@ -302,7 +302,7 @@ function openInCodePen() {
             </label>
           </div>
           <p class="text-[11px] opacity-60 mt-1">
-            Table output renders real <code>&lt;table&gt;</code> flow with dynamic measured heights and works in every
+            Table output renders a real <code>&lt;table&gt;</code> with measured row heights. It is used by every
             output (component tab, composable tab via the <code>VirtualScrollTable</code> component, CodePen and
             standalone). Snapping, sticky header/footer, infinite loading, prepend restoration, scroll position
             snapshots, the initial scroll target, RTL, ARIA and keyboard navigation are generated. Table mode is
@@ -350,10 +350,10 @@ function openInCodePen() {
             </label>
           </div>
           <p class="text-[11px] opacity-60 mt-1">
-            Masonry output renders a real masonry grid in one <code>VirtualScrollMasonry</code> container with
-            canonical oracle heights and works in every output (component tab, composable tab via the
-            <code>VirtualScrollMasonry</code> component, CodePen and standalone). The card height oracle is
-            deterministic from the generated data and the resolved column width, so every layout is reproducible.
+            Masonry output renders a masonry grid in one <code>VirtualScrollMasonry</code> container. It is used by
+            every output (component tab, composable tab via the <code>VirtualScrollMasonry</code> component, CodePen
+            and standalone). Card heights come from a deterministic function of the generated data and the resolved
+            column width, so the layout is reproducible.
             Masonry takes its own column geometry, the item count, the data source, the gap and an ARIA label;
             direction, item size, buffers, snapping, sticky items, sections, infinite loading, prepend restoration,
             snapshots, the initial scroll target, scroll padding, SSR, RTL, window containers and independent
@@ -365,7 +365,7 @@ function openInCodePen() {
 
       <FieldSet
         title="Data"
-        description="What should the items contain?"
+        description="Item data used by the generated code."
         :badge="state.dataSource === 'lorem' ? 'lorem-api.com' : 'local'"
       >
         <div class="flex flex-wrap gap-x-6 gap-y-2 items-center">
@@ -679,7 +679,7 @@ function openInCodePen() {
         title="Features"
         :description="derived.isIndependent
           ? 'Independent scrollbars replace the VirtualScroll component, so virtualization features do not apply.'
-          : 'Each feature generates its own code; details appear when the feature is used.'"
+          : 'Each enabled feature adds its own options and generated code.'"
         :badge="`${ enabledFeatures } used`"
       >
         <div class="space-y-3">
@@ -1065,7 +1065,7 @@ function openInCodePen() {
 
           <p class="text-[11px] opacity-60 leading-relaxed">
             <span v-if="activeTab === 'component'">
-              Single-file component using <code class="font-mono">VirtualScroll</code> - imports, typed data and configuration, template and styles included.
+              Single-file component using <code class="font-mono">VirtualScroll</code>, with imports, data, configuration, template and styles.
             </span>
             <span v-else-if="activeTab === 'composable'">
               Single-file component using <code class="font-mono">useVirtualScroll</code> with one extension per enabled feature and manual rendering.

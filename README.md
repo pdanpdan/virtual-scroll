@@ -1,6 +1,6 @@
 # @pdanpdan/virtual-scroll
 
-A virtual scrolling component for Vue 3: only the rows near the viewport are in the DOM, so lists, grids, tables and masonry layouts stay fast however long they get.
+A virtual scrolling component for Vue 3: only the rows near the viewport are in the DOM, so the DOM stays small as the list grows.
 
 [![NPM Version](https://img.shields.io/npm/v/@pdanpdan/virtual-scroll.svg)](https://www.npmjs.com/package/@pdanpdan/virtual-scroll)
 [![License](https://img.shields.io/npm/l/@pdanpdan/virtual-scroll.svg)](./LICENSE)

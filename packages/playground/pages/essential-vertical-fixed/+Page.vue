@@ -44,7 +44,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      {{ itemCount.toLocaleString() }} rows of one height ({{ itemSize }}px). Only the rows inside the viewport are mounted, so this is the shortest path to a long list.
+      {{ itemCount.toLocaleString() }} rows of one height ({{ itemSize }}px). Only the rows inside the viewport are mounted.
     </template>
 
     <template #icon>
@@ -127,8 +127,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           scroll container with a definite height, an <code>items</code> array, and a numeric
           <code>item-size</code>. With a uniform size the engine derives every row position from
           <code>index × item-size</code>, so computing the visible window on each scroll is
-          <em>O(1)</em> and only the window - plus a small overscan buffer - is ever mounted, no matter
-          whether the list has 1,000 or millions of rows. Rows may carry real data objects or be pure
+          <em>O(1)</em> and only the window - plus a small overscan buffer - is ever mounted, regardless of the
+          number of rows. Rows may carry real data objects or be pure
           index placeholders; both models are shown below.
         </p>
 
@@ -224,7 +224,7 @@ const items = Array.from({ length: 10_000 }, (_, i) => ({
           The payload is optional. When a row's content derives entirely from its index - numbered rows,
           patterns, skeleton placeholders - you can skip the data objects and pass a sparse array of the
           right length: <code>new Array(count)</code>. The engine accesses only the length and the visible
-          window, so holes are never materialized and memory stays flat however long the list is. With a
+          window, so holes are never materialized and memory stays flat as the list grows. With a
           sparse array <code>item</code> is <code>undefined</code>, so render from <code>index</code>. Type
           the component with the generic (e.g. <code>&lt;VirtualScroll&lt;Row&gt;&gt;</code>) when your slot
           reads typed fields.
@@ -258,8 +258,8 @@ const items = new Array(1_000_000);
 
         <h3>3. Declare the uniform size and overscan, and fill the row box</h3>
         <p>
-          <code>item-size</code> is a contract, not a hint: the engine sizes every row wrapper to exactly
-          this value and derives total scroll size, range math, and scrollbar geometry from it. Your slot
+          <code>item-size</code> sets every row wrapper to exactly this value; the engine derives the total
+          scroll size, range math and scrollbar geometry from it. Your slot
           root must therefore fill that box - <code>height: 100%</code> with
           <code>box-sizing: border-box</code> so borders and padding do not add to the measured size (see
           <code>.row</code> above). Because omitting <code>item-size</code> switches the axis to measured (dynamic) mode, declare the numeric size whenever your rows really are uniform - and use a value that matches your CSS row height.
@@ -268,9 +268,8 @@ const items = new Array(1_000_000);
           example pages).
         </p>
         <p>
-          The boolean <code>virtual-scrollbar</code> draws the built-in overlay bars instead of the native ones; the
-          bars are driven by the engine's own scroll math, so their rendering cost stays flat no matter how long the list
-          grows. They are also turned on automatically once content exceeds the browser's ~10M px limit.
+          The boolean <code>virtual-scrollbar</code> draws the built-in overlay bars instead of the native ones.
+          They turn on automatically once content exceeds the browser's ~10M px limit.
         </p>
 
         <p>

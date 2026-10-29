@@ -206,18 +206,12 @@ function setAllExpanded(nodes: TreeNode[], expanded: boolean) {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A tree is recursive, but a virtual scroller is linear: it positions a flat array of rows by integer index and mounts only the window around the scroll offset. The bridge is a flattening step - keep the real hierarchy in your data, then derive the array of <em>visible</em> rows (each node followed by its descendants while it is expanded) and pass that to <code>:items</code>. Expanding or collapsing then mutates the model and re-runs the flatten; nothing in the DOM tree needs rebuilding, so the cost scales with the visible nodes, not with layout of the whole tree. Each recompute yields a new array instance, which the engine picks up automatically - no <code>refresh()</code> call and nothing to reset.
+          A virtual scroller positions a flat array of rows by integer index, so a tree is flattened into its visible rows: keep the real hierarchy in your data, then derive the array of <em>visible</em> rows (each node followed by its descendants while it is expanded) and pass that to <code>:items</code>. Expanding or collapsing then mutates the model and re-runs the flatten; nothing in the DOM tree needs rebuilding, so the cost scales with the visible nodes, not with layout of the whole tree. Each recompute yields a new array instance, which the engine picks up automatically - no <code>refresh()</code> call and nothing to reset.
         </p>
 
         <h3>1. Flatten the visible subset of a real tree</h3>
         <p>
           Keep expand state in the model, never in the DOM: rows recycle - they unmount when they leave the window and remount on return, so a flag stored on an element is lost. A boolean on each node (or a <code>Set</code> of expanded ids in a store) survives recycling. The flatten walk pushes a node and, when it is expanded, recurses into its children - a pre-order traversal that stops at collapsed branches. Entries are the node objects themselves, so the <code>#item</code> slot receives the node and <code>toggle()</code> can mutate the reactive source directly.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

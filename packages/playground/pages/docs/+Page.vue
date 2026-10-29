@@ -83,11 +83,10 @@ onUnmounted(() => {
       </h2>
       <div class="prose prose-sm @4xl:prose-lg max-w-none">
         <p>
-          <code>@pdanpdan/virtual-scroll</code> renders only the rows near the viewport, so a list stays fast no matter
-          how many items it holds. It scrolls vertically, horizontally, or on both axes at once (grids), handles fixed,
-          computed and measured item sizes, and works with RTL layouts, the browser window as the scroll container,
-          and lists that overflow the browser's own size limit. The live examples cover every feature; the
-          reference below documents the full API.
+          <code>@pdanpdan/virtual-scroll</code> renders only the rows near the viewport. It scrolls vertically,
+          horizontally or on both axes (grids); item sizes can be fixed, computed or measured; and it supports
+          RTL layouts, the browser window as the scroll container, and lists larger than the browser's own size
+          limit. The examples below cover the features, and the reference documents the API.
         </p>
       </div>
     </section>
@@ -101,9 +100,9 @@ onUnmounted(() => {
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          Virtualization keeps the DOM small by rendering only the items in the viewport (plus a configurable buffer),
-          so scrolling stays responsive however large the dataset. Scroll handling is tuned per sizing mode; the
-          choices below have the largest effect.
+          Virtualization keeps the DOM small by rendering only the items in the viewport (plus a configurable
+          buffer), so the work per scroll does not grow with the dataset. Scroll handling differs per sizing mode;
+          the choices below have the largest effect.
         </p>
       </div>
 
@@ -114,7 +113,7 @@ onUnmounted(() => {
           Wheel, touch, and keyboard scrolling are not affected.
         </p>
         <p class="opacity-90 mt-2">
-          To keep scrollbar dragging instant and 1:1 with the pointer, use the built-in virtual scrollbars:
+          For scrollbar dragging that follows the pointer, use the built-in virtual scrollbars:
         </p>
         <ol class="list-decimal ps-5 space-y-1 opacity-90 mt-2">
           <li>
@@ -125,7 +124,7 @@ onUnmounted(() => {
           </li>
         </ol>
         <p class="opacity-90">
-          The native scrollbar is hidden automatically (<code>.virtual-scroll--hide-scrollbar</code>) whenever virtual scrollbars are active - no extra CSS is needed.
+          The native scrollbar is hidden automatically (<code>.virtual-scroll--hide-scrollbar</code>) whenever virtual scrollbars are active.
         </p>
         <p class="opacity-90 mt-2">
           Virtual scrollbars are not available when the scroll container is the window or the body - use an element container.
@@ -142,7 +141,7 @@ onUnmounted(() => {
           <strong>Prefer fixed sizes.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> gives O(1) range math; arrays and functions use O(log n) Fenwick-tree lookups; dynamic (measured) sizes are the most expensive and re-measure with <code>ResizeObserver</code>. See the <a href="#sizing-guide" class="link">Sizing Guide</a> below.
         </li>
         <li>
-          <strong>Skip per-row data for uniform lists.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> allocates no per-row storage and positions rows arithmetically, so index-only lists (sparse <code>items</code>, e.g. <code>new Array(10_000_000)</code>) keep memory flat at any scale - render row content from the slot's <code>index</code> instead of <code>item</code>.
+          <strong>Skip per-row data for uniform lists.</strong> A numeric <code>itemSize</code> / <code>columnWidth</code> allocates no per-row storage and positions rows arithmetically, so index-only lists (sparse <code>items</code>, e.g. <code>new Array(10_000_000)</code>) keep memory flat as the list grows - render row content from the slot's <code>index</code> instead of <code>item</code>.
         </li>
         <li>
           <strong>Keep buffers modest.</strong> <code>bufferBefore</code> / <code>bufferAfter</code> (default 5) trade rendering cost for scrolling smoothness - a larger buffer means more DOM nodes and more work per frame.
@@ -173,15 +172,15 @@ onUnmounted(() => {
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
           <p>
             Virtualization reuses a small window of DOM nodes: rows mount as they enter the viewport and unmount
-            when they leave. Most authoring works exactly like any other Vue list, but content that relies on being
-            mounted once, loads late, or grows after mount needs extra care to stay smooth and correct.
+            when they leave. Most authoring is the same as for a normal Vue list. Content that depends on staying
+            mounted, loads late or changes height after mount needs more care.
           </p>
           <ul class="list-disc ps-5 space-y-2">
             <li>
-              <strong>Keep row state in the model, not the DOM.</strong> Selection, expanded rows, likes, cart state,
-              or carousel positions belong in your data (keyed by item id) or a store - never in the row's own DOM.
-              Rows are recycled by index, so anything stored in the element disappears when the row scrolls away and
-              would also leak across items.
+              <strong>Keep row state in the model, not the DOM.</strong> Selection, expanded rows, likes, cart
+              state or carousel positions belong in your data (keyed by item id) or a store. Rows are recycled by
+              index, so state stored in the element is lost when the row scrolls away and can appear on another
+              item.
             </li>
             <li>
               <strong>Make row rendering idempotent.</strong> The <code>item</code> slot re-renders whenever the item
@@ -216,8 +215,7 @@ onUnmounted(() => {
             </li>
           </ul>
           <p>
-            The chat, gallery, blog, and data-browser examples in the playground demonstrate these patterns with real
-            content: dynamic bubbles, media cards, grouped headers, and interactive rows.
+            The chat, gallery, blog and data-browser examples apply these rules.
           </p>
         </div>
       </section>
@@ -233,8 +231,8 @@ onUnmounted(() => {
         </h2>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-12">
           <p>
-            Sizes can be a single number, a repeating pattern, a value computed per item, or measured from the DOM.
-            Cheaper sizes mean less work per scroll, so pick the first one that fits your data.
+            Sizes can be a single number, a repeating pattern, a value computed per item, or measured from the
+            DOM. Choose the first form that fits your data; the later forms do more work per scroll.
           </p>
           <div class="docs-table-container mt-4">
             <table class="docs-table">
@@ -363,7 +361,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Virtual Scrollbars</h4>
-              <p class="docs-feature-card-description">Virtual scrollbars that stay 1:1 on huge lists; style them with CSS variables or your own markup.</p>
+              <p class="docs-feature-card-description">Overlay scrollbars that follow the pointer on lists of any size; restyle them with CSS variables or replace them with your own markup.</p>
             </div>
           </div>
         </div>
@@ -390,7 +388,7 @@ onUnmounted(() => {
             <div class="docs-feature-card-icon">✓</div>
             <div>
               <h4 class="docs-feature-card-title">Masonry Layout</h4>
-              <p class="docs-feature-card-description">Masonry columns in a single scroll container: heights from your model, only the visible cards mounted.</p>
+              <p class="docs-feature-card-description">Masonry columns in a single scroll container: heights from the model; only visible cards are mounted.</p>
             </div>
           </div>
         </div>
@@ -426,8 +424,8 @@ import &quot;@pdanpdan/virtual-scroll/core/style.css&quot;;"
         <p>
           In that build <code>virtualScrollbar</code>, <code>snap</code>, <code>stickyIndices</code>, <code>loadDistance</code> and
           <code>restoreScrollOnPrepend</code> are accepted but have no effect; <code>loading</code> still drives the loading slot
-          and <code>aria-busy</code>. The flow-mode scrollbar a table shows for its own horizontal overflow stays. Use the
-          package root when you need any of them.
+          and <code>aria-busy</code>. The flow-mode scrollbar a table shows for its own horizontal overflow stays.
+          Import from the package root to use them.
         </p>
         <p>Basic usage in a Vue component:</p>
       </div>
@@ -570,9 +568,9 @@ const { renderedItems, scrollDetails } = useVirtualScroll(props);"
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          RTL, snapping, sticky items, infinite loading, scroll snapshots and coordinate scaling are extensions: each one
-          hooks into the scroll lifecycle, so a plain list only carries what it needs and you opt into the rest. You can
-          write your own against the same interface.
+          RTL, snapping, sticky items, infinite loading, scroll snapshots and coordinate scaling are extensions: each
+          one hooks into the scroll lifecycle, so a list includes only the behavior it configures. Custom extensions
+          use the same interface.
         </p>
       </div>
 
@@ -622,9 +620,9 @@ const vs = useVirtualScroll(props, [
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>
-          The component most projects use: pass your items and an <code>item</code> slot, and it mounts the rows around
-          the scroll position, recycles them as you scroll, and keeps the scroll state in step - vertical, horizontal
-          or grid, with the props and slots below.
+          The main component: pass items and an <code>item</code> slot, and it mounts the rows around the scroll
+          position and recycles them while scrolling. It works vertically, horizontally and in grids, with the props
+          and slots below.
         </p>
       </div>
 
@@ -950,7 +948,7 @@ const vs = useVirtualScroll(props, [
         </a>
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
-        <p>Roles and attributes are set for you, so screen readers can follow the virtualized content: lists, grids, and also <code>tree</code>, <code>listbox</code> and <code>menu</code> roles.</p>
+        <p>Roles and attributes are set automatically, so screen readers can follow the virtualized content: lists, grids and also <code>tree</code>, <code>listbox</code> and <code>menu</code> roles.</p>
         <p>With <a href="#props" class="link link-primary">keyboardActivation</a> in the item model - <code>'auto'</code> selects it for <code>listbox</code>, <code>menu</code> and <code>tree</code> - the container publishes <code>aria-activedescendant</code> pointing at the active item, and a polite live region announces the active position (<code>Item 21 of 100</code>) as it moves. <code>Enter</code>/<code>Space</code> and <code>handleItemActivate(index)</code> emit <code>itemActivate</code>. The attribute is set only while the active item is rendered; the index itself is kept and the reference returns when the item scrolls back into the window. When the list shrinks, the active index clamps to the last item.</p>
         <div class="docs-table-container">
           <table class="docs-table">
@@ -1591,8 +1589,8 @@ const vs = useVirtualScroll(props, [
         <p>
           <code>VirtualScrollMasonry</code> lays out a masonry grid inside a <strong>single</strong> native scroll
           container: columns are sized from the container width, each card goes to the shortest column, and only the
-          cards around the scroll position are mounted - the DOM stays bounded however large the dataset, and a far
-          <code>scrollToIndex</code> never mounts the cards it jumps over.
+          cards around the scroll position are mounted. A <code>scrollToIndex</code> target is computed without
+          mounting the cards in between.
         </p>
         <p>
           Heights come from the deterministic <code>itemHeight</code> oracle by default, so the layout is exact without
@@ -1813,7 +1811,7 @@ const vs = useVirtualScroll(props, [
       </h2>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <p>
-          An overlay scrollbar that looks and behaves the same in every browser, usable on its own or inside
+          An overlay scrollbar with one implementation across browsers, usable on its own or inside
           <code>VirtualScroll</code>. See the
           <a href="/feature-independent-scrollbars" class="link link-primary font-bold">Independent Scrollbars example</a>
           for it working without any virtualization.
@@ -1960,8 +1958,8 @@ const scrollY = ref(0);
 
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-10">
         <p>
-          Everything below is imported from the package root, with one exception:
-          <code>useVirtualScrollSizes</code> is the sizing layer the engine builds on and lives in
+          These composables are imported from the package root, except
+          <code>useVirtualScrollSizes</code>: it is the sizing layer the engine builds on and lives in
           <code>@pdanpdan/virtual-scroll/internal</code>. The pure calculation layer (<code>calculate*</code>),
           the DOM scroll helpers, the masonry layout engine and their parameter bags live in that same entry:
           they are what the components are built on and they carry <strong>no compatibility guarantee</strong> -
@@ -1979,7 +1977,7 @@ const scrollY = ref(0);
         </h3>
         <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
           <p>
-            The engine behind the component, for when you want to drive the markup yourself or build your own wrapper.
+            The engine behind the component, for custom markup or a custom wrapper.
           </p>
         </div>
 
@@ -4246,7 +4244,7 @@ element?: HTMLElement
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90">
         <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
         <p class="mt-4">
-          Hydration is automatic: the client renders the same in-flow items before mounting to match the server HTML, then scrolls to the pre-rendered range and switches to absolute positioning for virtualization.
+          On the client, the first render repeats the same in-flow items to match the server HTML. After mounting, the component scrolls to the pre-rendered range and switches to absolute positioning for virtualization.
         </p>
         <p class="mt-4">
           <a href="#masonry" class="link link-primary">VirtualScrollMasonry</a> has no box to measure on the server, so it takes <code>ssrWidth</code> and <code>ssrCount</code>: the grid is laid out from that width and the first cards are mounted. The first client render repeats the same layout; after mount the real width is measured and the cards re-flow if it differs.

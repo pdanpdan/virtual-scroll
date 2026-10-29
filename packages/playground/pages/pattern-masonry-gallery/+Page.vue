@@ -283,7 +283,7 @@ function schedulePrefetch() {
         <p>
           A masonry gallery streams a long feed of remote images through one scroll container. The masonry engine
           derives the column count from the container width, greedy-places each card on the shortest column, and
-          mounts only the window around the scroll position - so the DOM stays bounded no matter how long the feed.
+          mounts only the window around the scroll position.
           The key decision for images is the <strong>canonical height oracle</strong>: every height is a pure function
           of the item and the resolved column width, which makes the layout exact without ever measuring the DOM. When
           the card is a picture whose aspect ratio is known, the oracle reserves precisely the space the image will

@@ -61,7 +61,7 @@ function appendItems() {
     </template>
 
     <template #description>
-      Prepending items does not move the view: <strong>restoreScrollOnPrepend</strong> adds the height of the new items to the scroll position. Currently showing {{ items.length.toLocaleString() }} items - add some to the front and watch what you are reading stay put.
+      <strong>restoreScrollOnPrepend</strong> adds the height of prepended items to the scroll position, so the rows on screen stay in place. Currently showing {{ items.length.toLocaleString() }} items.
     </template>
 
     <template #icon>
@@ -149,12 +149,6 @@ function appendItems() {
           shifts the scroll offset by exactly that much, so if you scroll down a short distance and then prepend, the rows
           already on screen stay put. The batch size is arbitrary: any number of rows inserted in a single array replacement
           triggers one correction for their combined height.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

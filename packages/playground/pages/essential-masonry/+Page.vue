@@ -187,10 +187,10 @@ function handleJump() {
     </template>
 
     <template #description>
-      Masonry in a single scroll container: the column count follows the container width and only the visible
-      cards are mounted, however many there are. Heights come from the model - or flip
+      Masonry in a single scroll container: the column count follows the container width and only the cards
+      near the viewport are mounted. Heights come from the model - or flip
       <em>Measure card heights</em> on: mounted cards are measured and every few ticks two visible cards grow
-      a row, so you can watch the measured layout track the real DOM with the viewport pinned.
+      a row, the measured layout follows the real DOM while the viewport stays pinned.
     </template>
 
     <template #icon>

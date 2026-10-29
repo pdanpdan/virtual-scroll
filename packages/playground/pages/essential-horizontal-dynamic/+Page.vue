@@ -51,7 +51,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     </template>
 
     <template #description>
-      {{ itemCount.toLocaleString() }} items in one row, each width measured with <strong>ResizeObserver</strong>: even items are {{ baseItemSize }}px, odd items {{ baseItemSize * 2 }}px. Resize the container and watch the window re-measure.
+      {{ itemCount.toLocaleString() }} items in one row, each width measured with <strong>ResizeObserver</strong>: even items are {{ baseItemSize }}px, odd items {{ baseItemSize * 2 }}px. Resize the container to see the widths re-measure.
     </template>
 
     <template #icon>
@@ -119,9 +119,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
         <p>
           To virtualize a horizontal list whose items differ in width, the engine cannot place items arithmetically the way it
           does with uniform sizes - each item's offset depends on the widths of everything before it. Dynamic mode solves this
-          by <em>measuring</em> each rendered cell with a <code>ResizeObserver</code> so totals follow the measured sizes. The cost is real but bounded: layout starts from an estimate that is corrected as cells
-          mount, and totals only become exact once the relevant range has been measured. This page shows how to choose that mode
-          deliberately rather than by accident.
+          by <em>measuring</em> each rendered cell with a <code>ResizeObserver</code> so totals follow the measured sizes. Layout starts from an estimate that is corrected as cells mount, and totals become exact once the
+          relevant range has been measured.
         </p>
 
         <h3>1. Choose the size strategy that matches your data</h3>
@@ -144,12 +143,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           <code>width</code>), and reserve space for late media content so a post-mount resize does not shift neighbors. Because
           each rendered box is observed, a live resize (window resize, data-driven width change) is caught and the axis is
           re-laid automatically.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

@@ -144,8 +144,8 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
     <template #implementation>
       <ImplementationGuide>
         <p>
-          To build an iOS-contacts-style list whose section headers stick to the top of the scroll container and are pushed out
-          by the next section's header, you mark the header rows with the <code>stickyIndices</code> prop - an array of item
+          To build a list whose section headers stick to the top of the scroll container and are pushed out by the next
+          section's header, mark the header rows with the <code>stickyIndices</code> prop - an array of item
           indices that should remain sticky. Each marked row scrolls normally until its natural position would pass the
           container's leading edge, then sticks there while later rows scroll beneath it, and releases when the following sticky
           row arrives at that edge; that hand-off is what produces the "push". Because the marked rows are ordinary content, you
@@ -161,12 +161,6 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           indices in <code>stickyIndices</code>. The natural data shape is a flat array of real objects carrying a type
           discriminator (<code>'header' | 'item'</code>) plus per-row payload, so the <code>#item</code> slot can render either
           row kind straight from <code>item</code>.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

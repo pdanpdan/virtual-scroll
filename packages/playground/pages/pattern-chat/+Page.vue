@@ -303,10 +303,9 @@ function scrollToBottom() {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A chat is a vertical list that grows at the bottom with rows of uneven height - one of the harder cases for a
-          virtualized list to auto-scroll well. Two behaviors matter: a newly appended message scrolls into view so
-          the list &quot;sticks&quot; to the newest message, and when the user has scrolled up to read history the viewport is
-          never yanked away from them. The mechanism is a single <code>@scroll</code> handler that derives &quot;am I at the
+          A chat is a vertical list that grows at the bottom with rows of uneven height. Two behaviors matter: a newly
+          appended message scrolls into view, and when the user has scrolled up to read history the viewport stays where
+          they left it. The mechanism is a single <code>@scroll</code> handler that derives &quot;am I at the
           bottom?&quot; from the emitted <code>ScrollDetails</code>, plus a programmatic end-anchored
           <code>scrollToIndex()</code> after each append; loading older messages relies on the engine's prepend restoration so
           the line being read stays put. The main tradeoff: because bubbles have measured (dynamic) heights, rows must mount and
@@ -329,12 +328,6 @@ function scrollToBottom() {
           unmeasured the engine lays it out at <code>default-item-size</code> (default <code>40</code>); set it near the average
           rendered row so the scrollbar, total height, and far <code>scrollToIndex</code> targets stay accurate until the
           measurements arrive. Keep each bubble sized to its content.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

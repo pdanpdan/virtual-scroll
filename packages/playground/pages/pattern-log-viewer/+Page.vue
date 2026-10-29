@@ -334,7 +334,7 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
     <template #implementation>
       <ImplementationGuide>
         <p>
-          A log or dataset too large to materialize - or whose lines are a pure function of an index - does not need an array of
+          A log or dataset too large to store, or whose lines are a pure function of an index, does not need an array of
           stored objects. With an index-only model every visible row derives its text on demand, so memory stays flat across
           200,000+ lines and rendering costs only what is on screen. Filtering and searching then reduce to building a small
           array of matching <em>indices</em> and handing it to the same <code>VirtualScroll</code>, which draws only those rows
@@ -351,12 +351,6 @@ const currentGlobal = computed(() => (filteredIndices.value ? filteredIndices.va
           deterministically from its position: <code>items</code> is a sparse placeholder (<code>new Array(count)</code>), the
           slot renders from <code>index</code>, and content (timestamp, level, message) is computed on demand. Uniform rows keep
           the horizontal and vertical geometry stable, so a monospace, fixed-height line is the natural row shape.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

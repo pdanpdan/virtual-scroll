@@ -929,10 +929,9 @@ onUnmounted(() => clearTimeout(toastTimer));
           holds rows, and turning some of them into section headers is a data-modeling decision rather than a library
           mode. Each header is an ordinary row object flagged as such, and its index is listed in
           <code>sticky-indices</code>; the engine then pins that row to the top edge while you scroll and lets the next
-          pinned row push the current one out of view - the familiar iOS-style section effect. Because filtering and
-          section jumps only ever reshape the row array and call <code>scrollToIndex()</code>, the hard part of this UI
-          is data shaping, and the virtualizer&apos;s job stays constant: render the visible rows of whatever array it is
-          given.
+          pinned row push the current one out of view - the pinned section headers. Filtering and
+          section jumps reshape the row array and call <code>scrollToIndex()</code>; the virtualizer renders the visible
+          rows of that array.
         </p>
 
         <h3>1. Size the scroll container</h3>
@@ -941,12 +940,6 @@ onUnmounted(() => clearTimeout(toastTimer));
           its content and never produces scroll events. Give the list an explicit height (the demo&apos;s resizable card
           sizes it with flex, <code>flex-1 min-h-0</code>); in your own layout any explicit or viewport-relative height
           works. In flex/grid parents add <code>min-height: 0</code> so the box may shrink below its content.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

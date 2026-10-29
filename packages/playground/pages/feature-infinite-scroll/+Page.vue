@@ -141,8 +141,7 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
     <template #implementation>
       <ImplementationGuide>
         <p>
-          The goal is a list that keeps fetching and appending as the user nears the bottom, so there is no visible "end of
-          data" pause. The one mechanism that makes it work is the <code>load</code> event: the list engine watches its own
+          An infinite list fetches and appends rows as the user nears the bottom. The <code>load</code> event drives it: the list engine watches its own
           scroll state and, whenever the remaining distance to the bottom of the content drops to <code>loadDistance</code>,
           emits <code>load</code> with the axis that crossed the threshold. Your handler fetches and appends rows, and the
           <code>loading</code> prop reveals the <code>#loading</code> slot <em>and</em> suppresses repeated <code>load</code>
@@ -168,12 +167,6 @@ async function onLoad(direction: 'vertical' | 'horizontal') {
           because the event can fire again immediately after an append when you are still inside <code>loadDistance</code> of the
           <em>new</em> end. Prefer reassigning <code>items.value = [...items, ...chunk]</code> over mutating in place, and always
           reset <code>loading</code> in a <code>finally</code> so an error does not leave the spinner stuck.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

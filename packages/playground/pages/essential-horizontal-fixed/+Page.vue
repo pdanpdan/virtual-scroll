@@ -109,7 +109,7 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
           To virtualize a horizontal strip in which every item has the same width, switch the axis to horizontal and give the
           engine a numeric <code>item-size</code>. Uniform sizes are the cheapest case for virtualization: the visible window,
           each item's position, and the total scroll width are all derived arithmetically (<code>index × itemSize</code>), so
-          range math stays arithmetic and long datasets scroll without extra work. That speed depends on every item being
+          range math stays arithmetic. That speed depends on every item being
           exactly the declared width, so this mode fits only while that holds.
         </p>
 
@@ -126,16 +126,10 @@ const debugMode = inject<Ref<boolean>>('debugMode', ref(false));
 
         <h3>2. Pass a real array and render each row from <code>item</code></h3>
         <p>
-          The mainstream data model is an ordinary array of item objects. The <code>#item</code> slot receives both
+          The common data model is an ordinary array of item objects. The <code>#item</code> slot receives both
           <code>item</code> and <code>index</code>; render your cell from <code>item</code> and use <code>index</code> for
           position or keys. Only the window in view (plus the buffer) is mounted, but the full array still lives in memory -
           virtualization saves DOM nodes, not your data.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

@@ -318,17 +318,11 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
 
         <h3>1. Model each pair of lines as one row</h3>
         <p>
-          The naive layout - two lists side by side - forces you to synchronize scroll offsets by hand, and the sides
-          stop being index-aligned at the first insertion or deletion. Model the pairing instead: each row owns its
+          Two independent lists side by side require synchronized scroll offsets and stop being index-aligned at the first
+          insertion or deletion. Model the pairing instead: each row owns its
           old and new line numbers and carries <em>nullable</em> content for the side that has no line. Produce these
           rows once, ahead of rendering, by running your diff algorithm over the two files; the shape below also
           includes a placeholder for a folded run of unchanged lines (see step 5).
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock

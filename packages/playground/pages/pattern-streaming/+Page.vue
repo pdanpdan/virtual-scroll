@@ -203,7 +203,7 @@ function jumpToRandom() {
     </template>
 
     <template #description>
-      A simulated market feed over {{ SYMBOL_COUNT.toLocaleString() }} symbols. Prices are kept only for rows that entered the viewport, and every tick mutates only the visible window - the per-tick cost stays constant however large the dataset grows. Pause, resume, or change the feed speed.
+      A simulated market feed over {{ SYMBOL_COUNT.toLocaleString() }} symbols. Prices are kept only for rows that entered the viewport, and every tick mutates only the visible window, so the per-tick cost depends on the visible rows, not the dataset size. Pause, resume, or change the feed speed.
     </template>
 
     <template #icon>
@@ -321,9 +321,9 @@ function jumpToRandom() {
           mutate values in place - no rows are inserted or removed, and every row keeps its size - the list has a decisive
           property for live refresh: the engine's geometry never changes, so an update cannot shift the layout or move the
           user's scroll position. The technique is to keep that geometry fixed and drive each tick from the visible range the
-          engine reports, touching only mounted rows so the per-tick cost is O(viewport) no matter how large the dataset is.
-          The tradeoff is architectural: you design for a fixed set of uniform-height rows that refresh in place, which is the
-          right fit for live values but not for an ever-growing tail (that case needs the end-anchored append pattern instead).
+          engine reports, touching only mounted rows, so the per-tick cost is O(viewport) and does not depend on the dataset size.
+          This requires a fixed set of uniform-height rows that refresh in place. An ever-growing tail needs the end-anchored
+          append pattern instead.
         </p>
 
         <h3>1. Model rows for in-place updates</h3>
@@ -340,12 +340,6 @@ function jumpToRandom() {
           <code>Map</code>) that materializes a value only when the row first enters the viewport. The VirtualScroll props are
           identical; only the slot differs (<code>item</code> vs <code>index</code>). Reach for real objects when you already own
           the data, and index-only when deriving each row is inexpensive and you want zero storage cost for the unseen rows.
-        </p>
-
-        <p>
-          The examples also draw the built-in virtual scrollbar (boolean <code>virtual-scrollbar</code>) on the list.
-          The overlay bar is driven by the engine's own scroll math, so its
-          rendering cost stays flat no matter how long the list grows.
         </p>
 
         <CodeBlock
