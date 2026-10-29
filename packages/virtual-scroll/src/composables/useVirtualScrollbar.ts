@@ -60,7 +60,9 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
   const thumbSizePercent = computed(() => {
     // Minimum thumb size in pixels (32px for better touch targets and visibility)
     const minThumbSize = 32;
-    const minPercent = props.value.viewportSize > 0 ? (minThumbSize / props.value.viewportSize) : 0.1;
+    const minPercent = props.value.viewportSize > 0
+      ? (minThumbSize / props.value.viewportSize)
+      : 0.1;
     return Math.max(Math.min(minPercent, 0.1), viewportPercent.value) * 100;
   });
   /** Calculated thumb position as a percentage of the track size (0 to 100). */
@@ -113,7 +115,9 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
     let clickPos = 0;
 
     if (isHorizontal.value) {
-      clickPos = props.value.isRtl ? rect.right - event.clientX : event.clientX - rect.left;
+      clickPos = props.value.isRtl
+        ? rect.right - event.clientX
+        : event.clientX - rect.left;
     } else {
       clickPos = event.clientY - rect.top;
     }
@@ -137,7 +141,9 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
   const handleThumbPointerDown = (event: PointerEvent) => {
     isDragging.value = true;
     startPos = isHorizontal.value
-      ? (props.value.isRtl ? -event.clientX : event.clientX)
+      ? (props.value.isRtl
+        ? -event.clientX
+        : event.clientX)
       : event.clientY;
     startScrollPos = props.value.position;
 
@@ -163,7 +169,9 @@ export function useVirtualScrollbar(propsInput: MaybeRefOrGetter<UseVirtualScrol
     }
 
     const currentPos = isHorizontal.value
-      ? (props.value.isRtl ? -event.clientX : event.clientX)
+      ? (props.value.isRtl
+        ? -event.clientX
+        : event.clientX)
       : event.clientY;
     const delta = currentPos - startPos;
     const rect = track.getBoundingClientRect();
@@ -327,7 +335,9 @@ export function buildScrollbarSlotProps(params: BuildScrollbarSlotPropsParams): 
       scrollToOffset,
       containerId,
       isRtl,
-      ariaLabel: `${ axis === 'vertical' ? 'Vertical' : 'Horizontal' } scroll`,
+      ariaLabel: `${ axis === 'vertical'
+        ? 'Vertical'
+        : 'Horizontal' } scroll`,
     },
     isDragging: scrollbar.isDragging.value,
   };

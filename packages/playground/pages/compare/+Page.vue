@@ -6,14 +6,38 @@ type ContenderKey = 'ours' | 'vvs' | 'tanstack' | 'virtua' | 'vueuc' | 'vvsl' | 
 
 /** Feature-matrix columns: the key the score uses, and the two-line header for the narrow column. */
 const CONTENDERS: { key: ContenderKey; head: [ string, string? ]; }[] = [
-  { key: 'ours', head: [ '@pdanpdan', '/virtual-scroll' ] },
-  { key: 'vvs', head: [ 'vue-virtual-', 'scroller' ] },
-  { key: 'tanstack', head: [ '@tanstack', '/vue-virtual' ] },
-  { key: 'virtua', head: [ 'virtua' ] },
-  { key: 'vueuc', head: [ 'vueuc' ] },
-  { key: 'vvsl', head: [ 'vue-virtual-', 'scroll-list' ] },
-  { key: 'vlist', head: [ 'vlist' ] },
-  { key: 'cerious', head: [ '@ceriousdevtech/', 'vue-cerious-scroll' ] },
+  {
+    key: 'ours',
+    head: [ '@pdanpdan', '/virtual-scroll' ],
+  },
+  {
+    key: 'vvs',
+    head: [ 'vue-virtual-', 'scroller' ],
+  },
+  {
+    key: 'tanstack',
+    head: [ '@tanstack', '/vue-virtual' ],
+  },
+  {
+    key: 'virtua',
+    head: [ 'virtua' ],
+  },
+  {
+    key: 'vueuc',
+    head: [ 'vueuc' ],
+  },
+  {
+    key: 'vvsl',
+    head: [ 'vue-virtual-', 'scroll-list' ],
+  },
+  {
+    key: 'vlist',
+    head: [ 'vlist' ],
+  },
+  {
+    key: 'cerious',
+    head: [ '@ceriousdevtech/', 'vue-cerious-scroll' ],
+  },
 ];
 
 /** What a support symbol is worth in the feature score. */
@@ -53,14 +77,22 @@ const FEATURES: Feature[] = [
   { label: 'Masonry layout (one scroll container)', weight: 3, cells: '✅❌❌❌❌❌✅✅' },
   { label: 'Real table rows in flow + auto-size columns', weight: 3, cells: '✅🟠❌❌❌❌❌✅' },
   { label: 'Index-only lists (no per-row data objects)', weight: 2, cells: '✅❌✅❌❌❌🟠✅' },
-  { label: 'Custom item identity keys', weight: 1, code: 'getItemKey / getKey', cells: '❌❌✅✅❌❌❌❌' },
+  {
+    label: 'Custom item identity keys',
+    weight: 1,
+    code: 'getItemKey / getKey',
+    cells: '❌❌✅✅❌❌❌❌',
+  },
   { label: 'Automatic ARIA roles & item indices', weight: 2, cells: '✅❌❌❌❌❌✅❌' },
   { label: 'Official siblings for other frameworks (React, Solid, …)', weight: 1, cells: '❌❌✅✅❌❌✅✅' },
   { label: 'TypeScript', weight: 1, cells: '✅✅✅✅✅❌✅✅' },
 ];
 
 /** The rows with the symbols split, so the matrix can pick a column. */
-const MATRIX = FEATURES.map((feature) => ({ ...feature, cells: [ ...feature.cells ] }));
+const MATRIX = FEATURES.map((feature) => ({
+  ...feature,
+  cells: [ ...feature.cells ],
+}));
 
 /** What each weight means, for the matrix tooltips and the legend. */
 const WEIGHT_SCALE: Record<number, string> = {

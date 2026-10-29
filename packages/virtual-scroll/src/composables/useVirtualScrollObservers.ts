@@ -56,9 +56,19 @@ export function useVirtualScrollObservers({
         if (colIndex !== undefined) {
           // Cell measurement: -1 marks an update that carries no row index, so it
           // only feeds the column tree.
-          updates.push({ index: -1, inlineSize, blockSize, element: target });
+          updates.push({
+            index: -1,
+            inlineSize,
+            blockSize,
+            element: target,
+          });
         } else if (!Number.isNaN(index)) {
-          updates.push({ index, inlineSize, blockSize, element: target });
+          updates.push({
+            index,
+            inlineSize,
+            blockSize,
+            element: target,
+          });
         }
       }
 

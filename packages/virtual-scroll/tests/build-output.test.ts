@@ -30,9 +30,21 @@ interface Manifest {
 beforeAll(async () => {
   rmSync(distDir, { recursive: true, force: true });
   // pin root: vitest workers run from the repo root, and vite derives root from cwd
-  await build({ configFile: resolve(pkgRoot, 'vite.config.ts'), root: pkgRoot, logLevel: 'silent' });
-  await build({ configFile: resolve(pkgRoot, 'vite.config.core.ts'), root: pkgRoot, logLevel: 'silent' });
-  await build({ configFile: resolve(pkgRoot, 'vite.config.umd.ts'), root: pkgRoot, logLevel: 'silent' });
+  await build({
+    configFile: resolve(pkgRoot, 'vite.config.ts'),
+    root: pkgRoot,
+    logLevel: 'silent',
+  });
+  await build({
+    configFile: resolve(pkgRoot, 'vite.config.core.ts'),
+    root: pkgRoot,
+    logLevel: 'silent',
+  });
+  await build({
+    configFile: resolve(pkgRoot, 'vite.config.umd.ts'),
+    root: pkgRoot,
+    logLevel: 'silent',
+  });
 }, 120_000);
 
 afterAll(() => {
@@ -106,8 +118,14 @@ describe('build output layout', () => {
     const core = await import(pathToFileURL(resolve(distDir, 'core.mjs')).href) as { VirtualScroll: never; };
 
     // The built modules carry no types: the same props object drives both entries.
-    const fullWrapper = mount(full.VirtualScroll, { props: props as never, slots: { item: '<div class="row" />' } });
-    const coreWrapper = mount(core.VirtualScroll, { props: props as never, slots: { item: '<div class="row" />' } });
+    const fullWrapper = mount(full.VirtualScroll, {
+      props: props as never,
+      slots: { item: '<div class="row" />' },
+    });
+    const coreWrapper = mount(core.VirtualScroll, {
+      props: props as never,
+      slots: { item: '<div class="row" />' },
+    });
     await nextTick();
     await nextTick();
 
@@ -191,7 +209,9 @@ describe('build output layout', () => {
       ...Object.values(manifest.exports ?? {}),
     ];
     const declaredDistPaths = entries
-      .flatMap((entry) => (typeof entry === 'string' ? [ entry ] : [ entry?.types, entry?.import, entry?.require ]))
+      .flatMap((entry) => (typeof entry === 'string'
+        ? [ entry ]
+        : [ entry?.types, entry?.import, entry?.require ]))
       .filter((path): path is string => typeof path === 'string' && path.startsWith('./dist'));
     expect(declaredDistPaths.length).toBeGreaterThan(0);
     for (const path of declaredDistPaths) {

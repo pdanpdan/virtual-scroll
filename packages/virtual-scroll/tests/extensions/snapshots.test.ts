@@ -27,7 +27,9 @@ function createFakeStorage(): Storage {
       entries.clear();
     },
     getItem: (key: string) => entries.get(key) ?? null,
-    key: (index: number) => [ ...entries.keys() ][ index ] ?? null,
+    key: (index: number) => [
+      ...entries.keys(),
+    ][ index ] ?? null,
     removeItem: (key: string) => {
       entries.delete(key);
     },
@@ -39,12 +41,21 @@ function createFakeStorage(): Storage {
 
 /** Engine context mock: item 55 is visible at 10 VU inside it (items are 50 VU tall). */
 function makeCtx(overrides: { direction?: 'vertical' | 'horizontal' | 'both' | null; } = {}) {
-  const scrollToIndex = vi.fn(() => ({ targetX: 300, targetY: 2750, displayTargetX: 300, displayTargetY: 2750 }));
+  const scrollToIndex = vi.fn(() => ({
+    targetX: 300,
+    targetY: 2750,
+    displayTargetX: 300,
+    displayTargetY: 2750,
+  }));
   const scrollToOffset = vi.fn();
-  const direction = overrides.direction === undefined ? 'vertical' : overrides.direction;
+  const direction = overrides.direction === undefined
+    ? 'vertical'
+    : overrides.direction;
   const ctx = {
     props: ref({
-      ...(direction === null ? {} : { direction }),
+      ...(direction === null
+        ? {}
+        : { direction }),
       items: mockItems,
     }),
     scrollDetails: ref({

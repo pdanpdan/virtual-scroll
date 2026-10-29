@@ -246,7 +246,9 @@ describe('virtual-scroll-logic', () => {
         itemsLength: 1,
         queryColumn: () => 0,
         queryX: () => 0,
-        queryY: (idx) => (idx === 0 ? 0 : 5),
+        queryY: (idx) => (idx === 0
+          ? 0
+          : 5),
         usableHeight: 500,
         usableWidth: 500,
       });
@@ -263,7 +265,9 @@ describe('virtual-scroll-logic', () => {
         gap: 0,
         itemsLength: 1,
         queryColumn: () => 0,
-        queryX: (idx) => (idx === 0 ? 0 : 5),
+        queryX: (idx) => (idx === 0
+          ? 0
+          : 5),
         queryY: () => 0,
         usableHeight: 500,
         usableWidth: 500,
@@ -280,9 +284,13 @@ describe('virtual-scroll-logic', () => {
         fixedWidth: null,
         gap: 10,
         itemsLength: 1,
-        queryColumn: (idx) => (idx === 0 ? 0 : 110),
+        queryColumn: (idx) => (idx === 0
+          ? 0
+          : 110),
         queryX: () => 0,
-        queryY: (idx) => (idx === 0 ? 0 : 60),
+        queryY: (idx) => (idx === 0
+          ? 0
+          : 60),
         usableHeight: 500,
         usableWidth: 500,
       });
@@ -299,7 +307,9 @@ describe('virtual-scroll-logic', () => {
         fixedWidth: null,
         gap: 10,
         itemsLength: 1,
-        queryColumn: (idx) => (idx === 0 ? 0 : 110),
+        queryColumn: (idx) => (idx === 0
+          ? 0
+          : 110),
         queryX: () => 0,
         queryY: () => 0,
         usableHeight: 500,
@@ -451,7 +461,9 @@ describe('virtual-scroll-logic', () => {
   });
 
   describe('resolveSnap', () => {
-    const getSize = (i: number) => (i === 100 ? 1000 : 50);
+    const getSize = (i: number) => (i === 100
+      ? 1000
+      : 50);
     const getQuery = (i: number) => i * 50;
     const getIndexAt = (o: number) => Math.floor(o / 50);
 
@@ -604,7 +616,11 @@ describe('virtual-scroll-logic', () => {
         bufferBefore: 0,
         columnGap: 0,
         direction: 'horizontal',
-        findLowerBoundX: (val) => val >= 200 ? 2 : (val >= 100 ? 1 : 0),
+        findLowerBoundX: (val) => val >= 200
+          ? 2
+          : (val >= 100
+            ? 1
+            : 0),
         findLowerBoundY: () => 0,
         fixedSize: null,
         gap: 0,
@@ -672,7 +688,9 @@ describe('virtual-scroll-logic', () => {
         getItemQueryY: () => 0,
         getItemSizeX: () => 0,
         getItemSizeY: () => 0,
-        options: { align: { x: 'start' } },
+        options: {
+          align: { x: 'start' },
+        },
         relativeScrollX: 0,
         relativeScrollY: 0,
         rowIndex: null,
@@ -702,7 +720,9 @@ describe('virtual-scroll-logic', () => {
         getItemQueryY: (idx) => idx * 50,
         getItemSizeX: () => 0,
         getItemSizeY: () => 50,
-        options: { align: { y: 'start' } },
+        options: {
+          align: { y: 'start' },
+        },
         relativeScrollX: 50,
         relativeScrollY: 0,
         rowIndex: 10,
@@ -733,7 +753,9 @@ describe('virtual-scroll-logic', () => {
         getItemQueryY: () => 0,
         getItemSizeX: () => 50,
         getItemSizeY: () => 0,
-        options: { align: { x: 'start' } },
+        options: {
+          align: { x: 'start' },
+        },
         relativeScrollX: 0,
         relativeScrollY: 50,
         rowIndex: 10,
@@ -764,7 +786,9 @@ describe('virtual-scroll-logic', () => {
         getItemQueryY: () => 0,
         getItemSizeX: () => 50,
         getItemSizeY: () => 0,
-        options: { align: { x: 'start' } },
+        options: {
+          align: { x: 'start' },
+        },
         relativeScrollX: 0,
         relativeScrollY: 0,
         rowIndex: null,
@@ -1405,12 +1429,16 @@ describe('virtual-scroll-logic', () => {
         }
         let sum = 12000;
         for (let i = 100; i < index; i++) {
-          sum += (i % 2 === 0 ? 80 : 160);
+          sum += (i % 2 === 0
+            ? 80
+            : 160);
         }
         return sum;
       };
 
-      const getItemSizeY = (index: number) => (index % 2 === 0 ? 80 : 160);
+      const getItemSizeY = (index: number) => (index % 2 === 0
+        ? 80
+        : 160);
 
       const params = {
         scaleX: 1,
@@ -2761,7 +2789,9 @@ describe('virtual-scroll-logic', () => {
         width: 500,
       }));
 
-      const activeIndices = results.map((r, i) => r.isStickyActive ? i : -1).filter((i) => i !== -1);
+      const activeIndices = results.map((r, i) => r.isStickyActive
+        ? i
+        : -1).filter((i) => i !== -1);
       expect(activeIndices).toEqual([ 1 ]);
     });
 
@@ -3095,7 +3125,12 @@ describe('virtual-scroll-logic', () => {
     it('handles horizontal SSR offsets', () => {
       const offsets = calculateSSROffsets(
         'horizontal',
-        { start: 0, end: 10, colStart: 5, colEnd: 10 },
+        {
+          start: 0,
+          end: 10,
+          colStart: 5,
+          colEnd: 10,
+        },
         null,
         null,
         10,
@@ -3110,7 +3145,12 @@ describe('virtual-scroll-logic', () => {
     it('handles both direction SSR offsets', () => {
       const offsets = calculateSSROffsets(
         'both',
-        { start: 10, end: 20, colStart: 5, colEnd: 10 },
+        {
+          start: 10,
+          end: 20,
+          colStart: 5,
+          colEnd: 10,
+        },
         null,
         null,
         10,
@@ -3126,12 +3166,18 @@ describe('virtual-scroll-logic', () => {
     it('detects prepend count correctly', () => {
       expect(calculatePrependCount(undefined, 0, [ 1, 2 ])).toBe(0);
       const first = { id: 1 };
-      expect(calculatePrependCount(first, 1, [ { id: 2 }, first ])).toBe(1);
+      expect(calculatePrependCount(first, 1, [
+        { id: 2 },
+        first,
+      ])).toBe(1);
 
       // Item identity check
       const added = { id: 2 };
       expect(calculatePrependCount(first, 1, [ added, added, first ])).toBe(2);
-      expect(calculatePrependCount(first, 1, [ { id: 2 }, { id: 1 } ])).toBe(0); // different object reference
+      expect(calculatePrependCount(first, 1, [
+        { id: 2 },
+        { id: 1 },
+      ])).toBe(0); // different object reference
     });
 
     it('calculates scroll target with start alignment', () => {
@@ -3206,7 +3252,11 @@ describe('virtual-scroll-logic', () => {
 
     it('returns 0 in calculatePrependCount when the list did not grow', () => {
       const first = { id: 1 };
-      expect(calculatePrependCount(first, 3, [ first, { id: 2 }, { id: 3 } ])).toBe(0);
+      expect(calculatePrependCount(first, 3, [
+        first,
+        { id: 2 },
+        { id: 3 },
+      ])).toBe(0);
     });
   });
 

@@ -68,7 +68,9 @@ function resolveStorage(source: SnapshotsExtensionOptions[ 'storage' ]): Storage
     return source;
   }
   try {
-    return source === 'session' ? window.sessionStorage : window.localStorage;
+    return source === 'session'
+      ? window.sessionStorage
+      : window.localStorage;
   } catch {
     // SSR (no window) or a storage accessor blocked by the browser.
     return null;
@@ -126,7 +128,9 @@ export function useSnapshotsExtension<T = unknown>(options: SnapshotsExtensionOp
     }
     try {
       const raw = storage.getItem(key);
-      return raw === null ? null : normalizeSnapshot(JSON.parse(raw) as unknown);
+      return raw === null
+        ? null
+        : normalizeSnapshot(JSON.parse(raw) as unknown);
     } catch {
       // Blocked storage or a corrupted entry: fall back to memory.
       return null;
@@ -180,7 +184,9 @@ export function useSnapshotsExtension<T = unknown>(options: SnapshotsExtensionOp
     },
     save() {
       // Before initialization there is no scroll state to capture.
-      return ctx ? capture(ctx) : { index: 0, offset: 0, total: 0 };
+      return ctx
+        ? capture(ctx)
+        : { index: 0, offset: 0, total: 0 };
     },
     restore(target?: ScrollSnapshot | null) {
       const context = ctx;
@@ -204,8 +210,12 @@ export function useSnapshotsExtension<T = unknown>(options: SnapshotsExtensionOp
       // `scrollToIndex` aligns the item start; re-apply the offset inside the item on top.
       if (wanted.offset !== 0) {
         context.methods.scrollToOffset(
-          horizontal ? targetX + wanted.offset : null,
-          horizontal ? null : targetY + wanted.offset,
+          horizontal
+            ? targetX + wanted.offset
+            : null,
+          horizontal
+            ? null
+            : targetY + wanted.offset,
           { behavior: 'auto' },
         );
       }

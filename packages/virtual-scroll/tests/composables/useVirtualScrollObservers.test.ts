@@ -109,8 +109,14 @@ describe('useVirtualScrollObservers', () => {
     const target1 = document.createElement('div');
     target1.dataset.index = '0';
     // JSDOM doesn't implement layout; use defineProperty on the prototype chain
-    Object.defineProperty(target1, 'offsetWidth', { configurable: true, get: () => 100 });
-    Object.defineProperty(target1, 'offsetHeight', { configurable: true, get: () => 50 });
+    Object.defineProperty(target1, 'offsetWidth', {
+      configurable: true,
+      get: () => 100,
+    });
+    Object.defineProperty(target1, 'offsetHeight', {
+      configurable: true,
+      get: () => 50,
+    });
 
     const target2 = document.createElement('div');
     target2.dataset.index = '0';
@@ -121,41 +127,63 @@ describe('useVirtualScrollObservers', () => {
 
     if (itemResizeCallback) {
       // With borderBoxSize empty → falls back to offsetWidth/offsetHeight
-      itemResizeCallback([ {
-        target: target1,
-        contentRect: { width: 90, height: 40 } as DOMRectReadOnly,
-        borderBoxSize: [],
-        contentBoxSize: [],
-        devicePixelContentBoxSize: [],
-      } ], {} as ResizeObserver);
+      itemResizeCallback([
+        {
+          target: target1,
+          contentRect: { width: 90, height: 40 } as DOMRectReadOnly,
+          borderBoxSize: [],
+          contentBoxSize: [],
+          devicePixelContentBoxSize: [],
+        },
+      ], {} as ResizeObserver);
 
-      expect(updateItemSizes).toHaveBeenCalledWith([ { index: 0, inlineSize: 100, blockSize: 50, element: target1 } ]);
+      expect(updateItemSizes).toHaveBeenCalledWith([
+        {
+          index: 0,
+          inlineSize: 100,
+          blockSize: 50,
+          element: target1,
+        },
+      ]);
 
       updateItemSizes.mockClear();
 
       // With borderBoxSize present and colIndex set → uses borderBoxSize values
-      itemResizeCallback([ {
-        target: target2,
-        contentRect: { width: 90, height: 40 } as DOMRectReadOnly,
-        borderBoxSize: [ { inlineSize: 120, blockSize: 60 } ],
-        contentBoxSize: [],
-        devicePixelContentBoxSize: [],
-      } ], {} as ResizeObserver);
+      itemResizeCallback([
+        {
+          target: target2,
+          contentRect: { width: 90, height: 40 } as DOMRectReadOnly,
+          borderBoxSize: [
+            { inlineSize: 120, blockSize: 60 },
+          ],
+          contentBoxSize: [],
+          devicePixelContentBoxSize: [],
+        },
+      ], {} as ResizeObserver);
 
-      expect(updateItemSizes).toHaveBeenCalledWith([ { index: -1, inlineSize: 120, blockSize: 60, element: target2 } ]);
+      expect(updateItemSizes).toHaveBeenCalledWith([
+        {
+          index: -1,
+          inlineSize: 120,
+          blockSize: 60,
+          element: target2,
+        },
+      ]);
 
       updateItemSizes.mockClear();
 
       // Entry with NaN index and no colIndex → should be ignored
       const targetInvalid = document.createElement('div');
       // No dataset.index set → Number(undefined) = NaN
-      itemResizeCallback([ {
-        target: targetInvalid,
-        contentRect: { width: 10, height: 10 } as DOMRectReadOnly,
-        borderBoxSize: [],
-        contentBoxSize: [],
-        devicePixelContentBoxSize: [],
-      } ], {} as ResizeObserver);
+      itemResizeCallback([
+        {
+          target: targetInvalid,
+          contentRect: { width: 10, height: 10 } as DOMRectReadOnly,
+          borderBoxSize: [],
+          contentBoxSize: [],
+          devicePixelContentBoxSize: [],
+        },
+      ], {} as ResizeObserver);
 
       expect(updateItemSizes).not.toHaveBeenCalled();
     }
@@ -239,9 +267,15 @@ describe('useVirtualScrollObservers', () => {
     }));
 
     const header = document.createElement('div');
-    Object.defineProperty(header, 'offsetHeight', { configurable: true, get: () => 50 });
+    Object.defineProperty(header, 'offsetHeight', {
+      configurable: true,
+      get: () => 50,
+    });
     const footer = document.createElement('div');
-    Object.defineProperty(footer, 'offsetHeight', { configurable: true, get: () => 30 });
+    Object.defineProperty(footer, 'offsetHeight', {
+      configurable: true,
+      get: () => 30,
+    });
 
     headerRef.value = header;
     footerRef.value = footer;

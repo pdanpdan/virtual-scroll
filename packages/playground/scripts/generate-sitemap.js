@@ -19,8 +19,12 @@ function getPages(dir) {
       const hasPage = fs.existsSync(path.join(fullPath, '+Page.vue'));
 
       if (hasPage) {
-        const route = entry.name === 'index' ? '' : entry.name;
-        pages.push(route ? `${ route }/` : '');
+        const route = entry.name === 'index'
+          ? ''
+          : entry.name;
+        pages.push(route
+          ? `${ route }/`
+          : '');
       }
     }
   }

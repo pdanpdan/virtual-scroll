@@ -61,7 +61,9 @@ describe('masonry-layout', () => {
         }
         prefix[ best ] = prefix[ best ]! + oracle(i, WIDTH) + GAP;
       }
-      const expected = s >= segments ? Math.max(...prefix) : Math.min(...prefix);
+      const expected = s >= segments
+        ? Math.max(...prefix)
+        : Math.min(...prefix);
       expect(layout.segmentOrigin(s)).toBeCloseTo(expected, 6);
     }
   });

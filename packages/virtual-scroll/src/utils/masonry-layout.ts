@@ -155,7 +155,9 @@ export class MasonryLayout {
     let value = this.frontiers[ off ]!;
     for (let c = 1; c < this.columns; c++) {
       const other = this.frontiers[ off + c ]!;
-      if (atEnd ? other > value : other < value) {
+      if (atEnd
+        ? other > value
+        : other < value) {
         value = other;
       }
     }
@@ -177,7 +179,10 @@ export class MasonryLayout {
         hi = mid - 1;
       }
     }
-    return { segment: lo, offset: Math.max(0, y - this.segmentOrigin(lo)) };
+    return {
+      segment: lo,
+      offset: Math.max(0, y - this.segmentOrigin(lo)),
+    };
   }
 
   /**
@@ -187,7 +192,10 @@ export class MasonryLayout {
   totalHeight(): { height: number; exact: boolean; } {
     const segments = this.segmentCount();
     if (this.frontierKnown >= segments) {
-      return { height: this.segmentOrigin(segments), exact: true };
+      return {
+        height: this.segmentOrigin(segments),
+        exact: true,
+      };
     }
     if (this.frontierKnown <= 0) {
       return { height: this.segmentOrigin(1) * segments, exact: false };
@@ -314,7 +322,10 @@ export class MasonryLayout {
 
   /** How far the chain has been built, for progress reporting. */
   get chainProgress(): { known: number; total: number; } {
-    return { known: this.frontierKnown, total: this.segmentCount() };
+    return {
+      known: this.frontierKnown,
+      total: this.segmentCount(),
+    };
   }
 
   private now(): number {

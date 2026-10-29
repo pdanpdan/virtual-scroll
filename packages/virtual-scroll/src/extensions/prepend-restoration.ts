@@ -27,7 +27,9 @@ export function usePrependRestorationExtension<T = unknown>(): VirtualScrollExte
 
         if (prependCount > 0) {
           const direction = ctx.props.value.direction || 'vertical';
-          const gap = (direction === 'horizontal' ? ctx.props.value.columnGap : ctx.props.value.gap) || 0;
+          const gap = (direction === 'horizontal'
+            ? ctx.props.value.columnGap
+            : ctx.props.value.gap) || 0;
 
           let addedSize = 0;
           for (let i = 0; i < prependCount; i++) {
@@ -36,8 +38,12 @@ export function usePrependRestorationExtension<T = unknown>(): VirtualScrollExte
 
           if (addedSize > 0) {
             ctx.methods.handleScrollCorrection(
-              direction === 'horizontal' ? addedSize : 0,
-              direction !== 'horizontal' ? addedSize : 0,
+              direction === 'horizontal'
+                ? addedSize
+                : 0,
+              direction !== 'horizontal'
+                ? addedSize
+                : 0,
             );
           }
         }

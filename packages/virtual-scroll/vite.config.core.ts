@@ -21,7 +21,9 @@ import { defineConfig } from 'vite';
  * differs, so declarations are generated once by `vite.config.ts`.
  */
 export default defineConfig({
-  plugins: [ vue() ],
+  plugins: [
+    vue(),
+  ],
   define: {
     __VS_CORE_BUILD__: 'true',
   },
@@ -38,7 +40,9 @@ export default defineConfig({
       entry: resolve(import.meta.dirname, 'src/index.ts'),
       name: 'VirtualScroll',
       formats: [ 'es', 'cjs' ],
-      fileName: (format) => `core.${ format === 'es' ? 'mjs' : 'cjs' }`,
+      fileName: (format) => `core.${ format === 'es'
+        ? 'mjs'
+        : 'cjs' }`,
       cssFileName: 'core',
     },
     rollupOptions: {

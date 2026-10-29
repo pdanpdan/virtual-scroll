@@ -31,7 +31,9 @@ const itemCount = ref(50_000);
 // Live stats only exist client-side: while mounting/SSR the status line must
 // show zeros so the server-rendered markup matches hydration exactly.
 const mounted = ref(false);
-const displayStats = computed(() => (mounted.value ? feedStats : { cached: 0, fetched: 0 }));
+const displayStats = computed(() => (mounted.value
+  ? feedStats
+  : { cached: 0, fetched: 0 }));
 onMounted(() => {
   mounted.value = true;
 });

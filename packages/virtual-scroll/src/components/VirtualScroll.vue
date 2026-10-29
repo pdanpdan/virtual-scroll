@@ -101,12 +101,16 @@ const effectiveRole = computed((): string => {
   if (props.role) {
     return props.role;
   }
-  return props.direction === 'both' ? 'grid' : 'list';
+  return props.direction === 'both'
+    ? 'grid'
+    : 'list';
 });
 
 const isGrid = computed(() => effectiveRole.value === 'grid');
 
-const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : undefined);
+const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby)
+  ? 'region'
+  : undefined);
 const wrapperRole = computed(() => effectiveRole.value);
 const internalItemRole = computed(() => {
   if (isGrid.value) {
@@ -198,7 +202,9 @@ const {
     if (requested !== 'auto') {
       return requested;
     }
-    return ACTIVE_DESCENDANT_ROLES.has(effectiveRole.value) ? 'item' : 'viewport';
+    return ACTIVE_DESCENDANT_ROLES.has(effectiveRole.value)
+      ? 'item'
+      : 'viewport';
   }),
   onScroll: (details) => emit('scroll', details),
   onVisibleRangeChange: (range) => emit('visibleRangeChange', range),
@@ -223,7 +229,9 @@ const ScrollbarOverlay = IS_CORE_BUILD ? null : VirtualScrollbars;
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
-    ...(props.direction !== 'vertical' ? { whiteSpace: 'nowrap' as const } : {}),
+    ...(props.direction !== 'vertical'
+      ? { whiteSpace: 'nowrap' as const }
+      : {}),
   };
 
   if (showVirtualScrollbars.value || !isWindowContainer.value) {
@@ -241,10 +249,18 @@ const wrapperAriaProps = computed(() => {
   const aria: Record<string, string | number | undefined> = {};
 
   const role = effectiveRole.value;
-  const supportsOrientation = role && [ 'grid', 'tree', 'listbox', 'menu', 'tablist' ].includes(role);
+  const supportsOrientation = role && [
+    'grid',
+    'tree',
+    'listbox',
+    'menu',
+    'tablist',
+  ].includes(role);
 
   if (supportsOrientation) {
-    aria[ 'aria-orientation' ] = props.direction === 'both' ? undefined : props.direction;
+    aria[ 'aria-orientation' ] = props.direction === 'both'
+      ? undefined
+      : props.direction;
   }
 
   if (isGrid.value) {

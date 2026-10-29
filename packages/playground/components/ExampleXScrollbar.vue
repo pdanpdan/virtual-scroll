@@ -49,7 +49,9 @@ function sync() {
   isRtl.value = getComputedStyle(el).direction === 'rtl';
   viewportSize.value = el.clientWidth;
   totalSize.value = el.scrollWidth;
-  position.value = isRtl.value ? -el.scrollLeft : el.scrollLeft;
+  position.value = isRtl.value
+    ? -el.scrollLeft
+    : el.scrollLeft;
 }
 
 function scrollToOffset(offset: number) {
@@ -58,7 +60,9 @@ function scrollToOffset(offset: number) {
     return;
   }
   // Programmatic scrolls do not fire scroll events, so re-sync explicitly.
-  el.scrollLeft = isRtl.value ? -offset : offset;
+  el.scrollLeft = isRtl.value
+    ? -offset
+    : offset;
   scheduleSync();
 }
 

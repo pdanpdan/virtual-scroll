@@ -10,7 +10,16 @@ const ZERO_POINT: Point = { x: 0, y: 0 };
 const INSTANT_JUMP_VIEWPORTS = 10;
 
 /** Keys the viewport navigation handles; 'item' activation mode consumes its own first. */
-const NAVIGATION_KEYS = new Set([ 'Home', 'End', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown' ]);
+const NAVIGATION_KEYS = new Set([
+  'Home',
+  'End',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'PageUp',
+  'PageDown',
+]);
 
 export interface UseVirtualScrollKeyboardOptions<T> {
   /**
@@ -93,7 +102,9 @@ export function useVirtualScrollKeyboard<T>({
    */
   const liveMessage = computed(() => {
     const index = activeIndex.value;
-    return index < 0 || index >= props.value.items.length ? '' : `Item ${ index + 1 } of ${ props.value.items.length }`;
+    return index < 0 || index >= props.value.items.length
+      ? ''
+      : `Item ${ index + 1 } of ${ props.value.items.length }`;
   });
 
   /**
@@ -122,7 +133,9 @@ export function useVirtualScrollKeyboard<T>({
    */
   const getSnapAlignment = () => {
     const snap = props.value.snap;
-    return snap && snap !== 'auto' && snap !== true ? snap as ScrollAlignment : null;
+    return snap && snap !== 'auto' && snap !== true
+      ? snap as ScrollAlignment
+      : null;
   };
 
   /** Index of the item at the middle of the viewport on one axis. */
@@ -143,7 +156,9 @@ export function useVirtualScrollKeyboard<T>({
     index: number,
     isVerticalAxis: boolean,
     options: { align?: ScrollAlignment | 'auto'; behavior?: 'auto' | 'smooth'; },
-  ) => (isVerticalAxis ? scrollToIndex(index, null, options) : scrollToIndex(null, index, options));
+  ) => (isVerticalAxis
+    ? scrollToIndex(index, null, options)
+    : scrollToIndex(null, index, options));
 
   /**
    * Scrolls an item into view with the smallest movement that reveals it,
@@ -211,7 +226,9 @@ export function useVirtualScrollKeyboard<T>({
         }
         event.preventDefault();
         stopProgrammaticScroll();
-        moveActiveItem(event.key === 'ArrowDown' ? 1 : -1, true);
+        moveActiveItem(event.key === 'ArrowDown'
+          ? 1
+          : -1, true);
         return true;
       }
       case 'ArrowRight':
@@ -222,7 +239,11 @@ export function useVirtualScrollKeyboard<T>({
         event.preventDefault();
         stopProgrammaticScroll();
         const isForward = event.key === 'ArrowRight';
-        moveActiveItem((isRtl.value ? !isForward : isForward) ? 1 : -1, false);
+        moveActiveItem((isRtl.value
+          ? !isForward
+          : isForward)
+          ? 1
+          : -1, false);
         return true;
       }
       case 'Home':
@@ -230,7 +251,9 @@ export function useVirtualScrollKeyboard<T>({
         event.preventDefault();
         stopProgrammaticScroll();
         if (count > 0) {
-          const target = event.key === 'Home' ? 0 : count - 1;
+          const target = event.key === 'Home'
+            ? 0
+            : count - 1;
           setActiveIndex(target);
           scrollItemIntoView(target, isVerticalAxis);
         }
@@ -245,8 +268,12 @@ export function useVirtualScrollKeyboard<T>({
           const start = isVerticalAxis ? currentIndex : currentColIndex;
           const end = isVerticalAxis ? currentEndIndex : currentEndColIndex;
           const pageSize = Math.max(1, end - start + 1);
-          const base = activeIndex.value < 0 ? start : activeIndex.value;
-          const target = Math.max(0, Math.min(count - 1, base + (event.key === 'PageDown' ? pageSize : -pageSize)));
+          const base = activeIndex.value < 0
+            ? start
+            : activeIndex.value;
+          const target = Math.max(0, Math.min(count - 1, base + (event.key === 'PageDown'
+            ? pageSize
+            : -pageSize)));
           setActiveIndex(target);
           scrollItemIntoView(target, isVerticalAxis);
         }
@@ -298,17 +325,23 @@ export function useVirtualScrollKeyboard<T>({
 
     if (snapAlignment === 'center') {
       const centerIndex = getCenterIndex(isVerticalAxis);
-      const target = isForward ? Math.min(maxIndex, centerIndex + 1) : Math.max(0, centerIndex - 1);
+      const target = isForward
+        ? Math.min(maxIndex, centerIndex + 1)
+        : Math.max(0, centerIndex - 1);
       scrollToAxisIndex(target, isVerticalAxis, { align: 'center' });
       return;
     }
 
     // The inline axis follows reading order: in RTL a press towards the end of the
     // line moves the viewport towards the start of the data.
-    const isForwardMove = isVerticalAxis || !isRtl.value ? isForward : !isForward;
+    const isForwardMove = isVerticalAxis || !isRtl.value
+      ? isForward
+      : !isForward;
     const align = snapAlignment ?? (isForwardMove ? 'end' : 'start');
     if (snapAlignment === (isForwardMove ? 'start' : 'end')) {
-      const target = isForwardMove ? Math.min(maxIndex, visibleStartIndex + 1) : Math.max(0, visibleEndIndex - 1);
+      const target = isForwardMove
+        ? Math.min(maxIndex, visibleStartIndex + 1)
+        : Math.max(0, visibleEndIndex - 1);
       scrollToAxisIndex(target, isVerticalAxis, { align });
       return;
     }
@@ -338,7 +371,9 @@ export function useVirtualScrollKeyboard<T>({
 
     const itemStart = isVerticalAxis
       ? getRowOffset(visibleStartIndex)
-      : isColumnAxis ? getColumnOffset(visibleStartIndex) : getItemOffset(visibleStartIndex);
+      : isColumnAxis
+        ? getColumnOffset(visibleStartIndex)
+        : getItemOffset(visibleStartIndex);
     const viewportStart = isVerticalAxis
       ? scrollOffset.y + stickyStart.y + padStart.y
       : scrollOffset.x + stickyStart.x + padStart.x;
@@ -406,51 +441,83 @@ export function useVirtualScrollKeyboard<T>({
     const { key } = event;
 
     if (key === 'Home') {
-      const viewport = direction === 'horizontal' ? viewportSize.width : viewportSize.height;
+      const viewport = direction === 'horizontal'
+        ? viewportSize.width
+        : viewportSize.height;
       const distance = Math.max(scrollOffset.x, scrollOffset.y);
-      scrollToIndex(0, 0, { align: 'start', behavior: distance > INSTANT_JUMP_VIEWPORTS * viewport ? 'auto' : 'smooth' });
+      scrollToIndex(0, 0, {
+        align: 'start',
+        behavior: distance > INSTANT_JUMP_VIEWPORTS * viewport
+          ? 'auto'
+          : 'smooth',
+      });
       return;
     }
 
     if (key === 'End') {
-      const viewport = direction === 'horizontal' ? viewportSize.width : viewportSize.height;
+      const viewport = direction === 'horizontal'
+        ? viewportSize.width
+        : viewportSize.height;
       const distance = Math.max(
         totalSize.width - scrollOffset.x - viewportSize.width,
         totalSize.height - scrollOffset.y - viewportSize.height,
       );
-      const behavior = distance > INSTANT_JUMP_VIEWPORTS * viewport ? 'auto' : 'smooth';
+      const behavior = distance > INSTANT_JUMP_VIEWPORTS * viewport
+        ? 'auto'
+        : 'smooth';
       // The loading slot is always rendered (hidden when idle): include its height
       // so the last item plus the slot fit in the viewport. The extra also extends
       // scrollToOffset's clamp, which otherwise caps at the virtual content end and
       // would hide the slot below it.
-      const extra = getLoadingSlotSize ? getLoadingSlotSize() : 0;
+      const extra = getLoadingSlotSize
+        ? getLoadingSlotSize()
+        : 0;
 
       if (direction === 'both') {
         scrollToOffset(
           totalSize.width - viewportSize.width,
           totalSize.height - viewportSize.height + extra,
-          { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
+          {
+            behavior,
+            ...(extra > 0
+              ? { endExtraY: extra }
+              : {}),
+          },
         );
       } else if (direction === 'horizontal') {
         scrollToOffset(
           totalSize.width - viewportSize.width + extra,
           null,
-          { behavior, ...(extra > 0 ? { endExtraX: extra } : {}) },
+          {
+            behavior,
+            ...(extra > 0
+              ? { endExtraX: extra }
+              : {}),
+          },
         );
       } else {
         scrollToOffset(
           null,
           totalSize.height - viewportSize.height + extra,
-          { behavior, ...(extra > 0 ? { endExtraY: extra } : {}) },
+          {
+            behavior,
+            ...(extra > 0
+              ? { endExtraY: extra }
+              : {}),
+          },
         );
       }
       return;
     }
 
     const isPageKey = key === 'PageUp' || key === 'PageDown';
-    const isVerticalAxis = isPageKey ? direction !== 'horizontal' : key === 'ArrowUp' || key === 'ArrowDown';
+    const isVerticalAxis = isPageKey
+      ? direction !== 'horizontal'
+      : key === 'ArrowUp' || key === 'ArrowDown';
     // Arrows only navigate the axis the list actually scrolls on.
-    if (!isPageKey && (isVerticalAxis ? direction === 'horizontal' : direction === 'vertical')) {
+    if (!isPageKey && (isVerticalAxis
+      ? direction === 'horizontal'
+      : direction === 'vertical')) {
       return;
     }
     const isForward = key === 'ArrowDown' || key === 'ArrowRight' || key === 'PageDown';

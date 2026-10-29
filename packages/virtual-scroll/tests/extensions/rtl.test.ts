@@ -7,7 +7,12 @@ import { useRtlExtension } from '../../src/extensions/rtl';
 function makeCtx() {
   const updateDirection = vi.fn();
   const ctx = {
-    props: { value: { container: document.createElement('div'), hostRef: null } },
+    props: {
+      value: {
+        container: document.createElement('div'),
+        hostRef: null,
+      },
+    },
     methods: { updateDirection },
   } as unknown as ExtensionContext<unknown>;
   return { ctx, updateDirection };

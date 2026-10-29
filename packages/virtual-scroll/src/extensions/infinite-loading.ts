@@ -76,7 +76,9 @@ export function useInfiniteLoadingExtension<T = unknown>(options: InfiniteLoadin
       ) => {
         // Prefetch only in the direction of travel: the threshold grows only when the
         // scroll moves towards the checked end.
-        const threshold = loadDistance + (scrollDirection === 'end' ? preload : 0);
+        const threshold = loadDistance + (scrollDirection === 'end'
+          ? preload
+          : 0);
 
         if (remaining > threshold) {
           latched[ axis ] = false;

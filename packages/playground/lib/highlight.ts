@@ -18,7 +18,14 @@ export async function highlight(code: string, lang: string) {
           variableDefaults: {},
         }),
       ],
-      langs: [ 'vue', 'bash', 'ts', 'js', 'python', 'cpp' ],
+      langs: [
+        'vue',
+        'bash',
+        'ts',
+        'js',
+        'python',
+        'cpp',
+      ],
     });
   }
 

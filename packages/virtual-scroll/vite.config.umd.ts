@@ -12,7 +12,9 @@ import { defineConfig } from 'vite';
  * multi-entry lib build; the `unpkg`/`jsdelivr` fields point at `dist/index.js`.
  */
 export default defineConfig({
-  plugins: [ vue() ],
+  plugins: [
+    vue(),
+  ],
   css: {
     transformer: 'lightningcss',
     lightningcss: {

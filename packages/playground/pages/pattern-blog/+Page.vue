@@ -39,7 +39,14 @@ onMounted(() => {
   scrollContainer.value = window;
 });
 
-const palette = [ '0e7490', 'be123c', 'b45309', '4d7c0f', '6d28d9', '1d4ed8' ];
+const palette = [
+  '0e7490',
+  'be123c',
+  'b45309',
+  '4d7c0f',
+  '6d28d9',
+  '1d4ed8',
+];
 
 // Different aspect ratios per post, cycled deterministically.
 const imageRatios: Array<[number, number]> = [
@@ -106,9 +113,14 @@ async function loadMore() {
   loading.value = true;
   const start = posts.value.length;
   const batch = await Promise.all(
-    Array.from({ length: Math.min(BATCH_SIZE, TOTAL_POSTS - start) }, (_, i) => fetchPost(start + i)),
+    Array.from({
+      length: Math.min(BATCH_SIZE, TOTAL_POSTS - start),
+    }, (_, i) => fetchPost(start + i)),
   );
-  posts.value = [ ...posts.value, ...batch ];
+  posts.value = [
+    ...posts.value,
+    ...batch,
+  ];
   loading.value = false;
 }
 

@@ -89,16 +89,27 @@ function formatItem(rawLines, section, label) {
   // Commits listed before the first section keep their conventional header
   // (`refactor(scope)!: subject`), the section bullets are already stripped by the writer.
   const [ head, ...rest ] = lines;
-  const conventional = section === null ? head.match(CONVENTIONAL_HEADER) : null;
+  const conventional = section === null
+    ? head.match(CONVENTIONAL_HEADER)
+    : null;
   const scope = conventional?.[ 2 ];
   const subject = conventional ? conventional[ 4 ] : head;
   const group = section
-    ?? (conventional?.[ 3 ] ? 'breaking' : TYPE_GROUPS.get(conventional?.[ 1 ]) ?? 'features');
-  const prefix = scope ? `<strong>${ escapeHtml(scope) }:</strong> ` : '';
-  const heading = label ? `<strong>${ escapeHtml(label) }:</strong> ` : '';
+    ?? (conventional?.[ 3 ]
+      ? 'breaking'
+      : TYPE_GROUPS.get(conventional?.[ 1 ]) ?? 'features');
+  const prefix = scope
+    ? `<strong>${ escapeHtml(scope) }:</strong> `
+    : '';
+  const heading = label
+    ? `<strong>${ escapeHtml(label) }:</strong> `
+    : '';
 
   // Wrapped prose is joined into one line, nested bullets start their own line.
-  const text = [ prefix + formatInline(subject), ...rest.map((line) => formatInline(line)) ].join('<br>');
+  const text = [
+    prefix + formatInline(subject),
+    ...rest.map((line) => formatInline(line)),
+  ].join('<br>');
 
   return { group, text: heading + text };
 }
@@ -106,7 +117,12 @@ function formatItem(rawLines, section, label) {
 const versions = [];
 
 for (const block of blocks) {
-  const groups = { breaking: [], features: [], fixes: [], performance: [] };
+  const groups = {
+    breaking: [],
+    features: [],
+    fixes: [],
+    performance: [],
+  };
   let section = null;
   let label = null;
   let open = null;
@@ -140,7 +156,11 @@ for (const block of blocks) {
     const bullet = line.match(BULLET);
     if (bullet) {
       flush();
-      open = { section, label, lines: [ bullet[ 1 ] ] };
+      open = {
+        section,
+        label,
+        lines: [ bullet[ 1 ] ],
+      };
       continue;
     }
 

@@ -16,7 +16,9 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
       }
 
       const snapProp = ctx.props.value.snap;
-      const snapMode = snapProp === true ? 'auto' : snapProp as SnapMode;
+      const snapMode = snapProp === true
+        ? 'auto'
+        : snapProp as SnapMode;
       const details = ctx.scrollDetails.value;
       const itemsLen = ctx.props.value.items.length;
       const direction = ctx.props.value.direction || 'vertical';
@@ -49,7 +51,9 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
 
       if (direction !== 'vertical') {
         const isGrid = direction === 'both';
-        const colCount = isGrid ? (ctx.props.value.columnCount || 0) : itemsLen;
+        const colCount = isGrid
+          ? (ctx.props.value.columnCount || 0)
+          : itemsLen;
         const res = resolveSnap(
           snapMode,
           ctx.internalState.scrollDirectionX.value,
@@ -81,8 +85,12 @@ export function useSnappingExtension<T = unknown>(): VirtualScrollExtension<T> {
         const currentY = ctx.internalState.internalScrollY.value;
 
         // v8 ignore start -- getRowIndexAt/getColumnIndexAt return numbers, so targets are never null here
-        const diffX = (targetCol !== null) ? Math.abs(targetX - currentX) : 0;
-        const diffY = (targetRow !== null) ? Math.abs(targetY - currentY) : 0;
+        const diffX = (targetCol !== null)
+          ? Math.abs(targetX - currentX)
+          : 0;
+        const diffY = (targetRow !== null)
+          ? Math.abs(targetY - currentY)
+          : 0;
         // v8 ignore stop
 
         if (diffX > 0.5 || diffY > 0.5) {

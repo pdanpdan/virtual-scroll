@@ -48,7 +48,14 @@ interface Scenario {
   budget: [ number, number ];
 }
 
-const noOptionalWiring: FeatureName[] = [ 'keyboard', 'snapping', 'sticky', 'infiniteLoading', 'prependRestoration', 'scrollbar' ];
+const noOptionalWiring: FeatureName[] = [
+  'keyboard',
+  'snapping',
+  'sticky',
+  'infiniteLoading',
+  'prependRestoration',
+  'scrollbar',
+];
 
 const scenarios: Scenario[] = [
   {
@@ -56,7 +63,14 @@ const scenarios: Scenario[] = [
     entry: 'index.mjs',
     imports: [ 'VirtualScroll' ],
     absent: [ 'masonry', 'table' ],
-    present: [ 'keyboard', 'snapping', 'sticky', 'infiniteLoading', 'prependRestoration', 'scrollbar' ],
+    present: [
+      'keyboard',
+      'snapping',
+      'sticky',
+      'infiniteLoading',
+      'prependRestoration',
+      'scrollbar',
+    ],
     budget: [ 19, 25 ],
   },
   {
@@ -71,7 +85,16 @@ const scenarios: Scenario[] = [
     name: 'useVirtualScroll',
     entry: 'index.mjs',
     imports: [ 'useVirtualScroll' ],
-    absent: [ 'table', 'masonry', 'keyboard', 'snapping', 'sticky', 'infiniteLoading', 'prependRestoration', 'scrollbar' ],
+    absent: [
+      'table',
+      'masonry',
+      'keyboard',
+      'snapping',
+      'sticky',
+      'infiniteLoading',
+      'prependRestoration',
+      'scrollbar',
+    ],
     present: [],
     budget: [ 9, 13 ],
   },
@@ -89,7 +112,14 @@ const scenarios: Scenario[] = [
     imports: [ 'VirtualScrollTable' ],
     // The table keeps the flow-mode scrollbar it always renders, so `scrollbar`
     // stays present while the optional wiring goes.
-    absent: [ 'masonry', 'keyboard', 'snapping', 'sticky', 'infiniteLoading', 'prependRestoration' ],
+    absent: [
+      'masonry',
+      'keyboard',
+      'snapping',
+      'sticky',
+      'infiniteLoading',
+      'prependRestoration',
+    ],
     present: [ 'table', 'scrollbar' ],
     budget: [ 17, 23 ],
   },
@@ -137,8 +167,14 @@ async function measure(scenario: Scenario): Promise<{ result: Result; text: stri
       emptyOutDir: true,
       minify: 'esbuild',
       write: true,
-      lib: { entry: entryFile, formats: [ 'es' ], fileName: 'bundle' },
-      rollupOptions: { external: [ 'vue' ] },
+      lib: {
+        entry: entryFile,
+        formats: [ 'es' ],
+        fileName: 'bundle',
+      },
+      rollupOptions: {
+        external: [ 'vue' ],
+      },
     },
   });
 

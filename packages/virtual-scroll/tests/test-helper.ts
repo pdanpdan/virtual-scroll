@@ -53,21 +53,25 @@ globalThis.ResizeObserver = class ResizeObserver {
 export function triggerResize(el: Element, width: number, height: number) {
   const obs = observers.find((o) => o.targets.has(el));
   if (obs) {
-    obs.callback([ {
-      borderBoxSize: [ { blockSize: height, inlineSize: width } ],
-      contentRect: {
-        bottom: height,
-        height,
-        left: 0,
-        right: width,
-        toJSON: () => '',
-        top: 0,
-        width,
-        x: 0,
-        y: 0,
-      },
-      target: el,
-    } as unknown as ResizeObserverEntry ], obs);
+    obs.callback([
+      {
+        borderBoxSize: [
+          { blockSize: height, inlineSize: width },
+        ],
+        contentRect: {
+          bottom: height,
+          height,
+          left: 0,
+          right: width,
+          toJSON: () => '',
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        },
+        target: el,
+      } as unknown as ResizeObserverEntry,
+    ], obs);
   }
 }
 
@@ -176,5 +180,10 @@ export function setup<T>(propsValue: VirtualScrollProps<T>, customExtensions?: V
     },
   });
   const wrapper = mount(TestComponent);
-  return { props: propsRef, result: result!, wrapper, internalState: internalState! };
+  return {
+    props: propsRef,
+    result: result!,
+    wrapper,
+    internalState: internalState!,
+  };
 }

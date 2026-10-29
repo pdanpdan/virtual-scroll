@@ -28,7 +28,9 @@ const bufferAfter = ref(5);
 // Pattern: base, base*2, base, base*2, ...
 const itemSizeFn = computed(() => {
   const base = itemSize.value;
-  return (item: unknown, index: number) => index % 2 === 0 ? base : base * 2;
+  return (item: unknown, index: number) => index % 2 === 0
+    ? base
+    : base * 2;
 });
 
 // Items render purely from their index: the items array is a sparse placeholder

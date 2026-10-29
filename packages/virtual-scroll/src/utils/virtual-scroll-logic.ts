@@ -332,14 +332,20 @@ function calculateAxisTarget({
     // When the target itself is sticky it occupies the sticky line and pushes
     // the previous header out of view: do not reserve space for that header.
     const isTargetSticky = stickyIndices.includes(index);
-    const activeStickyIdx = isTargetSticky ? undefined : findPrevStickyIndex(stickyIndices, index);
+    const activeStickyIdx = isTargetSticky
+      ? undefined
+      : findPrevStickyIndex(stickyIndices, index);
     if (activeStickyIdx !== undefined) {
       stickyOffsetStart += calculateAxisSize(1, fixedSize, 0, () => getSize(activeStickyIdx));
     }
   }
 
-  const itemPos = (fixedSize !== null ? index * (fixedSize + gap) : query(index));
-  const itemSize = fixedSize !== null ? fixedSize : getSize(index) - gap;
+  const itemPos = (fixedSize !== null
+    ? index * (fixedSize + gap)
+    : query(index));
+  const itemSize = fixedSize !== null
+    ? fixedSize
+    : getSize(index) - gap;
 
   const { target, effectiveAlign } = calculateAxisAlignment({
     align,
@@ -449,7 +455,9 @@ export function calculateScale(isWindow: boolean, totalSize: number, viewportSiz
   const displaySize = Math.min(totalSize, BROWSER_MAX_SIZE);
   const realRange = totalSize - viewportSize;
   const displayRange = displaySize - viewportSize;
-  return displayRange > 0 ? realRange / displayRange : 1;
+  return displayRange > 0
+    ? realRange / displayRange
+    : 1;
 }
 
 /**
@@ -460,7 +468,9 @@ export function calculateScale(isWindow: boolean, totalSize: number, viewportSiz
  * @returns Physical size (DU).
  */
 export function calculateRenderedSize(isWindow: boolean, totalSize: number): number {
-  return isWindow ? totalSize : Math.min(totalSize, BROWSER_MAX_SIZE);
+  return isWindow
+    ? totalSize
+    : Math.min(totalSize, BROWSER_MAX_SIZE);
 }
 
 /**
@@ -557,8 +567,12 @@ export function calculateScrollTarget({
     align = options as ScrollAlignment | ScrollAlignmentOptions;
   }
 
-  const alignX = (align && typeof align === 'object' ? align.x : align) || 'auto';
-  const alignY = (align && typeof align === 'object' ? align.y : align) || 'auto';
+  const alignX = (align && typeof align === 'object'
+    ? align.x
+    : align) || 'auto';
+  const alignY = (align && typeof align === 'object'
+    ? align.y
+    : align) || 'auto';
 
   let targetX = relativeScrollX;
   let targetY = relativeScrollY;
@@ -568,8 +582,12 @@ export function calculateScrollTarget({
   let effectiveAlignY: ScrollAlignment = 'auto';
 
   // Clamp to valid range
-  const rWidth = scaleX === 1 ? totalWidth : BROWSER_MAX_SIZE;
-  const rHeight = scaleY === 1 ? totalHeight : BROWSER_MAX_SIZE;
+  const rWidth = scaleX === 1
+    ? totalWidth
+    : BROWSER_MAX_SIZE;
+  const rHeight = scaleY === 1
+    ? totalHeight
+    : BROWSER_MAX_SIZE;
 
   const maxDisplayX = Math.max(0, hostOffsetX + rWidth - viewportWidth);
   const maxDisplayY = Math.max(0, hostOffsetY + rHeight - viewportHeight);
@@ -611,7 +629,9 @@ export function calculateScrollTarget({
       viewSize: viewportWidth,
       scrollPos: relativeScrollX,
       fixedSize: isGrid ? fixedWidth : fixedSize,
-      gap: (isGrid || isHorizontal) ? columnGap : gap,
+      gap: (isGrid || isHorizontal)
+        ? columnGap
+        : gap,
       query: isGrid ? getColumnQuery : getItemQueryX,
       getSize: isGrid ? getColumnSize : getItemSizeX,
       stickyIndices,
@@ -626,7 +646,14 @@ export function calculateScrollTarget({
   targetX = Math.max(0, Math.min(targetX, maxTargetX));
   targetY = Math.max(0, Math.min(targetY, maxTargetY));
 
-  return { targetX, targetY, itemWidth, itemHeight, effectiveAlignX, effectiveAlignY };
+  return {
+    targetX,
+    targetY,
+    itemWidth,
+    itemHeight,
+    effectiveAlignX,
+    effectiveAlignY,
+  };
 }
 
 /**
@@ -686,7 +713,12 @@ export function calculateColumnRange({
   totalColsQuery,
 }: ColumnRangeParams) {
   if (!columnCount) {
-    return { start: 0, end: 0, padStart: 0, padEnd: 0 };
+    return {
+      start: 0,
+      end: 0,
+      padStart: 0,
+      padEnd: 0,
+    };
   }
 
   const { start, end } = calculateGenericRange({
@@ -704,12 +736,20 @@ export function calculateColumnRange({
   const safeStart = start;
   const safeEnd = end;
 
-  const padStart = fixedWidth !== null ? safeStart * (fixedWidth + columnGap) : query(safeStart);
-  const totalWidth = fixedWidth !== null ? columnCount * (fixedWidth + columnGap) - columnGap : Math.max(0, totalColsQuery() - columnGap);
+  const padStart = fixedWidth !== null
+    ? safeStart * (fixedWidth + columnGap)
+    : query(safeStart);
+  const totalWidth = fixedWidth !== null
+    ? columnCount * (fixedWidth + columnGap) - columnGap
+    : Math.max(0, totalColsQuery() - columnGap);
 
   const contentEnd = fixedWidth !== null
-    ? (safeEnd * (fixedWidth + columnGap) - (safeEnd > 0 ? columnGap : 0))
-    : (query(safeEnd) - (safeEnd > 0 ? columnGap : 0));
+    ? (safeEnd * (fixedWidth + columnGap) - (safeEnd > 0
+      ? columnGap
+      : 0))
+    : (query(safeEnd) - (safeEnd > 0
+      ? columnGap
+      : 0));
 
   return {
     start: safeStart,
@@ -756,7 +796,12 @@ export function calculateStickyItem({
   const stickyOffset = { x: 0, y: 0 };
 
   if (!isSticky) {
-    return { isStickyActiveX, isStickyActiveY, isStickyActive: false, stickyOffset };
+    return {
+      isStickyActiveX,
+      isStickyActiveY,
+      isStickyActive: false,
+      stickyOffset,
+    };
   }
 
   // Y Axis (Sticky Rows)
@@ -767,7 +812,9 @@ export function calculateStickyItem({
       height,
       index,
       stickyIndices,
-      (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + gap) : getItemQueryY(nextIdx)),
+      (nextIdx) => (fixedSize !== null
+        ? nextIdx * (fixedSize + gap)
+        : getItemQueryY(nextIdx)),
       nextStickyIndex,
       stickyStartY,
     );
@@ -783,7 +830,9 @@ export function calculateStickyItem({
       width,
       index,
       stickyIndices,
-      (nextIdx) => (fixedSize !== null ? nextIdx * (fixedSize + columnGap) : getItemQueryX(nextIdx)),
+      (nextIdx) => (fixedSize !== null
+        ? nextIdx * (fixedSize + columnGap)
+        : getItemQueryX(nextIdx)),
       nextStickyIndex,
       stickyStartX,
     );
@@ -829,18 +878,32 @@ export function calculateItemPosition({
   let height = 0;
 
   if (direction === 'horizontal') {
-    x = fixedSize !== null ? index * (fixedSize + columnGap) : queryX(index);
-    width = fixedSize !== null ? fixedSize : getSizeX(index) - columnGap;
+    x = fixedSize !== null
+      ? index * (fixedSize + columnGap)
+      : queryX(index);
+    width = fixedSize !== null
+      ? fixedSize
+      : getSizeX(index) - columnGap;
     height = usableHeight;
   } else if (direction === 'both' && columnRange) {
-    y = fixedSize !== null ? index * (fixedSize + gap) : queryY(index);
-    height = fixedSize !== null ? fixedSize : getSizeY(index) - gap;
+    y = fixedSize !== null
+      ? index * (fixedSize + gap)
+      : queryY(index);
+    height = fixedSize !== null
+      ? fixedSize
+      : getSizeY(index) - gap;
     x = columnRange.padStart;
     width = Math.max(0, totalWidth - columnRange.padStart - columnRange.padEnd);
   } else {
-    y = fixedSize !== null ? index * (fixedSize + gap) : queryY(index);
-    height = fixedSize !== null ? fixedSize : getSizeY(index) - gap;
-    width = direction === 'both' ? totalWidth : usableWidth;
+    y = fixedSize !== null
+      ? index * (fixedSize + gap)
+      : queryY(index);
+    height = fixedSize !== null
+      ? fixedSize
+      : getSizeY(index) - gap;
+    width = direction === 'both'
+      ? totalWidth
+      : usableWidth;
   }
 
   return { height, width, x, y };
@@ -869,13 +932,21 @@ export function calculateItemStyle<T = unknown>({
   const isDynamic = itemSize === undefined || itemSize === null || itemSize === 0;
 
   const style: Record<string, string | number | undefined> = {
-    blockSize: isHorizontal ? '100%' : (!isDynamic ? `${ item.size.height }px` : 'auto'),
+    blockSize: isHorizontal
+      ? '100%'
+      : (!isDynamic
+        ? `${ item.size.height }px`
+        : 'auto'),
   };
 
   if (isVertical && containerTag === 'table') {
     style.minInlineSize = '100%';
   } else {
-    style.inlineSize = isVertical ? '100%' : (!isDynamic ? `${ item.size.width }px` : 'auto');
+    style.inlineSize = isVertical
+      ? '100%'
+      : (!isDynamic
+        ? `${ item.size.width }px`
+        : 'auto');
   }
 
   if (isDynamic) {
@@ -897,8 +968,12 @@ export function calculateItemStyle<T = unknown>({
     const ty = isStickingVertically ? item.stickyOffset.y : item.offset.y;
 
     if (item.isStickyActive || item.isStickyActiveX || item.isStickyActiveY) {
-      style.insetBlockStart = isStickingVertically ? `${ paddingStartY }px` : 'auto';
-      style.insetInlineStart = isStickingHorizontally ? `${ paddingStartX }px` : 'auto';
+      style.insetBlockStart = isStickingVertically
+        ? `${ paddingStartY }px`
+        : 'auto';
+      style.insetInlineStart = isStickingHorizontally
+        ? `${ paddingStartX }px`
+        : 'auto';
       style.transform = `translate(${ tx }px, ${ ty }px)`;
     } else {
       style.transform = `translate(${ tx }px, ${ item.offset.y }px)`;
@@ -1017,8 +1092,12 @@ export function calculateTotalSize({
   }
 
   return {
-    width: isBoth ? Math.max(width, usableWidth) : width,
-    height: isBoth ? Math.max(height, usableHeight) : height,
+    width: isBoth
+      ? Math.max(width, usableWidth)
+      : width,
+    height: isBoth
+      ? Math.max(height, usableHeight)
+      : height,
   };
 }
 
@@ -1165,7 +1244,9 @@ export function resolveSnap(
     }
     const visibleAmount = getQuery(currentIdx) + size - relScroll;
     return {
-      index: Math.min(count - 1, visibleAmount / size >= 0.5 ? currentIdx : currentIdx + 1),
+      index: Math.min(count - 1, visibleAmount / size >= 0.5
+        ? currentIdx
+        : currentIdx + 1),
       align: 'start' as const,
     };
   }
@@ -1176,7 +1257,9 @@ export function resolveSnap(
     }
     const visibleAmount = relScroll + viewSize - getQuery(currentEndIdx);
     return {
-      index: Math.max(0, visibleAmount / size >= 0.5 ? currentEndIdx : currentEndIdx - 1),
+      index: Math.max(0, visibleAmount / size >= 0.5
+        ? currentEndIdx
+        : currentEndIdx - 1),
       align: 'end' as const,
     };
   }

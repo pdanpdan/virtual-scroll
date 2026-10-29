@@ -31,8 +31,12 @@ function makeCtx(overrides: CtxOverrides = {}) {
 
   const props = ref({
     loading,
-    ...(direction === undefined ? {} : { direction }),
-    ...(loadDistance === undefined ? {} : { loadDistance }),
+    ...(direction === undefined
+      ? {}
+      : { direction }),
+    ...(loadDistance === undefined
+      ? {}
+      : { loadDistance }),
   });
   const scrollDetails = ref({
     totalSize: { width: 10000, height: 10000 },
@@ -52,7 +56,13 @@ function makeCtx(overrides: CtxOverrides = {}) {
   } as unknown as ExtensionContext<unknown>;
   const onLoad = vi.fn();
 
-  return { ctx, isScrolling: isScrollingRef, props, scrollDetails, onLoad };
+  return {
+    ctx,
+    isScrolling: isScrollingRef,
+    props,
+    scrollDetails,
+    onLoad,
+  };
 }
 
 /** Controlled clock backing `performance.now()`. */
@@ -68,11 +78,17 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'vertical', loadDistance: 200 });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9268 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9268 },
+    };
     await nextTick();
 
     now += 16;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } }; // remaining: 200
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    }; // remaining: 200
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledTimes(1);
@@ -83,7 +99,10 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'vertical', loadDistance: 200 });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9299 } }; // remaining: 201
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9299 },
+    }; // remaining: 201
     await nextTick();
 
     expect(onLoad).not.toHaveBeenCalled();
@@ -93,7 +112,10 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, scrollDetails, onLoad } = makeCtx();
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } }; // remaining: 200
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    }; // remaining: 200
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
@@ -107,11 +129,17 @@ describe('useInfiniteLoadingExtension', () => {
     });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 9268, y: 0 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 9268, y: 0 },
+    };
     await nextTick();
 
     now += 16;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 9300, y: 0 } }; // remaining: 200
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 9300, y: 0 },
+    }; // remaining: 200
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledTimes(1);
@@ -122,7 +150,10 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'both', loadDistance: 200 });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 9300, y: 9300 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 9300, y: 9300 },
+    };
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
@@ -133,16 +164,25 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, props, scrollDetails, onLoad } = makeCtx({ direction: 'vertical', loading: true, loadDistance: 200 });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    };
     await nextTick();
     expect(onLoad).not.toHaveBeenCalled();
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9400 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9400 },
+    };
     await nextTick();
     expect(onLoad).not.toHaveBeenCalled();
 
     props.value.loading = false;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9401 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9401 },
+    };
     await nextTick();
     expect(onLoad).toHaveBeenCalledTimes(1);
     expect(onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
@@ -156,7 +196,10 @@ describe('useInfiniteLoadingExtension', () => {
     });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    };
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
@@ -190,16 +233,25 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'vertical', loadDistance: 200 });
     useInfiniteLoadingExtension({ onLoad }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9000 } }; // remaining: 500
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9000 },
+    }; // remaining: 500
     await nextTick();
 
     now += 16;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } }; // 18.75 VU/ms
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    }; // 18.75 VU/ms
     await nextTick();
     expect(onLoad).not.toHaveBeenCalled();
 
     now += 16;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9305 } }; // 0.3125 VU/ms
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9305 },
+    }; // 0.3125 VU/ms
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledTimes(1);
@@ -210,13 +262,19 @@ describe('useInfiniteLoadingExtension', () => {
     const { ctx, scrollDetails, onLoad } = makeCtx({ direction: 'vertical', loadDistance: 200 });
     useInfiniteLoadingExtension({ onLoad, flingVelocity: 1 }).onInit!(ctx);
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 8900 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 8900 },
+    };
     await nextTick();
 
     // 400 VU over 200 ms would measure 2 VU/ms, above the 1 VU/ms fling threshold:
     // the samples are stale, so the velocity is unknown (0) and the request is made.
     now += 200;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    };
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
@@ -228,13 +286,19 @@ describe('useInfiniteLoadingExtension', () => {
 
     // Measurement/append updates emit new details while the list is idle.
     isScrolling.value = false;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9268 } };
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9268 },
+    };
     await nextTick();
 
     // Measuring against that stale position would report 93 VU/ms (a fling) here.
     isScrolling.value = true;
     now += 100;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } }; // remaining: 200
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    }; // remaining: 200
     await nextTick();
 
     expect(onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
@@ -244,14 +308,20 @@ describe('useInfiniteLoadingExtension', () => {
     const towardsEnd = makeCtx({ direction: 'vertical', loadDistance: 200, scrollDirectionY: 'end' });
     useInfiniteLoadingExtension({ onLoad: towardsEnd.onLoad, preload: 100 }).onInit!(towardsEnd.ctx);
 
-    towardsEnd.scrollDetails.value = { ...towardsEnd.scrollDetails.value, scrollOffset: { x: 0, y: 9250 } }; // remaining: 250
+    towardsEnd.scrollDetails.value = {
+      ...towardsEnd.scrollDetails.value,
+      scrollOffset: { x: 0, y: 9250 },
+    }; // remaining: 250
     await nextTick();
     expect(towardsEnd.onLoad).toHaveBeenCalledWith('vertical', { velocity: 0, direction: 'end' });
 
     const awayFromEnd = makeCtx({ direction: 'vertical', loadDistance: 200, scrollDirectionY: 'start' });
     useInfiniteLoadingExtension({ onLoad: awayFromEnd.onLoad, preload: 100 }).onInit!(awayFromEnd.ctx);
 
-    awayFromEnd.scrollDetails.value = { ...awayFromEnd.scrollDetails.value, scrollOffset: { x: 0, y: 9250 } };
+    awayFromEnd.scrollDetails.value = {
+      ...awayFromEnd.scrollDetails.value,
+      scrollOffset: { x: 0, y: 9250 },
+    };
     await nextTick();
     expect(awayFromEnd.onLoad).not.toHaveBeenCalled();
   });
@@ -262,7 +332,10 @@ describe('useInfiniteLoadingExtension', () => {
 
     const scrollTo = async (y: number) => {
       now += 200;
-      scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y } };
+      scrollDetails.value = {
+        ...scrollDetails.value,
+        scrollOffset: { x: 0, y },
+      };
       await nextTick();
     };
 
@@ -283,13 +356,19 @@ describe('useInfiniteLoadingExtension', () => {
 
     const countAxis = (axis: string) => onLoad.mock.calls.filter(([ called ]) => called === axis).length;
 
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 0, y: 9300 } }; // vertical only
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 0, y: 9300 },
+    }; // vertical only
     await nextTick();
     expect(countAxis('vertical')).toBe(1);
     expect(countAxis('horizontal')).toBe(0);
 
     now += 200;
-    scrollDetails.value = { ...scrollDetails.value, scrollOffset: { x: 9300, y: 9300 } }; // horizontal only
+    scrollDetails.value = {
+      ...scrollDetails.value,
+      scrollOffset: { x: 9300, y: 9300 },
+    }; // horizontal only
     await nextTick();
     expect(countAxis('vertical')).toBe(1);
     expect(countAxis('horizontal')).toBe(1);

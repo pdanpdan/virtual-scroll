@@ -55,15 +55,36 @@ const oursOnly = process.argv.includes('--ours');
  * imports them. The composable ladder is what the page's prose prices.
  */
 const OUR_ENTRIES = {
-  oursFull: { file: 'index.mjs', symbols: [ 'VirtualScroll' ], style: 'virtual-scroll.css' },
-  oursCore: { file: 'core.mjs', symbols: [ 'VirtualScroll' ], style: 'core.css' },
-  oursComposable: { file: 'index.mjs', symbols: [ 'useVirtualScroll' ], style: null },
-  oursHeadlessWired: {
+  oursFull: {
     file: 'index.mjs',
-    symbols: [ 'useVirtualScroll', 'useVirtualScrollObservers', 'useVirtualScrollKeyboard', 'useVirtualScrollbar' ],
+    symbols: [ 'VirtualScroll' ],
+    style: 'virtual-scroll.css',
+  },
+  oursCore: {
+    file: 'core.mjs',
+    symbols: [ 'VirtualScroll' ],
+    style: 'core.css',
+  },
+  oursComposable: {
+    file: 'index.mjs',
+    symbols: [ 'useVirtualScroll' ],
     style: null,
   },
-  oursEngineObservers: { file: 'index.mjs', symbols: [ 'useVirtualScroll', 'useVirtualScrollObservers' ], style: null },
+  oursHeadlessWired: {
+    file: 'index.mjs',
+    symbols: [
+      'useVirtualScroll',
+      'useVirtualScrollObservers',
+      'useVirtualScrollKeyboard',
+      'useVirtualScrollbar',
+    ],
+    style: null,
+  },
+  oursEngineObservers: {
+    file: 'index.mjs',
+    symbols: [ 'useVirtualScroll', 'useVirtualScrollObservers' ],
+    style: null,
+  },
   oursEngineObserversKeyboard: {
     file: 'index.mjs',
     symbols: [ 'useVirtualScroll', 'useVirtualScrollObservers', 'useVirtualScrollKeyboard' ],
@@ -149,7 +170,9 @@ const kB = (bytes) => Number((bytes / 1000).toFixed(1));
 function packageOf(entry) {
   const specifier = entry.match(/from '([^']+)'/)?.[ 1 ] ?? '';
   const parts = specifier.split('/');
-  return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[ 0 ];
+  return specifier.startsWith('@')
+    ? parts.slice(0, 2).join('/')
+    : parts[ 0 ];
 }
 
 /** Resolves the esbuild this repo already depends on, through Vite. */
@@ -168,7 +191,9 @@ function distIsStale() {
   }
   const newest = Math.max(...entries.map((entry) => statSync(resolve(distDir, entry)).mtimeMs));
   const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((item) =>
-    item.isDirectory() ? walk(resolve(dir, item.name)) : [ statSync(resolve(dir, item.name)).mtimeMs ]);
+    item.isDirectory()
+      ? walk(resolve(dir, item.name))
+      : [ statSync(resolve(dir, item.name)).mtimeMs ]);
   return Math.max(...walk(librarySrc)) > newest;
 }
 
@@ -223,9 +248,19 @@ async function measure(esbuild, key, entrySource, resolveDir) {
 
   const js = statSync(outfile).size;
   const cssFile = outfile.replace(/\.js$/, '.css');
-  const css = existsSync(cssFile) ? statSync(cssFile).size : 0;
-  const gz = gzipSync(Buffer.concat([ readFileSync(outfile), css > 0 ? readFileSync(cssFile) : Buffer.alloc(0) ]), { level: 9 }).length;
-  return { min: kB(js + css), gz: kB(gz) };
+  const css = existsSync(cssFile)
+    ? statSync(cssFile).size
+    : 0;
+  const gz = gzipSync(Buffer.concat([
+    readFileSync(outfile),
+    css > 0
+      ? readFileSync(cssFile)
+      : Buffer.alloc(0),
+  ]), { level: 9 }).length;
+  return {
+    min: kB(js + css),
+    gz: kB(gz),
+  };
 }
 
 /** The file's current contents, so a run keeps whatever it is not re-measuring. */
@@ -236,7 +271,10 @@ function readCurrent() {
   const text = readFileSync(outputFile, 'utf8');
   const sizes = {};
   for (const match of text.matchAll(/^ {2}(\w+): \{ min: ([\d.]+), gz: ([\d.]+) \},$/gm)) {
-    sizes[ match[ 1 ] ] = { min: Number(match[ 2 ]), gz: Number(match[ 3 ]) };
+    sizes[ match[ 1 ] ] = {
+      min: Number(match[ 2 ]),
+      gz: Number(match[ 3 ]),
+    };
   }
   return {
     sizes,
@@ -288,7 +326,9 @@ async function main() {
 
   for (const [ key, entry ] of Object.entries(OUR_ENTRIES)) {
     const target = resolve(distDir, entry.file);
-    const style = entry.style ? `import ${ JSON.stringify(resolve(distDir, entry.style)) };\n` : '';
+    const style = entry.style
+      ? `import ${ JSON.stringify(resolve(distDir, entry.style)) };\n`
+      : '';
     measured[ key ] = await measure(esbuild, key, `import { ${ entry.symbols.join(', ') } } from ${ JSON.stringify(target) };\n${ style }globalThis.__s = [ ${ entry.symbols.join(', ') } ];\n`, workDir);
     report(key);
   }
@@ -299,9 +339,20 @@ async function main() {
     const contendersDir = resolve(workDir, 'contenders');
     mkdirSync(contendersDir, { recursive: true });
     writeFileSync(resolve(contendersDir, 'package.json'), `${ JSON.stringify({ name: 'compare-sizes', private: true, type: 'module' }, null, 2) }\n`);
-    const specs = [ ...new Set(Object.values(CONTENDERS).flatMap((contender) => contender.spec)) ];
+    const specs = [
+      ...new Set(Object.values(CONTENDERS).flatMap((contender) => contender.spec)),
+    ];
     console.log(`  installing ${ specs.length } packages from npm...`);
-    execFileSync('npm', [ 'install', '--no-audit', '--no-fund', '--silent', ...specs ], { cwd: contendersDir, stdio: [ 'ignore', 'ignore', 'inherit' ] });
+    execFileSync('npm', [
+      'install',
+      '--no-audit',
+      '--no-fund',
+      '--silent',
+      ...specs,
+    ], {
+      cwd: contendersDir,
+      stdio: [ 'ignore', 'ignore', 'inherit' ],
+    });
 
     for (const [ key, contender ] of Object.entries(CONTENDERS)) {
       const name = packageOf(contender.entry);

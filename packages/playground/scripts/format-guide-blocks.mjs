@@ -227,11 +227,15 @@ function formatCss(css) {
 
     // header lines
     const headerLines = css.slice(headerStart, brace).split('\n').map((l) => l.replace(/[ \t]+/g, ' ').replace(/^ /, '').replace(/[ \t]+$/, ''));
-    const hh = headerLines.filter((l, idx) => (idx === 0 ? true : l.trim() !== ''));
+    const hh = headerLines.filter((l, idx) => (idx === 0
+      ? true
+      : l.trim() !== ''));
     for (let li = 0; li < hh.length; li++) {
       const line = hh[ li ].trimEnd();
       if (li === hh.length - 1) {
-        out.push(line.endsWith('{') ? line : `${ line } {`);
+        out.push(line.endsWith('{')
+          ? line
+          : `${ line } {`);
       } else { out.push(line); }
     }
 
@@ -250,7 +254,9 @@ function formatCss(css) {
         if (!t) {
           continue;
         }
-        let line = (di === 0 ? '  ' : '    ') + t;
+        let line = (di === 0
+          ? '  '
+          : '    ') + t;
         if (di === declLines.length - 1) {
           line += ';';
         }
@@ -303,7 +309,10 @@ function lexBody(body, base, lineOf) {
   let declBuf = '';
   const flush = () => {
     if (declBuf.trim() !== '') {
-      items.push({ type: 'decl', text: declBuf.replace(/\s+$/g, '') });
+      items.push({
+        type: 'decl',
+        text: declBuf.replace(/\s+$/g, ''),
+      });
     }
     declStart = -1;
     declBuf = '';
@@ -342,7 +351,10 @@ function lexBody(body, base, lineOf) {
         declBuf += ` ${ body.slice(i, e + 2).replace(/\s+/g, ' ').trim() } `;
       } else {
         flush();
-        items.push({ type: 'comment', text: body.slice(i, e + 2) });
+        items.push({
+          type: 'comment',
+          text: body.slice(i, e + 2),
+        });
       }
       i = e + 2;
       continue;
@@ -376,7 +388,22 @@ function lexBody(body, base, lineOf) {
   return items;
 }
 
-const VOID = new Set([ 'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr' ]);
+const VOID = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
 
 const nameRe = /^[a-z][\w.:-]*/i;
 
@@ -435,7 +462,13 @@ function lexMarkup(text, L) {
     }
     if (regIdx < regions.length && i >= regions[ regIdx ][ 0 ] && i < regions[ regIdx ][ 1 ]) {
       const end = regions[ regIdx ][ 1 ];
-      toks.push({ type: 'text', text: text.slice(i, end), start: i, end, line: L(i) });
+      toks.push({
+        type: 'text',
+        text: text.slice(i, end),
+        start: i,
+        end,
+        line: L(i),
+      });
       i = end;
       continue;
     }
@@ -443,8 +476,16 @@ function lexMarkup(text, L) {
     if (c === '<') {
       if (text.startsWith('<!--', i)) {
         const e = text.indexOf('-->', i + 4);
-        const end = e === -1 ? n : e + 3;
-        toks.push({ type: 'text', text: text.slice(i, end), start: i, end, line: L(i) });
+        const end = e === -1
+          ? n
+          : e + 3;
+        toks.push({
+          type: 'text',
+          text: text.slice(i, end),
+          start: i,
+          end,
+          line: L(i),
+        });
         i = end;
         continue;
       }
@@ -456,7 +497,13 @@ function lexMarkup(text, L) {
             j++;
           }
           const end = Math.min(j + 1, n);
-          toks.push({ type: 'close', name: nm[ 0 ], start: i, end, line: L(i) });
+          toks.push({
+            type: 'close',
+            name: nm[ 0 ],
+            start: i,
+            end,
+            line: L(i),
+          });
           i = end;
           continue;
         }
@@ -467,7 +514,13 @@ function lexMarkup(text, L) {
         i = open.end;
         continue;
       }
-      toks.push({ type: 'text', text: '<', start: i, end: i + 1, line: L(i) });
+      toks.push({
+        type: 'text',
+        text: '<',
+        start: i,
+        end: i + 1,
+        line: L(i),
+      });
       i++;
       continue;
     }
@@ -476,7 +529,13 @@ function lexMarkup(text, L) {
       if (j === -1) {
         j = n;
       } else { j += 2; }
-      toks.push({ type: 'text', text: text.slice(i, j), start: i, end: j, line: L(i) });
+      toks.push({
+        type: 'text',
+        text: text.slice(i, j),
+        start: i,
+        end: j,
+        line: L(i),
+      });
       i = j;
       continue;
     }
@@ -486,7 +545,13 @@ function lexMarkup(text, L) {
       j++;
     }
     if (j > i) {
-      toks.push({ type: 'text', text: text.slice(i, j), start: i, end: j, line: L(i) });
+      toks.push({
+        type: 'text',
+        text: text.slice(i, j),
+        start: i,
+        end: j,
+        line: L(i),
+      });
     }
     i = j;
   }
@@ -515,12 +580,30 @@ function lexOpenTag(text, start, L) {
     const ch = text[ i ];
     if (ch === '>') {
       i++;
-      return { type: 'open', name, attrs, selfClose, voidTag: VOID.has(name), start, end: i, line: L(start) };
+      return {
+        type: 'open',
+        name,
+        attrs,
+        selfClose,
+        voidTag: VOID.has(name),
+        start,
+        end: i,
+        line: L(start),
+      };
     }
     if (ch === '/' && text[ i + 1 ] === '>') {
       selfClose = true;
       i += 2;
-      return { type: 'open', name, attrs, selfClose, voidTag: VOID.has(name), start, end: i, line: L(start) };
+      return {
+        type: 'open',
+        name,
+        attrs,
+        selfClose,
+        voidTag: VOID.has(name),
+        start,
+        end: i,
+        line: L(start),
+      };
     }
     j = i;
     while (j < n && !/[\s=/>]/.test(text[ j ])) {
@@ -540,15 +623,22 @@ function lexOpenTag(text, start, L) {
       const q = text[ i ];
       if (q === '"' || q === "'") {
         const close = text.indexOf(q, i + 1);
-        const inner = text.slice(i + 1, close === -1 ? n : close);
+        const inner = text.slice(i + 1, close === -1
+          ? n
+          : close);
         value = { quote: q, inner };
-        i = (close === -1 ? n : close) + 1;
+        i = (close === -1
+          ? n
+          : close) + 1;
       } else {
         let k = i;
         while (k < n && !/[\s>]/.test(text[ k ])) {
           k++;
         }
-        value = { quote: null, inner: text.slice(i, k) };
+        value = {
+          quote: null,
+          inner: text.slice(i, k),
+        };
         i = k;
       }
     }
@@ -588,7 +678,13 @@ function buildTree(toks) {
         }
       }
     } else {
-      stack[ stack.length - 1 ].children.push({ type: 'text', text: t.text, line: t.line, start: t.start, end: t.end });
+      stack[ stack.length - 1 ].children.push({
+        type: 'text',
+        text: t.text,
+        line: t.line,
+        start: t.start,
+        end: t.end,
+      });
     }
   }
   // merge adjacent text children (content + interpolation pieces belong
@@ -644,13 +740,19 @@ function formatMarkup(text) {
   // value may contain characters needing HTML escaping for display? NO: attr
   // content is code text; single quotes/`>` fine as-is. Only the SOURCE attr
   // gets escaped later by encodeAttr.
-  const renderAttrSingle = (a) => (a.value ? `${ a.name }="${ a.value.inner }"` : a.name);
+  const renderAttrSingle = (a) => (a.value
+    ? `${ a.name }="${ a.value.inner }"`
+    : a.name);
 
   // opening-tag "first line" when tag is inline-capable
   function openTagOneLine(node) {
     const parts = node.attrs.map(renderAttrSingle);
-    const close = node.selfClose || node.voidTag ? ' />' : '>';
-    return `<${ node.name }${ parts.length ? ` ${ parts.join(' ') }` : '' }${ close }`;
+    const close = node.selfClose || node.voidTag
+      ? ' />'
+      : '>';
+    return `<${ node.name }${ parts.length
+      ? ` ${ parts.join(' ') }`
+      : '' }${ close }`;
   }
 
   // Emit opening-tag lines for a block element; returns nothing (pushes lines)
@@ -676,14 +778,18 @@ function formatMarkup(text) {
       const first = lines[ 0 ];
       const last = lines[ lines.length - 1 ];
       const mid = lines.slice(1, -1);
-      const baseWs = mid.length ? leadWs(mid[ 0 ]) : leadWs(first) + 2;
+      const baseWs = mid.length
+        ? leadWs(mid[ 0 ])
+        : leadWs(first) + 2;
       // name line: name=" + first (usually '{')
       out.push(`${ ind1 }${ a.name }="${ first.trimEnd() }`);
       for (const ml of mid) {
         out.push(ind2 + ' '.repeat(Math.max(0, leadWs(ml) - baseWs)) + ml.trim().replace(/[ \t]+$/, ''));
       }
       // closing: last + '"'
-      const closeExtra = mid.length ? Math.max(0, leadWs(last) - baseWs) : 0;
+      const closeExtra = mid.length
+        ? Math.max(0, leadWs(last) - baseWs)
+        : 0;
       out.push(`${ ind1 + ' '.repeat(closeExtra) + last.trim() }"`);
     }
     out.push(ind + (closes ? '/>' : '>'));
@@ -726,8 +832,12 @@ function formatMarkup(text) {
       }
     }
     const attrTxt = node.attrs.map(renderAttrSingle).join(' ');
-    const close = node.selfClose || node.voidTag ? ' />' : '>';
-    const open = `<${ node.name }${ attrTxt ? ` ${ attrTxt }` : '' }${ close }`;
+    const close = node.selfClose || node.voidTag
+      ? ' />'
+      : '>';
+    const open = `<${ node.name }${ attrTxt
+      ? ` ${ attrTxt }`
+      : '' }${ close }`;
     if (node.selfClose || node.voidTag) {
       return open;
     }
@@ -749,7 +859,9 @@ function formatMarkup(text) {
     }
     const inlineRenderable = (node.selfClose || node.voidTag || canInline(node));
     if (inlineRenderable && !(node.attrs.length > 3 || node.attrs.some(attrML))) {
-      const r = node.selfClose || node.voidTag ? openTagOneLine(node) : inlineRender(node);
+      const r = node.selfClose || node.voidTag
+        ? openTagOneLine(node)
+        : inlineRender(node);
       if (join && out.length && out[ out.length - 1 ] !== '') {
         out[ out.length - 1 ] += sep + r;
       } else { out.push(ind + r); }
@@ -862,7 +974,9 @@ function formatMarkup(text) {
       const join = !gapBreaks && out.length > 0 && out[ out.length - 1 ] !== '';
       const startsNewLine = c.type === 'text' && /^\n/.test(c.text);
       emitNode(c, depth, join && !startsNewLine, sep);
-      prevRaw = c.type === 'text' ? c.text : '';
+      prevRaw = c.type === 'text'
+        ? c.text
+        : '';
       pendingGap = '';
     }
   }
@@ -908,7 +1022,9 @@ function formatVueBlock(p1, formatCssFn) {
   const flushStyle = () => {
     if (styleBody !== null) {
       const body = styleBody.join('\n');
-      const fmt = formatCssFn ? formatCssFn(body) : body;
+      const fmt = formatCssFn
+        ? formatCssFn(body)
+        : body;
       if (fmt.trim() !== '') {
         out.push(...fmt.split('\n'));
       }
@@ -1025,21 +1141,28 @@ function findBlocks(code, wantedClass) {
   const ast = parse(code);
   const blocks = [];
   transform(ast, {
-    nodeTransforms: [ (node) => {
-      if (node.type !== 1 || node.tag !== 'CodeBlock') {
-        return;
-      }
-      const cls = node.props.find((p) => p.name === 'class' && p.type === 6);
-      if (wantedClass !== '*' && (!cls || !cls.value?.content.includes(wantedClass))) {
-        return;
-      }
-      const cp = node.props.find((p) => p.name === 'code' && p.type === 6 && p.value);
-      if (!cp) {
-        return;
-      }
-      const lang = node.props.find((p) => p.name === 'lang' && p.type === 6)?.value?.content ?? 'vue';
-      blocks.push({ lang, content: cp.value.content, start: cp.loc.start.offset, end: cp.loc.end.offset });
-    } ],
+    nodeTransforms: [
+      (node) => {
+        if (node.type !== 1 || node.tag !== 'CodeBlock') {
+          return;
+        }
+        const cls = node.props.find((p) => p.name === 'class' && p.type === 6);
+        if (wantedClass !== '*' && (!cls || !cls.value?.content.includes(wantedClass))) {
+          return;
+        }
+        const cp = node.props.find((p) => p.name === 'code' && p.type === 6 && p.value);
+        if (!cp) {
+          return;
+        }
+        const lang = node.props.find((p) => p.name === 'lang' && p.type === 6)?.value?.content ?? 'vue';
+        blocks.push({
+          lang,
+          content: cp.value.content,
+          start: cp.loc.start.offset,
+          end: cp.loc.end.offset,
+        });
+      },
+    ],
   });
   return blocks;
 }

@@ -34,7 +34,11 @@ const isMounted = ref(false);
 
 const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => ({
   id: i,
-  text: `This is item #${ i }. It contains some random content to search for.${ (i % 10 === 0) ? ' BINGO!' : '' } ${ (i % 100 === 42) ? ' ULTIMATE ANSWER' : '' }`,
+  text: `This is item #${ i }. It contains some random content to search for.${ (i % 10 === 0)
+    ? ' BINGO!'
+    : '' } ${ (i % 100 === 42)
+    ? ' ULTIMATE ANSWER'
+    : '' }`,
 })));
 
 const matches = computed(() => {
@@ -93,7 +97,9 @@ function scrollToMatch() {
 }
 
 watch(searchQuery, () => {
-  currentMatchIndex.value = matches.value.length > 0 ? 0 : -1;
+  currentMatchIndex.value = matches.value.length > 0
+    ? 0
+    : -1;
   if (currentMatchIndex.value !== -1) {
     scrollToMatch();
   }
@@ -138,7 +144,9 @@ function updateHighlights() {
       range.setEnd(currentNode, start + query.length);
 
       const itemEl = (currentNode.parentElement as HTMLElement)?.closest('.virtual-scroll-item') as HTMLElement;
-      const itemIndex = itemEl ? Number.parseInt(itemEl.dataset.index || '-1', 10) : -1;
+      const itemIndex = itemEl
+        ? Number.parseInt(itemEl.dataset.index || '-1', 10)
+        : -1;
 
       if (itemIndex === currentMatchIdx) {
         currentRanges.push(range);

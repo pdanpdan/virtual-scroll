@@ -64,21 +64,29 @@ globalThis.ResizeObserver = class ResizeObserver {
 function triggerResize(el: Element, width: number, height: number, useBorderBox = true) {
   const obs = observers.find((o) => o.targets.has(el));
   if (obs) {
-    obs.callback([ {
-      ...(useBorderBox ? { borderBoxSize: [ { blockSize: height, inlineSize: width } ] } : {}),
-      contentRect: {
-        bottom: height,
-        height,
-        left: 0,
-        right: width,
-        toJSON: () => '',
-        top: 0,
-        width,
-        x: 0,
-        y: 0,
-      },
-      target: el,
-    } as unknown as ResizeObserverEntry ], obs);
+    obs.callback([
+      {
+        ...(useBorderBox
+          ? {
+            borderBoxSize: [
+              { blockSize: height, inlineSize: width },
+            ],
+          }
+          : {}),
+        contentRect: {
+          bottom: height,
+          height,
+          left: 0,
+          right: width,
+          toJSON: () => '',
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        },
+        target: el,
+      } as unknown as ResizeObserverEntry,
+    ], obs);
   }
 }
 
@@ -182,7 +190,10 @@ describe('virtualScroll', () => {
       wrapper.unmount();
 
       const plain = mount(VirtualScroll, {
-        props: { items: mockItems.slice(0, 10), direction: 'both' },
+        props: {
+          items: mockItems.slice(0, 10),
+          direction: 'both',
+        },
       });
       await nextTick();
       expect(plain.find('.virtual-scroll-wrapper').attributes('aria-colcount')).toBeUndefined();
@@ -195,7 +206,9 @@ describe('virtualScroll', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 0, writable: true });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 500 });
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 500 });
-    vi.useFakeTimers({ toFake: [ 'requestAnimationFrame' ] });
+    vi.useFakeTimers({
+      toFake: [ 'requestAnimationFrame' ],
+    });
   });
 
   afterEach(() => {
@@ -237,7 +250,9 @@ describe('virtualScroll', () => {
       await nextTick();
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(5);
 
-      await wrapper.setProps({ items: mockItems.slice(0, 10) });
+      await wrapper.setProps({
+        items: mockItems.slice(0, 10),
+      });
       await nextTick();
       expect(wrapper.findAll('.virtual-scroll-item').length).toBe(10);
     });
@@ -533,8 +548,14 @@ describe('virtualScroll', () => {
       HTMLElement.prototype.scrollTo = function (this: HTMLElement, options?: number | ScrollToOptions, y?: number) {
         if (typeof options === 'object' && options.top !== undefined) {
           const wrapperEl = this.querySelector('.virtual-scroll-wrapper') as HTMLElement | null;
-          const max = wrapperEl ? Number.parseFloat(wrapperEl.style.blockSize) - 500 : Number.POSITIVE_INFINITY;
-          Object.defineProperty(this, 'scrollTop', { configurable: true, value: Math.min(options.top, max), writable: true });
+          const max = wrapperEl
+            ? Number.parseFloat(wrapperEl.style.blockSize) - 500
+            : Number.POSITIVE_INFINITY;
+          Object.defineProperty(this, 'scrollTop', {
+            configurable: true,
+            value: Math.min(options.top, max),
+            writable: true,
+          });
         } else if (typeof options === 'object' && options.left !== undefined) {
           Object.defineProperty(this, 'scrollLeft', { configurable: true, value: options.left, writable: true });
         } else if (typeof options === 'number' && typeof y === 'number') {
@@ -567,7 +588,9 @@ describe('virtualScroll', () => {
         // The target item measures 80px: the running smooth scroll must be
         // re-based only after the wrapper height is updated - otherwise the
         // browser would clamp it to the stale max and the scroll lands short.
-        vs.updateItemSizes([ { index: 99, inlineSize: 100, blockSize: 80 } ]);
+        vs.updateItemSizes([
+          { index: 99, inlineSize: 100, blockSize: 80 },
+        ]);
         await nextTick();
         await nextTick();
         await nextTick();
@@ -735,7 +758,9 @@ describe('virtualScroll', () => {
       expect(vm.activeIndex).toBe(1);
 
       await container.trigger('keydown', { key: 'Enter' });
-      expect(wrapper.emitted('itemActivate')).toEqual([ [ 1, mockItems[ 1 ] ] ]);
+      expect(wrapper.emitted('itemActivate')).toEqual([
+        [ 1, mockItems[ 1 ] ],
+      ]);
 
       // Clicking into the content can move the active item without scrolling.
       (wrapper.vm as unknown as { setActiveIndex: (index: number | null) => void; }).setActiveIndex(4);
@@ -760,7 +785,12 @@ describe('virtualScroll', () => {
 
     it('keeps the item model off when the viewport model is requested', async () => {
       const wrapper = mount(VirtualScroll, {
-        props: { itemSize: 50, items: mockItems, role: 'listbox', keyboardActivation: 'viewport' },
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          role: 'listbox',
+          keyboardActivation: 'viewport',
+        },
       });
       await nextTick();
 
@@ -1730,7 +1760,9 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(0);
 
       const row0 = wrapper.find('.virtual-scroll-item[data-index="0"]').element;
-      const cells0 = [ ...row0.querySelectorAll('.cell') ];
+      const cells0 = [
+        ...row0.querySelectorAll('.cell'),
+      ];
 
       triggerResize(row0, 1000, 50);
       for (const cell of cells0) {
@@ -1749,7 +1781,9 @@ describe('virtualScroll', () => {
       await nextTick();
 
       const row20 = wrapper.find('.virtual-scroll-item[data-index="20"]').element;
-      const cells20 = [ ...row20.querySelectorAll('.cell') ];
+      const cells20 = [
+        ...row20.querySelectorAll('.cell'),
+      ];
 
       for (const cell of cells20) {
         triggerResize(cell, 110.1, 50);
@@ -1793,7 +1827,9 @@ describe('virtualScroll', () => {
       expect((wrapper.vm as { scrollDetails: ScrollDetails<MockItem>; }).scrollDetails.scrollOffset.x).toBe(5620);
 
       const row45El = wrapper.find('.virtual-scroll-item[data-index="45"]').element;
-      const cells45 = [ ...row45El.querySelectorAll('.cell') ];
+      const cells45 = [
+        ...row45El.querySelectorAll('.cell'),
+      ];
 
       for (const cell of cells45) {
         triggerResize(cell, 150, 120);
@@ -1984,7 +2020,9 @@ describe('virtualScroll', () => {
 
       const getY = (style: string) => {
         const match = style.match(/translate\([^,]+, ([^)]+)px\)/);
-        return match ? Number.parseFloat(match[ 1 ]!) : 0;
+        return match
+          ? Number.parseFloat(match[ 1 ]!)
+          : 0;
       };
 
       const y0 = getY(style0);
@@ -2075,7 +2113,12 @@ describe('virtualScroll', () => {
       const container = wrapper.find('.virtual-scroll-container');
       const containerEl = container.element as HTMLElement;
 
-      const pointerDownEvent = new PointerEvent('pointerdown', { button: 1, bubbles: true, clientY: 500, pointerType: 'mouse' });
+      const pointerDownEvent = new PointerEvent('pointerdown', {
+        button: 1,
+        bubbles: true,
+        clientY: 500,
+        pointerType: 'mouse',
+      });
       containerEl.dispatchEvent(pointerDownEvent);
 
       const scrollOffsetBefore = vs.scrollDetails.scrollOffset.y;
@@ -2119,8 +2162,19 @@ describe('virtualScroll', () => {
 
       const container = wrapper.find('.virtual-scroll-container');
 
-      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 0, clientY: 100, button: 0, pointerId: 1, bubbles: true }));
-      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 0, clientY: 50, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointerdown', {
+        clientX: 0,
+        clientY: 100,
+        button: 0,
+        pointerId: 1,
+        bubbles: true,
+      }));
+      container.element.dispatchEvent(new PointerEvent('pointermove', {
+        clientX: 0,
+        clientY: 50,
+        pointerId: 1,
+        bubbles: true,
+      }));
       await nextTick();
       vi.runAllTimers(); // process requestAnimationFrame
       await nextTick();
@@ -2129,7 +2183,12 @@ describe('virtualScroll', () => {
       expect(vs.scrollDetails.scrollOffset.y).toBe(50);
 
       // pointerup
-      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 0, clientY: 50, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointerup', {
+        clientX: 0,
+        clientY: 50,
+        pointerId: 1,
+        bubbles: true,
+      }));
       await nextTick();
     });
 
@@ -2149,12 +2208,28 @@ describe('virtualScroll', () => {
       const container = wrapper.find('.virtual-scroll-container');
 
       // 1. Start inertia by swiping quickly
-      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 0, clientY: 400, button: 0, pointerId: 1, bubbles: true }));
-      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 0, clientY: 300, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointerdown', {
+        clientX: 0,
+        clientY: 400,
+        button: 0,
+        pointerId: 1,
+        bubbles: true,
+      }));
+      container.element.dispatchEvent(new PointerEvent('pointermove', {
+        clientX: 0,
+        clientY: 300,
+        pointerId: 1,
+        bubbles: true,
+      }));
       await nextTick();
 
       // Swipe fast
-      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 0, clientY: 200, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointerup', {
+        clientX: 0,
+        clientY: 200,
+        pointerId: 1,
+        bubbles: true,
+      }));
       await nextTick();
 
       // 2. Verify it continues to scroll
@@ -2194,13 +2269,29 @@ describe('virtualScroll', () => {
       const container = wrapper.find('.virtual-scroll-container');
 
       // Swipe horizontally with very small vertical component
-      container.element.dispatchEvent(new PointerEvent('pointerdown', { clientX: 400, clientY: 100, button: 0, pointerId: 1, bubbles: true }));
-      container.element.dispatchEvent(new PointerEvent('pointermove', { clientX: 300, clientY: 98, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointerdown', {
+        clientX: 400,
+        clientY: 100,
+        button: 0,
+        pointerId: 1,
+        bubbles: true,
+      }));
+      container.element.dispatchEvent(new PointerEvent('pointermove', {
+        clientX: 300,
+        clientY: 98,
+        pointerId: 1,
+        bubbles: true,
+      }));
       await nextTick();
       vi.runAllTimers();
       await nextTick();
 
-      container.element.dispatchEvent(new PointerEvent('pointerup', { clientX: 200, clientY: 98, pointerId: 1, bubbles: true }));
+      container.element.dispatchEvent(new PointerEvent('pointerup', {
+        clientX: 200,
+        clientY: 98,
+        pointerId: 1,
+        bubbles: true,
+      }));
       await nextTick();
 
       // Velocity Y should have been zeroed because X velocity is much higher
@@ -2219,13 +2310,39 @@ describe('virtualScroll', () => {
 
       const variants = [
         { name: 'plain', props: {} },
-        { name: 'sticky header', props: { stickyHeader: true }, hasHeader: true },
-        { name: 'sticky footer', props: { stickyFooter: true }, hasFooter: true },
-        { name: 'both sticky', props: { stickyHeader: true, stickyFooter: true }, hasHeader: true, hasFooter: true },
+        {
+          name: 'sticky header',
+          props: { stickyHeader: true },
+          hasHeader: true,
+        },
+        {
+          name: 'sticky footer',
+          props: { stickyFooter: true },
+          hasFooter: true,
+        },
+        {
+          name: 'both sticky',
+          props: { stickyHeader: true, stickyFooter: true },
+          hasHeader: true,
+          hasFooter: true,
+        },
         { name: 'plain with gap', props: {} },
-        { name: 'sticky header with gap', props: { stickyHeader: true, gap: 50 }, hasHeader: true },
-        { name: 'sticky footer with gap', props: { stickyFooter: true, gap: 50 }, hasFooter: true },
-        { name: 'both sticky with gap', props: { stickyHeader: true, stickyFooter: true, gap: 50 }, hasHeader: true, hasFooter: true },
+        {
+          name: 'sticky header with gap',
+          props: { stickyHeader: true, gap: 50 },
+          hasHeader: true,
+        },
+        {
+          name: 'sticky footer with gap',
+          props: { stickyFooter: true, gap: 50 },
+          hasFooter: true,
+        },
+        {
+          name: 'both sticky with gap',
+          props: { stickyHeader: true, stickyFooter: true, gap: 50 },
+          hasHeader: true,
+          hasFooter: true,
+        },
       ];
 
       for (const variant of variants) {
@@ -2238,8 +2355,12 @@ describe('virtualScroll', () => {
                 ...variant.props,
               },
               slots: {
-                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+                ...(variant.hasHeader
+                  ? { header: '<div style="height: 50px">Header</div>' }
+                  : {}),
+                ...(variant.hasFooter
+                  ? { footer: '<div style="height: 50px">Footer</div>' }
+                  : {}),
               },
             });
 
@@ -2277,8 +2398,12 @@ describe('virtualScroll', () => {
                 ...variant.props,
               },
               slots: {
-                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+                ...(variant.hasHeader
+                  ? { header: '<div style="height: 50px">Header</div>' }
+                  : {}),
+                ...(variant.hasFooter
+                  ? { footer: '<div style="height: 50px">Footer</div>' }
+                  : {}),
               },
             });
 
@@ -2310,8 +2435,12 @@ describe('virtualScroll', () => {
                 ...variant.props,
               },
               slots: {
-                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+                ...(variant.hasHeader
+                  ? { header: '<div style="height: 50px">Header</div>' }
+                  : {}),
+                ...(variant.hasFooter
+                  ? { footer: '<div style="height: 50px">Footer</div>' }
+                  : {}),
               },
             });
 
@@ -2346,8 +2475,12 @@ describe('virtualScroll', () => {
                 ...variant.props,
               },
               slots: {
-                ...(variant.hasHeader ? { header: '<div style="height: 50px">Header</div>' } : {}),
-                ...(variant.hasFooter ? { footer: '<div style="height: 50px">Footer</div>' } : {}),
+                ...(variant.hasHeader
+                  ? { header: '<div style="height: 50px">Header</div>' }
+                  : {}),
+                ...(variant.hasFooter
+                  ? { footer: '<div style="height: 50px">Footer</div>' }
+                  : {}),
               },
             });
 
@@ -2531,7 +2664,12 @@ describe('virtualScroll', () => {
 
     it('scrolls to absolute end when clicking near the end of the horizontal track', async () => {
       const wrapper = mount(VirtualScroll, {
-        props: { direction: 'horizontal', itemSize: 50, items: mockItems, virtualScrollbar: true },
+        props: {
+          direction: 'horizontal',
+          itemSize: 50,
+          items: mockItems,
+          virtualScrollbar: true,
+        },
       });
       await nextTick();
       await nextTick();
@@ -2956,7 +3094,9 @@ describe('virtualScroll', () => {
   describe('slots & custom content', () => {
     it('renders header and footer', async () => {
       const wrapper = mount(VirtualScroll, {
-        props: { items: mockItems.slice(0, 1) },
+        props: {
+          items: mockItems.slice(0, 1),
+        },
         slots: {
           footer: () => h('div', 'FOOTER'),
           header: () => h('div', 'HEADER'),
@@ -3065,7 +3205,9 @@ describe('virtualScroll', () => {
           </VirtualScroll>
         `,
         data() {
-          return { items: Array.from({ length: 10 }, (_, i) => ({ id: i })) };
+          return {
+            items: Array.from({ length: 10 }, (_, i) => ({ id: i })),
+          };
         },
       };
 
@@ -3233,7 +3375,11 @@ describe('virtualScroll', () => {
       await nextTick();
       await nextTick();
 
-      items.value = [ { id: -2 }, { id: -1 }, ...items.value ];
+      items.value = [
+        { id: -2 },
+        { id: -1 },
+        ...items.value,
+      ];
 
       for (let i = 0; i < 15; i++) {
         await nextTick();

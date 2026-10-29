@@ -5,10 +5,34 @@ import { changelog } from '#/pages/changelog/changelog-data';
 type GroupKey = 'breaking' | 'features' | 'fixes' | 'performance';
 
 const GROUPS: { key: GroupKey; label: string; glyph: string; headingClass: string; glyphClass: string; }[] = [
-  { key: 'breaking', label: 'Breaking Changes', glyph: '!', headingClass: 'text-warning/70', glyphClass: 'text-warning' },
-  { key: 'features', label: 'Features', glyph: '✓', headingClass: 'text-primary/70', glyphClass: 'text-primary' },
-  { key: 'fixes', label: 'Bug Fixes', glyph: '⨯', headingClass: 'text-error/70', glyphClass: 'text-error' },
-  { key: 'performance', label: 'Performance', glyph: '↗', headingClass: 'text-success/70', glyphClass: 'text-success' },
+  {
+    key: 'breaking',
+    label: 'Breaking Changes',
+    glyph: '!',
+    headingClass: 'text-warning/70',
+    glyphClass: 'text-warning',
+  },
+  {
+    key: 'features',
+    label: 'Features',
+    glyph: '✓',
+    headingClass: 'text-primary/70',
+    glyphClass: 'text-primary',
+  },
+  {
+    key: 'fixes',
+    label: 'Bug Fixes',
+    glyph: '⨯',
+    headingClass: 'text-error/70',
+    glyphClass: 'text-error',
+  },
+  {
+    key: 'performance',
+    label: 'Performance',
+    glyph: '↗',
+    headingClass: 'text-success/70',
+    glyphClass: 'text-success',
+  },
 ];
 </script>
 

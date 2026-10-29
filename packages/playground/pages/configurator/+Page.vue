@@ -57,9 +57,13 @@ const activeCode = computed(() => {
   return componentCode.value;
 });
 
-const activeLang = computed(() => (activeTab.value === 'codepen' ? 'html' : 'vue'));
+const activeLang = computed(() => (activeTab.value === 'codepen'
+  ? 'html'
+  : 'vue'));
 
-const activeFileName = computed(() => (activeTab.value === 'codepen' ? 'virtual-scroll-demo.html' : 'virtual-scroll-demo.vue'));
+const activeFileName = computed(() => (activeTab.value === 'codepen'
+  ? 'virtual-scroll-demo.html'
+  : 'virtual-scroll-demo.vue'));
 
 /** Language used when pushing the pen to CodePen (CodePen 2.0 preprocessors). */
 const penLanguage = ref<'js' | 'ts'>('ts');

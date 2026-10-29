@@ -133,15 +133,25 @@ describe('sticky elements', () => {
 
   it('pins the previous sticky index only after hydration', () => {
     const extension = useStickyExtension<{ id: number; }>();
-    const range = ref({ start: 30, end: 40, padStart: 0, padEnd: 0 });
+    const range = ref({
+      start: 30,
+      end: 40,
+      padStart: 0,
+      padEnd: 0,
+    });
     const currentIndex = ref(25);
     const isHydrated = ref(false);
     const ctx = {
-      props: ref({ stickyIndices: [ 5, 20 ], direction: 'vertical' as const }),
+      props: ref({
+        stickyIndices: [ 5, 20 ],
+        direction: 'vertical' as const,
+      }),
       range,
       currentIndex,
       internalState: { isHydrated },
-      methods: { getItemRawOffset: () => 0 },
+      methods: {
+        getItemRawOffset: () => 0,
+      },
     } as unknown as ExtensionContext<{ id: number; }>;
 
     extension.onInit?.(ctx);
@@ -154,7 +164,12 @@ describe('sticky elements', () => {
     expect(extension.includeIndices!(ctx)).toEqual([ 20 ]);
 
     // Nothing to pin while the previous sticky index is still inside the range.
-    range.value = { start: 10, end: 20, padStart: 0, padEnd: 0 };
+    range.value = {
+      start: 10,
+      end: 20,
+      padStart: 0,
+      padEnd: 0,
+    };
     expect(extension.includeIndices!(ctx)).toEqual([]);
   });
 
@@ -162,14 +177,30 @@ describe('sticky elements', () => {
     const extension = useStickyExtension<{ id: number; }>();
     const ctx = {
       props: ref({ stickyIndices: [], direction: 'vertical' as const }),
-      internalState: { isHydrated: ref(true) },
-      methods: { getItemRawOffset: () => 0 },
+      internalState: {
+        isHydrated: ref(true),
+      },
+      methods: {
+        getItemRawOffset: () => 0,
+      },
     } as unknown as ExtensionContext<{ id: number; }>;
 
     extension.onInit?.(ctx);
 
     const items: RenderedItem<{ id: number; }>[] = [
-      { item: { id: 10 }, index: 10, offset: { x: 0, y: 0 }, size: { width: 100, height: 100 }, originalX: 0, originalY: 0, isSticky: false, isStickyActive: false, isStickyActiveX: false, isStickyActiveY: false, stickyOffset: { x: 0, y: 0 } },
+      {
+        item: { id: 10 },
+        index: 10,
+        offset: { x: 0, y: 0 },
+        size: { width: 100, height: 100 },
+        originalX: 0,
+        originalY: 0,
+        isSticky: false,
+        isStickyActive: false,
+        isStickyActiveX: false,
+        isStickyActiveY: false,
+        stickyOffset: { x: 0, y: 0 },
+      },
     ];
 
     expect(extension.transformRenderedItems!(items, ctx)).toBe(items);

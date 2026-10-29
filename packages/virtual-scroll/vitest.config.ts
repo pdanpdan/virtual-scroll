@@ -2,7 +2,9 @@ import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [ vue() ],
+  plugins: [
+    vue(),
+  ],
   test: {
     environment: 'jsdom',
     globals: true,
@@ -13,7 +15,13 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      reporter: [ 'text', 'json', 'html', 'json-summary', 'lcov' ],
+      reporter: [
+        'text',
+        'json',
+        'html',
+        'json-summary',
+        'lcov',
+      ],
       include: [ 'src/**' ],
       exclude: [
         'src/index.ts',

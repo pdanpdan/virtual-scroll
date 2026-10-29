@@ -29,7 +29,9 @@ function updateFps(timestamp: number) {
         const estimatedHz = Math.round(1000 / medianDt);
 
         const commonRates = [ 60, 75, 90, 120, 144, 165, 240, 360 ];
-        refreshRate.value = commonRates.reduce((prev, curr) => Math.abs(curr - estimatedHz) < Math.abs(prev - estimatedHz) ? curr : prev);
+        refreshRate.value = commonRates.reduce((prev, curr) => Math.abs(curr - estimatedHz) < Math.abs(prev - estimatedHz)
+          ? curr
+          : prev);
         isCalibrating = false;
       }
     }

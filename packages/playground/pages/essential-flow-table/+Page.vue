@@ -28,10 +28,36 @@ const widthMode = ref<WidthMode>('first');
 
 const CUSTOM_WIDTHS = [ 80, 250, 300, 250, 150 ];
 
-const NAMES = [ 'Ada Lovelace', 'Grace Hopper', 'Alan Turing', 'Linus Torvalds', 'Ada Chen', 'Edsger Dijkstra', 'Barbara Liskov', 'Guido Rossum', 'Margaret Hamilton', 'Dennis Ritchie', 'Radia Perlman', 'Ken Thompson', 'Hedy Lamarr', 'Brendan Eich', 'John Carmack', 'Frances Allen' ];
+const NAMES = [
+  'Ada Lovelace',
+  'Grace Hopper',
+  'Alan Turing',
+  'Linus Torvalds',
+  'Ada Chen',
+  'Edsger Dijkstra',
+  'Barbara Liskov',
+  'Guido Rossum',
+  'Margaret Hamilton',
+  'Dennis Ritchie',
+  'Radia Perlman',
+  'Ken Thompson',
+  'Hedy Lamarr',
+  'Brendan Eich',
+  'John Carmack',
+  'Frances Allen',
+];
 const ROLES = [ 'Admin', 'Editor', 'Viewer', 'Owner' ];
 const STATUSES = [ 'Active', 'Away', 'Busy' ];
-const META = [ 'Joined 2019', 'Core contributor', 'Last seen 2h ago', 'Weekend maintainer', 'Onboarding buddy', 'Docs champion', 'On call this week', 'In review round' ];
+const META = [
+  'Joined 2019',
+  'Core contributor',
+  'Last seen 2h ago',
+  'Weekend maintainer',
+  'Onboarding buddy',
+  'Docs champion',
+  'On call this week',
+  'In review round',
+];
 
 /** Deterministic pseudo-random number in [0, 1) derived from `i` and `salt`. */
 function rnd(i: number, salt: number): number {
@@ -45,7 +71,11 @@ function rnd(i: number, salt: number): number {
 const pick = (list: string[], i: number, salt: number) => list[ Math.floor(rnd(i, salt) * list.length) ]!;
 
 const pad = (i: number) => String(i).padStart(5, '0');
-const stripe = (i: number) => (i % 2 === 0 ? 'bg-base-200/50' : '');
+function stripe(i: number) {
+  return i % 2 === 0
+    ? 'bg-base-200/50'
+    : '';
+}
 const nameOf = (i: number) => pick(NAMES, i, 3);
 const statusOf = (i: number) => pick(STATUSES, i, 7);
 const emailOf = (i: number) => `${ nameOf(i).toLowerCase().replace(/[^a-z]+/g, '.').slice(0, 18) }${ pad(i) }@example.com`;
@@ -53,13 +83,19 @@ const emailOf = (i: number) => `${ nameOf(i).toLowerCase().replace(/[^a-z]+/g, '
 /** Rows alternate between short and long role labels in 200-row bands. */
 function roleOf(i: number) {
   const role = pick(ROLES, i, 5);
-  return i % 400 > 200 ? `${ role } (team lead)` : role;
+  return i % 400 > 200
+    ? `${ role } (team lead)`
+    : role;
 }
 
 /** Number of extra text lines under the name: 0, 1 or 2 per row. */
 function metaLinesOf(i: number) {
   const r = rnd(i, 11);
-  return r < 0.4 ? 0 : (r < 0.8 ? 1 : 2);
+  return r < 0.4
+    ? 0
+    : (r < 0.8
+      ? 1
+      : 2);
 }
 const metaOf = (i: number, line: number) => pick(META, i + 1, 17 + line * 5);
 

@@ -14,10 +14,54 @@ export interface Post {
   minutesAgo: number;
 }
 
-const AUTHORS = [ 'Ada Chen', 'Miro Petrov', 'Lena Fischer', 'Omar Haddad', 'Ines Silva', 'Tomas Novak', 'Yuki Tanaka', 'Amara Diallo', 'Jonas Weber', 'Freya Lindqvist' ];
-const VERBS = [ 'Shipping', 'Reconsidering', 'Debugging', 'Automating', 'Benchmarking', 'Migrating', 'Profiling', 'Refactoring', 'Hardening', 'Releasing' ];
-const NOUNS = [ 'the virtual list', 'our scroll engine', 'the query path', 'deferred renders', 'memory pressure', 'the Fenwick tree', 'hydration', 'frame budgets', 'the prefetch window', 'overscan tuning' ];
-const SUFFIXES = [ 'without breaking a sweat', 'at 60fps', 'under load', 'at 10M rows', 'in production', 'on low-end devices', 'with zero jank', 'over the weekend', 'in one afternoon', 'before the demo' ];
+const AUTHORS = [
+  'Ada Chen',
+  'Miro Petrov',
+  'Lena Fischer',
+  'Omar Haddad',
+  'Ines Silva',
+  'Tomas Novak',
+  'Yuki Tanaka',
+  'Amara Diallo',
+  'Jonas Weber',
+  'Freya Lindqvist',
+];
+const VERBS = [
+  'Shipping',
+  'Reconsidering',
+  'Debugging',
+  'Automating',
+  'Benchmarking',
+  'Migrating',
+  'Profiling',
+  'Refactoring',
+  'Hardening',
+  'Releasing',
+];
+const NOUNS = [
+  'the virtual list',
+  'our scroll engine',
+  'the query path',
+  'deferred renders',
+  'memory pressure',
+  'the Fenwick tree',
+  'hydration',
+  'frame budgets',
+  'the prefetch window',
+  'overscan tuning',
+];
+const SUFFIXES = [
+  'without breaking a sweat',
+  'at 60fps',
+  'under load',
+  'at 10M rows',
+  'in production',
+  'on low-end devices',
+  'with zero jank',
+  'over the weekend',
+  'in one afternoon',
+  'before the demo',
+];
 const CLAUSES = [
   'The measurements came back and the fix was smaller than expected.',
   'We pinned the regression to a single reflow and removed it entirely.',

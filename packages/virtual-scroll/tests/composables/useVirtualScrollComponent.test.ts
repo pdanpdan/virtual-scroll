@@ -42,8 +42,12 @@ function mountWiring(options: HarnessOptions = {}) {
       const wiring = useVirtualScrollComponent<MockItem>({
         props: props.value,
         containerTag: 'div',
-        ...(options.itemRole === undefined ? {} : { itemRole: options.itemRole }),
-        ...(options.activationMode === undefined ? {} : { activationMode: options.activationMode }),
+        ...(options.itemRole === undefined
+          ? {}
+          : { itemRole: options.itemRole }),
+        ...(options.activationMode === undefined
+          ? {}
+          : { activationMode: options.activationMode }),
         onScroll: () => { events.scroll++; },
         onVisibleRangeChange: () => { events.range++; },
         onLoad: () => { events.load++; },
@@ -63,8 +67,12 @@ function mountWiring(options: HarnessOptions = {}) {
         const slotRange = toValue(wiring.slotColumnRange);
         const details = toValue(wiring.scrollDetails);
         const rootAria = toValue(wiring.rootAriaProps);
-        const omitTransform = items[ 0 ] ? wiring.getItemStyle(items[ 0 ], true).transform : 'missing';
-        const style = firstRender && items[ 0 ] ? itemStyle(items[ 0 ]) : undefined;
+        const omitTransform = items[ 0 ]
+          ? wiring.getItemStyle(items[ 0 ], true).transform
+          : 'missing';
+        const style = firstRender && items[ 0 ]
+          ? itemStyle(items[ 0 ])
+          : undefined;
         firstRender = false;
 
         return h('div', {
@@ -97,7 +105,9 @@ function mountWiring(options: HarnessOptions = {}) {
           }, items.map((item) => h('div', {
             'data-index': item.index,
             ref: (el: unknown) => wiring.setItemRef(el, item.index),
-            style: firstRender ? itemStyle(item) : wiring.getItemStyle(item),
+            style: firstRender
+              ? itemStyle(item)
+              : wiring.getItemStyle(item),
             onClick: () => wiring.handleItemActivate(item.index),
           }))),
           // The loading slot always renders in the real components; a consumer
@@ -112,7 +122,12 @@ function mountWiring(options: HarnessOptions = {}) {
   });
 
   const wrapper = mount(TestComponent);
-  return { props, wrapper, events, hydrationStyle: () => preHydrationStyle };
+  return {
+    props,
+    wrapper,
+    events,
+    hydrationStyle: () => preHydrationStyle,
+  };
 }
 
 function attrs(wrapper: ReturnType<typeof mountWiring>[ 'wrapper' ]) {
@@ -163,7 +178,9 @@ describe('useVirtualScrollComponent', () => {
     });
 
     it('lays a pre-hydration "both" render out in flow', async () => {
-      const { hydrationStyle } = mountWiring({ props: { direction: 'both', columnCount: 3, columnGap: 8 } });
+      const { hydrationStyle } = mountWiring({
+        props: { direction: 'both', columnCount: 3, columnGap: 8 },
+      });
       await nextTick();
 
       // The first render happens before `isHydrated` flips, so those items are
@@ -186,7 +203,14 @@ describe('useVirtualScrollComponent', () => {
     });
 
     it('strips the range padding for a two-axis slot', async () => {
-      const { wrapper } = mountWiring({ props: { direction: 'both', columnCount: 3, bufferBefore: 5, bufferAfter: 5 } });
+      const { wrapper } = mountWiring({
+        props: {
+          direction: 'both',
+          columnCount: 3,
+          bufferBefore: 5,
+          bufferAfter: 5,
+        },
+      });
       await nextTick();
 
       expect(attrs(wrapper)[ 'data-slot-pad' ]).toBe('0:0');
@@ -254,7 +278,9 @@ describe('useVirtualScrollComponent', () => {
 
   describe('shared accessibility helpers', () => {
     it('marks a labelled container as a region and reports its busy state', async () => {
-      const { wrapper } = mountWiring({ props: { ariaLabel: 'List' } });
+      const { wrapper } = mountWiring({
+        props: { ariaLabel: 'List' },
+      });
       await nextTick();
       await nextTick();
 
@@ -264,7 +290,9 @@ describe('useVirtualScrollComponent', () => {
     });
 
     it('leaves an unlabelled container without a role', async () => {
-      const { wrapper } = mountWiring({ props: { loading: true } });
+      const { wrapper } = mountWiring({
+        props: { loading: true },
+      });
       await nextTick();
       await nextTick();
 
@@ -273,7 +301,9 @@ describe('useVirtualScrollComponent', () => {
     });
 
     it('reports the debug flag it was given', async () => {
-      const { wrapper } = mountWiring({ props: { debug: true } });
+      const { wrapper } = mountWiring({
+        props: { debug: true },
+      });
       await nextTick();
       await nextTick();
 
@@ -283,7 +313,9 @@ describe('useVirtualScrollComponent', () => {
 
   describe('scrollbar wiring', () => {
     it('publishes slot props for both axes when the content overflows', async () => {
-      const { wrapper } = mountWiring({ props: { virtualScrollbar: true, direction: 'both', columnCount: 10 } });
+      const { wrapper } = mountWiring({
+        props: { virtualScrollbar: true, direction: 'both', columnCount: 10 },
+      });
       await nextTick();
       await nextTick();
 
@@ -294,7 +326,13 @@ describe('useVirtualScrollComponent', () => {
     });
 
     it('publishes nothing while the content still fits', async () => {
-      const { wrapper } = mountWiring({ props: { items: mockItems.slice(0, 2), itemSize: 50, virtualScrollbar: true } });
+      const { wrapper } = mountWiring({
+        props: {
+          items: mockItems.slice(0, 2),
+          itemSize: 50,
+          virtualScrollbar: true,
+        },
+      });
       await nextTick();
       await nextTick();
 
@@ -303,7 +341,9 @@ describe('useVirtualScrollComponent', () => {
     });
 
     it('drives the scroll when the scrollbar asks for an offset', async () => {
-      const { wrapper } = mountWiring({ props: { virtualScrollbar: true } });
+      const { wrapper } = mountWiring({
+        props: { virtualScrollbar: true },
+      });
       await nextTick();
       await nextTick();
 

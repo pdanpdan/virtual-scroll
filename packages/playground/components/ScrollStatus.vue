@@ -52,7 +52,9 @@ const fpsClass = computed(() => {
   if (val > 90) {
     return 'status-success';
   }
-  return (val > 60) ? 'status-warning' : 'status-error';
+  return (val > 60)
+    ? 'status-warning'
+    : 'status-error';
 });
 
 onMounted(startDetection);

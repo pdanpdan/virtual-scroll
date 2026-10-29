@@ -22,7 +22,12 @@ describe('useVirtualScrollKeyboard', () => {
     isScrolling: false,
     isProgrammaticScroll: false,
     range: { start: 0, end: 10 },
-    columnRange: { start: 0, end: 10, padStart: 0, padEnd: 0 },
+    columnRange: {
+      start: 0,
+      end: 10,
+      padStart: 0,
+      padEnd: 0,
+    },
     ...overrides,
   });
 
@@ -72,9 +77,15 @@ describe('useVirtualScrollKeyboard', () => {
     // The cases above describe the default (`'viewport'`) behaviour: they pass
     // no `activationMode` at all. The roving model is opted into explicitly by
     // the activation-mode cases below.
-    ...(overrides.activationMode === undefined ? {} : { activationMode: overrides.activationMode }),
-    ...(overrides.onActivate ? { onActivate: overrides.onActivate } : {}),
-    ...(overrides.getLoadingSlotSize ? { getLoadingSlotSize: overrides.getLoadingSlotSize } : {}),
+    ...(overrides.activationMode === undefined
+      ? {}
+      : { activationMode: overrides.activationMode }),
+    ...(overrides.onActivate
+      ? { onActivate: overrides.onActivate }
+      : {}),
+    ...(overrides.getLoadingSlotSize
+      ? { getLoadingSlotSize: overrides.getLoadingSlotSize }
+      : {}),
   });
 
   // Browser keydown events are cancelable, so `preventDefault()` is observable.
@@ -83,7 +94,9 @@ describe('useVirtualScrollKeyboard', () => {
   // ── Home / End ──────────────────────────────────────────────────────────────
 
   it('home key scrolls to start (smooth, close)', () => {
-    const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 0, y: 100 } }));
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 0, y: 100 },
+    }));
     const scrollToIndex = vi.fn();
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToIndex });
 
@@ -92,7 +105,9 @@ describe('useVirtualScrollKeyboard', () => {
   });
 
   it('home key scrolls to start (auto, far away)', () => {
-    const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 0, y: 10000 } }));
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 0, y: 10000 },
+    }));
     const scrollToIndex = vi.fn();
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToIndex });
 
@@ -101,7 +116,10 @@ describe('useVirtualScrollKeyboard', () => {
   });
 
   it('end key scrolls to the end of the content (vertical)', () => {
-    const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 0, y: 0 }, totalSize: { width: 5000, height: 5000 } }));
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 0, y: 0 },
+      totalSize: { width: 5000, height: 5000 },
+    }));
     const scrollToOffset = vi.fn();
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToOffset });
 
@@ -129,9 +147,15 @@ describe('useVirtualScrollKeyboard', () => {
   });
 
   it('end key includes the loading slot height (vertical)', () => {
-    const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 0, y: 0 }, totalSize: { width: 5000, height: 5000 } }));
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 0, y: 0 },
+      totalSize: { width: 5000, height: 5000 },
+    }));
     const scrollToOffset = vi.fn();
-    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToOffset, getLoadingSlotSize: () => 56 });
+    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), {
+      scrollToOffset,
+      getLoadingSlotSize: () => 56,
+    });
 
     handleKeyDown(pressKey('End'));
     expect(scrollToOffset).toHaveBeenCalledWith(null, 4556, { behavior: 'smooth', endExtraY: 56 });
@@ -140,7 +164,10 @@ describe('useVirtualScrollKeyboard', () => {
   it('end key includes the loading slot height (horizontal)', () => {
     const scrollDetails = ref(makeScrollDetails());
     const scrollToOffset = vi.fn();
-    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToOffset, getLoadingSlotSize: () => 56 });
+    const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), {
+      scrollToOffset,
+      getLoadingSlotSize: () => 56,
+    });
 
     handleKeyDown(pressKey('End'));
     expect(scrollToOffset).toHaveBeenCalledWith(4556, null, { behavior: 'smooth', endExtraX: 56 });
@@ -150,14 +177,19 @@ describe('useVirtualScrollKeyboard', () => {
     const scrollDetails = ref(makeScrollDetails());
     const scrollToOffset = vi.fn();
     const props = makeProps({ direction: 'both', columnCount: 10 });
-    const { handleKeyDown } = makeKeyboard(scrollDetails, props, { scrollToOffset, getLoadingSlotSize: () => 56 });
+    const { handleKeyDown } = makeKeyboard(scrollDetails, props, {
+      scrollToOffset,
+      getLoadingSlotSize: () => 56,
+    });
 
     handleKeyDown(pressKey('End'));
     expect(scrollToOffset).toHaveBeenCalledWith(4500, 4556, { behavior: 'smooth', endExtraY: 56 });
   });
 
   it('home key scrolls to the start of a horizontal list', () => {
-    const scrollDetails = ref(makeScrollDetails({ scrollOffset: { x: 100, y: 0 } }));
+    const scrollDetails = ref(makeScrollDetails({
+      scrollOffset: { x: 100, y: 0 },
+    }));
     const scrollToIndex = vi.fn();
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps({ direction: 'horizontal' }), { scrollToIndex });
 
@@ -167,7 +199,9 @@ describe('useVirtualScrollKeyboard', () => {
   });
 
   it('end key jumps instantly when the remaining distance is large', () => {
-    const scrollDetails = ref(makeScrollDetails({ totalSize: { width: 200000, height: 200000 } }));
+    const scrollDetails = ref(makeScrollDetails({
+      totalSize: { width: 200000, height: 200000 },
+    }));
     const scrollToOffset = vi.fn();
     const { handleKeyDown } = makeKeyboard(scrollDetails, makeProps(), { scrollToOffset });
 
@@ -396,7 +430,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal', snap: 'center' }),
-      { scrollToIndex, getColumnIndexAt: (o) => Math.floor(o / 50) },
+      {
+        scrollToIndex,
+        getColumnIndexAt: (o) => Math.floor(o / 50),
+      },
     );
 
     handleKeyDown(pressKey('ArrowRight'));
@@ -409,7 +446,11 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal' }),
-      { scrollToIndex, getItemOffset: (idx) => idx * 100, getItemSize: () => 100 },
+      {
+        scrollToIndex,
+        getItemOffset: (idx) => idx * 100,
+        getItemSize: () => 100,
+      },
     );
 
     handleKeyDown(pressKey('ArrowRight'));
@@ -501,7 +542,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ snap: 'center' }),
-      { scrollToIndex, getRowIndexAt: (o) => Math.floor(o / 50) },
+      {
+        scrollToIndex,
+        getRowIndexAt: (o) => Math.floor(o / 50),
+      },
     );
 
     handleKeyDown(pressKey('PageDown'));
@@ -520,7 +564,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ snap: 'center' }),
-      { scrollToIndex, getRowIndexAt: (o) => Math.floor(o / 50) },
+      {
+        scrollToIndex,
+        getRowIndexAt: (o) => Math.floor(o / 50),
+      },
     );
 
     handleKeyDown(pressKey('PageUp'));
@@ -589,7 +636,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal' }),
-      { scrollToIndex, getItemOffset: (idx) => idx * 100 },
+      {
+        scrollToIndex,
+        getItemOffset: (idx) => idx * 100,
+      },
     );
 
     handleKeyDown(pressKey('ArrowLeft'));
@@ -607,7 +657,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal' }),
-      { scrollToIndex, getItemOffset: (idx) => idx * 100 },
+      {
+        scrollToIndex,
+        getItemOffset: (idx) => idx * 100,
+      },
     );
 
     handleKeyDown(pressKey('ArrowLeft'));
@@ -621,7 +674,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps({ direction: 'horizontal', snap: 'center', columnCount: 5 }),
-      { scrollToIndex, getColumnIndexAt: (o) => Math.floor(o / 50) },
+      {
+        scrollToIndex,
+        getColumnIndexAt: (o) => Math.floor(o / 50),
+      },
     );
 
     handleKeyDown(pressKey('ArrowRight'));
@@ -693,7 +749,10 @@ describe('useVirtualScrollKeyboard', () => {
     const { activeIndex, handleKeyDown } = makeKeyboard(
       scrollDetails,
       makeProps(),
-      { activationMode: () => mode.value, scrollToIndex },
+      {
+        activationMode: () => mode.value,
+        scrollToIndex,
+      },
     );
 
     handleKeyDown(pressKey('ArrowDown'));

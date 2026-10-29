@@ -23,7 +23,9 @@ export async function onRenderClient(pageContext: PageContextClient) {
   if (!isRootUrl(oldUrl) && !isRootUrl(newUrl)) {
     type = 'vertical';
   } else {
-    type = (pageContext.isBackwardNavigation || isPrefix) ? 'back' : 'forward';
+    type = (pageContext.isBackwardNavigation || isPrefix)
+      ? 'back'
+      : 'forward';
   }
 
   const transition = document.startViewTransition({

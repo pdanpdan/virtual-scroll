@@ -74,7 +74,9 @@ watch(scrollDetails, (details) => {
   emit('scroll', details);
 });
 
-const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : undefined);
+const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby)
+  ? 'region'
+  : undefined);
 const rootAriaProps = computed(() => ({
   'aria-label': props.ariaLabel,
   'aria-labelledby': props.ariaLabelledby,
@@ -118,7 +120,9 @@ function getCardStyle(card: MasonryRenderedItem<T>): Record<string, string> {
     width: `${ card.width }px`,
     transform: `translate(${ card.x }px, ${ card.y }px)`,
   };
-  style[ props.measuredHeights === true ? 'minHeight' : 'height' ] = `${ card.height }px`;
+  style[ props.measuredHeights === true
+    ? 'minHeight'
+    : 'height' ] = `${ card.height }px`;
   return style;
 }
 // ---------------------------------- measurement wiring ----------------------------------

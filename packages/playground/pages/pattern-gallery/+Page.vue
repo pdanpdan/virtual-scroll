@@ -25,7 +25,9 @@ const columns = ref(5);
 const virtualScrollbar = ref(true);
 
 const photos = computed(() => Array.from(
-  { length: Math.ceil(itemCount.value / columns.value) },
+  {
+    length: Math.ceil(itemCount.value / columns.value),
+  },
   (_, rowIdx) => Array.from({ length: columns.value }, (_, colIdx) => {
     const id = rowIdx * columns.value + colIdx;
 

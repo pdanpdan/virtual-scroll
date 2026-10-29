@@ -70,7 +70,9 @@ function generateMessage(id: number, sentByMe?: boolean): Message {
 
 function loadMessages(count: number, prepend = false) {
   const newItems = [];
-  const startId = prepend ? (items.value[ 0 ]?.id || 0) - count : (items.value.at(-1)?.id || 0) + 1;
+  const startId = prepend
+    ? (items.value[ 0 ]?.id || 0) - count
+    : (items.value.at(-1)?.id || 0) + 1;
 
   for (let i = 0; i < count; i++) {
     const id = startId + i;
@@ -78,9 +80,15 @@ function loadMessages(count: number, prepend = false) {
   }
 
   if (prepend) {
-    items.value = [ ...newItems, ...items.value ];
+    items.value = [
+      ...newItems,
+      ...items.value,
+    ];
   } else {
-    items.value = [ ...items.value, ...newItems ];
+    items.value = [
+      ...items.value,
+      ...newItems,
+    ];
   }
 }
 

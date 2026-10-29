@@ -131,7 +131,9 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
   const measuredPaddingStart = ref(0);
   const measuredPaddingEnd = ref(0);
 
-  const effectiveContainer = computed(() => (props.container === undefined ? hostRef.value : props.container));
+  const effectiveContainer = computed(() => (props.container === undefined
+    ? hostRef.value
+    : props.container));
 
   const isHeaderFooterInsideContainer = computed(() => {
     const container = effectiveContainer.value;
@@ -174,11 +176,15 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
       },
       stickyStart: {
         x: 0,
-        y: props.stickyHeader && isHeaderFooterInsideContainer.value ? measuredPaddingStart.value : 0,
+        y: props.stickyHeader && isHeaderFooterInsideContainer.value
+          ? measuredPaddingStart.value
+          : 0,
       },
       stickyEnd: {
         x: 0,
-        y: props.stickyFooter && isHeaderFooterInsideContainer.value ? measuredPaddingEnd.value : 0,
+        y: props.stickyFooter && isHeaderFooterInsideContainer.value
+          ? measuredPaddingEnd.value
+          : 0,
       },
       gap: props.gap,
       columnGap: props.columnGap,
@@ -454,7 +460,9 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
   /* v8 ignore start -- only the full build's branch runs in these suites */
   const activeDescendant = IS_CORE_BUILD
     ? undefined
-    : computed(() => (activeIndex.value >= 0 ? `${ containerId.value }-item-${ activeIndex.value }` : undefined));
+    : computed(() => (activeIndex.value >= 0
+      ? `${ containerId.value }-item-${ activeIndex.value }`
+      : undefined));
 
   if (!IS_CORE_BUILD) {
     useLiveRegion(hostRef, liveMessage);
@@ -524,8 +532,12 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
     const isBoth = props.direction === 'both';
 
     const style: Record<string, string | number | undefined> = {
-      inlineSize: isVertical ? '100%' : `${ renderedVirtualWidth.value }px`,
-      blockSize: isHorizontal ? '100%' : `${ renderedVirtualHeight.value }px`,
+      inlineSize: isVertical
+        ? '100%'
+        : `${ renderedVirtualWidth.value }px`,
+      blockSize: isHorizontal
+        ? '100%'
+        : `${ renderedVirtualHeight.value }px`,
     };
 
     if (!isHydrated.value) {
@@ -547,7 +559,9 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
 
     return {
       display: isHorizontal ? 'inline-block' : 'block',
-      ...(isHorizontal ? { blockSize: '100%', verticalAlign: 'top' } : { inlineSize: '100%' }),
+      ...(isHorizontal
+        ? { blockSize: '100%', verticalAlign: 'top' }
+        : { inlineSize: '100%' }),
     };
   });
 
@@ -589,7 +603,9 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
 
   const isDebug = computed(() => props.debug);
 
-  const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby) ? 'region' : undefined);
+  const containerRole = computed(() => (props.ariaLabel || props.ariaLabelledby)
+    ? 'region'
+    : undefined);
 
   const shouldBindItemAria = computed(() => {
     const role = itemRole.value;

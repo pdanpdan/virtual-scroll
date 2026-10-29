@@ -28,7 +28,9 @@ function applyTheme(next: 'light' | 'dark') {
 }
 
 function toggleTheme() {
-  const next = theme.value === 'dark' ? 'light' : 'dark';
+  const next = theme.value === 'dark'
+    ? 'light'
+    : 'dark';
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (typeof document.startViewTransition !== 'function' || prefersReducedMotion) {
     applyTheme(next);
@@ -133,7 +135,9 @@ onMounted(() => {
   if (savedTheme === 'light' || savedTheme === 'dark') {
     theme.value = savedTheme;
   } else {
-    theme.value = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    theme.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }
 });
 
@@ -156,7 +160,11 @@ const navLinks: Link[] = [
   { href: '/configurator', label: 'Configurator / Code Generator' },
   { href: '/compare', label: 'Comparison' },
   { href: '/changelog', label: 'Changelog' },
-  { href: '/llms.txt', label: 'LLM Support', props: { rel: 'external', target: '_blank' } },
+  {
+    href: '/llms.txt',
+    label: 'LLM Support',
+    props: { rel: 'external', target: '_blank' },
+  },
 ];
 
 const essentialLinks: Link[] = [
@@ -176,7 +184,11 @@ const featureLinks: Link[] = [
   { href: '/feature-infinite-scroll', label: 'Infinite Scroll' },
   { href: '/feature-scroll-restoration', label: 'Scroll Restoration' },
   { href: '/feature-sticky-sections', label: 'Sticky Sections' },
-  { href: '/feature-ssr', label: 'SSR Support', props: { rel: 'external' } },
+  {
+    href: '/feature-ssr',
+    label: 'SSR Support',
+    props: { rel: 'external' },
+  },
   { href: '/feature-custom-scrollbar', label: 'Custom Scrollbar' },
   { href: '/feature-independent-scrollbars', label: 'Independent Scrollbars' },
   { href: '/feature-scroll-snap', label: 'Scroll Snapping' },
@@ -203,7 +215,11 @@ const patternLinks: Link[] = [
 
 const isExamplePage = computed(() => {
   const pathname = pageContext.urlPathname;
-  return [ ...essentialLinks, ...featureLinks, ...patternLinks ].some((link) => pathname.includes(link.href));
+  return [
+    ...essentialLinks,
+    ...featureLinks,
+    ...patternLinks,
+  ].some((link) => pathname.includes(link.href));
 });
 
 const isDocsPage = computed(() => pageContext.urlPathname.includes('/docs'));

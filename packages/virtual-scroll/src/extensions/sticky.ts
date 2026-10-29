@@ -59,7 +59,9 @@ export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
       }
 
       const prevStickyIdx = findPrevStickyIndex(stickyIndices, ctx.currentIndex.value);
-      return prevStickyIdx !== undefined && prevStickyIdx < ctx.range.value.start ? [ prevStickyIdx ] : NO_INDICES;
+      return prevStickyIdx !== undefined && prevStickyIdx < ctx.range.value.start
+        ? [ prevStickyIdx ]
+        : NO_INDICES;
     },
 
     transformRenderedItems(items: RenderedItem<T>[], ctx: ExtensionContext<T>) {
@@ -110,7 +112,9 @@ export function useStickyExtension<T = unknown>(): VirtualScrollExtension<T> {
           columnGap,
           getItemQueryY: (idx) => rawOffset('y', idx),
           getItemQueryX: (idx) => rawOffset('x', idx),
-          nextStickyIndex: nextPtr < stickyIndices.length ? stickyIndices[ nextPtr ] : undefined,
+          nextStickyIndex: nextPtr < stickyIndices.length
+            ? stickyIndices[ nextPtr ]
+            : undefined,
           stickyStartX,
           stickyStartY,
         });

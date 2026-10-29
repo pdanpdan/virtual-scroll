@@ -27,11 +27,15 @@ function setup<T>(propsValue: VirtualScrollProps<T>) {
       );
 
       const fixedItemSize = computed(() =>
-        (typeof props.value.itemSize === 'number' && props.value.itemSize > 0) ? props.value.itemSize : null,
+        (typeof props.value.itemSize === 'number' && props.value.itemSize > 0)
+          ? props.value.itemSize
+          : null,
       );
 
       const direction = computed(() =>
-        (props.value.direction === 'horizontal' || props.value.direction === 'both') ? props.value.direction : 'vertical',
+        (props.value.direction === 'horizontal' || props.value.direction === 'both')
+          ? props.value.direction
+          : 'vertical',
       );
 
       const defaultSize = computed(() => props.value.defaultItemSize || fixedItemSize.value || DEFAULT_ITEM_SIZE);
@@ -133,7 +137,9 @@ describe('useVirtualScrollSizes', () => {
 
     // Measure item 0
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 80 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 80 },
+      ],
       () => 0,
       () => 0,
       0,
@@ -170,7 +176,9 @@ describe('useVirtualScrollSizes', () => {
     // Simulate update. Changing item 0 from 40 to 100.
     // relativeScrollY is 100. item 0 is at 0. So item 0 is BEFORE viewport.
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       0,
@@ -202,7 +210,9 @@ describe('useVirtualScrollSizes', () => {
 
     // Update item 10. Viewport at 0. Item 10 is AFTER viewport.
     result.updateItemSizes(
-      [ { index: 10, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 10, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       0,
@@ -232,7 +242,11 @@ describe('useVirtualScrollSizes', () => {
     await nextTick();
 
     // Prepend 2 items
-    props.value.items = [ { id: -1 }, { id: -2 }, ...items ];
+    props.value.items = [
+      { id: -1 },
+      { id: -2 },
+      ...items,
+    ];
 
     result.initializeSizes();
     await nextTick();
@@ -268,11 +282,20 @@ describe('useVirtualScrollSizes', () => {
     const rowEl = document.createElement('div');
     const cell = document.createElement('div');
     cell.dataset.colIndex = '0';
-    Object.defineProperty(cell, 'getBoundingClientRect', { value: () => ({ width: 150 }) });
+    Object.defineProperty(cell, 'getBoundingClientRect', {
+      value: () => ({ width: 150 }),
+    });
     rowEl.appendChild(cell);
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      [
+        {
+          index: 0,
+          inlineSize: 0,
+          blockSize: 50,
+          element: rowEl,
+        },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       100, // relativeScrollX
@@ -311,7 +334,9 @@ describe('useVirtualScrollSizes', () => {
 
     // Item 0 is 0 size in tree initially.
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       200, // scrollY
@@ -375,7 +400,9 @@ describe('useVirtualScrollSizes', () => {
 
     // Item 0 is at offset 0. Viewport is at 500. Item 0 is BEFORE viewport.
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       (o) => Math.floor(o / 40),
       () => 0,
       0,
@@ -434,7 +461,9 @@ describe('useVirtualScrollSizes', () => {
 
     // firstRowIndex will be 5. item 0 is before it.
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       () => 5,
       () => 0,
       500,
@@ -501,11 +530,20 @@ describe('useVirtualScrollSizes', () => {
     const rowEl = document.createElement('div');
     const cell0 = document.createElement('div');
     cell0.dataset.colIndex = '0';
-    Object.defineProperty(cell0, 'getBoundingClientRect', { value: () => ({ width: 110 }) });
+    Object.defineProperty(cell0, 'getBoundingClientRect', {
+      value: () => ({ width: 110 }),
+    });
     rowEl.appendChild(cell0);
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      [
+        {
+          index: 0,
+          inlineSize: 0,
+          blockSize: 50,
+          element: rowEl,
+        },
+      ],
       () => 0,
       () => 1, // firstColIndex = 1
       100,
@@ -525,7 +563,9 @@ describe('useVirtualScrollSizes', () => {
     result.initializeSizes();
     await nextTick();
     const initialSize = result.itemSizesY.get(0);
-    result.updateItemSizes([ { index: 0, inlineSize: 0, blockSize: 0 } ], () => 0, () => 0, 0, 0, () => {});
+    result.updateItemSizes([
+      { index: 0, inlineSize: 0, blockSize: 0 },
+    ], () => 0, () => 0, 0, 0, () => {});
     await nextTick();
     expect(result.itemSizesY.get(0)).toBe(initialSize);
     wrapper.unmount();
@@ -558,7 +598,14 @@ describe('useVirtualScrollSizes', () => {
     rowEl.appendChild(cell);
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      [
+        {
+          index: 0,
+          inlineSize: 0,
+          blockSize: 50,
+          element: rowEl,
+        },
+      ],
       () => 0,
       () => 0,
       100,
@@ -587,7 +634,14 @@ describe('useVirtualScrollSizes', () => {
 
     const onScrollCorrection = vi.fn();
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      [
+        {
+          index: 0,
+          inlineSize: 0,
+          blockSize: 50,
+          element: rowEl,
+        },
+      ],
       () => 0,
       () => 0,
       100,
@@ -612,7 +666,9 @@ describe('useVirtualScrollSizes', () => {
 
     const onScrollCorrection = vi.fn();
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 120, blockSize: 50 } ],
+      [
+        { index: 0, inlineSize: 120, blockSize: 50 },
+      ],
       () => 0,
       () => 0,
       100,
@@ -760,7 +816,9 @@ describe('useVirtualScrollSizes', () => {
     const getColumnIndexAt = () => 0;
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       0,
@@ -772,7 +830,9 @@ describe('useVirtualScrollSizes', () => {
 
     // Same measurement again: no rebuild, no correction
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       0,
@@ -798,7 +858,9 @@ describe('useVirtualScrollSizes', () => {
     const getColumnIndexAt = () => 0;
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       0,
@@ -809,7 +871,9 @@ describe('useVirtualScrollSizes', () => {
     onScrollCorrection.mockClear();
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 100, blockSize: 100 } ],
+      [
+        { index: 0, inlineSize: 100, blockSize: 100 },
+      ],
       getRowIndexAt,
       getColumnIndexAt,
       0,
@@ -850,11 +914,20 @@ describe('useVirtualScrollSizes', () => {
     const rowEl = document.createElement('div');
     const cell = document.createElement('div');
     cell.dataset.colIndex = '1';
-    Object.defineProperty(cell, 'getBoundingClientRect', { value: () => ({ width: 150 }) });
+    Object.defineProperty(cell, 'getBoundingClientRect', {
+      value: () => ({ width: 150 }),
+    });
     rowEl.appendChild(cell);
 
     result.updateItemSizes(
-      [ { index: 0, inlineSize: 0, blockSize: 50, element: rowEl } ],
+      [
+        {
+          index: 0,
+          inlineSize: 0,
+          blockSize: 50,
+          element: rowEl,
+        },
+      ],
       () => 0,
       () => 1, // firstColIndex = 1
       100, // relativeScrollX

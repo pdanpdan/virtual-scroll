@@ -31,7 +31,9 @@ export default defineConfig({
       // UMD cannot be built from multiple entries: `vite.config.umd.ts` builds
       // the CDN bundle from the public entry alone.
       formats: [ 'es', 'cjs' ],
-      fileName: (format, entryName) => `${ entryName }.${ format === 'es' ? 'mjs' : 'cjs' }`,
+      fileName: (format, entryName) => `${ entryName }.${ format === 'es'
+        ? 'mjs'
+        : 'cjs' }`,
       // Pinned so the emitted stylesheet does not depend on Vite's lib-mode
       // heuristics (the exports map points `./style.css` at this file).
       cssFileName: 'virtual-scroll',

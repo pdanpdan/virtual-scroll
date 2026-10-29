@@ -22,7 +22,12 @@ const post = shallowRef<Post | null>(null);
 let alive = true;
 
 watch(
-  () => [ props.id, props.latencyMin, props.latencyMax, props.version ] as const,
+  () => [
+    props.id,
+    props.latencyMin,
+    props.latencyMax,
+    props.version,
+  ] as const,
   async () => {
     // SSR renders skeletons only: the simulated fetch must never run (or be
     // scheduled) on the server, or the shared feed stats would make the

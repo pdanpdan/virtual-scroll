@@ -27,7 +27,10 @@ const stickyHeader = ref(false);
 const stickyFooter = ref(false);
 const virtualScrollbar = ref(true);
 
-const columnWidths = computed(() => [ Math.ceil(columnWidth.value * 1.5), columnWidth.value ]);
+const columnWidths = computed(() => [
+  Math.ceil(columnWidth.value * 1.5),
+  columnWidth.value,
+]);
 
 // SSR Range: from data (simulates state from a store)
 const { items, ssrRange } = data;

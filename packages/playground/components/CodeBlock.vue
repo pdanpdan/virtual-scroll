@@ -29,7 +29,9 @@ async function copyCode() {
   if (!shell || typeof navigator === 'undefined') {
     return;
   }
-  const lines = [ ...shell.querySelectorAll('.shiki-container .line') ];
+  const lines = [
+    ...shell.querySelectorAll('.shiki-container .line'),
+  ];
   const text = lines.length > 0
     ? lines.map((line) => (line.textContent ?? '')).join('\n').replace(/\n$/, '')
     : (shell.textContent ?? '');

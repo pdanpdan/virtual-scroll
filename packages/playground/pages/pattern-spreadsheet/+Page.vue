@@ -79,14 +79,20 @@ function startResizing(e: PointerEvent, type: 'row' | 'col', index: number) {
   e.preventDefault();
   e.stopPropagation();
 
-  const initialSize = type === 'row' ? getRowHeight(null, index) : getColWidth(index);
-  const initialPos = type === 'row' ? e.clientY : e.clientX;
+  const initialSize = type === 'row'
+    ? getRowHeight(null, index)
+    : getColWidth(index);
+  const initialPos = type === 'row'
+    ? e.clientY
+    : e.clientX;
 
   resizing.value = { type, index, initialPos, initialSize };
 
   window.addEventListener('pointermove', handlePointerMove);
   window.addEventListener('pointerup', stopResizing);
-  document.body.style.cursor = type === 'row' ? 'row-resize' : 'col-resize';
+  document.body.style.cursor = type === 'row'
+    ? 'row-resize'
+    : 'col-resize';
 }
 
 let rafId: number | null = null;
@@ -97,8 +103,12 @@ function handlePointerMove(e: PointerEvent) {
   }
 
   const { type, index, initialPos, initialSize } = resizing.value;
-  const currentPos = type === 'row' ? e.clientY : e.clientX;
-  const delta = (type === 'col' && rtlMode.value) ? initialPos - currentPos : currentPos - initialPos;
+  const currentPos = type === 'row'
+    ? e.clientY
+    : e.clientX;
+  const delta = (type === 'col' && rtlMode.value)
+    ? initialPos - currentPos
+    : currentPos - initialPos;
   const newSize = Math.max(20, initialSize + delta);
 
   if (type === 'row') {

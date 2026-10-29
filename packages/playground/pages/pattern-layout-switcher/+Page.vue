@@ -22,7 +22,13 @@ interface Item {
   status: 'active' | 'idle' | 'blocked';
 }
 
-const TEAMS = [ 'Atlas', 'Beacon', 'Cobalt', 'Delta', 'Ember' ];
+const TEAMS = [
+  'Atlas',
+  'Beacon',
+  'Cobalt',
+  'Delta',
+  'Ember',
+];
 const STATUSES: Item[ 'status' ][] = [ 'active', 'idle', 'blocked' ];
 const STATUS_BADGE: Record<Item[ 'status' ], string> = {
   active: 'badge-success',

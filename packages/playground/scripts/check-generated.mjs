@@ -47,26 +47,123 @@ const base = (overrides) => Object.assign(structuredClone(defaultState), overrid
 
 /** One entry per output shape the generator can produce. */
 const cases = {
-  'list-default': [ base(), 'component' ],
-  'list-sticky-sections': [ base({ stickySections: true, stickyHeader: true, itemsPerSection: 10 }), 'component' ],
-  'list-item-model': [ base({ keyboardActivation: 'item', snapshots: true, infiniteScroll: true }), 'component' ],
-  'list-item-model-auto': [ base({ ariaRole: 'listbox', snapshots: true }), 'component' ],
-  'list-viewport-keyboard': [ base({ keyboardActivation: 'viewport', snapshots: true }), 'component' ],
-  'list-window-infinite': [ base({ containerMode: 'window', infiniteScroll: true, infiniteFlingVelocity: 3, infinitePreload: 200 }), 'component' ],
-  'grid-item-model': [ base({ direction: 'both', keyboardActivation: 'item', snapshots: true }), 'component' ],
-  'grid-dynamic-columns': [ base({ direction: 'both', columnWidthMode: 'dynamic', itemSizeMode: 'function', snap: true, snapMode: 'center' }), 'component' ],
-  'table-item-model': [ base({ renderer: 'table', keyboardActivation: 'item', infiniteScroll: true }), 'component' ],
-  'table-features': [ base({ renderer: 'table', rtl: true, snap: true, snapMode: 'center', snapshots: true, snapshotStorage: 'local', initialScroll: true, initialScrollIndex: 20, initialScrollAlign: 'center', restoreOnPrepend: true, stickyHeader: true, stickyFooter: true, ariaRole: 'grid' }), 'component' ],
-  'list-local-storage': [ base({ snapshots: true, snapshotStorage: 'local' }), 'component' ],
-  'table-default': [ base({ renderer: 'table' }), 'component' ],
-  'masonry-default': [ base({ renderer: 'masonry' }), 'component' ],
-  'masonry-aria': [ base({ renderer: 'masonry', ariaRole: 'list', gap: 16 }), 'component' ],
-  'independent-scrollbars': [ base({ scrollbarStyle: 'independent', direction: 'both', rtl: true }), 'component' ],
-  'composable-default': [ base(), 'composable' ],
-  'composable-item-model': [ base({ keyboardActivation: 'item', snapshots: true, infiniteScroll: true, infiniteFlingVelocity: 3, infinitePreload: 150 }), 'composable' ],
-  'composable-role-auto': [ base({ ariaRole: 'menu', snapshots: true }), 'composable' ],
-  'composable-rtl-dynamic': [ base({ rtl: true, itemSizeMode: 'dynamic', stickySections: true, restoreOnPrepend: true, scrollbarStyle: 'custom' }), 'composable' ],
-  'composable-window': [ base({ containerMode: 'window', restoreOnPrepend: true }), 'composable' ],
+  'list-default': [
+    base(),
+    'component',
+  ],
+  'list-sticky-sections': [
+    base({ stickySections: true, stickyHeader: true, itemsPerSection: 10 }),
+    'component',
+  ],
+  'list-item-model': [
+    base({ keyboardActivation: 'item', snapshots: true, infiniteScroll: true }),
+    'component',
+  ],
+  'list-item-model-auto': [
+    base({ ariaRole: 'listbox', snapshots: true }),
+    'component',
+  ],
+  'list-viewport-keyboard': [
+    base({ keyboardActivation: 'viewport', snapshots: true }),
+    'component',
+  ],
+  'list-window-infinite': [
+    base({
+      containerMode: 'window',
+      infiniteScroll: true,
+      infiniteFlingVelocity: 3,
+      infinitePreload: 200,
+    }),
+    'component',
+  ],
+  'grid-item-model': [
+    base({ direction: 'both', keyboardActivation: 'item', snapshots: true }),
+    'component',
+  ],
+  'grid-dynamic-columns': [
+    base({
+      direction: 'both',
+      columnWidthMode: 'dynamic',
+      itemSizeMode: 'function',
+      snap: true,
+      snapMode: 'center',
+    }),
+    'component',
+  ],
+  'table-item-model': [
+    base({ renderer: 'table', keyboardActivation: 'item', infiniteScroll: true }),
+    'component',
+  ],
+  'table-features': [
+    base({
+      renderer: 'table',
+      rtl: true,
+      snap: true,
+      snapMode: 'center',
+      snapshots: true,
+      snapshotStorage: 'local',
+      initialScroll: true,
+      initialScrollIndex: 20,
+      initialScrollAlign: 'center',
+      restoreOnPrepend: true,
+      stickyHeader: true,
+      stickyFooter: true,
+      ariaRole: 'grid',
+    }),
+    'component',
+  ],
+  'list-local-storage': [
+    base({ snapshots: true, snapshotStorage: 'local' }),
+    'component',
+  ],
+  'table-default': [
+    base({ renderer: 'table' }),
+    'component',
+  ],
+  'masonry-default': [
+    base({ renderer: 'masonry' }),
+    'component',
+  ],
+  'masonry-aria': [
+    base({ renderer: 'masonry', ariaRole: 'list', gap: 16 }),
+    'component',
+  ],
+  'independent-scrollbars': [
+    base({ scrollbarStyle: 'independent', direction: 'both', rtl: true }),
+    'component',
+  ],
+  'composable-default': [
+    base(),
+    'composable',
+  ],
+  'composable-item-model': [
+    base({
+      keyboardActivation: 'item',
+      snapshots: true,
+      infiniteScroll: true,
+      infiniteFlingVelocity: 3,
+      infinitePreload: 150,
+    }),
+    'composable',
+  ],
+  'composable-role-auto': [
+    base({ ariaRole: 'menu', snapshots: true }),
+    'composable',
+  ],
+  'composable-rtl-dynamic': [
+    base({
+      rtl: true,
+      itemSizeMode: 'dynamic',
+      stickySections: true,
+      restoreOnPrepend: true,
+      scrollbarStyle: 'custom',
+    }),
+    'composable',
+  ],
+  'composable-window': [
+    base({ containerMode: 'window', restoreOnPrepend: true }),
+    'composable',
+  ],
 };
 
 // ---------------------------------------------------------------------------
@@ -132,7 +229,9 @@ function codeOf(expression) {
   const skipQuoted = (quote) => {
     i++;
     while (i < expression.length && expression[ i ] !== quote) {
-      i += expression[ i ] === '\\' ? 2 : 1;
+      i += expression[ i ] === '\\'
+        ? 2
+        : 1;
     }
     i++;
   };
@@ -276,7 +375,9 @@ function scriptBindings(script) {
     for (const part of (/\{([^}]*)\}/.exec(clause)?.[ 1 ] ?? '').split(',')) {
       const cleaned = part.trim().replace(/^type\s+/, '');
       const alias = cleaned.match(/\bas\s+([a-z_$][\w$]*)$/i);
-      const name = alias ? alias[ 1 ] : cleaned.split(':').pop().trim();
+      const name = alias
+        ? alias[ 1 ]
+        : cleaned.split(':').pop().trim();
       if (/^[a-z_$][\w$]*$/i.test(name)) {
         names.add(name);
       }
@@ -310,10 +411,15 @@ function penBindings(js) {
 
 const problems = [];
 function checkTemplateScope(label, template, available) {
-  const known = new Set([ ...available, ...localNames(template) ]);
+  const known = new Set([
+    ...available,
+    ...localNames(template),
+  ]);
   for (const [ name, what ] of templateReads(template)) {
     if (!known.has(name)) {
-      problems.push(`${ label }: template ${ what } reads \`${ name }\`, which the ${ label.includes('pen:') ? 'pen setup scope' : 'script' } does not declare`);
+      problems.push(`${ label }: template ${ what } reads \`${ name }\`, which the ${ label.includes('pen:')
+        ? 'pen setup scope'
+        : 'script' } does not declare`);
     }
   }
 }
@@ -333,7 +439,16 @@ for (const [ name, [ state, mode ] ] of Object.entries(cases)) {
   const template = sfc.match(/<template>([\s\S]*?)<\/template>/)?.[ 1 ] ?? '';
   checkTemplateScope(`sfc:${ name }`, template, scriptBindings(script));
 
-  for (const [ variant, pen ] of [ [ 'pen', generateCodePenForState(state) ], [ 'ts-pen', generateCodePenTypeScript(state) ] ]) {
+  for (const [ variant, pen ] of [
+    [
+      'pen',
+      generateCodePenForState(state),
+    ],
+    [
+      'ts-pen',
+      generateCodePenTypeScript(state),
+    ],
+  ]) {
     checkTemplateScope(`${ variant }:${ name }`, pen.html, penBindings(pen.js));
   }
 }

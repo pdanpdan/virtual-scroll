@@ -94,7 +94,9 @@ export class FenwickTree {
    * @returns The value at the specified index.
    */
   get(index: number): number {
-    return index >= 0 && index < this.size ? this.values[ index ]! : 0;
+    return index >= 0 && index < this.size
+      ? this.values[ index ]!
+      : 0;
   }
 
   /**

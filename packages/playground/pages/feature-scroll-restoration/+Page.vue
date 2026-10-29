@@ -31,7 +31,10 @@ function prependItems() {
     label: `Prepended Item ${ prependCount.value + i }`,
   }));
 
-  items.value = [ ...newItems, ...items.value ];
+  items.value = [
+    ...newItems,
+    ...items.value,
+  ];
   prependCount.value += count;
 }
 
@@ -43,7 +46,10 @@ function appendItems() {
     label: `Appended Item ${ appendCount.value + i }`,
   }));
 
-  items.value = [ ...items.value, ...newItems ];
+  items.value = [
+    ...items.value,
+    ...newItems,
+  ];
   appendCount.value += count;
 }
 </script>

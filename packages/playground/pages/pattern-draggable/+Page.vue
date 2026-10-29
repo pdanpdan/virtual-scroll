@@ -67,7 +67,9 @@ function stopAutoScroll() {
 function rowIndexAt(clientX: number, clientY: number): number | null {
   const row = document.elementFromPoint(clientX, clientY)?.closest<HTMLElement>('[data-row-index]');
   const raw = row?.dataset.rowIndex;
-  return raw === undefined ? null : Number(raw);
+  return raw === undefined
+    ? null
+    : Number(raw);
 }
 
 /**
@@ -112,7 +114,9 @@ function startAutoScroll(direction: 'up' | 'down') {
       return;
     }
     const { scrollOffset } = list.scrollDetails;
-    const delta = direction === 'up' ? -10 : 10;
+    const delta = direction === 'up'
+      ? -10
+      : 10;
     list.scrollToOffset(null, scrollOffset.y + delta, { behavior: 'auto' });
   }, 16);
 }
@@ -169,7 +173,9 @@ function handleDrop(event: DragEvent) {
   if (from !== null && to !== null && from !== to) {
     const list = [ ...items.value ];
     const [ draggedItem ] = list.splice(from, 1);
-    list.splice(to > from ? to - 1 : to, 0, draggedItem);
+    list.splice(to > from
+      ? to - 1
+      : to, 0, draggedItem);
     items.value = list;
   }
 

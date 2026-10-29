@@ -141,7 +141,11 @@ function refreshTocItems() {
     items.push({
       id,
       text: link.textContent?.trim() || id,
-      level: tagName === 'H4' ? 4 : (tagName === 'H3' ? 3 : 2),
+      level: tagName === 'H4'
+        ? 4
+        : (tagName === 'H3'
+          ? 3
+          : 2),
     });
   });
   tocItems.value = items;

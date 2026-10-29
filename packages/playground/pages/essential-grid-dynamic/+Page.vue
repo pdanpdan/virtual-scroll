@@ -27,7 +27,9 @@ const virtualScrollbar = ref(true);
 // Pattern: base, base*2, base, base*2, ...
 const itemSizeFn = computed(() => {
   const base = itemSize.value;
-  return (item: unknown, index: number) => index % 2 === 0 ? base : base * 2;
+  return (item: unknown, index: number) => index % 2 === 0
+    ? base
+    : base * 2;
 });
 
 // Use a deterministic function for column width: first column 300px, others alternate 100/150
@@ -37,7 +39,9 @@ const columnWidthFn = computed(() => {
     if (index === 0) {
       return base * 3;
     }
-    return index % 2 === 0 ? base : Math.ceil(base * 1.5);
+    return index % 2 === 0
+      ? base
+      : Math.ceil(base * 1.5);
   };
 });
 

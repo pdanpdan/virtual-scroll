@@ -229,7 +229,10 @@ describe('useVirtualScroll', () => {
       await nextTick();
       expect(internalState.internalScrollY.value).toBe(145000);
 
-      props.value = { ...props.value, items: items.slice(0, 1000) };
+      props.value = {
+        ...props.value,
+        items: items.slice(0, 1000),
+      };
       await nextTick();
       await nextTick();
 
@@ -434,7 +437,10 @@ describe('useVirtualScroll', () => {
     });
 
     it('renders every index when items contain holes (undefined entries)', async () => {
-      const items = [ { id: 1 }, { id: 2 } ];
+      const items = [
+        { id: 1 },
+        { id: 2 },
+      ];
       const { result, wrapper, props } = setup({
         items,
         itemSize: 50,
@@ -565,7 +571,9 @@ describe('useVirtualScroll', () => {
       // While the smooth scroll is still flagged as programmatic, a measurement
       // change runs checkPendingScroll: the offset-based branch must skip the
       // index rebase and not issue any additional scroll.
-      result.updateItemSizes([ { index: 0, inlineSize: 80, blockSize: 50 } ]);
+      result.updateItemSizes([
+        { index: 0, inlineSize: 80, blockSize: 50 },
+      ]);
       await nextTick();
       await nextTick();
 
@@ -711,7 +719,10 @@ describe('useVirtualScroll', () => {
 
         // A size-affecting prop change schedules the post-render scroll re-sync;
         // it must return early on the server instead of touching the DOM.
-        props.value = { ...props.value, items: mockItems.slice(0, 10) };
+        props.value = {
+          ...props.value,
+          items: mockItems.slice(0, 10),
+        };
         await nextTick();
         await nextTick();
 
@@ -739,7 +750,10 @@ describe('useVirtualScroll', () => {
         expect(internalState.internalScrollX.value).toBe(250);
 
         // The post-render re-sync reads the window scroll again (RTL: absolute value)
-        props.value = { ...props.value, items: mockItems.slice(0, 20) };
+        props.value = {
+          ...props.value,
+          items: mockItems.slice(0, 20),
+        };
         await nextTick();
         await nextTick();
 
@@ -891,7 +905,12 @@ describe('useVirtualScroll', () => {
       expect(vertical.result.getRowOffset(5)).toBe(200);
       vertical.wrapper.unmount();
 
-      const horizontal = setup({ direction: 'horizontal', itemSize: 0, defaultItemSize: 40, items: mockItems });
+      const horizontal = setup({
+        direction: 'horizontal',
+        itemSize: 0,
+        defaultItemSize: 40,
+        items: mockItems,
+      });
       expect(horizontal.result.getItemOffset(5)).toBe(200);
       expect(horizontal.result.getColumnOffset(5)).toBe(200);
       horizontal.wrapper.unmount();
@@ -1025,7 +1044,9 @@ describe('useVirtualScroll', () => {
 
       // The target item measures 80px: the running smooth scroll must be
       // re-based immediately instead of waiting for the programmatic timeout.
-      result.updateItemSizes([ { index: 99, inlineSize: 100, blockSize: 80 } ]);
+      result.updateItemSizes([
+        { index: 99, inlineSize: 100, blockSize: 80 },
+      ]);
       await nextTick();
       await nextTick();
       await nextTick();
@@ -1085,7 +1106,11 @@ describe('useVirtualScroll', () => {
     });
 
     it('works with snapping + sticky only (no RTL, no infinite loading)', async () => {
-      const { result, wrapper } = setup({ items: mockItems, itemSize: 50, stickyIndices: [ 0 ] }, [
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        stickyIndices: [ 0 ],
+      }, [
         useSnappingExtension(),
         useStickyExtension(),
       ]);
@@ -1101,7 +1126,12 @@ describe('useVirtualScroll', () => {
         name: 'pin',
         includeIndices: () => [ 3, 1 ],
       };
-      const { result, wrapper } = setup({ items: mockItems, itemSize: 50, bufferBefore: 0, bufferAfter: 0 }, [ pin ]);
+      const { result, wrapper } = setup({
+        items: mockItems,
+        itemSize: 50,
+        bufferBefore: 0,
+        bufferAfter: 0,
+      }, [ pin ]);
       await nextTick();
       await nextTick();
 
@@ -1113,7 +1143,12 @@ describe('useVirtualScroll', () => {
     });
 
     it('ignores pinned indices outside the item range', async () => {
-      const props = { items: mockItems, itemSize: 50, bufferBefore: 0, bufferAfter: 0 };
+      const props = {
+        items: mockItems,
+        itemSize: 50,
+        bufferBefore: 0,
+        bufferAfter: 0,
+      };
       const pin: VirtualScrollExtension = {
         name: 'pin',
         includeIndices: () => [ -1, mockItems.length + 10 ],
@@ -1154,7 +1189,19 @@ describe('useVirtualScroll', () => {
       await nextTick();
 
       // Wild landings: top, middle, fractions, way past the end, near-end.
-      const landings = [ 0, 5, 0.5, 249950, 249949, 123456.789, 250000, 250001, 99999, 7, 249999 ];
+      const landings = [
+        0,
+        5,
+        0.5,
+        249950,
+        249949,
+        123456.789,
+        250000,
+        250001,
+        99999,
+        7,
+        249999,
+      ];
       for (const top of landings) {
         el.scrollTop = top;
         el.dispatchEvent(new Event('scroll'));
@@ -1191,7 +1238,17 @@ describe('useVirtualScroll', () => {
       await nextTick();
 
       // Alternating extremes: first row, last row, middle, last, second, ...
-      const targets = [ 0, 4999, 2500, 4999, 1, 4998, 2501, 4999, 0 ];
+      const targets = [
+        0,
+        4999,
+        2500,
+        4999,
+        1,
+        4998,
+        2501,
+        4999,
+        0,
+      ];
       for (let round = 0; round < 4; round++) {
         for (const target of targets) {
           result.scrollToIndex(target, null, { behavior: 'auto' });

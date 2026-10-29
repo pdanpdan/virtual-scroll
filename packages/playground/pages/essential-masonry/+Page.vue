@@ -94,14 +94,21 @@ watch(count, (value) => {
  * over-estimates the base content so measured mode has room to correct.
  */
 function itemHeight(item: MasonryItem | undefined, _index: number, width: number): number {
-  const estimate = item ? naturalHeight(item) * 1.3 : 200;
+  const estimate = item
+    ? naturalHeight(item) * 1.3
+    : 200;
   return Math.max(48, Math.round(estimate * (width / 240)));
 }
 
 const masonryRef = ref<VirtualScrollMasonryInstance<MasonryItem> | null>(null);
 
 /** Proof readouts refreshed on every scroll/layout emission. */
-const stats = ref({ columns: 0, columnWidth: 0, totalHeight: 0, exact: false });
+const stats = ref({
+  columns: 0,
+  columnWidth: 0,
+  totalHeight: 0,
+  exact: false,
+});
 const scrollDetails = ref<MasonryScrollDetails<MasonryItem> | null>(null);
 
 function handleScroll(details: MasonryScrollDetails<MasonryItem>) {

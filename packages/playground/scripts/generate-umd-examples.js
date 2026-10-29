@@ -579,14 +579,20 @@ pages.forEach((page) => {
     extraStyle: '',
   };
 
-  const direction = page.includes('grid') ? 'both' : page.includes('horizontal') ? 'horizontal' : 'vertical';
+  const direction = page.includes('grid')
+    ? 'both'
+    : page.includes('horizontal')
+      ? 'horizontal'
+      : 'vertical';
 
   const html = baseHtml
     .replace(reReplaceTitle, title)
     .replace(reReplaceDescription, description)
     .replace('{{CONTENT}}', pageConfig.content)
     .replace('{{LOGIC}}', pageConfig.logic || '')
-    .replace('{{EXPOSE}}', pageConfig.expose ? `${ pageConfig.expose },` : '')
+    .replace('{{EXPOSE}}', pageConfig.expose
+      ? `${ pageConfig.expose },`
+      : '')
     .replace('{{EXTRA_STYLE}}', pageConfig.extraStyle || '')
     .replace('{{DIRECTION}}', direction);
 

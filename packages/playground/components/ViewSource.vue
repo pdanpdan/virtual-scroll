@@ -5,7 +5,9 @@ import { computed } from 'vue';
 const pageContext = usePageContext();
 
 const githubUrl = computed(() => {
-  const path = pageContext.urlPathname === '/' ? '/index' : pageContext.urlPathname;
+  const path = pageContext.urlPathname === '/'
+    ? '/index'
+    : pageContext.urlPathname;
   return `https://github.com/pdanpdan/virtual-scroll/blob/main/packages/playground/pages${ path }/+Page.vue`;
 });
 </script>

@@ -94,8 +94,12 @@ function expandRegion(index: number) {
 function getDiffParts(oldStr: string | null | undefined, newStr: string | null | undefined) {
   if (oldStr == null || newStr == null || oldStr === newStr) {
     return {
-      oldParts: [ { text: oldStr || '', changed: false } ],
-      newParts: [ { text: newStr || '', changed: false } ],
+      oldParts: [
+        { text: oldStr || '', changed: false },
+      ],
+      newParts: [
+        { text: newStr || '', changed: false },
+      ],
     };
   }
 
@@ -113,14 +117,32 @@ function getDiffParts(oldStr: string | null | undefined, newStr: string | null |
 
   return {
     oldParts: [
-      { text: oldStr.slice(0, start), changed: false },
-      { text: oldStr.slice(start, endOld + 1), changed: true },
-      { text: oldStr.slice(endOld + 1), changed: false },
+      {
+        text: oldStr.slice(0, start),
+        changed: false,
+      },
+      {
+        text: oldStr.slice(start, endOld + 1),
+        changed: true,
+      },
+      {
+        text: oldStr.slice(endOld + 1),
+        changed: false,
+      },
     ].filter((p) => p.text),
     newParts: [
-      { text: newStr.slice(0, start), changed: false },
-      { text: newStr.slice(start, endNew + 1), changed: true },
-      { text: newStr.slice(endNew + 1), changed: false },
+      {
+        text: newStr.slice(0, start),
+        changed: false,
+      },
+      {
+        text: newStr.slice(start, endNew + 1),
+        changed: true,
+      },
+      {
+        text: newStr.slice(endNew + 1),
+        changed: false,
+      },
     ].filter((p) => p.text),
   };
 }

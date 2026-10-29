@@ -42,12 +42,17 @@ async function loadMore() {
     loading.value = false;
     return;
   }
-  const newItems = Array.from({ length: Math.min(20, TOTAL_LIMIT - start) }, (_, i) => ({
+  const newItems = Array.from({
+    length: Math.min(20, TOTAL_LIMIT - start),
+  }, (_, i) => ({
     id: start + i,
     label: `Loaded Item ${ start + i }`,
   }));
 
-  items.value = [ ...items.value, ...newItems ];
+  items.value = [
+    ...items.value,
+    ...newItems,
+  ];
   loading.value = false;
 }
 

@@ -38,7 +38,12 @@ export const EMPTY_SCROLL_DETAILS: ScrollDetails<unknown> = {
   isScrolling: false,
   isProgrammaticScroll: false,
   range: { start: 0, end: 0 },
-  columnRange: { start: 0, end: 0, padStart: 0, padEnd: 0 },
+  columnRange: {
+    start: 0,
+    end: 0,
+    padStart: 0,
+    padEnd: 0,
+  },
 };
 
 /**

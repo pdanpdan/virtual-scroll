@@ -8,7 +8,9 @@ import { useVirtualScrollInertia } from '../../src/composables/useVirtualScrollI
 describe('useVirtualScrollInertia', () => {
   it('handles pointer down correctly', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 10, y: 20 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -24,7 +26,9 @@ describe('useVirtualScrollInertia', () => {
       button: 0,
       clientX: 100,
       clientY: 100,
-      currentTarget: { setPointerCapture: vi.fn() },
+      currentTarget: {
+        setPointerCapture: vi.fn(),
+      },
     } as unknown as PointerEvent;
 
     handlePointerDown(event);
@@ -36,7 +40,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('ignores pointer down for non-primary mouse button', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -52,7 +58,9 @@ describe('useVirtualScrollInertia', () => {
       button: 2, // right click
       clientX: 100,
       clientY: 100,
-      currentTarget: { setPointerCapture: vi.fn() },
+      currentTarget: {
+        setPointerCapture: vi.fn(),
+      },
     } as unknown as PointerEvent;
 
     handlePointerDown(event);
@@ -61,7 +69,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('ignores pointer down if not virtual scrolling', () => {
     const useVirtualScrolling = ref(false);
-    const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 10, y: 20 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -77,7 +87,9 @@ describe('useVirtualScrollInertia', () => {
       button: 0,
       clientX: 100,
       clientY: 100,
-      currentTarget: { setPointerCapture: vi.fn() },
+      currentTarget: {
+        setPointerCapture: vi.fn(),
+      },
     } as unknown as PointerEvent;
 
     handlePointerDown(event);
@@ -87,7 +99,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('follows a content correction while dragging', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
     const frames: Array<() => void> = [];
@@ -108,7 +122,9 @@ describe('useVirtualScrollInertia', () => {
       button: 0,
       clientX: 100,
       clientY: 100,
-      currentTarget: { setPointerCapture: vi.fn() },
+      currentTarget: {
+        setPointerCapture: vi.fn(),
+      },
     } as unknown as PointerEvent);
 
     // Content above the viewport grew by 40 VU and the engine compensated.
@@ -127,7 +143,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('ignores a content correction when no drag is in progress', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -145,7 +163,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('handles wheel correctly', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 10, y: 20 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -172,7 +192,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('handles wheel with shiftKey to scroll horizontally', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -196,7 +218,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('does not scroll on wheel when not using virtual scrolling', () => {
     const useVirtualScrolling = ref(false);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -220,7 +244,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('handles pointer move and up with velocity and inertia', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 10, y: 20 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -236,7 +262,10 @@ describe('useVirtualScrollInertia', () => {
       stopProgrammaticScroll,
     });
 
-    const target = { setPointerCapture: vi.fn(), releasePointerCapture: vi.fn() };
+    const target = {
+      setPointerCapture: vi.fn(),
+      releasePointerCapture: vi.fn(),
+    };
 
     const eventDown = {
       pointerType: 'mouse',
@@ -280,7 +309,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('skips velocity updates for zero-dt moves and slow releases', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
 
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
@@ -295,7 +326,10 @@ describe('useVirtualScrollInertia', () => {
       stopProgrammaticScroll: vi.fn(),
     });
 
-    const target = { setPointerCapture: vi.fn(), releasePointerCapture: vi.fn() };
+    const target = {
+      setPointerCapture: vi.fn(),
+      releasePointerCapture: vi.fn(),
+    };
     let now = 1000;
     vi.spyOn(performance, 'now').mockImplementation(() => now);
 
@@ -328,7 +362,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('pointer move early-returns when not scrolling', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
 
     const { handlePointerMove } = useVirtualScrollInertia({
@@ -345,7 +381,9 @@ describe('useVirtualScrollInertia', () => {
 
   it('pointer up early-returns when not scrolling', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 0, y: 0 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 0, y: 0 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
 
     const { handlePointerUp } = useVirtualScrollInertia({
@@ -355,14 +393,18 @@ describe('useVirtualScrollInertia', () => {
       stopProgrammaticScroll: vi.fn(),
     });
 
-    const target = { releasePointerCapture: vi.fn() };
+    const target = {
+      releasePointerCapture: vi.fn(),
+    };
     handlePointerUp({ currentTarget: target, pointerId: 1 } as unknown as PointerEvent);
     expect(target.releasePointerCapture).not.toHaveBeenCalled();
   });
 
   it('keeps both velocity components for diagonal movement', () => {
     const useVirtualScrolling = ref(true);
-    const scrollDetails = ref({ scrollOffset: { x: 10, y: 20 } } as ScrollDetails<unknown>);
+    const scrollDetails = ref({
+      scrollOffset: { x: 10, y: 20 },
+    } as ScrollDetails<unknown>);
     const scrollToOffset = vi.fn();
     const stopProgrammaticScroll = vi.fn();
 
@@ -378,7 +420,10 @@ describe('useVirtualScrollInertia', () => {
       stopProgrammaticScroll,
     });
 
-    const target = { setPointerCapture: vi.fn(), releasePointerCapture: vi.fn() };
+    const target = {
+      setPointerCapture: vi.fn(),
+      releasePointerCapture: vi.fn(),
+    };
 
     let time = 0;
     vi.spyOn(performance, 'now').mockImplementation(() => {

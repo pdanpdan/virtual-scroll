@@ -25,8 +25,14 @@ const items = computed(() => Array.from({ length: itemCount.value }, (_, i) => (
   id: i,
   name: `User ${ i }`,
   email: `user${ i }@example.com`,
-  role: i % 3 === 0 ? 'Admin' : (i % 3 === 1 ? 'Editor' : 'Viewer'),
-  status: i % 2 === 0 ? 'Active' : 'Inactive',
+  role: i % 3 === 0
+    ? 'Admin'
+    : (i % 3 === 1
+      ? 'Editor'
+      : 'Viewer'),
+  status: i % 2 === 0
+    ? 'Active'
+    : 'Inactive',
   age: 20 + (i * 7) % 60,
   city: `city${ 1 + i % 5 }`,
 })));

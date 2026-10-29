@@ -165,7 +165,9 @@ const {
   props,
   containerTag: 'table',
   itemRole,
-  activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item' ? 'item' : 'viewport')),
+  activationMode: computed<'item' | 'viewport'>(() => (props.keyboardActivation === 'item'
+    ? 'item'
+    : 'viewport')),
   onScroll: (details) => emit('scroll', details),
   onVisibleRangeChange: (range) => emit('visibleRangeChange', range),
   onLoad: (direction, details) => emit('load', direction, details),
@@ -174,7 +176,9 @@ const {
 
 const containerStyle = computed(() => {
   const base: Record<string, string | number | undefined> = {
-    ...(props.direction !== 'vertical' ? { whiteSpace: 'nowrap' as const } : {}),
+    ...(props.direction !== 'vertical'
+      ? { whiteSpace: 'nowrap' as const }
+      : {}),
   };
 
   if (showVirtualScrollbars.value || !isWindowContainer.value) {
@@ -195,13 +199,19 @@ const containerStyle = computed(() => {
   return {
     ...base,
     display: 'block',
-    minInlineSize: props.direction === 'vertical' ? '100%' : 'auto',
+    minInlineSize: props.direction === 'vertical'
+      ? '100%'
+      : 'auto',
   };
 });
 
 const spacerStyle = computed(() => ({
-  inlineSize: props.direction === 'vertical' ? '1px' : `${ renderedVirtualWidth.value }px`,
-  blockSize: props.direction === 'horizontal' ? '1px' : `${ renderedVirtualHeight.value }px`,
+  inlineSize: props.direction === 'vertical'
+    ? '1px'
+    : `${ renderedVirtualWidth.value }px`,
+  blockSize: props.direction === 'horizontal'
+    ? '1px'
+    : `${ renderedVirtualHeight.value }px`,
 }));
 
 /** A table always renders a table element, in both rendering modes. */
@@ -209,7 +219,9 @@ const isTable = true;
 /** The tag the item rows live under; it selects the table cell sizing. */
 const containerTag = 'table';
 
-const crossGapFlag = computed(() => (props.direction === 'both' ? 1 : 0));
+const crossGapFlag = computed(() => (props.direction === 'both'
+  ? 1
+  : 0));
 const wrapperTag = computed(() => 'tbody');
 const itemTag = computed(() => 'tr');
 
@@ -260,13 +272,18 @@ const flowSpacers = computed<{ top: number; bottom: number; } | null>(() => {
   const below = flowFooterHeight.value;
   const start = Math.max(0, range.start);
   const end = Math.min(props.items.length, range.end);
-  const top = start > 0 ? Math.max(0, getItemOffset(start) - above) : 0;
+  const top = start > 0
+    ? Math.max(0, getItemOffset(start) - above)
+    : 0;
   let contentEnd = top;
   if (end > start) {
     const lastIndex = end - 1;
     contentEnd = Math.max(top, getItemOffset(lastIndex) + getItemSize(lastIndex) - above);
   }
-  return { top, bottom: Math.max(0, details.totalSize.height - above - below - contentEnd) };
+  return {
+    top,
+    bottom: Math.max(0, details.totalSize.height - above - below - contentEnd),
+  };
 });
 
 /** Item style without the absolute translate when rows are in flow. */
@@ -276,7 +293,9 @@ function flowItemStyle(item: RenderedItem<T>) {
 
 /** Item style for the currently active rendering mode (flow vs absolute). */
 function renderedItemStyle(item: RenderedItem<T>) {
-  return isFlowTable.value ? flowItemStyle(item) : getItemStyle(item);
+  return isFlowTable.value
+    ? flowItemStyle(item)
+    : getItemStyle(item);
 }
 
 /** Pinned column widths (px) for `autoSizeColumns` flow tables. */
@@ -295,7 +314,9 @@ let flowColgroupProvisional = false;
  * ignores window content, keeping columns at their pinned sizes. */
 const flowTableWidth = computed(() => {
   const widths = flowColgroup.value;
-  return widths ? `${ widths.reduce((sum, width) => sum + width, 0) }px` : undefined;
+  return widths
+    ? `${ widths.reduce((sum, width) => sum + width, 0) }px`
+    : undefined;
 });
 
 /** Computed length as a number; non-finite values count as zero. */
@@ -306,12 +327,19 @@ function parsePx(value: string): number {
 async function measureFlowColumns() {
   await nextTick();
   const headerRows: HTMLTableRowElement[] = headerRef.value
-    ? [ ...headerRef.value.querySelectorAll('tr') ] as HTMLTableRowElement[]
+    ? [
+      ...headerRef.value.querySelectorAll('tr'),
+    ] as HTMLTableRowElement[]
     : [];
   const itemRows: HTMLTableRowElement[] = wrapperRef.value
-    ? [ ...wrapperRef.value.querySelectorAll('tr.virtual-scroll-item') ] as HTMLTableRowElement[]
+    ? [
+      ...wrapperRef.value.querySelectorAll('tr.virtual-scroll-item'),
+    ] as HTMLTableRowElement[]
     : [];
-  const rows = [ ...headerRows, ...itemRows ];
+  const rows = [
+    ...headerRows,
+    ...itemRows,
+  ];
   if (rows.length === 0) {
     return;
   }
@@ -461,7 +489,11 @@ const tableHorizontalScrollbarProps = computed(() => {
   });
 });
 
-watch([ () => props.direction, isFlowTable, isHydrated ], ([ direction, flow, hydrated ]) => {
+watch([
+  () => props.direction,
+  isFlowTable,
+  isHydrated,
+], ([ direction, flow, hydrated ]) => {
   const host = hostRef.value;
   const table = flowTableRef.value;
   if (direction === 'vertical' && hydrated && host && (!flow || table)) {
@@ -487,7 +519,9 @@ onBeforeUnmount(() => {
 
 /** ARIA binding for an item row: 'none' items still get the row role fallback. */
 function itemAriaBindings(index: number) {
-  return shouldBindItemAria.value ? getItemAriaProps(index) : { role: 'none' };
+  return shouldBindItemAria.value
+    ? getItemAriaProps(index)
+    : { role: 'none' };
 }
 
 const wrapperAriaProps = computed(() => {
@@ -507,7 +541,9 @@ function getItemAriaProps(index: number) {
   };
 
   const role = itemRole.value;
-  aria.role = (role === 'none' || role === 'presentation') ? 'row' : role;
+  aria.role = (role === 'none' || role === 'presentation')
+    ? 'row'
+    : role;
 
   return aria;
 }

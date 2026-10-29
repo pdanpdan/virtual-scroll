@@ -35,8 +35,16 @@ interface SourceFile {
 }
 
 const FILES: Record<'original' | 'changed', SourceFile> = {
-  original: { name: 'original.txt', label: 'Original', lines: loadLines(originalRaw) },
-  changed: { name: 'changed.txt', label: 'Changed', lines: loadLines(changedRaw) },
+  original: {
+    name: 'original.txt',
+    label: 'Original',
+    lines: loadLines(originalRaw),
+  },
+  changed: {
+    name: 'changed.txt',
+    label: 'Changed',
+    lines: loadLines(changedRaw),
+  },
 };
 
 const activeFile = ref<'original' | 'changed'>('original');
@@ -182,7 +190,12 @@ function tokenizeCode(code: string): CodeSegment[] {
     } else if (num !== undefined) {
       segments.push({ text: num, cls: 'text-warning' });
     } else if (word !== undefined) {
-      segments.push({ text: word, cls: KEYWORDS.has(word) ? 'text-primary' : undefined });
+      segments.push({
+        text: word,
+        cls: KEYWORDS.has(word)
+          ? 'text-primary'
+          : undefined,
+      });
     } else {
       // Whitespace (kept for indentation) and punctuation.
       segments.push({ text: match[ 0 ] });
@@ -208,14 +221,24 @@ function highlightSegments(segments: CodeSegment[], query: string): CodeSegment[
     }
     while (hit !== -1) {
       if (hit > from) {
-        pieces.push({ text: segment.text.slice(from, hit), cls: segment.cls });
+        pieces.push({
+          text: segment.text.slice(from, hit),
+          cls: segment.cls,
+        });
       }
-      pieces.push({ text: segment.text.slice(hit, hit + query.length), cls: segment.cls, mark: true });
+      pieces.push({
+        text: segment.text.slice(hit, hit + query.length),
+        cls: segment.cls,
+        mark: true,
+      });
       from = hit + query.length;
       hit = lower.indexOf(query, from);
     }
     if (from < segment.text.length) {
-      pieces.push({ text: segment.text.slice(from), cls: segment.cls });
+      pieces.push({
+        text: segment.text.slice(from),
+        cls: segment.cls,
+      });
     }
   }
   return pieces;
@@ -264,7 +287,9 @@ function scanMatches(query: string) {
       matches.value.push(i);
     }
   }
-  currentMatchIndex.value = matches.value.length > 0 ? 0 : -1;
+  currentMatchIndex.value = matches.value.length > 0
+    ? 0
+    : -1;
   searching.value = false;
   if (currentMatchIndex.value !== -1) {
     scrollToMatch();
@@ -310,7 +335,9 @@ function findPrev() {
   scrollToMatch();
 }
 
-const matchCounter = computed(() => (matches.value.length === 0 ? null : `${ currentMatchIndex.value + 1 } / ${ matches.value.length }`));
+const matchCounter = computed(() => (matches.value.length === 0
+  ? null
+  : `${ currentMatchIndex.value + 1 } / ${ matches.value.length }`));
 
 watch(activeFile, () => {
   matches.value = [];

@@ -37,7 +37,11 @@ function greedyReference(
     y[ i ] = tops[ best ]!;
     tops[ best ] = tops[ best ]! + heightFn(i, columnWidth) + gap;
   }
-  return { y: Array.from(y), column: Array.from(column), total: Math.max(...Array.from(tops)) };
+  return {
+    y: Array.from(y),
+    column: Array.from(column),
+    total: Math.max(...Array.from(tops)),
+  };
 }
 
 /** Filter of brute-force positions matching the rendered window predicate. */
@@ -69,7 +73,9 @@ function pickAnchor(cards: MasonryRenderedItem<number>[], line: number): { index
   const below = cards
     .filter((card) => card.y > line)
     .sort((a, b) => a.y - b.y)[ 0 ];
-  return below ? { index: below.index, delta: line - below.y } : { index: -1, delta: 0 };
+  return below
+    ? { index: below.index, delta: line - below.y }
+    : { index: -1, delta: 0 };
 }
 
 /** Harness: mount a stub component that calls the composable with the given props. */
@@ -162,7 +168,9 @@ describe('useVirtualScrollMasonry', () => {
       const { result, wrapper } = mountMasonry(makeProps({
         hostRef: host,
         items: Array.from({ length: 300 }, (_, i) => i),
-        itemHeight: (_, index, width) => (index % 7 === 0 ? Number.NaN : oracle(index, width)),
+        itemHeight: (_, index, width) => (index % 7 === 0
+          ? Number.NaN
+          : oracle(index, width)),
       }));
       await nextTick();
       await nextTick();
@@ -225,7 +233,9 @@ describe('useVirtualScrollMasonry', () => {
       const yBefore = cardsBefore.find((card) => card.index === anchor.index)?.y ?? 0;
 
       // Card 2 (above the anchor) grows by 900 px: the anchor keeps its delta.
-      result.applyMeasurements([ { index: 2, height: 1000 } ]);
+      result.applyMeasurements([
+        { index: 2, height: 1000 },
+      ]);
       await nextTick();
       await nextTick();
       const yAfter = result.renderedCards.value.find((card) => card.index === anchor.index)?.y ?? 0;
@@ -248,7 +258,9 @@ describe('useVirtualScrollMasonry', () => {
       const totalBefore = result.totalHeight.value;
       const scrollBefore = result.internalState.scrollY.value;
 
-      result.applyMeasurements([ { index: 3, height: 100 } ]); // == oracle
+      result.applyMeasurements([
+        { index: 3, height: 100 },
+      ]); // == oracle
       await nextTick();
       await nextTick();
       expect(result.renderedCards.value.map((card) => [ card.index, card.y ])).toEqual(before);
@@ -270,17 +282,23 @@ describe('useVirtualScrollMasonry', () => {
       const baseTotal = result.totalHeight.value;
 
       // Measurements override the oracle.
-      result.applyMeasurements([ { index: 5, height: 900 } ]);
+      result.applyMeasurements([
+        { index: 5, height: 900 },
+      ]);
       await nextTick();
       await nextTick();
       expect(result.totalHeight.value).toBeCloseTo(baseTotal + 800, 4);
 
       // Re-measurement replaces the stored value; reporting it again is a no-op.
-      result.applyMeasurements([ { index: 5, height: 500 } ]);
+      result.applyMeasurements([
+        { index: 5, height: 500 },
+      ]);
       await nextTick();
       await nextTick();
       expect(result.totalHeight.value).toBeCloseTo(baseTotal + 400, 4);
-      result.applyMeasurements([ { index: 5, height: 500 } ]);
+      result.applyMeasurements([
+        { index: 5, height: 500 },
+      ]);
       await nextTick();
       await nextTick();
       expect(result.totalHeight.value).toBeCloseTo(baseTotal + 400, 4);
@@ -298,7 +316,9 @@ describe('useVirtualScrollMasonry', () => {
       expect(result.totalHeight.value).toBeCloseTo(baseTotal, 4);
 
       // New measurements apply again, then a new dataset drops them all.
-      result.applyMeasurements([ { index: 7, height: 900 } ]);
+      result.applyMeasurements([
+        { index: 7, height: 900 },
+      ]);
       await nextTick();
       await nextTick();
       expect(result.totalHeight.value).toBeCloseTo(baseTotal + 800, 4);
@@ -335,7 +355,9 @@ describe('useVirtualScrollMasonry', () => {
       await nextTick();
       expect(result.totalHeight.value).toBe(totalBefore);
 
-      result.applyMeasurements([ { index: 2, height: 100.4 } ]); // below epsilon
+      result.applyMeasurements([
+        { index: 2, height: 100.4 },
+      ]); // below epsilon
       await nextTick();
       expect(result.totalHeight.value).toBe(totalBefore);
       wrapper.unmount();
@@ -348,7 +370,9 @@ describe('useVirtualScrollMasonry', () => {
       result.scrollToOffset(5000);
       result.scrollToOffset(Number.POSITIVE_INFINITY);
       result.scrollToIndex(10, { align: 'center' });
-      result.applyMeasurements([ { index: 2, height: 900 } ]);
+      result.applyMeasurements([
+        { index: 2, height: 900 },
+      ]);
       result.refresh();
       await nextTick();
       expect(result.internalState.scrollY.value).toBe(0);
@@ -455,7 +479,9 @@ describe('useVirtualScrollMasonry', () => {
       const host = makeHost(1000, 500);
       // The first segment is much taller than the rest: the extrapolated total
       // overshoots, so reaching the estimate end must settle on the true end.
-      const heightOf = (index: number) => (index < 10 ? 5000 : 100);
+      const heightOf = (index: number) => (index < 10
+        ? 5000
+        : 100);
       const { result, wrapper } = mountMasonry(makeProps({
         hostRef: host,
         items: Array.from({ length: 1000 }, (_, i) => i),
@@ -491,7 +517,9 @@ describe('useVirtualScrollMasonry', () => {
       const host = makeHost(1000, 500);
       // The first segment is tall, the rest is short: the initial extrapolation
       // overshoots the true total.
-      const heightOf = (index: number) => (index < 100 ? 400 : 40);
+      const heightOf = (index: number) => (index < 100
+        ? 400
+        : 40);
       const { result, wrapper } = mountMasonry(makeProps({
         hostRef: host,
         items: Array.from({ length: 2000 }, (_, i) => i),
@@ -603,7 +631,10 @@ describe('useVirtualScrollMasonry', () => {
       // Nested alignment object plus explicit auto behavior.
       scrollHost(host, 0);
       await nextTick();
-      const ended = result.scrollToIndex(idx, { align: { y: 'end' }, behavior: 'auto' });
+      const ended = result.scrollToIndex(idx, {
+        align: { y: 'end' },
+        behavior: 'auto',
+      });
       expect(ended.targetY).toBeCloseTo(Math.max(0, ref.y[ idx ]! - (500 - h)), 4);
 
       // Axis options object (x ignored): y falls back to 'auto' -> start for
@@ -621,7 +652,10 @@ describe('useVirtualScrollMasonry', () => {
 
       // Nested dry-run: target computed, nothing scrolled.
       const callsBefore = scrollCalls();
-      const dry = result.scrollToIndex(idx, { align: { y: 'center' }, dryRun: true });
+      const dry = result.scrollToIndex(idx, {
+        align: { y: 'center' },
+        dryRun: true,
+      });
       expect(dry.targetY).toBeCloseTo(ref.y[ idx ]! - (500 - h) / 2, 4);
       expect(scrollCalls()).toBe(callsBefore);
       wrapper.unmount();
@@ -703,7 +737,10 @@ describe('useVirtualScrollMasonry', () => {
       // Nested alignment without y falls back to 'auto' (below -> start).
       scrollHost(host, 0);
       await nextTick();
-      const nested = result.scrollToIndex(900, { align: { x: 'center' }, behavior: 'auto' });
+      const nested = result.scrollToIndex(900, {
+        align: { x: 'center' },
+        behavior: 'auto',
+      });
       expect(nested.targetY).toBeCloseTo(ref.y[ 900 ]!, 4);
 
       // Null/undefined offsets are accepted no-ops.
@@ -957,7 +994,9 @@ describe('useVirtualScrollMasonry', () => {
 
       // In-place content change is invisible to the layout until refresh().
       items[ 0 ] = -1;
-      props.value.itemHeight = (_, index) => (index === before.index ? 1000 : 60 + (index % 10) * 5);
+      props.value.itemHeight = (_, index) => (index === before.index
+        ? 1000
+        : 60 + (index % 10) * 5);
       result.refresh();
       await nextTick();
       await nextTick();
@@ -1203,13 +1242,24 @@ describe('useVirtualScrollMasonry', () => {
       await nextTick();
       await nextTick();
 
-      for (const y of [ 10_000_000, -10_000_000, 0, 123_456.789, 1 ]) {
+      for (const y of [
+        10_000_000,
+        -10_000_000,
+        0,
+        123_456.789,
+        1,
+      ]) {
         result.scrollToOffset(y);
         await nextTick();
         const d = result.scrollDetails.value;
         expect(Number.isFinite(d.totalSize.height)).toBe(true);
         expect(Number.isFinite(d.scrollOffset.y)).toBe(true);
-        expect(d.items.every((card) => [ card.x, card.y, card.width, card.height ].every(Number.isFinite))).toBe(true);
+        expect(d.items.every((card) => [
+          card.x,
+          card.y,
+          card.width,
+          card.height,
+        ].every(Number.isFinite))).toBe(true);
         expect(result.totalHeight.value).toBeGreaterThan(0);
       }
       wrapper.unmount();

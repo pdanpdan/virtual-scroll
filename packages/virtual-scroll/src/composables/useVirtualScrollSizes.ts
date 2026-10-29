@@ -89,7 +89,9 @@ export function useVirtualScrollSizes<T>(
    * @param item - The data item.
    * @param index - The item index.
    */
-  const getItemBaseSize = (item: T, index: number) => (typeof props.value.props.itemSize === 'function' ? (props.value.props.itemSize as (item: T, index: number) => number)(item, index) : props.value.defaultSize);
+  const getItemBaseSize = (item: T, index: number) => (typeof props.value.props.itemSize === 'function'
+    ? (props.value.props.itemSize as (item: T, index: number) => number)(item, index)
+    : props.value.defaultSize);
   /**
    * Internal helper to get the size of an item or column at a specific index.
    *
@@ -117,16 +119,22 @@ export function useVirtualScrollSizes<T>(
     }
     if (Array.isArray(sizeProp) && sizeProp.length > 0) {
       const val = sizeProp[ index % sizeProp.length ];
-      return (val != null && val > 0) ? val : defaultSize;
+      return (val != null && val > 0)
+        ? val
+        : defaultSize;
     }
     if (typeof sizeProp === 'function') {
       const item = props.value.props.items[ index ];
       return (isX && props.value.direction !== 'both') || !isX
-        ? (item !== undefined ? sizeProp(item, index) : defaultSize)
+        ? (item !== undefined
+          ? sizeProp(item, index)
+          : defaultSize)
         : (sizeProp as (i: number) => number)(index);
     }
     const val = tree.get(index);
-    return val > 0 ? val - gap : defaultSize;
+    return val > 0
+      ? val - gap
+      : defaultSize;
   };
 
   /**
@@ -149,9 +157,15 @@ export function useVirtualScrollSizes<T>(
     const prevYLen = itemSizesY.length;
     const prevColLen = columnSizes.length;
 
-    itemSizesX.resize(useX && itemStorage ? len : 0);
-    itemSizesY.resize(useY && itemStorage ? len : 0);
-    columnSizes.resize(colCount > 0 && colStorage ? colCount : 0);
+    itemSizesX.resize(useX && itemStorage
+      ? len
+      : 0);
+    itemSizesY.resize(useY && itemStorage
+      ? len
+      : 0);
+    columnSizes.resize(colCount > 0 && colStorage
+      ? colCount
+      : 0);
 
     if (measuredItemsX.value.length !== (useX ? len : 0)) {
       const newMeasuredX = new Uint8Array(useX ? len : 0);
@@ -169,9 +183,15 @@ export function useVirtualScrollSizes<T>(
       measuredColumns.value = newMeasuredCols;
     }
 
-    processedToX = (itemSizesX.length === 0 || prevXLen === 0) ? 0 : Math.min(processedToX, len);
-    processedToY = (itemSizesY.length === 0 || prevYLen === 0) ? 0 : Math.min(processedToY, len);
-    processedToCols = (columnSizes.length === 0 || prevColLen === 0) ? 0 : Math.min(processedToCols, colCount);
+    processedToX = (itemSizesX.length === 0 || prevXLen === 0)
+      ? 0
+      : Math.min(processedToX, len);
+    processedToY = (itemSizesY.length === 0 || prevYLen === 0)
+      ? 0
+      : Math.min(processedToY, len);
+    processedToCols = (columnSizes.length === 0 || prevColLen === 0)
+      ? 0
+      : Math.min(processedToCols, colCount);
   };
 
   /**
@@ -261,7 +281,9 @@ export function useVirtualScrollSizes<T>(
       if (uniformCols) {
         measuredColumns.value.fill(1);
       } else {
-        const startFrom = (prepended || lastColumnGap !== columnGap) ? 0 : Math.min(processedToCols, colCount);
+        const startFrom = (prepended || lastColumnGap !== columnGap)
+          ? 0
+          : Math.min(processedToCols, colCount);
         if (startFrom < colCount && initializeAxis(colCount, columnSizes, measuredColumns.value, cw, defaultColWidth, columnGap, props.value.isDynamicColumnWidth, true, startFrom, lastColumnGap)) {
           columnSizes.rebuild();
         }
@@ -274,7 +296,9 @@ export function useVirtualScrollSizes<T>(
       if (uniformItems) {
         measuredItemsX.value.fill(1);
       } else {
-        const startFrom = (prepended || lastColumnGap !== columnGap) ? 0 : Math.min(processedToX, len);
+        const startFrom = (prepended || lastColumnGap !== columnGap)
+          ? 0
+          : Math.min(processedToX, len);
         if (startFrom < len && initializeAxis(len, itemSizesX, measuredItemsX.value, itemSize, defaultItemSize, columnGap, props.value.isDynamicItemSize, true, startFrom, lastColumnGap)) {
           itemSizesX.rebuild();
         }
@@ -287,7 +311,9 @@ export function useVirtualScrollSizes<T>(
       if (uniformItems) {
         measuredItemsY.value.fill(1);
       } else {
-        const startFrom = (prepended || lastGap !== gap) ? 0 : Math.min(processedToY, len);
+        const startFrom = (prepended || lastGap !== gap)
+          ? 0
+          : Math.min(processedToY, len);
         if (startFrom < len && initializeAxis(len, itemSizesY, measuredItemsY.value, itemSize, defaultItemSize, gap, props.value.isDynamicItemSize, false, startFrom, lastGap)) {
           itemSizesY.rebuild();
         }
@@ -384,8 +410,11 @@ export function useVirtualScrollSizes<T>(
     const propsVal = props.value.props;
     const gap = propsVal.gap || 0;
     const columnGap = propsVal.columnGap || 0;
+    const colCount = propsVal.columnCount || 0;
 
-    const firstRowIndex = getRowIndexAt(props.value.direction === 'horizontal' ? relativeScrollX : relativeScrollY);
+    const firstRowIndex = getRowIndexAt(props.value.direction === 'horizontal'
+      ? relativeScrollX
+      : relativeScrollY);
     const firstColIndex = getColumnIndexAt(relativeScrollX);
 
     const isHorizontalMode = props.value.direction === 'horizontal';
@@ -400,7 +429,7 @@ export function useVirtualScrollSizes<T>(
      * @param width - Measured width.
      */
     const tryUpdateColumn = (colIdx: number, width: number) => {
-      if (colIdx >= 0 && colIdx < (propsVal.columnCount || 0) && !processedCols.has(colIdx)) {
+      if (colIdx >= 0 && colIdx < colCount && !processedCols.has(colIdx)) {
         processedCols.add(colIdx);
         if (updateAxis(colIdx, width, columnSizes, measuredColumns.value, columnGap, firstColIndex, deltaX)) {
           needUpdate = true;
@@ -443,7 +472,9 @@ export function useVirtualScrollSizes<T>(
           tryUpdateColumn(Number.parseInt(colIndexAttr, 10), inlineSize);
         } else {
           // If the element is a row, try to find cells with data-col-index
-          const cells = [ ...element.querySelectorAll('[data-col-index]') ] as HTMLElement[];
+          const cells = [
+            ...element.querySelectorAll('[data-col-index]'),
+          ] as HTMLElement[];
 
           for (const child of cells) {
             const colIndex = Number.parseInt(child.dataset.colIndex!, 10);

@@ -37,50 +37,348 @@ type DatasetId = typeof DATASETS[ number ][ 'id' ];
 const SIZES = [ 1_000, 10_000, 50_000, 250_000 ];
 const ALIGNMENTS = [ 'start', 'center', 'end', 'auto' ] as const;
 
-const FIRST_NAMES = [ 'James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth', 'David', 'Barbara' ];
+const FIRST_NAMES = [
+  'James',
+  'Mary',
+  'John',
+  'Patricia',
+  'Robert',
+  'Jennifer',
+  'Michael',
+  'Linda',
+  'William',
+  'Elizabeth',
+  'David',
+  'Barbara',
+];
 const SURNAMES_BY_LETTER: Record<string, readonly string[]> = {
-  A: [ 'Anderson', 'Adams', 'Allen', 'Arnold', 'Avery', 'Alvarez', 'Andrews' ],
-  B: [ 'Baker', 'Brown', 'Bennett', 'Bishop', 'Boyd', 'Brooks', 'Bailey', 'Butler' ],
-  C: [ 'Clark', 'Carter', 'Campbell', 'Collins', 'Cooper', 'Coleman', 'Cox' ],
-  D: [ 'Davis', 'Dixon', 'Dunn', 'Douglas', 'Daniels', 'Diaz' ],
-  E: [ 'Edwards', 'Ellis', 'Evans', 'Erickson', 'Elliott' ],
-  F: [ 'Foster', 'Fisher', 'Fox', 'Franklin', 'Flores', 'Ford' ],
-  G: [ 'Garcia', 'Green', 'Gonzalez', 'Gray', 'Griffin', 'Gomez', 'Graham' ],
-  H: [ 'Harris', 'Hall', 'Hernandez', 'Howard', 'Hughes', 'Hill', 'Hayes' ],
-  I: [ 'Ingram', 'Irwin', 'Ibarra', 'Isaacson' ],
-  J: [ 'Johnson', 'Jones', 'Jackson', 'James', 'Jenkins', 'Jordan' ],
-  K: [ 'King', 'Kelly', 'Kennedy', 'Knight', 'Kim' ],
-  L: [ 'Lee', 'Lewis', 'Lopez', 'Long', 'Larson', 'Lawrence' ],
-  M: [ 'Miller', 'Martin', 'Moore', 'Martinez', 'Mitchell', 'Morgan', 'Myers', 'Murphy' ],
-  N: [ 'Nelson', 'Nguyen', 'Nichols', 'Norris', 'Newman' ],
-  O: [ 'Ortiz', 'Oliver', 'Owens', 'Osborne', 'Olson' ],
-  P: [ 'Perez', 'Parker', 'Phillips', 'Powell', 'Price', 'Peterson' ],
+  A: [
+    'Anderson',
+    'Adams',
+    'Allen',
+    'Arnold',
+    'Avery',
+    'Alvarez',
+    'Andrews',
+  ],
+  B: [
+    'Baker',
+    'Brown',
+    'Bennett',
+    'Bishop',
+    'Boyd',
+    'Brooks',
+    'Bailey',
+    'Butler',
+  ],
+  C: [
+    'Clark',
+    'Carter',
+    'Campbell',
+    'Collins',
+    'Cooper',
+    'Coleman',
+    'Cox',
+  ],
+  D: [
+    'Davis',
+    'Dixon',
+    'Dunn',
+    'Douglas',
+    'Daniels',
+    'Diaz',
+  ],
+  E: [
+    'Edwards',
+    'Ellis',
+    'Evans',
+    'Erickson',
+    'Elliott',
+  ],
+  F: [
+    'Foster',
+    'Fisher',
+    'Fox',
+    'Franklin',
+    'Flores',
+    'Ford',
+  ],
+  G: [
+    'Garcia',
+    'Green',
+    'Gonzalez',
+    'Gray',
+    'Griffin',
+    'Gomez',
+    'Graham',
+  ],
+  H: [
+    'Harris',
+    'Hall',
+    'Hernandez',
+    'Howard',
+    'Hughes',
+    'Hill',
+    'Hayes',
+  ],
+  I: [
+    'Ingram',
+    'Irwin',
+    'Ibarra',
+    'Isaacson',
+  ],
+  J: [
+    'Johnson',
+    'Jones',
+    'Jackson',
+    'James',
+    'Jenkins',
+    'Jordan',
+  ],
+  K: [
+    'King',
+    'Kelly',
+    'Kennedy',
+    'Knight',
+    'Kim',
+  ],
+  L: [
+    'Lee',
+    'Lewis',
+    'Lopez',
+    'Long',
+    'Larson',
+    'Lawrence',
+  ],
+  M: [
+    'Miller',
+    'Martin',
+    'Moore',
+    'Martinez',
+    'Mitchell',
+    'Morgan',
+    'Myers',
+    'Murphy',
+  ],
+  N: [
+    'Nelson',
+    'Nguyen',
+    'Nichols',
+    'Norris',
+    'Newman',
+  ],
+  O: [
+    'Ortiz',
+    'Oliver',
+    'Owens',
+    'Osborne',
+    'Olson',
+  ],
+  P: [
+    'Perez',
+    'Parker',
+    'Phillips',
+    'Powell',
+    'Price',
+    'Peterson',
+  ],
   Q: [ 'Quinn', 'Quinlan', 'Quintero' ],
-  R: [ 'Robinson', 'Rodriguez', 'Rivera', 'Roberts', 'Ross', 'Reed', 'Ramirez' ],
-  S: [ 'Smith', 'Scott', 'Sanchez', 'Stewart', 'Sullivan', 'Sanders', 'Simmons' ],
-  T: [ 'Taylor', 'Thomas', 'Thompson', 'Turner', 'Torres', 'Tucker' ],
+  R: [
+    'Robinson',
+    'Rodriguez',
+    'Rivera',
+    'Roberts',
+    'Ross',
+    'Reed',
+    'Ramirez',
+  ],
+  S: [
+    'Smith',
+    'Scott',
+    'Sanchez',
+    'Stewart',
+    'Sullivan',
+    'Sanders',
+    'Simmons',
+  ],
+  T: [
+    'Taylor',
+    'Thomas',
+    'Thompson',
+    'Turner',
+    'Torres',
+    'Tucker',
+  ],
   U: [ 'Underwood', 'Upton', 'Ulrich' ],
-  V: [ 'Vasquez', 'Vaughn', 'Vargas', 'Vega' ],
-  W: [ 'Williams', 'Walker', 'White', 'Wilson', 'Wright', 'Watson' ],
+  V: [
+    'Vasquez',
+    'Vaughn',
+    'Vargas',
+    'Vega',
+  ],
+  W: [
+    'Williams',
+    'Walker',
+    'White',
+    'Wilson',
+    'Wright',
+    'Watson',
+  ],
   X: [ 'Xu', 'Xiong', 'Xiao' ],
   Y: [ 'Young', 'Yates', 'Yang' ],
-  Z: [ 'Zimmerman', 'Zhou', 'Zamora', 'Zhang' ],
+  Z: [
+    'Zimmerman',
+    'Zhou',
+    'Zamora',
+    'Zhang',
+  ],
 };
-const DEPARTMENTS = [ 'Engineering', 'Product Design', 'Growth Marketing', 'Enterprise Sales', 'Customer Success', 'Legal & Compliance', 'Finance & Operations', 'Human Resources', 'Global Support' ];
-const COUNTRIES = [ 'United States', 'Canada', 'United Kingdom', 'Germany', 'France', 'Japan', 'Australia', 'Brazil', 'India', 'China', 'Italy', 'Spain', 'Mexico', 'South Korea', 'Netherlands', 'Switzerland', 'Sweden', 'Norway', 'Singapore', 'New Zealand', 'South Africa', 'Argentina', 'Egypt', 'Turkey', 'Saudi Arabia', 'United Arab Emirates' ];
-const CITIES = [ 'Metropolis', 'Valoria', 'Oakhaven', 'Riverbend', 'Nova Crest', 'Beacon Hills', 'Sunnydale', 'Emerald Gates' ];
-const MONTHS = [ 'January 2026', 'February 2026', 'March 2026', 'April 2026', 'May 2026', 'June 2026' ];
-const MERCHANTS = [ 'AWS Cloud Billing', 'Vercel Enterprise', 'Google APIs', 'Stripe Gateway', 'Figma Pro Suite', 'Auth0 Auth Server', 'Slack Comms Hub', 'MongoDB Shard Pool' ];
-const CONCEPTS = [ 'Neural Networks', 'Quantum Mechanics', 'Consensus Protocol', 'Distributed Virtualization', 'Bio-Synthetic CRISPR', 'Superconducting Fields' ] as const;
+const DEPARTMENTS = [
+  'Engineering',
+  'Product Design',
+  'Growth Marketing',
+  'Enterprise Sales',
+  'Customer Success',
+  'Legal & Compliance',
+  'Finance & Operations',
+  'Human Resources',
+  'Global Support',
+];
+const COUNTRIES = [
+  'United States',
+  'Canada',
+  'United Kingdom',
+  'Germany',
+  'France',
+  'Japan',
+  'Australia',
+  'Brazil',
+  'India',
+  'China',
+  'Italy',
+  'Spain',
+  'Mexico',
+  'South Korea',
+  'Netherlands',
+  'Switzerland',
+  'Sweden',
+  'Norway',
+  'Singapore',
+  'New Zealand',
+  'South Africa',
+  'Argentina',
+  'Egypt',
+  'Turkey',
+  'Saudi Arabia',
+  'United Arab Emirates',
+];
+const CITIES = [
+  'Metropolis',
+  'Valoria',
+  'Oakhaven',
+  'Riverbend',
+  'Nova Crest',
+  'Beacon Hills',
+  'Sunnydale',
+  'Emerald Gates',
+];
+const MONTHS = [
+  'January 2026',
+  'February 2026',
+  'March 2026',
+  'April 2026',
+  'May 2026',
+  'June 2026',
+];
+const MERCHANTS = [
+  'AWS Cloud Billing',
+  'Vercel Enterprise',
+  'Google APIs',
+  'Stripe Gateway',
+  'Figma Pro Suite',
+  'Auth0 Auth Server',
+  'Slack Comms Hub',
+  'MongoDB Shard Pool',
+];
+const CONCEPTS = [
+  'Neural Networks',
+  'Quantum Mechanics',
+  'Consensus Protocol',
+  'Distributed Virtualization',
+  'Bio-Synthetic CRISPR',
+  'Superconducting Fields',
+] as const;
 const WIKI_ENTRIES: Record<typeof CONCEPTS[ number ], readonly string[]> = {
-  'Neural Networks': [ 'Backpropagation', 'Activation Functions', 'Gradient Descent', 'Convolutional Layers', 'Attention Mechanisms', 'Embedding Spaces', 'Regularization', 'Transformer Stacks' ],
-  'Quantum Mechanics': [ 'Wave Function Collapse', 'Superposition', 'Entanglement', 'Uncertainty Principle', 'Quantum Tunneling', 'Spin States', 'Interference Patterns', 'Measurement Operators' ],
-  'Consensus Protocol': [ 'Byzantine Fault Tolerance', 'Leader Election', 'Proof of Stake', 'Quorum Sizing', 'Finality Gadgets', 'Fork Choice Rules', 'Gossip Propagation', 'State Machine Replication' ],
-  'Distributed Virtualization': [ 'Fenwick Tree Indexing', 'Coordinate Scaling', 'Viewport Recycling', 'Sticky Section Pinning', 'Range Recalculation', 'Buffer Windows', 'Incremental Measurement', 'Scroll Restoration' ],
-  'Bio-Synthetic CRISPR': [ 'Guide RNA Design', 'Cas9 Cleavage', 'Off-Target Scoring', 'Homology-Directed Repair', 'Base Editing', 'Prime Editing', 'Delivery Vectors', 'Gene Drive Containment' ],
-  'Superconducting Fields': [ 'Meissner Effect', 'Flux Pinning', 'Josephson Junctions', 'Critical Temperature', 'Cooper Pairs', 'Type-II Vortices', 'Magnetic Levitation', 'Cryogenic Cooling' ],
+  'Neural Networks': [
+    'Backpropagation',
+    'Activation Functions',
+    'Gradient Descent',
+    'Convolutional Layers',
+    'Attention Mechanisms',
+    'Embedding Spaces',
+    'Regularization',
+    'Transformer Stacks',
+  ],
+  'Quantum Mechanics': [
+    'Wave Function Collapse',
+    'Superposition',
+    'Entanglement',
+    'Uncertainty Principle',
+    'Quantum Tunneling',
+    'Spin States',
+    'Interference Patterns',
+    'Measurement Operators',
+  ],
+  'Consensus Protocol': [
+    'Byzantine Fault Tolerance',
+    'Leader Election',
+    'Proof of Stake',
+    'Quorum Sizing',
+    'Finality Gadgets',
+    'Fork Choice Rules',
+    'Gossip Propagation',
+    'State Machine Replication',
+  ],
+  'Distributed Virtualization': [
+    'Fenwick Tree Indexing',
+    'Coordinate Scaling',
+    'Viewport Recycling',
+    'Sticky Section Pinning',
+    'Range Recalculation',
+    'Buffer Windows',
+    'Incremental Measurement',
+    'Scroll Restoration',
+  ],
+  'Bio-Synthetic CRISPR': [
+    'Guide RNA Design',
+    'Cas9 Cleavage',
+    'Off-Target Scoring',
+    'Homology-Directed Repair',
+    'Base Editing',
+    'Prime Editing',
+    'Delivery Vectors',
+    'Gene Drive Containment',
+  ],
+  'Superconducting Fields': [
+    'Meissner Effect',
+    'Flux Pinning',
+    'Josephson Junctions',
+    'Critical Temperature',
+    'Cooper Pairs',
+    'Type-II Vortices',
+    'Magnetic Levitation',
+    'Cryogenic Cooling',
+  ],
 };
-const WIKI_KINDS = [ 'Definition', 'Theorem', 'Proof', 'Lemma', 'Corollary', 'Postulate', 'Conjecture' ] as const;
+const WIKI_KINDS = [
+  'Definition',
+  'Theorem',
+  'Proof',
+  'Lemma',
+  'Corollary',
+  'Postulate',
+  'Conjecture',
+] as const;
 const WIKI_TEXTS = [
   'A brief introductory text node providing a simple overview of this dynamic topic to verify ResizeObserver is watching.',
   'Medium detailed research node explaining key historical milestones, current production viability, structural challenges, and real-time computation metrics. Provides an intermediate element height variance to test virtual calculations.',
@@ -152,7 +450,9 @@ function generateDataset(dataset: DatasetId, count: number): { items: DataItem[]
           name,
           sub: `${ fName.toLowerCase() }.${ lName.toLowerCase() }@enterprise.org`,
           meta: pick(DEPARTMENTS, random),
-          status: random() > 0.3 ? 'active' : 'dormant',
+          status: random() > 0.3
+            ? 'active'
+            : 'dormant',
           rowExtra: description,
           extra: description,
         });
@@ -173,9 +473,13 @@ function generateDataset(dataset: DatasetId, count: number): { items: DataItem[]
         items.push({
           id: `city-${ s }-${ j }`,
           name: city,
-          sub: `${ country } · GMT ${ random() > 0.5 ? '+' : '-' }${ Math.floor(random() * 12) }`,
+          sub: `${ country } · GMT ${ random() > 0.5
+            ? '+'
+            : '-' }${ Math.floor(random() * 12) }`,
           meta: formatNumber(Math.floor(random() * 9_500_000) + 45_000),
-          status: random() > 0.15 ? 'active' : 'dormant',
+          status: random() > 0.15
+            ? 'active'
+            : 'dormant',
           rowExtra: description,
           extra: description,
         });
@@ -197,7 +501,9 @@ function generateDataset(dataset: DatasetId, count: number): { items: DataItem[]
           name: merchant,
           sub: `TXID: 0x${ Math.floor(random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0') }`,
           meta: `$${ formatNumber(Math.round((random() * 9_500 + 15) * 100) / 100) }`,
-          status: random() > 0.05 ? 'active' : 'dormant',
+          status: random() > 0.05
+            ? 'active'
+            : 'dormant',
           rowExtra: description,
           extra: description,
         });
@@ -224,7 +530,9 @@ function generateDataset(dataset: DatasetId, count: number): { items: DataItem[]
           meta: `Delta ${ (random() * 100).toFixed(1) }%`,
           rowExtra: text,
           extra: text,
-          status: random() > 0.2 ? 'active' : 'dormant',
+          status: random() > 0.2
+            ? 'active'
+            : 'dormant',
         });
       }
       header.count = n;
@@ -294,7 +602,9 @@ const display = computed(() => {
       sticky.push(currentHeaderIndex);
       items.push(currentHeader);
     }
-    const header = currentHeaderIndex === -1 ? null : items[ currentHeaderIndex ];
+    const header = currentHeaderIndex === -1
+      ? null
+      : items[ currentHeaderIndex ];
     if (header) {
       header.count = (header.count ?? 0) + 1;
     }
@@ -316,7 +626,9 @@ const stuckHeader = computed(() => {
       break;
     }
   }
-  return found === -1 ? 'None' : (displayItems.value[ found ]?.name ?? 'None');
+  return found === -1
+    ? 'None'
+    : (displayItems.value[ found ]?.name ?? 'None');
 });
 const sectionOptions = computed(() => {
   const result: { name: string; index: number; }[] = [];

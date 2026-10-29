@@ -109,7 +109,9 @@ export function getPaddingX(p?: number | { x?: number; y?: number; } | null, dir
   if (typeof p === 'object' && p !== null) {
     return p.x || 0;
   }
-  return (direction === 'horizontal' || direction === 'both') ? (p || 0) : 0;
+  return (direction === 'horizontal' || direction === 'both')
+    ? (p || 0)
+    : 0;
 }
 
 /**
@@ -123,5 +125,7 @@ export function getPaddingY(p?: number | { x?: number; y?: number; } | null, dir
   if (typeof p === 'object' && p !== null) {
     return p.y || 0;
   }
-  return (direction === 'vertical' || direction === 'both') ? (p || 0) : 0;
+  return (direction === 'vertical' || direction === 'both')
+    ? (p || 0)
+    : 0;
 }

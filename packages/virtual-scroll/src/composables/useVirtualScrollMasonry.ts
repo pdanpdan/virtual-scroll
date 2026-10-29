@@ -35,7 +35,13 @@ function resolveScrollOptions(options?: ScrollAlignment | ScrollAlignmentOptions
     return { align: requested, behavior, dryRun };
   }
   if (requested) {
-    return { align: typeof requested.y === 'string' ? requested.y : 'auto', behavior, dryRun };
+    return {
+      align: typeof requested.y === 'string'
+        ? requested.y
+        : 'auto',
+      behavior,
+      dryRun,
+    };
   }
   return { align: opts.y ?? 'auto', behavior, dryRun };
 }
@@ -188,7 +194,9 @@ export function useVirtualScrollMasonry<T>(
   /** Oracle height for an index at a width, with the finite-positive fallback. */
   function resolveOracleHeight(index: number, width: number): number {
     const raw = props.value.itemHeight(props.value.items[ index ], index, width);
-    return Math.max(1, Number.isFinite(raw) ? raw : DEFAULT_ITEM_SIZE);
+    return Math.max(1, Number.isFinite(raw)
+      ? raw
+      : DEFAULT_ITEM_SIZE);
   }
 
   /** Height used by the layout: the measured override when present, else the oracle. */
@@ -289,7 +297,9 @@ export function useVirtualScrollMasonry<T>(
       isProgrammaticScroll.value = false;
       pending = null;
       scheduleScrollEnd();
-    }, behavior === 'smooth' ? PROGRAMMATIC_SMOOTH_DELAY : SCROLL_END_DELAY);
+    }, behavior === 'smooth'
+      ? PROGRAMMATIC_SMOOTH_DELAY
+      : SCROLL_END_DELAY);
     // behavior 'auto' fires a scroll event right away; 'smooth' streams events
     // while animating - both keep scrollY in sync through handleScroll.
     const target = Math.max(0, y);
@@ -393,7 +403,9 @@ export function useVirtualScrollMasonry<T>(
   /** Detect frontier-chain progress and invalidate everything derived from it. */
   function noteChainProgress(): void {
     const l = layout.value;
-    const reach = l ? l.frontierReach : -1;
+    const reach = l
+      ? l.frontierReach
+      : -1;
     const base = l ? l.frontierBase : 0;
     if (reach !== lastReach || base !== lastBase) {
       lastReach = reach;
@@ -428,7 +440,10 @@ export function useVirtualScrollMasonry<T>(
     const line = scrollY.value;
     const cards = renderedCards.value;
     if (cards.length === 0) {
-      return { kind: 'end', gap: Math.max(0, maxScrollHeight(l) - line) };
+      return {
+        kind: 'end',
+        gap: Math.max(0, maxScrollHeight(l) - line),
+      };
     }
     let straddle: MasonryRenderedItem<T> | null = null;
     let below: MasonryRenderedItem<T> | null = null;
@@ -449,7 +464,10 @@ export function useVirtualScrollMasonry<T>(
     if (below) {
       return { kind: 'card', index: below.index, delta: line - below.y };
     }
-    return { kind: 'end', gap: Math.max(0, maxScrollHeight(l) - line) };
+    return {
+      kind: 'end',
+      gap: Math.max(0, maxScrollHeight(l) - line),
+    };
     // v8 ignore stop
   }
 
@@ -461,7 +479,10 @@ export function useVirtualScrollMasonry<T>(
       return { height: 0, exact: true };
     }
     const t = l.totalHeight();
-    return { height: Math.max(0, t.height), exact: t.exact };
+    return {
+      height: Math.max(0, t.height),
+      exact: t.exact,
+    };
   });
 
   const totalHeight = computed(() => totalMetrics.value.height);
@@ -476,8 +497,12 @@ export function useVirtualScrollMasonry<T>(
     const vh = viewportHeight.value;
     // Every rendered card intersects the viewport window by construction, so
     // the visible span is the first and last rendered index.
-    const currentIndex = cards.length > 0 ? cards[ 0 ]!.index : 0;
-    const currentEndIndex = cards.length > 0 ? cards[ cards.length - 1 ]!.index : 0;
+    const currentIndex = cards.length > 0
+      ? cards[ 0 ]!.index
+      : 0;
+    const currentEndIndex = cards.length > 0
+      ? cards[ cards.length - 1 ]!.index
+      : 0;
     return {
       items: cards,
       currentIndex,
@@ -491,8 +516,15 @@ export function useVirtualScrollMasonry<T>(
       totalSize: { width: vw, height: totalMetrics.value.height },
       isScrolling: isScrolling.value,
       isProgrammaticScroll: isProgrammaticScroll.value,
-      range: cards.length > 0 ? { start: cards[ 0 ]!.index, end: cards[ cards.length - 1 ]!.index + 1 } : { start: 0, end: 0 },
-      columnRange: { start: 0, end: Math.max(0, columns.value), padStart: 0, padEnd: 0 },
+      range: cards.length > 0
+        ? { start: cards[ 0 ]!.index, end: cards[ cards.length - 1 ]!.index + 1 }
+        : { start: 0, end: 0 },
+      columnRange: {
+        start: 0,
+        end: Math.max(0, columns.value),
+        padStart: 0,
+        padEnd: 0,
+      },
     };
   });
 
@@ -593,10 +625,15 @@ export function useVirtualScrollMasonry<T>(
     } else {
       const edge = resolved.align === 'center'
         ? (vh - placed.height) / 2
-        : resolved.align === 'end' ? vh - placed.height : 0;
+        : resolved.align === 'end'
+          ? vh - placed.height
+          : 0;
       target = cardY - Math.max(0, edge);
     }
-    return { target: Math.max(0, Math.min(target, maxScrollHeight(l))), resolved };
+    return {
+      target: Math.max(0, Math.min(target, maxScrollHeight(l))),
+      resolved,
+    };
   }
 
   function scrollToIndex(index?: number | null, options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions): ScrollToIndexResult {
@@ -630,7 +667,11 @@ export function useVirtualScrollMasonry<T>(
     }
     const max = maxScrollHeight(l);
     const endIntent = !Number.isFinite(offset) && offset > 0;
-    const target = Math.max(0, Math.min(Number.isFinite(offset) ? offset : (offset > 0 ? max : 0), max));
+    const target = Math.max(0, Math.min(Number.isFinite(offset)
+      ? offset
+      : (offset > 0
+        ? max
+        : 0), max));
     pending = { kind: 'offset', offset: target, endIntent };
     performScroll(target, options?.behavior ?? 'auto');
   }
@@ -727,7 +768,12 @@ export function useVirtualScrollMasonry<T>(
   // Watch geometry/dataset changes: resize the frontier chain in place
   // (re-anchoring the content) or recreate the layout when its shape changed.
   watch(
-    () => [ geometry.value, props.value.items, resolvedGap.value, resolvedSegmentSize.value ],
+    () => [
+      geometry.value,
+      props.value.items,
+      resolvedGap.value,
+      resolvedSegmentSize.value,
+    ],
     () => {
       syncLayout();
     },

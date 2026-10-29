@@ -23,7 +23,12 @@ function makeItems(count: number): number[] {
 function parseTranslate(el: Element): { x: number; y: number; } {
   const transform = el.getAttribute('style') ?? '';
   const match = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(transform);
-  return match ? { x: Number(match[ 1 ]), y: Number(match[ 2 ]) } : { x: 0, y: 0 };
+  return match
+    ? {
+      x: Number(match[ 1 ]),
+      y: Number(match[ 2 ]),
+    }
+    : { x: 0, y: 0 };
 }
 
 /** Brute-force greedy reference for the measured-mode assertions. */
@@ -46,7 +51,10 @@ function greedyReference(
     y[ i ] = tops[ best ]!;
     tops[ best ] = tops[ best ]! + heightOf(i) + gap;
   }
-  return { y: Array.from(y), total: Math.max(...Array.from(tops)) };
+  return {
+    y: Array.from(y),
+    total: Math.max(...Array.from(tops)),
+  };
 }
 
 /** Loose component type: masonry props carry functions, so skip per-prop inference. */
@@ -124,7 +132,9 @@ describe('virtualScrollMasonry', () => {
     triggerResize(first.element, 245, 400);
     await nextTick();
     await nextTick();
-    const ref = greedyReference(500, 2, 245, 10, (i) => (i === 0 ? 400 : 100));
+    const ref = greedyReference(500, 2, 245, 10, (i) => (i === 0
+      ? 400
+      : 100));
     expect(vm.totalHeight).toBeCloseTo(ref.total, 4);
     expect(parseTranslate(cardOf(4).element).y).toBeCloseTo(ref.y[ 4 ]!, 4);
     expect(parseTranslate(cardOf(2).element).y).toBeCloseTo(ref.y[ 2 ]!, 4);
@@ -143,15 +153,19 @@ describe('virtualScrollMasonry', () => {
     Object.defineProperty(first.element, 'offsetHeight', { configurable: true, value: 600 });
     const measureObserver = observers.find((o) => o.targets.has(first.element))!;
     expect(measureObserver).toBeDefined();
-    measureObserver.callback([ {
-      target: first.element,
-      contentRect: { height: 5, width: 245 },
-      borderBoxSize: [],
-    } as unknown as ResizeObserverEntry ], measureObserver as unknown as ResizeObserver);
+    measureObserver.callback([
+      {
+        target: first.element,
+        contentRect: { height: 5, width: 245 },
+        borderBoxSize: [],
+      } as unknown as ResizeObserverEntry,
+    ], measureObserver as unknown as ResizeObserver);
     await nextTick();
     await nextTick();
 
-    const ref = greedyReference(300, 2, 245, 10, (i) => (i === 0 ? 600 : 100));
+    const ref = greedyReference(300, 2, 245, 10, (i) => (i === 0
+      ? 600
+      : 100));
     expect(vm.totalHeight).toBeCloseTo(ref.total, 4);
     expect(parseTranslate(wrapper.find('[data-index="4"]').element).y).toBeCloseTo(ref.y[ 4 ]!, 4);
     wrapper.unmount();
@@ -170,20 +184,26 @@ describe('virtualScrollMasonry', () => {
     // A target without a dataset index.
     const bare = document.createElement('div');
     measureObserver.observe(bare);
-    measureObserver.callback([ {
-      target: bare,
-      contentRect: { height: 300, width: 245 },
-      borderBoxSize: [ { blockSize: 300, inlineSize: 245 } ],
-    } as unknown as ResizeObserverEntry ], measureObserver as unknown as ResizeObserver);
+    measureObserver.callback([
+      {
+        target: bare,
+        contentRect: { height: 300, width: 245 },
+        borderBoxSize: [
+          { blockSize: 300, inlineSize: 245 },
+        ],
+      } as unknown as ResizeObserverEntry,
+    ], measureObserver as unknown as ResizeObserver);
     await nextTick();
     expect(vm.totalHeight).toBe(totalBefore);
     // A measured card whose box is not a finite number.
     Object.defineProperty(first.element, 'offsetHeight', { configurable: true, value: Number.NaN });
-    measureObserver.callback([ {
-      target: first.element,
-      contentRect: { height: Number.NaN, width: 245 },
-      borderBoxSize: [],
-    } as unknown as ResizeObserverEntry ], measureObserver as unknown as ResizeObserver);
+    measureObserver.callback([
+      {
+        target: first.element,
+        contentRect: { height: Number.NaN, width: 245 },
+        borderBoxSize: [],
+      } as unknown as ResizeObserverEntry,
+    ], measureObserver as unknown as ResizeObserver);
     await nextTick();
     expect(vm.totalHeight).toBe(totalBefore);
     wrapper.unmount();
@@ -267,7 +287,9 @@ describe('virtualScrollMasonry', () => {
     expect(wrapper.findAll('.virtual-scroll-item')).toHaveLength(0);
     expect(wrapper.find('.virtual-scroll-wrapper').attributes('style')).toContain('block-size: 0px');
 
-    await wrapper.setProps({ items: makeItems(200) });
+    await wrapper.setProps({
+      items: makeItems(200),
+    });
     await nextTick();
     await nextTick();
     const items = wrapper.findAll('.virtual-scroll-item');
@@ -290,7 +312,11 @@ describe('virtualScrollMasonry', () => {
 
     // Find the straddling card in the DOM (max-y straddler, like the composable).
     const straddler = wrapper.findAll('.virtual-scroll-item')
-      .map((item) => ({ el: item.element, index: Number(item.attributes('data-index')), y: parseTranslate(item.element).y }))
+      .map((item) => ({
+        el: item.element,
+        index: Number(item.attributes('data-index')),
+        y: parseTranslate(item.element).y,
+      }))
       .filter((card) => card.y <= line)
       .sort((a, b) => b.y - a.y)[ 0 ];
     expect(straddler).toBeDefined();
@@ -303,7 +329,10 @@ describe('virtualScrollMasonry', () => {
     await nextTick();
 
     const after = wrapper.findAll('.virtual-scroll-item')
-      .map((item) => ({ index: Number(item.attributes('data-index')), y: parseTranslate(item.element).y }))
+      .map((item) => ({
+        index: Number(item.attributes('data-index')),
+        y: parseTranslate(item.element).y,
+      }))
       .find((card) => card.index === straddler!.index);
     expect(after).toBeDefined();
     // Same card, same screen delta: the container scroll snapped to the anchor.
@@ -354,7 +383,10 @@ describe('virtualScrollMasonry', () => {
     expect(top).toBeGreaterThan(staleMax);
     const cards = wrapper.findAll('.virtual-scroll-item').map((item) => {
       const style = item.attributes('style') ?? '';
-      return { y: parseTranslate(item.element).y, height: Number(/height: ([\d.]+)px/.exec(style)?.[ 1 ] ?? '0') };
+      return {
+        y: parseTranslate(item.element).y,
+        height: Number(/height: ([\d.]+)px/.exec(style)?.[ 1 ] ?? '0'),
+      };
     });
     expect(cards.some((card) => card.y <= top && card.y + card.height > top)).toBe(true);
     wrapper.unmount();
@@ -525,7 +557,12 @@ describe('virtualScrollMasonry', () => {
   });
 
   it('maps tree, menu, grid and listbox wrapper roles to their child roles', async () => {
-    for (const [ role, childRole ] of [ [ 'tree', 'treeitem' ], [ 'menu', 'menuitem' ], [ 'grid', 'row' ], [ 'listbox', 'option' ] ] as const) {
+    for (const [ role, childRole ] of [
+      [ 'tree', 'treeitem' ],
+      [ 'menu', 'menuitem' ],
+      [ 'grid', 'row' ],
+      [ 'listbox', 'option' ],
+    ] as const) {
       const wrapper = mount(MasonryAny, {
         props: {
           items: makeItems(60),

@@ -54,8 +54,16 @@ function startDevServer(): Promise<void> {
   const env = { ...process.env };
   delete env.FORCE_COLOR;
   delete env.NO_COLOR;
-  const bin = path.join(ROOT_DIR, 'node_modules', '.bin', process.platform === 'win32' ? 'vike.cmd' : 'vike');
-  serverProcess = spawn(bin, [ 'dev', '--host', '127.0.0.1', '--port', String(PORT) ], {
+  const bin = path.join(ROOT_DIR, 'node_modules', '.bin', process.platform === 'win32'
+    ? 'vike.cmd'
+    : 'vike');
+  serverProcess = spawn(bin, [
+    'dev',
+    '--host',
+    '127.0.0.1',
+    '--port',
+    String(PORT),
+  ], {
     cwd: ROOT_DIR,
     env,
     stdio: [ 'ignore', 'pipe', 'pipe' ],
@@ -110,12 +118,16 @@ function getRoutes(): string[] {
   // vike serves routes with a trailing slash (trailingSlash: true), matching the app's own normalizeHref
   return fs.readdirSync(PAGES_DIR, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(PAGES_DIR, entry.name, '+Page.vue')))
-    .map((entry) => (entry.name === 'index' ? '/' : `/${ entry.name }/`))
+    .map((entry) => (entry.name === 'index'
+      ? '/'
+      : `/${ entry.name }/`))
     .sort();
 }
 
 function resolveRoute(route: string): string {
-  return route === '/' ? appBase : `${ appBase }${ route.slice(1) }`;
+  return route === '/'
+    ? appBase
+    : `${ appBase }${ route.slice(1) }`;
 }
 
 // The playground is served under its GitHub Pages base (e.g. /virtual-scroll/),
@@ -125,7 +137,9 @@ async function discoverAppBase(): Promise<void> {
   const location = response.headers.get('location');
   if (location) {
     const pathname = new URL(location, BASE_URL).pathname;
-    appBase = pathname.endsWith('/') ? pathname : `${ pathname }/`;
+    appBase = pathname.endsWith('/')
+      ? pathname
+      : `${ pathname }/`;
   }
 }
 
@@ -134,7 +148,9 @@ function captureConsoleProblems(page: Page): string[] {
   page.on('console', (message: ConsoleMessage) => {
     if (message.type() === 'error' || message.type() === 'warning') {
       const location = message.location();
-      problems.push(`[${ message.type() }] ${ message.text() }${ location.url ? ` (${ location.url })` : '' }`);
+      problems.push(`[${ message.type() }] ${ message.text() }${ location.url
+        ? ` (${ location.url })`
+        : '' }`);
     }
   });
   page.on('pageerror', (error: Error) => {

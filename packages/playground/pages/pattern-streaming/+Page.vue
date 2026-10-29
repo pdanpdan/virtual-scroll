@@ -21,8 +21,60 @@ const SYMBOL_COUNT = 5_000;
 const ROW_HEIGHT = 44;
 const SPARK_POINTS = 24;
 
-const TICKERS = [ 'AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'NFLX', 'AMD', 'INTC', 'CRM', 'ORCL', 'IBM', 'CSCO', 'QCOM', 'ADBE', 'PLTR', 'UBER', 'COIN', 'SHOP', 'SNOW', 'PANW', 'MRVL', 'MU' ];
-const NAMES = [ 'Alpha Works', 'Blue Ridge', 'Cascade Tech', 'Delta Systems', 'Evergreen Co', 'Falcon Labs', 'Glacier Soft', 'Harbor Inc', 'Iris Cloud', 'Juniper AI', 'Kepler Data', 'Lumen Grid', 'Meridian Pay', 'Northwind IO', 'Orbit Media', 'Pioneer Bio', 'Quartz Logic', 'Ridge Micro', 'Summit Bank', 'Titan Mobile', 'Ursa Energy', 'Vertex Games', 'Willow Health', 'Xeno Devices', 'Zenith Auto' ];
+const TICKERS = [
+  'AAPL',
+  'MSFT',
+  'NVDA',
+  'GOOGL',
+  'AMZN',
+  'META',
+  'TSLA',
+  'AVGO',
+  'NFLX',
+  'AMD',
+  'INTC',
+  'CRM',
+  'ORCL',
+  'IBM',
+  'CSCO',
+  'QCOM',
+  'ADBE',
+  'PLTR',
+  'UBER',
+  'COIN',
+  'SHOP',
+  'SNOW',
+  'PANW',
+  'MRVL',
+  'MU',
+];
+const NAMES = [
+  'Alpha Works',
+  'Blue Ridge',
+  'Cascade Tech',
+  'Delta Systems',
+  'Evergreen Co',
+  'Falcon Labs',
+  'Glacier Soft',
+  'Harbor Inc',
+  'Iris Cloud',
+  'Juniper AI',
+  'Kepler Data',
+  'Lumen Grid',
+  'Meridian Pay',
+  'Northwind IO',
+  'Orbit Media',
+  'Pioneer Bio',
+  'Quartz Logic',
+  'Ridge Micro',
+  'Summit Bank',
+  'Titan Mobile',
+  'Ursa Energy',
+  'Vertex Games',
+  'Willow Health',
+  'Xeno Devices',
+  'Zenith Auto',
+];
 
 /** Deterministic pseudo-random number in [0, 1) derived from `i` and `salt`. */
 function rnd(i: number, salt: number): number {
@@ -76,7 +128,9 @@ function sparkPath(i: number): string {
   return points.map((p, k) => {
     const x = (k / (points.length - 1)) * 100;
     const y = 26 - ((p - min) / range) * 22 - 2;
-    return `${ k === 0 ? 'M' : 'L' }${ x.toFixed(2) },${ y.toFixed(2) }`;
+    return `${ k === 0
+      ? 'M'
+      : 'L' }${ x.toFixed(2) },${ y.toFixed(2) }`;
   }).join(' ');
 }
 
@@ -116,7 +170,10 @@ function applyTick() {
     const drift = (rnd(i + tickCount.value * 7919, 17) - 0.5) * 0.012;
     const next = Math.max(1, Math.round(previous * (1 + drift) * 100) / 100);
     prices.set(i, next);
-    series.set(i, [ ...sparkOf(i).slice(1), next ]);
+    series.set(i, [
+      ...sparkOf(i).slice(1),
+      next,
+    ]);
   }
   tickCount.value++;
   lastUpdated.value = new Date().toLocaleTimeString();

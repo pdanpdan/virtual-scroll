@@ -23,9 +23,40 @@ const TOTAL_LINES = 200_000;
 const LINE_HEIGHT = 40;
 const BASE_TIME = Date.UTC(2026, 1, 3, 8, 0, 0);
 
-const SERVICES = [ 'AuthService', 'CacheWorker', 'OrderService', 'PaymentGateway', 'SearchIndex', 'SyncEngine', 'RateLimiter', 'EventBus', 'FileStore', 'QueueConsumer' ];
-const TOKENS = [ 'request', 'job', 'event', 'query', 'batch', 'session', 'payment', 'sync', 'upload', 'render', 'search', 'export' ];
-const ERROR_CAUSES = [ 'timeout', 'connection refused', 'invalid payload', 'rate limited', 'disk full', 'unexpected EOF' ];
+const SERVICES = [
+  'AuthService',
+  'CacheWorker',
+  'OrderService',
+  'PaymentGateway',
+  'SearchIndex',
+  'SyncEngine',
+  'RateLimiter',
+  'EventBus',
+  'FileStore',
+  'QueueConsumer',
+];
+const TOKENS = [
+  'request',
+  'job',
+  'event',
+  'query',
+  'batch',
+  'session',
+  'payment',
+  'sync',
+  'upload',
+  'render',
+  'search',
+  'export',
+];
+const ERROR_CAUSES = [
+  'timeout',
+  'connection refused',
+  'invalid payload',
+  'rate limited',
+  'disk full',
+  'unexpected EOF',
+];
 
 /** Deterministic pseudo-random number in [0, 1) derived from `i` and `salt`. */
 function rnd(i: number, salt: number): number {
@@ -62,7 +93,9 @@ function messageOf(i: number): string {
     case 'INFO':
       return `${ service }: completed ${ token } #${ id } in ${ 5 + (i % 250) }ms`;
     case 'DEBUG':
-      return `${ service }: cache ${ i % 2 === 0 ? 'hit' : 'miss' } for ${ token } #${ id } (${ (i * 13) % 100 } entries)`;
+      return `${ service }: cache ${ i % 2 === 0
+        ? 'hit'
+        : 'miss' } for ${ token } #${ id } (${ (i * 13) % 100 } entries)`;
     case 'WARN':
       return `${ service }: slow ${ token } #${ id } - took ${ 300 + (i % 700) }ms`;
     case 'ERROR':
@@ -79,7 +112,9 @@ function timeOf(i: number): string {
 
 /** Rows are hole-y in the unfiltered view and global log indices when filtered. */
 function rowIndexFor(item: unknown, index: number): number {
-  return typeof item === 'number' ? item : index;
+  return typeof item === 'number'
+    ? item
+    : index;
 }
 
 // Sparse placeholder for the unfiltered dataset: no per-line data is stored.

@@ -55,7 +55,12 @@ function imageUrl(item: GalleryItem, width: number): string {
 
 const masonryRef = ref<VirtualScrollMasonryInstance<GalleryItem> | null>(null);
 
-const stats = ref({ columns: 0, columnWidth: 0, totalHeight: 0, exact: false });
+const stats = ref({
+  columns: 0,
+  columnWidth: 0,
+  totalHeight: 0,
+  exact: false,
+});
 const scrollDetails = ref<MasonryScrollDetails<GalleryItem> | null>(null);
 
 // Per-card state lives model-side in plain sets; bumping a counter re-renders.
@@ -113,7 +118,11 @@ function schedulePrefetch() {
     if (!range || !(width > 0)) {
       return;
     }
-    const known = new Set([ ...prefetchedIds.value, ...loadedIds.value, ...failedIds.value ]);
+    const known = new Set([
+      ...prefetchedIds.value,
+      ...loadedIds.value,
+      ...failedIds.value,
+    ]);
     let issued = 0;
     for (let i = range.end; i <= range.end + PREFETCH_HORIZON && issued < PREFETCH_BATCH; i++) {
       const candidate = items.value[ i ];

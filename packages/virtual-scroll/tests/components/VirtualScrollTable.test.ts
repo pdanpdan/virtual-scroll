@@ -62,21 +62,29 @@ globalThis.ResizeObserver = class ResizeObserver {
 function triggerResize(el: Element, width: number, height: number, useBorderBox = true) {
   const obs = observers.find((o) => o.targets.has(el));
   if (obs) {
-    obs.callback([ {
-      ...(useBorderBox ? { borderBoxSize: [ { blockSize: height, inlineSize: width } ] } : {}),
-      contentRect: {
-        bottom: height,
-        height,
-        left: 0,
-        right: width,
-        toJSON: () => '',
-        top: 0,
-        width,
-        x: 0,
-        y: 0,
-      },
-      target: el,
-    } as unknown as ResizeObserverEntry ], obs);
+    obs.callback([
+      {
+        ...(useBorderBox
+          ? {
+            borderBoxSize: [
+              { blockSize: height, inlineSize: width },
+            ],
+          }
+          : {}),
+        contentRect: {
+          bottom: height,
+          height,
+          left: 0,
+          right: width,
+          toJSON: () => '',
+          top: 0,
+          width,
+          x: 0,
+          y: 0,
+        },
+        target: el,
+      } as unknown as ResizeObserverEntry,
+    ], obs);
   }
 }
 
@@ -116,7 +124,9 @@ describe('virtualScrollTable', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 0, writable: true });
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 500 });
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 500 });
-    vi.useFakeTimers({ toFake: [ 'requestAnimationFrame' ] });
+    vi.useFakeTimers({
+      toFake: [ 'requestAnimationFrame' ],
+    });
   });
 
   afterEach(() => {
@@ -142,7 +152,9 @@ describe('virtualScrollTable', () => {
       expect(container.attributes('aria-activedescendant')).toBe(`${ container.attributes('id') }-item-0`);
 
       await container.trigger('keydown', { key: 'Enter' });
-      expect(wrapper.emitted('itemActivate')).toEqual([ [ 0, mockItems[ 0 ] ] ]);
+      expect(wrapper.emitted('itemActivate')).toEqual([
+        [ 0, mockItems[ 0 ] ],
+      ]);
       wrapper.unmount();
     });
 
@@ -188,7 +200,9 @@ describe('virtualScrollTable', () => {
       const tdHeight = (spacer: typeof spacers[ number ]) => {
         const style = spacer.find('td')!.attributes('style') ?? '';
         const match = /block-size:\s*([\d.]+)px/.exec(style);
-        return match ? Number.parseFloat(match[ 1 ]!) : 0;
+        return match
+          ? Number.parseFloat(match[ 1 ]!)
+          : 0;
       };
       const top = tdHeight(spacers[ 0 ]!);
       const bottom = tdHeight(spacers[ 1 ]!);
@@ -251,7 +265,9 @@ describe('virtualScrollTable', () => {
       const tdHeight = (spacer: typeof spacers[ number ]) => {
         const style = spacer.find('td')!.attributes('style') ?? '';
         const match = /block-size:\s*([\d.]+)px/.exec(style);
-        return match ? Number.parseFloat(match[ 1 ]!) : 0;
+        return match
+          ? Number.parseFloat(match[ 1 ]!)
+          : 0;
       };
         // Header extent is normalized out: tbody content (spacers + rows)
         // still equals the plain item content height of 100 * 50.
@@ -299,7 +315,9 @@ describe('virtualScrollTable', () => {
       const tdHeight = (spacer: typeof spacers[ number ]) => {
         const style = spacer.find('td')!.attributes('style') ?? '';
         const match = /block-size:\s*([\d.]+)px/.exec(style);
-        return match ? Number.parseFloat(match[ 1 ]!) : 0;
+        return match
+          ? Number.parseFloat(match[ 1 ]!)
+          : 0;
       };
       const sum = tdHeight(spacers[ 0 ]!) + tdHeight(spacers[ 1 ]!) + wrapper.findAll('.virtual-scroll-item').length * 50;
       expect(sum).toBeCloseTo(5000, 0);
@@ -312,7 +330,9 @@ describe('virtualScrollTable', () => {
         { gap: 10 },
         { columnCount: 3 },
         { direction: 'horizontal' },
-        { stickyIndices: [ 0 ] },
+        {
+          stickyIndices: [ 0 ],
+        },
         { scrollPaddingStart: 20 },
       ];
       for (const extra of variants) {
@@ -384,7 +404,9 @@ describe('virtualScrollTable', () => {
         + spacers.reduce((acc, spacer) => {
           const style = spacer.find('td')!.attributes('style') ?? '';
           const match = /block-size:\s*([\d.]+)px/.exec(style);
-          return acc + (match ? Number.parseFloat(match[ 1 ]!) : 0);
+          return acc + (match
+            ? Number.parseFloat(match[ 1 ]!)
+            : 0);
         }, 0);
       expect(sum).toBeCloseTo(5000, 0);
       wrapper.unmount();
@@ -431,7 +453,17 @@ describe('virtualScrollTable', () => {
           return originalRect.call(this);
         }
         const width = cellWidths[ known ]!;
-        return { width, height: 10, top: 0, bottom: 10, left: 0, right: width, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+        return {
+          width,
+          height: 10,
+          top: 0,
+          bottom: 10,
+          left: 0,
+          right: width,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
       });
       const wrapper = mount(VirtualScrollTable, {
         props: {
@@ -561,8 +593,12 @@ describe('virtualScrollTable', () => {
           showFooter: true,
         },
         slots: {
-          header: () => h('tr', [ h('th', 'Header') ]),
-          footer: () => h('tr', [ h('td', 'Footer') ]),
+          header: () => h('tr', [
+            h('th', 'Header'),
+          ]),
+          footer: () => h('tr', [
+            h('td', 'Footer'),
+          ]),
         },
       });
 
@@ -591,8 +627,12 @@ describe('virtualScrollTable', () => {
           showFooter: true,
         },
         slots: {
-          header: () => h('tr', [ h('th', 'H') ]),
-          footer: () => h('tr', [ h('td', 'F') ]),
+          header: () => h('tr', [
+            h('th', 'H'),
+          ]),
+          footer: () => h('tr', [
+            h('td', 'F'),
+          ]),
         },
       });
       await nextTick();
@@ -702,7 +742,9 @@ describe('virtualScrollTable', () => {
         },
         slots: {
           loading: () => h('div', { class: 'loading' }, 'LOAD'),
-          item: () => h('tr', [ h('td', 'x') ]),
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
         },
       });
       await nextTick();
@@ -749,7 +791,11 @@ describe('virtualScrollTable', () => {
           itemSize: 50,
           flowTable: true,
         },
-        slots: { item: () => h('tr', [ h('td', 'x') ]) },
+        slots: {
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
+        },
       });
       await nextTick();
       await nextTick();
@@ -819,7 +865,11 @@ describe('virtualScrollTable', () => {
           gap: 4,
           virtualScrollbar: true,
         },
-        slots: { item: () => h('tr', [ h('td', 'x') ]) },
+        slots: {
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
+        },
       });
       const wrapperStyle = wrapper.find('.virtual-scroll-wrapper').attributes('style') ?? '';
       expect(wrapperStyle).toContain('row-gap');
@@ -873,7 +923,12 @@ describe('virtualScrollTable', () => {
       wrapper.unmount();
 
       const hw = mount(VirtualScrollTable, {
-        props: { direction: 'horizontal', items: mockItems, itemSize: 50, virtualScrollbar: true },
+        props: {
+          direction: 'horizontal',
+          items: mockItems,
+          itemSize: 50,
+          virtualScrollbar: true,
+        },
         slots: { scrollbar: slot },
       });
       await nextTick();
@@ -892,7 +947,9 @@ describe('virtualScrollTable', () => {
         props: { items: mockItems, itemSize: 50 },
         slots: {
           loading: () => h('div', { class: 'loading-slot', style: 'height: 30px' }, 'LOAD'),
-          item: () => h('tr', [ h('td', 'x') ]),
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
         },
       });
       await nextTick();
@@ -909,8 +966,14 @@ describe('virtualScrollTable', () => {
   describe('final branch coverage', () => {
     it('batches explicit size updates and measures the loading slot on End', async () => {
       const wrapper = mount(VirtualScrollTable, {
-        props: { items: mockItems.slice(0, 20) },
-        slots: { item: () => h('tr', [ h('td', 'x') ]) },
+        props: {
+          items: mockItems.slice(0, 20),
+        },
+        slots: {
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
+        },
       });
       await nextTick();
       await nextTick();
@@ -942,12 +1005,22 @@ describe('virtualScrollTable', () => {
     it('toggles scaling on the same host to re-register the wheel listener', async () => {
       const addSpy = vi.spyOn(HTMLElement.prototype, 'addEventListener');
       const wrapper = mount(VirtualScrollTable, {
-        props: { items: Array.from({ length: 20 }, (_, i) => ({ id: i })), itemSize: 50 },
-        slots: { item: () => h('tr', [ h('td', 'x') ]) },
+        props: {
+          items: Array.from({ length: 20 }, (_, i) => ({ id: i })),
+          itemSize: 50,
+        },
+        slots: {
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
+        },
       });
       await nextTick();
       addSpy.mockClear();
-      await wrapper.setProps({ items: Array.from({ length: 11000 }, (_, i) => ({ id: i })), itemSize: 1000 });
+      await wrapper.setProps({
+        items: Array.from({ length: 11000 }, (_, i) => ({ id: i })),
+        itemSize: 1000,
+      });
       await nextTick();
       await nextTick();
       const calls = addSpy.mock.calls.filter(([ type ]) => type === 'wheel');
@@ -965,7 +1038,11 @@ describe('virtualScrollTable', () => {
           itemRole: 'none',
           debug: true,
         },
-        slots: { item: () => h('tr', [ h('td', 'x') ]) },
+        slots: {
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
+        },
       });
       await nextTick();
       await nextTick();
@@ -985,7 +1062,11 @@ describe('virtualScrollTable', () => {
           flowTable: true,
           debug: true,
         },
-        slots: { item: () => h('tr', [ h('td', 'x') ]) },
+        slots: {
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
+        },
       });
       await nextTick();
       await nextTick();
@@ -1002,7 +1083,9 @@ describe('virtualScrollTable', () => {
         },
         slots: {
           loading: () => h('div', { class: 'loading-slot' }, 'LOAD'),
-          item: () => h('tr', [ h('td', 'x') ]),
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
         },
       });
       await nextTick();
@@ -1017,10 +1100,15 @@ describe('virtualScrollTable', () => {
 
     it('hides the loading indicator class while idle', async () => {
       const wrapper = mount(VirtualScrollTable, {
-        props: { items: mockItems.slice(0, 5), itemSize: 50 },
+        props: {
+          items: mockItems.slice(0, 5),
+          itemSize: 50,
+        },
         slots: {
           loading: () => h('div', { class: 'loading-slot' }, 'LOAD'),
-          item: () => h('tr', [ h('td', 'x') ]),
+          item: () => h('tr', [
+            h('td', 'x'),
+          ]),
         },
       });
       await nextTick();
@@ -1097,7 +1185,18 @@ describe('virtualScrollTable', () => {
       await nextTick();
 
       expect(wrapper.find('.virtual-scroll-flow-table').classes()).toContain('virtual-scroll--flow');
-      const heights = [ 40, 80, 40, 80, 40, 120, 40, 80, 40, 60 ];
+      const heights = [
+        40,
+        80,
+        40,
+        80,
+        40,
+        120,
+        40,
+        80,
+        40,
+        60,
+      ];
       vs.updateItemSizes(heights.map((blockSize, index) => ({ index, inlineSize: 100, blockSize })));
       await nextTick();
       await nextTick();

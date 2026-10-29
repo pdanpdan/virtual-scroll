@@ -96,7 +96,11 @@ describe('dynamic sizing & prepending', () => {
     expect(window.scrollY).toBe(250);
 
     // Prepend 2 items (100px)
-    props.value.items = [ { id: -1 }, { id: -2 }, ...items ];
+    props.value.items = [
+      { id: -1 },
+      { id: -2 },
+      ...items,
+    ];
 
     await nextTick();
     await nextTick();
@@ -173,7 +177,10 @@ describe('dynamic sizing & prepending', () => {
     document.dispatchEvent(new Event('scroll'));
     await nextTick();
 
-    props.value.items = [ { id: -1 }, ...items ];
+    props.value.items = [
+      { id: -1 },
+      ...items,
+    ];
     await nextTick();
     await nextTick();
 
@@ -197,7 +204,10 @@ describe('dynamic sizing & prepending', () => {
     await nextTick();
 
     // Prepend 1 item (50px)
-    props.value.items = [ { id: 1 }, ...items ];
+    props.value.items = [
+      { id: 1 },
+      ...items,
+    ];
     await nextTick();
     await nextTick();
     await nextTick();
@@ -223,7 +233,10 @@ describe('dynamic sizing & prepending', () => {
     await nextTick();
 
     // Add item at the end
-    props.value.items = [ ...items, { id: 100 } ];
+    props.value.items = [
+      ...items,
+      { id: 100 },
+    ];
     await nextTick();
     await nextTick();
 
@@ -245,7 +258,10 @@ describe('dynamic sizing & prepending', () => {
 
     // Prepend item: with no container, the scroll correction falls back to the window
     // and compensates the added 50px
-    props.value.items = [ { id: -1 }, ...items ];
+    props.value.items = [
+      { id: -1 },
+      ...items,
+    ];
     await nextTick();
     await nextTick();
     await nextTick();
@@ -270,7 +286,10 @@ describe('dynamic sizing & prepending', () => {
     await nextTick();
 
     // Prepend 1 item
-    props.value.items = [ { id: 1 }, ...items ];
+    props.value.items = [
+      { id: 1 },
+      ...items,
+    ];
     await nextTick();
     await nextTick();
     await nextTick();
@@ -285,7 +304,9 @@ describe('dynamic sizing & prepending', () => {
     const { props, wrapper } = setup({
       container: window,
       direction: 'vertical',
-      itemSize: (item: { id: number; }) => (item.id === 1 ? 0 : 50),
+      itemSize: (item: { id: number; }) => (item.id === 1
+        ? 0
+        : 50),
       items,
       restoreScrollOnPrepend: true,
       gap: 0,
@@ -301,7 +322,10 @@ describe('dynamic sizing & prepending', () => {
 
     // Prepend an item with a zero base size: the computed added size stays 0,
     // so no scroll correction must happen
-    props.value.items = [ { id: 1 }, ...items ];
+    props.value.items = [
+      { id: 1 },
+      ...items,
+    ];
     await nextTick();
     await nextTick();
     await nextTick();

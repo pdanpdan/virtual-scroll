@@ -23,7 +23,10 @@ const stickyHeader = ref(false);
 const stickyFooter = ref(false);
 const virtualScrollbar = ref(true);
 
-const columnWidths = computed(() => [ columnWidth.value, Math.ceil(columnWidth.value * 1.5) ]);
+const columnWidths = computed(() => [
+  columnWidth.value,
+  Math.ceil(columnWidth.value * 1.5),
+]);
 
 // Rows render purely from their index: the items array is a sparse placeholder
 // of the right length, so no per-row data is materialized even for 10M+ rows

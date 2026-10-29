@@ -28,7 +28,9 @@ function builtInExtensions<T>(): VirtualScrollExtension<T>[] {
     useRtlExtension<T>(),
     useSnappingExtension<T>(),
     useStickyExtension<T>(),
-    useInfiniteLoadingExtension<T>({ onLoad: () => {} }),
+    useInfiniteLoadingExtension<T>({
+      onLoad: () => {},
+    }),
     usePrependRestorationExtension<T>(),
     useCoordinateScalingExtension<T>(),
   ];
@@ -55,7 +57,9 @@ function expectWindowInvariants(
   label: string,
 ) {
   const { count, direction } = options;
-  const axis = direction === 'horizontal' ? 'x' : 'y' as const;
+  const axis = direction === 'horizontal'
+    ? 'x'
+    : 'y' as const;
   const items = result.renderedItems.value;
   const details = result.scrollDetails.value;
 
@@ -86,7 +90,9 @@ function expectWindowInvariants(
   // columns; in grid mode the window indexes rows. A leading inset puts the
   // viewport top before the first row, which the engine reports as -1 while
   // still rendering from the first row.
-  const visibleIndex = direction === 'horizontal' ? details.currentColIndex : details.currentIndex;
+  const visibleIndex = direction === 'horizontal'
+    ? details.currentColIndex
+    : details.currentIndex;
   expect(details.range.start, `${ label }: range start`).toBeGreaterThanOrEqual(0);
   expect(details.range.end, `${ label }: range end`).toBeLessThanOrEqual(count);
   if (visibleIndex === -1) {
@@ -114,7 +120,9 @@ function expectWindowInvariants(
   // Content size is finite, and the DOM boxes never exceed the browser limit.
   expect(Number.isFinite(details.totalSize.width), `${ label }: finite total width`).toBe(true);
   expect(Number.isFinite(details.totalSize.height), `${ label }: finite total height`).toBe(true);
-  expect(details.totalSize[ direction === 'horizontal' ? 'width' : 'height' ], `${ label }: content extent`)
+  expect(details.totalSize[ direction === 'horizontal'
+    ? 'width'
+    : 'height' ], `${ label }: content extent`)
     .toBeGreaterThan(0);
   expect(result.renderedWidth.value, `${ label }: rendered width inside the limit`)
     .toBeLessThanOrEqual(BROWSER_MAX_SIZE);
@@ -162,8 +170,14 @@ const DIRECTIONS: ScrollDirection[] = [ 'vertical', 'horizontal', 'both' ];
 /** 500px viewport over 50px rows. */
 const VISIBLE_ROWS = 10;
 const SIZINGS = [
-  { label: 'fixed size', props: { itemSize: 50 } },
-  { label: 'dynamic size', props: { itemSize: 0, defaultItemSize: 40 } },
+  {
+    label: 'fixed size',
+    props: { itemSize: 50 },
+  },
+  {
+    label: 'dynamic size',
+    props: { itemSize: 0, defaultItemSize: 40 },
+  },
 ] as const;
 
 describe('useVirtualScroll combinations', () => {
@@ -182,7 +196,10 @@ describe('useVirtualScroll combinations', () => {
     for (const direction of DIRECTIONS) {
       for (const sizing of SIZINGS) {
         for (const rtl of [ false, true ]) {
-          for (const pins of [ undefined, [ 0, 3 ] ] as const) {
+          for (const pins of [
+            undefined,
+            [ 0, 3 ],
+          ] as const) {
             const label = `${ direction } / ${ sizing.label } / ${ rtl ? 'rtl' : 'ltr' } / ${ pins ? 'pinned' : 'plain' }`;
 
             it(`renders and scrolls: ${ label }`, async () => {
@@ -198,8 +215,14 @@ describe('useVirtualScroll combinations', () => {
                 bufferBefore: 2,
                 bufferAfter: 2,
                 ...sizing.props,
-                ...(pins ? { stickyIndices: [ ...pins ] } : {}),
-                ...(direction === 'both' ? { columnCount: 4, columnWidth: 120 } : {}),
+                ...(pins
+                  ? {
+                    stickyIndices: [ ...pins ],
+                  }
+                  : {}),
+                ...(direction === 'both'
+                  ? { columnCount: 4, columnWidth: 120 }
+                  : {}),
               };
               const { result, wrapper } = setup(props, builtInExtensions<MockItem>());
               await nextTick();
@@ -208,7 +231,9 @@ describe('useVirtualScroll combinations', () => {
               expectWindowInvariants(result, {
                 count: mockItems.length,
                 direction,
-                ...(direction === 'both' ? { columns: 4 } : {}),
+                ...(direction === 'both'
+                  ? { columns: 4 }
+                  : {}),
               }, label);
               expectOffsetSteps(result, mockItems.length, 0, label);
               expect(result.isRtl.value, `${ label }: text direction`).toBe(rtl);
@@ -242,7 +267,9 @@ describe('useVirtualScroll combinations', () => {
               expectWindowInvariants(result, {
                 count: mockItems.length,
                 direction,
-                ...(direction === 'both' ? { columns: 4 } : {}),
+                ...(direction === 'both'
+                  ? { columns: 4 }
+                  : {}),
               }, `${ label } after scrollToIndex`);
 
               wrapper.unmount();
@@ -258,7 +285,9 @@ describe('useVirtualScroll combinations', () => {
     // combination must keep the window and the geometry coherent.
     for (let mask = 0; mask < 64; mask++) {
       const subset = builtInExtensions<MockItem>().filter((_, index) => (mask & (1 << index)) !== 0);
-      const label = subset.length > 0 ? subset.map((extension) => extension.name).join(' + ') : 'no extensions';
+      const label = subset.length > 0
+        ? subset.map((extension) => extension.name).join(' + ')
+        : 'no extensions';
 
       it(`stays coherent with ${ label }`, async () => {
         const { result, wrapper } = setup({
@@ -293,13 +322,22 @@ describe('useVirtualScroll combinations', () => {
 
   describe('grid columns and spacing', () => {
     const COLUMN_MODES = [
-      { label: 'fixed width', props: { columnWidth: 120 } },
-      { label: 'dynamic width', props: { columnWidth: 0, defaultColumnWidth: 80 } },
+      {
+        label: 'fixed width',
+        props: { columnWidth: 120 },
+      },
+      {
+        label: 'dynamic width',
+        props: { columnWidth: 0, defaultColumnWidth: 80 },
+      },
     ] as const;
 
     for (const columns of [ 1, 4, 7 ]) {
       for (const mode of COLUMN_MODES) {
-        for (const spacing of [ { gap: 0, columnGap: 0 }, { gap: 8, columnGap: 12 } ]) {
+        for (const spacing of [
+          { gap: 0, columnGap: 0 },
+          { gap: 8, columnGap: 12 },
+        ]) {
           const label = `${ columns } columns / ${ mode.label } / gap ${ spacing.gap } / columnGap ${ spacing.columnGap }`;
 
           it(`lays out a grid: ${ label }`, async () => {
@@ -369,10 +407,25 @@ describe('useVirtualScroll combinations', () => {
   describe('scroll padding, sticky and flow insets', () => {
     const INSETS = [
       { label: 'no insets', props: {} },
-      { label: 'scroll padding', props: { scrollPaddingStart: 24, scrollPaddingEnd: 16 } },
-      { label: 'per-axis scroll padding', props: { scrollPaddingStart: { x: 12, y: 30 }, scrollPaddingEnd: { x: 8, y: 20 } } },
-      { label: 'sticky insets', props: { stickyStart: 40, stickyEnd: 24 } },
-      { label: 'flow insets', props: { flowPaddingStart: 16, flowPaddingEnd: 32 } },
+      {
+        label: 'scroll padding',
+        props: { scrollPaddingStart: 24, scrollPaddingEnd: 16 },
+      },
+      {
+        label: 'per-axis scroll padding',
+        props: {
+          scrollPaddingStart: { x: 12, y: 30 },
+          scrollPaddingEnd: { x: 8, y: 20 },
+        },
+      },
+      {
+        label: 'sticky insets',
+        props: { stickyStart: 40, stickyEnd: 24 },
+      },
+      {
+        label: 'flow insets',
+        props: { flowPaddingStart: 16, flowPaddingEnd: 32 },
+      },
       {
         label: 'every inset at once',
         props: {
@@ -457,7 +510,11 @@ describe('useVirtualScroll combinations', () => {
     const hugeItems: MockItem[] = Array.from({ length: HUGE }, (_, i) => ({ id: i }));
 
     it('scales the display coordinates instead of the content', async () => {
-      const { result, wrapper } = setup({ container: makeContainer(), items: hugeItems, itemSize: 50 }, builtInExtensions<MockItem>());
+      const { result, wrapper } = setup({
+        container: makeContainer(),
+        items: hugeItems,
+        itemSize: 50,
+      }, builtInExtensions<MockItem>());
       await nextTick();
       await nextTick();
 
@@ -480,7 +537,12 @@ describe('useVirtualScroll combinations', () => {
     });
 
     it('scales a wide horizontal axis without clamping the virtual offset', async () => {
-      const { result, wrapper } = setup({ container: makeContainer(), direction: 'horizontal', items: hugeItems, itemSize: 50 }, builtInExtensions<MockItem>());
+      const { result, wrapper } = setup({
+        container: makeContainer(),
+        direction: 'horizontal',
+        items: hugeItems,
+        itemSize: 50,
+      }, builtInExtensions<MockItem>());
       await nextTick();
       await nextTick();
 
@@ -587,7 +649,9 @@ describe('useVirtualScroll combinations', () => {
           direction,
           items: mockItems,
           itemSize: 50,
-          ...(direction === 'both' ? { columnCount: 4, columnWidth: 120 } : {}),
+          ...(direction === 'both'
+            ? { columnCount: 4, columnWidth: 120 }
+            : {}),
         }, builtInExtensions<MockItem>());
         await nextTick();
         await nextTick();
