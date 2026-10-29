@@ -19,13 +19,13 @@ export const OURS_VERSION = '2.2.0';
 export const OURS_RELEASED = '2026-09-22';
 
 export const SIZES = {
-  oursFull: { min: 79.3, gz: 23.1 },
-  oursCore: { min: 61.1, gz: 17.7 },
-  oursComposable: { min: 33.9, gz: 10.8 },
-  oursHeadlessWired: { min: 42.2, gz: 13.7 },
-  oursEngineObservers: { min: 35.3, gz: 11.3 },
-  oursEngineObserversKeyboard: { min: 39.6, gz: 12.9 },
-  oursWired: { min: 50.7, gz: 16.4 },
+  oursFull: { min: 80.3, gz: 23.4 },
+  oursCore: { min: 62, gz: 18 },
+  oursComposable: { min: 34.1, gz: 10.9 },
+  oursHeadlessWired: { min: 42.5, gz: 13.8 },
+  oursEngineObservers: { min: 35.5, gz: 11.4 },
+  oursEngineObserversKeyboard: { min: 39.9, gz: 12.9 },
+  oursWired: { min: 51, gz: 16.5 },
   vvs: { min: 29, gz: 10.4 },
   tanstack: { min: 33.1, gz: 9.9 },
   virtua: { min: 9.8, gz: 4.7 },

@@ -104,7 +104,7 @@ const scenarios: Scenario[] = [
     imports: [ 'VirtualScrollTable' ],
     absent: [ 'masonry' ],
     present: [ 'table', 'sticky' ],
-    budget: [ 20, 26 ],
+    budget: [ 20, 27 ],
   },
   {
     name: 'VirtualScrollTable (core)',

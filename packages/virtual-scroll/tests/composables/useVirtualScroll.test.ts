@@ -1491,6 +1491,48 @@ describe('useVirtualScroll', () => {
     });
   });
 
+  describe('user input during a programmatic scroll', () => {
+    it('keeps a user scroll that interrupts a smooth scroll', async () => {
+      vi.useFakeTimers();
+      try {
+        const container = document.createElement('div');
+        Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+        Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+        const { result, wrapper, internalState } = setup({
+          container,
+          direction: 'vertical',
+          itemSize: 50,
+          items: mockItems,
+        });
+        await nextTick();
+
+        container.scrollTop = 1000;
+        container.dispatchEvent(new Event('scroll'));
+        await nextTick();
+        expect(internalState.internalScrollY.value).toBe(1000);
+
+        // The smooth scroll has not written anything yet.
+        container.scrollTo = vi.fn();
+        result.scrollToIndex(50, null, { align: 'start', behavior: 'smooth' });
+        await nextTick();
+
+        // The user drags back while the animation is in flight.
+        container.scrollTop = 500;
+        container.dispatchEvent(new Event('scroll'));
+        await nextTick();
+
+        vi.advanceTimersByTime(1500);
+        await nextTick();
+        await nextTick();
+
+        expect(internalState.internalScrollY.value).toBe(500);
+        wrapper.unmount();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   describe('items changes', () => {
     const makeContainer = () => {
       const container = document.createElement('div');

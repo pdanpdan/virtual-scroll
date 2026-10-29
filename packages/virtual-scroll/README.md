@@ -144,7 +144,7 @@ import '@pdanpdan/virtual-scroll/core/style.css';
 *   **Still included:** virtualization, dynamic measurement, RTL detection, coordinate scaling, inertia scrolling, ARIA roles, header/footer slots, the loading slot and SSR.
 *   **Accepted but ignored in this build:** `virtualScrollbar`, `snap`, `stickyIndices`, `loadDistance` and `restoreScrollOnPrepend` are kept in the type surface so a component can be swapped between the two entries, but they have no effect. `loading` still drives the `loading` slot and `aria-busy` - only the automatic threshold that emits `load` is gone. Import from the package root when you need any of the rest.
 
-A tree-shaken `<VirtualScroll>` is 18.4 KB gzipped from `./core` and 24.5 KB from the package root. `pnpm size` enforces those budgets; the comparison page reports both entries including the stylesheet (17.7 kB and 23.1 kB). `core/style.css` is smaller than the full stylesheet, and both entries ship the same types.
+A tree-shaken `<VirtualScroll>` is 18.7 KB gzipped from `./core` and 24.9 KB from the package root. `pnpm size` enforces those budgets; the comparison page reports both entries including the stylesheet (18.0 kB and 23.4 kB). `core/style.css` is smaller than the full stylesheet, and both entries ship the same types.
 
 ## Data-less Lists (Index-only Rows)
 
@@ -209,7 +209,7 @@ Rows are positioned with `translateY()` (or `translateX()` / `translate()`) from
 - **Uniform sizes:** a numeric `itemSize` / `columnWidth` is resolved arithmetically, with no per-row storage. Combined with data-less rows, memory stays flat at any list size.
 - **ResizeObserver:** mounted rows are measured when their size changes.
 - **Style isolation:** styles live in CSS `@layer`, and `contain: layout` limits layout work to the container.
-- **Bundle budgets:** `pnpm size` builds every published entry and one tree-shaken bundle per import scenario, then fails when an unused feature survives or an entry exceeds its gzipped budget (currently `<VirtualScroll>` 24.5 KB, `./core` 18.4 KB, headless `useVirtualScroll` 11.9 KB, `VirtualScrollTable` 25.8 KB, `./core` `VirtualScrollTable` 21.1 KB, `VirtualScrollMasonry` 7.8 KB).
+- **Bundle budgets:** `pnpm size` builds every published entry and one tree-shaken bundle per import scenario, then fails when an unused feature survives or an entry exceeds its gzipped budget (currently `<VirtualScroll>` 24.9 KB, `./core` 18.7 KB, headless `useVirtualScroll` 12.0 KB, `VirtualScrollTable` 26.1 KB, `./core` `VirtualScrollTable` 21.4 KB, `VirtualScrollMasonry` 7.8 KB).
 
 ## Key Features
 
@@ -565,7 +565,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 #### Methods
 - `setActiveIndex(index)`: Sets the active item without scrolling (`null` clears it), for syncing a click or an external selection.
 - `handleItemActivate(index)`: Marks an item active and emits `itemActivate`.
-- `scrollToIndex(row, col, options)`: Programmatic scroll to index. An end-anchored scroll (last row or content end) keeps re-clamping while settling measurements move the real end, so the first jump to the end lands flush even on dynamic lists. See [ScrollToIndexOptions](#scrolltoindexoptions).
+- `scrollToIndex(row, col, options)`: Programmatic scroll to index. An end-anchored scroll (last row or content end) keeps re-clamping while settling measurements move the real end, so the first jump to the end lands flush even on dynamic lists. A user scroll during a smooth animation cancels it. See [ScrollToIndexOptions](#scrolltoindexoptions).
 - `scrollToOffset(x, y, options)`: Programmatic scroll to pixel position. The target is re-clamped when measurements settle (dynamic items), mirroring `scrollToIndex`'s deferred settling. See [ScrollToOffsetOptions](#scrolltooffsetoptions).
 - `refresh()`: Resets all measurements and state.
 - `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
@@ -589,7 +589,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 
 The component automatically manages ARIA roles and attributes to ensure screen readers can navigate the virtualized content.
 
-In the item keyboard model, `aria-activedescendant` points at the active row only while that row is rendered, so the reference is always valid. The active index lives in the data: it returns to the attribute when the row scrolls back in, and it clamps to the last row when the list shrinks.
+In the item keyboard model, `aria-activedescendant` points at the active row only while that row is rendered, so the reference is always valid. The active index lives in the data: it returns to the attribute when the row scrolls back in, and it clamps to the last row when the list shrinks. If a focused control inside a row unmounts (the row scrolled out, or its item was removed), focus returns to the scroll container; it stays where it is when another control already has focus.
 
 | Role Prop | Default Item Role | Usage Case |
 |-----------|-------------------|------------|

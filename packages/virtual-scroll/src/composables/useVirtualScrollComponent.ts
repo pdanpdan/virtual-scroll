@@ -494,6 +494,78 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
   }
   /* v8 ignore stop */
 
+  // --- Focus recovery ---
+  // A focused control inside a row disappears when that row unmounts (it scrolled
+  // out of the window, or its item was removed). Focus then falls to the body and
+  // keyboard users lose their place, so it is returned to the container.
+  /** Last control inside a row that received focus. */
+  let focusedItemElement: Element | null = null;
+  /** Index of the row that control belongs to. */
+  let focusedItemIndex = -1;
+
+  const handleFocusIn = (event: FocusEvent) => {
+    // Focus events are dispatched by an Element (the listener is on the host).
+    const target = event.target as Element;
+    const row = target.closest<HTMLElement>('[data-index]');
+    if (!row) {
+      return;
+    }
+    const index = Number(row.dataset.index);
+    if (!Number.isInteger(index)) {
+      return;
+    }
+    focusedItemElement = target;
+    focusedItemIndex = index;
+  };
+
+  /** Returns focus to the container when the focused control was removed with its row. */
+  const restoreRemovedFocus = () => {
+    /* v8 ignore next 3 -- SSR guard; the listeners only exist with a window */
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const element = focusedItemElement;
+    if (!element || element.isConnected) {
+      return;
+    }
+    const host = hostRef.value;
+    if (!host || !host.isConnected) {
+      return;
+    }
+    // Another control took focus: do not steal it. An engine that keeps the
+    // removed node as `activeElement` is the case this recovery exists for.
+    const active = document.activeElement;
+    if (active && active !== document.body && active !== element) {
+      return;
+    }
+    // The roving model resumes from the row that held focus.
+    if (focusedItemIndex >= 0 && activeIndex.value >= 0) {
+      setActiveIndex(focusedItemIndex);
+    }
+    host.focus({ preventScroll: true });
+    focusedItemElement = null;
+    focusedItemIndex = -1;
+  };
+
+  const handleFocusOut = () => {
+    // Browsers do not all emit focusout for a removed element, so the render
+    // checks below repeat the same test.
+    nextTick(restoreRemovedFocus);
+  };
+
+  watch(hostRef, (host, oldHost) => {
+    oldHost?.removeEventListener('focusin', handleFocusIn);
+    oldHost?.removeEventListener('focusout', handleFocusOut);
+    host?.addEventListener('focusin', handleFocusIn);
+    host?.addEventListener('focusout', handleFocusOut);
+  }, { immediate: true });
+
+  watch(scrollDetails, () => nextTick(restoreRemovedFocus));
+  watch([
+    () => props.items,
+    () => props.items.length,
+  ], () => nextTick(restoreRemovedFocus));
+
   /* v8 ignore next -- the `if` is always taken outside the lean build */
   if (!IS_CORE_BUILD) {
     const verticalScrollbar = useVirtualScrollbar(computed(() => ({

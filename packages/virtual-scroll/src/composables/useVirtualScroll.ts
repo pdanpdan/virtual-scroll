@@ -1138,6 +1138,24 @@ export function useVirtualScroll<T = unknown>(
       }
     }
 
+    // A scroll event that moves away from a pending programmatic target is user
+    // input (a drag, a wheel, a scrollbar). The engine's own scrolls only
+    // approach their target, so the animation is no longer ours to finish.
+    if (isProgrammaticScroll.value) {
+      const pending = pendingScroll.value;
+      const pendingX = pending?.offsetX ?? pending?.targetX;
+      const pendingY = pending?.offsetY ?? pending?.targetY;
+      const relativeX = virtualX - (flowStartX.value + stickyStartX.value + paddingStartX.value);
+      const relativeY = virtualY - (flowStartY.value + stickyStartY.value + paddingStartY.value);
+      const movedAwayX = pendingX !== undefined
+        && Math.abs(pendingX - relativeX) > Math.abs(pendingX - relativeScrollX.value) + 1;
+      const movedAwayY = pendingY !== undefined
+        && Math.abs(pendingY - relativeY) > Math.abs(pendingY - relativeScrollY.value) + 1;
+      if (movedAwayX || movedAwayY) {
+        stopProgrammaticScroll();
+      }
+    }
+
     // A move away from the content end cancels the end-anchored re-clamp
     // (the engine's own re-anchor only ever moves towards the end).
     if (bottomIntentX && virtualX < internalScrollX.value - 0.5) {

@@ -949,7 +949,7 @@ const vs = useVirtualScroll(props, [
       </h3>
       <div class="prose prose-sm @4xl:prose-md max-w-none text-base-content/90 mb-8">
         <p>Roles and attributes are set automatically, so screen readers can follow the virtualized content: lists, grids and also <code>tree</code>, <code>listbox</code> and <code>menu</code> roles.</p>
-        <p>With <a href="#props" class="link link-primary">keyboardActivation</a> in the item model - <code>'auto'</code> selects it for <code>listbox</code>, <code>menu</code> and <code>tree</code> - the container publishes <code>aria-activedescendant</code> pointing at the active item, and a polite live region announces the active position (<code>Item 21 of 100</code>) as it moves. <code>Enter</code>/<code>Space</code> and <code>handleItemActivate(index)</code> emit <code>itemActivate</code>. The attribute is set only while the active item is rendered; the index itself is kept and the reference returns when the item scrolls back into the window. When the list shrinks, the active index clamps to the last item.</p>
+        <p>With <a href="#props" class="link link-primary">keyboardActivation</a> in the item model - <code>'auto'</code> selects it for <code>listbox</code>, <code>menu</code> and <code>tree</code> - the container publishes <code>aria-activedescendant</code> pointing at the active item, and a polite live region announces the active position (<code>Item 21 of 100</code>) as it moves. <code>Enter</code>/<code>Space</code> and <code>handleItemActivate(index)</code> emit <code>itemActivate</code>. The attribute is set only while the active item is rendered; the index itself is kept and the reference returns when the item scrolls back into the window. When the list shrinks, the active index clamps to the last item. If a focused control inside a row unmounts, focus returns to the scroll container, unless another control already has focus.</p>
         <div class="docs-table-container">
           <table class="docs-table">
             <thead><tr><th>Role Prop</th><th>Default Item Role</th><th>Behavior</th></tr></thead>
@@ -3719,7 +3719,7 @@ options?: ScrollAlignment | ScrollAlignmentOptions | ScrollToIndexOptions
 ): ScrollToIndexResult"
           />
           <div class="prose prose-sm max-w-none opacity-90 space-y-4">
-            <p>Scrolls a specific item into view. If the item's size is dynamic and not yet measured, the scroll position is corrected after rendering. Returns the computed scroll targets in virtual and display units (<code>ScrollToIndexResult</code>).</p>
+            <p>Scrolls a specific item into view. If the item's size is dynamic and not yet measured, the scroll position is corrected after rendering. A user scroll during a smooth animation cancels it. Returns the computed scroll targets in virtual and display units (<code>ScrollToIndexResult</code>).</p>
             <div class="overflow-x-auto">
               <table class="table table-xs w-full bg-base-200">
                 <thead class="text-base-content"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>

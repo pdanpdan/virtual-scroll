@@ -804,6 +804,209 @@ describe('virtualScroll', () => {
       wrapper.unmount();
     });
 
+    it('returns focus to the container when a focused row unmounts', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          role: 'listbox',
+          ariaLabel: 'Options',
+        },
+        slots: {
+          item: () => h('div', [
+            h('input', { class: 'row-input' }),
+          ]),
+        },
+      });
+      document.body.appendChild(wrapper.element);
+      await nextTick();
+      await nextTick();
+
+      // Activate the first row with the keyboard, then focus its control.
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      await nextTick();
+
+      const input = wrapper.find('.virtual-scroll-item[data-index="0"] input').element as HTMLInputElement;
+      input.focus();
+      expect(document.activeElement).toBe(input);
+
+      container.scrollTop = 2000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      expect(wrapper.find('.virtual-scroll-item[data-index="0"]').exists()).toBe(false);
+      expect(document.activeElement).toBe(container);
+      // The roving model continues from the row that held focus.
+      expect((wrapper.vm as unknown as { activeIndex: number; }).activeIndex).toBe(0);
+      wrapper.unmount();
+      wrapper.element.remove();
+    });
+
+    it('does not take focus from another control when a focused row unmounts', async () => {
+      const outside = document.createElement('button');
+      document.body.appendChild(outside);
+
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+        slots: {
+          item: () => h('div', [
+            h('input', { class: 'row-input' }),
+          ]),
+        },
+      });
+      document.body.appendChild(wrapper.element);
+      await nextTick();
+      await nextTick();
+
+      const input = wrapper.find('.virtual-scroll-item[data-index="0"] input').element as HTMLInputElement;
+      input.focus();
+      outside.focus();
+
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.scrollTop = 2000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      expect(document.activeElement).toBe(outside);
+      wrapper.unmount();
+      wrapper.element.remove();
+      outside.remove();
+    });
+
+    it('ignores focus that is not inside a row', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+      });
+      document.body.appendChild(wrapper.element);
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.focus();
+      // jsdom does not dispatch focusin for a container; the event itself is the
+      // supported path in browsers.
+      container.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      expect(document.activeElement).toBe(container);
+
+      container.scrollTop = 500;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+
+      expect(document.activeElement).toBe(container);
+      wrapper.unmount();
+      wrapper.element.remove();
+    });
+
+    it('ignores a nested element whose data-index is not a number', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+        slots: {
+          item: () => h('div', [
+            h('input', { class: 'row-input' }),
+          ]),
+        },
+      });
+      document.body.appendChild(wrapper.element);
+      await nextTick();
+      await nextTick();
+
+      const row = wrapper.find('.virtual-scroll-item[data-index="0"]').element;
+      const nested = document.createElement('div');
+      nested.dataset.index = 'not-a-number';
+      row.appendChild(nested);
+      nested.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.scrollTop = 2000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+
+      expect(document.activeElement).toBe(document.body);
+      wrapper.unmount();
+      wrapper.element.remove();
+    });
+
+    it('leaves focus alone when no row control had focus', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+      });
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+
+      expect(document.activeElement).toBe(document.body);
+      wrapper.unmount();
+    });
+
+    it('restores focus without activating an item in viewport mode', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+        slots: {
+          item: () => h('div', [
+            h('input', { class: 'row-input' }),
+          ]),
+        },
+      });
+      document.body.appendChild(wrapper.element);
+      await nextTick();
+      await nextTick();
+
+      const input = wrapper.find('.virtual-scroll-item[data-index="0"] input').element as HTMLInputElement;
+      input.focus();
+
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.scrollTop = 2000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      await nextTick();
+      await nextTick();
+
+      expect(document.activeElement).toBe(container);
+      expect((wrapper.vm as unknown as { activeIndex: number; }).activeIndex).toBe(-1);
+      wrapper.unmount();
+      wrapper.element.remove();
+    });
+
+    it('does not restore focus after the component unmounts', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: { itemSize: 50, items: mockItems },
+        slots: {
+          item: () => h('div', [
+            h('input', { class: 'row-input' }),
+          ]),
+        },
+      });
+      document.body.appendChild(wrapper.element);
+      await nextTick();
+      await nextTick();
+
+      const input = wrapper.find('.virtual-scroll-item[data-index="0"] input').element as HTMLInputElement;
+      input.focus();
+
+      const container = wrapper.find('.virtual-scroll-container').element as HTMLElement;
+      container.scrollTop = 2000;
+      container.dispatchEvent(new Event('scroll'));
+
+      wrapper.unmount();
+      wrapper.element.remove();
+      await nextTick();
+      await nextTick();
+
+      expect(document.activeElement).toBe(document.body);
+    });
+
     it('tracks an active item when asked for the item model on a plain list', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems, keyboardActivation: 'item' },
