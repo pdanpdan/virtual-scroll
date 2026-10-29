@@ -5,33 +5,35 @@
  *
  * Recipe: each library's entry for rendering a list, installed from npm at the
  * version the page lists, bundled with
- * `esbuild --bundle --minify --format=esm --external:vue`. `min` is the minified
- * JavaScript plus the stylesheet that entry needs, `gz` is gzip level 9 over the
- * two concatenated.
+ * `esbuild --bundle --splitting --minify --format=esm --external:vue`. `min` is
+ * the minified entry chunk plus the stylesheet that entry needs, `gz` is gzip
+ * level 9 over the two concatenated; a dependency's lazy `import()` lands in a
+ * separate chunk and is not counted.
  */
 
 /** When the contenders were last measured, in full. */
-export const CONTENDERS_MEASURED_ON = '2026-09-22';
+export const CONTENDERS_MEASURED_ON = '2026-10-29';
 
 /** This package's version, from its manifest, and the date the changelog gives it. */
-export const OURS_VERSION = '2.1.1';
+export const OURS_VERSION = '2.2.0';
 export const OURS_RELEASED = '2026-09-22';
 
 export const SIZES = {
-  oursFull: { min: 77.8, gz: 22.6 },
+  oursFull: { min: 77.8, gz: 22.5 },
   oursCore: { min: 59.6, gz: 17.1 },
   oursComposable: { min: 32.5, gz: 10.3 },
   oursHeadlessWired: { min: 40.8, gz: 13.1 },
   oursEngineObservers: { min: 33.9, gz: 10.8 },
   oursEngineObserversKeyboard: { min: 38.2, gz: 12.3 },
-  oursWired: { min: 49.4, gz: 15.9 },
+  oursWired: { min: 49.3, gz: 15.9 },
   vvs: { min: 29, gz: 10.4 },
-  tanstack: { min: 24.3, gz: 7.3 },
-  virtua: { min: 9.5, gz: 4.6 },
+  tanstack: { min: 33.1, gz: 9.9 },
+  virtua: { min: 9.8, gz: 4.7 },
   vueuc: { min: 22.9, gz: 8.6 },
   vvsl: { min: 15.3, gz: 4.9 },
-  vlistAdapter: { min: 112.7, gz: 37 },
-  vlistBase: { min: 38, gz: 12 },
-  vlistBaseScrollbar: { min: 45.1, gz: 14.1 },
+  vlistAdapter: { min: 39.2, gz: 12.9 },
+  vlistBase: { min: 38.8, gz: 12.8 },
+  vlistBaseScrollbar: { min: 47, gz: 15.7 },
+  vlistConfig: { min: 123.6, gz: 41.9 },
   cerious: { min: 100.6, gz: 26.7 },
 };

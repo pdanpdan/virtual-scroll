@@ -4,9 +4,11 @@
  *
  * Every row uses one recipe so the table stays comparable: the entry is
  * installed from npm at the version the page lists, bundled with esbuild
- * (`--bundle --minify --format=esm --external:vue`), and `min` is the minified
- * JavaScript plus the stylesheet that entry needs, `gz` is gzip level 9 over the
- * two concatenated. kB is 1000 bytes.
+ * (`--bundle --splitting --minify --format=esm --external:vue`), and `min` is
+ * the minified entry chunk plus the stylesheet that entry needs, `gz` is gzip
+ * level 9 over the two concatenated. Splitting keeps a dependency's lazy
+ * `import()` out of the entry chunk, so a page is not charged for code it
+ * downloads only when a feature is used. kB is 1000 bytes.
  *
  * Modes:
  *
@@ -120,13 +122,13 @@ const CONTENDERS = {
     symbols: [ 'RecycleScroller' ],
   },
   tanstack: {
-    spec: [ '@tanstack/vue-virtual@3.13.39' ],
+    spec: [ '@tanstack/vue-virtual@3.13.50' ],
     entry: `import { useVirtualizer } from '@tanstack/vue-virtual';\n`,
     symbols: [ 'useVirtualizer' ],
   },
   // The package root is the React build; the Vue entry is the `virtua/vue` condition.
   virtua: {
-    spec: [ 'virtua@0.52.7' ],
+    spec: [ 'virtua@0.54.0' ],
     entry: `import { VList } from 'virtua/vue';\n`,
     symbols: [ 'VList' ],
   },
@@ -141,9 +143,10 @@ const CONTENDERS = {
     entry: `import VirtualList from 'vue-virtual-scroll-list';\n`,
     symbols: [ 'VirtualList' ],
   },
+  // The Vue entry lives in the `vlist` package since 3.1; the `vlist-vue` adapter is deprecated.
   vlistAdapter: {
-    spec: [ 'vlist@2.8.1', 'vlist-vue@2.6.0' ],
-    entry: `import { useVList } from 'vlist-vue';\nimport 'vlist/styles';\n`,
+    spec: [ 'vlist@3.3.0' ],
+    entry: `import { useVList } from 'vlist/vue';\nimport 'vlist/styles';\n`,
     symbols: [ 'useVList' ],
   },
   vlistBase: {
@@ -155,6 +158,12 @@ const CONTENDERS = {
     spec: [],
     entry: `import { createVList, scrollbar } from 'vlist';\nimport 'vlist/styles';\n`,
     symbols: [ 'createVList', 'scrollbar' ],
+  },
+  // The config layer the deprecated adapters use: it statically imports every plugin.
+  vlistConfig: {
+    spec: [],
+    entry: `import { createVListFromConfig } from 'vlist/config';\nimport 'vlist/styles';\n`,
+    symbols: [ 'createVListFromConfig' ],
   },
   cerious: {
     spec: [ '@ceriousdevtech/vue-cerious-scroll@1.2.0' ],
@@ -232,12 +241,19 @@ async function measure(esbuild, key, entrySource, resolveDir) {
   const dir = resolve(resolveDir, `entry-${ key }`);
   mkdirSync(dir, { recursive: true });
   const entry = resolve(dir, 'entry.js');
-  const outfile = resolve(dir, 'out/app.js');
+  const outdir = resolve(dir, 'out');
+  const outfile = resolve(outdir, 'app.js');
   writeFileSync(entry, entrySource);
 
+  // Code splitting keeps a dependency's dynamic `import()` out of the entry
+  // chunk - a page downloads that chunk only when it uses it - instead of
+  // inlining it into the file whose size this row reports.
   await esbuild({
     entryPoints: [ entry ],
-    outfile,
+    outdir,
+    entryNames: 'app',
+    chunkNames: 'chunk-[hash]',
+    splitting: true,
     bundle: true,
     minify: true,
     format: 'esm',
@@ -247,7 +263,7 @@ async function measure(esbuild, key, entrySource, resolveDir) {
   });
 
   const js = statSync(outfile).size;
-  const cssFile = outfile.replace(/\.js$/, '.css');
+  const cssFile = resolve(outdir, 'app.css');
   const css = existsSync(cssFile)
     ? statSync(cssFile).size
     : 0;
@@ -292,9 +308,10 @@ function writeModule({ sizes, contendersMeasuredOn, version, released }) {
  *
  * Recipe: each library's entry for rendering a list, installed from npm at the
  * version the page lists, bundled with
- * \`esbuild --bundle --minify --format=esm --external:vue\`. \`min\` is the minified
- * JavaScript plus the stylesheet that entry needs, \`gz\` is gzip level 9 over the
- * two concatenated.
+ * \`esbuild --bundle --splitting --minify --format=esm --external:vue\`. \`min\` is
+ * the minified entry chunk plus the stylesheet that entry needs, \`gz\` is gzip
+ * level 9 over the two concatenated; a dependency's lazy \`import()\` lands in a
+ * separate chunk and is not counted.
  */
 
 /** When the contenders were last measured, in full. */
