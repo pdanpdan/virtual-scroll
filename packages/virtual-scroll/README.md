@@ -587,6 +587,8 @@ The following properties and methods are available on the `VirtualScroll` compon
 
 The component automatically manages ARIA roles and attributes to ensure screen readers can navigate the virtualized content.
 
+In the item keyboard model, `aria-activedescendant` points at the active row only while that row is rendered, so the reference is always valid. The active index lives in the data: it returns to the attribute when the row scrolls back in, and it clamps to the last row when the list shrinks.
+
 | Role Prop | Default Item Role | Usage Case |
 |-----------|-------------------|------------|
 | `list` | `listitem` | Standard vertical or horizontal list. |

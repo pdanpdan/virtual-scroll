@@ -770,6 +770,40 @@ describe('virtualScroll', () => {
       wrapper.unmount();
     });
 
+    it('clears the active descendant when the active item leaves the rendered window', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 50,
+          items: mockItems,
+          role: 'listbox',
+          ariaLabel: 'Options',
+        },
+        slots: { item: '<div class="row">row</div>' },
+      });
+      await nextTick();
+      await nextTick();
+
+      const container = wrapper.find('.virtual-scroll-container');
+      const wrapperEl = wrapper.find('.virtual-scroll-wrapper');
+      const vm = wrapper.vm as unknown as {
+        activeIndex: number;
+        setActiveIndex: (index: number | null) => void;
+      };
+
+      vm.setActiveIndex(0);
+      await nextTick();
+      expect(wrapperEl.attributes('aria-activedescendant')).toBe(`${ container.attributes('id') }-item-0`);
+
+      (container.element as HTMLElement).scrollTop = 2000;
+      await container.trigger('scroll');
+      await nextTick();
+
+      // The item stays active in the data, but its element is gone.
+      expect(vm.activeIndex).toBe(0);
+      expect(wrapperEl.attributes('aria-activedescendant')).toBeUndefined();
+      wrapper.unmount();
+    });
+
     it('tracks an active item when asked for the item model on a plain list', async () => {
       const wrapper = mount(VirtualScroll, {
         props: { itemSize: 50, items: mockItems, keyboardActivation: 'item' },

@@ -1,7 +1,7 @@
 import type { Point, ScrollAlignment, ScrollDetails, ScrollToOffsetOptions, VirtualScrollProps } from '../types';
 import type { MaybeRefOrGetter, Ref } from 'vue';
 
-import { computed, ref, toValue } from 'vue';
+import { computed, ref, toValue, watch } from 'vue';
 
 /** Shared zero point: a missing sticky or padding value must not allocate on every key press. */
 const ZERO_POINT: Point = { x: 0, y: 0 };
@@ -95,6 +95,16 @@ export function useVirtualScrollKeyboard<T>({
    * @default -1
    */
   const activeIndex = ref(-1);
+
+  // The active item is an index into the data, so a shrinking list must not
+  // leave it pointing past the end (and the live region announcing it).
+  watch(() => props.value.items.length, (length) => {
+    if (activeIndex.value >= length) {
+      activeIndex.value = length > 0
+        ? length - 1
+        : -1;
+    }
+  });
 
   /**
    * Polite announcement for the active item, e.g. `Item 21 of 100`; empty when

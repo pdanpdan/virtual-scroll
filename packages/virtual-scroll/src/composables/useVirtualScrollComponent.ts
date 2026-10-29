@@ -460,9 +460,15 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
   /* v8 ignore start -- only the full build's branch runs in these suites */
   const activeDescendant = IS_CORE_BUILD
     ? undefined
-    : computed(() => (activeIndex.value >= 0
-      ? `${ containerId.value }-item-${ activeIndex.value }`
-      : undefined));
+    : computed(() => {
+      const index = activeIndex.value;
+      const { range } = scrollDetails.value;
+      // Point at the item only while it is rendered: an id that no element
+      // carries is invalid, and screen readers ignore it.
+      return index >= range.start && index < range.end
+        ? `${ containerId.value }-item-${ index }`
+        : undefined;
+    });
 
   if (!IS_CORE_BUILD) {
     useLiveRegion(hostRef, liveMessage);
@@ -697,7 +703,7 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
     setActiveIndex,
     /** Marks an item active and emits `itemActivate`. */
     handleItemActivate,
-    /** `aria-activedescendant` target, `undefined` when no item is active. */
+    /** `aria-activedescendant` target, `undefined` when no item is active or the active item is not rendered. */
     activeDescendant,
 
     // --- Scrollbars ---

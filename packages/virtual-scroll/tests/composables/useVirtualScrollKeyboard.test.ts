@@ -783,6 +783,24 @@ describe('useVirtualScrollKeyboard', () => {
     expect(activeIndex.value).toBe(9);
   });
 
+  it('clamps the active item when the list shrinks', async () => {
+    const items = ref(Array.from({ length: 10 }, (_, id) => ({ id })));
+    const { activeIndex, setActiveIndex } = makeKeyboard(
+      ref(makeScrollDetails()),
+      () => makeProps({ items: items.value }),
+      { activationMode: 'item' },
+    );
+
+    setActiveIndex(9);
+    items.value = items.value.slice(0, 3);
+    await nextTick();
+    expect(activeIndex.value).toBe(2);
+
+    items.value = [];
+    await nextTick();
+    expect(activeIndex.value).toBe(-1);
+  });
+
   it('moves the active item with the vertical arrows and keeps it visible', () => {
     const scrollDetails = ref(makeScrollDetails({ currentIndex: 4 }));
     const scrollToIndex = vi.fn();
