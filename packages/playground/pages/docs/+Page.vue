@@ -65,7 +65,7 @@ onUnmounted(() => {
       <div>
         <h1 class="text-primary">API Reference</h1>
         <p class="text-base @4xl:text-xl opacity-60 font-medium mt-1">
-          Complete documentation for <code>@pdanpdan/virtual-scroll</code>.
+          Documentation for <code>@pdanpdan/virtual-scroll</code>.
         </p>
       </div>
     </div>
