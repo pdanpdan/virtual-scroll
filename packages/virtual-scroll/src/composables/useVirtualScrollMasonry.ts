@@ -167,7 +167,9 @@ export function useVirtualScrollMasonry<T>(
 
   /** Display scroll position (px; masonry has a single scroll axis and scale 1). */
   const scrollY = ref(0);
-  const viewportWidth = ref(0);
+  // Server rendering has no box to measure: seed the width so the layout and
+  // the first client render agree, then the measured width takes over.
+  const viewportWidth = ref(Math.max(0, props.value.ssrWidth ?? 0));
   const viewportHeight = ref(0);
   const isScrolling = ref(false);
   const isProgrammaticScroll = ref(false);
@@ -416,11 +418,46 @@ export function useVirtualScrollMasonry<T>(
 
   // ---------------------------------- computeds ----------------------------------
 
+  /**
+   * First `count` cards in placement order, for the pre-measurement render.
+   * Reactivity-free like `collectCards`.
+   */
+  function collectLeadingCards(count: number, items: T[]): MasonryRenderedItem<T>[] {
+    const l = layout.value;
+    if (!l || items.length === 0 || count <= 0) {
+      return [];
+    }
+    const out: MasonryRenderedItem<T>[] = [];
+    for (let s = 0; s < l.segmentCount() && out.length < count; s++) {
+      const origin = l.segmentOrigin(s);
+      for (const card of l.getSegment(s)) {
+        if (out.length >= count) {
+          break;
+        }
+        out.push({
+          item: items[ card.index ],
+          index: card.index,
+          column: card.column,
+          x: card.x,
+          y: origin + card.y,
+          width: card.width,
+          height: card.height,
+        });
+      }
+    }
+    return out;
+  }
+
   /** Cards in the DOM window: the viewport plus one segment of overscan per side. */
   const renderedCards = computed<MasonryRenderedItem<T>[]>(() => {
     // eslint-disable-next-line ts/no-unused-expressions
     layoutTick.value;
-    return collectCards(scrollY.value, viewportHeight.value, props.value.items);
+    const p = props.value;
+    const leading = p.ssrCount ?? 0;
+    if (!(viewportHeight.value > 0) && leading > 0) {
+      return collectLeadingCards(Math.floor(leading), p.items);
+    }
+    return collectCards(scrollY.value, viewportHeight.value, p.items);
   });
 
   watch(renderedCards, () => {

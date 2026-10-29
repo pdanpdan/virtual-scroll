@@ -53,6 +53,8 @@ const virtualScrollProps = computed<VirtualScrollMasonryProps<T>>(() => ({
   gap: props.gap,
   segmentSize: props.segmentSize,
   measuredHeights: props.measuredHeights === true,
+  ssrWidth: props.ssrWidth,
+  ssrCount: props.ssrCount,
   hostRef: hostRef.value,
 }));
 

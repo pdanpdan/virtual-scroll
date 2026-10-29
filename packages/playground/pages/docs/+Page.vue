@@ -1651,6 +1651,12 @@ const vs = useVirtualScroll(props, [
               <td>Measure mounted cards with a <code>ResizeObserver</code> and drive the layout from the measured boxes instead of the oracle. Off: canonical oracle layout, nothing is measured. On: cards size to their content (the oracle height becomes the pre-measure minimum, so estimate-sized first mounts do not re-flow) and every accepted measurement re-lays-out with the topmost visible card re-anchored.</td>
             </tr>
             <tr>
+              <td><code class="docs-prop-name">ssrWidth</code> / <code class="docs-prop-name">ssrCount</code></td>
+              <td><code>number</code></td>
+              <td>-</td>
+              <td>Server rendering: lay the grid out from <code>ssrWidth</code> and mount the first <code>ssrCount</code> cards until the container is measured. Pass both; after mount the measured width takes over.</td>
+            </tr>
+            <tr>
               <td><code class="docs-prop-name">gap</code></td>
               <td><code>number</code></td>
               <td><code>{{ DEFAULT_MASONRY_GAP }}</code></td>
@@ -4241,6 +4247,9 @@ element?: HTMLElement
         <p>The library supports Server-Side Rendering via the <code>ssrRange</code> prop. When provided, the specified items are rendered "in-flow" on the server.</p>
         <p class="mt-4">
           Hydration is automatic: the client renders the same in-flow items before mounting to match the server HTML, then scrolls to the pre-rendered range and switches to absolute positioning for virtualization.
+        </p>
+        <p class="mt-4">
+          <a href="#masonry" class="link link-primary">VirtualScrollMasonry</a> has no box to measure on the server, so it takes <code>ssrWidth</code> and <code>ssrCount</code>: the grid is laid out from that width and the first cards are mounted. The first client render repeats the same layout; after mount the real width is measured and the cards re-flow if it differs.
         </p>
       </div>
     </section>

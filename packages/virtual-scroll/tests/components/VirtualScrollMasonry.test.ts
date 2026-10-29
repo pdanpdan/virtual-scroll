@@ -111,6 +111,26 @@ describe('virtualScrollMasonry', () => {
     wrapper.unmount();
   });
 
+  it('renders the ssr cards before the container is measured', async () => {
+    const { wrapper, vm } = mountMasonry({ ssrWidth: 1000, ssrCount: 6 });
+
+    // First render (server and hydration) uses the ssr props; mounting has not
+    // flushed a new render yet.
+    const cards = wrapper.findAll('.virtual-scroll-item');
+    expect(cards).toHaveLength(6);
+    expect(cards[ 0 ]?.attributes('data-index')).toBe('0');
+    expect((wrapper.find('.virtual-scroll-wrapper').element as HTMLElement).style.blockSize).not.toBe('0px');
+
+    await nextTick();
+    await nextTick();
+
+    // After measurement the normal viewport window takes over and the real
+    // 500px width (2 columns of 245px) replaces the ssr assumptions.
+    expect(vm.columns).toBe(2);
+    expect((wrapper.find('.virtual-scroll-item').element as HTMLElement).style.width).toBe('245px');
+    wrapper.unmount();
+  });
+
   it('measures mounted cards with ResizeObserver when measuredHeights is enabled', async () => {
     const { wrapper, vm } = mountMasonry({
       items: makeItems(500),

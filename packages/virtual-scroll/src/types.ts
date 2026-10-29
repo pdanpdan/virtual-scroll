@@ -1127,6 +1127,24 @@ export interface VirtualScrollMasonryProps<T = unknown> {
   gap?: number | undefined;
 
   /**
+   * Container width in px to lay out with before the first client measurement.
+   *
+   * Server rendering has no box to measure, so the grid is laid out from this
+   * width and the first client render repeats it, avoiding a hydration
+   * mismatch. After mount the real width is measured and the cards re-layout
+   * if it differs. Pass it together with `ssrCount`.
+   */
+  ssrWidth?: number | undefined;
+
+  /**
+   * Number of cards to render before the container is measured.
+   *
+   * Requires {@link ssrWidth}; after mount the normal viewport window takes
+   * over.
+   */
+  ssrCount?: number | undefined;
+
+  /**
    * Measure mounted cards with a ResizeObserver and let the measured box
    * heights drive the layout ("local" determinism) instead of the oracle
    * alone ("canonical"). While false (default), cards must be sized to the

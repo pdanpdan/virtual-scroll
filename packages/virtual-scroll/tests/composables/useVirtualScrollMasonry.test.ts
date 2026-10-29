@@ -1265,4 +1265,29 @@ describe('useVirtualScrollMasonry', () => {
       wrapper.unmount();
     });
   });
+
+  describe('server rendering', () => {
+    it('lays out the first ssrCount cards from ssrWidth before measuring', async () => {
+      const { result, wrapper } = mountMasonry(makeProps({
+        hostRef: undefined,
+        ssrWidth: 1000,
+        ssrCount: 5,
+      }));
+      await nextTick();
+
+      expect(result.columns.value).toBe(4);
+      expect(result.renderedCards.value.map((card) => card.index)).toEqual([ 0, 1, 2, 3, 4 ]);
+      expect(result.renderedCards.value[ 0 ]?.width).toBeCloseTo(242.5, 6);
+      expect(result.totalHeight.value).toBeGreaterThan(0);
+      wrapper.unmount();
+    });
+
+    it('renders no cards before measuring without ssr props', async () => {
+      const { result, wrapper } = mountMasonry(makeProps({ hostRef: undefined }));
+      await nextTick();
+
+      expect(result.renderedCards.value).toHaveLength(0);
+      wrapper.unmount();
+    });
+  });
 });

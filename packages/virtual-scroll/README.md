@@ -409,7 +409,7 @@ The table fixes its own semantic tags (`table` > `tbody` > `tr`, with `thead`/`t
 
 ### VirtualScrollMasonry
 
-For a real masonry grid inside a **single** scroll container use the dedicated `VirtualScrollMasonry` component: the column count and a fractional column width are derived from the container width, cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only the window around the scroll position is mounted. Heights come exclusively from the `itemHeight` oracle, so the layout is canonical: far `scrollToIndex` calls land exactly without ever mounting the path, the total is exact once the frontier chain reaches the end (`totalHeightExact`), and reflows re-anchor the topmost visible card in content space. See the [Masonry example](https://pdanpdan.github.io/virtual-scroll/essential-masonry).
+For a real masonry grid inside a **single** scroll container use the dedicated `VirtualScrollMasonry` component: the column count and a fractional column width are derived from the container width, cards are placed greedily on the shortest column through segment-snapshotted column frontiers, and only the window around the scroll position is mounted. Heights come exclusively from the `itemHeight` oracle, so the layout is canonical: far `scrollToIndex` calls land exactly without ever mounting the path, the total is exact once the frontier chain reaches the end (`totalHeightExact`), and reflows re-anchor the topmost visible card in content space. See the [Masonry example](https://pdanpdan.github.io/virtual-scroll/essential-masonry). For server rendering, pass `ssrWidth` and `ssrCount`: the grid is laid out from that width on the server, the first client render repeats it, and the measured width takes over after mount.
 
 ```vue
 <VirtualScrollMasonry
@@ -437,6 +437,7 @@ Masonry-specific props:
 | `itemHeight` | `fn(item, index, columnWidth)` | Required | Canonical height oracle in px. **Must be deterministic**: the same `(index, columnWidth)` must always return the same height, because placements are committed to a frontier chain. Non-finite results fall back to `40`; finite non-positive results clamp to `1`. |
 | `measuredHeights` | `boolean` | `false` | Measure mounted cards with a `ResizeObserver` and drive the layout from the measured boxes ("local" determinism). Off: canonical oracle layout, nothing measured. On: cards size to their content (the oracle height becomes the pre-measure minimum) and every measurement batch re-lays-out with the viewport re-anchored. |
 | `targetColumnWidth` | `number` | `240` | Desired column width in px; the column count is derived so columns land as close as possible to it. |
+| `ssrWidth` / `ssrCount` | `number` | - | Server rendering: lay the grid out from `ssrWidth` and mount the first `ssrCount` cards before the container is measured. Pass both; after mount the measured width takes over. |
 | `minColumns` / `maxColumns` | `number` | `1` / `10` | Column count bounds for responsive reflow. |
 | `gap` | `number` | `10` | Spacing between cards, both between columns and rows. |
 | `segmentSize` | `number` | `500` | Items per stored frontier snapshot (memory vs. chain-step tradeoff). |
