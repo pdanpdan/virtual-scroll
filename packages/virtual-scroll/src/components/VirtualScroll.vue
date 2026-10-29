@@ -179,6 +179,7 @@ const {
   scrollToIndex,
   scrollToOffset,
   updateHostOffset,
+  remeasureItem,
   updateItemSize,
   updateItemSizes,
   updateDirection,
@@ -477,6 +478,21 @@ defineExpose({
   /**
    * Updates the size of a single item in the measurement tree.
    * @param index - The item index.
+   * @param inlineSize - Measured inline size of the element (width for horizontal, width in both modes).
+   * @param blockSize - Measured block size of the element (height for vertical, height in both modes).
+   * @param element - Optional DOM element used for column measurement in grid mode.
+   * @see useVirtualScroll
+   */
+  /**
+   * Re-reads the size of one rendered item from its element.
+   * @param index - Item index.
+   * @returns `true` when the item was rendered and measured.
+   */
+  remeasureItem,
+
+  /**
+   * Updates the size of a single item from measurements.
+   * @param index - Item index.
    * @param inlineSize - Measured inline size of the element (width for horizontal, width in both modes).
    * @param blockSize - Measured block size of the element (height for vertical, height in both modes).
    * @param element - Optional DOM element used for column measurement in grid mode.

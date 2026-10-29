@@ -570,6 +570,7 @@ The following properties and methods are available on the `VirtualScroll` compon
 - `stopProgrammaticScroll()`: Halt smooth scroll animations and inertia.
 - `updateDirection()`: Manually trigger direction detection.
 - `updateHostOffset()`: Recalculate component position.
+- `remeasureItem(index)`: Re-read one rendered item from its element; returns `false` when it is not rendered.
 - `updateItemSize(index, inlineSize, blockSize, el?)`: Register single measurement.
 - `updateItemSizes(updates)`: Batch register measurements.
 - `getRowHeight(index)`: Returns the calculated height of a row.

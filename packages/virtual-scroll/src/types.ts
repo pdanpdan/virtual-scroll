@@ -725,6 +725,13 @@ export interface VirtualScrollInstance<T = unknown> extends VirtualScrollCompone
   scrollToOffset: (x?: number | null, y?: number | null, options?: ScrollToOffsetOptions) => void;
   /** Resets all dynamic measurements and re-initializes from props. */
   refresh: () => void;
+  /**
+   * Re-reads the size of one rendered item from its element.
+   * Use it after content changes size without a `ResizeObserver` notification.
+   * @param index - Item index.
+   * @returns `true` when the item is rendered and was measured.
+   */
+  remeasureItem: (index: number) => boolean;
   /** Updates the size of a single item from measurements. */
   updateItemSize: (index: number, inlineSize: number, blockSize: number, element?: HTMLElement | undefined) => void;
   /** Batch-updates sizes for multiple items from measurements. */

@@ -1434,6 +1434,10 @@ const vs = useVirtualScroll(props, [
           <code class="docs-prop-name--secondary text-xs">updateHostOffset()</code>
           <p class="docs-link-description">Recalculate container position.</p>
         </a>
+        <a href="#method-remeasureitem" class="docs-link-card">
+          <code class="docs-prop-name--secondary text-xs">remeasureItem()</code>
+          <p class="docs-link-description">Re-read one rendered item.</p>
+        </a>
         <a href="#method-updateitemsize" class="docs-link-card">
           <code class="docs-prop-name--secondary text-xs">updateItemSize()</code>
           <p class="docs-link-description">Manually register measurement.</p>
@@ -2112,6 +2116,11 @@ scrollToIndex
                 <td><a href="#method-refresh" class="link font-bold text-secondary">refresh</a></td>
                 <td><code>Function</code></td>
                 <td>Resets all measurements and state.</td>
+              </tr>
+              <tr>
+                <td><a href="#method-remeasureitem" class="link font-bold text-secondary">remeasureItem</a></td>
+                <td><code>Function</code></td>
+                <td>Re-read the size of one rendered item from its element.</td>
               </tr>
               <tr>
                 <td><a href="#method-updateitemsize" class="link font-bold text-secondary">updateItemSize</a></td>
@@ -3747,6 +3756,21 @@ options?: ScrollToOffsetOptions // { behavior?: 'auto' | 'smooth', endExtraX?: n
           </h4>
           <div class="prose prose-sm max-w-none opacity-90">
             <p>Invalidates all cached measurements and triggers a full re-initialization. Use this if your item source data changes in a way that affects sizes without changing the <code>items</code> array reference.</p>
+          </div>
+        </div>
+
+        <!-- Method: remeasureItem -->
+        <div id="method-remeasureitem" class="docs-method-card docs-method-card--secondary">
+          <h4 class="docs-method-title docs-method-title--secondary">
+            <span class="badge badge-secondary">Method</span> remeasureItem()
+          </h4>
+          <CodeBlock
+            class="docs-code-block mb-4 font-mono text-xs"
+            lang="ts"
+            code="remeasureItem(index: number): boolean"
+          />
+          <div class="prose prose-sm max-w-none opacity-90">
+            <p>Reads the current box of one rendered item and registers it as the item's size. Use it after content changes size without a resize the <code>ResizeObserver</code> can see, for example after replacing markup that was measured while hidden. The row keeps its DOM and focus. Returns <code>false</code> when the item is not rendered.</p>
           </div>
         </div>
 

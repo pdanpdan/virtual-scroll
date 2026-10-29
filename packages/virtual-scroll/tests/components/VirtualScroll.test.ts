@@ -1725,6 +1725,34 @@ describe('virtualScroll', () => {
       expect((wrapper.find('.virtual-scroll-wrapper').element as HTMLElement).style.blockSize).toBe('460px');
     });
 
+    it('re-measures one rendered item on demand', async () => {
+      const wrapper = mount(VirtualScroll, {
+        props: {
+          itemSize: 0,
+          defaultItemSize: 40,
+          items: mockItems.slice(0, 10),
+        },
+      });
+      await nextTick();
+
+      const vm = wrapper.vm as unknown as {
+        getItemSize: (index: number) => number;
+        remeasureItem: (index: number) => boolean;
+      };
+      expect(vm.getItemSize(0)).toBe(40);
+
+      const firstItem = wrapper.find('.virtual-scroll-item[data-index="0"]').element as HTMLElement;
+      Object.defineProperty(firstItem, 'offsetHeight', { configurable: true, value: 63 });
+      Object.defineProperty(firstItem, 'offsetWidth', { configurable: true, value: 100 });
+
+      expect(vm.remeasureItem(0)).toBe(true);
+      expect(vm.getItemSize(0)).toBe(63);
+
+      // Rows outside the rendered window cannot be read from the DOM.
+      expect(vm.remeasureItem(99)).toBe(false);
+      wrapper.unmount();
+    });
+
     it('does not allow columns to become 0 width due to 0-size measurements', async () => {
       const wrapper = mount(VirtualScroll, {
         props: {

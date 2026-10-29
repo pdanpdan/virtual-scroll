@@ -321,6 +321,25 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
     });
   }
 
+  /**
+   * Re-reads the size of one rendered item from its element.
+   *
+   * Use it after the content of a row changes without a resize the
+   * `ResizeObserver` can see, for example after replacing markup that was
+   * measured while hidden. The row keeps its DOM and focus.
+   *
+   * @param index - Item index.
+   * @returns `true` when the item is rendered and was measured, `false` otherwise.
+   */
+  function remeasureItem(index: number): boolean {
+    const el = itemRefs.get(index);
+    if (!el) {
+      return false;
+    }
+    updateItemSize(index, el.offsetWidth, el.offsetHeight, el);
+    return true;
+  }
+
   // Watch for scroll details and emit event
   watch(scrollDetails, (details, oldDetails) => {
     if (!isHydrated.value || !details) {
@@ -733,6 +752,8 @@ export function useVirtualScrollComponent<T>(options: UseVirtualScrollComponentO
     scrollToOffset,
     /** Re-reads the component's offset inside its scroll container. */
     updateHostOffset,
+    /** Re-reads the size of one rendered item from its element. */
+    remeasureItem,
     /** Updates the measured size of one item. */
     updateItemSize,
     /** Updates the measured sizes of several items. */
