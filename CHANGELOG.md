@@ -1,5 +1,18 @@
 # Changelog
 
+# [2.3.0](https://github.com/pdanpdan/virtual-scroll/compare/v2.2.0...v2.3.0) (2026-10-29)
+
+### Bug Fixes
+
+* keep focus and scroll position when the user takes over ([a84c7ad](https://github.com/pdanpdan/virtual-scroll/commit/a84c7ada495c9e55fd964cadeb6d08747aa4724c))
+* keep sizes and scroll position across item changes ([faf0847](https://github.com/pdanpdan/virtual-scroll/commit/faf08470bd09b2a3c8b59352df24d79866a0c607))
+* keep the aria active descendant valid ([3ab9476](https://github.com/pdanpdan/virtual-scroll/commit/3ab9476ba16ae1dc5d78d2c5a9fd828435bae218))
+
+### Features
+
+* add remeasureItem to the components ([f70a32b](https://github.com/pdanpdan/virtual-scroll/commit/f70a32ba62cfa57fc17317f91cfc2ef58b9f436d))
+* render masonry on the server ([bdf78ab](https://github.com/pdanpdan/virtual-scroll/commit/bdf78ab60bd421e483942469fc75eac87d0ce5a4))
+
 # [2.2.0](https://github.com/pdanpdan/virtual-scroll/compare/v2.1.1...v2.2.0) (2026-09-22)
 
 ### Features
