@@ -260,6 +260,165 @@ describe('useVirtualScrollSizes', () => {
     wrapper.unmount();
   });
 
+  it('shifts measurements on prepend without scroll restoration enabled', async () => {
+    const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+    const { props, result, wrapper } = setup({
+      itemSize: 0,
+      defaultItemSize: 50,
+      items,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    result.updateItemSizes(
+      [
+        { index: 0, inlineSize: 100, blockSize: 77 },
+      ],
+      () => 0,
+      () => 0,
+      0,
+      0,
+      () => {},
+    );
+    expect(result.itemSizesY.get(0)).toBe(77);
+
+    props.value.items = [
+      { id: -1 },
+      { id: -2 },
+      ...items,
+    ];
+    await nextTick();
+    result.initializeSizes();
+
+    // The measured item moved from index 0 to index 2; the new rows keep the
+    // default estimate.
+    expect(result.itemSizesY.get(2)).toBe(77);
+    expect(result.itemSizesY.get(0)).toBe(50);
+    wrapper.unmount();
+  });
+
+  it('keeps measurements when items are appended', async () => {
+    const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+    const { props, result, wrapper } = setup({
+      itemSize: 0,
+      defaultItemSize: 50,
+      items,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    result.updateItemSizes(
+      [
+        { index: 0, inlineSize: 100, blockSize: 77 },
+      ],
+      () => 0,
+      () => 0,
+      0,
+      0,
+      () => {},
+    );
+
+    props.value.items = [
+      ...items,
+      { id: 10 },
+      { id: 11 },
+    ];
+    await nextTick();
+    result.initializeSizes();
+
+    expect(result.itemSizesY.get(0)).toBe(77);
+    expect(result.itemSizesY.get(10)).toBe(50);
+    wrapper.unmount();
+  });
+
+  it('discards stored measurements when items are removed', async () => {
+    const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+    const { props, result, wrapper } = setup({
+      itemSize: 0,
+      defaultItemSize: 50,
+      items,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    result.updateItemSizes(
+      [
+        { index: 0, inlineSize: 100, blockSize: 77 },
+      ],
+      () => 0,
+      () => 0,
+      0,
+      0,
+      () => {},
+    );
+
+    props.value.items = items.slice(1);
+    await nextTick();
+    result.initializeSizes();
+
+    // Index 0 now holds the item that used to be index 1, so the old measured
+    // size must not survive the shift.
+    expect(result.itemSizesY.get(0)).toBe(50);
+    wrapper.unmount();
+  });
+
+  it('keeps the X watermarks when horizontal items are appended', async () => {
+    const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+    const { props, result, wrapper } = setup({
+      itemSize: 0,
+      defaultItemSize: 40,
+      direction: 'horizontal',
+      items,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    props.value.items = [
+      ...items,
+      { id: 10 },
+    ];
+    await nextTick();
+    result.initializeSizes();
+
+    expect(result.itemSizesX.get(0)).toBe(40);
+    expect(result.itemSizesX.get(10)).toBe(40);
+    wrapper.unmount();
+  });
+
+  it('discards stored measurements when the dataset is replaced', async () => {
+    const items = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+    const { props, result, wrapper } = setup({
+      itemSize: 0,
+      defaultItemSize: 50,
+      items,
+    });
+
+    result.initializeSizes();
+    await nextTick();
+
+    result.updateItemSizes(
+      [
+        { index: 0, inlineSize: 100, blockSize: 77 },
+      ],
+      () => 0,
+      () => 0,
+      0,
+      0,
+      () => {},
+    );
+
+    props.value.items = Array.from({ length: 10 }, (_, i) => ({ id: 1000 + i }));
+    await nextTick();
+    result.initializeSizes();
+
+    expect(result.itemSizesY.get(0)).toBe(50);
+    wrapper.unmount();
+  });
+
   it('correctly handles column width updates', async () => {
     const { result, wrapper } = setup({
       direction: 'both',

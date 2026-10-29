@@ -35,6 +35,7 @@ import {
   calculateSSROffsets,
   calculateTotalSize,
   displayToVirtual,
+  findItemIndex,
   virtualToDisplay,
 } from '../utils/virtual-scroll-logic';
 import { useVirtualScrollSizes } from './useVirtualScrollSizes';
@@ -1536,6 +1537,72 @@ export function useVirtualScroll<T = unknown>(
     });
   }
 
+  /** Offset of an item along the scroll axis, in the same space as `relativeScroll*` (VU). */
+  const getAxisItemOffset = (index: number) => (direction.value === 'horizontal'
+    ? calculateOffsetAt(index, fixedItemSize.value, props.value.columnGap || 0, (idx) => itemSizesX.query(idx))
+    : calculateOffsetAt(index, fixedItemSize.value, props.value.gap || 0, (idx) => itemSizesY.query(idx)));
+
+  /** First visible item, captured before an items change so it can be held in place. */
+  interface ItemsAnchor<T> {
+    item: T;
+    index: number;
+    /** Distance between the item start and the viewport start. */
+    within: number;
+    horizontal: boolean;
+  }
+
+  const captureItemsAnchor = (oldItems: T[] | undefined): ItemsAnchor<T> | null => {
+    if (!oldItems || oldItems.length === 0) {
+      return null;
+    }
+    const horizontal = direction.value === 'horizontal';
+    const position = horizontal
+      ? relativeScrollX.value
+      : relativeScrollY.value;
+    const index = getRowIndexAt(position);
+    if (index < 0 || index >= oldItems.length) {
+      return null;
+    }
+    const item = oldItems[ index ] as T | undefined;
+    if (item === undefined) {
+      return null;
+    }
+    return {
+      item,
+      index,
+      within: Math.max(0, position - getAxisItemOffset(index)),
+      horizontal,
+    };
+  };
+
+  /**
+   * Moves the scroll position by the distance the anchored item travelled, so
+   * a removal, reorder or dataset replacement above the viewport does not
+   * change what the user is looking at.
+   */
+  const applyItemsAnchor = (anchor: ItemsAnchor<T>) => {
+    const newIndex = findItemIndex(props.value.items, anchor.item, anchor.index);
+    if (newIndex < 0) {
+      return;
+    }
+    const target = getAxisItemOffset(newIndex) + anchor.within;
+    const position = anchor.horizontal
+      ? relativeScrollX.value
+      : relativeScrollY.value;
+    if (Math.abs(target - position) < 0.5) {
+      return;
+    }
+    scrollToOffset(
+      anchor.horizontal
+        ? target
+        : null,
+      anchor.horizontal
+        ? null
+        : target,
+      { behavior: 'auto', isCorrection: true },
+    );
+  };
+
   watch([
     () => props.value.items,
     () => props.value.items.length,
@@ -1547,8 +1614,14 @@ export function useVirtualScroll<T = unknown>(
     () => props.value.columnGap,
     () => props.value.defaultItemSize,
     () => props.value.defaultColumnWidth,
-  ], () => {
-    initializeSizes();
+  ], (newValues, oldValues) => {
+    const oldItems = oldValues?.[ 0 ];
+    // A programmatic scroll already reconciles its target with the new totals;
+    // moving the viewport as well would fight it.
+    const anchor = oldItems !== undefined && oldItems !== props.value.items && !pendingScroll.value && !isProgrammaticScroll.value
+      ? captureItemsAnchor(oldItems)
+      : null;
+    const change = initializeSizes();
     // Content size (and possibly the coordinate scale) changed: after the DOM
     // updates, re-read the actual container scroll position so the rendered
     // range always matches the viewport. The browser may clamp the scroll
@@ -1568,15 +1641,16 @@ export function useVirtualScroll<T = unknown>(
           ? Math.abs(window.scrollX)
           : window.scrollX, componentOffset.x, scaleX.value);
         internalScrollY.value = displayToVirtual(window.scrollY, componentOffset.y, scaleY.value);
-        return;
-      }
-      if (isElement(container)) {
+      } else if (isElement(container)) {
         scrollX.value = container.scrollLeft;
         scrollY.value = container.scrollTop;
         internalScrollX.value = displayToVirtual(isRtl.value
           ? Math.abs(container.scrollLeft)
           : container.scrollLeft, componentOffset.x, scaleX.value);
         internalScrollY.value = displayToVirtual(container.scrollTop, componentOffset.y, scaleY.value);
+      }
+      if (anchor && change.resetMeasurements) {
+        applyItemsAnchor(anchor);
       }
     });
   }, { immediate: true });

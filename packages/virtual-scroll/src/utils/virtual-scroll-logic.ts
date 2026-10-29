@@ -1054,6 +1054,130 @@ export function calculatePrependCount<T>(prevFirstItem: T | undefined, prevLengt
   return 0;
 }
 
+/** Fractions of the list length that identity probes are read from. */
+const ITEM_PROBE_FRACTIONS = [ 0, 0.25, 0.5, 0.75, 1 ] as const;
+
+/** Index a probe is read from for a list of `length` items. */
+const itemProbeIndex = (length: number, fraction: number) => Math.min(length - 1, Math.floor(length * fraction));
+
+/** Identity probes kept between two items lists. */
+export interface ItemsSnapshot<T> {
+  /** Length of the previous list. */
+  length: number;
+  /** Item identities read at fixed fractions of the previous list. */
+  probes: readonly T[];
+}
+
+/** How the current items list differs from the previous one. */
+export interface ItemsChange {
+  /** Number of items prepended before the previous first item. */
+  prependCount: number;
+  /** Whether the change only appended items after the previous last item. */
+  appendOnly: boolean;
+  /** Whether the items changed at all (false when only props changed). */
+  changed: boolean;
+  /**
+   * Whether stored measurements belong to other items. True for removals,
+   * reorders and dataset replacements, where index-keyed sizes cannot be kept.
+   */
+  resetMeasurements: boolean;
+}
+
+/**
+ * Takes the identity probes used to compare two items lists.
+ *
+ * @param items - Items list to probe.
+ * @returns The length and the probe identities.
+ * @see ItemsSnapshot
+ */
+export function takeItemsSnapshot<T>(items: readonly T[]): ItemsSnapshot<T> {
+  return {
+    length: items.length,
+    probes: items.length === 0
+      ? []
+      : ITEM_PROBE_FRACTIONS.map((fraction) => items[ itemProbeIndex(items.length, fraction) ] as T),
+  };
+}
+
+/**
+ * Classifies an items list change from identity probes and the length.
+ *
+ * Appends keep the measurements of the previous items, prepends keep them once
+ * shifted, and anything else (removal, reorder, dataset replacement) makes the
+ * index-keyed measurements meaningless. The checks read positions in the
+ * previous list, so an in-place mutation is classified the same way as a
+ * replaced array.
+ *
+ * A change that leaves every probe intact is treated as unchanged; moving
+ * items between two probes without touching them is not detected.
+ *
+ * @param snapshot - Probes of the previous list.
+ * @param items - Current items list.
+ * @returns How the list changed.
+ * @see ItemsSnapshot
+ * @see ItemsChange
+ */
+export function calculateItemsChange<T>(snapshot: ItemsSnapshot<T>, items: T[]): ItemsChange {
+  const { length, probes } = snapshot;
+  const probeChanged = probes.some((probe, index) => items[ itemProbeIndex(length, ITEM_PROBE_FRACTIONS[ index ]!) ] !== probe);
+  const changed = items.length !== length || probeChanged;
+
+  if (!changed) {
+    return {
+      prependCount: 0,
+      appendOnly: true,
+      changed: false,
+      resetMeasurements: false,
+    };
+  }
+
+  const prependCount = calculatePrependCount(probes[ 0 ], length, items);
+  const appendOnly = length > 0
+    && items.length >= length
+    && !probeChanged;
+
+  return {
+    prependCount,
+    appendOnly,
+    changed: true,
+    resetMeasurements: prependCount === 0 && !appendOnly,
+  };
+}
+
+/**
+ * Finds an item in a list, starting from an expected index.
+ *
+ * Searching outwards from where the item used to be keeps insertions and
+ * removals near the top cheap; the worst case is still a full scan, so the
+ * helper is meant for one lookup per list change.
+ *
+ * @param items - Current items list.
+ * @param item - Item to find by identity.
+ * @param hint - Index the item occupied in the previous list.
+ * @returns Index of the item, or `-1` when it is gone.
+ */
+export function findItemIndex<T>(items: readonly T[], item: T, hint: number): number {
+  const count = items.length;
+  if (count === 0) {
+    return -1;
+  }
+  const start = Math.max(0, Math.min(Math.trunc(hint), count - 1));
+  if (items[ start ] === item) {
+    return start;
+  }
+  for (let offset = 1; offset < count; offset++) {
+    const before = start - offset;
+    const after = start + offset;
+    if (before >= 0 && items[ before ] === item) {
+      return before;
+    }
+    if (after < count && items[ after ] === item) {
+      return after;
+    }
+  }
+  return -1;
+}
+
 /**
  * Calculates the total width and height of the virtualized content.
  *

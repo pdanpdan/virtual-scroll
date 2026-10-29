@@ -1,11 +1,12 @@
 import type { VirtualScrollProps } from '../types';
+import type { ItemsChange, ItemsSnapshot } from '../utils/virtual-scroll-logic';
 import type { MaybeRefOrGetter } from 'vue';
 
 import { computed, ref, shallowRef, toValue } from 'vue';
 
 import { DEFAULT_COLUMN_WIDTH } from '../types';
 import { FenwickTree } from '../utils/fenwick-tree';
-import { calculatePrependCount } from '../utils/virtual-scroll-logic';
+import { calculateItemsChange, takeItemsSnapshot } from '../utils/virtual-scroll-logic';
 
 /**
  * Configuration properties for the `useVirtualScrollSizes` composable.
@@ -64,10 +65,8 @@ export function useVirtualScrollSizes<T>(
   /** Whether the initial sizes have been calculated. */
   const sizesInitialized = ref(false);
 
-  /** First item of the previous list, used to detect prepending. */
-  let prevFirstItem: T | undefined;
-  /** Length of the previous list, used to detect prepending. */
-  let prevLength = 0;
+  /** Identity probes of the previous list, used to classify the next change. */
+  let prevItemsSnapshot: ItemsSnapshot<T> = { length: 0, probes: [] };
   /** Gap used when the current measurements were stored, for rebasing on gap changes. */
   let lastGap = 0;
   /** Column gap used when the current measurements were stored, for rebasing on column gap changes. */
@@ -348,17 +347,31 @@ export function useVirtualScrollSizes<T>(
 
   /**
    * Initializes or updates sizes based on current props and items.
-   * Handles prepending of items by shifting existing measurements.
+   * Keeps measurements across appends and prepends, and discards them when the
+   * items were removed, reordered or replaced.
+   *
+   * @returns How the items list changed.
    */
-  const initializeSizes = () => {
+  const initializeSizes = (): ItemsChange => {
     const propsVal = props.value.props;
     const newItems = propsVal.items;
     const len = newItems.length;
     const colCount = propsVal.columnCount || 0;
 
-    const prependCount = propsVal.restoreScrollOnPrepend
-      ? calculatePrependCount(prevFirstItem, prevLength, newItems)
-      : 0;
+    const change = calculateItemsChange(prevItemsSnapshot, newItems);
+    const { prependCount, resetMeasurements } = change;
+
+    // Removals, reorders and dataset replacements leave sizes and `measured`
+    // flags on indices that now hold other items. Discard them and rebuild from
+    // the size source; only appends and prepends can keep measurements.
+    if (resetMeasurements) {
+      itemSizesX.resize(0);
+      itemSizesY.resize(0);
+      measuredItemsX.value.fill(0);
+      measuredItemsY.value.fill(0);
+      processedToX = 0;
+      processedToY = 0;
+    }
 
     resizeMeasurements(len, colCount);
 
@@ -376,14 +389,12 @@ export function useVirtualScrollSizes<T>(
       measuredItemsY.value = newMeasuredY;
     }
 
-    initializeMeasurements(prependCount > 0);
+    initializeMeasurements(prependCount > 0 || resetMeasurements);
 
-    // Keep the previous first item and length only while prepend detection is
-    // enabled: they are all the detection reads.
-    prevFirstItem = propsVal.restoreScrollOnPrepend ? newItems[ 0 ] : undefined;
-    prevLength = propsVal.restoreScrollOnPrepend ? len : 0;
+    prevItemsSnapshot = takeItemsSnapshot(newItems);
     sizesInitialized.value = true;
     treeUpdateFlag.value++;
+    return change;
   };
 
   /**

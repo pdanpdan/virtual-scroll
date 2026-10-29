@@ -1490,4 +1490,222 @@ describe('useVirtualScroll', () => {
       wrapper.unmount();
     });
   });
+
+  describe('items changes', () => {
+    const makeContainer = () => {
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
+      Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
+      return container;
+    };
+
+    it('keeps the first visible item in place when items above it are removed', async () => {
+      const container = makeContainer();
+      const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
+      const { result, props, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items,
+      });
+      await nextTick();
+
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+      expect(internalState.internalScrollY.value).toBe(1000);
+
+      props.value = {
+        ...props.value,
+        items: items.slice(10),
+      };
+      await nextTick();
+      await nextTick();
+
+      // Item 20 is now index 10; the viewport still starts at its top.
+      expect(internalState.internalScrollY.value).toBe(500);
+      expect(result.scrollDetails.value.currentIndex).toBe(10);
+      wrapper.unmount();
+    });
+
+    it('keeps the first visible item in place when items are reordered', async () => {
+      const container = makeContainer();
+      const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
+      const { props, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items,
+      });
+      await nextTick();
+
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      // Move item 20 to index 30; its offset moves from 1000 to 1500.
+      const next = [ ...items ];
+      const [ moved ] = next.splice(20, 1);
+      next.splice(30, 0, moved!);
+      props.value = { ...props.value, items: next };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(1500);
+      wrapper.unmount();
+    });
+
+    it('keeps the first visible item in place in horizontal mode', async () => {
+      const container = makeContainer();
+      const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
+      const { props, wrapper, internalState } = setup({
+        container,
+        direction: 'horizontal',
+        items,
+      });
+      await nextTick();
+
+      container.scrollLeft = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      props.value = {
+        ...props.value,
+        items: items.slice(5),
+      };
+      await nextTick();
+      await nextTick();
+
+      // Item 25 is now index 20; rows use the 40px estimate.
+      expect(internalState.internalScrollX.value).toBe(800);
+      wrapper.unmount();
+    });
+
+    it('anchors measured rows', async () => {
+      const container = makeContainer();
+      const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
+      const { props, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        items,
+      });
+      await nextTick();
+
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      props.value = {
+        ...props.value,
+        items: items.slice(10),
+      };
+      await nextTick();
+      await nextTick();
+
+      // The default 40px estimate applies until the rows are measured.
+      expect(internalState.internalScrollY.value).toBe(600);
+      wrapper.unmount();
+    });
+
+    it('does not anchor when the previous list was empty', async () => {
+      const container = makeContainer();
+      const { props, wrapper, internalState } = setup<MockItem>({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items: [],
+      });
+      await nextTick();
+
+      props.value = {
+        ...props.value,
+        items: [
+          { id: 1 },
+          { id: 2 },
+        ],
+      };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('does not anchor when the viewport starts past the end of the previous list', async () => {
+      const container = makeContainer();
+      const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
+      const { props, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items,
+      });
+      await nextTick();
+
+      container.scrollTop = 20_000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      props.value = {
+        ...props.value,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: 1000 + i })),
+      };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(20_000);
+      wrapper.unmount();
+    });
+
+    it('does not anchor on an index-only list', async () => {
+      const container = makeContainer();
+      const { props, wrapper, internalState } = setup<MockItem | undefined>({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items: Array.from<MockItem | undefined>({ length: 100 }),
+      });
+      await nextTick();
+
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      props.value = {
+        ...props.value,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: i })),
+      };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(1000);
+      wrapper.unmount();
+    });
+
+    it('leaves the position alone when the anchored item is gone', async () => {
+      const container = makeContainer();
+      const items = Array.from({ length: 100 }, (_, i) => ({ id: i }));
+      const { props, wrapper, internalState } = setup({
+        container,
+        direction: 'vertical',
+        itemSize: 50,
+        items,
+      });
+      await nextTick();
+
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event('scroll'));
+      await nextTick();
+
+      props.value = {
+        ...props.value,
+        items: Array.from({ length: 100 }, (_, i) => ({ id: 1000 + i })),
+      };
+      await nextTick();
+      await nextTick();
+
+      expect(internalState.internalScrollY.value).toBe(1000);
+      wrapper.unmount();
+    });
+  });
 });

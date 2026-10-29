@@ -654,7 +654,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">items</code></td>
               <td><code>T[]</code></td>
               <td>-</td>
-              <td>The array of items to render. Required. Entries may be <code>undefined</code> (e.g. <code>new Array(n)</code> for index-only lists): every index in range renders and the slot <code>item</code> is <code>undefined</code> for holes; only the visible window is ever accessed.</td>
+              <td>The array of items to render. Required. Entries may be <code>undefined</code> (e.g. <code>new Array(n)</code> for index-only lists): every index in range renders and the slot <code>item</code> is <code>undefined</code> for holes; only the visible window is ever accessed. Sizes follow the item they were measured on: appends and prepends keep them, removals, reorders and replacements re-measure and keep the first visible row in place.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">itemSize</code></td>
@@ -778,7 +778,7 @@ const vs = useVirtualScroll(props, [
               <td><code class="docs-prop-name">restoreScrollOnPrepend</code></td>
               <td><code>boolean</code></td>
               <td><code>false</code></td>
-              <td>Maintain scroll position when items are added to the top.</td>
+              <td>Keep the scroll position when items are added to the top.</td>
             </tr>
             <tr>
               <td><code class="docs-prop-name">container</code></td>
@@ -3409,7 +3409,7 @@ const vs = useVirtualScroll(props, [
               <tr><td><code>columnWidth</code></td><td><code>num | arr | fn | null</code></td><td>Column sizing. Omitted/<code>null</code> measures columns; the estimate before measurement is <code>{{ DEFAULT_COLUMN_WIDTH }}</code>px.</td></tr>
               <tr><td><code>scrollPaddingStart</code> / <code>End</code></td><td><code>num | {x, y}</code></td><td>Pixel offsets for scroll limits.</td></tr>
               <tr><td><code>gap</code> / <code>columnGap</code></td><td><code>number</code></td><td>Pixel space between items/cols.</td></tr>
-              <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Maintain chat scroll position.</td></tr>
+              <tr><td><code>restoreScrollOnPrepend</code></td><td><code>boolean</code></td><td>Keep the position when items are added to the top (chat history).</td></tr>
               <tr><td><code>keyboardActivation</code></td><td><code>'auto' | 'item' | 'viewport'</code></td><td>Keyboard model. <code>'auto'</code> (default) tracks a roving active item only for roles with an active descendant (<code>listbox</code>, <code>menu</code>, <code>tree</code>), and scrolls the viewport for every other role.</td></tr>
               <tr><td><code>snap</code></td><td><code><a href="#snap-modes" class="link link-primary">SnapMode</a></code></td><td>Auto-alignment after scroll stop.</td></tr>
               <tr><td><code>initialScrollIndex</code></td><td><code>number</code></td><td>Mount-time jump index.</td></tr>

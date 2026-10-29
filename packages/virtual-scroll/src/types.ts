@@ -348,8 +348,13 @@ export interface VirtualScrollBaseProps<T = unknown> {
   loading?: boolean | undefined;
 
   /**
-   * Whether to automatically maintain scroll position when items are prepended to the array.
+   * Whether to maintain the scroll position when items are prepended to the array.
    * Useful for "load more" chat interfaces.
+   *
+   * Measured sizes always follow the items they were taken for: prepends shift
+   * them, and a removal, reorder or replacement re-measures. Removals, reorders
+   * and replacements also keep the first visible row in place; this option adds
+   * the same behavior for prepends.
    */
   restoreScrollOnPrepend?: boolean | undefined;
 

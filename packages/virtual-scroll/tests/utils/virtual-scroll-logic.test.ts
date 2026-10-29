@@ -9,6 +9,7 @@ import {
   calculateInertiaStep,
   calculateInstantaneousVelocity,
   calculateItemPosition,
+  calculateItemsChange,
   calculateItemStyle,
   calculateOffsetAt,
   calculatePrependCount,
@@ -20,8 +21,10 @@ import {
   calculateStickyItem,
   calculateTotalSize,
   displayToVirtual,
+  findItemIndex,
   isItemVisible,
   resolveSnap,
+  takeItemsSnapshot,
   virtualToDisplay,
 } from '../../src/utils/virtual-scroll-logic';
 
@@ -3257,6 +3260,137 @@ describe('virtual-scroll-logic', () => {
         { id: 2 },
         { id: 3 },
       ])).toBe(0);
+    });
+  });
+
+  describe('calculateItemsChange', () => {
+    it('reports no change when only props changed', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+      ];
+      expect(calculateItemsChange(takeItemsSnapshot(items), items)).toEqual({
+        prependCount: 0,
+        appendOnly: true,
+        changed: false,
+        resetMeasurements: false,
+      });
+    });
+
+    it('keeps measurements for appended items', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+      ];
+      const next = [
+        ...items,
+        { id: 4 },
+        { id: 5 },
+      ];
+      expect(calculateItemsChange(takeItemsSnapshot(items), next)).toEqual({
+        prependCount: 0,
+        appendOnly: true,
+        changed: true,
+        resetMeasurements: false,
+      });
+    });
+
+    it('shifts measurements for prepended items', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+      ];
+      const next = [
+        { id: -1 },
+        { id: -2 },
+        ...items,
+      ];
+      const change = calculateItemsChange(takeItemsSnapshot(items), next);
+      expect(change.prependCount).toBe(2);
+      expect(change.resetMeasurements).toBe(false);
+    });
+
+    it('resets measurements when items are removed', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
+      ];
+      expect(calculateItemsChange(takeItemsSnapshot(items), items.slice(1)).resetMeasurements).toBe(true);
+    });
+
+    it('resets measurements when the dataset is replaced', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+      ];
+      const next = [
+        { id: 4 },
+        { id: 5 },
+        { id: 6 },
+      ];
+      expect(calculateItemsChange(takeItemsSnapshot(items), next).resetMeasurements).toBe(true);
+    });
+
+    it('resets measurements when items are reordered in place', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
+        { id: 5 },
+      ];
+      const next = [
+        items[ 0 ]!,
+        items[ 1 ]!,
+        items[ 4 ]!,
+        items[ 3 ]!,
+        items[ 2 ]!,
+      ];
+      expect(calculateItemsChange(takeItemsSnapshot(items), next).resetMeasurements).toBe(true);
+    });
+  });
+
+  describe('findItemIndex', () => {
+    it('finds the item at the hint first', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+      ];
+      expect(findItemIndex(items, items[ 1 ]!, 1)).toBe(1);
+    });
+
+    it('searches outwards from the hint', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
+      ];
+      expect(findItemIndex(items, items[ 3 ]!, 1)).toBe(3);
+      expect(findItemIndex(items, items[ 0 ]!, 2)).toBe(0);
+    });
+
+    it('returns -1 for a missing item or an empty list', () => {
+      expect(findItemIndex([
+        { id: 1 },
+      ], { id: 9 }, 0)).toBe(-1);
+      expect(findItemIndex([], undefined, 0)).toBe(-1);
+    });
+
+    it('clamps an out-of-range hint', () => {
+      const items = [
+        { id: 1 },
+        { id: 2 },
+      ];
+      expect(findItemIndex(items, items[ 1 ]!, 99)).toBe(1);
+      expect(findItemIndex(items, items[ 0 ]!, -5)).toBe(0);
     });
   });
 

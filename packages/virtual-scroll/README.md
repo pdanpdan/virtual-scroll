@@ -174,6 +174,20 @@ Notes:
 - Combined with a numeric `itemSize` (arithmetic positioning, no per-row storage), uniform lists scale to 10M+ rows with flat memory - the playground essential examples use this pattern.
 - Dynamic (ResizeObserver-measured) sizes work the same way: sizes are measured from the rendered DOM.
 
+## Changing the Items Array
+
+Measured sizes belong to the item they were measured on, not to the index:
+
+- Appending keeps every existing measurement.
+- Prepending shifts the measurements by the number of added rows.
+- Removing, reordering or replacing the array re-measures, because the stored
+  sizes no longer describe the rows at those indices.
+
+The first visible row stays where it is when rows above it are removed, when
+the array is reordered, or when it is replaced by a list that still contains
+that row. Set [`restoreScrollOnPrepend`](#props) to keep the position for
+prepends as well (chat history).
+
 ## Technical Overview
 
 ### Scaled Virtual Scroll
@@ -453,7 +467,7 @@ All `VirtualScroll` items/`itemSize`/`direction`/snap/sticky/table props do **no
 | `stickyHeader` / `stickyFooter` | `boolean` | `false` | If true, measures and adds slot size to padding. Sticky `stickyIndices` items align below/above them. |
 | `ssrRange` | `object` | - | Range of items to pre-render for SSR. |
 | `virtualScrollbar` | `boolean` | `false` | Whether to force virtual scrollbars. |
-| `restoreScrollOnPrepend` | `boolean` | `false` | Maintain position when items added to top. |
+| `restoreScrollOnPrepend` | `boolean` | `false` | Keep the scroll position when items are added to the top. |
 | `loading` | `boolean` | `false` | While `true`, reveals the `#loading` slot (kept mounted and hidden via CSS while `false`) and suppresses repeated `load` events. |
 | `loadDistance` | `number` | `200` | Distance from the end (DU) at which the `load` event triggers. |
 | `container` | `HTMLElement \| Window` | `hostRef` | The scrollable container element. |
