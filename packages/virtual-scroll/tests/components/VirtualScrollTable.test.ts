@@ -871,9 +871,11 @@ describe('virtualScrollTable', () => {
           ]),
         },
       });
-      const wrapperStyle = wrapper.find('.virtual-scroll-wrapper').attributes('style') ?? '';
-      expect(wrapperStyle).toContain('row-gap');
-      expect(wrapperStyle).toContain('column-gap');
+      const wrapperEl = wrapper.find('.virtual-scroll-wrapper').element as HTMLElement;
+      // jsdom serializes the longhands back as the `gap` shorthand; read the CSSOM
+      // properties so the assertion does not depend on the serializer.
+      expect(wrapperEl.style.rowGap).toBe('4px');
+      expect(wrapperEl.style.columnGap).toBe('6px');
       await nextTick();
       await nextTick();
       const viewport = wrapper.find('.virtual-scroll-scrollbar-viewport');

@@ -11,7 +11,7 @@ import { useCoordinateScalingExtension } from '../../src/extensions/coordinate-s
 import { usePrependRestorationExtension } from '../../src/extensions/prepend-restoration';
 import { useSnappingExtension } from '../../src/extensions/snapping';
 import { useStickyExtension } from '../../src/extensions/sticky';
-import { clearMocks, mockItems, scrollState, setup, setupMocks, triggerResize } from '../test-helper';
+import { attachToBody, clearMocks, mockItems, scrollState, setup, setupMocks, triggerResize } from '../test-helper';
 
 describe('useVirtualScroll', () => {
   setupMocks();
@@ -504,6 +504,7 @@ describe('useVirtualScroll', () => {
       Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
       container.style.borderLeft = '3px solid red';
       container.style.borderTop = '2px solid red';
+      attachToBody(container);
       const hostElement = document.createElement('div');
       vi.spyOn(hostElement, 'getBoundingClientRect').mockReturnValue({
         left: 8, // container 0 + border 3 + content offset 5
@@ -607,6 +608,7 @@ describe('useVirtualScroll', () => {
       Object.defineProperty(container, 'clientHeight', { configurable: true, value: 500 });
       Object.defineProperty(container, 'clientWidth', { configurable: true, value: 500 });
       container.style.borderRight = '3px solid red';
+      attachToBody(container);
       vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
         left: 0,
         right: 200,
@@ -693,6 +695,7 @@ describe('useVirtualScroll', () => {
     it('detects an rtl container without any extensions', async () => {
       const container = document.createElement('div');
       container.setAttribute('dir', 'rtl');
+      attachToBody(container);
       const { result, wrapper } = setup({
         items: mockItems,
         itemSize: 50,

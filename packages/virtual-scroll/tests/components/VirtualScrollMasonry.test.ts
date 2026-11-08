@@ -21,12 +21,14 @@ function makeItems(count: number): number[] {
 
 /** Parse the per-card inline transform into x/y. */
 function parseTranslate(el: Element): { x: number; y: number; } {
+  // jsdom serializes a zero y as the single-value form (`translate(0px)`), so the
+  // second component must be optional; the style attribute is the source of truth.
   const transform = el.getAttribute('style') ?? '';
-  const match = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(transform);
+  const match = /translate\(([-\d.]+)px(?:,\s*([-\d.]+)px)?\)/.exec(transform);
   return match
     ? {
       x: Number(match[ 1 ]),
-      y: Number(match[ 2 ]),
+      y: Number(match[ 2 ] ?? 0),
     }
     : { x: 0, y: 0 };
 }
@@ -106,7 +108,8 @@ describe('virtualScrollMasonry', () => {
     const style = first.attributes('style') ?? '';
     expect(style).toContain(`width: 245px`);
     expect(style).toContain(`height: ${ oracle(0, 245) }px`);
-    expect(style).toContain('translate(0px, 0px)');
+    expect(style).toContain('translate(');
+    expect(parseTranslate(first.element)).toEqual({ x: 0, y: 0 });
     expect(first.text()).toContain('#0');
     wrapper.unmount();
   });

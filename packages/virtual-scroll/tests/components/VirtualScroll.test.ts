@@ -8,6 +8,7 @@ import { h, nextTick, ref } from 'vue';
 
 import VirtualScroll from '../../src/components/VirtualScroll.vue';
 import { displayToVirtual, virtualToDisplay } from '../../src/utils/virtual-scroll-logic';
+import { attachToBody } from '../test-helper';
 
 // --- Mocks ---
 
@@ -3047,6 +3048,7 @@ describe('virtualScroll', () => {
 
     it('offsets the scrollbar viewport by the container padding', async () => {
       const wrapper = mount(VirtualScroll, {
+        attachTo: attachToBody(document.createElement('div')),
         attrs: { style: 'padding: 16px' },
         props: {
           items: mockItems,

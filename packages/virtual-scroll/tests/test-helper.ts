@@ -5,7 +5,7 @@ import type { Ref } from 'vue';
 /* global ScrollToOptions, ResizeObserverCallback */
 
 import { mount } from '@vue/test-utils';
-import { vi } from 'vitest';
+import { onTestFinished, vi } from 'vitest';
 import {
   defineComponent,
   ref,
@@ -76,6 +76,20 @@ export function triggerResize(el: Element, width: number, height: number) {
 }
 
 export const scrollState = { x: 0, y: 0 };
+
+/**
+ * Appends `node` to the document for the duration of the current test.
+ *
+ * jsdom 31 resolves computed styles (`getComputedStyle`) only for elements that
+ * belong to the document - detached elements report empty strings. Tests that
+ * read padding, borders or `direction` must mount their elements into the body
+ * first. The node is removed when the test finishes.
+ */
+export function attachToBody<T extends Element>(node: T): T {
+  document.body.append(node);
+  onTestFinished(() => node.remove());
+  return node;
+}
 
 export function clearMocks() {
   scrollState.x = 0;
